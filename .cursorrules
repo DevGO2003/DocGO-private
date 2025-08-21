@@ -138,6 +138,16 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
 - Java:
   - Thêm dependency vào `pom.xml` với version rõ ràng; tránh sử dụng snapshot nếu không cần thiết.
   - Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
+  - **QUY TẮC GROUP ID VÀ ARTIFACT ID**:
+    - Group ID: `com.devgo2003.docgo.{service-name}` (dùng kebab-case cho service-name)
+      - Ví dụ: `com.devgo2003.docgo.contract-management-service`
+      - Ví dụ: `com.devgo2003.docgo.authentication-identity-service`
+    - Artifact ID: `{service-name}` (dùng kebab-case, trùng với tên nhánh remote)
+      - Ví dụ: `contract-management-service`
+      - Ví dụ: `authentication-identity-service`
+    - Version: `1.0.0` (khởi đầu), tăng theo semantic versioning
+    - Parent POM: sử dụng `spring-boot-starter-parent` với version mới nhất stable
+    - Packaging: `jar` cho microservice, `pom` cho parent project
 
 ## 12) Port mapping và đường dẫn tài liệu (Docs)
 - Mặc định tài liệu OpenAPI hiển thị tại: `http://localhost:<PORT>/docs#/` cho MỌI microservice.
@@ -147,23 +157,30 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
     - `springdoc.swagger-ui.path=/docs`
     - (tuỳ chọn) nếu đã có cấu hình cũ, phải thay thế để Swagger UI mount tại `/docs`.
     - Kết quả docs: `http://localhost:<PORT>/docs#/`.
-- Port cố định cho toàn bộ microservice của DocGO:
-  - `api-gateway` (BFF): 8000 → Docs: `http://localhost:8000/docs#/`
-  - `user-service`: 8001 → Docs: `http://localhost:8001/docs#/`
-  - `community-service`: 8002 → Docs: `http://localhost:8002/docs#/`
-  - `approval-workflow-service`: 8003 → Docs: `http://localhost:8003/docs#/`
-  - `reminder-scheduler-service`: 8004 → Docs: `http://localhost:8004/docs#/`
-  - `notification-service`: 8005 → Docs: `http://localhost:8005/docs#/`
-  - `e-signature-integration-service`: 8006 → Docs: `http://localhost:8006/docs#/`
-  - `ml-statistics-service`: 8007 → Docs: `http://localhost:8007/docs#/`
-  - `bi-reporting-analytics-service`: 8008 → Docs: `http://localhost:8008/docs#/`
-  - `api-documentation-service`: 8009 → Docs: `http://localhost:8009/docs#/`
-  - `sla-alerting-monitor-service`: 8010 → Docs: `http://localhost:8010/docs#/`
-  - `ai-processing-service`: 8011 → Docs: `http://localhost:8011/docs#/`
+- **QUY TẮC TÊN FOLDER**: Tên thư mục microservice PHẢI trùng khớp với tên nhánh remote (sau dấu `/` cuối cùng):
+  - Ví dụ: `origin/backend-02/authentication-identity-service` → folder phải là `authentication-identity-service`
+  - Ví dụ: `origin/backend-01/api-gateway-bff` → folder phải là `api-gateway-bff`
+  - Điều này đảm bảo tính nhất quán giữa tên nhánh Git và cấu trúc thư mục workspace.
+- Port cố định cho toàn bộ microservice của DocGO (theo tên nhánh thực tế):
+  - `api-gateway-bff` (BFF): 8000 → Docs: `http://localhost:8000/docs#/`
+  - `authentication-identity-service`: 8001 → Docs: `http://localhost:8001/docs#/`
+  - `user-management-service`: 8002 → Docs: `http://localhost:8002/docs#/`
+  - `contract-management-service` (Spring): 8003 → Docs: `http://localhost:8003/docs#/`
+  - `versioning-document-history-service`: 8004 → Docs: `http://localhost:8004/docs#/`
+  - `commenting-collaboration-service`: 8005 → Docs: `http://localhost:8005/docs#/`
+  - `approval-workflow-service`: 8006 → Docs: `http://localhost:8006/docs#/`
+  - `reminder-scheduler-service`: 8007 → Docs: `http://localhost:8007/docs#/`
+  - `esignature-integration-service`: 8008 → Docs: `http://localhost:8008/docs#/`
+  - `notification-service`: 8009 → Docs: `http://localhost:8009/docs#/`
+  - `reporting-analytics-service`: 8010 → Docs: `http://localhost:8010/docs#/`
+  - `ocr-document-extraction-service`: 8011 → Docs: `http://localhost:8011/docs#/`
   - `file-storage-asset-service`: 8012 → Docs: `http://localhost:8012/docs#/`
-  - `contract-management-service` (Spring): 8081 → Docs: `http://localhost:8081/docs#/`
-  - `auth-service` (Spring): 8082 → Docs: `http://localhost:8082/docs#/`
-- Khi thêm microservice mới, phải chọn cổng trống theo dãy 80xx hoặc 81xx, cập nhật mục này và README/How-to-run tương ứng.
+  - `audit-activity-log-service`: 8013 → Docs: `http://localhost:8013/docs#/`
+  - `integration-connectors-service`: 8014 → Docs: `http://localhost:8014/docs#/`
+  - `batch-etl-service`: 8015 → Docs: `http://localhost:8015/docs#/`
+  - `health-monitoring-agent`: 8016 → Docs: `http://localhost:8016/docs#/`
+  - `ai-processing-service`: 8017 → Docs: `http://localhost:8017/docs#/`
+- Khi thêm microservice mới, phải chọn cổng trống theo dãy 80xx, cập nhật mục này và README/How-to-run tương ứng.
 
 ## 13) Chuẩn hóa mô tả Input/Output cho API
 - Mọi endpoint phải có chú thích rõ ràng về đầu vào/đầu ra ngay trong tài liệu API:
