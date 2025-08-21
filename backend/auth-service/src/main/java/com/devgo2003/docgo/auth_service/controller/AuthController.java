@@ -22,7 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/auth-service/auth")
+@RequestMapping("/api/v1/authentication-identity-service/auth")
 @Tag(name = "API Xác thực và Ủy quyền", description = "Các API để đăng ký, đăng nhập và quản lý xác thực người dùng")
 public class AuthController {
 

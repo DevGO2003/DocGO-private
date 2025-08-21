@@ -142,9 +142,17 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
     - Group ID: `com.devgo2003.docgo.{service-name}` (dùng kebab-case cho service-name)
       - Ví dụ: `com.devgo2003.docgo.contract-management-service`
       - Ví dụ: `com.devgo2003.docgo.authentication-identity-service`
-    - Artifact ID: `{service-name}` (dùng kebab-case, trùng với tên nhánh remote)
-      - Ví dụ: `contract-management-service`
-      - Ví dụ: `authentication-identity-service`
+    - **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
+      - Ví dụ: `authentication-identity-service` → `auth-service`
+      - Ví dụ: `contract-management-service` → `contract-service`
+      - Ví dụ: `user-management-service` → `user-service`
+    - **Tên folder**: Đổi dấu `-` thành `_` trong package structure
+      - Ví dụ: `authentication-identity-service` → `src/main/java/com/devgo2003/docgo/auth_service`
+      - Ví dụ: `contract-management-service` → `src/main/java/com/devgo2003/docgo/contract_service`
+      - Ví dụ: `user-management-service` → `src/main/java/com/devgo2003/docgo/user_service`
+    - **Package declaration**: Sử dụng tên folder (với dấu `_`)
+      - Ví dụ: `package com.devgo2003.docgo.auth_service;`
+      - Ví dụ: `package com.devgo2003.docgo.contract_service;`
     - Version: `1.0.0` (khởi đầu), tăng theo semantic versioning
     - Parent POM: sử dụng `spring-boot-starter-parent` với version mới nhất stable
     - Packaging: `jar` cho microservice, `pom` cho parent project

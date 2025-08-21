@@ -1,4 +1,4 @@
-# How to run Auth Service
+# How to run Authentication Identity Service
 
 ## Prerequisites
 - Java 21+ (or matching your toolchain)
@@ -17,10 +17,10 @@ Copy-Item .env.example .env -Force
 ```
 mvn spring-boot:run
 ```
-The service runs at: `http://localhost:8082`
+The service runs at: `http://localhost:8001`
 
-- Base API: `http://localhost:8082/api/v1/auth-service/...`
-- Swagger UI: `http://localhost:8082/docs#/`
+- Base API: `http://localhost:8001/api/v1/authentication-identity-service/...`
+- Swagger UI: `http://localhost:8001/docs#/`
 
 ## Build Jar
 ```
@@ -29,7 +29,7 @@ java -jar target/auth-service-*.jar
 ```
 
 ## Environment Variables
-- `SERVER_PORT` (default 8082)
+- `SERVER_PORT` (default 8001)
 - `SPRING_DATASOURCE_URL`
 - `SPRING_DATASOURCE_USERNAME`
 - `SPRING_DATASOURCE_PASSWORD`
