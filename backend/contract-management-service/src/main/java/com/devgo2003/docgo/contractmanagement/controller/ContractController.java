@@ -43,7 +43,49 @@ public class ContractController {
         this.request = request;
     }
 
-    @Operation(summary = "Tạo hợp đồng mới", description = "Tạo hợp đồng mới với trạng thái DRAFT",
+    @Operation(
+        summary = "Tạo hợp đồng mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 contract (bắt buộc, body)
+        Loại: Contract
+        Mô tả: Thông tin hợp đồng cần tạo (contractNumber, title, status, partiesJson, startDate, endDate, systemId).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Contract
+        Mô tả: Thông tin hợp đồng đã được tạo thành công.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """,
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             content = @Content(
@@ -73,7 +115,70 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Lấy danh sách hợp đồng với phân trang và sắp xếp", description = "Lấy danh sách hợp đồng với phân trang và sắp xếp")
+    @Operation(
+        summary = "Lấy danh sách hợp đồng với phân trang và sắp xếp", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (bắt đầu từ 0). Mặc định là 0.
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số lượng hợp đồng trên mỗi trang. Mặc định là 10.
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Danh sách các trường để sắp xếp.
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Hướng sắp xếp cho từng trường (ASC, DESC).
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm trong hợp đồng.
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Có bao gồm hợp đồng đã xóa hay không. Mặc định là false.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: PaginatedResponse<Contract>
+        Mô tả: Danh sách hợp đồng với thông tin phân trang.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping
     public ResponseEntity<RestResponse<PaginatedResponse<Contract>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -131,7 +236,50 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Lấy hợp đồng theo ID", description = "Lấy thông tin chi tiết hợp đồng theo ID")
+    @Operation(
+        summary = "Lấy hợp đồng theo ID", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần lấy thông tin.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Contract
+        Mô tả: Thông tin chi tiết của hợp đồng.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/{id}")
     public ResponseEntity<RestResponse<Contract>> getContract(@PathVariable Long id) {
         Optional<Contract> contract = contractService.getContract(id);
@@ -162,7 +310,54 @@ public class ContractController {
         }
     }
 
-    @Operation(summary = "Cập nhật hợp đồng", description = "Cập nhật thông tin hợp đồng")
+    @Operation(
+        summary = "Cập nhật hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần cập nhật.
+        
+        📄 contract (bắt buộc, body)
+        Loại: Contract
+        Mô tả: Thông tin mới cần cập nhật cho hợp đồng.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Contract
+        Mô tả: Thông tin hợp đồng đã được cập nhật.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PutMapping("/{id}")
     public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable Long id, @Valid @RequestBody Contract contract) {
         Contract updatedContract = contractService.updateContract(id, contract);
@@ -179,7 +374,50 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Xóa mềm hợp đồng", description = "Thay đổi trạng thái hợp đồng thành EXPIRED thay vì xóa vật lý")
+    @Operation(
+        summary = "Xóa mềm hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần xóa mềm.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<RestResponse<Void>> softDeleteContract(@PathVariable Long id) {
         contractService.softDeleteContract(id);
@@ -196,7 +434,50 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Khôi phục hợp đồng", description = "Khôi phục hợp đồng đã bị xóa")
+    @Operation(
+        summary = "Khôi phục hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần khôi phục.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PutMapping("/{id}/restore")
     public ResponseEntity<RestResponse<Void>> restoreContract(@PathVariable Long id) {
         contractService.restoreContract(id);
@@ -213,7 +494,50 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Lấy lịch sử sự kiện của hợp đồng", description = "Lấy lịch sử sự kiện của hợp đồng")
+    @Operation(
+        summary = "Lấy lịch sử sự kiện của hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần lấy lịch sử sự kiện.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<ContractEvent>
+        Mô tả: Danh sách các sự kiện của hợp đồng.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/{id}/events")
     public ResponseEntity<RestResponse<List<ContractEvent>>> getContractEvents(@PathVariable Long id) {
         List<ContractEvent> events = contractService.getContractEvents(id);
@@ -230,7 +554,50 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Lấy file đính kèm của hợp đồng", description = "Lấy file đính kèm của hợp đồng")
+    @Operation(
+        summary = "Lấy file đính kèm của hợp đồng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần lấy file đính kèm.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<ContractAttachment>
+        Mô tả: Danh sách các file đính kèm của hợp đồng.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/{id}/attachments")
     public ResponseEntity<RestResponse<List<ContractAttachment>>> getAttachments(@PathVariable Long id) {
         List<ContractAttachment> attachments = contractService.getAttachments(id);

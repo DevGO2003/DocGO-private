@@ -35,7 +35,50 @@ public class AuthController {
         this.request = request;
     }
 
-    @Operation(summary = "Tạo tài khoản mới", description = "Tạo tài khoản người dùng mới với thông tin cơ bản")
+    @Operation(
+        summary = "Tạo tài khoản mới", 
+        description = """
+        🔹 Đầu vào
+        
+        👤 authRequest (bắt buộc, body)
+        Loại: AuthRequest
+        Mô tả: Thông tin tài khoản cần tạo (username, email, password).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuthResponse
+        Mô tả: Thông tin tài khoản đã được tạo thành công.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PostMapping("/register")
     public ResponseEntity<RestResponse<AuthResponse>> createUser(@Valid @RequestBody AuthRequest authRequest) {
         AuthResponse created = authService.register(authRequest.getUsername(), authRequest.getEmail(), authRequest.getPassword());
@@ -52,7 +95,50 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Lấy thông tin đăng nhập", description = "Xác thực thông tin đăng nhập và trả về token")
+    @Operation(
+        summary = "Lấy thông tin đăng nhập", 
+        description = """
+        🔹 Đầu vào
+        
+        🔐 loginRequest (bắt buộc, body)
+        Loại: LoginRequest
+        Mô tả: Thông tin đăng nhập (username, password).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuthResponse
+        Mô tả: Thông tin xác thực và token đăng nhập.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/login")
     public ResponseEntity<RestResponse<AuthResponse>> getUser(@Valid @RequestBody LoginRequest loginRequest) {
         AuthResponse authResponse = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
@@ -69,7 +155,54 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Cập nhật thông tin tài khoản", description = "Cập nhật thông tin tài khoản người dùng")
+    @Operation(
+        summary = "Cập nhật thông tin tài khoản", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần cập nhật.
+        
+        👤 authRequest (bắt buộc, body)
+        Loại: AuthRequest
+        Mô tả: Thông tin mới cần cập nhật (username, email, password).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuthResponse
+        Mô tả: Thông tin tài khoản đã được cập nhật.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PutMapping("/{id}")
     public ResponseEntity<RestResponse<AuthResponse>> updateUser(@PathVariable Long id, @Valid @RequestBody AuthRequest authRequest) {
         // TODO: Implement update user logic
@@ -87,7 +220,50 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Xóa mềm tài khoản", description = "Thay đổi trạng thái tài khoản thành INACTIVE thay vì xóa vật lý")
+    @Operation(
+        summary = "Xóa mềm tài khoản", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần xóa mềm.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<RestResponse<Void>> softDeleteUser(@PathVariable Long id) {
         // TODO: Implement soft delete user logic
@@ -104,7 +280,50 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Khôi phục tài khoản", description = "Khôi phục tài khoản đã bị xóa")
+    @Operation(
+        summary = "Khôi phục tài khoản", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần khôi phục.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PutMapping("/{id}/restore")
     public ResponseEntity<RestResponse<Void>> restoreUser(@PathVariable Long id) {
         // TODO: Implement restore user logic
@@ -121,7 +340,54 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Làm mới token", description = "Tạo token mới khi token cũ hết hạn")
+    @Operation(
+        summary = "Làm mới token", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần làm mới token.
+        
+        🔑 refreshToken (bắt buộc, header)
+        Loại: string
+        Mô tả: Refresh token để tạo token mới.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuthResponse
+        Mô tả: Thông tin xác thực và token mới.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PostMapping("/{id}/refresh")
     public ResponseEntity<RestResponse<AuthResponse>> refreshToken(@PathVariable Long id, @RequestHeader("Authorization") String refreshToken) {
         // TODO: Implement refresh token logic
@@ -139,7 +405,54 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Đăng xuất", description = "Vô hiệu hóa token hiện tại")
+    @Operation(
+        summary = "Đăng xuất", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần đăng xuất.
+        
+        🔑 token (bắt buộc, header)
+        Loại: string
+        Mô tả: Token hiện tại cần vô hiệu hóa.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @PostMapping("/{id}/logout")
     public ResponseEntity<RestResponse<Void>> logout(@PathVariable Long id, @RequestHeader("Authorization") String token) {
         // TODO: Implement logout logic
@@ -156,7 +469,54 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Xác thực token", description = "Kiểm tra tính hợp lệ của token")
+    @Operation(
+        summary = "Xác thực token", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của tài khoản cần xác thực token.
+        
+        🔑 token (bắt buộc, header)
+        Loại: string
+        Mô tả: Token cần kiểm tra tính hợp lệ.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/{id}/validate")
     public ResponseEntity<RestResponse<Object>> validateToken(@PathVariable Long id, @RequestHeader("Authorization") String token) {
         // TODO: Implement token validation logic
@@ -173,7 +533,48 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "Kiểm tra trạng thái dịch vụ", description = "Kiểm tra xem dịch vụ xác thực có đang hoạt động không")
+    @Operation(
+        summary = "Kiểm tra trạng thái dịch vụ", 
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: string
+        Mô tả: Thông báo trạng thái dịch vụ.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
     @GetMapping("/health")
     public ResponseEntity<RestResponse<String>> health() {
         RestResponse<String> response = RestResponse.<String>builder()

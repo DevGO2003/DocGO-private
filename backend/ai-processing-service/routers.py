@@ -43,11 +43,49 @@ async def extract_api(
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
-    Đầu vào:
-        - file: File docx hoặc pdf (bắt buộc)
-        - gemini_api_key: Header (tùy chọn)
-    Đầu ra:
-        - data: Chuỗi text các điều khoản chính của hợp đồng (do AI sinh ra)
+    🔹 Đầu vào
+    
+    📄 file (bắt buộc, body)
+    Loại: UploadFile (DOCX hoặc PDF)
+    Mô tả: Tệp hợp đồng cần phân tích và trích xuất thông tin.
+    
+    🔑 gemini_api_key (tùy chọn, header)
+    Loại: string
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: string
+    Mô tả: Chuỗi văn bản chứa các điều khoản chính của hợp đồng (do AI sinh ra).
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1).
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server).
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả.
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả xử lý.
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu.
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu.
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi.
     """
     # Extract API logic
     temp_path = os.path.join(RESULTS_DIR, file.filename)
@@ -106,15 +144,53 @@ async def summarize_api(
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
-    Đầu vào:
-        - file: File txt (tùy chọn)
-        - text: Chuỗi văn bản (tùy chọn)
-        - gemini_api_key: Header (tùy chọn)
-        (Chỉ cần 1 trong 2: file hoặc text)
-    Đầu ra:
-        - data: object chứa các trường tóm tắt hợp đồng (title, parties, object, effective_date, ...)
-        (nếu AI trả về JSON hợp lệ)
-        - hoặc data: chuỗi text nếu không parse được JSON
+    🔹 Đầu vào
+    
+    📄 file (tùy chọn, body)
+    Loại: UploadFile (TXT)
+    Mô tả: Tệp văn bản cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai.
+    
+    📝 text (tùy chọn, body)
+    Loại: string
+    Mô tả: Nội dung văn bản dạng chuỗi cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai.
+    
+    🔑 gemini_api_key (tùy chọn, header)
+    Loại: string
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: object hoặc string
+    Mô tả: Nếu AI trả về JSON hợp lệ, data sẽ là object chứa các trường tóm tắt hợp đồng (title, parties, object, effective_date, ...). Nếu không parse được JSON, data sẽ là chuỗi text.
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1).
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server).
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả.
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả xử lý.
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu.
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu.
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi.
     """
     # Summarize API logic
     content = None

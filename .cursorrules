@@ -196,6 +196,21 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   - Liệt kê headers quan trọng (ví dụ: `Authorization: Bearer <token>`, `GEMINI_API_KEY`).
   - Tham số path (`{id}`), query (`pageNumber`, `pageSize`, ...), và body: kiểu dữ liệu + ví dụ payload.
   - Mô tả cấu trúc `RestResponse` cho success và error, kèm ví dụ giá trị thực tế; liệt kê status code có thể trả về (200/201/204/400/404/409/500...).
+  - **Format chuẩn cho mô tả Input/Output**:
+    ```
+    🔹 Đầu vào
+    <emoji + tên tham số> <(bắt buộc | tùy chọn, header/body/path …)>
+    Loại: <kiểu dữ liệu>
+    Mô tả: <giải thích ngắn gọn>
+    
+    🔹 Đầu ra
+    <emoji + tên trường>
+    Loại: <kiểu dữ liệu>
+    Mô tả: <giải thích ngắn gọn>
+    ```
+    - Sử dụng emoji phù hợp với từng loại tham số/trường
+    - Ghi rõ tính bắt buộc/tùy chọn và vị trí (header/body/path/query)
+    - Mô tả ngắn gọn, dễ hiểu
 - Spring (SpringDoc):
   - Dùng `@Tag`, `@Operation(summary, description)`, `@RequestBody` + `@Schema` + `@ExampleObject` cho ví dụ JSON; response mặc định bọc trong `RestResponse<T>`.
 - FastAPI:
