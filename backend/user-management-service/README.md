@@ -28,6 +28,7 @@ pip install -U fastapi "uvicorn[standard]" sqlalchemy pymysql ^
   "pydantic>=2.9" "pydantic-settings>=2.3" python-multipart ^
   python-dotenv boto3 alembic httpx "python-jose[cryptography]" "passlib[bcrypt]" ^
   "pydantic[email]"
+  // bo dau ^ di
 
 # 3) Tạo file .env từ mẫu
 Copy-Item .env.example .env -Force
