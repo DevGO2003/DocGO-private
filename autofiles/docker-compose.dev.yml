@@ -108,10 +108,9 @@ services:
 
   # Contract Management Service (Spring Boot) - Development Mode
   contract-management-service:
-    image: openjdk:17-jdk-slim
+    image: docgo-contract-service:latest
     container_name: docgo_contract_service_dev
     restart: unless-stopped
-    working_dir: /app
     ports:
       - "8003:8003"
     environment:
@@ -120,10 +119,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=docgo_user
       - SPRING_DATASOURCE_PASSWORD=docgo_password
       - SERVER_PORT=8003
-    volumes:
-      - ../backend/contract-management-service:/app
-    command: >
-      sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8003'"
     depends_on:
       - mariadb
       - redis

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 import routers
 
 app = FastAPI(
@@ -11,4 +12,7 @@ app.include_router(routers.router)
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Welcome to the AI Processing Service. Visit /docs for API documentation."}
+    """
+    Root endpoint - tự động redirect sang /docs để hiển thị API documentation
+    """
+    return RedirectResponse(url="/docs", status_code=302)

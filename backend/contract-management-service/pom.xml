@@ -9,14 +9,16 @@
 		<version>3.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devgo2003.docgo</groupId>
-	<artifactId>contract-management-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>com.devgo2003.docgo.contract-management-service</groupId>
+	<artifactId>contract-service</artifactId>
+	<version>1.0.0</version>
 	<name>contract-management-service</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>24</java.version>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -78,7 +80,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>annotationProcessor</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>

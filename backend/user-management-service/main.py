@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -44,12 +44,10 @@ async def startup_event():
 
 @app.get("/", tags=["Health"])
 async def root():
-    """Health check endpoint"""
-    return {
-        "message": "User Management Service is running",
-        "version": os.getenv("APP_VERSION", "1.0.0"),
-        "status": "healthy"
-    }
+    """
+    Root endpoint - tự động redirect sang /docs để hiển thị API documentation
+    """
+    return RedirectResponse(url="/docs", status_code=302)
 
 @app.get("/health", tags=["Health"])
 async def health_check():

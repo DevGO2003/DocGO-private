@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM openjdk:24-jdk-slim AS builder
+FROM openjdk:17-jdk-slim AS builder
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Production stage
-FROM openjdk:24-jre-slim AS runner
+FROM openjdk:17-jdk-slim AS runner
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -29,7 +29,7 @@ WORKDIR /app
 RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy built JAR from builder stage
-COPY --from=builder /app/target/contract-management-service-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/contract-service-1.0.0.jar app.jar
 
 # Change ownership to non-root user
 RUN chown spring:spring app.jar

@@ -1,8 +1,11 @@
-# Compiled class file
+# Java Spring Boot .gitignore
+
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
+logs/
 
 # BlueJ files
 *.ctxt
@@ -36,7 +39,7 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 # Gradle
-.gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -73,58 +76,35 @@ bin/
 # VS Code
 .vscode/
 
-# Mac
+# OS generated files
 .DS_Store
-
-# Windows
-Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 ehthumbs.db
-Desktop.ini
+Thumbs.db
 
-# Linux
-*~
-
-# Environment Variables
+# Environment files
 .env
 .env.local
-.env.production
-.env.staging
-
-# Application specific
-application-local.properties
-application-dev.properties
-application-prod.properties
-
-# Logs
-logs/
-*.log
-*.out
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-*.h2.db
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
-temp/
-tmp/
 
-# Test reports
-test-output/
-reports/
-coverage/
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
-# Spring Boot
-spring.log
-spring.log.*
-
-# Contract specific
-contracts/
-attachments/
+# Upload/temp directories
 uploads/
 temp/
+tmp/
+results/
