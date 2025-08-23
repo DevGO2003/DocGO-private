@@ -32,3 +32,4 @@ LOG_LEVEL_APP=DEBUG
 
 # Swagger Configuration
 SWAGGER_UI_PATH=/docs
+

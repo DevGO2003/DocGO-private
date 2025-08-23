@@ -1,12 +1,20 @@
-# Sử dụng Node.js 18 Alpine
-FROM node:18-alpine
+# Multi-stage build for production optimization
+FROM node:18-alpine AS base
 
-# Thiết lập thư mục làm việc
+# Install dependencies only when needed
+FROM base AS deps
 WORKDIR /app
 
-# Cài đặt dependencies
-COPY package*.json ./
+# Copy package files first for better layer caching
+COPY package.json package-lock.json* ./
 RUN npm ci --only=production
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copy source code
 COPY . .
@@ -14,8 +22,22 @@ COPY . .
 # Build ứng dụng Vite
 RUN npm run build
 
-# Cài đặt serve để chạy production build
+# Production stage
+FROM base AS runner
+WORKDIR /app
+
+# Install serve globally
 RUN npm install -g serve
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
 
 # Expose port 3000
 EXPOSE 3000

@@ -49,7 +49,7 @@ try {
 
     # Start services with Docker Compose
     Write-Host "Starting services with Docker Compose..." -ForegroundColor Yellow
-    docker-compose up -d
+    docker-compose -f autofiles/docker-compose.yml up -d
 
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan

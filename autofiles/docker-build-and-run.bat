@@ -68,7 +68,7 @@ echo All Docker images built successfully!
 echo.
 
 echo Starting services with Docker Compose...
-docker-compose up -d
+docker-compose -f autofiles/docker-compose.yml up -d
 
 echo.
 echo ========================================

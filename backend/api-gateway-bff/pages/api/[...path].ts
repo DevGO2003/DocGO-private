@@ -4,6 +4,294 @@ import serviceManager from '@/lib/services';
 import kafkaService from '@/lib/kafka';
 import logger from '@/lib/logger';
 
+/**
+ * @swagger
+ * /api/v1/{service-name}/{path}:
+ *   get:
+ *     summary: Proxy GET request đến microservice
+ *     description: |
+ *       ## 🔄 Proxy GET Request
+ *       
+ *       Định tuyến GET request đến microservice tương ứng dựa trên path.
+ *       
+ *       ### 🔹 Đầu vào
+ *       🛣️ **service-name** (bắt buộc, path)
+ *       Loại: string
+ *       Mô tả: Tên của microservice (authentication-identity-service, user-management-service, etc.)
+ *       
+ *       🛣️ **path** (bắt buộc, path)
+ *       Loại: string
+ *       Mô tả: Đường dẫn cụ thể trong microservice
+ *       
+ *       🔍 **query parameters** (tùy chọn, query)
+ *       Loại: object
+ *       Mô tả: Query parameters sẽ được forward đến microservice
+ *       
+ *       ### 🔹 Đầu ra
+ *       📊 **RestResponse<T>**
+ *       Loại: object
+ *       Mô tả: Response từ microservice được bọc trong RestResponse envelope
+ *       
+ *       ### 📋 Response Codes
+ *       - **200 OK**: Request thành công
+ *       - **404 Not Found**: Service không tồn tại
+ *       - **503 Service Unavailable**: Service không khả dụng
+ *       - **500 Internal Server Error**: Lỗi trong quá trình xử lý
+ *       
+ *       ### 🔗 Available Services
+ *       - `authentication-identity-service` - Authentication & Identity Management
+ *       - `user-management-service` - User Profile & Approval Management
+ *       - `contract-management-service` - Contract & Workflow Management
+ *       - `ai-processing-service` - AI Document Processing
+ *       - `file-storage-asset-service` - File & Asset Management
+ *       
+ *     tags: [API Gateway BFF]
+ *     parameters:
+ *       - in: path
+ *         name: service-name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tên của microservice
+ *         example: authentication-identity-service
+ *       - in: path
+ *         name: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Đường dẫn trong microservice
+ *         example: auth/login
+ *     responses:
+ *       200:
+ *         description: Request thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RestResponse'
+ *       404:
+ *         description: Service không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: "Service not found"
+ *               message: "No service configured for path: unknown-service. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service"
+ *       503:
+ *         description: Service không khả dụng
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: "Service unavailable"
+ *               message: "Service authentication is not available"
+ *       500:
+ *         description: Lỗi trong quá trình xử lý
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: "Service error"
+ *               message: "An error occurred while processing the request"
+ *   
+ *   post:
+ *     summary: Proxy POST request đến microservice
+ *     description: |
+ *       ## 🔄 Proxy POST Request
+ *       
+ *       Định tuyến POST request đến microservice tương ứng.
+ *       
+ *       ### 🔹 Đầu vào
+ *       🛣️ **service-name** (bắt buộc, path)
+ *       Loại: string
+ *       Mô tả: Tên của microservice
+ *       
+ *       🛣️ **path** (bắt buộc, path)
+ *       Loại: string
+ *       Mô tả: Đường dẫn trong microservice
+ *       
+ *       📝 **body** (tùy chọn, body)
+ *       Loại: object
+ *       Mô tả: Request body sẽ được forward đến microservice
+ *       
+ *       🔍 **query parameters** (tùy chọn, query)
+ *       Loại: object
+ *       Mô tả: Query parameters
+ *       
+ *       ### 🔹 Đầu ra
+ *       📊 **RestResponse<T>**
+ *       Loại: object
+ *       Mô tả: Response từ microservice
+ *       
+ *     tags: [API Gateway BFF]
+ *     parameters:
+ *       - in: path
+ *         name: service-name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: authentication-identity-service
+ *       - in: path
+ *         name: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: auth/register
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *           example:
+ *             username: "user@example.com"
+ *             password: "securepassword123"
+ *     responses:
+ *       200:
+ *         description: Request thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RestResponse'
+ *       201:
+ *         description: Resource được tạo thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RestResponse'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Service không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Lỗi trong quá trình xử lý
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *   
+ *   put:
+ *     summary: Proxy PUT request đến microservice
+ *     description: |
+ *       ## 🔄 Proxy PUT Request
+ *       
+ *       Định tuyến PUT request để cập nhật resource.
+ *       
+ *       ### 🔹 Đầu vào
+ *       🛣️ **service-name** (bắt buộc, path)
+ *       🛣️ **path** (bắt buộc, path)
+ *       📝 **body** (tùy chọn, body)
+ *       🔍 **query parameters** (tùy chọn, query)
+ *       
+ *       ### 🔹 Đầu ra
+ *       📊 **RestResponse<T>**
+ *       
+ *     tags: [API Gateway BFF]
+ *     parameters:
+ *       - in: path
+ *         name: service-name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: user-management-service
+ *       - in: path
+ *         name: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: users/123
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *           example:
+ *             firstName: "John"
+ *             lastName: "Doe"
+ *             email: "john.doe@example.com"
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RestResponse'
+ *       404:
+ *         description: Resource không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Lỗi trong quá trình xử lý
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *   
+ *   delete:
+ *     summary: Proxy DELETE request đến microservice
+ *     description: |
+ *       ## 🔄 Proxy DELETE Request
+ *       
+ *       Định tuyến DELETE request để xóa resource.
+ *       
+ *       ### 🔹 Đầu vào
+ *       🛣️ **service-name** (bắt buộc, path)
+ *       🛣️ **path** (bắt buộc, path)
+ *       🔍 **query parameters** (tùy chọn, query)
+ *       
+ *       ### 🔹 Đầu ra
+ *       📊 **RestResponse<T>**
+ *       
+ *     tags: [API Gateway BFF]
+ *     parameters:
+ *       - in: path
+ *         name: service-name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: contract-management-service
+ *       - in: path
+ *         name: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: contracts/456
+ *     responses:
+ *       200:
+ *         description: Xóa thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RestResponse'
+ *       204:
+ *         description: Không có nội dung (No Content)
+ *       404:
+ *         description: Resource không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Lỗi trong quá trình xử lý
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { path } = req.query;
@@ -22,10 +310,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (fullPath.startsWith('user-management-service')) {
       serviceKey = 'user-management';
       endpoint = `/${fullPath}`;
+    } else if (fullPath.startsWith('contract-management-service')) {
+      serviceKey = 'contract-management';
+      endpoint = `/${fullPath}`;
+    } else if (fullPath.startsWith('ai-processing-service')) {
+      serviceKey = 'ai-processing';
+      endpoint = `/${fullPath}`;
+    } else if (fullPath.startsWith('file-storage-asset-service')) {
+      serviceKey = 'file-storage';
+      endpoint = `/${fullPath}`;
     } else {
       return res.status(404).json({
         error: 'Service not found',
-        message: `No service configured for path: ${fullPath}`
+        message: `No service configured for path: ${fullPath}. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service`
       });
     }
 

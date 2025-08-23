@@ -346,4 +346,35 @@ git_push_and_sync() {
 # Sử dụng: git_push_and_sync "feat: thêm tính năng mới"
 ```
 
+## 17) Quy tắc Docker Development Local
+- **Khi chạy Docker local**: Luôn sử dụng volume mount để mount code trực tiếp từ máy host vào container
+- **Mục đích**: Container không cần copy code sẵn vào image, mà dùng code thật đang chỉnh sửa ở máy
+- **Cách thực hiện**: Sử dụng `-v` hoặc `volumes` trong docker-compose để mount thư mục code
+- **Ví dụ mount code**:
+  ```bash
+  # Docker run với volume mount
+  docker run -v $(pwd):/app -p 8000:8000 service-name
+  
+  # Hoặc trong docker-compose.yml
+  volumes:
+    - ./:/app
+  ```
+- **Chạy toàn bộ service backend**: Khi cần chạy nhiều service, sử dụng docker-compose để khởi động đồng thời
+- **Hot reload**: Code thay đổi trên máy host sẽ được reflect ngay trong container (không cần rebuild image)
+- **Ưu điểm**: Phát triển nhanh, không cần rebuild image mỗi khi sửa code, dễ debug
+- **File cấu hình**: Sử dụng `autofiles/docker-compose.dev.yml` cho development mode với volume mount
+- **Script hỗ trợ**: Có sẵn `autofiles/docker-dev.bat` và `autofiles/docker-dev.ps1` để chạy nhanh
+- **Port mapping**: Tuân thủ quy tắc port cố định theo tên nhánh (8000-8017)
 
+### **Quy tắc lệnh Docker Local:**
+- **`docker local`**: Chỉ khởi động những service có file được chỉnh sửa (smart restart)
+- **`docker local --new`**: Chạy script Docker local từ đầu (restart toàn bộ hệ thống)
+
+### **Development workflow**:
+  1. **Lần đầu hoặc khi cần restart toàn bộ**: Chạy `docker local --new`
+  2. **Khi chỉnh sửa code**: Chạy `docker local` để restart service tương ứng
+  3. Sửa code trực tiếp trên máy host
+  4. Code thay đổi được sync ngay vào container
+  5. Service tự động reload (nếu có hot reload)
+  6. Xem logs: `docker-compose -f autofiles/docker-compose.dev.yml logs -f`
+  7. Dừng: `docker-compose -f autofiles/docker-compose.dev.yml down`

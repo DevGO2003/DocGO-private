@@ -61,8 +61,11 @@ Xem [How to run this microservice.md](./How%20to%20run%20this%20microservice.md)
 ### Environment Variables
 ```env
 # Service URLs
-USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
 AUTHENTICATION_SERVICE_URL=http://localhost:8001
+USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
+CONTRACT_MANAGEMENT_SERVICE_URL=http://localhost:8003
+AI_PROCESSING_SERVICE_URL=http://localhost:8017
+FILE_STORAGE_SERVICE_URL=http://localhost:8012
 
 # Kafka
 KAFKA_BROKERS=localhost:9092
@@ -77,6 +80,9 @@ RATE_LIMIT_MAX_REQUESTS=100
 - **API Gateway BFF**: 8000
 - **Authentication Service**: 8001  
 - **User Management Service**: 8002
+- **Contract Management Service**: 8003
+- **AI Processing Service**: 8017
+- **File Storage Service**: 8012
 
 ## 📡 API Endpoints
 

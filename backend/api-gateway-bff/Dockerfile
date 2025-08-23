@@ -1,25 +1,57 @@
-# Sử dụng Node.js 18 Alpine
-FROM node:18-alpine
+# Multi-stage build for production optimization
+FROM node:18-alpine AS base
 
-# Thiết lập thư mục làm việc
-WORKDIR /app
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 
-# Cài đặt dependencies
-COPY package*.json ./
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
 RUN npm ci --only=production
 
-# Copy source code
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build ứng dụng Next.js
+# Create logs directory
+RUN mkdir -p logs
+
+# Build the application
 RUN npm run build
 
-# Expose port 8000 (theo quy tắc port mapping)
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy the public folder
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy logs directory
+COPY --from=builder /app/logs ./logs
+RUN chown -R nextjs:nodejs logs
+
+USER nextjs
+
 EXPOSE 8000
 
-# Thiết lập biến môi trường
-ENV NODE_ENV=production
 ENV PORT=8000
+ENV HOSTNAME="0.0.0.0"
 
-# Command khởi chạy service
-CMD ["npm", "start"]
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "server.js"]

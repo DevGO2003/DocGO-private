@@ -2,8 +2,11 @@
 
 ## Mô tả
 API Gateway BFF (Backend for Frontend) sử dụng Next.js và Kafka để kết nối và quản lý các microservice của DocGO, bao gồm:
-- `authentication-identity-service` (Spring Boot)
-- `user-management-service` (FastAPI)
+- `authentication-identity-service` (Spring Boot) - Port 8001
+- `user-management-service` (FastAPI) - Port 8002
+- `contract-management-service` (Spring Boot) - Port 8003
+- `ai-processing-service` (FastAPI) - Port 8017
+- `file-storage-asset-service` (FastAPI) - Port 8012
 
 ## Yêu cầu hệ thống
 - Node.js 18.0.0 trở lên
@@ -12,6 +15,9 @@ API Gateway BFF (Backend for Frontend) sử dụng Next.js và Kafka để kết
 - Các microservice đang chạy:
   - Authentication Service: http://localhost:8001
   - User Management Service: http://localhost:8002
+  - Contract Management Service: http://localhost:8003
+  - AI Processing Service: http://localhost:8017
+  - File Storage Service: http://localhost:8012
 
 ## Cài đặt
 
@@ -38,8 +44,11 @@ PORT=8000
 NODE_ENV=development
 
 # Service URLs
-USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
 AUTHENTICATION_SERVICE_URL=http://localhost:8001
+USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
+CONTRACT_MANAGEMENT_SERVICE_URL=http://localhost:8003
+AI_PROCESSING_SERVICE_URL=http://localhost:8017
+FILE_STORAGE_SERVICE_URL=http://localhost:8012
 
 # Kafka Configuration
 KAFKA_BROKERS=localhost:9092
@@ -98,6 +107,10 @@ npm start
 ### 3. API Endpoints
 - Base URL: http://localhost:8000/api/v1/
 - Authentication: `/authentication-identity-service/auth/*`
+- User Management: `/user-management-service/*`
+- Contract Management: `/contract-management-service/*`
+- AI Processing: `/ai-processing-service/*`
+- File Storage: `/file-storage-asset-service/*`
 - User Management: `/user-management-service/*`
 
 ## Cấu trúc thư mục

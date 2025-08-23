@@ -15,8 +15,8 @@ services:
       - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
-      - ./backend/contract-management-service/database/init_contract_service.sql:/docker-entrypoint-initdb.d/init_contract_service.sql
+      - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
+      - ../backend/contract-management-service/database/init_contract_service.sql:/docker-entrypoint-initdb.d/init_contract_service.sql
     networks:
       - docgo_network
 
@@ -35,7 +35,7 @@ services:
   # API Gateway BFF (Next.js)
   api-gateway-bff:
     build:
-      context: ./backend/api-gateway-bff
+      context: ../backend/api-gateway-bff
       dockerfile: Dockerfile
     container_name: docgo_api_gateway_bff
     restart: unless-stopped
@@ -53,7 +53,7 @@ services:
   # Authentication Identity Service (Spring Boot)
   authentication-identity-service:
     build:
-      context: ./backend/authentication-identity-service
+      context: ../backend/authentication-identity-service
       dockerfile: Dockerfile
     container_name: docgo_auth_service
     restart: unless-stopped
@@ -74,7 +74,7 @@ services:
   # User Management Service (FastAPI)
   user-management-service:
     build:
-      context: ./backend/user-management-service
+      context: ../backend/user-management-service
       dockerfile: Dockerfile
     container_name: docgo_user_management_service
     restart: unless-stopped
@@ -98,7 +98,7 @@ services:
   # Contract Management Service (Spring Boot)
   contract-management-service:
     build:
-      context: ./backend/contract-management-service
+      context: ../backend/contract-management-service
       dockerfile: Dockerfile
     container_name: docgo_contract_service
     restart: unless-stopped
@@ -119,7 +119,7 @@ services:
   # AI Processing Service (FastAPI)
   ai-processing-service:
     build:
-      context: ./backend/ai-processing-service
+      context: ../backend/ai-processing-service
       dockerfile: Dockerfile
     container_name: docgo_ai_processing_service
     restart: unless-stopped
@@ -137,7 +137,7 @@ services:
   # File Storage Asset Service (FastAPI)
   file-storage-asset-service:
     build:
-      context: ./backend/file-storage-asset-service
+      context: ../backend/file-storage-asset-service
       dockerfile: Dockerfile
     container_name: docgo_file_storage_service
     restart: unless-stopped
@@ -156,7 +156,7 @@ services:
   # Frontend Web (Vite + React)
   frontend-web:
     build:
-      context: ./frontend/web
+      context: ../frontend/web
       dockerfile: Dockerfile
     container_name: docgo_frontend_web
     restart: unless-stopped
