@@ -274,17 +274,76 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   git remote add private https://github.com/DevGO2003/DocGO-private.git
   git remote -v  # Kiểm tra remotes
   ```
-- **Push code nhạy cảm**:
-  ```bash
-  git add .env  # File chứa secrets
-  git commit -m "feat: thêm cấu hình môi trường"
-  git push private main  # Push lên remote private
-  ```
-- **Push code công khai**:
-  ```bash
-  git add .  # Code nguồn, không có secrets
-  git commit -m "feat: thêm tính năng mới"
-  git push origin main  # Push lên remote chính
-  ```
+
+### **Quy tắc đồng bộ hóa tự động:**
+- **Khi push lên `origin`**: Tự động đồng bộ sang `private` để đảm bảo cả hai remote luôn có code mới nhất
+- **Khi push lên `private`**: Chỉ push secrets và file nhạy cảm, không đồng bộ ngược về `origin`
+
+### **Quy trình push và đồng bộ hóa:**
+
+#### **1. Push code công khai (khuyến nghị):**
+```bash
+# Bước 1: Push lên origin
+git add .  # Code nguồn, không có secrets
+git commit -m "feat: thêm tính năng mới"
+git push origin main
+
+# Bước 2: Tự động đồng bộ sang private (đồng bộ code nguồn)
+git push private main
+```
+
+#### **2. Push code nhạy cảm:**
+```bash
+# Chỉ push file nhạy cảm lên private
+git add .env  # File chứa secrets
+git commit -m "feat: thêm cấu hình môi trường"
+git push private main  # KHÔNG push lên origin
+```
+
+#### **3. Đồng bộ hóa thủ công (nếu cần):**
+```bash
+# Đồng bộ từ origin sang private (để lấy code mới nhất)
+git fetch origin
+git checkout main
+git pull origin main
+git push private main
+
+# Đồng bộ từ private sang origin (chỉ khi cần thiết)
+git fetch private
+git checkout main
+git pull private main
+git push origin main
+```
+
+### **Quy tắc bảo mật khi đồng bộ hóa:**
+- **KHÔNG BAO GIỜ** push file `.env` chứa secrets thật lên `origin`
+- **LUÔN** kiểm tra `.gitignore` trước khi push để đảm bảo không có file nhạy cảm
+- **Ưu tiên** push lên `origin` trước, sau đó đồng bộ sang `private`
+- **Kiểm tra** trạng thái remote trước khi push để tránh conflict
+
+### **Script tự động hóa đồng bộ hóa:**
+```bash
+# Script push và đồng bộ hóa tự động
+git_push_and_sync() {
+    local commit_message="$1"
+    local branch="${2:-main}"
+    
+    # Commit changes
+    git add .
+    git commit -m "$commit_message"
+    
+    # Push to origin
+    echo "Pushing to origin..."
+    git push origin "$branch"
+    
+    # Sync to private
+    echo "Syncing to private..."
+    git push private "$branch"
+    
+    echo "Push and sync completed successfully!"
+}
+
+# Sử dụng: git_push_and_sync "feat: thêm tính năng mới"
+```
 
 
