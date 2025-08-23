@@ -9,9 +9,9 @@ import magic
 import aiofiles
 from fastapi import HTTPException, UploadFile
 
-from ..schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
-from ..services.malware_scanner import MalwareScanner
-from ..config import get_s3_client, get_bucket_name
+from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
+from services.malware_scanner import MalwareScanner
+from config import get_s3_client, get_bucket_name
 
 class FileStorageService:
     def __init__(self):

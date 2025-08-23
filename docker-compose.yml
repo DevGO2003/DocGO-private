@@ -1,0 +1,189 @@
+version: '3.8'
+
+services:
+  # Database - MariaDB
+  mariadb:
+    image: mariadb:11.2
+    container_name: docgo_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: sapassword
+      MYSQL_DATABASE: docgo
+      MYSQL_USER: docgo_user
+      MYSQL_PASSWORD: docgo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
+      - ./backend/contract-management-service/database/init_contract_service.sql:/docker-entrypoint-initdb.d/init_contract_service.sql
+    networks:
+      - docgo_network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: docgo_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - docgo_network
+
+  # API Gateway BFF (Next.js)
+  api-gateway-bff:
+    build:
+      context: ./backend/api-gateway-bff
+      dockerfile: Dockerfile
+    container_name: docgo_api_gateway_bff
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network
+
+  # Authentication Identity Service (Spring Boot)
+  authentication-identity-service:
+    build:
+      context: ./backend/authentication-identity-service
+      dockerfile: Dockerfile
+    container_name: docgo_auth_service
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
+      - SPRING_DATASOURCE_USERNAME=docgo_user
+      - SPRING_DATASOURCE_PASSWORD=docgo_password
+      - SERVER_PORT=8001
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network
+
+  # User Management Service (FastAPI)
+  user-management-service:
+    build:
+      context: ./backend/user-management-service
+      dockerfile: Dockerfile
+    container_name: docgo_user_management_service
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo_user_management_service
+      - DATABASE_HOST=mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=docgo_user_management_service
+      - DATABASE_USER=docgo_user
+      - DATABASE_PASSWORD=docgo_password
+      - HOST=0.0.0.0
+      - PORT=8002
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network
+
+  # Contract Management Service (Spring Boot)
+  contract-management-service:
+    build:
+      context: ./backend/contract-management-service
+      dockerfile: Dockerfile
+    container_name: docgo_contract_service
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
+      - SPRING_DATASOURCE_USERNAME=docgo_user
+      - SPRING_DATASOURCE_PASSWORD=docgo_password
+      - SERVER_PORT=8003
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network
+
+  # AI Processing Service (FastAPI)
+  ai-processing-service:
+    build:
+      context: ./backend/ai-processing-service
+      dockerfile: Dockerfile
+    container_name: docgo_ai_processing_service
+    restart: unless-stopped
+    ports:
+      - "8017:8017"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8017
+      - PYTHONPATH=/app
+    volumes:
+      - ai_processing_results:/app/results
+    networks:
+      - docgo_network
+
+  # File Storage Asset Service (FastAPI)
+  file-storage-asset-service:
+    build:
+      context: ./backend/file-storage-asset-service
+      dockerfile: Dockerfile
+    container_name: docgo_file_storage_service
+    restart: unless-stopped
+    ports:
+      - "8012:8012"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8012
+      - PYTHONPATH=/app
+    volumes:
+      - file_storage_uploads:/app/uploads
+      - file_storage_temp:/app/temp
+    networks:
+      - docgo_network
+
+  # Frontend Web (Vite + React)
+  frontend-web:
+    build:
+      context: ./frontend/web
+      dockerfile: Dockerfile
+    container_name: docgo_frontend_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - api-gateway-bff
+    networks:
+      - docgo_network
+
+volumes:
+  mariadb_data:
+    driver: local
+  redis_data:
+    driver: local
+  ai_processing_results:
+    driver: local
+  file_storage_uploads:
+    driver: local
+  file_storage_temp:
+    driver: local
+
+networks:
+  docgo_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

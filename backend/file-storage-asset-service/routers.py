@@ -363,9 +363,9 @@ async def scan_directory_malware(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi quét thư mục: {str(e)}")
 
-@router.get("/scan/statistics", summary="Thống kê kết quả quét malware")
+@router.post("/scan/statistics", summary="Thống kê kết quả quét malware")
 async def get_scan_statistics(
-    scan_results: List[MalwareScanResult] = Query(..., description="Danh sách kết quả quét")
+    scan_results: List[MalwareScanResult]
 ):
     """
     🔹 Đầu vào

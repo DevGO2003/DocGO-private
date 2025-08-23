@@ -11,15 +11,18 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Build ứng dụng Next.js
+# Build ứng dụng Vite
 RUN npm run build
 
-# Expose port 8000 (theo quy tắc port mapping)
-EXPOSE 8000
+# Cài đặt serve để chạy production build
+RUN npm install -g serve
+
+# Expose port 3000
+EXPOSE 3000
 
 # Thiết lập biến môi trường
 ENV NODE_ENV=production
-ENV PORT=8000
+ENV PORT=3000
 
 # Command khởi chạy service
-CMD ["npm", "start"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
