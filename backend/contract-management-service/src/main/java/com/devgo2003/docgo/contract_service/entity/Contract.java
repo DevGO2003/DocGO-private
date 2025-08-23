@@ -37,7 +37,31 @@ public class Contract extends BaseEntity {
     @Column(name = "system_id")
     private String systemId;
 
+    // Thông tin tóm tắt hợp đồng
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
+    @Column(name = "contract_type")
+    private String contractType;
+
+    @Column(name = "risk_level")
+    private String riskLevel;
+
+    @Column(name = "key_terms", columnDefinition = "TEXT")
+    private String keyTerms;
+
+    @Column(name = "ai_processed")
+    private Boolean aiProcessed = false;
+
+    @Column(name = "processing_status")
+    @Enumerated(EnumType.STRING)
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
+
     public enum ContractStatus {
         DRAFT, PENDING, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED
+    }
+
+    public enum ProcessingStatus {
+        PENDING, PROCESSING, COMPLETED, FAILED
     }
 }
