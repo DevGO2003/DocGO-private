@@ -1,0 +1,26 @@
+# S3/Filebase Configuration
+S3_ENDPOINT=https://s3.filebase.com
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=your_access_key_here
+S3_SECRET_ACCESS_KEY=your_secret_key_here
+S3_BUCKET=docgo-assets
+
+# IPFS Configuration (Optional)
+IPFS_RPC_ENDPOINT=https://rpc.filebase.io
+IPFS_RPC_TOKEN=your_ipfs_token_here
+
+# ClamAV Configuration
+CLAMD_HOST=localhost
+CLAMD_PORT=3310
+USE_CLAMD=true
+
+# File Storage Configuration
+MAX_FILE_SIZE=104857600
+ALLOWED_FILE_TYPES=pdf,docx,txt,jpg,jpeg,png,gif
+UPLOAD_DIR=uploads
+TEMP_DIR=temp
+
+# Server Configuration
+PORT=8012
+HOST=0.0.0.0
+DEBUG=true

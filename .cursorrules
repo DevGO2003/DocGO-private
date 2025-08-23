@@ -263,4 +263,28 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
 - **KIỂM TRA** `.gitignore` trước mỗi commit để đảm bảo không có file nhạy cảm
 - **SỬ DỤNG** `.gitignore` global cho workspace nếu cần thiết
 
+## 16) Quản lý Remote Repository
+- **Remote chính**: `origin` → `https://github.com/DevGO2003/DocGO` (public, không chứa secrets)
+- **Remote private**: `private` → `https://github.com/DevGO2003/DocGO-private` (chứa secrets, file nhạy cảm)
+- **Quy tắc sử dụng**:
+  - `origin`: Code nguồn, cấu hình cơ bản, tài liệu công khai
+  - `private`: API keys, database credentials, file nhạy cảm, logs, build artifacts
+- **Cách thêm remote private**:
+  ```bash
+  git remote add private https://github.com/DevGO2003/DocGO-private.git
+  git remote -v  # Kiểm tra remotes
+  ```
+- **Push code nhạy cảm**:
+  ```bash
+  git add .env  # File chứa secrets
+  git commit -m "feat: thêm cấu hình môi trường"
+  git push private main  # Push lên remote private
+  ```
+- **Push code công khai**:
+  ```bash
+  git add .  # Code nguồn, không có secrets
+  git commit -m "feat: thêm tính năng mới"
+  git push origin main  # Push lên remote chính
+  ```
+
 

@@ -44,4 +44,31 @@ def get_presigned_get_url(object_key: str, expires_in_seconds: int = 3600) -> st
 		ExpiresIn=expires_in_seconds,
 	)
 
+def get_s3_client():
+	"""Get S3 client instance."""
+	return s3_client
+
+def get_bucket_name() -> str:
+	"""Get S3 bucket name."""
+	return S3_BUCKET
+
+def get_s3_endpoint() -> str:
+	"""Get S3 endpoint URL."""
+	return S3_ENDPOINT
+
+def get_s3_region() -> str:
+	"""Get S3 region."""
+	return S3_REGION
+
+# ClamAV configuration
+CLAMD_HOST: str = get_env("CLAMD_HOST", "localhost")
+CLAMD_PORT: int = int(get_env("CLAMD_PORT", "3310"))
+USE_CLAMD: bool = get_env("USE_CLAMD", "true").lower() == "true"
+
+# File storage configuration
+MAX_FILE_SIZE: int = int(get_env("MAX_FILE_SIZE", "104857600"))  # 100MB default
+ALLOWED_FILE_TYPES: list = get_env("ALLOWED_FILE_TYPES", "pdf,docx,txt,jpg,jpeg,png,gif").split(",")
+UPLOAD_DIR: str = get_env("UPLOAD_DIR", "uploads")
+TEMP_DIR: str = get_env("TEMP_DIR", "temp")
+
 
