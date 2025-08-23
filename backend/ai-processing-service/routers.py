@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body
+from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request
 from docx import Document
 import PyPDF2
 import os
@@ -8,6 +8,7 @@ import google.generativeai as genai
 import json
 import uuid
 from datetime import datetime, timezone
+from schemas.response import RestResponse
 
 router = APIRouter(prefix="/api/v1/ai-processing-service")
 
@@ -39,6 +40,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 # API 1: EXTRACT (doc, pdf)
 @router.post("/extract", summary="Trích xuất thông tin hợp đồng (doc/pdf)", tags=["AI Processing Service"])
 async def extract_api(
+    request: Request,
     file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
@@ -97,39 +99,67 @@ async def extract_api(
         content = read_pdf(temp_path)
     else:
         os.remove(temp_path)
-        return {
-            "apiVersion": "v1",
-            "statusCode": 400,
-            "shortMessage": "Invalid Input",
-            "description": "Chỉ hỗ trợ file docx hoặc pdf.",
-            "data": None,
-            "path": "/api/v1/ai-processing-service/extract"
-        }
+        raise HTTPException(status_code=400, detail="Chỉ hỗ trợ file docx hoặc pdf.")
+    
     os.remove(temp_path)
     if not content.strip():
-        return {
-            "apiVersion": "v1",
-            "statusCode": 204,
-            "shortMessage": "No Content",
-            "description": "Không có nội dung văn bản để gửi cho AI.",
-            "data": None,
-            "path": "/api/v1/ai-processing-service/extract"
-        }
+        raise HTTPException(status_code=204, detail="Không có nội dung văn bản để gửi cho AI.")
+    
     api_key = gemini_api_key or get_gemini_api_key()
     try:
-        answer = ask_gemini(api_key, content, "Hãy trích xuất các điều khoản chính của hợp đồng này.")
+        prompt = """Hãy phân tích và trích xuất các điều khoản chính của hợp đồng dưới đây. 
+
+Yêu cầu:
+1. Chỉ trả về nội dung trích xuất, không giải thích thêm
+2. Nếu không thể trích xuất được thông tin hợp lệ, hãy trả về "KHÔNG_THỂ_TRÍCH_XUẤT"
+3. Tập trung vào các điều khoản quan trọng như: đối tượng hợp đồng, thời hạn, giá trị, điều kiện thanh toán, quyền và nghĩa vụ các bên, điều kiện chấm dứt
+
+Nội dung hợp đồng:"""
+        answer = ask_gemini(api_key, content, prompt)
+        
+        # Kiểm tra xem AI có trả về thông báo lỗi không
+        error_indicators = [
+            "tôi xin lỗi",
+            "tôi không thể",
+            "không thể trích xuất",
+            "không thể xử lý",
+            "không có đủ thông tin",
+            "cần thêm thông tin",
+            "không thể phân tích",
+            "không thể đọc",
+            "lỗi",
+            "error",
+            "không_thể_trích_xuất",
+            "không có điều khoản",
+            "không phải là hợp đồng",
+            "không phải hợp đồng",
+            "không có thông tin",
+            "không thể tìm thấy",
+            "không có dữ liệu"
+        ]
+        
+        answer_lower = answer.lower()
+        is_error_response = any(indicator in answer_lower for indicator in error_indicators)
+        
+        if is_error_response:
+            return RestResponse(
+                statusCode=422,
+                shortMessage="Unprocessable Entity",
+                description="AI không thể trích xuất thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
+                data=answer,
+                path=request.url.path
+            )
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi AI/Extract: {str(e)}")
-    return {
-        "apiVersion": "v1",
-        "statusCode": 200,
-        "shortMessage": "Success",
-        "description": "Trích xuất điều khoản thành công.",
-        "data": answer,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "requestId": str(uuid.uuid4()),
-        "path": "/api/v1/ai-processing-service/extract"
-    }
+    
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="Trích xuất điều khoản thành công.",
+        data=answer,
+        path=request.url.path
+    )
 
 
 
@@ -139,6 +169,7 @@ async def extract_api(
 # API 3: SUMMARIZE (txt, string input)
 @router.post("/summarize", summary="Tóm tắt hợp đồng (txt/string)", tags=["AI Processing Service"])
 async def summarize_api(
+    request: Request,
     file: UploadFile = File(None, description="File txt cần tóm tắt"),
     text: str = Body(None, description="Nội dung văn bản dạng chuỗi (txt)", embed=True),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
@@ -203,35 +234,15 @@ async def summarize_api(
                 content = tf.read()
         else:
             os.remove(temp_path)
-            return {
-                "apiVersion": "v1",
-                "statusCode": 400,
-                "shortMessage": "Invalid Input",
-                "description": "Chỉ hỗ trợ file txt hoặc chuỗi văn bản.",
-                "data": None,
-                "path": "/api/v1/ai-processing-service/summarize"
-            }
+            raise HTTPException(status_code=400, detail="Chỉ hỗ trợ file txt hoặc chuỗi văn bản.")
         os.remove(temp_path)
     elif text:
         content = text
     else:
-        return {
-            "apiVersion": "v1",
-            "statusCode": 400,
-            "shortMessage": "No Input",
-            "description": "Cần cung cấp file txt hoặc nội dung chuỗi.",
-            "data": None,
-            "path": "/api/v1/ai-processing-service/summarize"
-        }
+        raise HTTPException(status_code=400, detail="Cần cung cấp file txt hoặc nội dung chuỗi.")
+    
     if not content or not content.strip():
-        return {
-            "apiVersion": "v1",
-            "statusCode": 204,
-            "shortMessage": "No Content",
-            "description": "Không có nội dung để gửi cho AI.",
-            "data": None,
-            "path": "/api/v1/ai-processing-service/summarize"
-        }
+        raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
     api_key = gemini_api_key or get_gemini_api_key()
     try:
         prompt = (
@@ -262,9 +273,47 @@ async def summarize_api(
             '    "termination_conditions": string\n'
             '  }\n'
             '}'
-            "\nChỉ trả về đúng JSON hợp lệ, không giải thích thêm. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (yyyy-MM-dd), nếu không có ngày cụ thể thì để date=null. Dưới đây là nội dung hợp đồng:"
+            "\nYêu cầu:\n"
+            "1. Chỉ trả về đúng JSON hợp lệ, không giải thích thêm\n"
+            "2. Nếu không thể tóm tắt được thông tin hợp lệ, hãy trả về 'KHÔNG_THỂ_TÓM_TẮT'\n"
+            "3. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (yyyy-MM-dd), nếu không có ngày cụ thể thì để date=null\n"
+            "4. Điền thông tin dựa trên nội dung hợp đồng, nếu không có thông tin thì để null hoặc mảng rỗng\n\n"
+            "Dưới đây là nội dung hợp đồng:"
         )
         answer = ask_gemini(api_key, content, prompt)
+        
+        # Kiểm tra xem AI có trả về thông báo lỗi không
+        error_indicators = [
+            "tôi xin lỗi",
+            "tôi không thể",
+            "không thể tóm tắt",
+            "không thể xử lý",
+            "không có đủ thông tin",
+            "cần thêm thông tin",
+            "không thể phân tích",
+            "không thể đọc",
+            "lỗi",
+            "error",
+            "không_thể_tóm_tắt",
+            "không có thông tin",
+            "không phải là hợp đồng",
+            "không phải hợp đồng",
+            "không thể tìm thấy",
+            "không có dữ liệu"
+        ]
+        
+        answer_lower = answer.lower()
+        is_error_response = any(indicator in answer_lower for indicator in error_indicators)
+        
+        if is_error_response:
+            return RestResponse(
+                statusCode=422,
+                shortMessage="Unprocessable Entity",
+                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
+                data=answer,
+                path=request.url.path
+            )
+        
         # Loại bỏ các ký tự đặc biệt, markdown, ...
         cleaned = answer.strip()
         if cleaned.startswith('```json'):
@@ -294,15 +343,13 @@ async def summarize_api(
             data_out = answer
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi AI/Summarize: {str(e)}")
-    return {
-        "apiVersion": "v1",
-        "statusCode": 200,
-        "shortMessage": "Success",
-        "description": "Tóm tắt hợp đồng thành công.",
-        "data": data_out,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "requestId": str(uuid.uuid4()),
-        "path": "/api/v1/ai-processing-service/summarize"
-    }
+    
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="Tóm tắt hợp đồng thành công.",
+        data=data_out,
+        path=request.url.path
+    )
 
 

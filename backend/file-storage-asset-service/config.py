@@ -3,6 +3,7 @@ from typing import Optional
 
 import boto3
 from botocore.client import Config
+from botocore.exceptions import ClientError, NoCredentialsError
 from dotenv import load_dotenv
 
 
@@ -15,11 +16,11 @@ def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
 
 
 # S3 / Filebase configuration
-S3_ENDPOINT: str = get_env("S3_ENDPOINT", "https://s3.filebase.com")
-S3_REGION: str = get_env("S3_REGION", "us-east-1")
-S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY_ID", "minioadmin")
-S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_ACCESS_KEY", "miniopassword")
-S3_BUCKET: str = get_env("S3_BUCKET", "docgo-assets")
+S3_ENDPOINT: str = get_env("S3_ENDPOINT")
+S3_REGION: str = get_env("S3_REGION")
+S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY_ID")
+S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_ACCESS_KEY")
+S3_BUCKET: str = get_env("S3_BUCKET")
 
 s3_client = boto3.client(
 	"s3",
@@ -34,6 +35,37 @@ s3_client = boto3.client(
 # Optional IPFS (Filebase RPC) configuration
 IPFS_RPC_ENDPOINT: str = get_env("IPFS_RPC_ENDPOINT", "https://rpc.filebase.io")
 IPFS_RPC_TOKEN: Optional[str] = get_env("IPFS_RPC_TOKEN")
+
+
+def ensure_bucket_exists():
+	"""Đảm bảo bucket S3 tồn tại, tạo nếu chưa có."""
+	try:
+		s3_client.head_bucket(Bucket=S3_BUCKET)
+		print(f"✅ Bucket '{S3_BUCKET}' đã tồn tại")
+	except ClientError as e:
+		error_code = e.response['Error']['Code']
+		if error_code == '404':
+			try:
+				s3_client.create_bucket(Bucket=S3_BUCKET)
+				print(f"✅ Đã tạo bucket '{S3_BUCKET}' thành công")
+			except ClientError as create_error:
+				print(f"❌ Không thể tạo bucket '{S3_BUCKET}': {create_error}")
+				raise
+		else:
+			print(f"❌ Lỗi kiểm tra bucket '{S3_BUCKET}': {e}")
+			raise
+	except NoCredentialsError:
+		print("❌ Không tìm thấy credentials S3. Vui lòng kiểm tra S3_ACCESS_KEY_ID và S3_SECRET_ACCESS_KEY")
+		raise
+
+
+def ensure_local_directories():
+	"""Đảm bảo các thư mục local tồn tại."""
+	directories = [UPLOAD_DIR, TEMP_DIR]
+	for directory in directories:
+		if not os.path.exists(directory):
+			os.makedirs(directory)
+			print(f"✅ Đã tạo thư mục '{directory}'")
 
 
 def get_presigned_get_url(object_key: str, expires_in_seconds: int = 3600) -> str:

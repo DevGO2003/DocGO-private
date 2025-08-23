@@ -16,8 +16,8 @@ python -m venv venv
 ./venv/Scripts/Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env -Force
-uvicorn main:app --reload --port 8011
+uvicorn main:app --reload --port 8017
 ```
 
-Docs: `http://localhost:8011/docs#/`
+Docs: `http://localhost:8017/docs#/`
 
