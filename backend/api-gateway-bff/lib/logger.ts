@@ -4,6 +4,20 @@ import path from 'path';
 // Create logs directory if it doesn't exist
 const logsDir = path.join(process.cwd(), 'logs');
 
+// Helper function to handle circular references
+const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (key: string, value: any) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+};
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -38,7 +52,12 @@ if (process.env.NODE_ENV !== 'production') {
       winston.format.colorize(),
       winston.format.simple(),
       winston.format.printf(({ timestamp, level, message, ...meta }) => {
-        return `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''}`;
+        try {
+          const metaString = Object.keys(meta).length ? JSON.stringify(meta, getCircularReplacer(), 2) : '';
+          return `${timestamp} [${level}]: ${message} ${metaString}`;
+        } catch (error) {
+          return `${timestamp} [${level}]: ${message} [Logging Error: ${error.message}]`;
+        }
       })
     )
   }));

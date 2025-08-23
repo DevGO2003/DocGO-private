@@ -21,11 +21,11 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
-    "next": "14.0.4",
+    "next": "^14.2.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-react": "^5.10.5",
+    "swagger-ui-react": "^3.29.0",
     "uuid": "^9.0.1",
     "winston": "^3.11.0"
   },
