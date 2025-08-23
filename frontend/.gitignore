@@ -6,11 +6,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Next.js
-.next/
-out/
+# Production builds
 build/
 dist/
+out/
 
 # Environment Variables
 .env
@@ -136,5 +135,11 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
-# Kafka logs
-kafka-logs/
+# React specific
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vite
+.vite/
