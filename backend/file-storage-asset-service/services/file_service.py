@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List, BinaryIO
 import boto3
 from botocore.exceptions import ClientError
-import magic
+import filetype
 import aiofiles
 from fastapi import HTTPException, UploadFile
 
@@ -37,17 +37,19 @@ class FileStorageService:
         elif ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
             return FileType.IMAGE
         
-        # Sử dụng python-magic để kiểm tra content
+        # Sử dụng filetype để kiểm tra content
         try:
-            mime_type = magic.from_buffer(content, mime=True)
-            if 'pdf' in mime_type:
-                return FileType.PDF
-            elif 'word' in mime_type or 'document' in mime_type:
-                return FileType.DOCX
-            elif 'text' in mime_type:
-                return FileType.TXT
-            elif 'image' in mime_type:
-                return FileType.IMAGE
+            file_info = filetype.guess(content)
+            if file_info:
+                mime_type = file_info.mime
+                if 'pdf' in mime_type:
+                    return FileType.PDF
+                elif 'word' in mime_type or 'document' in mime_type:
+                    return FileType.DOCX
+                elif 'text' in mime_type:
+                    return FileType.TXT
+                elif 'image' in mime_type:
+                    return FileType.IMAGE
         except:
             pass
             
