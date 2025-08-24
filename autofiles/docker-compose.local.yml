@@ -1,10 +1,11 @@
 # Docker Compose Local - Backend Services with Hot Reload
+# Tên container: docgo-local
 
 services:
   # Database - MariaDB (Infrastructure - No volume mounting)
   mariadb:
     image: mariadb:11.2
-    container_name: docgo_mariadb_local
+    container_name: docgo-local-mariadb
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: sapassword
@@ -20,10 +21,10 @@ services:
     networks:
       - docgo_network_local
 
-  # Redis for caching and session management (Infrastructure - No volume mounting)
+  # Redis for caching, session management and message broker
   redis:
     image: redis:7-alpine
-    container_name: docgo_redis_local
+    container_name: docgo-local-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -32,10 +33,26 @@ services:
     networks:
       - docgo_network_local
 
+  # Elasticsearch for search and indexing
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: docgo-local-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data_local:/usr/share/elasticsearch/data
+    networks:
+      - docgo_network_local
+
   # API Gateway BFF (Next.js) - Backend Service with Hot Reload
   api-gateway-bff:
     image: node:18-alpine
-    container_name: docgo_api_gateway_bff_local
+    container_name: docgo-local-api-gateway-bff
     restart: unless-stopped
     working_dir: /app
     ports:
@@ -43,6 +60,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8000
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
@@ -51,65 +70,68 @@ services:
     depends_on:
       - mariadb
       - redis
+      - elasticsearch
     networks:
       - docgo_network_local
 
-  # Authentication Identity Service (Spring Boot) - Commented out temporarily
-  # authentication-identity-service:
-  #   image: openjdk:17-jdk-slim
-  #   container_name: docgo_auth_service_local
-  #   restart: unless-stopped
-  #   working_dir: /app
-  #   ports:
-  #     - "8001:8001"
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
-  #     - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
-  #     - SPRING_DATASOURCE_USERNAME=docgo_user
-  #     - SPRING_DATASOURCE_PASSWORD=docgo_password
-  #     - SERVER_PORT=8001
-  #   volumes:
-  #     - ../backend/authentication-identity-service:/app
-  #   command: >
-  #     sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
-  #   depends_on:
-  #     - mariadb
-  #     - redis
-  #   networks:
-  #     - docgo_network_local
+  # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
+  file-storage-asset-service:
+    image: python:3.11-slim
+    container_name: docgo-local-file-storage-asset-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8012:8012"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8012
+      - PYTHONPATH=/app
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - ../backend/file-storage-asset-service:/app
+      - file_storage_uploads_local:/app/uploads
+      - file_storage_temp_local:/app/temp
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
+    depends_on:
+      - mariadb
+      - redis
+      - elasticsearch
+    networks:
+      - docgo_network_local
 
-  # User Management Service (FastAPI) - Commented out temporarily
-  # user-management-service:
-  #   image: python:3.11-slim
-  #   container_name: docgo_user_management_service_local
-  #   restart: unless-stopped
-  #   working_dir: /app
-  #   ports:
-  #     - "8002:8002"
-  #   environment:
-  #     - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo_user_management_service
-  #     - DATABASE_HOST=mariadb
-  #     - DATABASE_PORT=3306
-  #     - DATABASE_NAME=docgo_user_management_service
-  #     - DATABASE_USER=docgo_user
-  #     - DATABASE_PASSWORD=docgo_password
-  #     - HOST=0.0.0.0
-  #     - PORT=8002
-  #     - PYTHONPATH=/app
-  #   volumes:
-  #     - ../backend/user-management-service:/app
-  #   command: >
-  #     sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
-  #   depends_on:
-  #     - mariadb
-  #     - redis
-  #   networks:
-  #     - docgo_network_local
+  # AI Processing Service (FastAPI) - Backend Service with Hot Reload
+  ai-processing-service:
+    image: python:3.11-slim
+    container_name: docgo-local-ai-processing-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8017:8017"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8017
+      - PYTHONPATH=/app
+      - GEMINI_API_KEY=hHlL3ELm8Gp_RIYL1EZCpOnyAA
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - ../backend/ai-processing-service:/app
+      - ai_processing_results_local:/app/results
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
+    depends_on:
+      - redis
+      - elasticsearch
+    networks:
+      - docgo_network_local
 
   # Contract Management Service (Spring Boot) - Backend Service with Hot Reload
   contract-management-service:
     image: openjdk:17-jdk-slim
-    container_name: docgo_contract_service_local
+    container_name: docgo-local-contract-management-service
     restart: unless-stopped
     working_dir: /app
     ports:
@@ -121,6 +143,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=docgo_password
       - SERVER_PORT=8003
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
       - ../backend/contract-management-service:/app
       - ../backend/contract-management-service/uploads:/app/uploads
@@ -129,55 +153,14 @@ services:
     depends_on:
       - mariadb
       - redis
-    networks:
-      - docgo_network_local
-
-  # AI Processing Service (FastAPI) - Backend Service with Hot Reload
-  ai-processing-service:
-    image: python:3.11-slim
-    container_name: docgo_ai_processing_service_local
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8017:8017"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8017
-      - PYTHONPATH=/app
-      - GEMINI_API_KEY=hHlL3ELm8Gp_RIYL1EZCpOnyAA
-    volumes:
-      - ../backend/ai-processing-service:/app
-      - ai_processing_results_local:/app/results
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
-    networks:
-      - docgo_network_local
-
-  # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
-  file-storage-asset-service:
-    image: python:3.11-slim
-    container_name: docgo_file_storage_service_local
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8012:8012"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8012
-      - PYTHONPATH=/app
-    volumes:
-      - ../backend/file-storage-asset-service:/app
-      - file_storage_uploads_local:/app/uploads
-      - file_storage_temp_local:/app/temp
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
+      - elasticsearch
     networks:
       - docgo_network_local
 
   # General File Management Service (FastAPI) - Backend Service with Hot Reload
   general-file-management-service:
     image: python:3.11-slim
-    container_name: docgo_general_file_management_service_local
+    container_name: docgo-local-general-file-management-service
     restart: unless-stopped
     working_dir: /app
     ports:
@@ -188,6 +171,7 @@ services:
       - PYTHONPATH=/app
       - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
       - ../backend/general-file-management-service:/app
       - general_file_management_uploads_local:/app/uploads
@@ -196,6 +180,7 @@ services:
     depends_on:
       - mariadb
       - redis
+      - elasticsearch
     networks:
       - docgo_network_local
 
@@ -203,6 +188,8 @@ volumes:
   mariadb_data_local:
     driver: local
   redis_data_local:
+    driver: local
+  elasticsearch_data_local:
     driver: local
   ai_processing_results_local:
     driver: local
