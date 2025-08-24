@@ -38,7 +38,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 
 
 # API 1: EXTRACT (doc, pdf)
-@router.post("/extract", summary="Trích xuất thông tin hợp đồng (doc/pdf)", tags=["AI Processing Service"])
+@router.post("/extract", summary="Trích xuất toàn bộ nội dung file (doc/pdf)", tags=["AI Processing Service"])
 async def extract_api(
     request: Request,
     file: UploadFile = File(..., description="File hợp đồng (docx, pdf)"),
@@ -49,7 +49,7 @@ async def extract_api(
     
     📄 file (bắt buộc, body)
     Loại: UploadFile (DOCX hoặc PDF)
-    Mô tả: Tệp hợp đồng cần phân tích và trích xuất thông tin.
+    Mô tả: Tệp hợp đồng cần trích xuất toàn bộ nội dung văn bản.
     
     🔑 gemini_api_key (tùy chọn, header)
     Loại: string
@@ -59,7 +59,7 @@ async def extract_api(
     
     📝 data
     Loại: string
-    Mô tả: Chuỗi văn bản chứa các điều khoản chính của hợp đồng (do AI sinh ra).
+    Mô tả: Chuỗi văn bản chứa toàn bộ nội dung được trích xuất từ file (không qua AI xử lý).
     
     📊 apiVersion
     Loại: string
@@ -105,63 +105,15 @@ async def extract_api(
     if not content.strip():
         raise HTTPException(status_code=204, detail="Không có nội dung văn bản để gửi cho AI.")
     
-    api_key = gemini_api_key or get_gemini_api_key()
-    try:
-        prompt = """Hãy phân tích và trích xuất các điều khoản chính của hợp đồng dưới đây. 
-
-Yêu cầu:
-1. Chỉ trả về nội dung trích xuất, không giải thích thêm
-2. Nếu không thể trích xuất được thông tin hợp lệ, hãy trả về "KHÔNG_THỂ_TRÍCH_XUẤT"
-3. Tập trung vào các điều khoản quan trọng như: đối tượng hợp đồng, thời hạn, giá trị, điều kiện thanh toán, quyền và nghĩa vụ các bên, điều kiện chấm dứt
-
-Nội dung hợp đồng:"""
-        answer = ask_gemini(api_key, content, prompt)
-        
-        # Kiểm tra xem AI có trả về thông báo lỗi không
-        error_indicators = [
-            "tôi xin lỗi",
-            "tôi không thể",
-            "không thể trích xuất",
-            "không thể xử lý",
-            "không có đủ thông tin",
-            "cần thêm thông tin",
-            "không thể phân tích",
-            "không thể đọc",
-            "lỗi",
-            "error",
-            "không_thể_trích_xuất",
-            "không có điều khoản",
-            "không phải là hợp đồng",
-            "không phải hợp đồng",
-            "không có thông tin",
-            "không thể tìm thấy",
-            "không có dữ liệu"
-        ]
-        
-        answer_lower = answer.lower()
-        is_error_response = any(indicator in answer_lower for indicator in error_indicators)
-        
-        if is_error_response:
-            return RestResponse(
-                statusCode=422,
-                shortMessage="Unprocessable Entity",
-                description="AI không thể trích xuất thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
-                data=answer,
-                path=request.url.path,
-                timestamp=datetime.now(),
-                requestId=str(uuid.uuid4())
-            )
-        
-    except Exception as e:
-        # Xử lý lỗi từ Gemini AI
-        error_message = f"Lỗi AI/Extract: {str(e)}"
-        print(f"Error in extract_api: {error_message}")
-        
+    # Trích xuất toàn bộ nội dung file (không cần AI)
+    extracted_content = content.strip()
+    
+    if not extracted_content:
         return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description="Lỗi xảy ra khi gọi AI service. Vui lòng thử lại sau.",
-            data={"error": error_message, "raw_content": content[:200] + "..." if len(content) > 200 else content},
+            statusCode=204,
+            shortMessage="No Content",
+            description="File không chứa nội dung văn bản.",
+            data=None,
             path=request.url.path,
             timestamp=datetime.now(),
             requestId=str(uuid.uuid4())
@@ -170,8 +122,8 @@ Nội dung hợp đồng:"""
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Trích xuất điều khoản thành công.",
-        data=answer,
+        description="Trích xuất toàn bộ nội dung file thành công.",
+        data=extracted_content,
         path=request.url.path,
         timestamp=datetime.now(),
         requestId=str(uuid.uuid4())
@@ -240,7 +192,6 @@ async def summarize_api(
     Mô tả: Đường dẫn API được gọi.
     """
     # Summarize API logic
-    print(f"DEBUG: file={file}, text={text}")
     content = None
     if file:
         temp_path = os.path.join(RESULTS_DIR, file.filename)
