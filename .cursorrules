@@ -170,24 +170,25 @@ Khi thêm API mới trong 2 service trên, hãy tuân thủ các quy tắc này 
   - Ví dụ: `origin/backend-01/api-gateway-bff` → folder phải là `api-gateway-bff`
   - Điều này đảm bảo tính nhất quán giữa tên nhánh Git và cấu trúc thư mục workspace.
 - Port cố định cho toàn bộ microservice của DocGO (theo tên nhánh thực tế):
-  - `api-gateway-bff` (BFF): 8000 → Docs: `http://localhost:8000/docs#/`
-  - `authentication-identity-service`: 8001 → Docs: `http://localhost:8001/docs#/`
-  - `user-management-service`: 8002 → Docs: `http://localhost:8002/docs#/`
-  - `contract-management-service` (Spring): 8003 → Docs: `http://localhost:8003/docs#/`
-  - `versioning-document-history-service`: 8004 → Docs: `http://localhost:8004/docs#/`
-  - `commenting-collaboration-service`: 8005 → Docs: `http://localhost:8005/docs#/`
-  - `approval-workflow-service`: 8006 → Docs: `http://localhost:8006/docs#/`
-  - `reminder-scheduler-service`: 8007 → Docs: `http://localhost:8007/docs#/`
-  - `esignature-integration-service`: 8008 → Docs: `http://localhost:8008/docs#/`
-  - `notification-service`: 8009 → Docs: `http://localhost:8009/docs#/`
-  - `reporting-analytics-service`: 8010 → Docs: `http://localhost:8010/docs#/`
-  - `ocr-document-extraction-service`: 8011 → Docs: `http://localhost:8011/docs#/`
-  - `file-storage-asset-service`: 8012 → Docs: `http://localhost:8012/docs#/`
-  - `audit-activity-log-service`: 8013 → Docs: `http://localhost:8013/docs#/`
-  - `integration-connectors-service`: 8014 → Docs: `http://localhost:8014/docs#/`
-  - `batch-etl-service`: 8015 → Docs: `http://localhost:8015/docs#/`
-  - `health-monitoring-agent`: 8016 → Docs: `http://localhost:8016/docs#/`
-  - `ai-processing-service`: 8017 → Docs: `http://localhost:8017/docs#/`
+  - `api-gateway-bff` (Next.js): 8000 → Docs: `http://localhost:8000/docs#/`
+  - `authentication-identity-service` (Spring Boot): 8001 → Docs: `http://localhost:8001/docs#/`
+  - `user-management-service` (FastAPI): 8002 → Docs: `http://localhost:8002/docs#/`
+  - `contract-management-service` (Spring Boot): 8003 → Docs: `http://localhost:8003/docs#/`
+  - `versioning-document-history-service` (FastAPI): 8004 → Docs: `http://localhost:8004/docs#/`
+  - `commenting-collaboration-service` (FastAPI): 8005 → Docs: `http://localhost:8005/docs#/`
+  - `approval-workflow-service` (FastAPI): 8006 → Docs: `http://localhost:8006/docs#/`
+  - `reminder-scheduler-service` (FastAPI): 8007 → Docs: `http://localhost:8007/docs#/`
+  - `esignature-integration-service` (FastAPI): 8008 → Docs: `http://localhost:8008/docs#/`
+  - `notification-service` (FastAPI): 8009 → Docs: `http://localhost:8009/docs#/`
+  - `reporting-analytics-service` (FastAPI): 8010 → Docs: `http://localhost:8010/docs#/`
+  - `ocr-document-extraction-service` (FastAPI): 8011 → Docs: `http://localhost:8011/docs#/`
+  - `file-storage-asset-service` (FastAPI): 8012 → Docs: `http://localhost:8012/docs#/`
+  - `audit-activity-log-service` (FastAPI): 8013 → Docs: `http://localhost:8013/docs#/`
+  - `integration-connectors-service` (FastAPI): 8014 → Docs: `http://localhost:8014/docs#/`
+  - `batch-etl-service` (FastAPI): 8015 → Docs: `http://localhost:8015/docs#/`
+  - `health-monitoring-agent` (FastAPI): 8016 → Docs: `http://localhost:8016/docs#/`
+  - `ai-processing-service` (FastAPI): 8017 → Docs: `http://localhost:8017/docs#/`
+  - `general-file-management-service` (FastAPI): 8018 → Docs: `http://localhost:8018/docs#/`
 - Khi thêm microservice mới, phải chọn cổng trống theo dãy 80xx, cập nhật mục này và README/How-to-run tương ứng.
 
 ## 13) Chuẩn hóa mô tả Input/Output cho API
