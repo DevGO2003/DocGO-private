@@ -22,10 +22,10 @@ services:
       - ./backend/authentication-identity-service:/app
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # User Management Service (FastAPI)
@@ -36,10 +36,10 @@ services:
     volumes:
       - ./backend/user-management-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Contract Management Service (Spring Boot)
@@ -51,10 +51,10 @@ services:
       - ./backend/contract-management-service:/app
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Versioning Document History Service (FastAPI)
@@ -65,10 +65,10 @@ services:
     volumes:
       - ./backend/versioning-document-history-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Commenting Collaboration Service (FastAPI)
@@ -79,10 +79,10 @@ services:
     volumes:
       - ./backend/commenting-collaboration-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Approval Workflow Service (FastAPI)
@@ -93,10 +93,10 @@ services:
     volumes:
       - ./backend/approval-workflow-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Reminder Scheduler Service (FastAPI)
@@ -107,10 +107,10 @@ services:
     volumes:
       - ./backend/reminder-scheduler-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # E-Signature Integration Service (FastAPI)
@@ -121,10 +121,10 @@ services:
     volumes:
       - ./backend/esignature-integration-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Notification Service (FastAPI)
@@ -135,10 +135,10 @@ services:
     volumes:
       - ./backend/notification-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Reporting Analytics Service (FastAPI)
@@ -149,10 +149,10 @@ services:
     volumes:
       - ./backend/reporting-analytics-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # OCR Document Extraction Service (FastAPI)
@@ -173,14 +173,14 @@ services:
   file-storage-asset-service:
     build: ./backend/file-storage-asset-service
     ports:
-      - "8012:8012"
+      - "8002:8002"
     volumes:
       - ./backend/file-storage-asset-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Audit Activity Log Service (FastAPI)
@@ -205,10 +205,10 @@ services:
     volumes:
       - ./backend/integration-connectors-service:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Batch ETL Service (FastAPI)
@@ -233,10 +233,10 @@ services:
     volumes:
       - ./backend/health-monitoring-agent:/app
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # AI Processing Service (FastAPI)
@@ -262,22 +262,22 @@ services:
       - ./backend/general-file-management-service:/app
       - ./backend/general-file-management-service/uploads:/app/uploads
     environment:
-      - DATABASE_HOST=mysql
+      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
     depends_on:
-      - mysql
+      - mariadb
       - redis
 
   # Database Services
-  mysql:
-    image: mariadb:10.11
+  mariadb:
+    image: mariadb:11.2
     ports:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=password
       - MYSQL_DATABASE=docgo
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d
     command: --default-authentication-plugin=mysql_native_password
 
@@ -310,7 +310,7 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
 volumes:
-  mysql_data:
+  mariadb_data:
   mongodb_data:
   redis_data:
   elasticsearch_data:
