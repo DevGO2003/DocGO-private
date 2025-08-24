@@ -147,18 +147,34 @@ Nội dung hợp đồng:"""
                 shortMessage="Unprocessable Entity",
                 description="AI không thể trích xuất thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
                 data=answer,
-                path=request.url.path
+                path=request.url.path,
+                timestamp=datetime.now(),
+                requestId=str(uuid.uuid4())
             )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi AI/Extract: {str(e)}")
+        # Xử lý lỗi từ Gemini AI
+        error_message = f"Lỗi AI/Extract: {str(e)}"
+        print(f"Error in extract_api: {error_message}")
+        
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description="Lỗi xảy ra khi gọi AI service. Vui lòng thử lại sau.",
+            data={"error": error_message, "raw_content": content[:200] + "..." if len(content) > 200 else content},
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
     
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
         description="Trích xuất điều khoản thành công.",
         data=answer,
-        path=request.url.path
+        path=request.url.path,
+        timestamp=datetime.now(),
+        requestId=str(uuid.uuid4())
     )
 
 
@@ -171,7 +187,7 @@ Nội dung hợp đồng:"""
 async def summarize_api(
     request: Request,
     file: UploadFile = File(None, description="File txt cần tóm tắt"),
-    text: str = Body(None, description="Nội dung văn bản dạng chuỗi (txt)", embed=True),
+    text: str = Body(None, description="Nội dung văn bản dạng chuỗi (txt)"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
@@ -224,6 +240,7 @@ async def summarize_api(
     Mô tả: Đường dẫn API được gọi.
     """
     # Summarize API logic
+    print(f"DEBUG: file={file}, text={text}")
     content = None
     if file:
         temp_path = os.path.join(RESULTS_DIR, file.filename)
@@ -311,7 +328,9 @@ async def summarize_api(
                 shortMessage="Unprocessable Entity",
                 description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
                 data=answer,
-                path=request.url.path
+                path=request.url.path,
+                timestamp=datetime.now(),
+                requestId=str(uuid.uuid4())
             )
         
         # Loại bỏ các ký tự đặc biệt, markdown, ...
@@ -323,6 +342,9 @@ async def summarize_api(
         if cleaned.endswith('```'):
             cleaned = cleaned[:-3]
         cleaned = cleaned.replace('\n', '').replace('\r', '').replace('\\', '')
+        
+        data_out = answer  # Mặc định trả về text gốc
+        
         try:
             summary_json = json.loads(cleaned)
             # Nếu có contract_summary thì chỉ lấy các trường con ra ngoài data
@@ -339,17 +361,34 @@ async def summarize_api(
                     data_out['reminders'] = [r for r in data_out['reminders'] if r.get('date') is not None]
             else:
                 data_out = summary_json
-        except Exception:
+        except Exception as parse_error:
+            # Nếu không parse được JSON, vẫn trả về text gốc
             data_out = answer
+            print(f"Warning: Không thể parse JSON từ AI response: {parse_error}")
+            
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi AI/Summarize: {str(e)}")
+        # Xử lý lỗi từ Gemini AI
+        error_message = f"Lỗi AI/Summarize: {str(e)}"
+        print(f"Error in summarize_api: {error_message}")
+        
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description="Lỗi xảy ra khi gọi AI service. Vui lòng thử lại sau.",
+            data={"error": error_message, "raw_content": content[:200] + "..." if len(content) > 200 else content},
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
     
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
         description="Tóm tắt hợp đồng thành công.",
         data=data_out,
-        path=request.url.path
+        path=request.url.path,
+        timestamp=datetime.now(),
+        requestId=str(uuid.uuid4())
     )
 
 

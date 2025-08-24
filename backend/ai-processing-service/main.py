@@ -43,7 +43,7 @@ async def health_check():
         "status": "healthy",
         "service": "AI Processing Service",
         "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "ai_model": "Gemini 2.0 Flash",
         "supported_formats": ["docx", "pdf", "txt"]
     }
@@ -64,12 +64,14 @@ async def validation_exception_handler(request, exc):
         shortMessage="Validation Error",
         description="Dữ liệu đầu vào không hợp lệ",
         error="; ".join(error_details),
-        path=str(request.url)
+        path=str(request.url),
+        timestamp=datetime.now(),
+        requestId=str(uuid.uuid4())
     )
     
     return JSONResponse(
         status_code=422,
-        content=error_response.dict()
+        content=error_response.model_dump(mode='json')
     )
 
 @app.exception_handler(HTTPException)
@@ -84,12 +86,14 @@ async def http_exception_handler(request, exc):
         shortMessage="Error",
         description=f"HTTP {exc.status_code}: {exc.detail}",
         error=exc.detail,
-        path=str(request.url)
+        path=str(request.url),
+        timestamp=datetime.now(),
+        requestId=str(uuid.uuid4())
     )
     
     return JSONResponse(
         status_code=exc.status_code,
-        content=error_response.dict()
+        content=error_response.model_dump(mode='json')
     )
 
 @app.exception_handler(Exception)
@@ -104,12 +108,14 @@ async def general_exception_handler(request, exc):
         shortMessage="Internal Server Error",
         description="Lỗi không lường trước xảy ra trong quá trình xử lý",
         error=str(exc),
-        path=str(request.url)
+        path=str(request.url),
+        timestamp=datetime.now(),
+        requestId=str(uuid.uuid4())
     )
     
     return JSONResponse(
         status_code=500,
-        content=error_response.dict()
+        content=error_response.model_dump(mode='json')
     )
 
 if __name__ == "__main__":

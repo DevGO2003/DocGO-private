@@ -1,0 +1,194 @@
+# Docker Compose Local - Backend Services with Hot Reload
+
+services:
+  # Database - MariaDB (Infrastructure - No volume mounting)
+  mariadb:
+    image: mariadb:11.2
+    container_name: docgo_mariadb_local
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: sapassword
+      MYSQL_DATABASE: docgo
+      MYSQL_USER: docgo_user
+      MYSQL_PASSWORD: docgo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data_local:/var/lib/mysql
+      - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
+      - ../backend/contract-management-service/database/init_contract_service.sql:/docker-entrypoint-initdb.d/init_contract_service.sql
+    networks:
+      - docgo_network_local
+
+  # Redis for caching and session management (Infrastructure - No volume mounting)
+  redis:
+    image: redis:7-alpine
+    container_name: docgo_redis_local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+    networks:
+      - docgo_network_local
+
+  # API Gateway BFF (Next.js) - Backend Service with Hot Reload
+  api-gateway-bff:
+    image: node:18-alpine
+    container_name: docgo_api_gateway_bff_local
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+    volumes:
+      - ../backend/api-gateway-bff:/app
+      - /app/node_modules
+    command: >
+      sh -c "npm install && npm run dev"
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Authentication Identity Service (Spring Boot) - Commented out temporarily
+  # authentication-identity-service:
+  #   image: openjdk:17-jdk-slim
+  #   container_name: docgo_auth_service_local
+  #   restart: unless-stopped
+  #   working_dir: /app
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
+  #     - SPRING_DATASOURCE_USERNAME=docgo_user
+  #     - SPRING_DATASOURCE_PASSWORD=docgo_password
+  #     - SERVER_PORT=8001
+  #   volumes:
+  #     - ../backend/authentication-identity-service:/app
+  #   command: >
+  #     sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
+  #   depends_on:
+  #     - mariadb
+  #     - redis
+  #   networks:
+  #     - docgo_network_local
+
+  # User Management Service (FastAPI) - Commented out temporarily
+  # user-management-service:
+  #   image: python:3.11-slim
+  #   container_name: docgo_user_management_service_local
+  #   restart: unless-stopped
+  #   working_dir: /app
+  #   ports:
+  #     - "8002:8002"
+  #   environment:
+  #     - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo_user_management_service
+  #     - DATABASE_HOST=mariadb
+  #     - DATABASE_PORT=3306
+  #     - DATABASE_NAME=docgo_user_management_service
+  #     - DATABASE_USER=docgo_user
+  #     - DATABASE_PASSWORD=docgo_password
+  #     - HOST=0.0.0.0
+  #     - PORT=8002
+  #     - PYTHONPATH=/app
+  #   volumes:
+  #     - ../backend/user-management-service:/app
+  #   command: >
+  #     sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
+  #   depends_on:
+  #     - mariadb
+  #     - redis
+  #   networks:
+  #     - docgo_network_local
+
+  # Contract Management Service (Spring Boot) - Backend Service with Hot Reload
+  contract-management-service:
+    image: openjdk:17-jdk-slim
+    container_name: docgo_contract_service_local
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8003:8003"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo_contract_service
+      - SPRING_DATASOURCE_USERNAME=docgo_user
+      - SPRING_DATASOURCE_PASSWORD=docgo_password
+      - SERVER_PORT=8003
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+    volumes:
+      - ../backend/contract-management-service:/app
+      - ../backend/contract-management-service/uploads:/app/uploads
+    command: >
+      sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8003'"
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - docgo_network_local
+
+  # AI Processing Service (FastAPI) - Backend Service with Hot Reload
+  ai-processing-service:
+    image: python:3.11-slim
+    container_name: docgo_ai_processing_service_local
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8017:8017"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8017
+      - PYTHONPATH=/app
+      - GEMINI_API_KEY=hHlL3ELm8Gp_RIYL1EZCpOnyAA
+    volumes:
+      - ../backend/ai-processing-service:/app
+      - ai_processing_results_local:/app/results
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
+    networks:
+      - docgo_network_local
+
+  # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
+  file-storage-asset-service:
+    image: python:3.11-slim
+    container_name: docgo_file_storage_service_local
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8012:8012"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8012
+      - PYTHONPATH=/app
+    volumes:
+      - ../backend/file-storage-asset-service:/app
+      - file_storage_uploads_local:/app/uploads
+      - file_storage_temp_local:/app/temp
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
+    networks:
+      - docgo_network_local
+
+volumes:
+  mariadb_data_local:
+    driver: local
+  redis_data_local:
+    driver: local
+  ai_processing_results_local:
+    driver: local
+  file_storage_uploads_local:
+    driver: local
+  file_storage_temp_local:
+    driver: local
+
+networks:
+  docgo_network_local:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
