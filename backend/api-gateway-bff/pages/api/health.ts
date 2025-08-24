@@ -7,13 +7,13 @@ import logger from '@/lib/logger';
  * @swagger
  * /api/health:
  *   get:
- *     summary: Kiểm tra trạng thái sức khỏe của API Gateway và tất cả microservice
+ *     summary: Kiểm tra trạng thái sức khỏe của API Gateway và tất cả 19 microservices
  *     description: |
  *       ## 🔍 Health Check Endpoint
  *       
  *       Endpoint này kiểm tra trạng thái sức khỏe của:
- *       - API Gateway BFF
- *       - Tất cả microservice đã được cấu hình
+ *       - API Gateway BFF (Port 8000)
+ *       - Tất cả 19 microservices đã được cấu hình
  *       - Kết nối Kafka
  *       
  *       ### 🔹 Đầu vào
@@ -35,7 +35,7 @@ import logger from '@/lib/logger';
  *     tags: [API Gateway BFF]
  *     responses:
  *       200:
- *         description: Tất cả service đều khỏe mạnh
+ *         description: Tất cả 19 microservices đều khỏe mạnh
  *         content:
  *           application/json:
  *             schema:
@@ -46,15 +46,29 @@ import logger from '@/lib/logger';
  *               timestamp: "2025-08-23T11:00:00.000Z"
  *               uptime: 3600.5
  *               services:
- *                 authentication: true
+ *                 "api-gateway-bff": true
+ *                 "authentication": true
  *                 "user-management": true
  *                 "contract-management": true
- *                 "ai-processing": true
+ *                 "versioning-document-history": true
+ *                 "commenting-collaboration": true
+ *                 "approval-workflow": true
+ *                 "reminder-scheduler": true
+ *                 "esignature-integration": true
+ *                 "notification": true
+ *                 "reporting-analytics": true
+ *                 "ocr-document-extraction": true
  *                 "file-storage": true
+ *                 "audit-activity-log": true
+ *                 "integration-connectors": true
+ *                 "batch-etl": true
+ *                 "health-monitoring-agent": true
+ *                 "ai-processing": true
+ *                 "general-file-management": true
  *               kafka: true
  *               version: "1.0.0"
  *       503:
- *         description: Một số service không khỏe mạnh
+ *         description: Một số microservices không khỏe mạnh
  *         content:
  *           application/json:
  *             schema:
@@ -65,11 +79,25 @@ import logger from '@/lib/logger';
  *               timestamp: "2025-08-23T11:00:00.000Z"
  *               uptime: 3600.5
  *               services:
- *                 authentication: true
+ *                 "api-gateway-bff": true
+ *                 "authentication": true
  *                 "user-management": false
  *                 "contract-management": true
- *                 "ai-processing": true
+ *                 "versioning-document-history": true
+ *                 "commenting-collaboration": true
+ *                 "approval-workflow": true
+ *                 "reminder-scheduler": true
+ *                 "esignature-integration": true
+ *                 "notification": true
+ *                 "reporting-analytics": true
+ *                 "ocr-document-extraction": true
  *                 "file-storage": true
+ *                 "audit-activity-log": true
+ *                 "integration-connectors": true
+ *                 "batch-etl": true
+ *                 "health-monitoring-agent": true
+ *                 "ai-processing": true
+ *                 "general-file-management": true
  *               kafka: true
  *               version: "1.0.0"
  *       500:

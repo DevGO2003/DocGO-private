@@ -11,7 +11,15 @@ class ServiceManager {
   }
 
   private initializeServices(): void {
-    // Authentication Service
+    // API Gateway BFF (Next.js) - Port 8000
+    this.addService('api-gateway-bff', {
+      name: 'api-gateway-bff',
+      url: process.env.API_GATEWAY_BFF_URL || 'http://localhost:8000',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Authentication Identity Service (Spring Boot) - Port 8001
     this.addService('authentication', {
       name: 'authentication-identity-service',
       url: process.env.AUTHENTICATION_SERVICE_URL || 'http://authentication-identity-service:8001',
@@ -19,7 +27,7 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // User Management Service
+    // User Management Service (FastAPI) - Port 8002
     this.addService('user-management', {
       name: 'user-management-service',
       url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://user-management-service:8002',
@@ -27,7 +35,7 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // Contract Management Service
+    // Contract Management Service (Spring Boot) - Port 8003
     this.addService('contract-management', {
       name: 'contract-management-service',
       url: process.env.CONTRACT_MANAGEMENT_SERVICE_URL || 'http://contract-management-service:8003',
@@ -35,15 +43,71 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // AI Processing Service
-    this.addService('ai-processing', {
-      name: 'ai-processing-service',
-      url: process.env.AI_PROCESSING_SERVICE_URL || 'http://ai-processing-service:8017',
+    // Versioning Document History Service (FastAPI) - Port 8004
+    this.addService('versioning-document-history', {
+      name: 'versioning-document-history-service',
+      url: process.env.VERSIONING_DOCUMENT_HISTORY_SERVICE_URL || 'http://versioning-document-history-service:8004',
       healthCheck: '/health',
       timeout: 10000
     });
 
-    // File Storage Asset Service
+    // Commenting Collaboration Service (FastAPI) - Port 8005
+    this.addService('commenting-collaboration', {
+      name: 'commenting-collaboration-service',
+      url: process.env.COMMENTING_COLLABORATION_SERVICE_URL || 'http://commenting-collaboration-service:8005',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Approval Workflow Service (FastAPI) - Port 8006
+    this.addService('approval-workflow', {
+      name: 'approval-workflow-service',
+      url: process.env.APPROVAL_WORKFLOW_SERVICE_URL || 'http://approval-workflow-service:8006',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Reminder Scheduler Service (FastAPI) - Port 8007
+    this.addService('reminder-scheduler', {
+      name: 'reminder-scheduler-service',
+      url: process.env.REMINDER_SCHEDULER_SERVICE_URL || 'http://reminder-scheduler-service:8007',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // E-Signature Integration Service (FastAPI) - Port 8008
+    this.addService('esignature-integration', {
+      name: 'esignature-integration-service',
+      url: process.env.ESIGNATURE_INTEGRATION_SERVICE_URL || 'http://esignature-integration-service:8008',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Notification Service (FastAPI) - Port 8009
+    this.addService('notification', {
+      name: 'notification-service',
+      url: process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:8009',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Reporting Analytics Service (FastAPI) - Port 8010
+    this.addService('reporting-analytics', {
+      name: 'reporting-analytics-service',
+      url: process.env.REPORTING_ANALYTICS_SERVICE_URL || 'http://reporting-analytics-service:8010',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // OCR Document Extraction Service (FastAPI) - Port 8011
+    this.addService('ocr-document-extraction', {
+      name: 'ocr-document-extraction-service',
+      url: process.env.OCR_DOCUMENT_EXTRACTION_SERVICE_URL || 'http://ocr-document-extraction-service:8011',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // File Storage Asset Service (FastAPI) - Port 8012
     this.addService('file-storage', {
       name: 'file-storage-asset-service',
       url: process.env.FILE_STORAGE_SERVICE_URL || 'http://file-storage-asset-service:8012',
@@ -51,7 +115,47 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // General File Management Service
+    // Audit Activity Log Service (FastAPI) - Port 8013
+    this.addService('audit-activity-log', {
+      name: 'audit-activity-log-service',
+      url: process.env.AUDIT_ACTIVITY_LOG_SERVICE_URL || 'http://audit-activity-log-service:8013',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Integration Connectors Service (FastAPI) - Port 8014
+    this.addService('integration-connectors', {
+      name: 'integration-connectors-service',
+      url: process.env.INTEGRATION_CONNECTORS_SERVICE_URL || 'http://integration-connectors-service:8014',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Batch ETL Service (FastAPI) - Port 8015
+    this.addService('batch-etl', {
+      name: 'batch-etl-service',
+      url: process.env.BATCH_ETL_SERVICE_URL || 'http://batch-etl-service:8015',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // Health Monitoring Agent (FastAPI) - Port 8016
+    this.addService('health-monitoring-agent', {
+      name: 'health-monitoring-agent',
+      url: process.env.HEALTH_MONITORING_AGENT_URL || 'http://health-monitoring-agent:8016',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // AI Processing Service (FastAPI) - Port 8017
+    this.addService('ai-processing', {
+      name: 'ai-processing-service',
+      url: process.env.AI_PROCESSING_SERVICE_URL || 'http://ai-processing-service:8017',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // General File Management Service (FastAPI) - Port 8018
     this.addService('general-file-management', {
       name: 'general-file-management-service',
       url: process.env.GENERAL_FILE_MANAGEMENT_SERVICE_URL || 'http://general-file-management-service:8018',

@@ -315,14 +315,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       endpoint = `/${fullPath}`;
     } else if (fullPath.startsWith('ai-processing-service')) {
       serviceKey = 'ai-processing';
-      endpoint = `/${fullPath}`;
+      endpoint = `/${fullPath.replace('ai-processing-service/', '')}`;
     } else if (fullPath.startsWith('file-storage-asset-service')) {
       serviceKey = 'file-storage';
-      endpoint = `/${fullPath}`;
+      endpoint = `/${fullPath.replace('file-storage-asset-service/', '')}`;
+    } else if (fullPath.startsWith('general-file-management-service')) {
+      serviceKey = 'general-file-management';
+      endpoint = `/${fullPath.replace('general-file-management-service/', '')}`;
     } else {
       return res.status(404).json({
         error: 'Service not found',
-        message: `No service configured for path: ${fullPath}. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service`
+        message: `No service configured for path: ${fullPath}. Available services: authentication-identity-service, user-management-service, contract-management-service, ai-processing-service, file-storage-asset-service, general-file-management-service`
       });
     }
 

@@ -62,9 +62,25 @@ services:
       - PORT=8000
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - AI_PROCESSING_SERVICE_URL=http://ai-processing-service:8017
-      - FILE_STORAGE_SERVICE_URL=http://file-storage-asset-service:8012
+      # Service URLs for all 19 microservices
+      - API_GATEWAY_BFF_URL=http://localhost:8000
+      - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8001
+      - USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8002
       - CONTRACT_MANAGEMENT_SERVICE_URL=http://contract-management-service:8003
+      - VERSIONING_DOCUMENT_HISTORY_SERVICE_URL=http://versioning-document-history-service:8004
+      - COMMENTING_COLLABORATION_SERVICE_URL=http://commenting-collaboration-service:8005
+      - APPROVAL_WORKFLOW_SERVICE_URL=http://approval-workflow-service:8006
+      - REMINDER_SCHEDULER_SERVICE_URL=http://reminder-scheduler-service:8007
+      - ESIGNATURE_INTEGRATION_SERVICE_URL=http://esignature-integration-service:8008
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8009
+      - REPORTING_ANALYTICS_SERVICE_URL=http://reporting-analytics-service:8010
+      - OCR_DOCUMENT_EXTRACTION_SERVICE_URL=http://ocr-document-extraction-service:8011
+      - FILE_STORAGE_SERVICE_URL=http://file-storage-asset-service:8012
+      - AUDIT_ACTIVITY_LOG_SERVICE_URL=http://audit-activity-log-service:8013
+      - INTEGRATION_CONNECTORS_SERVICE_URL=http://integration-connectors-service:8014
+      - BATCH_ETL_SERVICE_URL=http://batch-etl-service:8015
+      - HEALTH_MONITORING_AGENT_URL=http://health-monitoring-agent:8016
+      - AI_PROCESSING_SERVICE_URL=http://ai-processing-service:8017
       - GENERAL_FILE_MANAGEMENT_SERVICE_URL=http://general-file-management-service:8018
     volumes:
       - ../backend/api-gateway-bff:/app
