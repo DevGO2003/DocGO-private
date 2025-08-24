@@ -54,11 +54,48 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
   - 409 Conflict: xung đột nghiệp vụ
   - 500 Internal Server Error: lỗi không lường trước
 
-## 5) Chuẩn hóa Exception Handling
+## 5) Chuẩn hóa Event Payload Standard (dùng cho mọi publisher)
+- Tất cả events giữa các services phải tuân thủ schema chuẩn sau để đảm bảo tính nhất quán và traceability:
+```json
+{
+  "eventVersion": "<string>",       // Version của schema event (vd: "v1")
+  "eventType": "<string>",          // Loại sự kiện (vd: FileUploaded, ContractCreated)
+  "eventId": "<uuid>",              // UUID duy nhất cho mỗi event (dùng để idempotency)
+  "timestamp": "<ISO-8601>",        // Thời điểm phát sinh event theo chuẩn ISO-8601 UTC
+  "source": "<string>",             // Tên service phát sinh event (vd: FileStorageService)
+  "correlationId": "<uuid>",        // Liên kết với request gốc để trace end-to-end
+  "actor": {                        // Thông tin ai/what gây ra event
+    "userId": "<string>",           // ID của user (nếu có context user)
+    "userRole": "<string>",         // Role của user (vd: uploader, admin)
+    "ip": "<string>"                // IP hoặc thông tin client (optional)
+  },
+  "data": {                         // Payload chính của sự kiện (domain object)
+    /* cấu trúc thay đổi tùy eventType */
+  },
+  "metadata": {                     // Thông tin phụ cho logging/ops (optional)
+    "region": "<string>",           // Khu vực phát sinh event (vd: ap-southeast-1)
+    "serviceVersion": "<string>"    // Version của service phát event
+  }
+}
+```
+
+### Quy tắc Event Types:
+- **File Events**: `FileUploaded`, `FileProcessed`, `FileDeleted`, `FileUpdated`
+- **Contract Events**: `ContractCreated`, `ContractUpdated`, `ContractDeleted`, `ContractProcessed`
+- **AI Events**: `AIProcessingStarted`, `AIProcessingCompleted`, `AIProcessingFailed`
+- **User Events**: `UserLoggedIn`, `UserCreated`, `UserUpdated`, `UserDeleted`
+
+### Quy tắc Implementation:
+- **Java (Spring)**: Sử dụng `@EventListener` và `ApplicationEventPublisher` với schema chuẩn
+- **Python (FastAPI)**: Sử dụng Redis Pub/Sub hoặc message queue với schema chuẩn
+- **Message Broker**: Redis hoặc Apache Kafka với payload format chuẩn
+- **Correlation ID**: Tự động generate từ request context hoặc truyền từ upstream
+
+## 6) Chuẩn hóa Exception Handling
 - Java: sử dụng `GlobalExceptionHandler` hiện có để map các exception thành `RestResponse` với mã HTTP tương ứng: 400/404/409/500 và tổng hợp lỗi validation từ `MethodArgumentNotValidException`.
 - Python (FastAPI): với các lỗi dự kiến, ném `HTTPException(status_code=...)` hoặc tạo tương đương `RestResponse`; với lỗi không lường trước, dùng middleware/exception handler để trả về `RestResponse` 500 có `requestId`, `timestamp`, `path`.
 
-## 6) Quy tắc viết tài liệu (tiếng Việt)
+## 7) Quy tắc viết tài liệu (tiếng Việt)
 - Tiêu đề và mô tả API dùng giọng văn ngắn gọn, chủ động, tiếng Việt chuẩn.
 - Java (SpringDoc):
   - `@Tag(name = "…", description = "…")`
@@ -74,7 +111,7 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
   - Mẫu response `RestResponse` kèm ví dụ thành công và lỗi
   - Ghi chú quy tắc phân trang/sắp xếp nếu áp dụng
 
-## 7) Ví dụ mô hình hóa từ hiện trạng
+## 8) Ví dụ mô hình hóa từ hiện trạng
 - Tạo hợp đồng (Java):
   - `POST /api/v1/contract-management-service/contracts`
   - Body: `Contract` JSON (không gửi `id` khi tạo)
