@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { ServiceConfig, RestResponse } from '@/types';
+import { ServiceConfig, RestResponse } from '@/types/index';
 import logger from './logger';
 
 class ServiceManager {
@@ -131,7 +131,10 @@ class ServiceManager {
   async checkAllServicesHealth(): Promise<Record<string, boolean>> {
     const healthStatus: Record<string, boolean> = {};
     
-    for (const [key] of this.services) {
+    // Use Array.from to convert Map keys to array for iteration
+    const serviceKeys = Array.from(this.services.keys());
+    
+    for (const key of serviceKeys) {
       healthStatus[key] = await this.checkServiceHealth(key);
     }
 
