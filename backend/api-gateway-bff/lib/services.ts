@@ -14,7 +14,7 @@ class ServiceManager {
     // Authentication Service
     this.addService('authentication', {
       name: 'authentication-identity-service',
-      url: process.env.AUTHENTICATION_SERVICE_URL || 'http://localhost:8001',
+      url: process.env.AUTHENTICATION_SERVICE_URL || 'http://authentication-identity-service:8001',
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -22,7 +22,7 @@ class ServiceManager {
     // User Management Service
     this.addService('user-management', {
       name: 'user-management-service',
-      url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://localhost:8002',
+      url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://user-management-service:8002',
       healthCheck: '/health',
       timeout: 10000
     });
@@ -30,7 +30,7 @@ class ServiceManager {
     // Contract Management Service
     this.addService('contract-management', {
       name: 'contract-management-service',
-      url: process.env.CONTRACT_MANAGEMENT_SERVICE_URL || 'http://localhost:8003',
+      url: process.env.CONTRACT_MANAGEMENT_SERVICE_URL || 'http://contract-management-service:8003',
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -38,7 +38,7 @@ class ServiceManager {
     // AI Processing Service
     this.addService('ai-processing', {
       name: 'ai-processing-service',
-      url: process.env.AI_PROCESSING_SERVICE_URL || 'http://localhost:8017',
+      url: process.env.AI_PROCESSING_SERVICE_URL || 'http://ai-processing-service:8017',
       healthCheck: '/health',
       timeout: 10000
     });
@@ -46,7 +46,15 @@ class ServiceManager {
     // File Storage Asset Service
     this.addService('file-storage', {
       name: 'file-storage-asset-service',
-      url: process.env.FILE_STORAGE_SERVICE_URL || 'http://localhost:8012',
+      url: process.env.FILE_STORAGE_SERVICE_URL || 'http://file-storage-asset-service:8012',
+      healthCheck: '/health',
+      timeout: 10000
+    });
+
+    // General File Management Service
+    this.addService('general-file-management', {
+      name: 'general-file-management-service',
+      url: process.env.GENERAL_FILE_MANAGEMENT_SERVICE_URL || 'http://general-file-management-service:8018',
       healthCheck: '/health',
       timeout: 10000
     });

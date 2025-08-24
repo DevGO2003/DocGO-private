@@ -62,6 +62,10 @@ services:
       - PORT=8000
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - AI_PROCESSING_SERVICE_URL=http://ai-processing-service:8017
+      - FILE_STORAGE_SERVICE_URL=http://file-storage-asset-service:8012
+      - CONTRACT_MANAGEMENT_SERVICE_URL=http://contract-management-service:8003
+      - GENERAL_FILE_MANAGEMENT_SERVICE_URL=http://general-file-management-service:8018
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
