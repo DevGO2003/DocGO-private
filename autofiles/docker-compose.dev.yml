@@ -1,206 +1,316 @@
 version: '3.8'
 
 services:
-  # Database - MariaDB
-  mariadb:
-    image: mariadb:11.2
-    container_name: docgo_mariadb_dev
-    restart: unless-stopped
+  # API Gateway BFF (Next.js)
+  api-gateway-bff:
+    build: ./backend/api-gateway-bff
+    ports:
+      - "8000:3000"
+    volumes:
+      - ./backend/api-gateway-bff:/app
+      - /app/node_modules
     environment:
-      MYSQL_ROOT_PASSWORD: sapassword
-      MYSQL_DATABASE: docgo
-      MYSQL_USER: docgo_user
-      MYSQL_PASSWORD: docgo_password
+      - NODE_ENV=development
+    command: npm run dev
+
+  # Authentication Identity Service (Spring Boot)
+  authentication-identity-service:
+    build: ./backend/authentication-identity-service
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/authentication-identity-service:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # User Management Service (FastAPI)
+  user-management-service:
+    build: ./backend/user-management-service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend/user-management-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Contract Management Service (Spring Boot)
+  contract-management-service:
+    build: ./backend/contract-management-service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/contract-management-service:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Versioning Document History Service (FastAPI)
+  versioning-document-history-service:
+    build: ./backend/versioning-document-history-service
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend/versioning-document-history-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Commenting Collaboration Service (FastAPI)
+  commenting-collaboration-service:
+    build: ./backend/commenting-collaboration-service
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend/commenting-collaboration-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Approval Workflow Service (FastAPI)
+  approval-workflow-service:
+    build: ./backend/approval-workflow-service
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend/approval-workflow-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Reminder Scheduler Service (FastAPI)
+  reminder-scheduler-service:
+    build: ./backend/reminder-scheduler-service
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./backend/reminder-scheduler-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # E-Signature Integration Service (FastAPI)
+  esignature-integration-service:
+    build: ./backend/esignature-integration-service
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./backend/esignature-integration-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Notification Service (FastAPI)
+  notification-service:
+    build: ./backend/notification-service
+    ports:
+      - "8009:8009"
+    volumes:
+      - ./backend/notification-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Reporting Analytics Service (FastAPI)
+  reporting-analytics-service:
+    build: ./backend/reporting-analytics-service
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./backend/reporting-analytics-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # OCR Document Extraction Service (FastAPI)
+  ocr-document-extraction-service:
+    build: ./backend/ocr-document-extraction-service
+    ports:
+      - "8011:8011"
+    volumes:
+      - ./backend/ocr-document-extraction-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # File Storage Asset Service (FastAPI)
+  file-storage-asset-service:
+    build: ./backend/file-storage-asset-service
+    ports:
+      - "8012:8012"
+    volumes:
+      - ./backend/file-storage-asset-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Audit Activity Log Service (FastAPI)
+  audit-activity-log-service:
+    build: ./backend/audit-activity-log-service
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./backend/audit-activity-log-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # Integration Connectors Service (FastAPI)
+  integration-connectors-service:
+    build: ./backend/integration-connectors-service
+    ports:
+      - "8014:8014"
+    volumes:
+      - ./backend/integration-connectors-service:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Batch ETL Service (FastAPI)
+  batch-etl-service:
+    build: ./backend/batch-etl-service
+    ports:
+      - "8015:8015"
+    volumes:
+      - ./backend/batch-etl-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # Health Monitoring Agent (FastAPI)
+  health-monitoring-agent:
+    build: ./backend/health-monitoring-agent
+    ports:
+      - "8016:8016"
+    volumes:
+      - ./backend/health-monitoring-agent:/app
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # AI Processing Service (FastAPI)
+  ai-processing-service:
+    build: ./backend/ai-processing-service
+    ports:
+      - "8017:8017"
+    volumes:
+      - ./backend/ai-processing-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # General File Management Service (FastAPI)
+  general-file-management-service:
+    build: ./backend/general-file-management-service
+    ports:
+      - "8018:8018"
+    volumes:
+      - ./backend/general-file-management-service:/app
+      - ./backend/general-file-management-service/uploads:/app/uploads
+    environment:
+      - DATABASE_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+
+  # Database Services
+  mysql:
+    image: mariadb:10.11
     ports:
       - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=docgo
     volumes:
-      - mariadb_data_dev:/var/lib/mysql
-      - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
-      - ../backend/contract-management-service/database/init_contract_service.sql:/docker-entrypoint-initdb.d/init_contract_service.sql
-    networks:
-      - docgo_network_dev
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
 
-  # Redis for caching and session management
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=docgo
+    volumes:
+      - mongodb_data:/data/db
+
   redis:
-    image: redis:7-alpine
-    container_name: docgo_redis_dev
-    restart: unless-stopped
+    image: redis:7.2-alpine
     ports:
       - "6379:6379"
     volumes:
-      - redis_data_dev:/data
-    networks:
-      - docgo_network_dev
+      - redis_data:/data
 
-  # API Gateway BFF (Next.js) - Development Mode
-  api-gateway-bff:
-    image: node:18-alpine
-    container_name: docgo_api_gateway_bff_dev
-    restart: unless-stopped
-    working_dir: /app
+  # Elasticsearch for search functionality
+  elasticsearch:
+    image: elasticsearch:8.11.0
     ports:
-      - "8000:8000"
+      - "9200:9200"
     environment:
-      - NODE_ENV=development
-      - PORT=8000
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-      - ../backend/api-gateway-bff:/app
-      - /app/node_modules
-    command: >
-      sh -c "npm install && npm run dev"
-    depends_on:
-      - mariadb
-      - redis
-    networks:
-      - docgo_network_dev
-
-  # Authentication Identity Service (Spring Boot) - Development Mode
-  authentication-identity-service:
-    image: openjdk:17-jdk-slim
-    container_name: docgo_auth_service_dev
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8001:8001"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
-      - SPRING_DATASOURCE_USERNAME=docgo_user
-      - SPRING_DATASOURCE_PASSWORD=docgo_password
-      - SERVER_PORT=8001
-    volumes:
-      - ../backend/authentication-identity-service:/app
-    command: >
-      sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
-    depends_on:
-      - mariadb
-      - redis
-    networks:
-      - docgo_network_dev
-
-  # User Management Service (FastAPI) - Development Mode
-  user-management-service:
-    image: python:3.11-slim
-    container_name: docgo_user_management_service_dev
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8002:8002"
-    environment:
-      - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo_user_management_service
-      - DATABASE_HOST=mariadb
-      - DATABASE_PORT=3306
-      - DATABASE_NAME=docgo_user_management_service
-      - DATABASE_USER=docgo_user
-      - DATABASE_PASSWORD=docgo_password
-      - HOST=0.0.0.0
-      - PORT=8002
-      - PYTHONPATH=/app
-    volumes:
-      - ../backend/user-management-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
-    depends_on:
-      - mariadb
-      - redis
-    networks:
-      - docgo_network_dev
-
-  # Contract Management Service (Spring Boot) - Development Mode
-  contract-management-service:
-    image: docgo-contract-service:latest
-    container_name: docgo_contract_service_dev
-    restart: unless-stopped
-    ports:
-      - "8003:8003"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
-      - SPRING_DATASOURCE_USERNAME=docgo_user
-      - SPRING_DATASOURCE_PASSWORD=docgo_password
-      - SERVER_PORT=8003
-    depends_on:
-      - mariadb
-      - redis
-    networks:
-      - docgo_network_dev
-
-  # AI Processing Service (FastAPI) - Development Mode
-  ai-processing-service:
-    image: python:3.11-slim
-    container_name: docgo_ai_processing_service_dev
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8017:8017"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8017
-      - PYTHONPATH=/app
-    volumes:
-      - ../backend/ai-processing-service:/app
-      - ai_processing_results_dev:/app/results
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
-    networks:
-      - docgo_network_dev
-
-  # File Storage Asset Service (FastAPI) - Development Mode
-  file-storage-asset-service:
-    image: python:3.11-slim
-    container_name: docgo_file_storage_service_dev
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8012:8012"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8012
-      - PYTHONPATH=/app
-    volumes:
-      - ../backend/file-storage-asset-service:/app
-      - file_storage_uploads_dev:/app/uploads
-      - file_storage_temp_dev:/app/temp
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
-    networks:
-      - docgo_network_dev
-
-  # Frontend Web (Vite + React) - Development Mode
-  frontend-web:
-    image: node:18-alpine
-    container_name: docgo_frontend_web_dev
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000
-    volumes:
-      - ../frontend/web:/app
-      - /app/node_modules
-    command: >
-      sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    depends_on:
-      - api-gateway-bff
-    networks:
-      - docgo_network_dev
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
 volumes:
-  mariadb_data_dev:
-    driver: local
-  redis_data_dev:
-    driver: local
-  ai_processing_results_dev:
-    driver: local
-  file_storage_uploads_dev:
-    driver: local
-  file_storage_temp_dev:
-    driver: local
-
-networks:
-  docgo_network_dev:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.21.0.0/16
+  mysql_data:
+  mongodb_data:
+  redis_data:
+  elasticsearch_data:

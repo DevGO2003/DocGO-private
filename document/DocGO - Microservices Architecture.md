@@ -19,43 +19,46 @@ DocGO là hệ thống quản lý tài liệu và hợp đồng thông minh đư
 | **E-Signature Integration Service** | FastAPI | Tích hợp chữ ký điện tử, digital signatures | Port: 8008, DB: MariaDB, third-party e-signature APIs |
 | **Notification Service** | FastAPI | Gửi thông báo, email, SMS, push notifications | Port: 8009, DB: MariaDB, email/SMS providers, WebSocket |
 | **Reporting Analytics Service** | FastAPI | Báo cáo, thống kê, analytics, dashboards | Port: 8010, DB: MariaDB, Redis cache, data aggregation |
-| **OCR Document Extraction Service** | FastAPI | OCR, trích xuất text từ hình ảnh, PDF | Port: 8011, DB: MariaDB, OCR engines (Tesseract, Google Vision) |
+| **OCR Document Extraction Service** | FastAPI | OCR, trích xuất text từ hình ảnh, PDF | Port: 8011, DB: MongoDB, OCR engines (Tesseract, Google Vision) |
 | **File Storage Asset Service** | FastAPI | Lưu trữ file, quản lý assets, malware scanning | Port: 8012, DB: MariaDB, S3/Filebase, virus scanning |
-| **Audit Activity Log Service** | FastAPI | Ghi log hoạt động, audit trail, compliance | Port: 8013, DB: MariaDB, log aggregation, search |
+| **Audit Activity Log Service** | FastAPI | Ghi log hoạt động, audit trail, compliance | Port: 8013, DB: MongoDB, log aggregation, search |
 | **Integration Connectors Service** | FastAPI | Tích hợp hệ thống bên ngoài, APIs, webhooks | Port: 8014, DB: MariaDB, third-party integrations |
-| **Batch ETL Service** | FastAPI | Xử lý dữ liệu hàng loạt, ETL pipelines | Port: 8015, DB: MariaDB, data processing, scheduling |
+| **Batch ETL Service** | FastAPI | Xử lý dữ liệu hàng loạt, ETL pipelines | Port: 8015, DB: MongoDB, data processing, scheduling |
 | **Health Monitoring Agent** | FastAPI | Giám sát sức khỏe service, metrics, alerting | Port: 8016, DB: MariaDB, Prometheus, Grafana |
-| **AI Processing Service** | FastAPI | Xử lý AI, machine learning, document analysis | Port: 8017, DB: MariaDB, Gemini AI, model inference |
+| **AI Processing Service** | FastAPI | Xử lý AI, machine learning, document analysis | Port: 8017, DB: MongoDB, Gemini AI, model inference |
 | **General File Management Service** | FastAPI | Quản lý file tổng quát, metadata, organization | Port: 8018, DB: MariaDB, file categorization, search |
 
 ## Công nghệ sử dụng
 
 ### Backend Frameworks
-- **Spring Boot (Java)**: 2 services
+- **Spring Boot (Java)**: 2 services (MariaDB)
   - Authentication Identity Service
   - Contract Management Service
 - **FastAPI (Python)**: 16 services
-  - User Management Service
-  - Versioning Document History Service
-  - Commenting Collaboration Service
-  - Approval Workflow Service
-  - Reminder Scheduler Service
-  - E-Signature Integration Service
-  - Notification Service
-  - Reporting Analytics Service
-  - OCR Document Extraction Service
-  - File Storage Asset Service
-  - Audit Activity Log Service
-  - Integration Connectors Service
-  - Batch ETL Service
-  - Health Monitoring Agent
-  - AI Processing Service
-  - General File Management Service
+  - **MariaDB Services** (Dữ liệu có cấu trúc):
+    - User Management Service
+    - Versioning Document History Service
+    - Commenting Collaboration Service
+    - Approval Workflow Service
+    - Reminder Scheduler Service
+    - E-Signature Integration Service
+    - Notification Service
+    - Reporting Analytics Service
+    - File Storage Asset Service
+    - Integration Connectors Service
+    - Health Monitoring Agent
+    - General File Management Service
+  - **MongoDB Services** (Dữ liệu phi cấu trúc):
+    - OCR Document Extraction Service
+    - Audit Activity Log Service
+    - Batch ETL Service
+    - AI Processing Service
 - **Next.js (Node.js)**: 1 service
   - API Gateway BFF
 
 ### Cơ sở dữ liệu
-- **MariaDB**: Database chính cho tất cả services
+- **MariaDB**: Database chính cho dữ liệu có cấu trúc rõ ràng (users, contracts, workflows)
+- **MongoDB**: Database cho dữ liệu phi cấu trúc (logs, analytics, AI results, OCR data)
 - **Redis**: Cache, session storage, rate limiting
 - **S3/Filebase**: File storage và assets
 
@@ -134,13 +137,31 @@ DocGO là hệ thống quản lý tài liệu và hợp đồng thông minh đư
 ┌─────────────────────▼───────────────────────────────────────┐
 │                    Data Layer                               │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │   MariaDB   │ │    Redis    │ │ S3/Filebase │          │
-│  │  (Primary)  │ │   (Cache)   │ │ (Storage)   │          │
+│  │   MariaDB   │ │   MongoDB   │ │    Redis    │          │
+│  │(Structured) │ │(Unstructured)│ │   (Cache)   │          │
+│  └─────────────┘ └─────────────┘ └─────────────┘          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
+│  │ S3/Filebase │ │   Logs      │ │   Metrics   │          │
+│  │ (Storage)   │ │ (Monitoring)│ │(Monitoring) │          │
 │  └─────────────┘ └─────────────┘ └─────────────┘          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Quy tắc thiết kế
+
+### 0. Database Selection Strategy
+- **MariaDB (MySQL)**: Sử dụng cho dữ liệu có cấu trúc rõ ràng, cần ACID compliance
+  - Users, roles, permissions
+  - Contracts, workflows, approvals
+  - Business entities với relationships phức tạp
+  - Dữ liệu cần transaction support
+- **MongoDB**: Sử dụng cho dữ liệu phi cấu trúc, cần flexibility
+  - Logs, audit trails
+  - AI/ML results, OCR data
+  - Analytics, reporting data
+  - Dữ liệu có schema thay đổi thường xuyên
+- **Redis**: Cache, session storage, rate limiting
+- **S3/Filebase**: File storage, binary data
 
 ### 1. API Design
 - **Base URL**: `/api/v1/{service-name}/...`
@@ -150,9 +171,13 @@ DocGO là hệ thống quản lý tài liệu và hợp đồng thông minh đư
 
 ### 2. Database Design
 - **Multi-tenancy**: Hỗ trợ nhiều tenant với `system_id`
-- **Soft Delete**: Sử dụng `is_deleted` và `deleted_at` thay vì xóa thật
+- **Database Selection**:
+  - **MariaDB**: Dữ liệu có cấu trúc rõ ràng (users, contracts, workflows, approvals)
+  - **MongoDB**: Dữ liệu phi cấu trúc (logs, analytics, AI results, OCR data, audit trails)
+- **Soft Delete**: Sử dụng `is_deleted` và `deleted_at` thay vì xóa thật (MariaDB)
 - **Audit Trail**: Ghi log mọi thay đổi với `created_by`, `updated_by`, `created_at`, `updated_at`
 - **Versioning**: Hỗ trợ version control cho documents và contracts
+- **Schema Flexibility**: MongoDB cho dữ liệu thay đổi cấu trúc thường xuyên
 
 ### 3. Security
 - **Authentication**: JWT tokens với expiration
