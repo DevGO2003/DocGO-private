@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from routers import router
@@ -13,8 +14,27 @@ app = FastAPI(
 	description="Dịvụ lưu trữ và quản lý tài sản (file) dùng S3/Filebase và tùy chọn IPFS.",
 	version="1.0.0",
 	docs_url="/docs",
-	redoc_url="/redoc"
+	redoc_url="/redoc",
+	openapi_version="3.0.3"
 )
+
+# Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
+def custom_openapi():
+	if app.openapi_schema:
+		return app.openapi_schema
+	
+	openapi_schema = get_openapi(
+		title=app.title,
+		version=app.version,
+		description=app.description,
+		routes=app.routes,
+		openapi_version="3.0.3"
+	)
+	
+	app.openapi_schema = openapi_schema
+	return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # Add CORS middleware
 app.add_middleware(

@@ -338,21 +338,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Filter out path parameters from query params
+    const { path: pathParam, ...queryParams } = req.query;
+
     // Make request to microservice
     let response;
     try {
       switch (method.toUpperCase()) {
         case 'GET':
-          response = await service.get(endpoint, { params: req.query });
+          response = await service.get(endpoint, { params: queryParams });
           break;
         case 'POST':
-          response = await service.post(endpoint, req.body, { params: req.query });
+          response = await service.post(endpoint, req.body, { params: queryParams });
           break;
         case 'PUT':
-          response = await service.put(endpoint, req.body, { params: req.query });
+          response = await service.put(endpoint, req.body, { params: queryParams });
           break;
         case 'DELETE':
-          response = await service.delete(endpoint, { params: req.query });
+          response = await service.delete(endpoint, { params: queryParams });
           break;
         default:
           return res.status(405).json({

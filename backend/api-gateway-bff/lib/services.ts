@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import fs from 'fs';
 import { ServiceConfig, RestResponse } from '@/types/index';
 import logger from './logger';
 
@@ -11,6 +12,18 @@ class ServiceManager {
   }
 
   private initializeServices(): void {
+    const isInDocker = (): boolean => {
+      try {
+        return fs.existsSync('/.dockerenv') || (process.env.DOCKERIZED === '1');
+      } catch {
+        return false;
+      }
+    };
+
+    const selectUrl = (envVar: string | undefined, dockerUrl: string, hostUrl: string): string => {
+      if (envVar && envVar.trim().length > 0) return envVar;
+      return isInDocker() ? dockerUrl : hostUrl;
+    };
     // API Gateway BFF (Next.js) - Port 8000
     this.addService('api-gateway-bff', {
       name: 'api-gateway-bff',
@@ -22,7 +35,7 @@ class ServiceManager {
     // Authentication Identity Service (Spring Boot) - Port 8001
     this.addService('authentication', {
       name: 'authentication-identity-service',
-      url: process.env.AUTHENTICATION_SERVICE_URL || 'http://authentication-identity-service:8001',
+      url: selectUrl(process.env.AUTHENTICATION_SERVICE_URL, 'http://authentication-identity-service:8001', 'http://localhost:8001'),
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -30,7 +43,7 @@ class ServiceManager {
     // User Management Service (FastAPI) - Port 8002
     this.addService('user-management', {
       name: 'user-management-service',
-      url: process.env.USER_MANAGEMENT_SERVICE_URL || 'http://user-management-service:8002',
+      url: selectUrl(process.env.USER_MANAGEMENT_SERVICE_URL, 'http://user-management-service:8002', 'http://localhost:8002'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -38,7 +51,7 @@ class ServiceManager {
     // Contract Management Service (Spring Boot) - Port 8003
     this.addService('contract-management', {
       name: 'contract-management-service',
-      url: process.env.CONTRACT_MANAGEMENT_SERVICE_URL || 'http://contract-management-service:8003',
+      url: selectUrl(process.env.CONTRACT_MANAGEMENT_SERVICE_URL, 'http://contract-management-service:8003', 'http://localhost:8003'),
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -46,7 +59,7 @@ class ServiceManager {
     // Versioning Document History Service (FastAPI) - Port 8004
     this.addService('versioning-document-history', {
       name: 'versioning-document-history-service',
-      url: process.env.VERSIONING_DOCUMENT_HISTORY_SERVICE_URL || 'http://versioning-document-history-service:8004',
+      url: selectUrl(process.env.VERSIONING_DOCUMENT_HISTORY_SERVICE_URL, 'http://versioning-document-history-service:8004', 'http://localhost:8004'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -54,7 +67,7 @@ class ServiceManager {
     // Commenting Collaboration Service (FastAPI) - Port 8005
     this.addService('commenting-collaboration', {
       name: 'commenting-collaboration-service',
-      url: process.env.COMMENTING_COLLABORATION_SERVICE_URL || 'http://commenting-collaboration-service:8005',
+      url: selectUrl(process.env.COMMENTING_COLLABORATION_SERVICE_URL, 'http://commenting-collaboration-service:8005', 'http://localhost:8005'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -62,7 +75,7 @@ class ServiceManager {
     // Approval Workflow Service (FastAPI) - Port 8006
     this.addService('approval-workflow', {
       name: 'approval-workflow-service',
-      url: process.env.APPROVAL_WORKFLOW_SERVICE_URL || 'http://approval-workflow-service:8006',
+      url: selectUrl(process.env.APPROVAL_WORKFLOW_SERVICE_URL, 'http://approval-workflow-service:8006', 'http://localhost:8006'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -70,7 +83,7 @@ class ServiceManager {
     // Reminder Scheduler Service (FastAPI) - Port 8007
     this.addService('reminder-scheduler', {
       name: 'reminder-scheduler-service',
-      url: process.env.REMINDER_SCHEDULER_SERVICE_URL || 'http://reminder-scheduler-service:8007',
+      url: selectUrl(process.env.REMINDER_SCHEDULER_SERVICE_URL, 'http://reminder-scheduler-service:8007', 'http://localhost:8007'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -78,7 +91,7 @@ class ServiceManager {
     // E-Signature Integration Service (FastAPI) - Port 8008
     this.addService('esignature-integration', {
       name: 'esignature-integration-service',
-      url: process.env.ESIGNATURE_INTEGRATION_SERVICE_URL || 'http://esignature-integration-service:8008',
+      url: selectUrl(process.env.ESIGNATURE_INTEGRATION_SERVICE_URL, 'http://esignature-integration-service:8008', 'http://localhost:8008'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -86,7 +99,7 @@ class ServiceManager {
     // Notification Service (FastAPI) - Port 8009
     this.addService('notification', {
       name: 'notification-service',
-      url: process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:8009',
+      url: selectUrl(process.env.NOTIFICATION_SERVICE_URL, 'http://notification-service:8009', 'http://localhost:8009'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -94,7 +107,7 @@ class ServiceManager {
     // Reporting Analytics Service (FastAPI) - Port 8010
     this.addService('reporting-analytics', {
       name: 'reporting-analytics-service',
-      url: process.env.REPORTING_ANALYTICS_SERVICE_URL || 'http://reporting-analytics-service:8010',
+      url: selectUrl(process.env.REPORTING_ANALYTICS_SERVICE_URL, 'http://reporting-analytics-service:8010', 'http://localhost:8010'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -102,7 +115,7 @@ class ServiceManager {
     // OCR Document Extraction Service (FastAPI) - Port 8011
     this.addService('ocr-document-extraction', {
       name: 'ocr-document-extraction-service',
-      url: process.env.OCR_DOCUMENT_EXTRACTION_SERVICE_URL || 'http://ocr-document-extraction-service:8011',
+      url: selectUrl(process.env.OCR_DOCUMENT_EXTRACTION_SERVICE_URL, 'http://ocr-document-extraction-service:8011', 'http://localhost:8011'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -110,7 +123,7 @@ class ServiceManager {
     // File Storage Asset Service (FastAPI) - Port 8012
     this.addService('file-storage', {
       name: 'file-storage-asset-service',
-      url: process.env.FILE_STORAGE_SERVICE_URL || 'http://file-storage-asset-service:8012',
+      url: selectUrl(process.env.FILE_STORAGE_SERVICE_URL, 'http://file-storage-asset-service:8012', 'http://localhost:8012'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -118,7 +131,7 @@ class ServiceManager {
     // Audit Activity Log Service (FastAPI) - Port 8013
     this.addService('audit-activity-log', {
       name: 'audit-activity-log-service',
-      url: process.env.AUDIT_ACTIVITY_LOG_SERVICE_URL || 'http://audit-activity-log-service:8013',
+      url: selectUrl(process.env.AUDIT_ACTIVITY_LOG_SERVICE_URL, 'http://audit-activity-log-service:8013', 'http://localhost:8013'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -126,7 +139,7 @@ class ServiceManager {
     // Integration Connectors Service (FastAPI) - Port 8014
     this.addService('integration-connectors', {
       name: 'integration-connectors-service',
-      url: process.env.INTEGRATION_CONNECTORS_SERVICE_URL || 'http://integration-connectors-service:8014',
+      url: selectUrl(process.env.INTEGRATION_CONNECTORS_SERVICE_URL, 'http://integration-connectors-service:8014', 'http://localhost:8014'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -134,7 +147,7 @@ class ServiceManager {
     // Batch ETL Service (FastAPI) - Port 8015
     this.addService('batch-etl', {
       name: 'batch-etl-service',
-      url: process.env.BATCH_ETL_SERVICE_URL || 'http://batch-etl-service:8015',
+      url: selectUrl(process.env.BATCH_ETL_SERVICE_URL, 'http://batch-etl-service:8015', 'http://localhost:8015'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -142,7 +155,7 @@ class ServiceManager {
     // Health Monitoring Agent (FastAPI) - Port 8016
     this.addService('health-monitoring-agent', {
       name: 'health-monitoring-agent',
-      url: process.env.HEALTH_MONITORING_AGENT_URL || 'http://health-monitoring-agent:8016',
+      url: selectUrl(process.env.HEALTH_MONITORING_AGENT_URL, 'http://health-monitoring-agent:8016', 'http://localhost:8016'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -150,7 +163,7 @@ class ServiceManager {
     // AI Processing Service (FastAPI) - Port 8017
     this.addService('ai-processing', {
       name: 'ai-processing-service',
-      url: process.env.AI_PROCESSING_SERVICE_URL || 'http://ai-processing-service:8017',
+      url: selectUrl(process.env.AI_PROCESSING_SERVICE_URL, 'http://ai-processing-service:8017', 'http://localhost:8017'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -158,7 +171,7 @@ class ServiceManager {
     // General File Management Service (FastAPI) - Port 8018
     this.addService('general-file-management', {
       name: 'general-file-management-service',
-      url: process.env.GENERAL_FILE_MANAGEMENT_SERVICE_URL || 'http://general-file-management-service:8018',
+      url: selectUrl(process.env.GENERAL_FILE_MANAGEMENT_SERVICE_URL, 'http://general-file-management-service:8018', 'http://localhost:8018'),
       healthCheck: '/health',
       timeout: 10000
     });

@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 import uuid
 from datetime import datetime
 from routers import file_management_router
 from config import settings
+from fastapi.openapi.utils import get_openapi
+from schemas.response import RestResponse
 
 # Khởi tạo FastAPI app
 app = FastAPI(
@@ -12,7 +14,8 @@ app = FastAPI(
     description="Dịch vụ quản lý file tổng quát, metadata, organization và search",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    openapi_version="3.0.3"
 )
 
 # CORS middleware
@@ -31,16 +34,28 @@ app.include_router(
     tags=["General File Management Service"]
 )
 
-# Root endpoint
-@app.get("/")
+# Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        openapi_version="3.0.3"
+    )
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
+# Root endpoint → auto redirect to docs
+@app.get("/", include_in_schema=False)
 async def root():
-    return {
-        "service": "General File Management Service",
-        "version": "1.0.0",
-        "port": 8018,
-        "docs": "/docs",
-        "health": "/health"
-    }
+    return RedirectResponse(url="/docs")
 
 # Health check endpoint
 @app.get("/health")
@@ -56,20 +71,19 @@ async def health_check():
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     request_id = str(uuid.uuid4())
-    
-    return JSONResponse(
-        status_code=500,
-        content={
-            "apiVersion": "v1",
-            "statusCode": 500,
-            "shortMessage": "Internal Server Error",
-            "description": f"Lỗi không lường trước: {str(exc)}",
-            "data": None,
-            "timestamp": datetime.utcnow().isoformat(),
-            "requestId": request_id,
-            "path": str(request.url)
-        }
+    response = RestResponse[
+        dict
+    ](
+        apiVersion="v1",
+        statusCode=500,
+        shortMessage="Internal Server Error",
+        description=f"Lỗi không lường trước: {str(exc)}",
+        data=None,
+        timestamp=datetime.utcnow().isoformat(),
+        requestId=request_id,
+        path=str(request.url)
     )
+    return JSONResponse(status_code=500, content=response.model_dump())
 
 if __name__ == "__main__":
     import uvicorn
