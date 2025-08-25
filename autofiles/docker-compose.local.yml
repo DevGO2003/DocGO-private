@@ -13,7 +13,7 @@ services:
       MYSQL_USER: docgo_user
       MYSQL_PASSWORD: docgo_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mariadb_data_local:/var/lib/mysql
       - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
