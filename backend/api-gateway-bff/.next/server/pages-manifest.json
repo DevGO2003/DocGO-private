@@ -3,7 +3,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/swagger": "pages/swagger.js",
-  "/": "pages/index.js",
   "/api/swagger.json": "pages/api/swagger.json.js",
+  "/api/[...path]": "pages/api/[...path].js",
   "/api/docs/[service]": "pages/api/docs/[service].js"
 }

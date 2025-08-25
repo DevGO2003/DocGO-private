@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.openapi.utils import get_openapi
 import uvicorn
 import os
 from dotenv import load_dotenv
@@ -17,8 +18,27 @@ app = FastAPI(
     description="User management service with approval workflow and S3 integration",
     version=os.getenv("APP_VERSION", "1.0.0"),
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    openapi_version="3.0.3"
 )
+
+# Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        openapi_version="3.0.3"
+    )
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # Add CORS middleware
 app.add_middleware(

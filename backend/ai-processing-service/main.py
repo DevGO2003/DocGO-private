@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
+from fastapi.openapi.utils import get_openapi
 import routers
 import os
 from datetime import datetime
@@ -13,7 +14,8 @@ app = FastAPI(
     description="Một dịch vụ xử lý tài liệu sử dụng AI.",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    openapi_version="3.0.3"
 )
 
 # Add CORS middleware
@@ -26,6 +28,24 @@ app.add_middleware(
 )
 
 app.include_router(routers.router)
+
+# Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        openapi_version="3.0.3"
+    )
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 @app.get("/", tags=["Root"])
 async def read_root():
