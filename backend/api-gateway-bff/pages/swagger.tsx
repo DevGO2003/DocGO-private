@@ -15,22 +15,10 @@ export default function SwaggerPage() {
   const sources = useMemo(() => ([
     { key: 'gateway', name: 'API Gateway BFF', url: '/api/swagger.json' },
     { key: 'authentication', name: 'Authentication Service', url: '/api/docs/authentication' },
-    { key: 'contract-management', name: 'Contract Management', url: '/api/docs/contract-management' },
     { key: 'user-management', name: 'User Management', url: '/api/docs/user-management' },
-    { key: 'versioning-document-history', name: 'Versioning Document History', url: '/api/docs/versioning-document-history' },
-    { key: 'commenting-collaboration', name: 'Commenting Collaboration', url: '/api/docs/commenting-collaboration' },
-    { key: 'approval-workflow', name: 'Approval Workflow', url: '/api/docs/approval-workflow' },
-    { key: 'reminder-scheduler', name: 'Reminder Scheduler', url: '/api/docs/reminder-scheduler' },
-    { key: 'esignature-integration', name: 'E-Signature Integration', url: '/api/docs/esignature-integration' },
-    { key: 'notification', name: 'Notification Service', url: '/api/docs/notification' },
-    { key: 'reporting-analytics', name: 'Reporting Analytics', url: '/api/docs/reporting-analytics' },
-    { key: 'ocr-document-extraction', name: 'OCR Document Extraction', url: '/api/docs/ocr-document-extraction' },
+    { key: 'contract-management', name: 'Contract Management', url: '/api/docs/contract-management' },
+    { key: 'ai-processing', name: 'AI Processing Service', url: '/api/docs/ai-processing' },
     { key: 'file-storage', name: 'File Storage Asset', url: '/api/docs/file-storage' },
-    { key: 'audit-activity-log', name: 'Audit Activity Log', url: '/api/docs/audit-activity-log' },
-    { key: 'integration-connectors', name: 'Integration Connectors', url: '/api/docs/integration-connectors' },
-    { key: 'batch-etl', name: 'Batch ETL', url: '/api/docs/batch-etl' },
-    { key: 'health-monitoring-agent', name: 'Health Monitoring Agent', url: '/api/docs/health-monitoring-agent' },
-    { key: 'ai-processing', name: 'AI Processing', url: '/api/docs/ai-processing' },
     { key: 'general-file-management', name: 'General File Management', url: '/api/docs/general-file-management' }
   ]), []);
 
@@ -83,7 +71,7 @@ export default function SwaggerPage() {
           
           {/* Microservices Overview */}
           <div className="microservices-overview">
-            <h3>📋 Tổng quan 19 Microservices</h3>
+            <h3>📋 Tổng quan 7 Microservices đang chạy</h3>
             
             {/* Technology Summary */}
             <div className="tech-summary">
@@ -98,7 +86,7 @@ export default function SwaggerPage() {
                 <div className="tech-icon">🐍</div>
                 <div className="tech-info">
                   <h4>FastAPI (Python)</h4>
-                  <span className="tech-count">16 services</span>
+                  <span className="tech-count">4 services</span>
                 </div>
               </div>
               <div className="tech-card">
@@ -151,14 +139,7 @@ export default function SwaggerPage() {
                       <p>Quản lý hợp đồng, workflow, approval processes</p>
                     </div>
                   </div>
-                  <div className="service-item">
-                    <span className="service-icon">📚</span>
-                    <div className="service-info">
-                      <h5>Versioning Document History</h5>
-                      <p>Port 8004 - FastAPI</p>
-                      <p>Quản lý phiên bản tài liệu, lịch sử thay đổi</p>
-                    </div>
-                  </div>
+
                   <div className="service-item">
                     <span className="service-icon">📁</span>
                     <div className="service-info">
@@ -170,89 +151,15 @@ export default function SwaggerPage() {
                 </div>
               </div>
               
-              <div className="service-category">
-                <h4>💬 Collaboration & Communication</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">💬</span>
-                    <div className="service-info">
-                      <h5>Commenting Collaboration</h5>
-                      <p>Port 8005 - FastAPI</p>
-                      <p>Bình luận, cộng tác, thảo luận, teamwork</p>
-                    </div>
-                  </div>
-                  <div className="service-item">
-                    <span className="service-icon">🔔</span>
-                    <div className="service-info">
-                      <h5>Notification Service</h5>
-                      <p>Port 8009 - FastAPI</p>
-                      <p>Email, SMS, push notifications, alerts</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
               
-              <div className="service-category">
-                <h4>✅ Workflow & Approval</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">✅</span>
-                    <div className="service-info">
-                      <h5>Approval Workflow</h5>
-                      <p>Port 8006 - FastAPI</p>
-                      <p>Quy trình phê duyệt, workflow management</p>
-                    </div>
-                  </div>
-                  <div className="service-item">
-                    <span className="service-icon">✍️</span>
-                    <div className="service-info">
-                      <h5>E-Signature Integration</h5>
-                      <p>Port 8008 - FastAPI</p>
-                      <p>Chữ ký điện tử, digital signature, verification</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
               
-              <div className="service-category">
-                <h4>⏰ Scheduling & Reminders</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">⏰</span>
-                    <div className="service-info">
-                      <h5>Reminder Scheduler</h5>
-                      <p>Port 8007 - FastAPI</p>
-                      <p>Lập lịch nhắc nhở, notification scheduling</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="service-category">
-                <h4>📊 Analytics & Reporting</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">📊</span>
-                    <div className="service-info">
-                      <h5>Reporting Analytics</h5>
-                      <p>Port 8010 - FastAPI</p>
-                      <p>Báo cáo, phân tích dữ liệu, dashboard, insights</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
               
               <div className="service-category">
                 <h4>🔍 Document Processing & AI</h4>
                 <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">🔍</span>
-                    <div className="service-info">
-                      <h5>OCR Document Extraction</h5>
-                      <p>Port 8011 - FastAPI</p>
-                      <p>OCR, trích xuất text từ hình ảnh/tài liệu</p>
-                    </div>
-                  </div>
                   <div className="service-item">
                     <span className="service-icon">🤖</span>
                     <div className="service-info">
@@ -278,49 +185,7 @@ export default function SwaggerPage() {
                 </div>
               </div>
               
-              <div className="service-category">
-                <h4>📝 Audit & Monitoring</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">📝</span>
-                    <div className="service-info">
-                      <h5>Audit Activity Log</h5>
-                      <p>Port 8013 - FastAPI</p>
-                      <p>Ghi log hoạt động, audit trail, compliance</p>
-                    </div>
-                  </div>
-                  <div className="service-item">
-                    <span className="service-icon">🏥</span>
-                    <div className="service-info">
-                      <h5>Health Monitoring Agent</h5>
-                      <p>Port 8016 - FastAPI</p>
-                      <p>Giám sát sức khỏe hệ thống, metrics collection</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="service-category">
-                <h4>🔗 Integration & Data</h4>
-                <div className="service-list">
-                  <div className="service-item">
-                    <span className="service-icon">🔗</span>
-                    <div className="service-info">
-                      <h5>Integration Connectors</h5>
-                      <p>Port 8014 - FastAPI</p>
-                      <p>Kết nối hệ thống bên ngoài, API integration</p>
-                    </div>
-                  </div>
-                  <div className="service-item">
-                    <span className="service-icon">⚙️</span>
-                    <div className="service-info">
-                      <h5>Batch ETL Service</h5>
-                      <p>Port 8015 - FastAPI</p>
-                      <p>Xử lý dữ liệu hàng loạt, ETL pipeline, data transformation</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
