@@ -1,4 +1,6 @@
 CREATE DATABASE IF NOT EXISTS docgo_contract_service;
+GRANT ALL PRIVILEGES ON docgo_contract_service.* TO 'docgo_user'@'%';
+FLUSH PRIVILEGES;
 USE docgo_contract_service;
 
 DROP TABLE IF EXISTS contract_attachments;

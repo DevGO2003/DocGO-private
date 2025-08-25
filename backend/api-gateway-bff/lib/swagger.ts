@@ -293,6 +293,7 @@ API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết
   },
   apis: [
     './pages/api/*.ts',
+    './pages/api/v1/**/*.ts',
     './lib/*.ts',
     './types/*.ts'
   ]

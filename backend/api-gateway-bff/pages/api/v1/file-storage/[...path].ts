@@ -49,6 +49,10 @@ import logger from '@/lib/logger';
  *               folder:
  *                 type: string
  *                 description: Thư mục lưu trữ
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             additionalProperties: true
  *     responses:
  *       200:
  *         description: Request thành công
@@ -56,6 +60,53 @@ import logger from '@/lib/logger';
  *         description: Tạo thành công
  *       400:
  *         description: Dữ liệu không hợp lệ
+ *       500:
+ *         description: Lỗi server
+ *   put:
+ *     summary: Proxy PUT request đến File Storage Service
+ *     description: Forward PUT request đến File Storage Asset Service (Port 8012)
+ *     tags: [File Storage Asset]
+ *     parameters:
+ *       - name: path
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: files/metadata
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             additionalProperties: true
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *       400:
+ *         description: Dữ liệu không hợp lệ
+ *       404:
+ *         description: Resource không tồn tại
+ *       500:
+ *         description: Lỗi server
+ *   delete:
+ *     summary: Proxy DELETE request đến File Storage Service
+ *     description: Forward DELETE request đến File Storage Asset Service (Port 8012)
+ *     tags: [File Storage Asset]
+ *     parameters:
+ *       - name: path
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: files/{key}
+ *     responses:
+ *       200:
+ *         description: Xóa thành công
+ *       204:
+ *         description: Không có nội dung
+ *       404:
+ *         description: Resource không tồn tại
  *       500:
  *         description: Lỗi server
  */
