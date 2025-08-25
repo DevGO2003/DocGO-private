@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 
@@ -12,6 +12,45 @@ const SwaggerUI = dynamic(() => import('swagger-ui-react'), {
 import 'swagger-ui-react/swagger-ui.css';
 
 export default function SwaggerPage() {
+  const sources = useMemo(() => ([
+    { key: 'gateway', name: 'API Gateway BFF', url: '/api/swagger.json' },
+    { key: 'authentication', name: 'Authentication Service', url: '/api/docs/authentication' },
+    { key: 'contract-management', name: 'Contract Management', url: '/api/docs/contract-management' },
+    { key: 'user-management', name: 'User Management', url: '/api/docs/user-management' },
+    { key: 'versioning-document-history', name: 'Versioning Document History', url: '/api/docs/versioning-document-history' },
+    { key: 'commenting-collaboration', name: 'Commenting Collaboration', url: '/api/docs/commenting-collaboration' },
+    { key: 'approval-workflow', name: 'Approval Workflow', url: '/api/docs/approval-workflow' },
+    { key: 'reminder-scheduler', name: 'Reminder Scheduler', url: '/api/docs/reminder-scheduler' },
+    { key: 'esignature-integration', name: 'E-Signature Integration', url: '/api/docs/esignature-integration' },
+    { key: 'notification', name: 'Notification Service', url: '/api/docs/notification' },
+    { key: 'reporting-analytics', name: 'Reporting Analytics', url: '/api/docs/reporting-analytics' },
+    { key: 'ocr-document-extraction', name: 'OCR Document Extraction', url: '/api/docs/ocr-document-extraction' },
+    { key: 'file-storage', name: 'File Storage Asset', url: '/api/docs/file-storage' },
+    { key: 'audit-activity-log', name: 'Audit Activity Log', url: '/api/docs/audit-activity-log' },
+    { key: 'integration-connectors', name: 'Integration Connectors', url: '/api/docs/integration-connectors' },
+    { key: 'batch-etl', name: 'Batch ETL', url: '/api/docs/batch-etl' },
+    { key: 'health-monitoring-agent', name: 'Health Monitoring Agent', url: '/api/docs/health-monitoring-agent' },
+    { key: 'ai-processing', name: 'AI Processing', url: '/api/docs/ai-processing' },
+    { key: 'general-file-management', name: 'General File Management', url: '/api/docs/general-file-management' }
+  ]), []);
+
+  const [selectedKey, setSelectedKey] = useState<string>('gateway');
+  const [spec, setSpec] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const src = sources.find(s => s.key === selectedKey) || sources[0];
+    setError(null);
+    setSpec(null);
+    fetch(src.url)
+      .then(async r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(json => setSpec(json))
+      .catch(e => setError(`Không tải được spec từ ${src.name}: ${e.message}`));
+  }, [selectedKey, sources]);
+
   return (
     <>
       <Head>
@@ -24,6 +63,23 @@ export default function SwaggerPage() {
         <div className="swagger-header">
           <h1>🚀 DocGO - API Gateway BFF Documentation</h1>
           <p>Swagger/OpenAPI documentation cho API Gateway Backend for Frontend</p>
+          
+          <div style={{ marginTop: 20 }}>
+            <label htmlFor="spec-select" style={{ fontWeight: 600, marginRight: 8 }}>Chọn service:</label>
+            <select
+              id="spec-select"
+              value={selectedKey}
+              onChange={(e) => setSelectedKey(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: 6 }}
+            >
+              {sources.map(s => (
+                <option key={s.key} value={s.key}>{s.name}</option>
+              ))}
+            </select>
+            {error && (
+              <div style={{ marginTop: 10, color: '#ffdddd', fontWeight: 600 }}>{error}</div>
+            )}
+          </div>
           
           {/* Microservices Overview */}
           <div className="microservices-overview">
@@ -270,7 +326,7 @@ export default function SwaggerPage() {
         </div>
         
         <SwaggerUI 
-          url="/api/swagger.json"
+          spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
           docExpansion="list"
           defaultModelsExpandDepth={2}
           defaultModelExpandDepth={2}

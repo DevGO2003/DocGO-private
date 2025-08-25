@@ -27,11 +27,6 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/docs": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/docs.js"
-    ],
     "/swagger": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
