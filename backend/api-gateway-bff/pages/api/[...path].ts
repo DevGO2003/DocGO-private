@@ -314,19 +314,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (fullPath.startsWith('authentication-identity-service')) {
       serviceKey = 'authentication';
-      endpoint = `/${fullPath}`;
+      endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('user-management-service')) {
       serviceKey = 'user-management';
-      endpoint = `/${fullPath}`;
+      endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('contract-management-service')) {
       serviceKey = 'contract-management';
-      endpoint = `/${fullPath}`;
+      endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('ai-processing-service')) {
       serviceKey = 'ai-processing';
-      endpoint = `/${fullPath.replace('ai-processing-service/', '')}`;
+      endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('file-storage-asset-service')) {
       serviceKey = 'file-storage';
-      endpoint = `/${fullPath.replace('file-storage-asset-service/', '')}`;
+      endpoint = `/api/v1/${fullPath}`;
     } else if (fullPath.startsWith('general-file-management-service')) {
       serviceKey = 'general-file-management';
       // Forward with API version prefix expected by the service
@@ -352,7 +352,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Make request to microservice
     try {
-      const isMultipart = (req.headers['content-type'] || '').toLowerCase().startsWith('multipart/');
+      const contentTypeHeader = (req.headers['content-type'] || '').toLowerCase();
+      const isMultipart = contentTypeHeader.startsWith('multipart/');
 
       if (isMultipart) {
         const upstreamUrl = new URL(service.defaults.baseURL || '');
@@ -386,16 +387,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // JSON/x-www-form-urlencoded flows
+      // Vì đã tắt bodyParser, cần tự đọc body đối với JSON/x-www-form-urlencoded
+      let parsedBody: any = undefined;
+      if (method !== 'GET' && method !== 'DELETE') {
+        const rawBody: string = await new Promise((resolve, reject) => {
+          let data = '';
+          req.on('data', (chunk) => { data += chunk; });
+          req.on('end', () => resolve(data));
+          req.on('error', (err) => reject(err));
+        });
+
+        if (rawBody && contentTypeHeader.includes('application/json')) {
+          try {
+            parsedBody = JSON.parse(rawBody);
+          } catch {
+            parsedBody = rawBody;
+          }
+        } else if (rawBody && contentTypeHeader.includes('application/x-www-form-urlencoded')) {
+          // Trường hợp form urlencoded
+          const params = new URLSearchParams(rawBody);
+          parsedBody = Object.fromEntries(params.entries());
+        } else if (rawBody) {
+          parsedBody = rawBody;
+        }
+      }
+
       let response;
       switch (method.toUpperCase()) {
         case 'GET':
           response = await service.get(endpoint, { params: queryParams });
           break;
         case 'POST':
-          response = await service.post(endpoint, req.body, { params: queryParams });
+          response = await service.post(endpoint, parsedBody, {
+            params: queryParams,
+            headers: { 'Content-Type': req.headers['content-type'] as string }
+          });
           break;
         case 'PUT':
-          response = await service.put(endpoint, req.body, { params: queryParams });
+          response = await service.put(endpoint, parsedBody, {
+            params: queryParams,
+            headers: { 'Content-Type': req.headers['content-type'] as string }
+          });
           break;
         case 'DELETE':
           response = await service.delete(endpoint, { params: queryParams });

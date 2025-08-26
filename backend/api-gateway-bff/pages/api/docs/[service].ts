@@ -27,10 +27,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const path = SPRING_SERVICES.has(serviceKey) ? '/v3/api-docs' : '/openapi.json';
     const response = await axiosInstance.get(path, { headers: { Accept: 'application/json' } });
+    const spec = response.data;
+    // Rewrite servers của spec về Gateway để Try it out đi qua 8000
+    const gwUrl = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host || 'localhost:8000'}`;
+    spec.servers = [{ url: gwUrl }];
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     // Không ép Content-Type ở proxy docs
-    return res.status(200).json(response.data);
+    return res.status(200).json(spec);
   } catch (error: any) {
     const status = error.response?.status || 500;
     const message = error.response?.data || { error: 'Failed to fetch OpenAPI spec' };
