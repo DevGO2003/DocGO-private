@@ -120,6 +120,33 @@ services:
     networks:
       - docgo_network_local
 
+  # Authentication & Identity Service (Spring Boot) - Backend Service with Hot Reload
+  authentication-identity-service:
+    image: openjdk:21-jdk-slim
+    container_name: docgo-local-authentication-identity-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8001
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
+      - SPRING_DATASOURCE_USERNAME=docgo_user
+      - SPRING_DATASOURCE_PASSWORD=docgo_password
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - ../backend/authentication-identity-service:/app
+    command: >
+      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
+    depends_on:
+      - mariadb
+      - redis
+      - elasticsearch
+    networks:
+      - docgo_network_local
+
   # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
   file-storage-asset-service:
     image: python:3.11-slim
