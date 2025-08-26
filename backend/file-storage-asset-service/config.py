@@ -104,3 +104,10 @@ UPLOAD_DIR: str = get_env("UPLOAD_DIR", "uploads")
 TEMP_DIR: str = get_env("TEMP_DIR", "temp")
 
 
+# Kafka configuration
+KAFKA_BOOTSTRAP_SERVERS: str = get_env("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+KAFKA_FILE_EVENTS_TOPIC: str = get_env("KAFKA_FILE_EVENTS_TOPIC", "file.events")
+KAFKA_AI_EVENTS_TOPIC: str = get_env("KAFKA_AI_EVENTS_TOPIC", "ai.events")
+KAFKA_CLIENT_ID: str = get_env("KAFKA_CLIENT_ID", "file-storage-asset-service")
+KAFKA_MESSAGE_KEY_FIELD: str = get_env("KAFKA_MESSAGE_KEY_FIELD", "key")  # key | fileId | filename
+

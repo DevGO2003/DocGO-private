@@ -12,3 +12,16 @@ def get_gemini_api_key():
     if not api_key:
         raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
     return api_key
+
+# Kafka configs
+def get_kafka_bootstrap_servers():
+    return os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
+def get_kafka_file_events_topic():
+    return os.getenv("KAFKA_FILE_EVENTS_TOPIC", "file.events")
+
+def get_kafka_ai_events_topic():
+    return os.getenv("KAFKA_AI_EVENTS_TOPIC", "ai.events")
+
+def get_kafka_client_id():
+    return os.getenv("KAFKA_CLIENT_ID", "ai-processing-service")

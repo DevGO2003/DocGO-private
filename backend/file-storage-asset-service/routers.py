@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta
 
 from config import s3_client, S3_BUCKET, get_presigned_get_url, get_s3_client, get_bucket_name
+from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_EVENTS_TOPIC, KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD
 from services.file_service import FileStorageService
 from services.malware_scanner import MalwareScanner
 from schemas.file import (
@@ -12,9 +13,26 @@ from schemas.file import (
     FileListResponse, FileVersion
 )
 from schemas.response import RestResponse
+import json
+from aiokafka import AIOKafkaProducer
 
 
 router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Storage Asset Service"])
+
+# Kafka producer singleton
+_producer: AIOKafkaProducer | None = None
+
+async def get_kafka_producer() -> AIOKafkaProducer:
+    global _producer
+    if _producer is None:
+        _producer = AIOKafkaProducer(
+            bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+            client_id=KAFKA_CLIENT_ID,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks="all",
+        )
+        await _producer.start()
+    return _producer
 
 
 @router.post("/files", summary="Upload file lên S3/Filebase với scan")
@@ -56,15 +74,63 @@ async def upload_file(
 		# Upload file với scan
 		file_info = await file_service.upload_file(file, None)  # Không cần user_id
 		
+		# Bảo đảm có key hợp lệ (tránh None)
+		_generated_key = f"{folder}/{uuid4().hex}_{file.filename}"
+		s3_key = getattr(file_info, 's3_key', None) or _generated_key
+		
 		response_data = {
-			"bucket": S3_BUCKET, 
-			"key": file_info.s3_key if hasattr(file_info, 's3_key') else f"{folder}/{uuid4().hex}_{file.filename}",
-			"url": get_presigned_get_url(file_info.s3_key if hasattr(file_info, 's3_key') else f"{folder}/{uuid4().hex}_{file.filename}", 7 * 24 * 3600),
+			"bucket": S3_BUCKET,
+			"key": s3_key,
+			"url": get_presigned_get_url(s3_key, 7 * 24 * 3600),
 			"filename": file.filename,
 			"size": file.size if hasattr(file, 'size') else 0,
-			"scan_status": file_info.status if hasattr(file_info, 'status') else "completed"
+			"scan_status": getattr(file_info, 'status', None) or "completed"
 		}
 		
+		# Publish FileUploaded event (best-effort)
+		try:
+			producer = await get_kafka_producer()
+			event_payload = {
+				"eventVersion": "v1",
+				"eventType": "FileUploaded",
+				"eventId": uuid4().hex,
+				"timestamp": datetime.utcnow().isoformat() + "Z",
+				"source": "file-storage-asset-service",
+				"correlationId": (request.headers.get("x-correlation-id") or uuid4().hex),
+				"actor": {
+					"userId": request.headers.get("x-user-id", ""),
+					"userRole": request.headers.get("x-user-role", ""),
+					"ip": request.client.host if request.client else ""
+				},
+				"data": {
+					"fileId": getattr(file_info, "file_id", None) or getattr(file_info, "s3_key", None) or response_data["key"],
+					"filename": file.filename,
+					"contentType": file.content_type,
+					"size": (file.size if hasattr(file, 'size') else 0),
+					"bucket": response_data["bucket"],
+					"key": response_data["key"],
+					"url": response_data["url"],
+					"folder": folder,
+				},
+				"metadata": {"serviceVersion": "1.0.0"}
+			}
+			# Chọn key theo cấu hình .env (KAFKA_MESSAGE_KEY_FIELD)
+			candidate = None
+			if KAFKA_MESSAGE_KEY_FIELD == "fileId":
+				candidate = event_payload["data"].get("fileId")
+			elif KAFKA_MESSAGE_KEY_FIELD == "filename":
+				candidate = response_data.get("filename")
+			else:
+				candidate = response_data.get("key")
+			kafka_key_val = candidate
+			kafka_key_bytes = (str(kafka_key_val).encode("utf-8")) if kafka_key_val is not None else None
+			if kafka_key_bytes is not None:
+				await producer.send_and_wait(KAFKA_FILE_EVENTS_TOPIC, event_payload, key=kafka_key_bytes)
+			else:
+				await producer.send_and_wait(KAFKA_FILE_EVENTS_TOPIC, event_payload)
+		except Exception:
+			pass
+
 		return RestResponse(
 			statusCode=201,
 			shortMessage="Created",

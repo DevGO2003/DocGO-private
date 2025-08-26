@@ -8,6 +8,7 @@ import routers
 import os
 from datetime import datetime
 import uuid
+from kafka_worker import worker
 
 app = FastAPI(
     title="AI Processing Service",
@@ -67,6 +68,21 @@ async def health_check():
         "ai_model": "Gemini 2.0 Flash",
         "supported_formats": ["docx", "pdf", "txt"]
     }
+
+@app.on_event("startup")
+async def on_startup():
+    try:
+        await worker.start()
+    except Exception:
+        # Không chặn service nếu Kafka không sẵn sàng
+        pass
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    try:
+        await worker.stop()
+    except Exception:
+        pass
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
