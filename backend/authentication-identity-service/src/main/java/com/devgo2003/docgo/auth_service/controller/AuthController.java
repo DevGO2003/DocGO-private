@@ -139,7 +139,7 @@ public class AuthController {
         Mô tả: Đường dẫn API được gọi.
         """
     )
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<RestResponse<AuthResponse>> getUser(@Valid @RequestBody LoginRequest loginRequest) {
         AuthResponse authResponse = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
         RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
