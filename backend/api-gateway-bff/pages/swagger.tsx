@@ -9,7 +9,7 @@ const SwaggerUI = dynamic(() => import('swagger-ui-react'), {
   loading: () => <div>Loading Swagger UI...</div>
 });
 
-// Import Swagger CSS
+// Import Swagger CSS cho phiên bản mới
 import 'swagger-ui-react/swagger-ui.css';
 
 export default function SwaggerPage() {

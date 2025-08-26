@@ -3,7 +3,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['kafkajs', 'winston']
   },
-  output: 'standalone',
+  // output: 'standalone', // Comment out để tránh conflict trong development mode
   async rewrites() {
     return [
       {
