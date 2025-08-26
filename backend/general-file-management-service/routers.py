@@ -16,65 +16,6 @@ file_management_router = APIRouter()
 # Khởi tạo service
 file_service = FileManagementService()
 
-@file_management_router.post("/files/upload", response_model=RestResponse[FileUploadResponse])
-async def upload_file(
-    file: UploadFile = File(...),
-    category: Optional[str] = Query(None, description="Danh mục file"),
-    tags: Optional[str] = Query(None, description="Tags phân cách bởi dấu phẩy"),
-    description: Optional[str] = Query(None, description="Mô tả file")
-):
-    """
-    🔹 Đầu vào
-    📁 file (bắt buộc, body)
-    Loại: UploadFile
-    Mô tả: File cần upload
-    
-    🏷️ category (tùy chọn, query)
-    Loại: string
-    Mô tả: Danh mục file
-    
-    🏷️ tags (tùy chọn, query)
-    Loại: string
-    Mô tả: Tags phân cách bởi dấu phẩy
-    
-    🔹 Đầu ra
-    📄 file_id
-    Loại: string
-    Mô tả: ID duy nhất của file
-    
-    📄 filename
-    Loại: string
-    Mô tả: Tên file gốc
-    
-    📄 status
-    Loại: string
-    Mô tả: Trạng thái upload
-    """
-    try:
-        result = await file_service.upload_file(
-            file=file,
-            category=category,
-            tags=tags.split(",") if tags else [],
-            description=description
-        )
-        
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=201,
-            shortMessage="Success",
-            description="File đã được upload thành công",
-            data=result,
-            timestamp=datetime.utcnow().isoformat(),
-            requestId=str(uuid.uuid4()),
-            path="/api/v1/general-file-management-service/files/upload"
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Lỗi khi upload file: {str(e)}"
-        )
-
 @file_management_router.get("/files", response_model=RestResponse[List[FileInfo]])
 async def get_files(
     page_number: int = Query(0, ge=0, description="Số trang"),
