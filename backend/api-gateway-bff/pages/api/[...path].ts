@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios';
 import { applyMiddleware } from '@/lib/middleware';
 import serviceManager from '@/lib/services';
 import kafkaService from '@/lib/kafka';
@@ -142,6 +143,13 @@ import logger from '@/lib/logger';
  *     requestBody:
  *       required: false
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
@@ -321,7 +329,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       endpoint = `/${fullPath.replace('file-storage-asset-service/', '')}`;
     } else if (fullPath.startsWith('general-file-management-service')) {
       serviceKey = 'general-file-management';
-      endpoint = `/${fullPath.replace('general-file-management-service/', '')}`;
+      // Forward with API version prefix expected by the service
+      endpoint = `/api/v1/${fullPath}`;
     } else {
       return res.status(404).json({
         error: 'Service not found',
@@ -342,8 +351,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { path: pathParam, ...queryParams } = req.query;
 
     // Make request to microservice
-    let response;
     try {
+      const isMultipart = (req.headers['content-type'] || '').toLowerCase().startsWith('multipart/');
+
+      if (isMultipart) {
+        const upstreamUrl = new URL(service.defaults.baseURL || '');
+        // Stream raw request to upstream to preserve multipart boundary
+        const upstreamResponse = await axios.request({
+          method,
+          url: `${upstreamUrl.origin}${endpoint}`,
+          params: queryParams,
+          headers: {
+            ...req.headers,
+          },
+          data: req as any,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          // Do not transform request body
+          transformRequest: [(data) => data],
+          // Important for streaming in Node
+          responseType: 'stream',
+          validateStatus: () => true
+        });
+
+        // Pipe upstream response back to client
+        res.status(upstreamResponse.status);
+        for (const [key, value] of Object.entries(upstreamResponse.headers)) {
+          if (value !== undefined) {
+            res.setHeader(key, value as any);
+          }
+        }
+        (upstreamResponse.data as any).pipe(res);
+        return;
+      }
+
+      // JSON/x-www-form-urlencoded flows
+      let response;
       switch (method.toUpperCase()) {
         case 'GET':
           response = await service.get(endpoint, { params: queryParams });
@@ -364,7 +407,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
       }
 
-      // Return response from microservice
       return res.status(response.status).json(response.data);
 
     } catch (error: any) {
@@ -393,9 +435,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
+    // Disable bodyParser to allow streaming multipart/form-data
+    bodyParser: false,
     responseLimit: false,
   },
 };
+
+/**
+ * @swagger
+ * /api/v1/general-file-management-service/files/upload:
+ *   post:
+ *     summary: Upload file (proxy qua API Gateway)
+ *     description: Tải file lên General File Management Service thông qua API Gateway BFF.
+ *     tags: [General File Management Service]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Upload thành công
+ *       400:
+ *         description: Bad Request
+ *       422:
+ *         description: Thiếu trường file trong multipart/form-data
+ */

@@ -534,8 +534,7 @@ export default function SwaggerPage() {
           showCommonExtensions={true}
           tryItOutEnabled={true}
           requestInterceptor={(request: any) => {
-            // Thêm headers cần thiết
-            request.headers['Content-Type'] = 'application/json';
+            // Không ép Content-Type; để Swagger tự đặt đúng (vd: multipart/form-data)
             return request;
           }}
           responseInterceptor={(response: any) => {

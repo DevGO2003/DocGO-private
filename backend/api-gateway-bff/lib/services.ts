@@ -182,7 +182,6 @@ class ServiceManager {
       baseURL: config.url,
       timeout: config.timeout,
       headers: {
-        'Content-Type': 'application/json',
         'User-Agent': 'API-Gateway-BFF/1.0.0'
       }
     });

@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await axiosInstance.get(path, { headers: { Accept: 'application/json' } });
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'application/json');
+    // Không ép Content-Type ở proxy docs
     return res.status(200).json(response.data);
   } catch (error: any) {
     const status = error.response?.status || 500;
