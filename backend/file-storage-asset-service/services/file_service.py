@@ -11,7 +11,7 @@ from fastapi import HTTPException, UploadFile
 
 from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
 from services.malware_scanner import MalwareScanner
-from config import get_s3_client, get_bucket_name
+from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR
 
 class FileStorageService:
     def __init__(self):
@@ -59,7 +59,7 @@ class FileStorageService:
         """Tính MD5 checksum của file"""
         return hashlib.md5(content).hexdigest()
     
-    async def upload_file(self, file: UploadFile, user_id: str) -> FileInfo:
+    async def upload_file(self, file: UploadFile, user_id: Optional[str]) -> FileInfo:
         """Upload file lên S3 với malware scan và versioning"""
         try:
             # Đọc nội dung file
@@ -69,32 +69,41 @@ class FileStorageService:
             file_id = self._generate_file_id()
             file_type = self._get_file_type(file.filename, content)
             checksum = self._calculate_checksum(content)
+            user_id_str = user_id or "public"
             
             # Kiểm tra xem file đã tồn tại chưa (dựa trên checksum)
-            existing_file = await self._find_file_by_checksum(checksum, user_id)
+            existing_file = await self._find_file_by_checksum(checksum, user_id_str)
             if existing_file:
                 # Tạo version mới
                 version = existing_file.version + 1
-                file_key = f"users/{user_id}/files/{existing_file.file_id}/v{version}/{file.filename}"
+                file_key = f"users/{user_id_str}/files/{existing_file.file_id}/v{version}/{file.filename}"
             else:
                 version = 1
-                file_key = f"users/{user_id}/files/{file_id}/{file.filename}"
+                file_key = f"users/{user_id_str}/files/{file_id}/{file.filename}"
             
-            # Upload lên S3
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=file_key,
-                Body=content,
-                ContentType=file.content_type,
-                Metadata={
-                    'user_id': user_id,
-                    'original_filename': file.filename,
-                    'file_type': file_type.value,
-                    'checksum': checksum,
-                    'version': str(version),
-                    'upload_time': datetime.utcnow().isoformat()
-                }
-            )
+            if is_s3_enabled():
+                # Upload lên S3/Filebase
+                self.s3_client.put_object(
+                    Bucket=self.bucket_name,
+                    Key=file_key,
+                    Body=content,
+                    ContentType=file.content_type,
+                    Metadata={
+                        'user_id': user_id_str,
+                        'original_filename': file.filename,
+                        'file_type': str(file_type.value),
+                        'checksum': str(checksum),
+                        'version': str(version),
+                        'upload_time': datetime.utcnow().isoformat()
+                    }
+                )
+            else:
+                # Lưu local để test offline
+                local_dir = os.path.join(UPLOAD_DIR, user_id_str, 'files', file_id, f'v{version}')
+                os.makedirs(local_dir, exist_ok=True)
+                local_path = os.path.join(local_dir, file.filename)
+                async with aiofiles.open(local_path, 'wb') as f:
+                    await f.write(content)
             
             # Quét malware (bất đồng bộ)
             malware_result = await self.malware_scanner.scan_file(content)
@@ -114,7 +123,7 @@ class FileStorageService:
             )
             
             # Lưu metadata vào database (cần implement)
-            await self._save_file_metadata(file_info, user_id)
+            await self._save_file_metadata(file_info, user_id_str)
             
             return file_info
             

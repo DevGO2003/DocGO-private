@@ -21,6 +21,7 @@ S3_REGION: str = get_env("S3_REGION")
 S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY_ID")
 S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_ACCESS_KEY")
 S3_BUCKET: str = get_env("S3_BUCKET")
+S3_ENABLED: bool = get_env("S3_ENABLED", "true").lower() == "true"
 
 s3_client = boto3.client(
 	"s3",
@@ -28,7 +29,7 @@ s3_client = boto3.client(
 	aws_access_key_id=S3_ACCESS_KEY_ID,
 	aws_secret_access_key=S3_SECRET_ACCESS_KEY,
 	region_name=S3_REGION,
-	config=Config(signature_version="s3v4"),
+	config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
 )
 
 
@@ -75,6 +76,9 @@ def get_presigned_get_url(object_key: str, expires_in_seconds: int = 3600) -> st
 		Params={"Bucket": S3_BUCKET, "Key": object_key},
 		ExpiresIn=expires_in_seconds,
 	)
+
+def is_s3_enabled() -> bool:
+	return S3_ENABLED
 
 def get_s3_client():
 	"""Get S3 client instance."""

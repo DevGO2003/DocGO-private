@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from config import s3_client, S3_BUCKET, get_presigned_get_url, get_s3_client, get_bucket_name
 from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_EVENTS_TOPIC, KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD
+from config import MAX_FILE_SIZE, ALLOWED_FILE_TYPES, is_s3_enabled, UPLOAD_DIR
 from services.file_service import FileStorageService
 from services.malware_scanner import MalwareScanner
 from schemas.file import (
@@ -15,6 +16,7 @@ from schemas.file import (
 from schemas.response import RestResponse
 import json
 from aiokafka import AIOKafkaProducer
+
 
 
 router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Storage Asset Service"])
@@ -67,21 +69,33 @@ async def upload_file(
 	Mô tả: Thông tin về file đã upload (bucket, key, url, filename, size, scan_status).
 	"""
 	try:
-		# Kiểm tra kích thước file
-		if file.size and file.size > 100 * 1024 * 1024:  # 100MB
-			raise HTTPException(status_code=400, detail="File quá lớn (>100MB)")
+		# Kiểm tra kích thước file từ env (.env_exmaple.txt → MAX_FILE_SIZE)
+		if file.size and file.size > MAX_FILE_SIZE:
+			raise HTTPException(status_code=400, detail=f"File quá lớn (> {MAX_FILE_SIZE} bytes)")
+
+		# Kiểm tra loại file theo ALLOWED_FILE_TYPES (extension)
+		ext = (file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else '')
+		allowed = [x.strip().lower() for x in ALLOWED_FILE_TYPES]
+		if ext and allowed and ext not in allowed:
+			raise HTTPException(status_code=400, detail=f"Loại file không được phép: .{ext}. Cho phép: {', '.join(allowed)}")
 		
 		# Upload file với scan
 		file_info = await file_service.upload_file(file, None)  # Không cần user_id
 		
 		# Bảo đảm có key hợp lệ (tránh None)
 		_generated_key = f"{folder}/{uuid4().hex}_{file.filename}"
-		s3_key = getattr(file_info, 's3_key', None) or _generated_key
+		if is_s3_enabled():
+			s3_key = getattr(file_info, 's3_key', None) or _generated_key
+			file_url = get_presigned_get_url(s3_key, 7 * 24 * 3600)
+		else:
+			# URL local (giả lập) trả về path tương đối để test
+			s3_key = _generated_key
+			file_url = f"/uploads/{file.filename}"
 		
 		response_data = {
 			"bucket": S3_BUCKET,
 			"key": s3_key,
-			"url": get_presigned_get_url(s3_key, 7 * 24 * 3600),
+			"url": file_url,
 			"filename": file.filename,
 			"size": file.size if hasattr(file, 'size') else 0,
 			"scan_status": getattr(file_info, 'status', None) or "completed"
