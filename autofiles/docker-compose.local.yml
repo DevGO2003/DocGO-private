@@ -94,6 +94,32 @@ services:
     networks:
       - docgo_network_local
 
+  # User Management Service (FastAPI) - Backend Service with Hot Reload
+  user-management-service:
+    image: python:3.11-slim
+    container_name: docgo-local-user-management-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8002:8002"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8002
+      - PYTHONPATH=/app
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      - ../backend/user-management-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
+    depends_on:
+      - mariadb
+      - redis
+      - elasticsearch
+    networks:
+      - docgo_network_local
+
   # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
   file-storage-asset-service:
     image: python:3.11-slim
