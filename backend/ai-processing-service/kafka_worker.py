@@ -126,7 +126,23 @@ class AIKafkaWorker:
         }
         await self.producer.send_and_wait(self.ai_events_topic, started_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
 
-        # Here would be actual AI processing; we simulate immediate completion
+        # Simulate AI processing steps
+        try:
+            # 1. Extract text if DOCX/PDF
+            if content_type in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                await self._publish_text_extracted(event, data, file_type)
+                
+                # 2. Classify document
+                await self._publish_classified(event, data, file_type)
+                
+                # 3. Generate summary if contract
+                if is_contract:
+                    await self._publish_summary_created(event, data, file_type)
+
+        except Exception as e:
+            print(f"Error in AI processing: {e}")
+
+        # Publish AIProcessingCompleted
         completed_event = {
             "eventVersion": "v1",
             "eventType": "AIProcessingCompleted",
@@ -139,11 +155,87 @@ class AIKafkaWorker:
                 "fileId": data.get("fileId"),
                 "filename": data.get("filename"),
                 "fileType": file_type,
-                "summaryAvailable": False,
+                "summaryAvailable": is_contract,
+                "textExtracted": content_type in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+                "classified": True,
             },
             "metadata": {"serviceVersion": "1.0.0"}
         }
         await self.producer.send_and_wait(self.ai_events_topic, completed_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+
+    async def _publish_text_extracted(self, event: dict, data: dict, file_type: str) -> None:
+        """Publish text-extracted event"""
+        text_extracted_event = {
+            "eventVersion": "v1",
+            "eventType": "TextExtracted",
+            "eventId": uuid.uuid4().hex,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "ai-processing-service",
+            "correlationId": event.get("correlationId") or uuid.uuid4().hex,
+            "actor": event.get("actor", {}),
+            "data": {
+                "fileId": data.get("fileId"),
+                "filename": data.get("filename"),
+                "fileType": file_type,
+                "extractedText": f"Extracted text from {data.get('filename')} (simulated)",
+                "extractionMethod": "AI/OCR",
+                "confidence": 0.95,
+                "key": data.get("key"),
+                "bucket": data.get("bucket"),
+            },
+            "metadata": {"serviceVersion": "1.0.0"}
+        }
+        await self.producer.send_and_wait(self.ai_events_topic, text_extracted_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+        print(f"✅ Published TextExtracted for file: {data.get('filename')}")
+
+    async def _publish_classified(self, event: dict, data: dict, file_type: str) -> None:
+        """Publish classified event"""
+        classified_event = {
+            "eventVersion": "v1",
+            "eventType": "Classified",
+            "eventId": uuid.uuid4().hex,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "ai-processing-service",
+            "correlationId": event.get("correlationId") or uuid.uuid4().hex,
+            "actor": event.get("actor", {}),
+            "data": {
+                "fileId": data.get("fileId"),
+                "filename": data.get("filename"),
+                "classification": file_type,
+                "confidence": 0.92,
+                "categories": ["document", file_type.lower()],
+                "key": data.get("key"),
+                "bucket": data.get("bucket"),
+            },
+            "metadata": {"serviceVersion": "1.0.0"}
+        }
+        await self.producer.send_and_wait(self.ai_events_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+        print(f"✅ Published Classified for file: {data.get('filename')} as {file_type}")
+
+    async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
+        """Publish summary-created event"""
+        summary_created_event = {
+            "eventVersion": "v1",
+            "eventType": "SummaryCreated",
+            "eventId": uuid.uuid4().hex,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "ai-processing-service",
+            "correlationId": event.get("correlationId") or uuid.uuid4().hex,
+            "actor": event.get("actor", {}),
+            "data": {
+                "fileId": data.get("fileId"),
+                "filename": data.get("filename"),
+                "fileType": file_type,
+                "summary": f"AI-generated summary for contract {data.get('filename')} (simulated)",
+                "summaryLength": 150,
+                "keyPoints": ["contract terms", "parties involved", "effective date"],
+                "key": data.get("key"),
+                "bucket": data.get("bucket"),
+            },
+            "metadata": {"serviceVersion": "1.0.0"}
+        }
+        await self.producer.send_and_wait(self.ai_events_topic, summary_created_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+        print(f"✅ Published SummaryCreated for contract: {data.get('filename')}")
 
 
 worker = AIKafkaWorker()

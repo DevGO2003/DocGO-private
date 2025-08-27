@@ -35,6 +35,12 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     
+    # Kafka configuration
+    kafka_bootstrap_servers: str = "localhost:9092"
+    kafka_file_events_topic: str = "file.events"
+    kafka_gfms_events_topic: str = "gfms.events"
+    kafka_client_id: str = "general-file-management-service"
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

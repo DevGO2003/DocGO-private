@@ -7,6 +7,7 @@ from routers import file_management_router
 from config import settings
 from fastapi.openapi.utils import get_openapi
 from schemas.response import RestResponse
+from kafka_worker import worker
 
 # Khởi tạo FastAPI app
 app = FastAPI(
@@ -84,6 +85,35 @@ async def global_exception_handler(request: Request, exc: Exception):
         path=str(request.url)
     )
     return JSONResponse(status_code=500, content=response.model_dump())
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Khởi động Kafka worker khi service startup"""
+    try:
+        await worker.start()
+        # Chạy consumer loop trong background
+        import asyncio
+        app.state.kafka_task = asyncio.create_task(worker.run())
+        print("✅ Kafka worker started successfully")
+    except Exception as e:
+        # Không chặn service nếu Kafka không sẵn sàng
+        print(f"⚠️ Kafka worker failed to start: {e}")
+        app.state.kafka_task = None
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Dừng Kafka worker khi service shutdown"""
+    try:
+        task = getattr(app.state, 'kafka_task', None)
+        if task:
+            task.cancel()
+        await worker.stop()
+        print("✅ Kafka worker stopped successfully")
+    except Exception as e:
+        print(f"⚠️ Error stopping Kafka worker: {e}")
+
 
 if __name__ == "__main__":
     import uvicorn
