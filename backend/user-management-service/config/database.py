@@ -7,11 +7,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database configuration
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "mariadb+pymysql://username:password@localhost:3306/user_db"
-)
+# Database configuration - build DATABASE_URL from individual env vars
+DB_DRIVER = os.getenv("DB_DRIVER", "mariadb+pymysql")
+DB_HOST = os.getenv("DATABASE_HOST", "mariadb")  # Use DATABASE_HOST from docker-compose
+DB_PORT = os.getenv("DB_PORT", "3306")
+DB_USER = os.getenv("DB_USER", "docgo_user")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "docgo_password")
+DB_NAME = os.getenv("DB_NAME", "docgo_user_service")
+
+# Construct DATABASE_URL
+DATABASE_URL = f"{DB_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Create database engine
 engine = create_engine(

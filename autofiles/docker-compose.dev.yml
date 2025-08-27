@@ -37,6 +37,11 @@ services:
       - ./backend/user-management-service:/app
     environment:
       - DATABASE_HOST=mariadb
+      - DB_DRIVER=mariadb+pymysql
+      - DB_PORT=3306
+      - DB_USER=docgo_user
+      - DB_PASSWORD=docgo_password
+      - DB_NAME=docgo_user_service
       - REDIS_HOST=redis
     depends_on:
       - mariadb
@@ -274,7 +279,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=sapassword
       - MYSQL_DATABASE=docgo
     volumes:
       - mariadb_data:/var/lib/mysql
