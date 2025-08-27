@@ -5,9 +5,15 @@ import boto3
 from botocore.client import Config
 from botocore.exceptions import ClientError, NoCredentialsError
 from dotenv import load_dotenv
+from pathlib import Path
 
 
-load_dotenv()  # Load variables from .env if present
+# Load .env from service directory first, then fallback to CWD
+_service_env = Path(__file__).resolve().parent / ".env"
+if _service_env.exists():
+	load_dotenv(dotenv_path=_service_env, override=False)
+else:
+	load_dotenv()  # fallback to default lookup (CWD)
 
 
 def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -22,6 +28,11 @@ S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY_ID")
 S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_ACCESS_KEY")
 S3_BUCKET: str = get_env("S3_BUCKET")
 S3_ENABLED: bool = get_env("S3_ENABLED", "true").lower() == "true"
+S3_PUBLIC_BUCKET: bool = get_env("S3_PUBLIC_BUCKET", "false").lower() == "true"
+S3_ADDRESSING_STYLE: str = get_env("S3_ADDRESSING_STYLE", "virtual")  # virtual | path
+S3_KEY_STYLE: str = get_env("S3_KEY_STYLE", "detailed")  # detailed | simple
+S3_METADATA_MINIMAL: bool = get_env("S3_METADATA_MINIMAL", "false").lower() == "true"
+S3_SANITIZE_KEYS: bool = get_env("S3_SANITIZE_KEYS", "true").lower() == "true"
 
 s3_client = boto3.client(
 	"s3",
@@ -29,7 +40,7 @@ s3_client = boto3.client(
 	aws_access_key_id=S3_ACCESS_KEY_ID,
 	aws_secret_access_key=S3_SECRET_ACCESS_KEY,
 	region_name=S3_REGION,
-	config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
+	config=Config(signature_version="s3v4", s3={"addressing_style": S3_ADDRESSING_STYLE}),
 )
 
 
@@ -39,12 +50,16 @@ IPFS_RPC_TOKEN: Optional[str] = get_env("IPFS_RPC_TOKEN")
 
 
 def ensure_bucket_exists():
-	"""Đảm bảo bucket S3 tồn tại, tạo nếu chưa có."""
+	"""Đảm bảo bucket S3 tồn tại nếu đã bật S3 và cấu hình hợp lệ."""
+	if not S3_ENABLED:
+		return
+	if not S3_BUCKET:
+		raise ValueError("S3_ENABLED=true nhưng S3_BUCKET chưa được cấu hình")
 	try:
 		s3_client.head_bucket(Bucket=S3_BUCKET)
 		print(f"✅ Bucket '{S3_BUCKET}' đã tồn tại")
 	except ClientError as e:
-		error_code = e.response['Error']['Code']
+		error_code = e.response['Error'].get('Code') if hasattr(e, 'response') else None
 		if error_code == '404':
 			try:
 				s3_client.create_bucket(Bucket=S3_BUCKET)
@@ -77,8 +92,14 @@ def get_presigned_get_url(object_key: str, expires_in_seconds: int = 3600) -> st
 		ExpiresIn=expires_in_seconds,
 	)
 
+def build_public_url(object_key: str) -> str:
+	"""Build a public URL in virtual-hosted style if bucket is public."""
+	if not S3_BUCKET:
+		return ""
+	return f"https://{S3_BUCKET}.s3.filebase.com/{object_key}"
+
 def is_s3_enabled() -> bool:
-	return S3_ENABLED
+	return bool(S3_ENABLED and S3_BUCKET)
 
 def get_s3_client():
 	"""Get S3 client instance."""
@@ -95,6 +116,12 @@ def get_s3_endpoint() -> str:
 def get_s3_region() -> str:
 	"""Get S3 region."""
 	return S3_REGION
+
+def is_s3_metadata_minimal() -> bool:
+	return S3_METADATA_MINIMAL
+
+def is_s3_sanitize_keys() -> bool:
+	return S3_SANITIZE_KEYS
 
 # ClamAV configuration
 CLAMD_HOST: str = get_env("CLAMD_HOST", "localhost")

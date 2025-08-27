@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from config import s3_client, S3_BUCKET, get_presigned_get_url, get_s3_client, get_bucket_name
 from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_EVENTS_TOPIC, KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD
 from config import MAX_FILE_SIZE, ALLOWED_FILE_TYPES, is_s3_enabled, UPLOAD_DIR
+from config import S3_PUBLIC_BUCKET, build_public_url
 from services.file_service import FileStorageService
 from services.malware_scanner import MalwareScanner
 from schemas.file import (
@@ -69,35 +70,38 @@ async def upload_file(
 	Mô tả: Thông tin về file đã upload (bucket, key, url, filename, size, scan_status).
 	"""
 	try:
+		# Chuẩn hóa tên file an toàn
+		safe_filename = file.filename or "unknown"
 		# Kiểm tra kích thước file từ env (.env_exmaple.txt → MAX_FILE_SIZE)
-		if file.size and file.size > MAX_FILE_SIZE:
+		if hasattr(file, 'size') and file.size and file.size > MAX_FILE_SIZE:
 			raise HTTPException(status_code=400, detail=f"File quá lớn (> {MAX_FILE_SIZE} bytes)")
 
 		# Kiểm tra loại file theo ALLOWED_FILE_TYPES (extension)
-		ext = (file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else '')
+		ext = (safe_filename.rsplit('.', 1)[-1].lower() if '.' in safe_filename else '')
 		allowed = [x.strip().lower() for x in ALLOWED_FILE_TYPES]
 		if ext and allowed and ext not in allowed:
 			raise HTTPException(status_code=400, detail=f"Loại file không được phép: .{ext}. Cho phép: {', '.join(allowed)}")
 		
-		# Upload file với scan
-		file_info = await file_service.upload_file(file, None)  # Không cần user_id
+		# Upload file với scan, đưa folder vào để key lưu trữ phản ánh đúng query
+		file_info = await file_service.upload_file(file, None, folder)
 		
-		# Bảo đảm có key hợp lệ (tránh None)
-		_generated_key = f"{folder}/{uuid4().hex}_{file.filename}"
+		# Bảo đảm có key hợp lệ (tránh None) và khớp với key đã lưu
+		s3_key = getattr(file_info, 's3_key', None) or f"{folder}/{uuid4().hex}_{safe_filename}"
 		if is_s3_enabled():
-			s3_key = getattr(file_info, 's3_key', None) or _generated_key
 			file_url = get_presigned_get_url(s3_key, 7 * 24 * 3600)
+			public_url = build_public_url(s3_key) if S3_PUBLIC_BUCKET else None
 		else:
 			# URL local (giả lập) trả về path tương đối để test
-			s3_key = _generated_key
-			file_url = f"/uploads/{file.filename}"
+			file_url = f"/uploads/{s3_key}"
+			public_url = None
 		
 		response_data = {
 			"bucket": S3_BUCKET,
 			"key": s3_key,
 			"url": file_url,
-			"filename": file.filename,
-			"size": file.size if hasattr(file, 'size') else 0,
+			"publicUrl": public_url,
+			"filename": safe_filename,
+			"size": (getattr(file_info, 'file_size', None) if getattr(file_info, 'file_size', None) is not None else (file.size if hasattr(file, 'size') and file.size is not None else 0)),
 			"scan_status": getattr(file_info, 'status', None) or "completed"
 		}
 		
@@ -199,11 +203,23 @@ def list_objects(
 	Mô tả: Danh sách các object với thông tin key và size.
 	"""
 	try:
-		resp = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=prefix)
-		items = [
-			{"key": o["Key"], "size": o.get("Size", 0), "lastModified": o.get("LastModified")}
-			for o in resp.get("Contents", [])
-		]
+		items = []
+		if is_s3_enabled():
+			resp = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=prefix)
+			items = [
+				{"key": o["Key"], "size": o.get("Size", 0), "lastModified": o.get("LastModified")}
+				for o in resp.get("Contents", [])
+			]
+		else:
+			# Liệt kê local từ thư mục uploads
+			base_dir = os.path.join(UPLOAD_DIR)
+			prefix_dir = os.path.join(base_dir, prefix.strip('/'))
+			if os.path.isdir(prefix_dir):
+				for root, _, files in os.walk(prefix_dir):
+					for fname in files:
+						full_path = os.path.join(root, fname)
+						rel_key = os.path.relpath(full_path, start=base_dir).replace('\\', '/')
+						items.append({"key": rel_key, "size": os.path.getsize(full_path), "lastModified": None})
 		
 		# Phân trang
 		total_items = len(items)

@@ -1,6 +1,8 @@
 import os
 import hashlib
 import uuid
+import base64
+import unicodedata
 from datetime import datetime, timedelta
 from typing import Optional, List, BinaryIO
 import boto3
@@ -11,7 +13,7 @@ from fastapi import HTTPException, UploadFile
 
 from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
 from services.malware_scanner import MalwareScanner
-from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR
+from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR, S3_KEY_STYLE, is_s3_metadata_minimal, is_s3_sanitize_keys
 
 class FileStorageService:
     def __init__(self):
@@ -59,15 +61,23 @@ class FileStorageService:
         """Tính MD5 checksum của file"""
         return hashlib.md5(content).hexdigest()
     
-    async def upload_file(self, file: UploadFile, user_id: Optional[str]) -> FileInfo:
+    async def upload_file(self, file: UploadFile, user_id: Optional[str], folder: Optional[str] = None) -> FileInfo:
         """Upload file lên S3 với malware scan và versioning"""
         try:
             # Đọc nội dung file
             content = await file.read()
+            original_name = file.filename or "unknown"
+            if is_s3_sanitize_keys():
+                # Chuẩn hóa tên file: thay khoảng trắng bằng _ và bỏ ký tự không an toàn
+                import re
+                name, ext = os.path.splitext(original_name)
+                safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._-")
+                original_name = (safe_name or "file") + ext
+            folder_prefix = (folder.strip('/') + '/') if folder else ''
             
             # Tạo file ID và thông tin cơ bản
             file_id = self._generate_file_id()
-            file_type = self._get_file_type(file.filename, content)
+            file_type = self._get_file_type(original_name, content)
             checksum = self._calculate_checksum(content)
             user_id_str = user_id or "public"
             
@@ -76,34 +86,69 @@ class FileStorageService:
             if existing_file:
                 # Tạo version mới
                 version = existing_file.version + 1
-                file_key = f"users/{user_id_str}/files/{existing_file.file_id}/v{version}/{file.filename}"
+                if S3_KEY_STYLE == "simple":
+                    file_key = f"{folder_prefix}{original_name}"
+                else:
+                    file_key = f"{folder_prefix}users/{user_id_str}/files/{existing_file.file_id}/v{version}/{original_name}"
             else:
                 version = 1
-                file_key = f"users/{user_id_str}/files/{file_id}/{file.filename}"
+                if S3_KEY_STYLE == "simple":
+                    file_key = f"{folder_prefix}{original_name}"
+                else:
+                    file_key = f"{folder_prefix}users/{user_id_str}/files/{file_id}/v{version}/{original_name}"
             
             if is_s3_enabled():
                 # Upload lên S3/Filebase
-                self.s3_client.put_object(
-                    Bucket=self.bucket_name,
-                    Key=file_key,
-                    Body=content,
-                    ContentType=file.content_type,
-                    Metadata={
-                        'user_id': user_id_str,
-                        'original_filename': file.filename,
-                        'file_type': str(file_type.value),
-                        'checksum': str(checksum),
-                        'version': str(version),
-                        'upload_time': datetime.utcnow().isoformat()
+                safe_content_type = file.content_type or "application/octet-stream"
+                # original_name đã chuẩn hóa bên trên
+                # Chuẩn hóa metadata về ASCII để phù hợp yêu cầu của S3
+                ascii_name = (
+                    unicodedata.normalize('NFKD', original_name)
+                    .encode('ascii', 'ignore')
+                    .decode('ascii')
+                ) or "unknown"
+                b64_name = base64.b64encode(original_name.encode('utf-8')).decode('ascii')
+                try:
+                    put_kwargs = {
+                        'Bucket': self.bucket_name,
+                        'Key': file_key,
+                        'Body': content,
+                        'ContentType': safe_content_type,
                     }
-                )
+                    if not is_s3_metadata_minimal():
+                        put_kwargs['Metadata'] = {
+                            'user_id': user_id_str,
+                            'original_filename': ascii_name,
+                            'original_filename_b64': b64_name,
+                            'file_type': str(file_type.value),
+                            'checksum': str(checksum),
+                            'version': str(version),
+                            'upload_time': datetime.utcnow().isoformat()
+                        }
+                    self.s3_client.put_object(**put_kwargs)
+                except ClientError as e:
+                    err = e.response.get('Error', {}) if hasattr(e, 'response') else {}
+                    code = err.get('Code')
+                    message = err.get('Message')
+                    raise HTTPException(
+                        status_code=500,
+                        detail=(
+                            f"S3 PutObject failed: code={code}, message={message}, "
+                            f"bucket={self.bucket_name}, key={file_key}"
+                        )
+                    )
             else:
                 # Lưu local để test offline
-                local_dir = os.path.join(UPLOAD_DIR, user_id_str, 'files', file_id, f'v{version}')
+                if S3_KEY_STYLE == "simple":
+                    local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []))
+                else:
+                    local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []), 'users', user_id_str, 'files', file_id, f'v{version}')
                 os.makedirs(local_dir, exist_ok=True)
-                local_path = os.path.join(local_dir, file.filename)
+                local_path = os.path.join(local_dir, original_name)
                 async with aiofiles.open(local_path, 'wb') as f:
                     await f.write(content)
+                # Với lưu local, vẫn trả về s3_key tương tự để dùng chung
+                file_key = os.path.relpath(local_path, start=UPLOAD_DIR).replace('\\', '/')
             
             # Quét malware (bất đồng bộ)
             malware_result = await self.malware_scanner.scan_file(content)
@@ -111,7 +156,7 @@ class FileStorageService:
             # Tạo file info
             file_info = FileInfo(
                 file_id=file_id if version == 1 else existing_file.file_id,
-                filename=file.filename,
+                filename=original_name,
                 file_size=len(content),
                 file_type=file_type,
                 status=FileStatus.CLEAN if malware_result.is_clean else FileStatus.INFECTED,
@@ -119,7 +164,8 @@ class FileStorageService:
                 upload_time=datetime.utcnow(),
                 last_modified=datetime.utcnow(),
                 checksum=checksum,
-                malware_scan_result=malware_result.scan_details
+                malware_scan_result=malware_result.scan_details,
+                s3_key=file_key
             )
             
             # Lưu metadata vào database (cần implement)

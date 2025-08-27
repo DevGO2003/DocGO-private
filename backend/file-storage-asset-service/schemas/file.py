@@ -37,6 +37,7 @@ class FileInfo(BaseModel):
     last_modified: datetime = Field(..., description="Thời gian sửa đổi cuối")
     checksum: str = Field(..., description="Checksum MD5 của file")
     malware_scan_result: Optional[str] = Field(None, description="Kết quả quét malware")
+    s3_key: Optional[str] = Field(None, description="Object key đã lưu trên S3 hoặc đường dẫn local")
 
 class SignedURLRequest(BaseModel):
     file_id: str = Field(..., description="ID của file cần tạo signed URL")
