@@ -6,3 +6,7 @@ google-generativeai
 python-dotenv
 python-multipart
 aiokafka
+beautifulsoup4
+python-pptx
+openpyxl
+striprtf

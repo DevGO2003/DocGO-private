@@ -9,6 +9,11 @@ import json
 import uuid
 from datetime import datetime, timezone
 from schemas.response import RestResponse
+from bs4 import BeautifulSoup
+from pptx import Presentation
+from openpyxl import load_workbook
+from striprtf.striprtf import rtf_to_text
+import csv
 
 router = APIRouter(prefix="/api/v1/ai-processing-service")
 
@@ -133,20 +138,193 @@ async def extract_api(
 
 
 
-
-# API 3: SUMMARIZE (txt, string input)
-@router.post("/summarize", summary="Tóm tắt hợp đồng (txt/string)", tags=["AI Processing Service"])
-async def summarize_api(
+# API 4: CLASSIFY (nhận diện loại tài liệu: hợp đồng, đề cương, giáo trình, sách giáo khoa, ...)
+@router.post("/classify", summary="Phân loại loại tài liệu (file đa định dạng hoặc text)", tags=["AI Processing Service"])
+async def classify_api(
     request: Request,
-    file: UploadFile = File(None, description="File txt cần tóm tắt"),
-    text: str = Body(None, description="Nội dung văn bản dạng chuỗi (txt)"),
+    file: UploadFile = File(None, description="File cần phân loại (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)"),
+    text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
     🔹 Đầu vào
     
     📄 file (tùy chọn, body)
-    Loại: UploadFile (TXT)
+    Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
+    Mô tả: Tệp cần phân loại. Cung cấp file HOẶC text.
+    
+    📝 text (tùy chọn, body)
+    Loại: string
+    Mô tả: Nội dung văn bản dạng chuỗi cần phân loại. Cung cấp file HOẶC text.
+    
+    🔑 gemini_api_key (tùy chọn, header)
+    Loại: string
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: object
+    Mô tả: JSON kết quả phân loại gồm: documentType, isContract, confidence, reasons, contractSubtype (nếu có).
+    """
+    # Chuẩn hóa nội dung đầu vào như summarize
+    content = None
+    if file:
+        temp_path = os.path.join(RESULTS_DIR, file.filename)
+        with open(temp_path, "wb") as f:
+            f.write(await file.read())
+
+        filename_lower = file.filename.lower()
+        try:
+            if filename_lower.endswith(".txt") or filename_lower.endswith(".md"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as tf:
+                    content = tf.read()
+            elif filename_lower.endswith(".html") or filename_lower.endswith(".htm"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as hf:
+                    html = hf.read()
+                    content = BeautifulSoup(html, "html.parser").get_text(separator="\n")
+            elif filename_lower.endswith(".json"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as jf:
+                    try:
+                        obj = json.load(jf)
+                        content = json.dumps(obj, ensure_ascii=False, indent=2)
+                    except Exception:
+                        jf.seek(0)
+                        content = jf.read()
+            elif filename_lower.endswith(".csv"):
+                lines = []
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as cf:
+                    reader = csv.reader(cf)
+                    for row in reader:
+                        lines.append(", ".join([str(col) for col in row]))
+                content = "\n".join(lines)
+            elif filename_lower.endswith(".xlsx"):
+                wb = load_workbook(temp_path, data_only=True)
+                texts = []
+                for ws in wb.worksheets:
+                    for row in ws.iter_rows(values_only=True):
+                        row_vals = [str(cell) for cell in row if cell is not None]
+                        if row_vals:
+                            texts.append(" \t ".join(row_vals))
+                content = "\n".join(texts)
+            elif filename_lower.endswith(".pptx"):
+                prs = Presentation(temp_path)
+                texts = []
+                for slide in prs.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "has_text_frame") and shape.has_text_frame:
+                            for paragraph in shape.text_frame.paragraphs:
+                                texts.append("".join([run.text for run in paragraph.runs]))
+                content = "\n".join([t for t in texts if t and t.strip()])
+            elif filename_lower.endswith(".rtf"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as rf:
+                    content = rtf_to_text(rf.read())
+            elif filename_lower.endswith(".docx"):
+                content = read_docx(temp_path)
+            elif filename_lower.endswith(".pdf"):
+                content = read_pdf(temp_path)
+            else:
+                raise HTTPException(status_code=400, detail="Định dạng file không được hỗ trợ cho classify.")
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+    elif text:
+        content = text
+    else:
+        raise HTTPException(status_code=400, detail="Cần cung cấp file hoặc text để phân loại.")
+
+    if not content or not content.strip():
+        raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
+
+    api_key = gemini_api_key or get_gemini_api_key()
+
+    try:
+        categories = [
+            "contract", "syllabus", "curriculum", "textbook", "lecture_notes", "assignment",
+            "research_paper", "invoice", "receipt", "policy", "manual", "letter", "report", "other"
+        ]
+        prompt = (
+            "Hãy phân loại loại tài liệu dưới đây. Chỉ trả về JSON hợp lệ với cấu trúc:\n"
+            "{\n"
+            "  \"documentType\": string, // một trong: contract, syllabus, curriculum, textbook, lecture_notes, assignment, research_paper, invoice, receipt, policy, manual, letter, report, other\n"
+            "  \"isContract\": boolean,\n"
+            "  \"contractSubtype\": string|null, // ví dụ: Service Agreement, NDA, Sales Contract ... nếu là hợp đồng\n"
+            "  \"confidence\": number, // 0..1\n"
+            "  \"reasons\": [string] // 2-5 gợi ý lý do\n"
+            "}\n\n"
+            "Yêu cầu: Không giải thích thêm, không kèm markdown, chỉ JSON.\n"
+            "Danh mục hợp lệ: " + ", ".join(categories) + "\n\n"
+            "Nội dung tài liệu:\n" + content[:8000]
+        )
+
+        answer = ask_gemini(api_key, content, prompt)
+
+        cleaned = answer.strip()
+        if cleaned.startswith('```json'):
+            cleaned = cleaned[7:]
+        if cleaned.startswith('```'):
+            cleaned = cleaned[3:]
+        if cleaned.endswith('```'):
+            cleaned = cleaned[:-3]
+
+        data_out = None
+        try:
+            parsed = json.loads(cleaned)
+            # Hậu kiểm tối thiểu
+            if isinstance(parsed, dict):
+                doc_type = parsed.get("documentType", "other")
+                is_contract = parsed.get("isContract", False)
+                confidence = parsed.get("confidence", 0.0)
+                reasons = parsed.get("reasons", [])
+                subtype = parsed.get("contractSubtype")
+                data_out = {
+                    "documentType": doc_type,
+                    "isContract": bool(is_contract),
+                    "confidence": float(confidence),
+                    "reasons": reasons if isinstance(reasons, list) else [],
+                    "contractSubtype": subtype if (is_contract and isinstance(subtype, str)) else None
+                }
+            else:
+                data_out = parsed
+        except Exception:
+            # Nếu không parse được JSON, trả về text gốc để debug
+            data_out = {"documentType": "other", "isContract": False, "confidence": 0.0, "reasons": [answer]}
+
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Phân loại tài liệu thành công.",
+            data=data_out,
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi xảy ra khi gọi AI classify: {e}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+
+
+# API 3: SUMMARIZE (đa định dạng văn bản hoặc chuỗi)
+@router.post("/summarize", summary="Tóm tắt hợp đồng (nhiều định dạng văn bản hoặc chuỗi)", tags=["AI Processing Service"])
+async def summarize_api(
+    request: Request,
+    file: UploadFile = File(None, description="File văn bản cần tóm tắt (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)"),
+    text: str = Body(None, description="Nội dung văn bản dạng chuỗi"),
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+):
+    """
+    🔹 Đầu vào
+    
+    📄 file (tùy chọn, body)
+    Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
     Mô tả: Tệp văn bản cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai.
     
     📝 text (tùy chọn, body)
@@ -197,17 +375,65 @@ async def summarize_api(
         temp_path = os.path.join(RESULTS_DIR, file.filename)
         with open(temp_path, "wb") as f:
             f.write(await file.read())
-        if file.filename.endswith(".txt"):
-            with open(temp_path, "r", encoding="utf-8") as tf:
-                content = tf.read()
-        else:
-            os.remove(temp_path)
-            raise HTTPException(status_code=400, detail="Chỉ hỗ trợ file txt hoặc chuỗi văn bản.")
-        os.remove(temp_path)
+
+        filename_lower = file.filename.lower()
+        try:
+            if filename_lower.endswith(".txt") or filename_lower.endswith(".md"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as tf:
+                    content = tf.read()
+            elif filename_lower.endswith(".html") or filename_lower.endswith(".htm"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as hf:
+                    html = hf.read()
+                    content = BeautifulSoup(html, "html.parser").get_text(separator="\n")
+            elif filename_lower.endswith(".json"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as jf:
+                    try:
+                        obj = json.load(jf)
+                        content = json.dumps(obj, ensure_ascii=False, indent=2)
+                    except Exception:
+                        jf.seek(0)
+                        content = jf.read()
+            elif filename_lower.endswith(".csv"):
+                lines = []
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as cf:
+                    reader = csv.reader(cf)
+                    for row in reader:
+                        lines.append(", ".join([str(col) for col in row]))
+                content = "\n".join(lines)
+            elif filename_lower.endswith(".xlsx"):
+                wb = load_workbook(temp_path, data_only=True)
+                texts = []
+                for ws in wb.worksheets:
+                    for row in ws.iter_rows(values_only=True):
+                        row_vals = [str(cell) for cell in row if cell is not None]
+                        if row_vals:
+                            texts.append(" \t ".join(row_vals))
+                content = "\n".join(texts)
+            elif filename_lower.endswith(".pptx"):
+                prs = Presentation(temp_path)
+                texts = []
+                for slide in prs.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "has_text_frame") and shape.has_text_frame:
+                            for paragraph in shape.text_frame.paragraphs:
+                                texts.append("".join([run.text for run in paragraph.runs]))
+                content = "\n".join([t for t in texts if t and t.strip()])
+            elif filename_lower.endswith(".rtf"):
+                with open(temp_path, "r", encoding="utf-8", errors="ignore") as rf:
+                    content = rtf_to_text(rf.read())
+            elif filename_lower.endswith(".docx"):
+                content = read_docx(temp_path)
+            elif filename_lower.endswith(".pdf"):
+                content = read_pdf(temp_path)
+            else:
+                raise HTTPException(status_code=400, detail="Định dạng file không được hỗ trợ cho summarize.")
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
     elif text:
         content = text
     else:
-        raise HTTPException(status_code=400, detail="Cần cung cấp file txt hoặc nội dung chuỗi.")
+        raise HTTPException(status_code=400, detail="Cần cung cấp file hợp lệ (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf) hoặc nội dung chuỗi.")
     
     if not content or not content.strip():
         raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
