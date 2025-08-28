@@ -49,6 +49,20 @@ services:
     networks:
       - docgo_network_local
 
+  # Kibana for viewing Elasticsearch logs
+  kibana:
+    image: kibana:8.11.0
+    container_name: docgo-local-kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - docgo_network_local
+
   # API Gateway BFF (Next.js) - Backend Service with Hot Reload
   api-gateway-bff:
     image: node:18-alpine
@@ -91,6 +105,7 @@ services:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -112,11 +127,12 @@ services:
     volumes:
       - ../backend/user-management-service:/app
     command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload --access-log"
     depends_on:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -144,6 +160,7 @@ services:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -172,6 +189,7 @@ services:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -198,6 +216,7 @@ services:
     depends_on:
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -227,6 +246,7 @@ services:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
@@ -254,6 +274,25 @@ services:
       - mariadb
       - redis
       - elasticsearch
+      - kibana
+    networks:
+      - docgo_network_local
+
+  # Filebeat to ship container logs to Elasticsearch
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.0
+    container_name: docgo-local-filebeat
+    user: root
+    restart: unless-stopped
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat.docker.yml:/config/filebeat.yml:ro
+    command: >
+      sh -c "cp /config/filebeat.yml /usr/share/filebeat/filebeat.yml && chmod go-w /usr/share/filebeat/filebeat.yml && filebeat -e"
+    depends_on:
+      - elasticsearch
+      - kibana
     networks:
       - docgo_network_local
 
