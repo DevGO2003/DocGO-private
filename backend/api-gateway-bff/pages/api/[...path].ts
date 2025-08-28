@@ -472,29 +472,3 @@ export const config = {
     responseLimit: false,
   },
 };
-
-/**
- * @swagger
- * /api/v1/general-file-management-service/files/upload:
- *   post:
- *     summary: Upload file (proxy qua API Gateway)
- *     description: Tải file lên General File Management Service thông qua API Gateway BFF.
- *     tags: [General File Management Service]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       201:
- *         description: Upload thành công
- *       400:
- *         description: Bad Request
- *       422:
- *         description: Thiếu trường file trong multipart/form-data
- */
