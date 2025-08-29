@@ -3,15 +3,25 @@ package com.devgo2003.docgo.contract_service.service;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
+import com.devgo2003.docgo.contract_service.entity.ContractSummary;
+import com.devgo2003.docgo.contract_service.entity.ContractParty;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractAttachmentRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractEventRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractSummaryRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractPartyRepository;
+import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
+import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPayload;
 import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
 import com.devgo2003.docgo.contract_service.common.exception.InvalidInputException;
 import com.devgo2003.docgo.contract_service.common.exception.NoContentException;
 import com.devgo2003.docgo.contract_service.common.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +45,10 @@ public class ContractService {
     private final ContractRepository contractRepository;
     private final ContractAttachmentRepository attachmentRepository;
     private final ContractEventRepository eventRepository;
+    private final ContractSummaryRepository summaryRepository;
+    private final ContractPartyRepository partyRepository;
     private final ContractEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
     private static final Set<String> VALID_SORT_BY_PROPERTIES = new HashSet<>(Arrays.asList(
             "id", "contractNumber", "title", "status", "partiesJson", "startDate", "endDate", "systemId",
@@ -45,11 +59,17 @@ public class ContractService {
     public ContractService(ContractRepository contractRepository,
                            ContractAttachmentRepository attachmentRepository,
                            ContractEventRepository eventRepository,
-                           ContractEventPublisher eventPublisher) {
+                           ContractSummaryRepository summaryRepository,
+                           ContractPartyRepository partyRepository,
+                           ContractEventPublisher eventPublisher,
+                           ObjectMapper objectMapper) {
         this.contractRepository = contractRepository;
         this.attachmentRepository = attachmentRepository;
         this.eventRepository = eventRepository;
+        this.summaryRepository = summaryRepository;
+        this.partyRepository = partyRepository;
         this.eventPublisher = eventPublisher;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -82,7 +102,7 @@ public class ContractService {
         return contractRepository.findById(id);
     }
 
-    public Page<Contract> getAllContracts(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+    public Page<ContractWithSummaryDto> getAllContracts(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
         List<Sort.Order> orders = new ArrayList<>();
         if (sortBy != null && !sortBy.isEmpty()) {
             for (int i = 0; i < sortBy.size(); i++) {
@@ -100,11 +120,23 @@ public class ContractService {
         Sort sort = Sort.by(orders);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
+        Page<Contract> contractsPage;
         if (includeDeleted) {
-            return contractRepository.findAll(pageable);
+            contractsPage = contractRepository.findAll(pageable);
         } else {
-            return contractRepository.findByIsDeletedFalse(pageable);
+            contractsPage = contractRepository.findByIsDeletedFalse(pageable);
         }
+
+        // Chuyển đổi thành ContractWithSummaryDto
+        List<ContractWithSummaryDto> contractsWithSummary = contractsPage.getContent().stream()
+                .map(this::convertToContractWithSummaryDto)
+                .collect(Collectors.toList());
+
+        return new org.springframework.data.domain.PageImpl<>(
+                contractsWithSummary,
+                contractsPage.getPageable(),
+                contractsPage.getTotalElements()
+        );
     }
 
     public List<Contract> getActiveContracts() {
@@ -224,5 +256,274 @@ public class ContractService {
 
     public List<ContractEvent> getContractEvents(Long contractId) {
         return eventRepository.findByContractIdOrderByEventTimeDesc(contractId);
+    }
+
+    /**
+     * Lấy tất cả contracts cơ bản (không có summary) - giữ lại để tương thích
+     */
+    public Page<Contract> getAllContractsBasic(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        List<Sort.Order> orders = new ArrayList<>();
+        if (sortBy != null && !sortBy.isEmpty()) {
+            for (int i = 0; i < sortBy.size(); i++) {
+                String property = sortBy.get(i);
+                if (!VALID_SORT_BY_PROPERTIES.contains(property)) {
+                    throw new InvalidInputException("Thuộc tính sắp xếp không hợp lệ: " + property);
+                }
+                Sort.Direction direction = (sortDirection != null && i < sortDirection.size())
+                        ? Sort.Direction.fromString(sortDirection.get(i))
+                        : Sort.Direction.ASC;
+                orders.add(new Sort.Order(direction, property));
+            }
+        }
+
+        Sort sort = Sort.by(orders);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        if (includeDeleted) {
+            return contractRepository.findAll(pageable);
+        } else {
+            return contractRepository.findByIsDeletedFalse(pageable);
+        }
+    }
+
+    /**
+     * Lấy tất cả contracts với summary information (API chính)
+     */
+    public Page<ContractWithSummaryDto> getAllContractsWithSummary(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        List<ContractWithSummaryDto> contractsWithSummary = contractsPage.getContent().stream()
+                .map(this::convertToContractWithSummaryDto)
+                .collect(Collectors.toList());
+        
+        return new org.springframework.data.domain.PageImpl<>(
+                contractsWithSummary,
+                contractsPage.getPageable(),
+                contractsPage.getTotalElements()
+        );
+    }
+
+    /**
+     * Lấy contract với summary theo ID
+     */
+    public ContractWithSummaryDto getContractWithSummary(Long id) {
+        Contract contract = getContractOrThrow(id);
+        return convertToContractWithSummaryDto(contract);
+    }
+
+    /**
+     * Chuyển đổi Contract entity thành ContractWithSummaryDto
+     */
+    private ContractWithSummaryDto convertToContractWithSummaryDto(Contract contract) {
+        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
+        List<ContractSummaryDto> summaryDtos = summaries.stream()
+                .map(this::convertToContractSummaryDto)
+                .collect(Collectors.toList());
+
+        return ContractWithSummaryDto.builder()
+                .id(contract.getId())
+                .contractNumber(contract.getContractNumber())
+                .title(contract.getTitle())
+                .status(contract.getStatus().name())
+                .partiesJson(contract.getPartiesJson())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .systemId(contract.getSystemId())
+                .summary(contract.getSummary())
+                .contractType(contract.getContractType())
+                .riskLevel(contract.getRiskLevel())
+                .keyTerms(contract.getKeyTerms())
+                .aiProcessed(contract.getAiProcessed())
+                .processingStatus(contract.getProcessingStatus() != null ? contract.getProcessingStatus().name() : null)
+                .createdAt(contract.getCreatedAt())
+                .createdBy(contract.getCreatedBy())
+                .deletedAt(contract.getDeletedAt())
+                .deletedBy(contract.getDeletedBy())
+                .isDeleted(contract.getIsDeleted())
+                .version(contract.getVersion())
+                .summaries(summaryDtos)
+                .build();
+    }
+
+    /**
+     * Chuyển đổi ContractSummary entity thành ContractSummaryDto
+     */
+    private ContractSummaryDto convertToContractSummaryDto(ContractSummary summary) {
+        List<String> keyPoints = new ArrayList<>();
+        List<String> categories = new ArrayList<>();
+        
+        try {
+            if (summary.getKeyPoints() != null) {
+                keyPoints = objectMapper.readValue(summary.getKeyPoints(), new TypeReference<List<String>>() {});
+            }
+            if (summary.getCategories() != null) {
+                categories = objectMapper.readValue(summary.getCategories(), new TypeReference<List<String>>() {});
+            }
+        } catch (Exception e) {
+            // Log error but continue with empty lists
+        }
+
+        return ContractSummaryDto.builder()
+                .id(summary.getId())
+                .contractId(summary.getContractId())
+                .fileId(summary.getFileId())
+                .filename(summary.getFilename())
+                .summary(summary.getSummary())
+                .summaryLength(summary.getSummaryLength())
+                .keyPoints(keyPoints)
+                .extractionMethod(summary.getExtractionMethod())
+                .confidence(summary.getConfidence())
+                .classification(summary.getClassification())
+                .classificationConfidence(summary.getClassificationConfidence())
+                .categories(categories)
+                .processedAt(summary.getProcessedAt())
+                .createdAt(summary.getCreatedAt())
+                .updatedAt(summary.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * Tạo hoặc cập nhật contract summary từ AI processing
+     */
+    @Transactional
+    public ContractSummary createOrUpdateContractSummary(Long contractId, String fileId, String filename, 
+                                                       String summary, Integer summaryLength, List<String> keyPoints,
+                                                       String extractionMethod, java.math.BigDecimal confidence,
+                                                       String classification, java.math.BigDecimal classificationConfidence,
+                                                       List<String> categories) {
+        
+        Optional<ContractSummary> existingSummary = summaryRepository.findByContractIdAndFileId(contractId, fileId);
+        ContractSummary contractSummary;
+        
+        if (existingSummary.isPresent()) {
+            contractSummary = existingSummary.get();
+        } else {
+            contractSummary = new ContractSummary();
+            contractSummary.setContractId(contractId);
+            contractSummary.setFileId(fileId);
+        }
+        
+        contractSummary.setFilename(filename);
+        contractSummary.setSummary(summary);
+        contractSummary.setSummaryLength(summaryLength);
+        contractSummary.setExtractionMethod(extractionMethod);
+        contractSummary.setConfidence(confidence);
+        contractSummary.setClassification(classification);
+        contractSummary.setClassificationConfidence(classificationConfidence);
+        contractSummary.setProcessedAt(LocalDateTime.now());
+        
+        try {
+            if (keyPoints != null) {
+                contractSummary.setKeyPoints(objectMapper.writeValueAsString(keyPoints));
+            }
+            if (categories != null) {
+                contractSummary.setCategories(objectMapper.writeValueAsString(categories));
+            }
+        } catch (Exception e) {
+            // Log error but continue
+        }
+        
+        return summaryRepository.save(contractSummary);
+    }
+
+    /**
+     * Lấy tất cả contracts với thông tin chi tiết đầy đủ
+     */
+    public Page<ContractDetailDto> getAllContractsWithDetails(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        List<ContractDetailDto> contractsWithDetails = contractsPage.getContent().stream()
+                .map(this::convertToContractDetailDto)
+                .collect(Collectors.toList());
+        
+        return new org.springframework.data.domain.PageImpl<>(
+                contractsWithDetails,
+                contractsPage.getPageable(),
+                contractsPage.getTotalElements()
+        );
+    }
+
+    /**
+     * Lấy contract với thông tin chi tiết đầy đủ theo ID
+     */
+    public ContractDetailDto getContractWithDetails(Long id) {
+        Contract contract = getContractOrThrow(id);
+        return convertToContractDetailDto(contract);
+    }
+
+    /**
+     * Chuyển đổi Contract entity thành ContractDetailDto
+     */
+    private ContractDetailDto convertToContractDetailDto(Contract contract) {
+        // Lấy summaries
+        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
+        List<ContractSummaryDto> summaryDtos = summaries.stream()
+                .map(this::convertToContractSummaryDto)
+                .collect(Collectors.toList());
+
+        // Lấy parties
+        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        List<ContractPartyDto> partyDtos = parties.stream()
+                .map(this::convertToContractPartyDto)
+                .collect(Collectors.toList());
+
+        return ContractDetailDto.builder()
+                .id(contract.getId())
+                .contractNumber(contract.getContractNumber())
+                .title(contract.getTitle())
+                .status(contract.getStatus().name())
+                .partiesJson(contract.getPartiesJson())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .systemId(contract.getSystemId())
+                .summary(contract.getSummary())
+                .contractType(contract.getContractType())
+                .riskLevel(contract.getRiskLevel())
+                .keyTerms(contract.getKeyTerms())
+                .aiProcessed(contract.getAiProcessed())
+                .processingStatus(contract.getProcessingStatus() != null ? contract.getProcessingStatus().name() : null)
+                .createdAt(contract.getCreatedAt())
+                .createdBy(contract.getCreatedBy())
+                .deletedAt(contract.getDeletedAt())
+                .deletedBy(contract.getDeletedBy())
+                .isDeleted(contract.getIsDeleted())
+                .version(contract.getVersion())
+                // New fields from updated schema
+                .contractObject(contract.getContractObject())
+                .effectiveDate(contract.getEffectiveDate())
+                .contractTerm(contract.getContractTerm())
+                .totalValue(contract.getTotalValue())
+                .paymentSchedule(contract.getPaymentSchedule())
+                .currency(contract.getCurrency())
+                .terminationConditions(contract.getTerminationConditions())
+                .riskAssessment(contract.getRiskAssessment())
+                .complianceStatus(contract.getComplianceStatus())
+                .legalReviewRequired(contract.getLegalReviewRequired())
+                .reviewDeadline(contract.getReviewDeadline())
+                // Related data
+                .summaries(summaryDtos)
+                .parties(partyDtos)
+                .build();
+    }
+
+    /**
+     * Chuyển đổi ContractParty entity thành ContractPartyDto
+     */
+    private ContractPartyDto convertToContractPartyDto(ContractParty party) {
+        return ContractPartyDto.builder()
+                .id(party.getId())
+                .contractId(party.getContractId())
+                .partyName(party.getPartyName())
+                .partyRole(party.getPartyRole())
+                .representative(party.getRepresentative())
+                .taxCode(party.getTaxCode())
+                .contactInfo(party.getContactInfo())
+                .address(party.getAddress())
+                .businessLicense(party.getBusinessLicense())
+                .partyType(party.getPartyType() != null ? party.getPartyType().name() : null)
+                .isPrimary(party.getIsPrimary())
+                .createdAt(party.getCreatedAt())
+                .updatedAt(party.getUpdatedAt())
+                .build();
     }
 }

@@ -57,6 +57,40 @@ public class Contract extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
 
+    // New fields from updated schema
+    @Column(name = "contract_object", columnDefinition = "TEXT")
+    private String contractObject;
+
+    @Column(name = "effective_date")
+    private String effectiveDate;
+
+    @Column(name = "contract_term")
+    private String contractTerm;
+
+    @Column(name = "total_value")
+    private String totalValue;
+
+    @Column(name = "payment_schedule", columnDefinition = "TEXT")
+    private String paymentSchedule;
+
+    @Column(name = "currency")
+    private String currency;
+
+    @Column(name = "termination_conditions", columnDefinition = "TEXT")
+    private String terminationConditions;
+
+    @Column(name = "risk_assessment", columnDefinition = "TEXT")
+    private String riskAssessment;
+
+    @Column(name = "compliance_status")
+    private String complianceStatus;
+
+    @Column(name = "legal_review_required")
+    private Boolean legalReviewRequired = false;
+
+    @Column(name = "review_deadline")
+    private LocalDate reviewDeadline;
+
     public enum ContractStatus {
         DRAFT, PENDING, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED
     }

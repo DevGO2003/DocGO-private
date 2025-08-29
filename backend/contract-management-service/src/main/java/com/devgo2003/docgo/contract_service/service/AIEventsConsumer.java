@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -20,15 +21,20 @@ import java.util.UUID;
 public class AIEventsConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ContractEventPublisher contractEventPublisher;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Value("${app.kafka.topic.contract-events:contract.events}")
     private String contractEventsTopic;
 
-    @KafkaListener(topics = "${app.kafka.topic.ai-events:ai.events}",
-                   groupId = "${spring.kafka.consumer.group-id:contract-service-group}")
+    @KafkaListener(
+            topics = "${app.kafka.topic.ai-events:ai.events}",
+            groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
+            containerFactory = "kafkaListenerContainerFactory"
+    )
     public void consumeAIEvents(ConsumerRecord<String, String> record) {
         try {
+            log.info("AIEventsConsumer received record: topic={}, key={}, partition={}, offset={}",
+                    record.topic(), record.key(), record.partition(), record.offset());
             final String value = record.value();
             if (value == null || value.isBlank()) {
                 return;
@@ -65,7 +71,8 @@ public class AIEventsConsumer {
             metadata.put("serviceVersion", "1.0.0");
             contractUpdated.put("metadata", metadata);
 
-            contractEventPublisher.publishContractEvent(contractEventsTopic, fileId, contractUpdated);
+            String json = objectMapper.writeValueAsString(contractUpdated);
+            kafkaTemplate.send(contractEventsTopic, fileId, json);
             log.info("Published ContractUpdated for fileId={}, filename={}", fileId, filename);
         } catch (Exception e) {
             log.error("Error while consuming AI event: {}", e.getMessage(), e);

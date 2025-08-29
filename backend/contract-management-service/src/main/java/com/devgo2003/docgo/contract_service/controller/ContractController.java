@@ -8,6 +8,8 @@ import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
+import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -147,8 +149,8 @@ public class ContractController {
         🔹 Đầu ra
         
         📝 data
-        Loại: PaginatedResponse<Contract>
-        Mô tả: Danh sách hợp đồng với thông tin phân trang.
+        Loại: PaginatedResponse<ContractWithSummaryDto>
+        Mô tả: Danh sách hợp đồng với thông tin phân trang và tóm tắt AI.
         
         📊 apiVersion
         Loại: string
@@ -180,7 +182,7 @@ public class ContractController {
         """
     )
     @GetMapping
-    public ResponseEntity<RestResponse<PaginatedResponse<Contract>>> getAllContracts(
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractWithSummaryDto>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) List<String> sortBy,
@@ -188,7 +190,7 @@ public class ContractController {
             @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
-        Page<Contract> contractsPage = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        Page<ContractWithSummaryDto> contractsPage = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
         if (contractsPage.getContent().isEmpty()) {
             throw new NoContentException("Không có hợp đồng nào.");
         }
@@ -220,9 +222,9 @@ public class ContractController {
                 .sort(sortInfoList)
                 .build();
 
-        PaginatedResponse<Contract> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
+        PaginatedResponse<ContractWithSummaryDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
 
-        RestResponse<PaginatedResponse<Contract>> response = RestResponse.<PaginatedResponse<Contract>>builder()
+        RestResponse<PaginatedResponse<ContractWithSummaryDto>> response = RestResponse.<PaginatedResponse<ContractWithSummaryDto>>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
@@ -611,6 +613,356 @@ public class ContractController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Lấy tất cả hợp đồng với thông tin tóm tắt AI", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: Integer
+        Mô tả: Số trang (mặc định: 0).
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: Integer
+        Mô tả: Kích thước trang (mặc định: 10).
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Danh sách các trường để sắp xếp.
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Hướng sắp xếp (ASC/DESC).
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: Boolean
+        Mô tả: Có bao gồm hợp đồng đã xóa không (mặc định: false).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: PaginatedResponse<ContractWithSummaryDto>
+        Mô tả: Danh sách hợp đồng với thông tin tóm tắt AI, bao gồm:
+        - Thông tin hợp đồng cơ bản
+        - Danh sách summaries từ AI processing
+        - Thông tin classification, confidence, key points
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @GetMapping("/with-summary")
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractWithSummaryDto>>> getAllContractsWithSummary(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) List<String> sortBy,
+            @RequestParam(required = false) List<String> sortDirection,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        org.springframework.data.domain.Page<ContractWithSummaryDto> contractsPage = 
+                contractService.getAllContractsWithSummary(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        PaginatedResponse<ContractWithSummaryDto> paginatedResponse = PaginatedResponse.<ContractWithSummaryDto>builder()
+                .request(RequestInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .searchTerm(null)
+                        .sortBy(sortBy)
+                        .sortDirection(sortDirection)
+                        .build())
+                .result(ResultInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .totalElements(contractsPage.getTotalElements())
+                        .totalPages(contractsPage.getTotalPages())
+                        .first(contractsPage.isFirst())
+                        .last(contractsPage.isLast())
+                        .numberOfElements(contractsPage.getNumberOfElements())
+                        .empty(contractsPage.isEmpty())
+                        .sort(new ArrayList<>())
+                        .build())
+                .content(contractsPage.getContent())
+                .build();
+        
+        RestResponse<PaginatedResponse<ContractWithSummaryDto>> response = RestResponse.<PaginatedResponse<ContractWithSummaryDto>>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Danh sách hợp đồng với thông tin tóm tắt AI đã được lấy thành công.")
+                .data(paginatedResponse)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Lấy hợp đồng theo ID với thông tin tóm tắt AI", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần lấy.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: ContractWithSummaryDto
+        Mô tả: Thông tin hợp đồng với thông tin tóm tắt AI chi tiết.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @GetMapping("/{id}/with-summary")
+    public ResponseEntity<RestResponse<ContractWithSummaryDto>> getContractWithSummary(@PathVariable Long id) {
+        ContractWithSummaryDto contractWithSummary = contractService.getContractWithSummary(id);
+        RestResponse<ContractWithSummaryDto> response = RestResponse.<ContractWithSummaryDto>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Thông tin hợp đồng với tóm tắt AI đã được lấy thành công.")
+                .data(contractWithSummary)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Lấy tất cả hợp đồng với thông tin chi tiết đầy đủ", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: Integer
+        Mô tả: Số trang (mặc định: 0).
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: Integer
+        Mô tả: Kích thước trang (mặc định: 10).
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Danh sách các trường để sắp xếp.
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: List<String>
+        Mô tả: Hướng sắp xếp (ASC/DESC).
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: Boolean
+        Mô tả: Có bao gồm hợp đồng đã xóa không (mặc định: false).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: PaginatedResponse<ContractDetailDto>
+        Mô tả: Danh sách hợp đồng với thông tin chi tiết đầy đủ, bao gồm:
+        - Thông tin hợp đồng cơ bản
+        - Thông tin mới từ schema cập nhật (contract_object, effective_date, contract_term, total_value, payment_schedule, currency, termination_conditions, risk_assessment, compliance_status, legal_review_required, review_deadline)
+        - Danh sách summaries từ AI processing
+        - Danh sách parties (các bên tham gia)
+        - Danh sách clauses (các điều khoản)
+        - Danh sách payments (thanh toán)
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @GetMapping("/with-details")
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractDetailDto>>> getAllContractsWithDetails(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) List<String> sortBy,
+            @RequestParam(required = false) List<String> sortDirection,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        org.springframework.data.domain.Page<ContractDetailDto> contractsPage = 
+                contractService.getAllContractsWithDetails(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        PaginatedResponse<ContractDetailDto> paginatedResponse = PaginatedResponse.<ContractDetailDto>builder()
+                .request(RequestInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .searchTerm(null)
+                        .sortBy(sortBy)
+                        .sortDirection(sortDirection)
+                        .build())
+                .result(ResultInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .totalElements(contractsPage.getTotalElements())
+                        .totalPages(contractsPage.getTotalPages())
+                        .first(contractsPage.isFirst())
+                        .last(contractsPage.isLast())
+                        .numberOfElements(contractsPage.getNumberOfElements())
+                        .empty(contractsPage.isEmpty())
+                        .sort(new ArrayList<>())
+                        .build())
+                .content(contractsPage.getContent())
+                .build();
+        
+        RestResponse<PaginatedResponse<ContractDetailDto>> response = RestResponse.<PaginatedResponse<ContractDetailDto>>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Danh sách hợp đồng với thông tin chi tiết đầy đủ đã được lấy thành công.")
+                .data(paginatedResponse)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Lấy hợp đồng theo ID với thông tin chi tiết đầy đủ", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: Long
+        Mô tả: ID của hợp đồng cần lấy.
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: ContractDetailDto
+        Mô tả: Thông tin hợp đồng với thông tin chi tiết đầy đủ, bao gồm:
+        - Thông tin hợp đồng cơ bản
+        - Thông tin mới từ schema cập nhật (contract_object, effective_date, contract_term, total_value, payment_schedule, currency, termination_conditions, risk_assessment, compliance_status, legal_review_required, review_deadline)
+        - Danh sách summaries từ AI processing
+        - Danh sách parties (các bên tham gia)
+        - Danh sách clauses (các điều khoản)
+        - Danh sách payments (thanh toán)
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @GetMapping("/{id}/with-details")
+    public ResponseEntity<RestResponse<ContractDetailDto>> getContractWithDetails(@PathVariable Long id) {
+        ContractDetailDto contractWithDetails = contractService.getContractWithDetails(id);
+        RestResponse<ContractDetailDto> response = RestResponse.<ContractDetailDto>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Thông tin hợp đồng với chi tiết đầy đủ đã được lấy thành công.")
+                .data(contractWithDetails)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -96,6 +96,7 @@ async def startup_event():
     except Exception as e:
         # Không chặn service nếu Kafka không sẵn sàng
         print(f"⚠️ Kafka worker failed to start: {e}")
+        return
 
 
 @app.on_event("shutdown")

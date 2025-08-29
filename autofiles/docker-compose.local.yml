@@ -2,6 +2,25 @@
 # Tên container: docgo-local
 
 services:
+  # Kafka (KRaft mode) for local testing
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: docgo-local-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"   # Host access
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9094
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9094,INTERNAL://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    networks:
+      - docgo_network_local
   # Database - MariaDB (Infrastructure - No volume mounting)
   mariadb:
     image: mariadb:11.2
@@ -162,6 +181,7 @@ services:
       - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/file-storage-asset-service:/app
       - file_storage_uploads_local:/app/uploads
@@ -190,6 +210,7 @@ services:
       - GEMINI_API_KEY=hHlL3ELm8Gp_RIYL1EZCpOnyAA
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
@@ -215,7 +236,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=docgo_user
       - SPRING_DATASOURCE_PASSWORD=docgo_password
       - SERVER_PORT=8003
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
@@ -245,6 +266,7 @@ services:
       - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/general-file-management-service:/app
       - general_file_management_uploads_local:/app/uploads
