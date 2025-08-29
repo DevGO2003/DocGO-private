@@ -214,6 +214,62 @@ class AIKafkaWorker:
 
     async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
         """Publish summary-created event"""
+        # Tạo contract summary chi tiết
+        contract_summary = {
+            "title": f"Hợp đồng từ file: {data.get('filename')}",
+            "parties": [
+                {
+                    "name": "Công ty Cổ phần Phát triển Phần mềm Giải pháp Phân phối Dược và Nhà thuốc",
+                    "role": "Bên cung cấp dịch vụ (Bên B)",
+                    "representative": "Ông Nguyễn Văn Dũng, Giám đốc",
+                    "tax_code": "0109889002",
+                    "contact": "0983.456.455"
+                },
+                {
+                    "name": None,
+                    "role": "Bên sử dụng dịch vụ (Bên A)",
+                    "representative": None,
+                    "tax_code": None,
+                    "contact": None
+                }
+            ],
+            "object": f"Tóm tắt nội dung hợp đồng từ file {data.get('filename')}",
+            "effective_date": "Ngày ký hợp đồng năm 2024",
+            "term": "6 năm, tự động gia hạn các năm tiếp theo",
+            "payment_details": {
+                "total_value": "4.000.000 VND (phí khởi tạo một lần) + 500.000 VND (phát sinh)",
+                "schedule": "Thanh toán 100% giá trị hợp đồng sau khi ký biên bản nghiệm thu.",
+                "currency": "VND"
+            },
+            "key_clauses": [
+                {
+                    "name": "Nội dung hợp tác",
+                    "description": "Các bên thỏa thuận về việc cung cấp và sử dụng dịch vụ.",
+                    "source": "Điều 1"
+                },
+                {
+                    "name": "Quyền và Trách nhiệm",
+                    "description": "Quy định về quyền và trách nhiệm của các bên trong hợp đồng.",
+                    "source": "Điều 5 & 6"
+                }
+            ],
+            "favorable_clauses": [
+                {
+                    "clause_name": "Tự động gia hạn không phí",
+                    "description": "Hợp đồng có hiệu lực và sẽ tự động gia hạn các năm tiếp theo mà không phát sinh thêm chi phí gia hạn.",
+                    "benefit_to": "Bên sử dụng dịch vụ (Bên A)"
+                }
+            ],
+            "unfavorable_clauses": [
+                {
+                    "clause_name": "Tự động gia hạn",
+                    "description": "Hợp đồng sẽ tự động gia hạn hàng năm mà không cần thông báo.",
+                    "risk_to": "Bên sử dụng dịch vụ (Bên A)"
+                }
+            ],
+            "termination_conditions": "Hợp đồng có thể bị chấm dứt trước thời hạn nếu các bên thỏa thuận hoặc có vi phạm nghiêm trọng."
+        }
+
         summary_created_event = {
             "eventVersion": "v1",
             "eventType": "SummaryCreated",
@@ -223,14 +279,17 @@ class AIKafkaWorker:
             "correlationId": event.get("correlationId") or uuid.uuid4().hex,
             "actor": event.get("actor", {}),
             "data": {
-                "fileId": data.get("fileId"),
-                "filename": data.get("filename"),
-                "fileType": file_type,
-                "summary": f"AI-generated summary for contract {data.get('filename')} (simulated)",
-                "summaryLength": 150,
-                "keyPoints": ["contract terms", "parties involved", "effective date"],
-                "key": data.get("key"),
-                "bucket": data.get("bucket"),
+                "file_information": {
+                    "fileId": data.get("fileId"),
+                    "filename": data.get("filename"),
+                    "fileType": file_type,
+                    "summary": f"AI-generated summary for contract {data.get('filename')} (simulated)",
+                    "summaryLength": 150,
+                    "keyPoints": ["contract terms", "parties involved", "effective date"],
+                    "key": data.get("key"),
+                    "bucket": data.get("bucket"),
+                },
+                "contract_summary": contract_summary
             },
             "metadata": {"serviceVersion": "1.0.0"}
         }

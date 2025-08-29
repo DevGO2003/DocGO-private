@@ -67,15 +67,20 @@ public class ContractKafkaService {
             Map<String, Object> data = (Map<String, Object>) event.get("data");
             Map<String, Object> actor = (Map<String, Object>) event.get("actor");
             
-            String fileId = (String) data.get("fileId");
-            String filename = (String) data.get("filename");
-            String summary = (String) data.get("summary");
+            // Lấy thông tin file từ file_information
+            Map<String, Object> fileInformation = (Map<String, Object>) data.get("file_information");
+            String fileId = (String) fileInformation.get("fileId");
+            String filename = (String) fileInformation.get("filename");
+            String summary = (String) fileInformation.get("summary");
+            
+            // Lấy thông tin contract summary chi tiết
+            Map<String, Object> contractSummary = (Map<String, Object>) data.get("contract_summary");
             
             logger.info("Processing contract for file: {} with summary: {}", filename, summary);
             
             // Tạo hợp đồng mới trong database
             Contract contract = new Contract();
-            contract.setTitle("Hợp đồng từ file: " + filename);
+            contract.setTitle((String) contractSummary.get("title"));
             contract.setStatus(Contract.ContractStatus.DRAFT);
             contract.setSummary(summary);
             contract.setContractType("AUTO_GENERATED");
@@ -89,10 +94,10 @@ public class ContractKafkaService {
             logger.info("✅ Created contract with ID: {} for file: {}", savedContract.getId(), filename);
             
             // Lưu thông tin summary chi tiết vào bảng contract_summaries
-            saveContractSummary(savedContract.getId(), data, event);
+            saveContractSummary(savedContract.getId(), fileInformation, contractSummary, event);
             
             // Publish contract-updated event
-            publishContractUpdated(event, data, actor, fileId, savedContract.getId());
+            publishContractUpdated(event, fileInformation, actor, fileId, savedContract.getId());
             
         } catch (Exception e) {
             logger.error("Error processing contract from summary: {}", e.getMessage(), e);
@@ -102,17 +107,17 @@ public class ContractKafkaService {
     /**
      * Lưu thông tin summary chi tiết vào database
      */
-    private void saveContractSummary(Long contractId, Map<String, Object> data, Map<String, Object> event) {
+    private void saveContractSummary(Long contractId, Map<String, Object> fileInformation, Map<String, Object> contractSummary, Map<String, Object> event) {
         try {
-            String fileId = (String) data.get("fileId");
-            String filename = (String) data.get("filename");
-            String summary = (String) data.get("summary");
-            Integer summaryLength = (Integer) data.get("summaryLength");
+            String fileId = (String) fileInformation.get("fileId");
+            String filename = (String) fileInformation.get("filename");
+            String summary = (String) fileInformation.get("summary");
+            Integer summaryLength = (Integer) fileInformation.get("summaryLength");
             
-            // Lấy key points từ data
+            // Lấy key points từ file_information
             List<String> keyPoints = new ArrayList<>();
-            if (data.get("keyPoints") instanceof List) {
-                keyPoints = (List<String>) data.get("keyPoints");
+            if (fileInformation.get("keyPoints") instanceof List) {
+                keyPoints = (List<String>) fileInformation.get("keyPoints");
             }
             
             // Lấy thông tin classification từ event
@@ -127,6 +132,10 @@ public class ContractKafkaService {
                 // Hiện tại sử dụng default values
             }
             
+            // Lưu thông tin file vào bảng contract_files
+            saveContractFile(contractId, fileInformation, event);
+            
+            // Lưu thông tin cơ bản vào contract_summaries
             contractService.createOrUpdateContractSummary(
                 contractId,
                 fileId,
@@ -141,10 +150,151 @@ public class ContractKafkaService {
                 categories
             );
             
+            // Lưu thông tin contract summary chi tiết
+            saveDetailedContractSummary(contractId, contractSummary);
+            
             logger.info("✅ Saved contract summary for contract ID: {} and file: {}", contractId, filename);
             
         } catch (Exception e) {
             logger.error("Error saving contract summary: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Lưu thông tin file vào bảng contract_files
+     */
+    private void saveContractFile(Long contractId, Map<String, Object> fileInformation, Map<String, Object> event) {
+        try {
+            String fileId = (String) fileInformation.get("fileId");
+            String filename = (String) fileInformation.get("filename");
+            String fileType = (String) fileInformation.get("fileType");
+            String fileKey = (String) fileInformation.get("key");
+            String bucket = (String) fileInformation.get("bucket");
+            String summary = (String) fileInformation.get("summary");
+            Integer summaryLength = (Integer) fileInformation.get("summaryLength");
+            
+            // Lấy key points
+            List<String> keyPoints = new ArrayList<>();
+            if (fileInformation.get("keyPoints") instanceof List) {
+                keyPoints = (List<String>) fileInformation.get("keyPoints");
+            }
+            
+            // Lấy thông tin classification từ event
+            String classification = "CONTRACT"; // Default
+            Double classificationConfidence = 0.92; // Default
+            List<String> categories = Arrays.asList("document", "contract"); // Default
+            
+            // Lưu vào bảng contract_files
+            contractService.createOrUpdateContractFile(
+                contractId,
+                fileId,
+                filename,
+                fileType,
+                fileKey,
+                bucket,
+                summary,
+                summaryLength,
+                keyPoints,
+                "AI/OCR", // extractionMethod
+                new java.math.BigDecimal("0.95"), // confidence
+                classification,
+                new java.math.BigDecimal(classificationConfidence.toString()),
+                categories
+            );
+            
+            logger.info("✅ Saved contract file for contract ID: {} and file: {}", contractId, filename);
+            
+        } catch (Exception e) {
+            logger.error("Error saving contract file: {}", e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Lưu thông tin contract summary chi tiết
+     */
+    private void saveDetailedContractSummary(Long contractId, Map<String, Object> contractSummary) {
+        try {
+            // Lưu thông tin parties
+            List<Map<String, Object>> parties = (List<Map<String, Object>>) contractSummary.get("parties");
+            if (parties != null) {
+                for (Map<String, Object> party : parties) {
+                    contractService.createOrUpdateContractParty(
+                        contractId,
+                        (String) party.get("name"),
+                        (String) party.get("role"),
+                        (String) party.get("representative"),
+                        (String) party.get("tax_code"),
+                        (String) party.get("contact")
+                    );
+                }
+            }
+            
+            // Lưu thông tin key clauses
+            List<Map<String, Object>> keyClauses = (List<Map<String, Object>>) contractSummary.get("key_clauses");
+            if (keyClauses != null) {
+                for (Map<String, Object> clause : keyClauses) {
+                    contractService.createOrUpdateContractClause(
+                        contractId,
+                        (String) clause.get("name"),
+                        (String) clause.get("description"),
+                        (String) clause.get("source"),
+                        "KEY"
+                    );
+                }
+            }
+            
+            // Lưu thông tin favorable clauses
+            List<Map<String, Object>> favorableClauses = (List<Map<String, Object>>) contractSummary.get("favorable_clauses");
+            if (favorableClauses != null) {
+                for (Map<String, Object> clause : favorableClauses) {
+                    contractService.createOrUpdateContractClause(
+                        contractId,
+                        (String) clause.get("clause_name"),
+                        (String) clause.get("description"),
+                        (String) clause.get("benefit_to"),
+                        "FAVORABLE"
+                    );
+                }
+            }
+            
+            // Lưu thông tin unfavorable clauses
+            List<Map<String, Object>> unfavorableClauses = (List<Map<String, Object>>) contractSummary.get("unfavorable_clauses");
+            if (unfavorableClauses != null) {
+                for (Map<String, Object> clause : unfavorableClauses) {
+                    contractService.createOrUpdateContractClause(
+                        contractId,
+                        (String) clause.get("clause_name"),
+                        (String) clause.get("description"),
+                        (String) clause.get("risk_to"),
+                        "UNFAVORABLE"
+                    );
+                }
+            }
+            
+            // Lưu thông tin payment details
+            Map<String, Object> paymentDetails = (Map<String, Object>) contractSummary.get("payment_details");
+            if (paymentDetails != null) {
+                contractService.createOrUpdateContractPayment(
+                    contractId,
+                    (String) paymentDetails.get("total_value"),
+                    (String) paymentDetails.get("schedule"),
+                    (String) paymentDetails.get("currency")
+                );
+            }
+            
+            // Lưu thông tin khác
+            contractService.updateContractDetails(
+                contractId,
+                (String) contractSummary.get("object"),
+                (String) contractSummary.get("effective_date"),
+                (String) contractSummary.get("term"),
+                (String) contractSummary.get("termination_conditions")
+            );
+            
+            logger.info("✅ Saved detailed contract summary for contract ID: {}", contractId);
+            
+        } catch (Exception e) {
+            logger.error("Error saving detailed contract summary: {}", e.getMessage(), e);
         }
     }
 

@@ -14,6 +14,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
+import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPayload;
 import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
@@ -39,9 +40,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class ContractService {
+    private static final Logger logger = LoggerFactory.getLogger(ContractService.class);
+    
     private final ContractRepository contractRepository;
     private final ContractAttachmentRepository attachmentRepository;
     private final ContractEventRepository eventRepository;
@@ -525,5 +530,131 @@ public class ContractService {
                 .createdAt(party.getCreatedAt())
                 .updatedAt(party.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * Tạo hoặc cập nhật contract party
+     */
+    @Transactional
+    public ContractParty createOrUpdateContractParty(Long contractId, String name, String role, 
+                                                   String representative, String taxCode, String contact) {
+        ContractParty party = new ContractParty();
+        party.setContractId(contractId);
+        party.setPartyName(name);
+        party.setPartyRole(role);
+        party.setRepresentative(representative);
+        party.setTaxCode(taxCode);
+        party.setContactInfo(contact);
+        party.setIsPrimary(false); // Default to false
+        
+        return partyRepository.save(party);
+    }
+
+    /**
+     * Tạo hoặc cập nhật contract clause
+     */
+    @Transactional
+    public void createOrUpdateContractClause(Long contractId, String name, String description, 
+                                           String source, String clauseType) {
+        // Note: This would require a ContractClause entity and repository
+        // For now, we'll store this information in the contract's keyTerms field
+        Contract contract = getContractOrThrow(contractId);
+        String currentKeyTerms = contract.getKeyTerms();
+        
+        String newClause = String.format("Type: %s, Name: %s, Description: %s, Source: %s", 
+                                       clauseType, name, description, source);
+        
+        if (currentKeyTerms == null || currentKeyTerms.isEmpty()) {
+            contract.setKeyTerms(newClause);
+        } else {
+            contract.setKeyTerms(currentKeyTerms + "; " + newClause);
+        }
+        
+        contractRepository.save(contract);
+    }
+
+    /**
+     * Tạo hoặc cập nhật contract payment details
+     */
+    @Transactional
+    public void createOrUpdateContractPayment(Long contractId, String totalValue, 
+                                            String schedule, String currency) {
+        Contract contract = getContractOrThrow(contractId);
+        contract.setTotalValue(totalValue);
+        contract.setPaymentSchedule(schedule);
+        contract.setCurrency(currency);
+        
+        contractRepository.save(contract);
+    }
+
+    /**
+     * Cập nhật contract details
+     */
+    @Transactional
+    public void updateContractDetails(Long contractId, String contractObject, String effectiveDate, 
+                                    String contractTerm, String terminationConditions) {
+        Contract contract = getContractOrThrow(contractId);
+        contract.setContractObject(contractObject);
+        contract.setEffectiveDate(effectiveDate);
+        contract.setContractTerm(contractTerm);
+        contract.setTerminationConditions(terminationConditions);
+        
+        contractRepository.save(contract);
+    }
+
+    /**
+     * Tạo hoặc cập nhật contract file từ AI event
+     */
+    @Transactional
+    public void createOrUpdateContractFile(Long contractId, String fileId, String filename, 
+                                         String fileType, String fileKey, String bucket, String summary, 
+                                         Integer summaryLength, List<String> keyPoints, String extractionMethod, 
+                                         java.math.BigDecimal confidence, String classification, 
+                                         java.math.BigDecimal classificationConfidence, List<String> categories) {
+        // Note: This would require a ContractFile entity and repository
+        // For now, we'll store this information in the contract's systemId field
+        Contract contract = getContractOrThrow(contractId);
+        contract.setSystemId(fileId);
+        
+        // Có thể lưu thêm thông tin file vào các trường khác nếu cần
+        if (contract.getSummary() == null || contract.getSummary().isEmpty()) {
+            contract.setSummary(summary);
+        }
+        
+        contractRepository.save(contract);
+        
+        logger.info("✅ Saved contract file info for contract ID: {} and file: {}", contractId, filename);
+    }
+
+    /**
+     * Lấy contract với response format mới nhất quán
+     */
+    public ContractResponseDto getContractWithNewFormat(Long id) {
+        Contract contract = getContractOrThrow(id);
+        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
+        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        
+        return ContractResponseDto.fromContract(contract, summaries, parties);
+    }
+
+    /**
+     * Lấy tất cả contracts với response format mới nhất quán
+     */
+    public Page<ContractResponseDto> getAllContractsWithNewFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        List<ContractResponseDto> contractsWithNewFormat = contractsPage.getContent().stream()
+                .map(contract -> {
+                    List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
+                    List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+                    return ContractResponseDto.fromContract(contract, summaries, parties);
+                })
+                .collect(Collectors.toList());
+        
+        return new org.springframework.data.domain.PageImpl<>(
+                contractsWithNewFormat,
+                contractsPage.getPageable(),
+                contractsPage.getTotalElements()
+        );
     }
 }

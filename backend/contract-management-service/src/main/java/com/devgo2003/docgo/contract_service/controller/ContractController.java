@@ -10,6 +10,7 @@ import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -118,7 +119,7 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy danh sách hợp đồng với phân trang và sắp xếp", 
+        summary = "Lấy danh sách hợp đồng với format mới nhất quán", 
         description = """
         🔹 Đầu vào
         
@@ -149,8 +150,15 @@ public class ContractController {
         🔹 Đầu ra
         
         📝 data
-        Loại: PaginatedResponse<ContractWithSummaryDto>
-        Mô tả: Danh sách hợp đồng với thông tin phân trang và tóm tắt AI.
+        Loại: PaginatedResponse<ContractResponseDto>
+        Mô tả: Danh sách hợp đồng với thông tin phân trang và format mới nhất quán với AI event structure, bao gồm:
+        - Thông tin cơ bản hợp đồng
+        - Contract summary với parties, clauses, payment details
+        - Thông tin file từ AI event
+        - Các bên tham gia chi tiết
+        - Điều khoản hợp đồng (key, favorable, unfavorable)
+        - Thông tin thanh toán
+        - Đánh giá rủi ro và tuân thủ
         
         📊 apiVersion
         Loại: string
@@ -158,7 +166,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content).
+        Mô tả: Mã trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -182,7 +190,7 @@ public class ContractController {
         """
     )
     @GetMapping
-    public ResponseEntity<RestResponse<PaginatedResponse<ContractWithSummaryDto>>> getAllContracts(
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) List<String> sortBy,
@@ -190,7 +198,7 @@ public class ContractController {
             @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
-        Page<ContractWithSummaryDto> contractsPage = contractService.getAllContracts(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        Page<ContractResponseDto> contractsPage = contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
         if (contractsPage.getContent().isEmpty()) {
             throw new NoContentException("Không có hợp đồng nào.");
         }
@@ -222,13 +230,13 @@ public class ContractController {
                 .sort(sortInfoList)
                 .build();
 
-        PaginatedResponse<ContractWithSummaryDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
+        PaginatedResponse<ContractResponseDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
 
-        RestResponse<PaginatedResponse<ContractWithSummaryDto>> response = RestResponse.<PaginatedResponse<ContractWithSummaryDto>>builder()
+        RestResponse<PaginatedResponse<ContractResponseDto>> response = RestResponse.<PaginatedResponse<ContractResponseDto>>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
-                .description("Danh sách hợp đồng đã được lấy thành công.")
+                .description("Danh sách hợp đồng đã được lấy thành công với format mới nhất quán với AI event structure.")
                 .data(paginatedResponse)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -239,7 +247,7 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy hợp đồng theo ID", 
+        summary = "Lấy hợp đồng theo ID với format mới nhất quán", 
         description = """
         🔹 Đầu vào
         
@@ -250,8 +258,15 @@ public class ContractController {
         🔹 Đầu ra
         
         📝 data
-        Loại: Contract
-        Mô tả: Thông tin chi tiết của hợp đồng.
+        Loại: ContractResponseDto
+        Mô tả: Thông tin hợp đồng với ID tương ứng, bao gồm:
+        - Thông tin cơ bản hợp đồng
+        - Contract summary với parties, clauses, payment details
+        - Thông tin file từ AI event
+        - Các bên tham gia chi tiết
+        - Điều khoản hợp đồng (key, favorable, unfavorable)
+        - Thông tin thanh toán
+        - Đánh giá rủi ro và tuân thủ
         
         📊 apiVersion
         Loại: string
@@ -259,7 +274,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found).
+        Mô tả: Mã trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -283,33 +298,19 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}")
-    public ResponseEntity<RestResponse<Contract>> getContract(@PathVariable Long id) {
-        Optional<Contract> contract = contractService.getContract(id);
-        if (contract.isPresent()) {
-            RestResponse<Contract> response = RestResponse.<Contract>builder()
-                    .apiVersion("v1")
-                    .statusCode(HttpStatus.OK.value())
-                    .shortMessage("Success")
-                    .description("Thông tin hợp đồng đã được lấy thành công.")
-                    .data(contract.get())
-                    .timestamp(ZonedDateTime.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path(request.getRequestURI())
-                    .build();
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            RestResponse<Contract> response = RestResponse.<Contract>builder()
-                    .apiVersion("v1")
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .shortMessage("Not Found")
-                    .description("Không tìm thấy hợp đồng với ID đã cung cấp.")
-                    .data(null)
-                    .timestamp(ZonedDateTime.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path(request.getRequestURI())
-                    .build();
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable Long id) {
+        ContractResponseDto contract = contractService.getContractWithNewFormat(id);
+        RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Thông tin hợp đồng đã được lấy thành công với format mới nhất quán với AI event structure.")
+                .data(contract)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(
