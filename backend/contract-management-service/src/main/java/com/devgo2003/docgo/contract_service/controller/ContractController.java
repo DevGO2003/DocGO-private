@@ -11,6 +11,7 @@ import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.service.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -150,15 +151,18 @@ public class ContractController {
         🔹 Đầu ra
         
         📝 data
-        Loại: PaginatedResponse<ContractResponseDto>
+        Loại: PaginatedResponse<ContractDetailResponseDto>
         Mô tả: Danh sách hợp đồng với thông tin phân trang và format mới nhất quán với AI event structure, bao gồm:
-        - Thông tin cơ bản hợp đồng
-        - Contract summary với parties, clauses, payment details
-        - Thông tin file từ AI event
-        - Các bên tham gia chi tiết
-        - Điều khoản hợp đồng (key, favorable, unfavorable)
-        - Thông tin thanh toán
-        - Đánh giá rủi ro và tuân thủ
+        - Thông tin cơ bản hợp đồng (id, contractNumber, title, status, contractType, riskLevel)
+        - Key terms với cấu trúc mới (name, description, source)
+        - Favorable clauses với cấu trúc mới (name, description, source)
+        - Unfavorable clauses với cấu trúc mới (name, description, source)
+        - Contract object, effective date, contract term
+        - Payment information với cấu trúc mới (totalValue, schedule, currency, method)
+        - Termination conditions
+        - Risk assessment với cấu trúc mới (riskLevel, riskFactors, mitigationMeasures)
+        - Compliance status với cấu trúc mới (status, issues, recommendations)
+        - Parties với cấu trúc mới (role, name, address)
         
         📊 apiVersion
         Loại: string
@@ -190,7 +194,7 @@ public class ContractController {
         """
     )
     @GetMapping
-    public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractDetailResponseDto>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) List<String> sortBy,
@@ -198,7 +202,7 @@ public class ContractController {
             @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
-        Page<ContractResponseDto> contractsPage = contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        Page<ContractDetailResponseDto> contractsPage = contractService.getAllContractsWithDetailFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
         if (contractsPage.getContent().isEmpty()) {
             throw new NoContentException("Không có hợp đồng nào.");
         }
@@ -230,9 +234,9 @@ public class ContractController {
                 .sort(sortInfoList)
                 .build();
 
-        PaginatedResponse<ContractResponseDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
+        PaginatedResponse<ContractDetailResponseDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
 
-        RestResponse<PaginatedResponse<ContractResponseDto>> response = RestResponse.<PaginatedResponse<ContractResponseDto>>builder()
+        RestResponse<PaginatedResponse<ContractDetailResponseDto>> response = RestResponse.<PaginatedResponse<ContractDetailResponseDto>>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
@@ -258,15 +262,18 @@ public class ContractController {
         🔹 Đầu ra
         
         📝 data
-        Loại: ContractResponseDto
+        Loại: ContractDetailResponseDto
         Mô tả: Thông tin hợp đồng với ID tương ứng, bao gồm:
-        - Thông tin cơ bản hợp đồng
-        - Contract summary với parties, clauses, payment details
-        - Thông tin file từ AI event
-        - Các bên tham gia chi tiết
-        - Điều khoản hợp đồng (key, favorable, unfavorable)
-        - Thông tin thanh toán
-        - Đánh giá rủi ro và tuân thủ
+        - Thông tin cơ bản hợp đồng (id, contractNumber, title, status, contractType, riskLevel)
+        - Key terms với cấu trúc mới (name, description, source)
+        - Favorable clauses với cấu trúc mới (name, description, source)
+        - Unfavorable clauses với cấu trúc mới (name, description, source)
+        - Contract object, effective date, contract term
+        - Payment information với cấu trúc mới (totalValue, schedule, currency, method)
+        - Termination conditions
+        - Risk assessment với cấu trúc mới (riskLevel, riskFactors, mitigationMeasures)
+        - Compliance status với cấu trúc mới (status, issues, recommendations)
+        - Parties với cấu trúc mới (role, name, address)
         
         📊 apiVersion
         Loại: string
@@ -298,9 +305,9 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}")
-    public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable Long id) {
-        ContractResponseDto contract = contractService.getContractWithNewFormat(id);
-        RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
+    public ResponseEntity<RestResponse<ContractDetailResponseDto>> getContract(@PathVariable Long id) {
+        ContractDetailResponseDto contract = contractService.getContractWithDetailFormat(id);
+        RestResponse<ContractDetailResponseDto> response = RestResponse.<ContractDetailResponseDto>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")

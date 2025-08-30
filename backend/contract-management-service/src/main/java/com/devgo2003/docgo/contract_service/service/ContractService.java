@@ -10,11 +10,15 @@ import com.devgo2003.docgo.contract_service.repository.ContractAttachmentReposit
 import com.devgo2003.docgo.contract_service.repository.ContractEventRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractSummaryRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractPartyRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractPaymentDetailRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractRiskAssessmentRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractComplianceStatusRepository;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPayload;
 import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
@@ -52,6 +56,9 @@ public class ContractService {
     private final ContractEventRepository eventRepository;
     private final ContractSummaryRepository summaryRepository;
     private final ContractPartyRepository partyRepository;
+    private final ContractPaymentDetailRepository paymentDetailRepository;
+    private final ContractRiskAssessmentRepository riskAssessmentRepository;
+    private final ContractComplianceStatusRepository complianceStatusRepository;
     private final ContractEventPublisher eventPublisher;
     private final ContractStatusEventPublisher contractStatusEventPublisher;
     private final ObjectMapper objectMapper;
@@ -67,6 +74,9 @@ public class ContractService {
                            ContractEventRepository eventRepository,
                            ContractSummaryRepository summaryRepository,
                            ContractPartyRepository partyRepository,
+                           ContractPaymentDetailRepository paymentDetailRepository,
+                           ContractRiskAssessmentRepository riskAssessmentRepository,
+                           ContractComplianceStatusRepository complianceStatusRepository,
                            ContractEventPublisher eventPublisher,
                            ContractStatusEventPublisher contractStatusEventPublisher,
                            ObjectMapper objectMapper) {
@@ -75,6 +85,9 @@ public class ContractService {
         this.eventRepository = eventRepository;
         this.summaryRepository = summaryRepository;
         this.partyRepository = partyRepository;
+        this.paymentDetailRepository = paymentDetailRepository;
+        this.riskAssessmentRepository = riskAssessmentRepository;
+        this.complianceStatusRepository = complianceStatusRepository;
         this.eventPublisher = eventPublisher;
         this.contractStatusEventPublisher = contractStatusEventPublisher;
         this.objectMapper = objectMapper;
@@ -657,6 +670,36 @@ public class ContractService {
         
         return new org.springframework.data.domain.PageImpl<>(
                 contractsWithNewFormat,
+                contractsPage.getPageable(),
+                contractsPage.getTotalElements()
+        );
+    }
+
+    /**
+     * Lấy contract với format mới theo cấu trúc response mới
+     */
+    public ContractDetailResponseDto getContractWithDetailFormat(Long id) {
+        Contract contract = getContractOrThrow(id);
+        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        
+        return ContractDetailResponseDto.fromContract(contract, parties);
+    }
+
+    /**
+     * Lấy tất cả contracts với format mới theo cấu trúc response mới
+     */
+    public Page<ContractDetailResponseDto> getAllContractsWithDetailFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted) {
+        Page<Contract> contractsPage = getAllContractsBasic(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        List<ContractDetailResponseDto> contractsWithDetailFormat = contractsPage.getContent().stream()
+                .map(contract -> {
+                    List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+                    return ContractDetailResponseDto.fromContract(contract, parties);
+                })
+                .collect(Collectors.toList());
+        
+        return new org.springframework.data.domain.PageImpl<>(
+                contractsWithDetailFormat,
                 contractsPage.getPageable(),
                 contractsPage.getTotalElements()
         );

@@ -47,8 +47,17 @@ public class Contract extends BaseEntity {
     @Column(name = "risk_level")
     private String riskLevel;
 
-    @Column(name = "key_terms", columnDefinition = "TEXT")
+    @Column(name = "key_terms", columnDefinition = "JSON")
     private String keyTerms;
+    
+    @Column(name = "favorable_clauses", columnDefinition = "JSON")
+    private String favorableClauses;
+    
+    @Column(name = "unfavorable_clauses", columnDefinition = "JSON")
+    private String unfavorableClauses;
+    
+    @Column(name = "payment_currency")
+    private String paymentCurrency;
 
     @Column(name = "ai_processed")
     private Boolean aiProcessed = false;
