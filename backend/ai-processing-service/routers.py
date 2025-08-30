@@ -444,34 +444,45 @@ async def summarize_api(
             '{\n'
             '  "contract_summary": {\n'
             '    "title": string,\n'
-            '    "tag": string hoặc mảng string,\n'
+            '    "tag": [string],\n'
             '    "parties": [\n'
-            '      {"name": string, "role": string, "representative": string, "tax_code": string, "contact": string}, ...\n'
+            '      {"name": string, "role": string, "representative": string, "taxCode": string, "contact": string, "address": string, "businessLicense": string}, ...\n'
             '    ],\n'
             '    "object": string,\n'
-            '    "effective_date": string,\n'
+            '    "effectiveDate": string (yyyy-MM-dd),\n'
             '    "term": string,\n'
-            '    "payment_details": {"total_value": string, "schedule": string, "currency": string},\n'
-            '    "key_clauses": [\n'
+            '    "paymentDetails": {"totalValue": string, "schedule": string, "currency": string, "paymentMethod": string},\n'
+            '    "keyClauses": [\n'
             '      {"name": string, "description": string, "source": string}, ...\n'
             '    ],\n'
-            '    "favorable_clauses": [\n'
-            '      {"clause_name": string, "description": string, "benefit_to": string}, ...\n'
+            '    "favorableClauses": [\n'
+            '      {"clauseName": string, "description": string, "benefitTo": string}, ...\n'
             '    ],\n'
-            '    "unfavorable_clauses": [\n'
-            '      {"clause_name": string, "description": string, "risk_to": string}, ...\n'
+            '    "unfavorableClauses": [\n'
+            '      {"clauseName": string, "description": string, "riskTo": string}, ...\n'
             '    ],\n'
             '    "reminders": [\n'
             '      {"type": "gia hạn|xem xét|hết hạn", "date": "yyyy-MM-dd hoặc null", "content": string}, ...\n'
             '    ],\n'
-            '    "termination_conditions": string\n'
+            '    "terminationConditions": string,\n'
+            '    "riskAssessment": {\n'
+            '      "riskLevel": "LOW|MEDIUM|HIGH",\n'
+            '      "riskFactors": [string],\n'
+            '      "mitigationMeasures": [string]\n'
+            '    },\n'
+            '    "complianceStatus": {\n'
+            '      "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
+            '      "issues": [string],\n'
+            '      "recommendations": [string]\n'
+            '    }\n'
             '  }\n'
             '}'
             "\nYêu cầu:\n"
             "1. Chỉ trả về đúng JSON hợp lệ, không giải thích thêm\n"
             "2. Nếu không thể tóm tắt được thông tin hợp lệ, hãy trả về 'KHÔNG_THỂ_TÓM_TẮT'\n"
             "3. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (yyyy-MM-dd), nếu không có ngày cụ thể thì để date=null\n"
-            "4. Điền thông tin dựa trên nội dung hợp đồng, nếu không có thông tin thì để null hoặc mảng rỗng\n\n"
+            "4. Điền thông tin dựa trên nội dung hợp đồng, nếu không có thông tin thì để null hoặc mảng rỗng\n"
+            "5. Sử dụng camelCase cho tất cả các key\n\n"
             "Dưới đây là nội dung hợp đồng:"
         )
         answer = ask_gemini(api_key, content, prompt)

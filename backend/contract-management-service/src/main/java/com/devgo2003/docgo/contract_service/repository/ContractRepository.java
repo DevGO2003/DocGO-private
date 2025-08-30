@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
@@ -15,4 +16,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     Page<Contract> findByIsDeletedFalse(Pageable pageable);
 
     List<Contract> findByStatusAndIsDeletedFalse(Contract.ContractStatus status);
+    
+    Optional<Contract> findBySystemId(String systemId);
 }

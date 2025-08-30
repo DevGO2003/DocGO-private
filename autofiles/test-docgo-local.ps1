@@ -110,6 +110,6 @@ Write-Host "• Hot Reload: Code changes sẽ được reflect ngay" -Foreground
 
 Write-Host "`n🚀 DocGO Local Environment đã sẵn sàng!" -ForegroundColor Green
 Write-Host "Bạn có thể bắt đầu test flow upload file:" -ForegroundColor Yellow
-Write-Host "1. Upload file → File Storage Service (8012)" -ForegroundColor White
-Write-Host "2. AI Processing → AI Service (8017)" -ForegroundColor White
-Write-Host "3. Contract/General Classification → Contract/General Service" -ForegroundColor White
+Write-Host "1. Upload file -> File Storage Service (8012)" -ForegroundColor White
+Write-Host "2. AI Processing -> AI Service (8017)" -ForegroundColor White
+Write-Host "3. Contract/General Classification -> Contract/General Service" -ForegroundColor White

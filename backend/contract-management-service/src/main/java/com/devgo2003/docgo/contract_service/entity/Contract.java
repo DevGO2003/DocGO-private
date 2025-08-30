@@ -76,6 +76,12 @@ public class Contract extends BaseEntity {
     @Column(name = "currency")
     private String currency;
 
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "reminders", columnDefinition = "JSON")
+    private String reminders;
+
     @Column(name = "termination_conditions", columnDefinition = "TEXT")
     private String terminationConditions;
 

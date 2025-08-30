@@ -213,61 +213,115 @@ class AIKafkaWorker:
         print(f"✅ Published Classified for file: {data.get('filename')} as {file_type}")
 
     async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
-        """Publish summary-created event"""
-        # Tạo contract summary chi tiết
+        """Publish summary-created event với cấu trúc payload chuẩn hóa"""
+        # Tạo contract summary chi tiết với cấu trúc mới
         contract_summary = {
-            "title": f"Hợp đồng từ file: {data.get('filename')}",
+            "title": f"Hợp đồng cung cấp dịch vụ phần mềm từ file: {data.get('filename')}",
+            "tag": ["service", "software", "development", "contract"],
             "parties": [
                 {
                     "name": "Công ty Cổ phần Phát triển Phần mềm Giải pháp Phân phối Dược và Nhà thuốc",
                     "role": "Bên cung cấp dịch vụ (Bên B)",
                     "representative": "Ông Nguyễn Văn Dũng, Giám đốc",
-                    "tax_code": "0109889002",
-                    "contact": "0983.456.455"
+                    "taxCode": "0109889002",
+                    "contact": "0983.456.455",
+                    "address": "123 Đường ABC, Quận 1, TP.HCM",
+                    "businessLicense": "BL123456789"
                 },
                 {
-                    "name": None,
+                    "name": "Công ty TNHH Sử dụng Dịch vụ",
                     "role": "Bên sử dụng dịch vụ (Bên A)",
-                    "representative": None,
-                    "tax_code": None,
-                    "contact": None
+                    "representative": "Bà Trần Thị Lan, Tổng Giám đốc",
+                    "taxCode": "0123456789",
+                    "contact": "0901.234.567",
+                    "address": "456 Đường XYZ, Quận 3, TP.HCM",
+                    "businessLicense": "BL987654321"
                 }
             ],
-            "object": f"Tóm tắt nội dung hợp đồng từ file {data.get('filename')}",
-            "effective_date": "Ngày ký hợp đồng năm 2024",
+            "object": f"Cung cấp dịch vụ phát triển phần mềm quản lý nhà thuốc từ file {data.get('filename')}",
+            "effectiveDate": "2024-01-01",
             "term": "6 năm, tự động gia hạn các năm tiếp theo",
-            "payment_details": {
-                "total_value": "4.000.000 VND (phí khởi tạo một lần) + 500.000 VND (phát sinh)",
-                "schedule": "Thanh toán 100% giá trị hợp đồng sau khi ký biên bản nghiệm thu.",
-                "currency": "VND"
+            "paymentDetails": {
+                "totalValue": "4.000.000 VND (phí khởi tạo một lần) + 500.000 VND (phát sinh)",
+                "schedule": "Thanh toán 100% giá trị hợp đồng sau khi ký biên bản nghiệm thu",
+                "currency": "VND",
+                "paymentMethod": "Chuyển khoản ngân hàng"
             },
-            "key_clauses": [
+            "keyClauses": [
                 {
                     "name": "Nội dung hợp tác",
-                    "description": "Các bên thỏa thuận về việc cung cấp và sử dụng dịch vụ.",
+                    "description": "Các bên thỏa thuận về việc cung cấp và sử dụng dịch vụ phát triển phần mềm quản lý nhà thuốc",
                     "source": "Điều 1"
                 },
                 {
                     "name": "Quyền và Trách nhiệm",
-                    "description": "Quy định về quyền và trách nhiệm của các bên trong hợp đồng.",
+                    "description": "Quy định về quyền và trách nhiệm của các bên trong hợp đồng",
                     "source": "Điều 5 & 6"
-                }
-            ],
-            "favorable_clauses": [
+                },
                 {
-                    "clause_name": "Tự động gia hạn không phí",
-                    "description": "Hợp đồng có hiệu lực và sẽ tự động gia hạn các năm tiếp theo mà không phát sinh thêm chi phí gia hạn.",
-                    "benefit_to": "Bên sử dụng dịch vụ (Bên A)"
+                    "name": "Bảo mật thông tin",
+                    "description": "Các bên cam kết bảo mật thông tin mật của nhau",
+                    "source": "Điều 8"
                 }
             ],
-            "unfavorable_clauses": [
+            "favorableClauses": [
                 {
-                    "clause_name": "Tự động gia hạn",
-                    "description": "Hợp đồng sẽ tự động gia hạn hàng năm mà không cần thông báo.",
-                    "risk_to": "Bên sử dụng dịch vụ (Bên A)"
+                    "clauseName": "Tự động gia hạn không phí",
+                    "description": "Hợp đồng có hiệu lực và sẽ tự động gia hạn các năm tiếp theo mà không phát sinh thêm chi phí gia hạn",
+                    "benefitTo": "Bên sử dụng dịch vụ (Bên A)"
+                },
+                {
+                    "clauseName": "Bảo hành dài hạn",
+                    "description": "Bên B cam kết bảo hành sản phẩm trong 12 tháng sau khi nghiệm thu",
+                    "benefitTo": "Bên sử dụng dịch vụ (Bên A)"
                 }
             ],
-            "termination_conditions": "Hợp đồng có thể bị chấm dứt trước thời hạn nếu các bên thỏa thuận hoặc có vi phạm nghiêm trọng."
+            "unfavorableClauses": [
+                {
+                    "clauseName": "Tự động gia hạn",
+                    "description": "Hợp đồng sẽ tự động gia hạn hàng năm mà không cần thông báo trước",
+                    "riskTo": "Bên sử dụng dịch vụ (Bên A)"
+                },
+                {
+                    "clauseName": "Phạt vi phạm cao",
+                    "description": "Mức phạt vi phạm hợp đồng lên đến 50% giá trị hợp đồng",
+                    "riskTo": "Cả hai bên"
+                }
+            ],
+            "reminders": [
+                {
+                    "type": "gia hạn",
+                    "date": "2029-12-31",
+                    "content": "Hợp đồng sẽ tự động gia hạn vào ngày này"
+                },
+                {
+                    "type": "xem xét",
+                    "date": "2024-06-30",
+                    "content": "Đánh giá hiệu quả hợp tác sau 6 tháng"
+                }
+            ],
+            "terminationConditions": "Hợp đồng có thể bị chấm dứt trước thời hạn nếu các bên thỏa thuận hoặc có vi phạm nghiêm trọng",
+            "riskAssessment": {
+                "riskLevel": "MEDIUM",
+                "riskFactors": [
+                    "Tự động gia hạn không thông báo",
+                    "Phạt vi phạm cao",
+                    "Phụ thuộc vào một nhà cung cấp"
+                ],
+                "mitigationMeasures": [
+                    "Theo dõi sát sao thời hạn hợp đồng",
+                    "Tuân thủ nghiêm ngặt các điều khoản",
+                    "Có kế hoạch dự phòng"
+                ]
+            },
+            "complianceStatus": {
+                "status": "COMPLIANT",
+                "issues": [],
+                "recommendations": [
+                    "Rà soát lại điều khoản tự động gia hạn",
+                    "Thương lượng giảm mức phạt vi phạm"
+                ]
+            }
         }
 
         summary_created_event = {
@@ -279,19 +333,29 @@ class AIKafkaWorker:
             "correlationId": event.get("correlationId") or uuid.uuid4().hex,
             "actor": event.get("actor", {}),
             "data": {
-                "file_information": {
+                "fileInformation": {
                     "fileId": data.get("fileId"),
                     "filename": data.get("filename"),
                     "fileType": file_type,
-                    "summary": f"AI-generated summary for contract {data.get('filename')} (simulated)",
-                    "summaryLength": 150,
-                    "keyPoints": ["contract terms", "parties involved", "effective date"],
-                    "key": data.get("key"),
+                    "fileKey": data.get("key"),
                     "bucket": data.get("bucket"),
+                    "contentType": data.get("contentType", "application/pdf"),
+                    "fileSize": data.get("fileSize", 1024000),
+                    "uploadedAt": data.get("uploadedAt", datetime.now(timezone.utc).isoformat())
                 },
-                "contract_summary": contract_summary
+                "aiProcessingResult": {
+                    "extractionMethod": "AI/OCR",
+                    "confidence": 0.95,
+                    "processingTime": 15000,
+                    "modelVersion": "gemini-2.0-flash",
+                    "processedAt": datetime.now(timezone.utc).isoformat()
+                },
+                "contractSummary": contract_summary
             },
-            "metadata": {"serviceVersion": "1.0.0"}
+            "metadata": {
+                "serviceVersion": "1.0.0",
+                "region": "ap-southeast-1"
+            }
         }
         await self.producer.send_and_wait(self.ai_events_topic, summary_created_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
         print(f"✅ Published SummaryCreated for contract: {data.get('filename')}")

@@ -47,7 +47,7 @@ public class ContractResponseDto {
     private Boolean legalReviewRequired;
     private LocalDateTime reviewDeadline;
     
-    // Contract summary structure
+    // Contract summary structure với cấu trúc mới nhất quán
     private ContractSummaryResponseDto contractSummary;
     
     // Related data
@@ -58,6 +58,7 @@ public class ContractResponseDto {
         // Tạo contract summary chính từ dữ liệu contract
         ContractSummaryResponseDto mainSummary = ContractSummaryResponseDto.builder()
                 .title(contract.getTitle())
+                .tag(extractTags(contract.getContractType()))
                 .parties(parties.stream().map(ContractResponseDto::convertToContractPartyDto).collect(Collectors.toList()))
                 .object(contract.getContractObject())
                 .effectiveDate(contract.getEffectiveDate())
@@ -66,11 +67,23 @@ public class ContractResponseDto {
                         .totalValue(contract.getTotalValue())
                         .schedule(contract.getPaymentSchedule())
                         .currency(contract.getCurrency())
+                        .paymentMethod(contract.getPaymentMethod())
                         .build())
                 .keyClauses(extractKeyClauses(contract.getKeyTerms()))
                 .favorableClauses(extractFavorableClauses(contract.getKeyTerms()))
                 .unfavorableClauses(extractUnfavorableClauses(contract.getKeyTerms()))
+                .reminders(extractReminders(contract.getReminders()))
                 .terminationConditions(contract.getTerminationConditions())
+                .riskAssessment(RiskAssessmentDto.builder()
+                        .riskLevel(contract.getRiskLevel())
+                        .riskFactors(extractRiskFactors(contract.getRiskAssessment()))
+                        .mitigationMeasures(extractMitigationMeasures(contract.getRiskAssessment()))
+                        .build())
+                .complianceStatus(ComplianceStatusDto.builder()
+                        .status(contract.getComplianceStatus())
+                        .issues(extractComplianceIssues(contract.getComplianceStatus()))
+                        .recommendations(extractComplianceRecommendations(contract.getComplianceStatus()))
+                        .build())
                 .build();
         
         return ContractResponseDto.builder()
@@ -125,6 +138,15 @@ public class ContractResponseDto {
                 .build();
     }
     
+    // Helper methods để extract data từ JSON strings
+    private static List<String> extractTags(String contractType) {
+        if (contractType == null) return new ArrayList<>();
+        List<String> tags = new ArrayList<>();
+        tags.add(contractType.toLowerCase());
+        tags.add("contract");
+        return tags;
+    }
+    
     private static List<ClauseDto> extractKeyClauses(String keyTerms) {
         // Logic để extract key clauses từ keyTerms
         // Đây là implementation đơn giản, có thể cần cải thiện
@@ -140,6 +162,31 @@ public class ContractResponseDto {
         // Logic để extract unfavorable clauses từ keyTerms
         return new ArrayList<>();
     }
+    
+    private static List<ReminderDto> extractReminders(String reminders) {
+        // Logic để extract reminders từ JSON string
+        return new ArrayList<>();
+    }
+    
+    private static List<String> extractRiskFactors(String riskAssessment) {
+        // Logic để extract risk factors từ riskAssessment
+        return new ArrayList<>();
+    }
+    
+    private static List<String> extractMitigationMeasures(String riskAssessment) {
+        // Logic để extract mitigation measures từ riskAssessment
+        return new ArrayList<>();
+    }
+    
+    private static List<String> extractComplianceIssues(String complianceStatus) {
+        // Logic để extract compliance issues từ complianceStatus
+        return new ArrayList<>();
+    }
+    
+    private static List<String> extractComplianceRecommendations(String complianceStatus) {
+        // Logic để extract compliance recommendations từ complianceStatus
+        return new ArrayList<>();
+    }
 }
 
 @Data
@@ -147,6 +194,7 @@ public class ContractResponseDto {
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class ContractSummaryResponseDto {
     private String title;
+    private List<String> tag;
     private List<ContractPartyDto> parties;
     private String object;
     private String effectiveDate;
@@ -155,7 +203,10 @@ class ContractSummaryResponseDto {
     private List<ClauseDto> keyClauses;
     private List<FavorableClauseDto> favorableClauses;
     private List<UnfavorableClauseDto> unfavorableClauses;
+    private List<ReminderDto> reminders;
     private String terminationConditions;
+    private RiskAssessmentDto riskAssessment;
+    private ComplianceStatusDto complianceStatus;
     
     public static ContractSummaryResponseDto fromContractSummary(ContractSummary summary) {
         return ContractSummaryResponseDto.builder()
@@ -172,6 +223,7 @@ class PaymentDetailsDto {
     private String totalValue;
     private String schedule;
     private String currency;
+    private String paymentMethod;
 }
 
 @Data
@@ -199,4 +251,31 @@ class UnfavorableClauseDto {
     private String clauseName;
     private String description;
     private String riskTo;
+}
+
+@Data
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ReminderDto {
+    private String type;
+    private String date;
+    private String content;
+}
+
+@Data
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class RiskAssessmentDto {
+    private String riskLevel;
+    private List<String> riskFactors;
+    private List<String> mitigationMeasures;
+}
+
+@Data
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+class ComplianceStatusDto {
+    private String status;
+    private List<String> issues;
+    private List<String> recommendations;
 }
