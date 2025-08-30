@@ -96,6 +96,9 @@ public class Contract extends BaseEntity {
 
     @Column(name = "review_deadline")
     private LocalDate reviewDeadline;
+    
+    @Column(name = "tags", columnDefinition = "JSON")
+    private String tags;
 
     public enum ContractStatus {
         DRAFT, PENDING, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED

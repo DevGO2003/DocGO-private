@@ -32,6 +32,11 @@ public class AIEventsConsumer {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consumeAIEvents(ConsumerRecord<String, String> record) {
+        String eventType = "unknown";
+        String fileId = "unknown";
+        String filename = "unknown";
+        String correlationId = "unknown";
+        
         try {
             log.info("AIEventsConsumer received record: topic={}, key={}, partition={}, offset={}",
                     record.topic(), record.key(), record.partition(), record.offset());
@@ -41,22 +46,31 @@ public class AIEventsConsumer {
             }
 
             JsonNode root = objectMapper.readTree(value);
-            String eventType = getText(root, "eventType");
+            eventType = getText(root, "eventType");
             if (!"SummaryCreated".equals(eventType)) {
                 return; // only interested in summary-created for now
             }
 
             JsonNode data = root.path("data");
-            String fileId = getText(data, "fileId");
-            String filename = getText(data, "filename");
+            fileId = getText(data, "fileId");
+            filename = getText(data, "filename");
+            correlationId = getText(root, "correlationId");
 
+            if (fileId == null || filename == null) {
+                log.warn("⚠️ [AI_EVENT_MISSING_FIELDS] Thiếu các trường bắt buộc - fileId: {}, filename: {}", fileId, filename);
+                return;
+            }
+            
+            log.info("📁 [AI_EVENT_FILE_INFO] Thông tin file từ AI event - fileId: {}, filename: {}", fileId, filename);
+
+            log.info("📢 [CONTRACT_UPDATED_PREP] Chuẩn bị publish ContractUpdated event...");
             Map<String, Object> contractUpdated = new HashMap<>();
             contractUpdated.put("eventVersion", "v1");
             contractUpdated.put("eventType", "ContractUpdated");
             contractUpdated.put("eventId", UUID.randomUUID().toString().replace("-", ""));
             contractUpdated.put("timestamp", OffsetDateTime.now().toString());
             contractUpdated.put("source", "contract-management-service");
-            contractUpdated.put("correlationId", getText(root, "correlationId"));
+            contractUpdated.put("correlationId", correlationId);
             contractUpdated.put("actor", root.path("actor"));
 
             Map<String, Object> payload = new HashMap<>();
@@ -71,11 +85,19 @@ public class AIEventsConsumer {
             metadata.put("serviceVersion", "1.0.0");
             contractUpdated.put("metadata", metadata);
 
+            log.info("📋 [CONTRACT_UPDATED_PAYLOAD] ContractUpdated payload đã sẵn sàng - eventId: {}, eventType: {}, source: {}, correlationId: {}", 
+                     contractUpdated.get("eventId"), contractUpdated.get("eventType"), contractUpdated.get("source"), correlationId);
+
             String json = objectMapper.writeValueAsString(contractUpdated);
+            log.info("📤 [KAFKA_SEND] Gửi ContractUpdated event lên Kafka topic: {} với key: {}", contractEventsTopic, fileId);
+            
             kafkaTemplate.send(contractEventsTopic, fileId, json);
-            log.info("Published ContractUpdated for fileId={}, filename={}", fileId, filename);
+            log.info("✅ [CONTRACT_UPDATED_PUBLISH_SUCCESS] Đã publish ContractUpdated event thành công - fileId: {}, filename: {}, correlationId: {}", 
+                     fileId, filename, correlationId);
+            
         } catch (Exception e) {
-            log.error("Error while consuming AI event: {}", e.getMessage(), e);
+            log.error("❌ [AI_EVENT_PROCESSING_ERROR] Lỗi xử lý AI event - eventType: {}, fileId: {}, filename: {}, correlationId: {}, error: {}", 
+                      eventType, fileId, filename, correlationId, e.getMessage(), e);
         }
     }
 

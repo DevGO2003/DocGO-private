@@ -18,7 +18,7 @@ public class ContractPartyDto {
     private String partyRole;
     private String representative;
     private String taxCode;
-    private String contactInfo;
+    private String contact;
     private String address;
     private String businessLicense;
     private String partyType;

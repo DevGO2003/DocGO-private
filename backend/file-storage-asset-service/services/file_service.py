@@ -10,10 +10,14 @@ from botocore.exceptions import ClientError
 import filetype
 import aiofiles
 from fastapi import HTTPException, UploadFile
+import logging
 
 from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
 from services.malware_scanner import MalwareScanner
 from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR, S3_KEY_STYLE, is_s3_metadata_minimal, is_s3_sanitize_keys
+
+# Cấu hình logging
+logger = logging.getLogger(__name__)
 
 class FileStorageService:
     def __init__(self):
@@ -63,17 +67,28 @@ class FileStorageService:
     
     async def upload_file(self, file: UploadFile, user_id: Optional[str], folder: Optional[str] = None) -> FileInfo:
         """Upload file lên S3 với malware scan và versioning"""
+        file_id = None
+        s3_key = None
         try:
+            logger.info("📁 [FILE_SERVICE_START] Bắt đầu xử lý upload file - filename: %s, user_id: %s, folder: %s", 
+                        file.filename, user_id, folder)
+            
             # Đọc nội dung file
+            logger.info("📖 [FILE_READ] Đang đọc nội dung file...")
             content = await file.read()
             original_name = file.filename or "unknown"
+            logger.info("✅ [FILE_READ_SUCCESS] Đã đọc file thành công - size: %s bytes", len(content))
+            
             if is_s3_sanitize_keys():
                 # Chuẩn hóa tên file: thay khoảng trắng bằng _ và bỏ ký tự không an toàn
                 import re
                 name, ext = os.path.splitext(original_name)
                 safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._-")
                 original_name = (safe_name or "file") + ext
+                logger.info("🔒 [FILENAME_SANITIZATION] Tên file đã được chuẩn hóa: %s -> %s", file.filename, original_name)
+            
             folder_prefix = (folder.strip('/') + '/') if folder else ''
+            logger.info("📁 [FOLDER_PREFIX] Sử dụng folder prefix: %s", folder_prefix)
             
             # Tạo file ID và thông tin cơ bản
             file_id = self._generate_file_id()
@@ -81,24 +96,34 @@ class FileStorageService:
             checksum = self._calculate_checksum(content)
             user_id_str = user_id or "public"
             
+            logger.info("🆔 [FILE_INFO] Đã tạo thông tin file - file_id: %s, file_type: %s, checksum: %s, user_id: %s", 
+                        file_id, file_type.value, checksum, user_id_str)
+            
             # Kiểm tra xem file đã tồn tại chưa (dựa trên checksum)
+            logger.info("🔍 [DUPLICATE_CHECK] Kiểm tra file trùng lặp dựa trên checksum...")
             existing_file = await self._find_file_by_checksum(checksum, user_id_str)
             if existing_file:
                 # Tạo version mới
                 version = existing_file.version + 1
+                logger.info("🔄 [VERSION_INCREMENT] File đã tồn tại, tạo version mới: %s", version)
                 if S3_KEY_STYLE == "simple":
                     file_key = f"{folder_prefix}{original_name}"
                 else:
                     file_key = f"{folder_prefix}users/{user_id_str}/files/{existing_file.file_id}/v{version}/{original_name}"
             else:
                 version = 1
+                logger.info("🆕 [NEW_FILE] File mới, sử dụng version: %s", version)
                 if S3_KEY_STYLE == "simple":
                     file_key = f"{folder_prefix}{original_name}"
                 else:
                     file_key = f"{folder_prefix}users/{user_id_str}/files/{file_id}/v{version}/{original_name}"
             
+            s3_key = file_key
+            logger.info("🗝️ [S3_KEY] Đã tạo S3 key: %s", s3_key)
+            
             if is_s3_enabled():
                 # Upload lên S3/Filebase
+                logger.info("☁️ [S3_UPLOAD_START] Bắt đầu upload lên S3/Filebase - bucket: %s, key: %s", self.bucket_name, s3_key)
                 safe_content_type = file.content_type or "application/octet-stream"
                 # original_name đã chuẩn hóa bên trên
                 # Chuẩn hóa metadata về ASCII để phù hợp yêu cầu của S3
@@ -108,10 +133,13 @@ class FileStorageService:
                     .decode('ascii')
                 ) or "unknown"
                 b64_name = base64.b64encode(original_name.encode('utf-8')).decode('ascii')
+                
+                logger.info("📋 [S3_METADATA] Chuẩn bị metadata - content_type: %s, ascii_name: %s", safe_content_type, ascii_name)
+                
                 try:
                     put_kwargs = {
                         'Bucket': self.bucket_name,
-                        'Key': file_key,
+                        'Key': s3_key,
                         'Body': content,
                         'ContentType': safe_content_type,
                     }
@@ -125,33 +153,49 @@ class FileStorageService:
                             'version': str(version),
                             'upload_time': datetime.utcnow().isoformat()
                         }
+                        logger.info("📝 [S3_METADATA_EXTENDED] Sử dụng metadata mở rộng với %s trường", len(put_kwargs['Metadata']))
+                    
                     self.s3_client.put_object(**put_kwargs)
+                    logger.info("✅ [S3_UPLOAD_SUCCESS] Đã upload file lên S3 thành công - bucket: %s, key: %s", self.bucket_name, s3_key)
+                    
                 except ClientError as e:
                     err = e.response.get('Error', {}) if hasattr(e, 'response') else {}
                     code = err.get('Code')
                     message = err.get('Message')
+                    logger.error("❌ [S3_UPLOAD_FAILED] Lỗi upload lên S3 - code: %s, message: %s, bucket: %s, key: %s", 
+                                code, message, self.bucket_name, s3_key)
                     raise HTTPException(
                         status_code=500,
                         detail=(
                             f"S3 PutObject failed: code={code}, message={message}, "
-                            f"bucket={self.bucket_name}, key={file_key}"
+                            f"bucket={self.bucket_name}, key={s3_key}"
                         )
                     )
             else:
                 # Lưu local để test offline
+                logger.info("💾 [LOCAL_STORAGE] S3 không được bật, lưu file local - upload_dir: %s", UPLOAD_DIR)
                 if S3_KEY_STYLE == "simple":
                     local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []))
                 else:
                     local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []), 'users', user_id_str, 'files', file_id, f'v{version}')
+                
                 os.makedirs(local_dir, exist_ok=True)
                 local_path = os.path.join(local_dir, original_name)
+                logger.info("📁 [LOCAL_DIR] Đã tạo thư mục local: %s", local_dir)
+                
                 async with aiofiles.open(local_path, 'wb') as f:
                     await f.write(content)
+                logger.info("✅ [LOCAL_SAVE_SUCCESS] Đã lưu file local thành công - path: %s", local_path)
+                
                 # Với lưu local, vẫn trả về s3_key tương tự để dùng chung
                 file_key = os.path.relpath(local_path, start=UPLOAD_DIR).replace('\\', '/')
+                s3_key = file_key
             
             # Quét malware (bất đồng bộ)
+            logger.info("🛡️ [MALWARE_SCAN_START] Bắt đầu quét malware cho file...")
             malware_result = await self.malware_scanner.scan_file(content)
+            logger.info("✅ [MALWARE_SCAN_COMPLETE] Hoàn thành quét malware - is_clean: %s, threat_name: %s", 
+                        malware_result.is_clean, malware_result.threat_name or "none")
             
             # Tạo file info
             file_info = FileInfo(
@@ -168,12 +212,22 @@ class FileStorageService:
                 s3_key=file_key
             )
             
-            # Lưu metadata vào database (cần implement)
-            await self._save_file_metadata(file_info, user_id_str)
+            logger.info("📋 [FILE_INFO_CREATED] Đã tạo FileInfo object - file_id: %s, status: %s, version: %s", 
+                        file_info.file_id, file_info.status.value, file_info.version)
             
+            # Lưu metadata vào database (cần implement)
+            logger.info("💾 [DATABASE_SAVE] Lưu metadata file vào database...")
+            await self._save_file_metadata(file_info, user_id_str)
+            logger.info("✅ [DATABASE_SAVE_SUCCESS] Đã lưu metadata vào database")
+            
+            logger.info("🎉 [FILE_SERVICE_COMPLETE] Hoàn thành xử lý upload file - file_id: %s, s3_key: %s", 
+                        file_id, s3_key)
             return file_info
             
         except Exception as e:
+            logger.error("❌ [FILE_SERVICE_FAILED] Lỗi xử lý upload file - file_id: %s, s3_key: %s, error: %s", 
+                        file_id, s3_key, str(e))
+            logger.debug("🔍 [FILE_SERVICE_ERROR_DETAILS] Chi tiết lỗi:", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Lỗi upload file: {str(e)}")
     
     async def download_file(self, file_id: str, user_id: str, version: int = 1) -> bytes:

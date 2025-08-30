@@ -4,6 +4,8 @@ import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractSummary;
 import com.devgo2003.docgo.contract_service.entity.ContractParty;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Data;
 
@@ -46,6 +48,7 @@ public class ContractResponseDto {
     private String complianceStatus;
     private Boolean legalReviewRequired;
     private LocalDateTime reviewDeadline;
+    private String tags;
     
     // Contract summary structure với cấu trúc mới nhất quán
     private ContractSummaryResponseDto contractSummary;
@@ -58,7 +61,7 @@ public class ContractResponseDto {
         // Tạo contract summary chính từ dữ liệu contract
         ContractSummaryResponseDto mainSummary = ContractSummaryResponseDto.builder()
                 .title(contract.getTitle())
-                .tag(extractTags(contract.getContractType()))
+                .tag(extractTagsFromJson(contract.getTags()))
                 .parties(parties.stream().map(ContractResponseDto::convertToContractPartyDto).collect(Collectors.toList()))
                 .object(contract.getContractObject())
                 .effectiveDate(contract.getEffectiveDate())
@@ -128,7 +131,7 @@ public class ContractResponseDto {
                 .partyRole(party.getPartyRole())
                 .representative(party.getRepresentative())
                 .taxCode(party.getTaxCode())
-                .contactInfo(party.getContactInfo())
+                .contact(party.getContact())
                 .address(party.getAddress())
                 .businessLicense(party.getBusinessLicense())
                 .partyType(party.getPartyType() != null ? party.getPartyType().name() : null)
@@ -147,45 +150,95 @@ public class ContractResponseDto {
         return tags;
     }
     
+    private static List<String> extractTagsFromJson(String tagsJson) {
+        if (tagsJson == null || tagsJson.isEmpty()) return new ArrayList<>();
+        try {
+            // Parse JSON array of strings
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+    
     private static List<ClauseDto> extractKeyClauses(String keyTerms) {
-        // Logic để extract key clauses từ keyTerms
-        // Đây là implementation đơn giản, có thể cần cải thiện
-        return new ArrayList<>();
+        if (keyTerms == null || keyTerms.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(keyTerms, new TypeReference<List<ClauseDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<FavorableClauseDto> extractFavorableClauses(String keyTerms) {
-        // Logic để extract favorable clauses từ keyTerms
-        return new ArrayList<>();
+        if (keyTerms == null || keyTerms.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(keyTerms, new TypeReference<List<FavorableClauseDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<UnfavorableClauseDto> extractUnfavorableClauses(String keyTerms) {
-        // Logic để extract unfavorable clauses từ keyTerms
-        return new ArrayList<>();
+        if (keyTerms == null || keyTerms.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(keyTerms, new TypeReference<List<UnfavorableClauseDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<ReminderDto> extractReminders(String reminders) {
-        // Logic để extract reminders từ JSON string
-        return new ArrayList<>();
+        if (reminders == null || reminders.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(reminders, new TypeReference<List<ReminderDto>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<String> extractRiskFactors(String riskAssessment) {
-        // Logic để extract risk factors từ riskAssessment
-        return new ArrayList<>();
+        if (riskAssessment == null || riskAssessment.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(riskAssessment, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<String> extractMitigationMeasures(String riskAssessment) {
-        // Logic để extract mitigation measures từ riskAssessment
-        return new ArrayList<>();
+        if (riskAssessment == null || riskAssessment.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(riskAssessment, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<String> extractComplianceIssues(String complianceStatus) {
-        // Logic để extract compliance issues từ complianceStatus
-        return new ArrayList<>();
+        if (complianceStatus == null || complianceStatus.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(complianceStatus, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
     
     private static List<String> extractComplianceRecommendations(String complianceStatus) {
-        // Logic để extract compliance recommendations từ complianceStatus
-        return new ArrayList<>();
+        if (complianceStatus == null || complianceStatus.isEmpty()) return new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(complianceStatus, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 }
 

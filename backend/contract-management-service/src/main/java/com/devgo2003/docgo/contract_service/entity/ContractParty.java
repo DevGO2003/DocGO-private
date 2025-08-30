@@ -31,8 +31,8 @@ public class ContractParty extends BaseEntity {
     @Column(name = "tax_code")
     private String taxCode;
 
-    @Column(name = "contact_info")
-    private String contactInfo;
+    @Column(name = "contact")
+    private String contact;
 
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;

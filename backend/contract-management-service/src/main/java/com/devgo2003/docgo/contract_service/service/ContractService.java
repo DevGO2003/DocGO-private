@@ -53,6 +53,7 @@ public class ContractService {
     private final ContractSummaryRepository summaryRepository;
     private final ContractPartyRepository partyRepository;
     private final ContractEventPublisher eventPublisher;
+    private final ContractStatusEventPublisher contractStatusEventPublisher;
     private final ObjectMapper objectMapper;
 
     private static final Set<String> VALID_SORT_BY_PROPERTIES = new HashSet<>(Arrays.asList(
@@ -67,6 +68,7 @@ public class ContractService {
                            ContractSummaryRepository summaryRepository,
                            ContractPartyRepository partyRepository,
                            ContractEventPublisher eventPublisher,
+                           ContractStatusEventPublisher contractStatusEventPublisher,
                            ObjectMapper objectMapper) {
         this.contractRepository = contractRepository;
         this.attachmentRepository = attachmentRepository;
@@ -74,6 +76,7 @@ public class ContractService {
         this.summaryRepository = summaryRepository;
         this.partyRepository = partyRepository;
         this.eventPublisher = eventPublisher;
+        this.contractStatusEventPublisher = contractStatusEventPublisher;
         this.objectMapper = objectMapper;
     }
 
@@ -100,6 +103,7 @@ public class ContractService {
 
         eventRepository.save(event);
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
+        contractStatusEventPublisher.publishContractCreated(savedContract, "system", "system", "system");
         return savedContract;
     }
 
@@ -522,7 +526,7 @@ public class ContractService {
                 .partyRole(party.getPartyRole())
                 .representative(party.getRepresentative())
                 .taxCode(party.getTaxCode())
-                .contactInfo(party.getContactInfo())
+                .contact(party.getContact())
                 .address(party.getAddress())
                 .businessLicense(party.getBusinessLicense())
                 .partyType(party.getPartyType() != null ? party.getPartyType().name() : null)
@@ -544,7 +548,7 @@ public class ContractService {
         party.setPartyRole(role);
         party.setRepresentative(representative);
         party.setTaxCode(taxCode);
-        party.setContactInfo(contact);
+        party.setContact(contact);
         party.setIsPrimary(false); // Default to false
         
         return partyRepository.save(party);

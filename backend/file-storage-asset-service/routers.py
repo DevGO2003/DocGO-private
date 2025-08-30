@@ -3,6 +3,7 @@ from typing import List, Optional
 from uuid import uuid4
 import os
 from datetime import datetime, timedelta
+import logging
 
 from config import s3_client, S3_BUCKET, get_presigned_get_url, get_s3_client, get_bucket_name
 from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_EVENTS_TOPIC, KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD
@@ -18,7 +19,9 @@ from schemas.response import RestResponse
 import json
 from aiokafka import AIOKafkaProducer
 
-
+# Cấu hình logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Storage Asset Service"])
 
@@ -69,31 +72,54 @@ async def upload_file(
 	Loại: object
 	Mô tả: Thông tin về file đã upload (bucket, key, url, filename, size, scan_status).
 	"""
+	# Tạo correlation ID cho request
+	correlation_id = request.headers.get("x-correlation-id") or str(uuid4())
+	user_id = request.headers.get("x-user-id", "anonymous")
+	user_role = request.headers.get("x-user-role", "user")
+	client_ip = request.client.host if request.client else "unknown"
+	
+	logger.info("🚀 [UPLOAD_START] Bắt đầu upload file - correlation_id: %s, user_id: %s, user_role: %s, client_ip: %s", 
+	            correlation_id, user_id, user_role, client_ip)
+	logger.info("📁 [UPLOAD_INFO] File: %s, size: %s bytes, content_type: %s, folder: %s", 
+	            file.filename, getattr(file, 'size', 'unknown'), file.content_type, folder)
+	
 	try:
 		# Chuẩn hóa tên file an toàn
 		safe_filename = file.filename or "unknown"
+		logger.info("🔒 [FILENAME_SANITIZATION] Tên file gốc: %s, tên file an toàn: %s", 
+		            file.filename, safe_filename)
+		
 		# Kiểm tra kích thước file từ env (.env_exmaple.txt → MAX_FILE_SIZE)
 		if hasattr(file, 'size') and file.size and file.size > MAX_FILE_SIZE:
+			logger.warning("⚠️ [FILE_SIZE_VALIDATION] File quá lớn: %s bytes > %s bytes", file.size, MAX_FILE_SIZE)
 			raise HTTPException(status_code=400, detail=f"File quá lớn (> {MAX_FILE_SIZE} bytes)")
 
 		# Kiểm tra loại file theo ALLOWED_FILE_TYPES (extension)
 		ext = (safe_filename.rsplit('.', 1)[-1].lower() if '.' in safe_filename else '')
 		allowed = [x.strip().lower() for x in ALLOWED_FILE_TYPES]
 		if ext and allowed and ext not in allowed:
+			logger.warning("⚠️ [FILE_TYPE_VALIDATION] Loại file không được phép: .%s. Cho phép: %s", ext, ', '.join(allowed))
 			raise HTTPException(status_code=400, detail=f"Loại file không được phép: .{ext}. Cho phép: {', '.join(allowed)}")
 		
+		logger.info("✅ [VALIDATION_PASSED] File đã vượt qua validation - extension: .%s, size: %s bytes", ext, getattr(file, 'size', 'unknown'))
+		
 		# Upload file với scan, đưa folder vào để key lưu trữ phản ánh đúng query
+		logger.info("📤 [STORAGE_UPLOAD] Bắt đầu upload file lên storage với folder: %s", folder)
 		file_info = await file_service.upload_file(file, None, folder)
+		logger.info("✅ [STORAGE_UPLOAD_SUCCESS] File đã được upload thành công - file_id: %s, s3_key: %s", 
+		            getattr(file_info, 'file_id', 'unknown'), getattr(file_info, 's3_key', 'unknown'))
 		
 		# Bảo đảm có key hợp lệ (tránh None) và khớp với key đã lưu
 		s3_key = getattr(file_info, 's3_key', None) or f"{folder}/{uuid4().hex}_{safe_filename}"
 		if is_s3_enabled():
 			file_url = get_presigned_get_url(s3_key, 7 * 24 * 3600)
 			public_url = build_public_url(s3_key) if S3_PUBLIC_BUCKET else None
+			logger.info("🔗 [URL_GENERATION] Đã tạo presigned URL cho S3 - s3_key: %s, expires: 7 days", s3_key)
 		else:
 			# URL local (giả lập) trả về path tương đối để test
 			file_url = f"/uploads/{s3_key}"
 			public_url = None
+			logger.info("🔗 [URL_GENERATION] Đã tạo URL local cho test - local_path: %s", file_url)
 		
 		response_data = {
 			"bucket": S3_BUCKET,
@@ -105,7 +131,11 @@ async def upload_file(
 			"scan_status": getattr(file_info, 'status', None) or "completed"
 		}
 		
+		logger.info("📊 [RESPONSE_DATA] Đã chuẩn bị response data - bucket: %s, key: %s, size: %s, scan_status: %s", 
+		            response_data["bucket"], response_data["key"], response_data["size"], response_data["scan_status"])
+		
 		# Publish FileUploaded event (best-effort)
+		logger.info("📢 [KAFKA_PUBLISH_START] Bắt đầu publish FileUploaded event lên Kafka topic: %s", KAFKA_FILE_EVENTS_TOPIC)
 		try:
 			producer = await get_kafka_producer()
 			event_payload = {
@@ -114,11 +144,11 @@ async def upload_file(
 				"eventId": uuid4().hex,
 				"timestamp": datetime.utcnow().isoformat() + "Z",
 				"source": "file-storage-asset-service",
-				"correlationId": (request.headers.get("x-correlation-id") or uuid4().hex),
+				"correlationId": correlation_id,
 				"actor": {
-					"userId": request.headers.get("x-user-id", ""),
-					"userRole": request.headers.get("x-user-role", ""),
-					"ip": request.client.host if request.client else ""
+					"userId": user_id,
+					"userRole": user_role,
+					"ip": client_ip
 				},
 				"data": {
 					"fileId": getattr(file_info, "file_id", None) or getattr(file_info, "s3_key", None) or response_data["key"],
@@ -132,6 +162,10 @@ async def upload_file(
 				},
 				"metadata": {"serviceVersion": "1.0.0"}
 			}
+			
+			logger.info("📋 [EVENT_PAYLOAD] Đã chuẩn bị event payload - eventId: %s, fileId: %s, filename: %s", 
+			            event_payload["eventId"], event_payload["data"]["fileId"], event_payload["data"]["filename"])
+			
 			# Chọn key theo cấu hình .env (KAFKA_MESSAGE_KEY_FIELD)
 			candidate = None
 			if KAFKA_MESSAGE_KEY_FIELD == "fileId":
@@ -142,13 +176,25 @@ async def upload_file(
 				candidate = response_data.get("key")
 			kafka_key_val = candidate
 			kafka_key_bytes = (str(kafka_key_val).encode("utf-8")) if kafka_key_val is not None else None
+			
+			logger.info("🔑 [KAFKA_KEY] Sử dụng key cho Kafka message: %s (từ field: %s)", kafka_key_val, KAFKA_MESSAGE_KEY_FIELD)
+			
 			if kafka_key_bytes is not None:
 				await producer.send_and_wait(KAFKA_FILE_EVENTS_TOPIC, event_payload, key=kafka_key_bytes)
 			else:
 				await producer.send_and_wait(KAFKA_FILE_EVENTS_TOPIC, event_payload)
-		except Exception:
-			pass
+			
+			logger.info("✅ [KAFKA_PUBLISH_SUCCESS] Đã publish FileUploaded event thành công - topic: %s, key: %s", 
+			            KAFKA_FILE_EVENTS_TOPIC, kafka_key_val)
+			
+		except Exception as kafka_error:
+			logger.error("❌ [KAFKA_PUBLISH_FAILED] Không thể publish event lên Kafka: %s", str(kafka_error))
+			logger.debug("🔍 [KAFKA_ERROR_DETAILS] Chi tiết lỗi Kafka:", exc_info=True)
+			# Không throw exception vì đây là best-effort
 
+		logger.info("🎉 [UPLOAD_COMPLETE] Hoàn thành upload file thành công - correlation_id: %s, file: %s", 
+		            correlation_id, safe_filename)
+		
 		return RestResponse(
 			statusCode=201,
 			shortMessage="Created",
@@ -157,6 +203,9 @@ async def upload_file(
 			path=request.url.path
 		)
 	except Exception as exc:
+		logger.error("❌ [UPLOAD_FAILED] Lỗi upload file - correlation_id: %s, file: %s, error: %s", 
+		             correlation_id, safe_filename, str(exc))
+		logger.debug("🔍 [UPLOAD_ERROR_DETAILS] Chi tiết lỗi upload:", exc_info=True)
 		raise HTTPException(status_code=500, detail=f"Upload error: {exc}")
 
 

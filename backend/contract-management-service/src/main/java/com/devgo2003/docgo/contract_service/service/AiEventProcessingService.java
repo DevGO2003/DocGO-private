@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,6 +80,7 @@ public class AiEventProcessingService {
         }
         
         contract.setTitle(summary.getTitle());
+        contract.setTags(objectMapper.writeValueAsString(summary.getTag()));
         contract.setContractType(extractContractType(summary.getTag()));
         contract.setContractObject(summary.getObject());
         contract.setEffectiveDate(summary.getEffectiveDate());
@@ -133,11 +135,11 @@ public class AiEventProcessingService {
             party.setPartyRole(partyDto.getRole());
             party.setRepresentative(partyDto.getRepresentative());
             party.setTaxCode(partyDto.getTaxCode());
-            party.setContactInfo(partyDto.getContact());
+            party.setContact(partyDto.getContact());
             party.setAddress(partyDto.getAddress());
             party.setBusinessLicense(partyDto.getBusinessLicense());
             party.setIsPrimary(i == 0); // Party đầu tiên là primary
-            party.setPartyType(ContractParty.PartyType.COMPANY); // Default
+            party.setPartyType(ContractParty.PartyType.ORGANIZATION); // Default
             
             partyRepository.save(party);
         }
@@ -156,9 +158,9 @@ public class AiEventProcessingService {
         contractSummary.setSummaryLength(summary.getTitle().length());
         contractSummary.setKeyPoints(objectMapper.writeValueAsString(summary.getTag()));
         contractSummary.setExtractionMethod(aiResult.getExtractionMethod());
-        contractSummary.setConfidence(aiResult.getConfidence());
+        contractSummary.setConfidence(BigDecimal.valueOf(aiResult.getConfidence()));
         contractSummary.setClassification("CONTRACT");
-        contractSummary.setClassificationConfidence(aiResult.getConfidence());
+        contractSummary.setClassificationConfidence(BigDecimal.valueOf(aiResult.getConfidence()));
         contractSummary.setCategories(objectMapper.writeValueAsString(summary.getTag()));
         contractSummary.setProcessedAt(LocalDateTime.now());
         
