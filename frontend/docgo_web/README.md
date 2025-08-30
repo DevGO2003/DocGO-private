@@ -1,19 +1,19 @@
 # DocGO Web Frontend
 
-Ứng dụng web frontend cho hệ thống quản lý tài liệu và hợp đồng thông minh DocGO, được xây dựng bằng Next.js.
+Nền tảng quản lý tài liệu và hợp đồng thông minh, được xây dựng với Next.js 14 và TypeScript.
 
-## 🚀 Tính năng
+## 🚀 Tính năng chính
 
-- **Quản lý hợp đồng**: Tạo, chỉnh sửa, xem và quản lý hợp đồng
-- **Xử lý AI**: Trích xuất văn bản và tóm tắt tài liệu với AI
-- **Quản lý người dùng**: Hệ thống xác thực và phân quyền
-- **Giao diện hiện đại**: Thiết kế responsive với Tailwind CSS
-- **TypeScript**: Được viết hoàn toàn bằng TypeScript
-- **State Management**: Sử dụng Zustand và React hooks
+- **Quản lý hợp đồng**: Tạo, chỉnh sửa và theo dõi vòng đời hợp đồng
+- **Xử lý AI**: Trích xuất và tóm tắt tài liệu tự động
+- **Quản lý người dùng**: Hệ thống phân quyền và quản lý tài khoản
+- **Lưu trữ tài liệu**: Hệ thống lưu trữ đám mây an toàn
+- **Báo cáo & Phân tích**: Theo dõi hiệu suất và tạo báo cáo chi tiết
+- **Giao diện responsive**: Tối ưu cho mọi thiết bị
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Framework**: Next.js 14
+- **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
@@ -21,193 +21,209 @@
 - **Icons**: Heroicons
 - **Forms**: React Hook Form
 - **Notifications**: React Hot Toast
+- **Data Fetching**: SWR
 
-## 📋 Yêu cầu hệ thống
+## 📁 Cấu trúc dự án
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root layout với AuthProvider
+│   ├── page.tsx           # Trang chủ
+│   ├── contracts/         # Trang quản lý hợp đồng
+│   ├── ai-processing/     # Trang xử lý AI
+│   └── globals.css        # CSS toàn cục
+├── components/            # React components
+│   ├── ui/               # UI components cơ bản
+│   │   ├── Button.tsx    # Component Button
+│   │   ├── Input.tsx     # Component Input
+│   │   ├── Card.tsx      # Component Card
+│   │   └── index.ts      # Export tất cả UI components
+│   ├── layout/           # Layout components
+│   │   ├── Header.tsx    # Header component
+│   │   ├── Footer.tsx    # Footer component
+│   │   ├── MainLayout.tsx # Layout chính
+│   │   └── index.ts      # Export layout components
+│   └── Sidebar.tsx       # Sidebar navigation
+├── hooks/                 # Custom React hooks
+│   └── useAuth.ts        # Authentication hook
+├── lib/                   # Thư viện và utilities
+│   ├── api.ts            # API client và services
+│   └── constants.ts      # Constants và configuration
+├── types/                 # TypeScript type definitions
+│   └── index.ts          # Common types và interfaces
+└── utils/                 # Utility functions
+    ├── cn.ts             # Class name utility
+    └── helpers.ts        # Helper functions
+```
 
-## 🚀 Cài đặt và chạy
+## 🎨 UI Components
 
-### 1. Cài đặt dependencies
+### Button Component
+```tsx
+import { Button } from '@/components/ui/Button'
 
+<Button variant="primary" size="lg" loading={isLoading}>
+  Click me
+</Button>
+```
+
+**Variants**: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`
+**Sizes**: `default`, `sm`, `lg`, `icon`
+
+### Input Component
+```tsx
+import { Input } from '@/components/ui/Input'
+
+<Input
+  label="Email"
+  type="email"
+  error="Email không hợp lệ"
+  leftIcon={<MailIcon />}
+/>
+```
+
+### Card Component
+```tsx
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+
+<Card>
+  <CardHeader>
+    <CardTitle>Tiêu đề</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Nội dung card
+  </CardContent>
+</Card>
+```
+
+## 🏗️ Layout System
+
+### MainLayout
+Layout chính với sidebar, header và footer tùy chỉnh được.
+
+### Layout Variants
+- **DashboardLayout**: Layout cho dashboard (có sidebar, header, không có footer)
+- **AuthLayout**: Layout cho trang đăng nhập/đăng ký (không có sidebar, header)
+- **PublicLayout**: Layout cho trang công khai (có header, footer, không có sidebar)
+
+```tsx
+import { DashboardLayout } from '@/components/layout'
+
+export default function DashboardPage() {
+  return (
+    <DashboardLayout>
+      <h1>Dashboard Content</h1>
+    </DashboardLayout>
+  )
+}
+```
+
+## 🔧 Cấu hình
+
+### Environment Variables
+Tạo file `.env` từ `.env.example`:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_AUTH_ENABLED=true
+
+# Service URLs
+NEXT_PUBLIC_AI_SERVICE_URL=http://localhost:8017
+NEXT_PUBLIC_FILE_STORAGE_URL=http://localhost:8012
+NEXT_PUBLIC_CONTRACT_SERVICE_URL=http://localhost:8003
+NEXT_PUBLIC_USER_SERVICE_URL=http://localhost:8002
+```
+
+### Tailwind CSS
+Cấu hình Tailwind với custom colors, animations và utilities:
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: { /* custom primary colors */ }
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out'
+      }
+    }
+  }
+}
+```
+
+## 🚀 Chạy dự án
+
+### Yêu cầu hệ thống
+- Node.js 18+ 
+- npm hoặc yarn
+
+### Cài đặt dependencies
 ```bash
 npm install
 ```
 
-### 2. Cấu hình môi trường
-
-Tạo file `.env.local` từ `.env.example`:
-
-```bash
-cp .env.example .env.local
-```
-
-Cập nhật các biến môi trường cần thiết:
-
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-```
-
-### 3. Chạy ứng dụng
-
-#### Development mode
-
+### Chạy development server
 ```bash
 npm run dev
 ```
 
-Ứng dụng sẽ chạy tại: http://localhost:8000
+Dự án sẽ chạy tại `http://localhost:3000`
 
-#### Production build
-
+### Build production
 ```bash
 npm run build
 npm start
 ```
 
-### 4. Kiểm tra code
-
+### Kiểm tra TypeScript
 ```bash
-npm run lint
 npm run type-check
 ```
 
-## 📁 Cấu trúc thư mục
-
-```
-src/
-├── app/                    # App Router (Next.js 13+)
-│   ├── contracts/         # Trang quản lý hợp đồng
-│   ├── ai-processing/     # Trang xử lý AI
-│   ├── globals.css        # CSS toàn cục
-│   ├── layout.tsx         # Layout chính
-│   └── page.tsx           # Trang chủ
-├── components/             # React components
-│   └── Sidebar.tsx        # Component sidebar navigation
-├── hooks/                  # Custom React hooks
-│   └── useAuth.ts         # Hook xác thực
-├── lib/                    # Utilities và services
-│   └── api.ts             # API client
-├── types/                  # TypeScript type definitions
-│   └── index.ts           # Types chính
-└── utils/                  # Helper functions
-```
-
-## 🔧 Cấu hình
-
-### Tailwind CSS
-
-Tailwind CSS được cấu hình với các component classes tùy chỉnh:
-
-- `.btn-primary`: Nút chính
-- `.btn-secondary`: Nút phụ
-- `.btn-danger`: Nút nguy hiểm
-- `.input-field`: Input field
-- `.card`: Card container
-- `.sidebar-item`: Sidebar navigation item
-
-### API Integration
-
-Ứng dụng tích hợp với các microservices backend:
-
-- **Contract Management Service**: Quản lý hợp đồng
-- **User Management Service**: Quản lý người dùng
-- **AI Processing Service**: Xử lý AI
-- **File Storage Service**: Lưu trữ file
-
-## 🎨 UI Components
-
-### Button Components
-
-```tsx
-<button className="btn-primary">Nút chính</button>
-<button className="btn-secondary">Nút phụ</button>
-<button className="btn-danger">Nút nguy hiểm</button>
-```
-
-### Form Components
-
-```tsx
-<input className="input-field" placeholder="Nhập dữ liệu..." />
-<textarea className="input-field" rows={4} />
-```
-
-### Layout Components
-
-```tsx
-<div className="card">
-  <h3>Tiêu đề</h3>
-  <p>Nội dung</p>
-</div>
-```
-
-## 🔐 Authentication
-
-Hệ thống xác thực sử dụng JWT tokens:
-
-- **Login**: Đăng nhập với username/password
-- **Register**: Đăng ký tài khoản mới
-- **Token Refresh**: Tự động refresh token
-- **Route Protection**: Bảo vệ các route cần xác thực
-
-### Sử dụng Auth Hook
-
-```tsx
-import { useAuth } from '@/hooks/useAuth'
-
-function MyComponent() {
-  const { user, login, logout } = useAuth()
-  
-  if (!user) {
-    return <div>Vui lòng đăng nhập</div>
-  }
-  
-  return (
-    <div>
-      <p>Xin chào, {user.fullName}!</p>
-      <button onClick={logout}>Đăng xuất</button>
-    </div>
-  )
-}
+### Lint code
+```bash
+npm run lint
 ```
 
 ## 📱 Responsive Design
 
-Ứng dụng được thiết kế responsive với các breakpoints:
+Dự án sử dụng mobile-first approach với các breakpoints:
 
-- **Mobile**: < 640px
-- **Tablet**: 640px - 1024px
-- **Desktop**: > 1024px
+- **Mobile**: `< 640px`
+- **Tablet**: `640px - 1024px`
+- **Desktop**: `> 1024px`
 
-## 🚀 Deployment
+## 🎯 Best Practices
 
-### Vercel (Khuyến nghị)
+### Code Organization
+- Sử dụng TypeScript strict mode
+- Tách biệt logic business và UI components
+- Sử dụng custom hooks cho state management
+- Tổ chức components theo atomic design
 
-1. Push code lên GitHub
-2. Kết nối repository với Vercel
-3. Cấu hình environment variables
-4. Deploy tự động
+### Performance
+- Lazy loading cho components
+- Image optimization với Next.js Image
+- Code splitting tự động
+- Bundle analysis và optimization
 
-### Docker
+### Accessibility
+- Semantic HTML
+- ARIA labels
+- Keyboard navigation
+- Screen reader support
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 8000
-CMD ["npm", "start"]
-```
+## 🔒 Bảo mật
 
-## 📊 Performance
-
-- **Code Splitting**: Tự động với Next.js
-- **Image Optimization**: Sử dụng Next.js Image component
-- **Lazy Loading**: Components được load khi cần
-- **Bundle Analysis**: Sử dụng `@next/bundle-analyzer`
+- JWT authentication
+- Role-based access control
+- Input validation
+- XSS protection
+- CSRF protection
 
 ## 🧪 Testing
 
@@ -222,26 +238,52 @@ npm run test:e2e
 npm run test:coverage
 ```
 
-## 📝 Contributing
+## 📦 Deployment
 
-1. Fork repository
-2. Tạo feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
+### Vercel (Recommended)
+```bash
+npm install -g vercel
+vercel
+```
+
+### Docker
+```bash
+docker build -t docgo-web .
+docker run -p 3000:3000 docgo-web
+```
+
+### Manual Deployment
+```bash
+npm run build
+# Copy .next folder to server
+npm start
+```
+
+## 🤝 Contributing
+
+1. Fork dự án
+2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Tạo Pull Request
 
 ## 📄 License
 
-Dự án này được phát triển bởi DevGO2003 và được cấp phép theo MIT License.
+Dự án này được phát hành dưới MIT License - xem file [LICENSE](LICENSE) để biết thêm chi tiết.
 
-## 🤝 Support
+## 📞 Hỗ trợ
 
-Nếu bạn gặp vấn đề hoặc có câu hỏi:
+- **Email**: support@docgo.com
+- **Documentation**: [docs.docgo.com](https://docs.docgo.com)
+- **Issues**: [GitHub Issues](https://github.com/DevGO2003/DocGO/issues)
 
-- Tạo issue trên GitHub
-- Liên hệ team phát triển
-- Tham khảo tài liệu API
+## 🙏 Acknowledgments
+
+- Next.js team cho framework tuyệt vời
+- Tailwind CSS team cho utility-first CSS
+- Heroicons team cho icon library
+- Cộng đồng open source
 
 ---
 
-**DocGO Web Frontend** - Quản lý tài liệu thông minh với AI 🚀
+**Phát triển bởi DevGO2003** 🚀

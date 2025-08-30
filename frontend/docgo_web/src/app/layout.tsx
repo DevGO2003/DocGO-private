@@ -1,16 +1,37 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from '@/hooks/useAuth'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'DocGO - Quản lý tài liệu thông minh',
-  description: 'Hệ thống quản lý tài liệu và hợp đồng thông minh với AI',
-  keywords: 'DocGO, quản lý tài liệu, AI, hợp đồng, OCR',
+  title: 'DocGO - Quản lý tài liệu và hợp đồng thông minh',
+  description: 'Nền tảng quản lý tài liệu và hợp đồng thông minh, giúp doanh nghiệp tối ưu hóa quy trình làm việc và tăng hiệu quả kinh doanh.',
+  keywords: 'quản lý tài liệu, hợp đồng, AI, tự động hóa, doanh nghiệp',
   authors: [{ name: 'DevGO2003' }],
-  viewport: 'width=device-width, initial-scale=1',
+  creator: 'DevGO2003',
+  publisher: 'DevGO2003',
+  robots: 'index, follow',
+  openGraph: {
+    title: 'DocGO - Quản lý tài liệu và hợp đồng thông minh',
+    description: 'Nền tảng quản lý tài liệu và hợp đồng thông minh, giúp doanh nghiệp tối ưu hóa quy trình làm việc.',
+    type: 'website',
+    locale: 'vi_VN',
+    siteName: 'DocGO',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DocGO - Quản lý tài liệu và hợp đồng thông minh',
+    description: 'Nền tảng quản lý tài liệu và hợp đồng thông minh, giúp doanh nghiệp tối ưu hóa quy trình làm việc.',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#2563eb',
 }
 
 export default function RootLayout({
@@ -21,19 +42,33 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
+        <AuthProvider>
           {children}
-        </div>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-          }}
-        />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff',
+              },
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                duration: 5000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
   )

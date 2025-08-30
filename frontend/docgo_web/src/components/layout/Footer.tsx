@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { APP_CONFIG } from '@/utils/constants'
+import { APP_CONFIG } from '@/lib/constants'
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()

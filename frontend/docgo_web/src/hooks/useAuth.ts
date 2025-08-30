@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect, createContext, useContext } from 'react'
-import { User, LoginCredentials, RegisterData, AuthResponse } from '@/types'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { toast } from 'react-hot-toast'
 import { authAPI } from '@/lib/api'
-import toast from 'react-hot-toast'
+import { User, AuthResponse, LoginCredentials, RegisterData } from '@/types'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (credentials: LoginCredentials) => Promise<boolean>
+  login: (data: LoginCredentials) => Promise<boolean>
   register: (data: RegisterData) => Promise<boolean>
   logout: () => void
   refreshToken: () => Promise<void>
@@ -16,7 +16,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -27,7 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (token && userData) {
       try {
-        setUser(JSON.parse(userData))
+        const user = JSON.parse(userData)
+        setUser(user)
       } catch (error) {
         console.error('Error parsing user data:', error)
         localStorage.removeItem('auth_token')
@@ -38,13 +43,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
   }, [])
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = async (data: LoginCredentials): Promise<boolean> => {
     try {
       setLoading(true)
-      const response = await authAPI.login(credentials)
+      const response = await authAPI.login(data)
       const authData: AuthResponse = response.data.data
 
-      // Store tokens and user data
       localStorage.setItem('auth_token', authData.accessToken)
       localStorage.setItem('refresh_token', authData.refreshToken)
       localStorage.setItem('user_data', JSON.stringify(authData.user))
@@ -114,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshToken,
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return React.createElement(AuthContext.Provider, { value }, children)
 }
 
 export function useAuth() {
