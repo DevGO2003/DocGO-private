@@ -9,7 +9,7 @@ Thư mục này chứa các tài liệu và dữ liệu để test dự án DocG
 - **HopDongMauGDP.pdf**: Hợp đồng mẫu GDP để test các trường hợp khác nhau
 
 ### Dữ liệu JSON
-- **Tóm tắt hợp đồng.json**: Dữ liệu JSON mẫu cho hợp đồng
+- **contract-summary.json**: Dữ liệu JSON mẫu cho hợp đồng
 - **Tóm tắt hợp đồng (1).json**: Dữ liệu JSON mẫu bổ sung
 
 ### File test khác
