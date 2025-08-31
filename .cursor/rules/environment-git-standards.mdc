@@ -1,0 +1,136 @@
+## Tệp môi trường (.env, .env.example)
+
+- **Mỗi microservice PHẢI kèm tệp `.env.example`** tại thư mục gốc của service.
+- `.env.example` liệt kê đầy đủ các biến môi trường tối thiểu để chạy local và kiểm thử; **KHÔNG chứa secrets thật**.
+- Trước khi chạy, developer tạo `.env` từ `.env.example`. Hướng dẫn chạy phải có bước:
+  - PowerShell: `Copy-Item .env.example .env -Force`
+- **Python (FastAPI)**: dùng `python-dotenv` để tự động nạp `.env` (đã có trong cấu hình hiện tại).
+- **Java (Spring Boot)**: `.env.example` đóng vai trò template biến môi trường; giá trị thực được truyền qua system env và/hoặc cấu hình `application.properties`. Ưu tiên cho phép env override properties theo chuẩn Spring.
+
+## Quy tắc .gitignore
+
+- **MỌI microservice PHẢI có file `.gitignore`** tại thư mục gốc của service.
+- **KHÔNG BAO GIỜ commit** các file sau vào Git:
+  - File môi trường chứa secrets: `.env`, `.env.local`, `.env.production`
+  - File build/compiled: `__pycache__/`, `*.pyc`, `*.pyo`, `*.pyd`, `target/`, `build/`, `dist/`, `.next/`, `node_modules/`
+  - File log: `*.log`, `logs/`, `*.out`
+  - File IDE/Editor: `.vscode/`, `.idea/`, `*.swp`, `*.swo`, `*~`
+  - File OS: `.DS_Store`, `Thumbs.db`, `desktop.ini`
+  - File tạm thời: `*.tmp`, `*.temp`, `*.bak`, `*.backup`
+  - File database: `*.db`, `*.sqlite`, `*.sqlite3`
+  - File upload/temp: `uploads/`, `temp/`, `tmp/`, `results/`
+
+### Quy tắc .gitignore theo loại service:
+
+**Python (FastAPI)**: 
+- `__pycache__/`, `*.pyc`, `*.pyo`, `*.pyd`
+- `venv/`, `env/`, `.venv/`, `.env/`
+- `*.log`, `logs/`
+- `.pytest_cache/`, `htmlcov/`, `.coverage`
+
+**Java (Spring Boot)**:
+- `target/`, `build/`, `out/`
+- `*.class`, `*.jar`, `*.war`
+- `.gradle/`, `gradle-app.setting`
+- `*.log`, `logs/`
+
+**Node.js/Next.js**:
+- `node_modules/`, `npm-debug.log*`, `yarn-debug.log*`, `yarn-error.log*`
+- `.next/`, `out/`, `build/`, `dist/`
+- `.env.local`, `.env.development.local`, `.env.test.local`, `.env.production.local`
+- `*.log`, `logs/`
+
+### Quy tắc bảo mật:
+- **KHÔNG BAO GIỜ commit** file `.env` chứa secrets thật
+- **LUÔN commit** file `.env.example` làm template
+- **KIỂM TRA** `.gitignore` trước mỗi commit để đảm bảo không có file nhạy cảm
+- **SỬ DỤNG** `.gitignore` global cho workspace nếu cần thiết
+
+## Quản lý Remote Repository
+
+- **Remote chính**: `origin` → `https://github.com/DevGO2003/DocGO` (public, không chứa secrets)
+- **Remote private**: `private` → `https://github.com/DevGO2003/DocGO-private` (chứa secrets, file nhạy cảm)
+- **Quy tắc sử dụng**:
+  - `origin`: Code nguồn, cấu hình cơ bản, tài liệu công khai
+  - `private`: API keys, database credentials, file nhạy cảm, logs, build artifacts
+
+**Cách thêm remote private**:
+```bash
+git remote add private https://github.com/DevGO2003/DocGO-private.git
+git remote -v  # Kiểm tra remotes
+```
+
+### Quy tắc đồng bộ hóa tự động:
+- **Khi push lên `origin`**: Tự động đồng bộ sang `private` để đảm bảo cả hai remote luôn có code mới nhất
+- **Khi push lên `private`**: Chỉ push secrets và file nhạy cảm, không đồng bộ ngược về `origin`
+
+### Quy trình push và đồng bộ hóa:
+
+#### **1. Push code công khai (khuyến nghị)**:
+```bash
+# Bước 1: Push lên origin
+git add .  # Code nguồn, không có secrets
+git commit -m "feat: thêm tính năng mới"
+git push origin main
+
+# Bước 2: Tự động đồng bộ sang private (đồng bộ code nguồn)
+git push private main
+```
+
+#### **2. Push code nhạy cảm**:
+```bash
+# Chỉ push file nhạy cảm lên private
+git add .env  # File chứa secrets
+git commit -m "feat: thêm cấu hình môi trường"
+git push private main  # KHÔNG push lên origin
+```
+
+#### **3. Đồng bộ hóa thủ công (nếu cần)**:
+```bash
+# Đồng bộ từ origin sang private (để lấy code mới nhất)
+git fetch origin
+git checkout main
+git pull origin main
+git push private main
+
+# Đồng bộ từ private sang origin (chỉ khi cần thiết)
+git fetch private
+git checkout main
+git pull private main
+git push origin main
+```
+
+### Quy tắc bảo mật khi đồng bộ hóa:
+- **KHÔNG BAO GIỜ** push file `.env` chứa secrets thật lên `origin`
+- **LUÔN** kiểm tra `.gitignore` trước khi push để đảm bảo không có file nhạy cảm
+- **Ưu tiên** push lên `origin` trước, sau đó đồng bộ sang `private`
+- **Kiểm tra** trạng thái remote trước khi push để tránh conflict
+
+### Script tự động hóa đồng bộ hóa:
+```bash
+# Script push và đồng bộ hóa tự động
+git_push_and_sync() {
+    local commit_message="$1"
+    local branch="${2:-main}"
+    
+    # Commit changes
+    git add .
+    git commit -m "$commit_message"
+    
+    # Push to origin
+    echo "Pushing to origin..."
+    git push origin "$branch"
+    
+    # Sync to private
+    echo "Syncing to private..."
+    git push private "$branch"
+    
+    echo "Push and sync completed successfully!"
+}
+
+# Sử dụng: git_push_and_sync "feat: thêm tính năng mới"
+```
+description:
+globs:
+alwaysApply: true
+---

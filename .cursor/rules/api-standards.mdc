@@ -1,0 +1,101 @@
+---
+description: API Standardization Rules for DocGO - URL, payload, response format
+globs: ["**/*.java", "**/*.py", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
+---
+
+### API Standardization for DocGO (applies to ai-processing-service and contract-management-service)
+
+Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `contract-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `ai-processing-service` (FastAPI) và hướng tới đồng nhất giữa các service.
+
+## 1) Quy tắc URL
+- Base path: `/api/v1/{service-name}/...`
+- `service-name` dùng kebab-case trùng tên service trong code:
+  - `ai-processing-service`
+  - `contract-management-service`
+- Tài nguyên (resource) dùng số nhiều, kebab-case: `contracts`, `events`, `attachments`.
+- Hành động (sub-resource) dùng tiếp đầu ngữ theo REST; chỉ khi là hành động phi-CRUD rõ ràng thì dùng hậu tố dạng action:
+  - Chuẩn REST: `POST /contracts`, `GET /contracts`, `GET /contracts/{id}`, `PUT /contracts/{id}`, `DELETE /contracts/{id}`
+  - Sub-resource: `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments`, `PUT /contracts/{id}/restore`
+  - Tác vụ AI chuyên biệt (file hoặc chuỗi):
+    - `POST /ai-processing-service/extract`
+    - `POST /ai-processing-service/summarize`
+- Query chuẩn phân trang, sắp xếp và lọc (giữ nguyên như trong controller):
+  - `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
+
+## 2) Tên hàm handler (Controller/Router)
+- Java (Spring): dùng động từ rõ ràng, hiện tại đơn và mô tả ngắn: `createContract`, `getAllContracts`, `getContract`, `updateContract`, `softDeleteContract`, `restoreContract`, `getContractEvents`, `getAttachments`.
+- Python (FastAPI): dùng snake_case tương đương: `extract_api`, `summarize_api`.
+- Tên biến path: dùng `{id}` cho định danh chính; sub-resource đặt sau `{id}`.
+
+## 3) Payload và Content-Type
+- CRUD JSON: `application/json` với body là DTO/entity tương ứng.
+- Upload file: `multipart/form-data` với trường `file` (FastAPI) hoặc `@RequestPart`/`MultipartFile` (Spring) nếu có.
+- AI summarize cho phép 2 dạng đầu vào (chỉ 1 trong 2):
+  - `multipart/form-data`: `file` (txt)
+  - `application/json`: `{ "text": "..." }`
+- Phân trang: dùng query params như mục 1.
+
+## 4) Chuẩn hóa Response Envelope (RestResponse)
+- Tất cả response nên bọc trong cấu trúc sau để đồng nhất giữa Java và Python:
+```
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success | Not Found | Bad Request | Conflict | No Content | Internal Server Error",
+  "description": "Mô tả ngắn gọn kết quả",
+  "data": <object|null>,
+  "timestamp": <ISO-8601>,
+  "requestId": <uuid>,
+  "path": "/api/v1/..."
+}
+```
+- Java đã có `RestResponse<T>` và `GlobalExceptionHandler` sinh đúng schema. Python service cần trả về cùng định dạng (đã có trong router của AI service; tiếp tục duy trì).
+- HTTP status:
+  - 201 Created: tạo mới
+  - 200 OK: trả dữ liệu thành công
+  - 204 No Content: không có dữ liệu (Java hiện dùng `NoContentException` → handler trả 204)
+  - 400 Bad Request: dữ liệu không hợp lệ (validation)
+  - 404 Not Found: không tìm thấy tài nguyên
+  - 409 Conflict: xung đột nghiệp vụ
+  - 500 Internal Server Error: lỗi không lường trước
+
+## 5) Ví dụ mô hình hóa từ hiện trạng
+- Tạo hợp đồng (Java):
+  - `POST /api/v1/contract-management-service/contracts`
+  - Body: `Contract` JSON (không gửi `id` khi tạo)
+  - 201 + `RestResponse<Contract>`
+
+- Danh sách hợp đồng (Java):
+  - `GET /api/v1/contract-management-service/contracts?pageNumber=0&pageSize=10&sortBy=...`
+  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 204 No Content
+
+- Lấy chi tiết (Java):
+  - `GET /api/v1/contract-management-service/contracts/{id}` → 200 hoặc 404
+
+- Khôi phục (Java):
+  - `PUT /api/v1/contract-management-service/contracts/{id}/restore` → 200
+
+- AI Extract (Python):
+  - `POST /api/v1/ai-processing-service/extract`
+  - multipart: `file` (docx/pdf) + header `GEMINI_API_KEY` (tùy chọn)
+  - 200 + `RestResponse<string>` nội dung trích xuất
+
+- AI Summarize (Python):
+  - `POST /api/v1/ai-processing-service/summarize`
+  - multipart `file` (txt) hoặc JSON `{ "text": "..." }`
+  - 200 + `RestResponse<object|string>`; có làm sạch JSON trong handler
+
+## 6) Quy ước đặt tên mã nguồn
+- Controller class (Java): `*Controller` theo tài nguyên chính, ví dụ `ContractController`.
+- Service class (Java): `*Service` với nghiệp vụ: `ContractService`.
+- Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`extract_api`, `summarize_api`).
+- Tên biến phản ánh ý nghĩa nghiệp vụ, tránh viết tắt.
+
+## 7) Bảo mật và versioning
+- Luôn đặt tiền tố `/api/v1/…`. Khi thay đổi lớn không tương thích, phát hành `/api/v2/…` song song.
+- Định nghĩa rõ header bảo mật (ví dụ JWT) ở tài liệu, ngay trong phần mô tả endpoint.
+
+---
+
+When adding new APIs in the above 2 services, please follow these rules to ensure consistency, readability and easy integration.
