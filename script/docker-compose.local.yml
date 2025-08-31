@@ -76,11 +76,14 @@ services:
     working_dir: /app
     ports:
       - "8000:8000"
+    env_file:
+      - ../backend/api-gateway-bff/.env
     environment:
       - NODE_ENV=development
       - PORT=8000
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BROKERS=kafka:29092
       # Service URLs for all 19 microservices
       - API_GATEWAY_BFF_URL=http://localhost:8000
       - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8001
@@ -121,6 +124,8 @@ services:
     working_dir: /app
     ports:
       - "8002:8002"
+    env_file:
+      - ../backend/user-management-service/.env
     environment:
       - HOST=0.0.0.0
       - PORT=8002
@@ -128,6 +133,7 @@ services:
       - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/user-management-service:/app
     command: >
@@ -147,6 +153,8 @@ services:
     working_dir: /app
     ports:
       - "8001:8001"
+    env_file:
+      - ../backend/authentication-identity-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8001
@@ -155,6 +163,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=docgo_password
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/authentication-identity-service:/app
     command: >
@@ -174,6 +183,8 @@ services:
     working_dir: /app
     ports:
       - "8012:8012"
+    env_file:
+      - ../backend/file-storage-asset-service/.env
     environment:
       - HOST=0.0.0.0
       - PORT=8012
@@ -203,11 +214,12 @@ services:
     working_dir: /app
     ports:
       - "8017:8017"
+    env_file:
+      - ../backend/ai-processing-service/.env
     environment:
       - HOST=0.0.0.0
       - PORT=8017
       - PYTHONPATH=/app
-      - GEMINI_API_KEY=hHlL3ELm8Gp_RIYL1EZCpOnyAA
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
@@ -230,6 +242,8 @@ services:
     working_dir: /app
     ports:
       - "8003:8003"
+    env_file:
+      - ../backend/contract-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo_contract_service
@@ -259,6 +273,8 @@ services:
     working_dir: /app
     ports:
       - "8018:8018"
+    env_file:
+      - ../backend/general-file-management-service/.env
     environment:
       - HOST=0.0.0.0
       - PORT=8018
