@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractClauseDto {
+public class ContractKeyTermDto {
     private String name;
     private String description;
     private String source;

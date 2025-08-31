@@ -36,7 +36,7 @@ services:
     volumes:
       - mariadb_data_local:/var/lib/mysql
       - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
-      - ../backend/contract-management-service/database/contract_schema_v5_validation.sql:/docker-entrypoint-initdb.d/contract_schema_v5_validation.sql
+      - ../backend/contract-management-service/database/contract_schema_v6_enhanced.sql:/docker-entrypoint-initdb.d/contract_schema_v6_enhanced.sql
     networks:
       - docgo_network_local
 

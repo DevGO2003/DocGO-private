@@ -13,6 +13,10 @@ import com.devgo2003.docgo.contract_service.repository.ContractPartyRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractPaymentDetailRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRiskAssessmentRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractComplianceStatusRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractKeyTermRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractFavorableClauseRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractUnfavorableClauseRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractTerminationConditionRepository;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
@@ -59,6 +63,10 @@ public class ContractService {
     private final ContractPaymentDetailRepository paymentDetailRepository;
     private final ContractRiskAssessmentRepository riskAssessmentRepository;
     private final ContractComplianceStatusRepository complianceStatusRepository;
+    private final ContractKeyTermRepository keyTermRepository;
+    private final ContractFavorableClauseRepository favorableClauseRepository;
+    private final ContractUnfavorableClauseRepository unfavorableClauseRepository;
+    private final ContractTerminationConditionRepository terminationConditionRepository;
     private final ContractEventPublisher eventPublisher;
     private final ContractStatusEventPublisher contractStatusEventPublisher;
     private final ObjectMapper objectMapper;
@@ -78,6 +86,10 @@ public class ContractService {
                            ContractPaymentDetailRepository paymentDetailRepository,
                            ContractRiskAssessmentRepository riskAssessmentRepository,
                            ContractComplianceStatusRepository complianceStatusRepository,
+                           ContractKeyTermRepository keyTermRepository,
+                           ContractFavorableClauseRepository favorableClauseRepository,
+                           ContractUnfavorableClauseRepository unfavorableClauseRepository,
+                           ContractTerminationConditionRepository terminationConditionRepository,
                            ContractEventPublisher eventPublisher,
                            ContractStatusEventPublisher contractStatusEventPublisher,
                            ObjectMapper objectMapper,
@@ -90,6 +102,10 @@ public class ContractService {
         this.paymentDetailRepository = paymentDetailRepository;
         this.riskAssessmentRepository = riskAssessmentRepository;
         this.complianceStatusRepository = complianceStatusRepository;
+        this.keyTermRepository = keyTermRepository;
+        this.favorableClauseRepository = favorableClauseRepository;
+        this.unfavorableClauseRepository = unfavorableClauseRepository;
+        this.terminationConditionRepository = terminationConditionRepository;
         this.eventPublisher = eventPublisher;
         this.contractStatusEventPublisher = contractStatusEventPublisher;
         this.objectMapper = objectMapper;
