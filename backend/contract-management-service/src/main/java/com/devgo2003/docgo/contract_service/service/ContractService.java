@@ -62,6 +62,7 @@ public class ContractService {
     private final ContractEventPublisher eventPublisher;
     private final ContractStatusEventPublisher contractStatusEventPublisher;
     private final ObjectMapper objectMapper;
+    private final ContractValidationService validationService;
 
     private static final Set<String> VALID_SORT_BY_PROPERTIES = new HashSet<>(Arrays.asList(
             "id", "contractNumber", "title", "status", "partiesJson", "startDate", "endDate", "systemId",
@@ -79,7 +80,8 @@ public class ContractService {
                            ContractComplianceStatusRepository complianceStatusRepository,
                            ContractEventPublisher eventPublisher,
                            ContractStatusEventPublisher contractStatusEventPublisher,
-                           ObjectMapper objectMapper) {
+                           ObjectMapper objectMapper,
+                           ContractValidationService validationService) {
         this.contractRepository = contractRepository;
         this.attachmentRepository = attachmentRepository;
         this.eventRepository = eventRepository;
@@ -91,6 +93,7 @@ public class ContractService {
         this.eventPublisher = eventPublisher;
         this.contractStatusEventPublisher = contractStatusEventPublisher;
         this.objectMapper = objectMapper;
+        this.validationService = validationService;
     }
 
     /**
@@ -103,6 +106,10 @@ public class ContractService {
 
     @Transactional
     public Contract createContract(Contract contract) {
+        // Validate contract data
+        ContractDetailDto contractDto = convertToContractDetailDto(contract);
+        validationService.validateContractCreation(contractDto);
+        
         contract.setContractNumber("CONTRACT-" + System.currentTimeMillis());
         contract.setStatus(Contract.ContractStatus.DRAFT);
 
@@ -182,6 +189,15 @@ public class ContractService {
             throw new ConflictException("Không thể cập nhật hợp đồng đã bị xóa");
         }
 
+        // Validate status transition
+        if (!existingContract.getStatus().equals(updatedContract.getStatus())) {
+            validationService.validateStatusTransition(existingContract.getStatus().name(), updatedContract.getStatus().name());
+        }
+
+        // Validate updated contract data
+        ContractDetailDto contractDto = convertToContractDetailDto(updatedContract);
+        validationService.validateContractUpdate(id, contractDto);
+
         existingContract.setTitle(updatedContract.getTitle());
         existingContract.setStatus(updatedContract.getStatus());
         existingContract.setPartiesJson(updatedContract.getPartiesJson());
@@ -209,6 +225,9 @@ public class ContractService {
         if (contract.getIsDeleted()) {
             throw new ConflictException("Hợp đồng đã bị xóa trước đó");
         }
+
+        // Validate contract for deletion
+        validationService.validateContractDeletion(contract);
 
         contract.markAsDeleted("system");
         contract.setStatus(Contract.ContractStatus.EXPIRED);
