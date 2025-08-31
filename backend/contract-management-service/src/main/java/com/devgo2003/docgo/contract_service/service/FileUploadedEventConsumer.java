@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Service
+// @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FileUploadedEventConsumer {
@@ -23,11 +23,11 @@ public class FileUploadedEventConsumer {
     /**
      * Consume FileUploaded events từ File Storage Service
      */
-    @KafkaListener(
-            topics = "${app.kafka.topic.file-events:file.events}",
-            groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //     topics = "${app.kafka.topic.file-events:file.events}",
+    //     groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
+    //     containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void consumeFileUploadedEvent(String eventJson) {
         String correlationId = "unknown";
         String fileId = "unknown";

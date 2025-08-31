@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-@Service
+// @Service
 public class ContractKafkaService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractKafkaService.class);
@@ -43,7 +43,7 @@ public class ContractKafkaService {
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */
-    @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "contract-management-service-group")
+    // @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "contract-management-service-group")
     public void handleSummaryCreated(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
@@ -143,7 +143,7 @@ public class ContractKafkaService {
     /**
      * Lưu thông tin summary chi tiết vào database
      */
-    private void saveContractSummary(Long contractId, Map<String, Object> fileInformation, Map<String, Object> contractSummary, Map<String, Object> event) {
+    private void saveContractSummary(String contractId, Map<String, Object> fileInformation, Map<String, Object> contractSummary, Map<String, Object> event) {
         try {
             // Kiểm tra null cho các tham số
             if (contractId == null || fileInformation == null || contractSummary == null || event == null) {
@@ -420,7 +420,7 @@ public class ContractKafkaService {
     /**
      * Publish contract-updated event
      */
-    private void publishContractUpdated(Map<String, Object> originalEvent, Map<String, Object> data, Map<String, Object> actor, String fileId, Long contractId) {
+    private void publishContractUpdated(Map<String, Object> originalEvent, Map<String, Object> data, Map<String, Object> actor, String fileId, String contractId) {
         String correlationId = (String) originalEvent.get("correlationId");
         logger.info("📢 [CONTRACT_UPDATED_PUBLISH_START] Bắt đầu publish ContractUpdated event - fileId: {}, contractId: {}, correlationId: {}", 
                     fileId, contractId, correlationId);

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.Map;
 
-@Service
+// @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ContractEventConsumer {
@@ -21,11 +21,11 @@ public class ContractEventConsumer {
     /**
      * Consume contract events từ các service khác
      */
-    @KafkaListener(
-            topics = "${app.kafka.topic.contract-events:contract.events}",
-            groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //         topics = "${app.kafka.topic.contract-events:contract.events}",
+    //         groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
+    //         containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void consumeContractEvent(String eventJson) {
         String correlationId = "unknown";
         String eventType = "unknown";

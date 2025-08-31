@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-@Component
+// @Component
 public class AiEventKafkaListener {
     private static final Logger logger = LoggerFactory.getLogger(AiEventKafkaListener.class);
     
@@ -22,11 +22,11 @@ public class AiEventKafkaListener {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(
-        topics = "${app.kafka.topic.ai-events:ai-events}",
-        groupId = "${app.kafka.group-id:contract-service-group}",
-        containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //     topics = "${app.kafka.topic.ai-events:ai-events}",
+    //     groupId = "${app.kafka.group-id:contract-service-group}",
+    //     containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void handleAiEvent(String eventJson) {
         try {
             logger.info("Received AI event: {}", eventJson);

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-@Service
+// @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FileProcessingStatusConsumer {
@@ -20,11 +20,11 @@ public class FileProcessingStatusConsumer {
     /**
      * Consume file processing status events từ AI Processing Service
      */
-    @KafkaListener(
-            topics = "${app.kafka.topic.file-processing-status:file-processing-status}",
-            groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //         topics = "${app.kafka.topic.file-processing-status:file-processing-status}",
+    //         groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
+    //         containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void consumeFileProcessingStatus(String eventJson) {
         String correlationId = "unknown";
         String eventType = "unknown";

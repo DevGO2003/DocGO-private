@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Service
+// @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AIEventsConsumer {
@@ -26,11 +26,11 @@ public class AIEventsConsumer {
     @Value("${app.kafka.topic.contract-events:contract.events}")
     private String contractEventsTopic;
 
-    @KafkaListener(
-            topics = "${app.kafka.topic.ai-events:ai.events}",
-            groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //         topics = "${app.kafka.topic.ai-events:ai.events}",
+    //         groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
+    //         containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void consumeAIEvents(ConsumerRecord<String, String> record) {
         String eventType = "unknown";
         String fileId = "unknown";
