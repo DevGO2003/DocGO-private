@@ -59,7 +59,7 @@ public class ContractValidationService {
     /**
      * Validate contract data before update
      */
-    public void validateContractUpdate(Long contractId, ContractDetailDto contractDto) {
+    public void validateContractUpdate(String contractId, ContractDetailDto contractDto) {
         logger.info("Validating contract update for ID: {}", contractId);
         
         // Basic field validation
@@ -232,7 +232,7 @@ public class ContractValidationService {
     /**
      * Check for duplicate contract number when updating (excluding current contract)
      */
-    private void validateNoDuplicateContractNumberForUpdate(Long contractId, String contractNumber) {
+    private void validateNoDuplicateContractNumberForUpdate(String contractId, String contractNumber) {
         if (contractRepository.existsByContractNumberAndIdNot(contractNumber, contractId)) {
             throw new ConflictException("Contract number already exists: " + contractNumber);
         }

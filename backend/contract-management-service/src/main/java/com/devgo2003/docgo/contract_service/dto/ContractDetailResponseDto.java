@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractDetailResponseDto {
-    private Long id;
+    private String id;
     private String contractNumber;
     private String title;
     private String status;

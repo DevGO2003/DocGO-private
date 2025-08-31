@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractSummaryDto {
-    private Long id;
-    private Long contractId;
+    private String id;
+    private String contractId;
     private String fileId;
     private String filename;
     private String summary;

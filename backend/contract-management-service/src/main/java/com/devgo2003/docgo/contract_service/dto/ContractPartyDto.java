@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractPartyDto {
-    private Long id;
-    private Long contractId;
+    private String id;
+    private String contractId;
     private String partyName;
     private String partyRole;
     private String representative;

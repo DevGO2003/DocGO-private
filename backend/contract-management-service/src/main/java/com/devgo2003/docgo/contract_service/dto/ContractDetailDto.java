@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ContractDetailDto {
     // Basic contract fields
-    private Long id;
+    private String id;
     private String contractNumber;
     private String title;
     private String status;

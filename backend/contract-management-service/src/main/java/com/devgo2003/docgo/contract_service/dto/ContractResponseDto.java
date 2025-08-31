@@ -19,7 +19,7 @@ import java.util.ArrayList;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContractResponseDto {
-    private Long id;
+    private String id;
     private String contractNumber;
     private String title;
     private String status;
@@ -93,14 +93,11 @@ public class ContractResponseDto {
                 .id(party.getId())
                 .contractId(party.getContractId())
                 .partyName(party.getPartyName())
-                .partyRole(party.getPartyRole())
-                .representative(party.getRepresentative())
+                .partyRole(party.getPartyType())
+                .representative(party.getContactPerson())
                 .taxCode(party.getTaxCode())
-                .contact(party.getContact())
+                .contact(party.getPhone())
                 .address(party.getAddress())
-                .businessLicense(party.getBusinessLicense())
-                .partyType(party.getPartyType() != null ? party.getPartyType().name() : null)
-                .isPrimary(party.getIsPrimary())
                 .createdAt(party.getCreatedAt())
                 .updatedAt(party.getUpdatedAt())
                 .build();
