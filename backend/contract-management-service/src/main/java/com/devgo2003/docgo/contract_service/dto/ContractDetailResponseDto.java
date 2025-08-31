@@ -77,14 +77,35 @@ public class ContractDetailResponseDto {
                 .build();
     }
     
-    private static List<ContractClauseDto> convertToClauseDtos(List<? extends ContractClauseDto> clauses) {
+    private static List<ContractClauseDto> convertToClauseDtos(List<?> clauses) {
         if (clauses == null) return null;
         return clauses.stream()
-                .map(clause -> ContractClauseDto.builder()
-                        .name(clause.getName())
-                        .description(clause.getDescription())
-                        .source(clause.getSource())
-                        .build())
+                .map(clause -> {
+                    if (clause instanceof ContractKeyTermDto) {
+                        ContractKeyTermDto dto = (ContractKeyTermDto) clause;
+                        return ContractClauseDto.builder()
+                                .name(dto.getName())
+                                .description(dto.getDescription())
+                                .source(dto.getSource())
+                                .build();
+                    } else if (clause instanceof ContractFavorableClauseDto) {
+                        ContractFavorableClauseDto dto = (ContractFavorableClauseDto) clause;
+                        return ContractClauseDto.builder()
+                                .name(dto.getName())
+                                .description(dto.getDescription())
+                                .source(dto.getSource())
+                                .build();
+                    } else if (clause instanceof ContractUnfavorableClauseDto) {
+                        ContractUnfavorableClauseDto dto = (ContractUnfavorableClauseDto) clause;
+                        return ContractClauseDto.builder()
+                                .name(dto.getName())
+                                .description(dto.getDescription())
+                                .source(dto.getSource())
+                                .build();
+                    }
+                    return null;
+                })
+                .filter(clause -> clause != null)
                 .toList();
     }
     

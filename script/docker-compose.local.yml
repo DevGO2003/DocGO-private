@@ -36,7 +36,22 @@ services:
     volumes:
       - mariadb_data_local:/var/lib/mysql
       - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
-      - ../backend/contract-management-service/database/contract_schema_v6_enhanced.sql:/docker-entrypoint-initdb.d/contract_schema_v6_enhanced.sql
+    networks:
+      - docgo_network_local
+
+  # MongoDB for Contract Management Service
+  mongodb:
+    image: mongo:7.0
+    container_name: docgo-local-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: docgo_contract_service
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_local:/data/db
     networks:
       - docgo_network_local
 
@@ -246,9 +261,9 @@ services:
       - ../backend/contract-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo_contract_service
-      - SPRING_DATASOURCE_USERNAME=docgo_user
-      - SPRING_DATASOURCE_PASSWORD=docgo_password
+      - SPRING_DATA_MONGODB_HOST=mongodb
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=docgo_contract_service
       - SERVER_PORT=8003
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - REDIS_HOST=redis
@@ -259,7 +274,7 @@ services:
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8003'"
     depends_on:
-      - mariadb
+      - mongodb
       - redis
       - elasticsearch
     networks:
@@ -297,6 +312,8 @@ services:
 
 volumes:
   mariadb_data_local:
+    driver: local
+  mongodb_data_local:
     driver: local
   redis_data_local:
     driver: local
