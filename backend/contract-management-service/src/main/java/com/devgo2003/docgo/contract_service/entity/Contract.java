@@ -1,104 +1,112 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
-@Document(collection = "contracts")
+@Entity
+@Table(name = "contracts")
 @Getter
 @Setter
 public class Contract extends BaseEntity {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Field("contract_number")
+    @Column(name = "contract_number", nullable = false, unique = true)
     private String contractNumber;
 
+    @Column(nullable = false)
     private String title;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ContractStatus status;
 
-    @Field("parties_json")
+    @Column(name = "parties_json", columnDefinition = "JSON")
     private String partiesJson;
 
-    @Field("start_date")
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Field("end_date")
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Field("system_id")
+    @Column(name = "system_id")
     private String systemId;
 
     // Thông tin tóm tắt hợp đồng
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
-    @Field("contract_type")
+    @Column(name = "contract_type")
     private String contractType;
 
-    @Field("risk_level")
+    @Column(name = "risk_level")
     private String riskLevel;
 
-    @Field("key_terms")
+    @Column(name = "key_terms", columnDefinition = "JSON")
     private String keyTerms;
     
-    @Field("favorable_clauses")
+    @Column(name = "favorable_clauses", columnDefinition = "JSON")
     private String favorableClauses;
     
-    @Field("unfavorable_clauses")
+    @Column(name = "unfavorable_clauses", columnDefinition = "JSON")
     private String unfavorableClauses;
     
-    @Field("payment_currency")
+    @Column(name = "payment_currency")
     private String paymentCurrency;
 
-    @Field("ai_processed")
+    @Column(name = "ai_processed")
     private Boolean aiProcessed = false;
 
-    @Field("processing_status")
+    @Column(name = "processing_status")
+    @Enumerated(EnumType.STRING)
     private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
 
     // New fields from updated schema
-    @Field("contract_object")
+    @Column(name = "contract_object", columnDefinition = "TEXT")
     private String contractObject;
 
-    @Field("effective_date")
+    @Column(name = "effective_date")
     private String effectiveDate;
 
-    @Field("contract_term")
+    @Column(name = "contract_term")
     private String contractTerm;
 
-    @Field("total_value")
+    @Column(name = "total_value")
     private String totalValue;
 
-    @Field("payment_schedule")
+    @Column(name = "payment_schedule", columnDefinition = "TEXT")
     private String paymentSchedule;
 
+    @Column(name = "currency")
     private String currency;
 
-    @Field("payment_method")
+    @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Column(name = "reminders", columnDefinition = "JSON")
     private String reminders;
 
-    @Field("termination_conditions")
+    @Column(name = "termination_conditions", columnDefinition = "TEXT")
     private String terminationConditions;
 
-    @Field("risk_assessment")
+    @Column(name = "risk_assessment", columnDefinition = "TEXT")
     private String riskAssessment;
 
-    @Field("compliance_status")
+    @Column(name = "compliance_status")
     private String complianceStatus;
 
-    @Field("legal_review_required")
+    @Column(name = "legal_review_required")
     private Boolean legalReviewRequired = false;
 
-    @Field("review_deadline")
+    @Column(name = "review_deadline")
     private LocalDate reviewDeadline;
     
+    @Column(name = "tags", columnDefinition = "JSON")
     private String tags;
 
     public enum ContractStatus {

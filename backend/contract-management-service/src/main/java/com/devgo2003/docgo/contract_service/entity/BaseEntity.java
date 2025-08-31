@@ -1,67 +1,58 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.mapping.Field;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * Base entity chứa các trường audit cơ bản (created_at, created_by),
- * soft-delete và version. Các thay đổi/updates sẽ được lưu vào collection audit riêng (contract_events).
+ * soft-delete và version. Các thay đổi/updates sẽ được lưu vào bảng audit riêng (contract_events).
  */
+@MappedSuperclass
 public abstract class BaseEntity {
 
     /**
      * Thời gian tạo bản ghi
      */
-    @CreatedDate
-    @Field("created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     /**
      * Người tạo bản ghi
      */
-    @Field("created_by")
+    @Column(name = "created_by")
     private String createdBy;
-
-    /**
-     * Thời gian cập nhật cuối
-     */
-    @LastModifiedDate
-    @Field("updated_at")
-    private LocalDateTime updatedAt;
-
-    /**
-     * Người cập nhật cuối
-     */
-    @Field("updated_by")
-    private String updatedBy;
 
     /**
      * Thời gian xóa (null nếu chưa xóa)
      */
-    @Field("deleted_at")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     /**
      * Người xóa
      */
-    @Field("deleted_by")
+    @Column(name = "deleted_by")
     private String deletedBy;
 
     /**
      * Trạng thái xóa: false = chưa xóa, true = đã xóa
      */
-    @Field("is_deleted")
+    @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
     /**
      * Phiên bản bản ghi cho optimistic locking
      */
     @Version
-    @Field("version")
+    @Column(name = "version", nullable = false)
     private Long version = 0L;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 
     // Getters / Setters
     public LocalDateTime getCreatedAt() {
@@ -75,18 +66,6 @@ public abstract class BaseEntity {
     }
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
     }
     public LocalDateTime getDeletedAt() {
         return deletedAt;
