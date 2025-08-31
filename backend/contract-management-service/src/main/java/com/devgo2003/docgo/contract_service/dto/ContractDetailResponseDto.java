@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @Builder
@@ -49,12 +50,22 @@ public class ContractDetailResponseDto {
     // Static factory method to create from Contract entity
     public static ContractDetailResponseDto fromContract(
             com.devgo2003.docgo.contract_service.entity.Contract contract,
-            List<ContractKeyTermDto> keyTerms,
-            List<ContractFavorableClauseDto> favorableClauses,
-            List<ContractUnfavorableClauseDto> unfavorableClauses,
-            ContractPaymentDto payment,
-            String terminationConditions,
-            List<ContractPartyDto> parties) {
+            List<com.devgo2003.docgo.contract_service.entity.ContractParty> parties) {
+        
+        List<ContractPartyDto> partyDtos = parties.stream()
+                .map(party -> ContractPartyDto.builder()
+                        .id(party.getId())
+                        .contractId(party.getContractId())
+                        .partyName(party.getPartyName())
+                        .partyRole(party.getPartyType())
+                        .representative(party.getContactPerson())
+                        .taxCode(party.getTaxCode())
+                        .contact(party.getPhone())
+                        .address(party.getAddress())
+                        .createdAt(party.getCreatedAt())
+                        .updatedAt(party.getUpdatedAt())
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
         
         return ContractDetailResponseDto.builder()
                 .id(contract.getId())
@@ -63,17 +74,17 @@ public class ContractDetailResponseDto {
                 .status(contract.getStatus().name())
                 .contractType(contract.getContractType())
                 .riskLevel(contract.getRiskLevel())
-                .keyTerms(convertToClauseDtos(keyTerms))
-                .favorableClauses(convertToClauseDtos(favorableClauses))
-                .unfavorableClauses(convertToClauseDtos(unfavorableClauses))
+                .keyTerms(new ArrayList<>())
+                .favorableClauses(new ArrayList<>())
+                .unfavorableClauses(new ArrayList<>())
                 .contractObject(contract.getContractObject())
                 .effectiveDate(contract.getEffectiveDate())
                 .contractTerm(contract.getContractTerm())
-                .payment(payment)
-                .terminationConditions(terminationConditions)
+                .payment(null)
+                .terminationConditions(contract.getTerminationConditions())
                 .riskAssessment(parseRiskAssessment(contract.getRiskAssessment()))
                 .complianceStatus(parseComplianceStatus(contract.getComplianceStatus()))
-                .parties(parties)
+                .parties(partyDtos)
                 .build();
     }
     

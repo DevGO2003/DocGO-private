@@ -135,7 +135,7 @@ public class ContractService {
         event.setContractId(savedContract.getId());
         event.setEventType("CREATE");
         event.setEventData("{\"message\": \"Tạo hợp đồng mới\"}");
-        event.setActor("system");
+        event.setUserId("system");
 
         eventRepository.save(event);
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
