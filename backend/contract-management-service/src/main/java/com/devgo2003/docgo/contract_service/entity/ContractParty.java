@@ -1,65 +1,40 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "contract_parties")
+@Document(collection = "contract_parties")
 @Getter
 @Setter
 public class ContractParty extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
+    @Field("contract_id")
+    private String contractId;
 
-    @Column(name = "party_name")
+    @Field("party_name")
     private String partyName;
 
-    @Column(name = "party_role")
-    private String partyRole;
+    @Field("party_type")
+    private String partyType;
 
-    @Column(name = "representative")
-    private String representative;
+    @Field("contact_person")
+    private String contactPerson;
 
-    @Column(name = "tax_code")
-    private String taxCode;
+    @Field("email")
+    private String email;
 
-    @Column(name = "contact")
-    private String contact;
+    @Field("phone")
+    private String phone;
 
-    @Column(name = "address", columnDefinition = "TEXT")
+    @Field("address")
     private String address;
 
-    @Column(name = "business_license")
-    private String businessLicense;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "party_type")
-    private PartyType partyType;
-
-    @Column(name = "is_primary")
-    private Boolean isPrimary;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Relationship with Contract
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
-    private Contract contract;
-
-    public enum PartyType {
-        INDIVIDUAL,
-        ORGANIZATION
-    }
+    @Field("tax_code")
+    private String taxCode;
 }

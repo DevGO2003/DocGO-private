@@ -1,39 +1,31 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "contract_risk_assessments")
+@Document(collection = "contract_risk_assessments")
 @Getter
 @Setter
 public class ContractRiskAssessment extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
+    @Field("contract_id")
+    private String contractId;
 
-    @Column(name = "risk_level")
+    @Field("risk_level")
     private String riskLevel;
 
-    @Column(name = "risk_factors", columnDefinition = "JSON")
+    @Field("risk_factors")
     private String riskFactors;
 
-    @Column(name = "mitigation_measures", columnDefinition = "JSON")
+    @Field("mitigation_measures")
     private String mitigationMeasures;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
-    private Contract contract;
+    @Field("assessment_date")
+    private String assessmentDate;
 }

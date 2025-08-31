@@ -115,7 +115,7 @@ public class ContractService {
     /**
      * Hàm tiện ích để lấy contract hoặc ném ResourceNotFoundException
      */
-    private Contract getContractOrThrow(Long id) {
+    private Contract getContractOrThrow(String id) {
         return contractRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
     }
@@ -143,7 +143,7 @@ public class ContractService {
         return savedContract;
     }
 
-    public Optional<Contract> getContract(Long id) {
+    public Optional<Contract> getContract(String id) {
         return contractRepository.findById(id);
     }
 
@@ -198,7 +198,7 @@ public class ContractService {
     }
 
     @Transactional
-    public Contract updateContract(Long id, Contract updatedContract) {
+    public Contract updateContract(String id, Contract updatedContract) {
         Contract existingContract = getContractOrThrow(id);
 
         if (existingContract.getIsDeleted()) {
@@ -227,7 +227,7 @@ public class ContractService {
         event.setContractId(savedContract.getId());
         event.setEventType("UPDATE");
         event.setEventData("{\"message\": \"Cập nhật hợp đồng\"}");
-        event.setActor("system");
+        event.setUserId("system");
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "updated"));
@@ -235,7 +235,7 @@ public class ContractService {
     }
 
     @Transactional
-    public void softDeleteContract(Long id) {
+    public void softDeleteContract(String id) {
         Contract contract = getContractOrThrow(id);
 
         if (contract.getIsDeleted()) {
@@ -253,14 +253,14 @@ public class ContractService {
         event.setContractId(contract.getId());
         event.setEventType("SOFT_DELETE");
         event.setEventData("{\"message\": \"Xóa mềm hợp đồng\"}");
-        event.setActor("system");
+        event.setUserId("system");
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(contract, "soft_deleted"));
     }
 
     @Transactional
-    public void restoreContract(Long id) {
+    public void restoreContract(String id) {
         Contract contract = getContractOrThrow(id);
 
         if (!contract.getIsDeleted()) {
@@ -275,14 +275,14 @@ public class ContractService {
         event.setContractId(contract.getId());
         event.setEventType("RESTORE");
         event.setEventData("{\"message\": \"Khôi phục hợp đồng\"}");
-        event.setActor("system");
+        event.setUserId("system");
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(contract, "restored"));
     }
 
     @Transactional
-    public ContractAttachment addAttachment(Long contractId, ContractAttachment attachment) {
+    public ContractAttachment addAttachment(String contractId, ContractAttachment attachment) {
         Contract contract = getContractOrThrow(contractId);
 
         if (contract.getIsDeleted()) {
@@ -295,24 +295,24 @@ public class ContractService {
         ContractEvent event = new ContractEvent();
         event.setContractId(contractId);
         event.setEventType("ATTACHMENT_ADD");
-        event.setEventData("{\"file_id\": \"" + savedAttachment.getFileId() + "\", \"file_name\": \"" + savedAttachment.getFileName() + "\"}");
-        event.setActor("system");
+        event.setEventData("{\"file_name\": \"" + savedAttachment.getFileName() + "\"}");
+        event.setUserId("system");
         eventRepository.save(event);
 
         return savedAttachment;
     }
 
-    public List<ContractAttachment> getAttachments(Long contractId) {
+    public List<ContractAttachment> getAttachments(String contractId) {
         getContractOrThrow(contractId);
-        List<ContractAttachment> attachments = attachmentRepository.findByContractIdAndIsDeletedFalse(contractId);
+        List<ContractAttachment> attachments = attachmentRepository.findByContractId(contractId);
         if (attachments.isEmpty()) {
             throw new NoContentException("Không tìm thấy file đính kèm nào cho hợp đồng này.");
         }
         return attachments;
     }
 
-    public List<ContractEvent> getContractEvents(Long contractId) {
-        return eventRepository.findByContractIdOrderByEventTimeDesc(contractId);
+    public List<ContractEvent> getContractEvents(String contractId) {
+        return eventRepository.findByContractIdOrderByTimestampDesc(contractId);
     }
 
     /**
@@ -363,7 +363,7 @@ public class ContractService {
     /**
      * Lấy contract với summary theo ID
      */
-    public ContractWithSummaryDto getContractWithSummary(Long id) {
+    public ContractWithSummaryDto getContractWithSummary(String id) {
         Contract contract = getContractOrThrow(id);
         return convertToContractWithSummaryDto(contract);
     }
@@ -372,10 +372,11 @@ public class ContractService {
      * Chuyển đổi Contract entity thành ContractWithSummaryDto
      */
     private ContractWithSummaryDto convertToContractWithSummaryDto(Contract contract) {
-        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
-        List<ContractSummaryDto> summaryDtos = summaries.stream()
-                .map(this::convertToContractSummaryDto)
-                .collect(Collectors.toList());
+        Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
+        List<ContractSummaryDto> summaryDtos = new ArrayList<>();
+        if (summaryOpt.isPresent()) {
+            summaryDtos.add(convertToContractSummaryDto(summaryOpt.get()));
+        }
 
         return ContractWithSummaryDto.builder()
                 .id(contract.getId())
@@ -407,14 +408,14 @@ public class ContractService {
      */
     private ContractSummaryDto convertToContractSummaryDto(ContractSummary summary) {
         List<String> keyPoints = new ArrayList<>();
-        List<String> categories = new ArrayList<>();
+        List<String> riskAssessment = new ArrayList<>();
         
         try {
             if (summary.getKeyPoints() != null) {
                 keyPoints = objectMapper.readValue(summary.getKeyPoints(), new TypeReference<List<String>>() {});
             }
-            if (summary.getCategories() != null) {
-                categories = objectMapper.readValue(summary.getCategories(), new TypeReference<List<String>>() {});
+            if (summary.getRiskAssessment() != null) {
+                riskAssessment = objectMapper.readValue(summary.getRiskAssessment(), new TypeReference<List<String>>() {});
             }
         } catch (Exception e) {
             // Log error but continue with empty lists
@@ -423,17 +424,9 @@ public class ContractService {
         return ContractSummaryDto.builder()
                 .id(summary.getId())
                 .contractId(summary.getContractId())
-                .fileId(summary.getFileId())
-                .filename(summary.getFilename())
-                .summary(summary.getSummary())
-                .summaryLength(summary.getSummaryLength())
+                .summary(summary.getSummaryText())
                 .keyPoints(keyPoints)
-                .extractionMethod(summary.getExtractionMethod())
-                .confidence(summary.getConfidence())
-                .classification(summary.getClassification())
-                .classificationConfidence(summary.getClassificationConfidence())
-                .categories(categories)
-                .processedAt(summary.getProcessedAt())
+                .categories(riskAssessment)
                 .createdAt(summary.getCreatedAt())
                 .updatedAt(summary.getUpdatedAt())
                 .build();
@@ -443,13 +436,13 @@ public class ContractService {
      * Tạo hoặc cập nhật contract summary từ AI processing
      */
     @Transactional
-    public ContractSummary createOrUpdateContractSummary(Long contractId, String fileId, String filename, 
+    public ContractSummary createOrUpdateContractSummary(String contractId, String fileId, String filename, 
                                                        String summary, Integer summaryLength, List<String> keyPoints,
                                                        String extractionMethod, java.math.BigDecimal confidence,
                                                        String classification, java.math.BigDecimal classificationConfidence,
                                                        List<String> categories) {
         
-        Optional<ContractSummary> existingSummary = summaryRepository.findByContractIdAndFileId(contractId, fileId);
+        Optional<ContractSummary> existingSummary = summaryRepository.findByContractId(contractId);
         ContractSummary contractSummary;
         
         if (existingSummary.isPresent()) {
@@ -457,28 +450,12 @@ public class ContractService {
         } else {
             contractSummary = new ContractSummary();
             contractSummary.setContractId(contractId);
-            contractSummary.setFileId(fileId);
         }
         
-        contractSummary.setFilename(filename);
-        contractSummary.setSummary(summary);
-        contractSummary.setSummaryLength(summaryLength);
-        contractSummary.setExtractionMethod(extractionMethod);
-        contractSummary.setConfidence(confidence);
-        contractSummary.setClassification(classification);
-        contractSummary.setClassificationConfidence(classificationConfidence);
-        contractSummary.setProcessedAt(LocalDateTime.now());
-        
-        try {
-            if (keyPoints != null) {
-                contractSummary.setKeyPoints(objectMapper.writeValueAsString(keyPoints));
-            }
-            if (categories != null) {
-                contractSummary.setCategories(objectMapper.writeValueAsString(categories));
-            }
-        } catch (Exception e) {
-            // Log error but continue
-        }
+        contractSummary.setSummaryText(summary);
+        contractSummary.setKeyPoints(objectMapper.writeValueAsString(keyPoints));
+        contractSummary.setRiskAssessment(objectMapper.writeValueAsString(categories));
+        contractSummary.setRecommendations(objectMapper.writeValueAsString(categories));
         
         return summaryRepository.save(contractSummary);
     }
@@ -503,7 +480,7 @@ public class ContractService {
     /**
      * Lấy contract với thông tin chi tiết đầy đủ theo ID
      */
-    public ContractDetailDto getContractWithDetails(Long id) {
+    public ContractDetailDto getContractWithDetails(String id) {
         Contract contract = getContractOrThrow(id);
         return convertToContractDetailDto(contract);
     }
@@ -513,13 +490,14 @@ public class ContractService {
      */
     private ContractDetailDto convertToContractDetailDto(Contract contract) {
         // Lấy summaries
-        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
-        List<ContractSummaryDto> summaryDtos = summaries.stream()
-                .map(this::convertToContractSummaryDto)
-                .collect(Collectors.toList());
+        Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
+        List<ContractSummaryDto> summaryDtos = new ArrayList<>();
+        if (summaryOpt.isPresent()) {
+            summaryDtos.add(convertToContractSummaryDto(summaryOpt.get()));
+        }
 
         // Lấy parties
-        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
         List<ContractPartyDto> partyDtos = parties.stream()
                 .map(this::convertToContractPartyDto)
                 .collect(Collectors.toList());
@@ -571,14 +549,11 @@ public class ContractService {
                 .id(party.getId())
                 .contractId(party.getContractId())
                 .partyName(party.getPartyName())
-                .partyRole(party.getPartyRole())
-                .representative(party.getRepresentative())
+                .partyRole(party.getPartyType())
+                .representative(party.getContactPerson())
                 .taxCode(party.getTaxCode())
-                .contact(party.getContact())
+                .contact(party.getPhone())
                 .address(party.getAddress())
-                .businessLicense(party.getBusinessLicense())
-                .partyType(party.getPartyType() != null ? party.getPartyType().name() : null)
-                .isPrimary(party.getIsPrimary())
                 .createdAt(party.getCreatedAt())
                 .updatedAt(party.getUpdatedAt())
                 .build();
@@ -588,16 +563,16 @@ public class ContractService {
      * Tạo hoặc cập nhật contract party
      */
     @Transactional
-    public ContractParty createOrUpdateContractParty(Long contractId, String name, String role, 
+    public ContractParty createOrUpdateContractParty(String contractId, String name, String role, 
                                                    String representative, String taxCode, String contact) {
         ContractParty party = new ContractParty();
         party.setContractId(contractId);
         party.setPartyName(name);
-        party.setPartyRole(role);
-        party.setRepresentative(representative);
+        party.setPartyType(role);
+        party.setContactPerson(representative);
         party.setTaxCode(taxCode);
-        party.setContact(contact);
-        party.setIsPrimary(false); // Default to false
+        party.setPhone(contact);
+        party.setAddress("");
         
         return partyRepository.save(party);
     }
@@ -606,7 +581,7 @@ public class ContractService {
      * Tạo hoặc cập nhật contract clause
      */
     @Transactional
-    public void createOrUpdateContractClause(Long contractId, String name, String description, 
+    public void createOrUpdateContractClause(String contractId, String name, String description, 
                                            String source, String clauseType) {
         // Note: This would require a ContractClause entity and repository
         // For now, we'll store this information in the contract's keyTerms field
@@ -629,7 +604,7 @@ public class ContractService {
      * Tạo hoặc cập nhật contract payment details
      */
     @Transactional
-    public void createOrUpdateContractPayment(Long contractId, String totalValue, 
+    public void createOrUpdateContractPayment(String contractId, String totalValue, 
                                             String schedule, String currency) {
         Contract contract = getContractOrThrow(contractId);
         contract.setTotalValue(totalValue);
@@ -643,7 +618,7 @@ public class ContractService {
      * Cập nhật contract details
      */
     @Transactional
-    public void updateContractDetails(Long contractId, String contractObject, String effectiveDate, 
+    public void updateContractDetails(String contractId, String contractObject, String effectiveDate, 
                                     String contractTerm, String terminationConditions) {
         Contract contract = getContractOrThrow(contractId);
         contract.setContractObject(contractObject);
@@ -658,7 +633,7 @@ public class ContractService {
      * Tạo hoặc cập nhật contract file từ AI event
      */
     @Transactional
-    public void createOrUpdateContractFile(Long contractId, String fileId, String filename, 
+    public void createOrUpdateContractFile(String contractId, String fileId, String filename, 
                                          String fileType, String fileKey, String bucket, String summary, 
                                          Integer summaryLength, List<String> keyPoints, String extractionMethod, 
                                          java.math.BigDecimal confidence, String classification, 
@@ -681,10 +656,14 @@ public class ContractService {
     /**
      * Lấy contract với response format mới nhất quán
      */
-    public ContractResponseDto getContractWithNewFormat(Long id) {
+    public ContractResponseDto getContractWithNewFormat(String id) {
         Contract contract = getContractOrThrow(id);
-        List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
-        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
+        List<ContractSummary> summaries = new ArrayList<>();
+        if (summaryOpt.isPresent()) {
+            summaries.add(summaryOpt.get());
+        }
+        List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
         
         return ContractResponseDto.fromContract(contract, summaries, parties);
     }
@@ -697,8 +676,12 @@ public class ContractService {
         
         List<ContractResponseDto> contractsWithNewFormat = contractsPage.getContent().stream()
                 .map(contract -> {
-                    List<ContractSummary> summaries = summaryRepository.findByContractId(contract.getId());
-                    List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+                    Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
+                    List<ContractSummary> summaries = new ArrayList<>();
+                    if (summaryOpt.isPresent()) {
+                        summaries.add(summaryOpt.get());
+                    }
+                    List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
                     return ContractResponseDto.fromContract(contract, summaries, parties);
                 })
                 .collect(Collectors.toList());
@@ -713,9 +696,9 @@ public class ContractService {
     /**
      * Lấy contract với format mới theo cấu trúc response mới
      */
-    public ContractDetailResponseDto getContractWithDetailFormat(Long id) {
+    public ContractDetailResponseDto getContractWithDetailFormat(String id) {
         Contract contract = getContractOrThrow(id);
-        List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+        List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
         
         return ContractDetailResponseDto.fromContract(contract, parties);
     }
@@ -728,7 +711,7 @@ public class ContractService {
         
         List<ContractDetailResponseDto> contractsWithDetailFormat = contractsPage.getContent().stream()
                 .map(contract -> {
-                    List<ContractParty> parties = partyRepository.findByContractIdOrderByIsPrimaryDesc(contract.getId());
+                    List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
                     return ContractDetailResponseDto.fromContract(contract, parties);
                 })
                 .collect(Collectors.toList());

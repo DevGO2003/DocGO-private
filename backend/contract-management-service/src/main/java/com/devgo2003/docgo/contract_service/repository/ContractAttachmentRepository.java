@@ -1,9 +1,12 @@
 package com.devgo2003.docgo.contract_service.repository;
 
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface ContractAttachmentRepository extends JpaRepository<ContractAttachment, Long> {
-    List<ContractAttachment> findByContractIdAndIsDeletedFalse(Long contractId);
+@Repository
+public interface ContractAttachmentRepository extends MongoRepository<ContractAttachment, String> {
+    List<ContractAttachment> findByContractId(String contractId);
 }

@@ -1,39 +1,31 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "contract_compliance_status")
+@Document(collection = "contract_compliance_statuses")
 @Getter
 @Setter
 public class ContractComplianceStatus extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
+    @Field("contract_id")
+    private String contractId;
 
-    @Column(name = "status")
-    private String status;
+    @Field("compliance_status")
+    private String complianceStatus;
 
-    @Column(name = "issues", columnDefinition = "JSON")
-    private String issues;
+    @Field("compliance_issues")
+    private String complianceIssues;
 
-    @Column(name = "recommendations", columnDefinition = "JSON")
-    private String recommendations;
+    @Field("compliance_recommendations")
+    private String complianceRecommendations;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
-    private Contract contract;
+    @Field("last_review_date")
+    private String lastReviewDate;
 }

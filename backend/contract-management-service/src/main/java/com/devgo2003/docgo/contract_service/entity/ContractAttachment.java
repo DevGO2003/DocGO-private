@@ -1,25 +1,25 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "contract_attachments")
+@Document(collection = "contract_attachments")
 @Getter
 @Setter
 public class ContractAttachment extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
+    @Field("contract_id")
+    private String contractId;
 
-    @Column(name = "file_id", nullable = false)
-    private String fileId;
-
-    @Column(name = "file_name")
+    @Field("file_name")
     private String fileName;
+
+    @Field("file_path")
+    private String filePath;
 }

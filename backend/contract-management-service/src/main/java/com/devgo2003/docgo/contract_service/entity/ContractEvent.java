@@ -1,60 +1,46 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name = "contract_events", indexes = {
-        @Index(name = "idx_contract_events_contract_id", columnList = "contract_id")
-})
+@Document(collection = "contract_events")
 @Getter
 @Setter
-public class ContractEvent {
+public class ContractEvent extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    // liên kết tới contract (nullable = true nếu event chung hệ thống)
-    @Column(name = "contract_id")
-    private Long contractId;
+    @Indexed
+    @Field("contract_id")
+    private String contractId;
 
-    /**
-     * Ví dụ: CREATE, UPDATE, DELETE, ATTACHMENT_ADD, ATTACHMENT_REMOVE, STATUS_CHANGE
-     */
-    @Column(name = "event_type", nullable = false)
+    @Field("event_type")
     private String eventType;
 
-    /**
-     * Dữ liệu chi tiết của event, dạng JSON (what changed, previous values, new values...)
-     */
-    @Column(name = "event_data", columnDefinition = "JSON")
+    @Field("event_data")
     private String eventData;
 
-    /**
-     * Người thực hiện (actor)
-     */
-    @Column(name = "actor")
-    private String actor;
+    @Field("user_id")
+    private String userId;
 
-    /**
-     * Thời điểm xảy ra event
-     */
-    @Column(name = "event_time", nullable = false)
-    private LocalDateTime eventTime;
+    @Field("user_name")
+    private String userName;
 
-    /**
-     * Ghi chú (tuỳ chọn)
-     */
-    @Column(name = "note", columnDefinition = "TEXT")
-    private String note;
+    @Field("ip_address")
+    private String ipAddress;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.eventTime == null) {
-            this.eventTime = LocalDateTime.now();
-        }
-    }
+    @Field("user_agent")
+    private String userAgent;
+
+    @Field("timestamp")
+    private LocalDateTime timestamp;
+
+    @Field("metadata")
+    private String metadata;
 }

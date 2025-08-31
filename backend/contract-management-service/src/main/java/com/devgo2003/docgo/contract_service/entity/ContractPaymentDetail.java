@@ -1,42 +1,34 @@
 package com.devgo2003.docgo.contract_service.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "contract_payment_details")
+@Document(collection = "contract_payment_details")
 @Getter
 @Setter
 public class ContractPaymentDetail extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "contract_id", nullable = false)
-    private Long contractId;
+    @Field("contract_id")
+    private String contractId;
 
-    @Column(name = "total_value")
-    private String totalValue;
+    @Field("payment_type")
+    private String paymentType;
 
-    @Column(name = "schedule", columnDefinition = "TEXT")
-    private String schedule;
+    @Field("amount")
+    private String amount;
 
-    @Column(name = "currency")
+    @Field("currency")
     private String currency;
 
-    @Column(name = "method")
-    private String method;
+    @Field("due_date")
+    private String dueDate;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", insertable = false, updatable = false)
-    private Contract contract;
+    @Field("payment_status")
+    private String paymentStatus;
 }

@@ -259,9 +259,7 @@ services:
       - "8003:8003"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo_contract_service
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/docgo_contract_service
       - SERVER_PORT=8003
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - REDIS_HOST=redis
@@ -272,7 +270,7 @@ services:
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8003'"
     depends_on:
-      - mariadb
+      - mongodb
       - redis
       - elasticsearch
     networks:

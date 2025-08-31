@@ -163,7 +163,7 @@ class ContractKafkaServiceTest {
         
         // Mock contractService để trả về contract hợp lệ
         Contract mockContract = new Contract();
-        mockContract.setId(1L);
+        mockContract.setId("1");
         when(contractService.createContract(any(Contract.class))).thenReturn(mockContract);
         
         contractKafkaService.processSummaryCreated(event);
