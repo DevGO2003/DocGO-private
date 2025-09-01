@@ -7,12 +7,12 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
-@Document(collection = "contract_compliance_statuses")
+@Document(collection = "contract_clauses")
 @Getter
 @Setter
-public class ContractComplianceStatus extends BaseEntity {
+public class ContractClause extends BaseEntity {
 
     @Id
     @MongoId
@@ -22,17 +22,27 @@ public class ContractComplianceStatus extends BaseEntity {
     @NotBlank(message = "Contract ID không được để trống")
     private String contractId;
 
-    @Field("status")
-    private String status;
+    @Field("clause_name")
+    @NotBlank(message = "Tên điều khoản không được để trống")
+    private String clauseName;
 
-    @Field("issues")
-    private List<String> issues;
+    @Field("description")
+    private String description;
 
-    @Field("recommendations")
-    private List<String> recommendations;
+    @Field("source") // Can be used for 'source', 'benefitTo', or 'riskTo'
+    private String source;
+
+    @Field("clause_type")
+    @NotNull(message = "Loại điều khoản không được để trống")
+    private ClauseType clauseType;
+
+    public enum ClauseType {
+        KEY, FAVORABLE, UNFAVORABLE
+    }
 
     @Override
     public boolean isNew() {
         return this.id == null;
     }
 }
+

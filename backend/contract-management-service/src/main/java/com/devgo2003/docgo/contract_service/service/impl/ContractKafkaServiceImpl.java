@@ -43,6 +43,9 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     @Autowired
     private IContractService contractService;
 
+    @Autowired
+    private com.devgo2003.docgo.contract_service.repository.AuditEventRepository auditEventRepository;
+
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */
@@ -180,8 +183,20 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
 
             // Tạo hợp đồng cơ bản từ data
             Contract contract = Contract.createNew();
+            contract.setContractNumber((String) data.get("contractNumber"));
             contract.setTitle((String) data.get("title"));
-            contract.setStatus(Contract.ContractStatus.DRAFT);
+
+            // Map status từ event, fallback về DRAFT nếu không có hoặc không hợp lệ
+            String eventStatus = (String) data.get("status");
+            Contract.ContractStatus contractStatus = Contract.ContractStatus.DRAFT; // Default
+            if (eventStatus != null) {
+                try {
+                    contractStatus = Contract.ContractStatus.valueOf(eventStatus.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    logger.warn("⚠️ [SUMMARY_PUBLISHED_INVALID_STATUS] Status '{}' không hợp lệ, fallback về DRAFT.", eventStatus);
+                }
+            }
+            contract.setStatus(contractStatus);
             contract.setSummary("SUMMARY_PUBLISHED");
             contract.setContractType((String) data.getOrDefault("contractType", "AUTO_GENERATED"));
             contract.setAiProcessed(true);

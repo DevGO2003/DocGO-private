@@ -7,12 +7,12 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
+import java.time.LocalDate;
 
-@Document(collection = "contract_compliance_statuses")
+@Document(collection = "contract_reminders")
 @Getter
 @Setter
-public class ContractComplianceStatus extends BaseEntity {
+public class ContractReminder extends BaseEntity {
 
     @Id
     @MongoId
@@ -22,17 +22,21 @@ public class ContractComplianceStatus extends BaseEntity {
     @NotBlank(message = "Contract ID không được để trống")
     private String contractId;
 
-    @Field("status")
-    private String status;
+    @Field("reminder_type")
+    @NotBlank(message = "Loại nhắc nhở không được để trống")
+    private String reminderType;
 
-    @Field("issues")
-    private List<String> issues;
+    @Field("reminder_date")
+    @NotBlank(message = "Ngày nhắc nhở không được để trống")
+    private String reminderDate; // Storing as String to match event data
 
-    @Field("recommendations")
-    private List<String> recommendations;
+    @Field("content")
+    @NotBlank(message = "Nội dung không được để trống")
+    private String content;
 
     @Override
     public boolean isNew() {
         return this.id == null;
     }
 }
+

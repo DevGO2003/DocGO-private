@@ -62,4 +62,10 @@ public interface IContractService {
     void createOrUpdateContractPayment(String contractId, String totalValue, String schedule, String currency);
     
     void updateContractDetails(String contractId, String object, String effectiveDate, String term, String terminationConditions);
+
+    void createOrUpdateContractReminder(String contractId, String type, String date, String content);
+
+    void createOrUpdateContractRiskAssessment(String contractId, String riskLevel, List<String> riskFactors, List<String> mitigationMeasures);
+
+    void createOrUpdateContractComplianceStatus(String contractId, String status, List<String> issues, List<String> recommendations);
 }

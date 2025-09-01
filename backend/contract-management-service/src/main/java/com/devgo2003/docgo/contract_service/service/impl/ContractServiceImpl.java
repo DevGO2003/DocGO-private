@@ -2,10 +2,19 @@ package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
+import com.devgo2003.docgo.contract_service.entity.ContractClause;
+import com.devgo2003.docgo.contract_service.entity.ContractRiskAssessment;
+import com.devgo2003.docgo.contract_service.entity.ContractComplianceStatus;
+import com.devgo2003.docgo.contract_service.entity.ContractReminder;
 import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.entity.ContractSummary;
 import com.devgo2003.docgo.contract_service.entity.ContractParty;
+import com.devgo2003.docgo.contract_service.entity.ContractClause;
+import com.devgo2003.docgo.contract_service.entity.ContractRiskAssessment;
+import com.devgo2003.docgo.contract_service.entity.ContractComplianceStatus;
+import com.devgo2003.docgo.contract_service.entity.ContractReminder;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractClauseRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractAttachmentRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractEventRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractSummaryRepository;
@@ -17,6 +26,7 @@ import com.devgo2003.docgo.contract_service.repository.ContractKeyTermRepository
 import com.devgo2003.docgo.contract_service.repository.ContractFavorableClauseRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractUnfavorableClauseRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractTerminationConditionRepository;
+import com.devgo2003.docgo.contract_service.repository.ContractReminderRepository;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractValidationResult;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
@@ -80,6 +90,10 @@ public class ContractServiceImpl implements IContractService {
     private final ContractFavorableClauseRepository favorableClauseRepository;
     private final ContractUnfavorableClauseRepository unfavorableClauseRepository;
     private final ContractTerminationConditionRepository terminationConditionRepository;
+    private final ContractClauseRepository contractClauseRepository;
+    private final ContractReminderRepository contractReminderRepository;
+    private final ContractRiskAssessmentRepository contractRiskAssessmentRepository;
+    private final ContractComplianceStatusRepository contractComplianceStatusRepository;
     private final ContractEventPublisher eventPublisher;
     private final IContractStatusEventPublisher contractStatusEventPublisher;
     private final ObjectMapper objectMapper;
@@ -103,6 +117,10 @@ public class ContractServiceImpl implements IContractService {
                            ContractFavorableClauseRepository favorableClauseRepository,
                            ContractUnfavorableClauseRepository unfavorableClauseRepository,
                            ContractTerminationConditionRepository terminationConditionRepository,
+                           ContractClauseRepository contractClauseRepository,
+                           ContractReminderRepository contractReminderRepository,
+                           ContractRiskAssessmentRepository contractRiskAssessmentRepository,
+                           ContractComplianceStatusRepository contractComplianceStatusRepository,
                            ContractEventPublisher eventPublisher,
                            IContractStatusEventPublisher contractStatusEventPublisher,
                            ObjectMapper objectMapper,
@@ -119,6 +137,10 @@ public class ContractServiceImpl implements IContractService {
         this.favorableClauseRepository = favorableClauseRepository;
         this.unfavorableClauseRepository = unfavorableClauseRepository;
         this.terminationConditionRepository = terminationConditionRepository;
+        this.contractClauseRepository = contractClauseRepository;
+        this.contractReminderRepository = contractReminderRepository;
+        this.contractRiskAssessmentRepository = contractRiskAssessmentRepository;
+        this.contractComplianceStatusRepository = contractComplianceStatusRepository;
         this.eventPublisher = eventPublisher;
         this.contractStatusEventPublisher = contractStatusEventPublisher;
         this.objectMapper = objectMapper;
@@ -820,9 +842,21 @@ public class ContractServiceImpl implements IContractService {
     public void createOrUpdateContractClause(String contractId, String clauseName, String description, 
                                             String source, String clauseType) {
         try {
-            // Note: This would require a ContractClause entity and repository
-            // For now, we'll log the information
-            logger.info("✅ Would save contract clause for contract ID: {} - name: {}, type: {}", contractId, clauseName, clauseType);
+            ContractClause clause = new ContractClause();
+            clause.setContractId(contractId);
+            clause.setClauseName(clauseName);
+            clause.setDescription(description);
+            clause.setSource(source);
+            
+            try {
+                clause.setClauseType(ContractClause.ClauseType.valueOf(clauseType.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                logger.error("❌ Invalid clause type: {}", clauseType);
+                return; // Or throw an exception
+            }
+
+            contractClauseRepository.save(clause);
+            logger.info("✅ Saved contract clause for contract ID: {} - name: {}, type: {}", contractId, clauseName, clauseType);
         } catch (Exception e) {
             logger.error("❌ Error saving contract clause: {}", e.getMessage(), e);
         }
@@ -831,9 +865,20 @@ public class ContractServiceImpl implements IContractService {
     @Override
     public void createOrUpdateContractPayment(String contractId, String totalValue, String schedule, String currency) {
         try {
-            // Note: This would require a ContractPayment entity and repository
-            // For now, we'll log the information
-            logger.info("✅ Would save contract payment for contract ID: {} - value: {}, schedule: {}, currency: {}", 
+            Contract contract = getContractOrThrow(contractId);
+
+            if (totalValue != null) {
+                contract.setTotalValue(totalValue);
+            }
+            if (schedule != null) {
+                contract.setPaymentSchedule(schedule);
+            }
+            if (currency != null) {
+                contract.setCurrency(currency);
+            }
+
+            contractRepository.save(contract);
+            logger.info("✅ Saved contract payment for contract ID: {} - value: {}, schedule: {}, currency: {}", 
                        contractId, totalValue, schedule, currency);
         } catch (Exception e) {
             logger.error("❌ Error saving contract payment: {}", e.getMessage(), e);
@@ -844,26 +889,72 @@ public class ContractServiceImpl implements IContractService {
     public void updateContractDetails(String contractId, String object, String effectiveDate, String term, String terminationConditions) {
         try {
             Contract contract = getContractOrThrow(contractId);
-            
-            // Update contract fields if they exist
+
             if (object != null) {
-                // Assuming there's a field for contract object
-                // contract.setContractObject(object);
+                contract.setContractObject(object);
             }
             if (effectiveDate != null) {
-                // contract.setEffectiveDate(LocalDate.parse(effectiveDate));
+                contract.setEffectiveDate(effectiveDate);
             }
             if (term != null) {
-                // contract.setContractTerm(term);
+                contract.setContractTerm(term);
             }
             if (terminationConditions != null) {
-                // contract.setTerminationConditions(terminationConditions);
+                contract.setTerminationConditions(terminationConditions);
             }
-            
+
             contractRepository.save(contract);
             logger.info("✅ Updated contract details for contract ID: {}", contractId);
         } catch (Exception e) {
             logger.error("❌ Error updating contract details: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void createOrUpdateContractReminder(String contractId, String type, String date, String content) {
+        try {
+            ContractReminder reminder = new ContractReminder();
+            reminder.setContractId(contractId);
+            reminder.setReminderType(type);
+            reminder.setReminderDate(date);
+            reminder.setContent(content);
+
+            contractReminderRepository.save(reminder);
+            logger.info("✅ Saved contract reminder for contract ID: {} - type: {}, date: {}", contractId, type, date);
+        } catch (Exception e) {
+            logger.error("❌ Error saving contract reminder: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void createOrUpdateContractRiskAssessment(String contractId, String riskLevel, List<String> riskFactors, List<String> mitigationMeasures) {
+        try {
+            ContractRiskAssessment riskAssessment = new ContractRiskAssessment();
+            riskAssessment.setContractId(contractId);
+            riskAssessment.setRiskLevel(riskLevel);
+            riskAssessment.setRiskFactors(riskFactors);
+            riskAssessment.setMitigationMeasures(mitigationMeasures);
+
+            contractRiskAssessmentRepository.save(riskAssessment);
+            logger.info("✅ Saved contract risk assessment for contract ID: {} - level: {}", contractId, riskLevel);
+        } catch (Exception e) {
+            logger.error("❌ Error saving contract risk assessment: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void createOrUpdateContractComplianceStatus(String contractId, String status, List<String> issues, List<String> recommendations) {
+        try {
+            ContractComplianceStatus complianceStatus = new ContractComplianceStatus();
+            complianceStatus.setContractId(contractId);
+            complianceStatus.setStatus(status);
+            complianceStatus.setIssues(issues);
+            complianceStatus.setRecommendations(recommendations);
+
+            contractComplianceStatusRepository.save(complianceStatus);
+            logger.info("✅ Saved contract compliance status for contract ID: {} - status: {}", contractId, status);
+        } catch (Exception e) {
+            logger.error("❌ Error saving contract compliance status: {}", e.getMessage(), e);
         }
     }
 }
