@@ -1,3 +1,9 @@
+---
+name: "Chuẩn hóa cấu trúc dịch vụ"
+description: "Quy tắc cấu trúc thư mục, dependencies và port mapping cho microservices"
+alwaysApply: true
+---
+
 ## Quy tắc cấu trúc dịch vụ (structure)
 
 ### Python (FastAPI) – áp dụng cho `ai-processing-service` và các service Python khác:

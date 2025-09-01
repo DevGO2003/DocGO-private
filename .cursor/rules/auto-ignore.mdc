@@ -1,5 +1,6 @@
 ---
-name: Tự động thêm các tệp/thư mục không cần thiết vào .cursorignore (trừ env)
+name: "Tự động thêm các tệp/thư mục không cần thiết vào .cursorignore (trừ env)"
+description: "Chuẩn hóa việc loại trừ các tệp/thư mục phát sinh khỏi index của Cursor"
 alwaysApply: true
 scope: workspace
 ---

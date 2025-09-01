@@ -1,3 +1,9 @@
+---
+name: "Chuẩn hóa Event và Exception"
+description: "Chuẩn hóa event payload, exception handling và tài liệu API"
+alwaysApply: true
+---
+
 ## Chuẩn hóa Event Payload Standard (dùng cho mọi publisher)
 
 Tất cả events giữa các services phải tuân thủ schema chuẩn sau để đảm bảo tính nhất quán và traceability:

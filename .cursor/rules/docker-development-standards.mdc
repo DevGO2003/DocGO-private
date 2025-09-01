@@ -1,3 +1,9 @@
+---
+name: "Chuẩn hóa Docker Development"
+description: "Quy tắc Docker local development, cấu trúc Dockerfile và docker-compose"
+alwaysApply: true
+---
+
 ## Quy tắc Docker Development Local
 
 - **Khi chạy Docker local**: Luôn sử dụng volume mount để mount code trực tiếp từ máy host vào container
