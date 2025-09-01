@@ -1,2 +1,57 @@
-# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
-.env
+# VCS & IDE
+.git/
+.github/
+.gitlab/
+.idea/
+.vscode/
+**/*.iml
+.DS_Store
+Thumbs.db
+
+# Node/JS
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/build/
+
+# Python
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.pytest_cache/
+
+# Java/Maven/Gradle
+**/target/
+**/.mvn/
+**/.gradle/
+
+# Caches, logs, temp
+**/.cache/
+**/logs/
+**/*.log
+**/tmp/
+**/temp/
+**/coverage/
+**/.nyc_output/
+
+# Large/binary assets and datasets
+document/**/*.pdf
+document/**/*.doc
+document/**/*.docx
+document/**/*.xls
+document/**/*.xlsx
+document/**/*.ppt
+document/**/*.pptx
+**/*.zip
+**/*.rar
+**/*.7z
+
+# Project-specific data dirs
+**/uploads/
+**/documents/
+**/contract_uploads/
+**/results/
+backend/api-gateway-bff/logs/
