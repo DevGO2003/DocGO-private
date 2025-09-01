@@ -122,7 +122,7 @@ public class AiEventProcessingService {
         return contractRepository.save(contract);
     }
 
-    private void createContractParties(Long contractId, List<AiEventDto.ContractPartyDto> parties) {
+    private void createContractParties(String contractId, List<AiEventDto.ContractPartyDto> parties) {
         // Xóa parties cũ nếu có
         partyRepository.deleteByContractId(contractId);
         
@@ -132,37 +132,27 @@ public class AiEventProcessingService {
             ContractParty party = new ContractParty();
             party.setContractId(contractId);
             party.setPartyName(partyDto.getName());
-            party.setPartyRole(partyDto.getRole());
-            party.setRepresentative(partyDto.getRepresentative());
+            party.setPartyType(partyDto.getRole());
+            party.setContactPerson(partyDto.getRepresentative());
             party.setTaxCode(partyDto.getTaxCode());
-            party.setContact(partyDto.getContact());
+            party.setPhone(partyDto.getContact());
             party.setAddress(partyDto.getAddress());
-            party.setBusinessLicense(partyDto.getBusinessLicense());
-            party.setIsPrimary(i == 0); // Party đầu tiên là primary
-            party.setPartyType(ContractParty.PartyType.ORGANIZATION); // Default
             
             partyRepository.save(party);
         }
     }
 
-    private void createContractSummary(Long contractId, AiEventDto event) throws JsonProcessingException {
+    private void createContractSummary(String contractId, AiEventDto event) throws JsonProcessingException {
         AiEventDto.ContractSummaryDto summary = event.getData().getContractSummary();
         AiEventDto.FileInformationDto fileInfo = event.getData().getFileInformation();
         AiEventDto.AiProcessingResultDto aiResult = event.getData().getAiProcessingResult();
         
         ContractSummary contractSummary = new ContractSummary();
         contractSummary.setContractId(contractId);
-        contractSummary.setFileId(fileInfo.getFileId());
-        contractSummary.setFilename(fileInfo.getFilename());
-        contractSummary.setSummary(objectMapper.writeValueAsString(summary));
-        contractSummary.setSummaryLength(summary.getTitle().length());
+        contractSummary.setSummaryText(objectMapper.writeValueAsString(summary));
         contractSummary.setKeyPoints(objectMapper.writeValueAsString(summary.getTag()));
-        contractSummary.setExtractionMethod(aiResult.getExtractionMethod());
-        contractSummary.setConfidence(BigDecimal.valueOf(aiResult.getConfidence()));
-        contractSummary.setClassification("CONTRACT");
-        contractSummary.setClassificationConfidence(BigDecimal.valueOf(aiResult.getConfidence()));
-        contractSummary.setCategories(objectMapper.writeValueAsString(summary.getTag()));
-        contractSummary.setProcessedAt(LocalDateTime.now());
+        contractSummary.setRiskAssessment(objectMapper.writeValueAsString(summary.getTag()));
+        contractSummary.setRecommendations(objectMapper.writeValueAsString(summary.getTag()));
         
         summaryRepository.save(contractSummary);
     }

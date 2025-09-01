@@ -206,7 +206,7 @@ public class ContractKafkaService {
     /**
      * Lưu thông tin file vào bảng contract_files
      */
-    private void saveContractFile(Long contractId, Map<String, Object> fileInformation, Map<String, Object> event) {
+    private void saveContractFile(String contractId, Map<String, Object> fileInformation, Map<String, Object> event) {
         try {
             // Kiểm tra null cho các tham số
             if (contractId == null || fileInformation == null || event == null) {
@@ -262,7 +262,7 @@ public class ContractKafkaService {
     /**
      * Lưu thông tin contract summary chi tiết
      */
-    private void saveDetailedContractSummary(Long contractId, Map<String, Object> contractSummary) {
+    private void saveDetailedContractSummary(String contractId, Map<String, Object> contractSummary) {
         logger.info("📋 [DETAILED_SUMMARY_SAVE_START] Bắt đầu lưu contract summary chi tiết - contractId: {}", contractId);
         
         try {

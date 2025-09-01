@@ -453,9 +453,17 @@ public class ContractService {
         }
         
         contractSummary.setSummaryText(summary);
-        contractSummary.setKeyPoints(objectMapper.writeValueAsString(keyPoints));
-        contractSummary.setRiskAssessment(objectMapper.writeValueAsString(categories));
-        contractSummary.setRecommendations(objectMapper.writeValueAsString(categories));
+        try {
+            contractSummary.setKeyPoints(objectMapper.writeValueAsString(keyPoints));
+            contractSummary.setRiskAssessment(objectMapper.writeValueAsString(categories));
+            contractSummary.setRecommendations(objectMapper.writeValueAsString(categories));
+        } catch (Exception e) {
+            logger.error("Error serializing data for contract summary: {}", e.getMessage());
+            // Fallback to empty strings if serialization fails
+            contractSummary.setKeyPoints("[]");
+            contractSummary.setRiskAssessment("[]");
+            contractSummary.setRecommendations("[]");
+        }
         
         return summaryRepository.save(contractSummary);
     }
