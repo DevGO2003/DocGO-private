@@ -1,4 +1,3 @@
-
 ---
 name: "Chuẩn hóa API cho DocGO"
 description: "Chuẩn hóa URL, payload, response format cho các microservices"
