@@ -15,7 +15,7 @@ import java.util.Map;
 public class FileProcessingStatusConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ContractService contractService;
+    private final IContractService contractService;
 
     /**
      * Consume file processing status events từ AI Processing Service

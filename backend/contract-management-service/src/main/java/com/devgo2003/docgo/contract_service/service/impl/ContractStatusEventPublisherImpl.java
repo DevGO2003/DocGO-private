@@ -1,6 +1,8 @@
-package com.devgo2003.docgo.contract_service.service;
+package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.ContractStatusChangeEvent;
+import com.devgo2003.docgo.contract_service.service.IContractStatusEventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +18,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ContractStatusEventPublisher {
+public class ContractStatusEventPublisherImpl implements IContractStatusEventPublisher {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -205,5 +207,111 @@ public class ContractStatusEventPublisher {
         event.put("metadata", metadata);
         
         return event;
+    }
+
+    @Override
+    public void publishStatusChangeEvent(Contract contract, String oldStatus, String newStatus) {
+        publishContractStatusChanged(contract, oldStatus, newStatus, 
+                                   UUID.randomUUID().toString(), "system", "service");
+    }
+
+    @Override
+    public void publishStatusChangeEvent(ContractStatusChangeEvent event) {
+        try {
+            log.info("📢 [STATUS_CHANGE_EVENT_PUBLISH] Publishing status change event for contract: {}", event.getContractId());
+            
+            Map<String, Object> eventPayload = new HashMap<>();
+            eventPayload.put("eventVersion", "v1");
+            eventPayload.put("eventType", "ContractStatusChanged");
+            eventPayload.put("eventId", UUID.randomUUID().toString());
+            eventPayload.put("timestamp", OffsetDateTime.now().toString());
+            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("correlationId", event.getCorrelationId());
+            
+            Map<String, Object> actor = new HashMap<>();
+            actor.put("userId", event.getChangedBy() != null ? event.getChangedBy() : "system");
+            actor.put("userRole", "service");
+            actor.put("ip", "internal");
+            eventPayload.put("actor", actor);
+            
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("contractId", event.getContractId());
+            eventData.put("oldStatus", event.getOldStatus());
+            eventData.put("newStatus", event.getNewStatus());
+            eventData.put("changedBy", event.getChangedBy());
+            eventData.put("changedAt", event.getChangedAt());
+            eventData.put("reason", event.getReason());
+            eventPayload.put("data", eventData);
+            
+            String payloadJson = objectMapper.writeValueAsString(eventPayload);
+            kafkaTemplate.send(contractEventsTopic, event.getContractId(), payloadJson);
+            
+            log.info("✅ [STATUS_CHANGE_EVENT_PUBLISH_SUCCESS] Published status change event for contract: {}", event.getContractId());
+            
+        } catch (Exception e) {
+            log.error("❌ [STATUS_CHANGE_EVENT_PUBLISH_FAILED] Failed to publish status change event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void publishExpiryWarningEvent(Contract contract, int daysUntilExpiry) {
+        try {
+            log.info("📢 [EXPIRY_WARNING_PUBLISH] Publishing expiry warning for contract: {} - days until expiry: {}", 
+                     contract.getId(), daysUntilExpiry);
+            
+            Map<String, Object> eventPayload = new HashMap<>();
+            eventPayload.put("eventVersion", "v1");
+            eventPayload.put("eventType", "ContractExpiryWarning");
+            eventPayload.put("eventId", UUID.randomUUID().toString());
+            eventPayload.put("timestamp", OffsetDateTime.now().toString());
+            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("correlationId", UUID.randomUUID().toString());
+            
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("contractId", contract.getId().toString());
+            eventData.put("contractNumber", contract.getContractNumber());
+            eventData.put("title", contract.getTitle());
+            eventData.put("daysUntilExpiry", daysUntilExpiry);
+            eventData.put("expiryDate", contract.getEndDate() != null ? contract.getEndDate().toString() : null);
+            eventPayload.put("data", eventData);
+            
+            String payloadJson = objectMapper.writeValueAsString(eventPayload);
+            kafkaTemplate.send(contractEventsTopic, contract.getId().toString(), payloadJson);
+            
+            log.info("✅ [EXPIRY_WARNING_PUBLISH_SUCCESS] Published expiry warning for contract: {}", contract.getId());
+            
+        } catch (Exception e) {
+            log.error("❌ [EXPIRY_WARNING_PUBLISH_FAILED] Failed to publish expiry warning: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void publishExpiredEvent(Contract contract) {
+        try {
+            log.info("📢 [EXPIRED_EVENT_PUBLISH] Publishing expired event for contract: {}", contract.getId());
+            
+            Map<String, Object> eventPayload = new HashMap<>();
+            eventPayload.put("eventVersion", "v1");
+            eventPayload.put("eventType", "ContractExpired");
+            eventPayload.put("eventId", UUID.randomUUID().toString());
+            eventPayload.put("timestamp", OffsetDateTime.now().toString());
+            eventPayload.put("source", "contract-management-service");
+            eventPayload.put("correlationId", UUID.randomUUID().toString());
+            
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("contractId", contract.getId().toString());
+            eventData.put("contractNumber", contract.getContractNumber());
+            eventData.put("title", contract.getTitle());
+            eventData.put("expiryDate", contract.getEndDate() != null ? contract.getEndDate().toString() : null);
+            eventPayload.put("data", eventData);
+            
+            String payloadJson = objectMapper.writeValueAsString(eventPayload);
+            kafkaTemplate.send(contractEventsTopic, contract.getId().toString(), payloadJson);
+            
+            log.info("✅ [EXPIRED_EVENT_PUBLISH_SUCCESS] Published expired event for contract: {}", contract.getId());
+            
+        } catch (Exception e) {
+            log.error("❌ [EXPIRED_EVENT_PUBLISH_FAILED] Failed to publish expired event: {}", e.getMessage(), e);
+        }
     }
 }

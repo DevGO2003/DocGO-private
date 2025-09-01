@@ -1,7 +1,9 @@
-package com.devgo2003.docgo.contract_service.service;
+package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
+import com.devgo2003.docgo.contract_service.service.IContractKafkaService;
+import com.devgo2003.docgo.contract_service.service.IContractService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +25,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-// @Service
-public class ContractKafkaService {
+@Service
+public class ContractKafkaServiceImpl implements IContractKafkaService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ContractKafkaService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContractKafkaServiceImpl.class);
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -38,7 +40,7 @@ public class ContractKafkaService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ContractService contractService;
+    private IContractService contractService;
 
     /**
      * Consume SummaryCreated events từ AI Processing Service
@@ -61,8 +63,9 @@ public class ContractKafkaService {
     /**
      * Xử lý SummaryCreated event và tạo/cập nhật hợp đồng
      */
+    @Override
     @Transactional
-    void processSummaryCreated(Map<String, Object> event) {
+    public void processSummaryCreated(Map<String, Object> event) {
         try {
             // Kiểm tra null cho event
             if (event == null) {
@@ -474,6 +477,109 @@ public class ContractKafkaService {
         } catch (Exception e) {
             logger.error("❌ [CONTRACT_UPDATED_PUBLISH_FAILED] Không thể publish ContractUpdated event: {} - fileId: {}, contractId: {}, correlationId: {}", 
                         e.getMessage(), fileId, contractId, correlationId, e);
+        }
+    }
+
+    @Override
+    public void sendContractCreatedEvent(Contract contract) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "ContractCreated");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", contract);
+            
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(contractEventsTopic, contract.getId(), payload);
+            logger.info("Published ContractCreated event for contract: {}", contract.getId());
+        } catch (Exception e) {
+            logger.error("Failed to publish ContractCreated event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendContractUpdatedEvent(Contract contract) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "ContractUpdated");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", contract);
+            
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(contractEventsTopic, contract.getId(), payload);
+            logger.info("Published ContractUpdated event for contract: {}", contract.getId());
+        } catch (Exception e) {
+            logger.error("Failed to publish ContractUpdated event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendContractDeletedEvent(String contractId) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "ContractDeleted");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", Map.of("contractId", contractId));
+            
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(contractEventsTopic, contractId, payload);
+            logger.info("Published ContractDeleted event for contract: {}", contractId);
+        } catch (Exception e) {
+            logger.error("Failed to publish ContractDeleted event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendContractRestoredEvent(String contractId) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "ContractRestored");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", Map.of("contractId", contractId));
+            
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(contractEventsTopic, contractId, payload);
+            logger.info("Published ContractRestored event for contract: {}", contractId);
+        } catch (Exception e) {
+            logger.error("Failed to publish ContractRestored event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendContractStatusChangedEvent(com.devgo2003.docgo.contract_service.dto.AiEventDto eventDto) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "ContractStatusChanged");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", eventDto);
+            
+            String payload = objectMapper.writeValueAsString(event);
+            String fileId = eventDto.getData().getFileInformation().getFileId();
+            kafkaTemplate.send(contractEventsTopic, fileId, payload);
+            logger.info("Published ContractStatusChanged event for file: {}", fileId);
+        } catch (Exception e) {
+            logger.error("Failed to publish ContractStatusChanged event: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendAiProcessingCompletedEvent(String contractId, String processingStatus) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "AiProcessingCompleted");
+            event.put("eventId", UUID.randomUUID().toString());
+            event.put("timestamp", ZonedDateTime.now().toString());
+            event.put("data", Map.of("contractId", contractId, "processingStatus", processingStatus));
+            
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(contractEventsTopic, contractId, payload);
+            logger.info("Published AiProcessingCompleted event for contract: {} with status: {}", contractId, processingStatus);
+        } catch (Exception e) {
+            logger.error("Failed to publish AiProcessingCompleted event: {}", e.getMessage(), e);
         }
     }
 }

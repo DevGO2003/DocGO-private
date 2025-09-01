@@ -12,7 +12,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
-import com.devgo2003.docgo.contract_service.service.ContractService;
+import com.devgo2003.docgo.contract_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -38,11 +38,11 @@ import org.springframework.data.domain.Page;
 @Tag(name = "API Quản lý Hợp đồng", description = "Các API để tạo, đọc, cập nhật và xóa hợp đồng")
 public class ContractController {
 
-    private final ContractService contractService;
+    private final IContractService contractService;
     private final HttpServletRequest request;
 
     @Autowired
-    public ContractController(ContractService contractService, HttpServletRequest request) {
+    public ContractController(IContractService contractService, HttpServletRequest request) {
         this.contractService = contractService;
         this.request = request;
     }
@@ -305,7 +305,7 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}")
-    public ResponseEntity<RestResponse<ContractDetailResponseDto>> getContract(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<ContractDetailResponseDto>> getContract(@PathVariable String id) {
         ContractDetailResponseDto contract = contractService.getContractWithDetailFormat(id);
         RestResponse<ContractDetailResponseDto> response = RestResponse.<ContractDetailResponseDto>builder()
                 .apiVersion("v1")
@@ -369,7 +369,7 @@ public class ContractController {
         """
     )
     @PutMapping("/{id}")
-    public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable Long id, @Valid @RequestBody Contract contract) {
+    public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable String id, @Valid @RequestBody Contract contract) {
         Contract updatedContract = contractService.updateContract(id, contract);
         RestResponse<Contract> response = RestResponse.<Contract>builder()
                 .apiVersion("v1")
@@ -429,7 +429,7 @@ public class ContractController {
         """
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<RestResponse<Void>> softDeleteContract(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<Void>> softDeleteContract(@PathVariable String id) {
         contractService.softDeleteContract(id);
         RestResponse<Void> response = RestResponse.<Void>builder()
                 .apiVersion("v1")
@@ -489,7 +489,7 @@ public class ContractController {
         """
     )
     @PutMapping("/{id}/restore")
-    public ResponseEntity<RestResponse<Void>> restoreContract(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<Void>> restoreContract(@PathVariable String id) {
         contractService.restoreContract(id);
         RestResponse<Void> response = RestResponse.<Void>builder()
                 .apiVersion("v1")
@@ -549,7 +549,7 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}/events")
-    public ResponseEntity<RestResponse<List<ContractEvent>>> getContractEvents(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<List<ContractEvent>>> getContractEvents(@PathVariable String id) {
         List<ContractEvent> events = contractService.getContractEvents(id);
         RestResponse<List<ContractEvent>> response = RestResponse.<List<ContractEvent>>builder()
                 .apiVersion("v1")
@@ -609,7 +609,7 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}/attachments")
-    public ResponseEntity<RestResponse<List<ContractAttachment>>> getAttachments(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<List<ContractAttachment>>> getAttachments(@PathVariable String id) {
         List<ContractAttachment> attachments = contractService.getAttachments(id);
         RestResponse<List<ContractAttachment>> response = RestResponse.<List<ContractAttachment>>builder()
                 .apiVersion("v1")
@@ -779,7 +779,7 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}/with-summary")
-    public ResponseEntity<RestResponse<ContractWithSummaryDto>> getContractWithSummary(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<ContractWithSummaryDto>> getContractWithSummary(@PathVariable String id) {
         ContractWithSummaryDto contractWithSummary = contractService.getContractWithSummary(id);
         RestResponse<ContractWithSummaryDto> response = RestResponse.<ContractWithSummaryDto>builder()
                 .apiVersion("v1")
@@ -958,7 +958,7 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}/with-details")
-    public ResponseEntity<RestResponse<ContractDetailDto>> getContractWithDetails(@PathVariable Long id) {
+    public ResponseEntity<RestResponse<ContractDetailDto>> getContractWithDetails(@PathVariable String id) {
         ContractDetailDto contractWithDetails = contractService.getContractWithDetails(id);
         RestResponse<ContractDetailDto> response = RestResponse.<ContractDetailDto>builder()
                 .apiVersion("v1")

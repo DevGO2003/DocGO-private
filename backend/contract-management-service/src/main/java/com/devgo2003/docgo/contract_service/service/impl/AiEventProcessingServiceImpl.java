@@ -1,6 +1,7 @@
-package com.devgo2003.docgo.contract_service.service;
+package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.dto.AiEventDto;
+import com.devgo2003.docgo.contract_service.service.IAiEventProcessingService;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractParty;
 import com.devgo2003.docgo.contract_service.entity.ContractSummary;
@@ -23,8 +24,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AiEventProcessingService {
-    private static final Logger logger = LoggerFactory.getLogger(AiEventProcessingService.class);
+public class AiEventProcessingServiceImpl implements IAiEventProcessingService {
+    private static final Logger logger = LoggerFactory.getLogger(AiEventProcessingServiceImpl.class);
     
     private final ContractRepository contractRepository;
     private final ContractPartyRepository partyRepository;
@@ -32,7 +33,7 @@ public class AiEventProcessingService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public AiEventProcessingService(ContractRepository contractRepository,
+    public AiEventProcessingServiceImpl(ContractRepository contractRepository,
                                    ContractPartyRepository partyRepository,
                                    ContractSummaryRepository summaryRepository,
                                    ObjectMapper objectMapper) {

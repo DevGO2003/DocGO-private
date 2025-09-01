@@ -16,7 +16,7 @@ import java.util.Map;
 public class ContractEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ContractService contractService;
+    private final IContractService contractService;
 
     /**
      * Consume contract events từ các service khác

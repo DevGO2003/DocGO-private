@@ -1,7 +1,7 @@
 package com.devgo2003.docgo.contract_service.listener;
 
 import com.devgo2003.docgo.contract_service.dto.AiEventDto;
-import com.devgo2003.docgo.contract_service.service.AiEventProcessingService;
+import com.devgo2003.docgo.contract_service.service.IAiEventProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 public class AiEventKafkaListener {
     private static final Logger logger = LoggerFactory.getLogger(AiEventKafkaListener.class);
     
-    private final AiEventProcessingService aiEventProcessingService;
+    private final IAiEventProcessingService aiEventProcessingService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public AiEventKafkaListener(AiEventProcessingService aiEventProcessingService, ObjectMapper objectMapper) {
+    public AiEventKafkaListener(IAiEventProcessingService aiEventProcessingService, ObjectMapper objectMapper) {
         this.aiEventProcessingService = aiEventProcessingService;
         this.objectMapper = objectMapper;
     }

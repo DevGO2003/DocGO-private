@@ -1,7 +1,9 @@
-package com.devgo2003.docgo.contract_service.service;
+package com.devgo2003.docgo.contract_service.service.impl;
 
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
+import com.devgo2003.docgo.contract_service.dto.ContractValidationResult;
+import com.devgo2003.docgo.contract_service.service.IContractValidationService;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.common.exception.InvalidInputException;
 import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
@@ -19,9 +21,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
-public class ContractValidationService {
+public class ContractValidationServiceImpl implements IContractValidationService {
     
-    private static final Logger logger = LoggerFactory.getLogger(ContractValidationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContractValidationServiceImpl.class);
     
     private final ContractRepository contractRepository;
     
@@ -31,7 +33,7 @@ public class ContractValidationService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     
     @Autowired
-    public ContractValidationService(ContractRepository contractRepository) {
+    public ContractValidationServiceImpl(ContractRepository contractRepository) {
         this.contractRepository = contractRepository;
     }
     
@@ -276,6 +278,76 @@ public class ContractValidationService {
         
         if (contract.getEndDate() != null && contract.getEndDate().isAfter(LocalDate.now())) {
             throw new InvalidInputException("Cannot delete contracts that are still in effect");
+        }
+    }
+
+    @Override
+    public ContractValidationResult validateForCreation(Contract contract) {
+        try {
+            // Convert Contract to ContractDetailDto for validation
+            ContractDetailDto dto = new ContractDetailDto();
+            dto.setContractNumber(contract.getContractNumber());
+            dto.setTitle(contract.getTitle());
+            dto.setStatus(contract.getStatus() != null ? contract.getStatus().name() : null);
+            dto.setStartDate(contract.getStartDate());
+            dto.setEndDate(contract.getEndDate());
+            dto.setTotalValue(contract.getTotalValue());
+            dto.setCurrency(contract.getCurrency());
+            
+            validateContractCreation(dto);
+            return ContractValidationResult.success();
+        } catch (InvalidInputException | ConflictException e) {
+            return ContractValidationResult.failure(List.of(e.getMessage()));
+        }
+    }
+
+    @Override
+    public ContractValidationResult validateForUpdate(Contract contract) {
+        try {
+            // Convert Contract to ContractDetailDto for validation
+            ContractDetailDto dto = new ContractDetailDto();
+            dto.setContractNumber(contract.getContractNumber());
+            dto.setTitle(contract.getTitle());
+            dto.setStatus(contract.getStatus() != null ? contract.getStatus().name() : null);
+            dto.setStartDate(contract.getStartDate());
+            dto.setEndDate(contract.getEndDate());
+            dto.setTotalValue(contract.getTotalValue());
+            dto.setCurrency(contract.getCurrency());
+            
+            validateContractUpdate(contract.getId(), dto);
+            return ContractValidationResult.success();
+        } catch (InvalidInputException | ConflictException e) {
+            return ContractValidationResult.failure(List.of(e.getMessage()));
+        }
+    }
+
+    @Override
+    public ContractValidationResult validateBusinessRules(Contract contract) {
+        try {
+            // Convert Contract to ContractDetailDto for validation
+            ContractDetailDto dto = new ContractDetailDto();
+            dto.setContractNumber(contract.getContractNumber());
+            dto.setTitle(contract.getTitle());
+            dto.setStatus(contract.getStatus() != null ? contract.getStatus().name() : null);
+            dto.setStartDate(contract.getStartDate());
+            dto.setEndDate(contract.getEndDate());
+            dto.setTotalValue(contract.getTotalValue());
+            dto.setCurrency(contract.getCurrency());
+            
+            validateBusinessRules(dto);
+            return ContractValidationResult.success();
+        } catch (InvalidInputException e) {
+            return ContractValidationResult.failure(List.of(e.getMessage()));
+        }
+    }
+
+    @Override
+    public boolean isValidContractNumber(String contractNumber) {
+        try {
+            validateContractNumber(contractNumber);
+            return true;
+        } catch (InvalidInputException e) {
+            return false;
         }
     }
 }

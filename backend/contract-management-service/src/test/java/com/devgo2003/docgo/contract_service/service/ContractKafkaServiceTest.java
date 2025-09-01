@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.service.IContractService;
+import com.devgo2003.docgo.contract_service.service.impl.ContractKafkaServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,10 +28,10 @@ class ContractKafkaServiceTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private ContractService contractService;
+    private IContractService contractService;
 
     @InjectMocks
-    private ContractKafkaService contractKafkaService;
+    private ContractKafkaServiceImpl contractKafkaService;
 
     private ObjectMapper testObjectMapper;
 

@@ -18,7 +18,7 @@ import java.util.UUID;
 public class FileUploadedEventConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final ContractService contractService;
+    private final IContractService contractService;
 
     /**
      * Consume FileUploaded events từ File Storage Service

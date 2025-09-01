@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ContractPartyRepository extends MongoRepository<ContractParty, String> {
     List<ContractParty> findByContractId(String contractId);
+    void deleteByContractId(String contractId);
 }
