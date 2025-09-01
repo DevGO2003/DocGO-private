@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 @Service
 public class ContractKafkaServiceImpl implements IContractKafkaService {
@@ -57,6 +58,23 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             }
         } catch (Exception e) {
             logger.error("Error processing SummaryCreated event: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Consume ContractSummaryPublished events theo schema mới (document/architecture/contract-summary-published.*.json)
+     */
+    @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.published}", groupId = "contract-management-service-group")
+    public void handleContractSummaryPublished(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        try {
+            Map<String, Object> event = objectMapper.readValue(message, Map.class);
+            String eventType = (String) event.get("eventType");
+            if ("ContractSummaryPublished".equals(eventType)) {
+                logger.info("📥 [SUMMARY_PUBLISHED_RECEIVED] Nhận event ContractSummaryPublished từ topic {}", topic);
+                processContractSummaryPublished(event);
+            }
+        } catch (Exception e) {
+            logger.error("❌ [SUMMARY_PUBLISHED_ERROR] Lỗi parse/handle ContractSummaryPublished: {}", e.getMessage(), e);
         }
     }
 
@@ -140,6 +158,58 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             
         } catch (Exception e) {
             logger.error("Error processing contract from summary: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Xử lý event ContractSummaryPublished (schema camelCase) và lưu theo logic hiện có
+     */
+    @Transactional
+    public void processContractSummaryPublished(Map<String, Object> event) {
+        try {
+            if (event == null) {
+                logger.error("❌ [SUMMARY_PUBLISHED_INVALID] Event null");
+                return;
+            }
+
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            if (data == null) {
+                logger.error("❌ [SUMMARY_PUBLISHED_INVALID] data null trong event: {}", event);
+                return;
+            }
+
+            // Tạo hợp đồng cơ bản từ data
+            Contract contract = Contract.createNew();
+            contract.setTitle((String) data.get("title"));
+            contract.setStatus(Contract.ContractStatus.DRAFT);
+            contract.setSummary("SUMMARY_PUBLISHED");
+            contract.setContractType((String) data.getOrDefault("contractType", "AUTO_GENERATED"));
+            contract.setAiProcessed(true);
+            contract.setProcessingStatus(Contract.ProcessingStatus.COMPLETED);
+
+            // Map tags (List<String>) -> chuỗi comma để tương thích entity hiện tại
+            Object tagsObj = data.get("tags");
+            if (tagsObj instanceof List) {
+                List<?> tags = (List<?>) tagsObj;
+                List<String> tagStrings = new ArrayList<>();
+                for (Object t : tags) {
+                    if (t != null) tagStrings.add(String.valueOf(t));
+                }
+                if (!tagStrings.isEmpty()) {
+                    contract.setTags(String.join(", ", tagStrings));
+                }
+            }
+
+            Contract saved = contractService.createContract(contract);
+            logger.info("✅ [SUMMARY_PUBLISHED_CONTRACT_CREATED] contractId={}", saved.getId());
+
+            // Chuyển schema camelCase -> schema snake_case mà saveDetailedContractSummary đang đọc
+            Map<String, Object> legacySummary = convertPublishedDataToLegacyContractSummary(data);
+            saveDetailedContractSummary(saved.getId(), legacySummary);
+
+            logger.info("🎉 [SUMMARY_PUBLISHED_DONE] Đã xử lý ContractSummaryPublished thành công - contractId={}", saved.getId());
+        } catch (Exception e) {
+            logger.error("❌ [SUMMARY_PUBLISHED_PROCESS_ERROR] {}", e.getMessage(), e);
         }
     }
 
@@ -418,6 +488,93 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             logger.error("❌ [DETAILED_SUMMARY_SAVE_ERROR] Lỗi lưu contract summary chi tiết: {} - contractId: {}", 
                         e.getMessage(), contractId, e);
         }
+    }
+
+    /**
+     * Chuyển đổi schema mới (camelCase) sang schema cũ (snake_case) để tái sử dụng logic lưu hiện có
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> convertPublishedDataToLegacyContractSummary(Map<String, Object> data) {
+        Map<String, Object> legacy = new LinkedHashMap<>();
+
+        // parties
+        Object partiesObj = data.get("parties");
+        if (partiesObj instanceof List) {
+            List<Map<String, Object>> partiesIn = (List<Map<String, Object>>) partiesObj;
+            List<Map<String, Object>> partiesOut = new ArrayList<>();
+            for (Map<String, Object> p : partiesIn) {
+                if (p == null) continue;
+                Map<String, Object> o = new LinkedHashMap<>();
+                o.put("name", p.get("name"));
+                o.put("role", p.get("role"));
+                o.put("representative", p.get("representative"));
+                // Map taxCode -> tax_code
+                o.put("tax_code", p.get("taxCode"));
+                o.put("contact", p.get("contact"));
+                // address, businessLicense hiện chưa được dùng bởi service -> bỏ qua để tránh lỗi
+                partiesOut.add(o);
+            }
+            legacy.put("parties", partiesOut);
+        }
+
+        // keyClauses -> key_clauses
+        Object keyClausesObj = data.get("keyClauses");
+        if (keyClausesObj instanceof List) {
+            legacy.put("key_clauses", keyClausesObj);
+        }
+
+        // favorableClauses -> favorable_clauses (clauseName -> clause_name, benefitTo -> benefit_to)
+        Object favorableObj = data.get("favorableClauses");
+        if (favorableObj instanceof List) {
+            List<Map<String, Object>> in = (List<Map<String, Object>>) favorableObj;
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Map<String, Object> c : in) {
+                if (c == null) continue;
+                Map<String, Object> o = new LinkedHashMap<>();
+                o.put("clause_name", c.get("clauseName"));
+                o.put("description", c.get("description"));
+                o.put("benefit_to", c.get("benefitTo"));
+                out.add(o);
+            }
+            legacy.put("favorable_clauses", out);
+        }
+
+        // unfavorableClauses -> unfavorable_clauses (clauseName -> clause_name, riskTo -> risk_to)
+        Object unfavorableObj = data.get("unfavorableClauses");
+        if (unfavorableObj instanceof List) {
+            List<Map<String, Object>> in = (List<Map<String, Object>>) unfavorableObj;
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Map<String, Object> c : in) {
+                if (c == null) continue;
+                Map<String, Object> o = new LinkedHashMap<>();
+                o.put("clause_name", c.get("clauseName"));
+                o.put("description", c.get("description"));
+                o.put("risk_to", c.get("riskTo"));
+                out.add(o);
+            }
+            legacy.put("unfavorable_clauses", out);
+        }
+
+        // paymentDetails -> payment_details (totalValue number -> string)
+        Object paymentObj = data.get("paymentDetails");
+        if (paymentObj instanceof Map) {
+            Map<String, Object> pmIn = (Map<String, Object>) paymentObj;
+            Map<String, Object> pmOut = new LinkedHashMap<>();
+            Object totalValue = pmIn.get("totalValue");
+            pmOut.put("total_value", totalValue == null ? null : String.valueOf(totalValue));
+            pmOut.put("schedule", pmIn.get("schedule"));
+            pmOut.put("currency", pmIn.get("currency"));
+            // paymentMethod hiện không dùng ở service -> có thể bổ sung DB sau
+            legacy.put("payment_details", pmOut);
+        }
+
+        // object, effectiveDate -> effective_date, term, terminationConditions -> termination_conditions
+        legacy.put("object", data.get("object"));
+        legacy.put("effective_date", data.get("effectiveDate"));
+        legacy.put("term", data.get("term"));
+        legacy.put("termination_conditions", data.get("terminationConditions"));
+
+        return legacy;
     }
 
     /**

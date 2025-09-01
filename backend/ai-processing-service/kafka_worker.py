@@ -13,7 +13,6 @@ from config import (
     get_kafka_client_id,
 )
 from schemas.contract_summary import ContractSummary
-from schemas.events import SummaryCreatedEvent, SummaryCreatedEventData, FileInformation, AIProcessingResult
 import google.generativeai as genai
 from config import get_gemini_api_key
 
@@ -217,7 +216,7 @@ class AIKafkaWorker:
         print(f"✅ Published Classified for file: {data.get('filename')} as {file_type}")
 
     async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
-        """Publish summary-created event với contract summary từ AI"""
+        """Publish ContractSummaryPublished event theo schema chuẩn"""
         try:
             # Lấy nội dung file để gửi cho AI
             content = await self._extract_file_content(data)
@@ -242,7 +241,7 @@ class AIKafkaWorker:
                 "status": "DRAFT",
                 "contractType": "UNKNOWN",
                 "title": f"Hợp đồng từ file: {data.get('filename')}",
-                "tag": ["contract", "unknown"],
+                "tags": ["contract", "unknown"],
                 "parties": [],
                 "object": "Không thể xác định đối tượng hợp đồng",
                 "effectiveDate": None,
@@ -259,56 +258,56 @@ class AIKafkaWorker:
                 "reminders": [],
                 "terminationConditions": "Không xác định",
                 "riskAssessment": {
-                    "riskLevel": "UNKNOWN",
+                    "riskLevel": "LOW",
                     "riskFactors": ["Không thể đánh giá"],
                     "mitigationMeasures": ["Cần xem xét lại"]
                 },
                 "complianceStatus": {
-                    "status": "REVIEW_REQUIRED",
+                    "status": "COMPLIANT",
                     "issues": ["Không thể phân tích"],
                     "recommendations": ["Cần kiểm tra lại tài liệu"]
                 }
             }
 
-        # Tạo event data theo schema chuẩn
-        file_info = FileInformation(
-            fileId=data.get("fileId", ""),
-            filename=data.get("filename", ""),
-            fileType=file_type,
-            fileKey=data.get("key", ""),
-            bucket=data.get("bucket", ""),
-            contentType=data.get("contentType", "application/pdf"),
-            fileSize=data.get("fileSize", 1024000),
-            uploadedAt=datetime.fromisoformat(data.get("uploadedAt", datetime.now(timezone.utc).isoformat()))
-        )
-        
-        ai_result = AIProcessingResult(
-            extractionMethod="AI/OCR",
-            confidence=0.95,
-            processingTime=15000,
-            modelVersion="gemini-2.0-flash",
-            processedAt=datetime.now(timezone.utc)
-        )
-        
-        event_data = SummaryCreatedEventData(
-            fileInformation=file_info,
-            aiProcessingResult=ai_result,
-            contractSummary=contract_summary
-        )
-        
-        summary_created_event = SummaryCreatedEvent(
-            eventId=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            correlationId=event.get("correlationId") or uuid.uuid4().hex,
-            actor=event.get("actor", {}),
-            data=event_data,
-            metadata={
+        # Chuẩn hóa field names theo schema (tags thay cho tag)
+        if isinstance(contract_summary, dict) and "tag" in contract_summary and "tags" not in contract_summary:
+            try:
+                tags_val = contract_summary.pop("tag")
+                contract_summary["tags"] = tags_val if isinstance(tags_val, list) else [tags_val]
+            except Exception:
+                contract_summary["tags"] = []
+
+        # Nếu AI trả về nested { contract_summary: {...} } thì lấy phần bên trong
+        if isinstance(contract_summary, dict) and "contract_summary" in contract_summary:
+            inner = contract_summary.get("contract_summary")
+            if isinstance(inner, dict):
+                contract_summary = inner
+
+        # Đảm bảo tồn tại khóa tối thiểu theo schema
+        contract_summary.setdefault("tags", [])
+
+        # Build event theo schema ContractSummaryPublished
+        event_payload = {
+            "eventVersion": "v1",
+            "eventType": "ContractSummaryPublished",
+            "eventId": str(uuid.uuid4()),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "ai-processing-service",
+            "correlationId": event.get("correlationId") or str(uuid.uuid4()),
+            "actor": event.get("actor", {}),
+            "data": contract_summary,
+            "metadata": {
                 "serviceVersion": "1.0.0",
                 "region": "ap-southeast-1"
             }
+        }
+
+        await self.producer.send_and_wait(
+            self.ai_events_topic,
+            event_payload,
+            key=str(data.get("fileId") or data.get("key") or "").encode("utf-8")
         )
-        await self.producer.send_and_wait(self.ai_events_topic, summary_created_event.dict(), key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
-        print(f"✅ Published SummaryCreated for contract: {data.get('filename')}")
+        print(f"✅ Published ContractSummaryPublished for contract: {data.get('filename')}")
 
     async def _extract_file_content(self, data: dict) -> str:
         """Trích xuất nội dung từ file"""
@@ -386,25 +385,25 @@ class AIKafkaWorker:
                 '  "status": "string",\n'
                 '  "contractType": "string",\n'
                 '  "title": "string",\n'
-                '  "tag": ["string"],\n'
+                '  "tags": ["string"],\n'
                 '  "parties": [\n'
                 '    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}, ...\n'
                 '  ],\n'
                 '  "object": "string",\n'
                 '  "effectiveDate": "string (ISO 8601)",\n'
                 '  "term": "string",\n'
-                '  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string},\n'
+                '  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
                 '  "keyClauses": [\n'
-                '    {"name": "string", "description": "string", "source": "string}, ...\n'
+                '    {"name": "string", "description": "string", "source": "string"}, ...\n'
                 '  ],\n'
                 '  "favorableClauses": [\n'
-                '    {"clauseName": "string", "description": "string", "benefitTo": "string}, ...\n'
+                '    {"clauseName": "string", "description": "string", "benefitTo": "string"}, ...\n'
                 '  ],\n'
                 '  "unfavorableClauses": [\n'
-                '    {"clauseName": "string", "description": "string", "riskTo": "string}, ...\n'
+                '    {"clauseName": "string", "description": "string", "riskTo": "string"}, ...\n'
                 '  ],\n'
                 '  "reminders": [\n'
-                '    {"type": "string", "date": "string (ISO 8601)", "content": "string}, ...\n'
+                '    {"type": "string", "date": "string (ISO 8601)", "content": "string"}, ...\n'
                 '  ],\n'
                 '  "terminationConditions": "string",\n'
                 '  "riskAssessment": {\n'
@@ -413,7 +412,7 @@ class AIKafkaWorker:
                 '    "mitigationMeasures": ["string"]\n'
                 '  },\n'
                 '  "complianceStatus": {\n'
-                '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
+                '    "status": "COMPLIANT|NON_COMPLIANT",\n'
                 '    "issues": ["string"],\n'
                 '    "recommendations": ["string"]\n'
                 '  }\n'
