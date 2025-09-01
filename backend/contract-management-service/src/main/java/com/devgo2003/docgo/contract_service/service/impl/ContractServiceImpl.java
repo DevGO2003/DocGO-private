@@ -18,6 +18,7 @@ import com.devgo2003.docgo.contract_service.repository.ContractFavorableClauseRe
 import com.devgo2003.docgo.contract_service.repository.ContractUnfavorableClauseRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractTerminationConditionRepository;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.contract_service.dto.ContractValidationResult;
 import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractPartyDto;
@@ -126,24 +127,45 @@ public class ContractServiceImpl implements IContractService {
     @Override
     @Transactional
     public Contract createContract(Contract contract) {
-        // Validate contract data
-        ContractDetailDto contractDto = convertToContractDetailDto(contract);
-        validationService.validateForCreation(contract);
+        logger.info("Creating new contract with number: {}", contract.getContractNumber());
         
-        contract.setContractNumber("CONTRACT-" + System.currentTimeMillis());
-        contract.setStatus(Contract.ContractStatus.DRAFT);
-
+        // Validate contract data
+        ContractValidationResult validationResult = validationService.validateForCreation(contract);
+        if (!validationResult.isValid()) {
+            logger.error("Contract validation failed: {}", validationResult.getErrors());
+            throw new InvalidInputException("Validation failed: " + String.join(", ", validationResult.getErrors()));
+        }
+        
+        if (!validationResult.getWarnings().isEmpty()) {
+            logger.warn("Contract validation warnings: {}", validationResult.getWarnings());
+        }
+        
+        // Set default values
+        contract.setId(null); // Ensure new contract
+        contract.setCreatedAt(LocalDateTime.now());
+        contract.setUpdatedAt(LocalDateTime.now());
+        contract.setVersion(1L);
+        
+        // Save contract
         Contract savedContract = contractRepository.save(contract);
-
+        logger.info("Successfully created contract with ID: {}", savedContract.getId());
+        
+        // Create event
         ContractEvent event = new ContractEvent();
         event.setContractId(savedContract.getId());
         event.setEventType("CREATE");
         event.setEventData("{\"message\": \"Tạo hợp đồng mới\"}");
         event.setUserId("system");
-
         eventRepository.save(event);
-        eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
-        contractStatusEventPublisher.publishStatusChangeEvent(savedContract, "DRAFT", "DRAFT");
+        
+        // Publish events
+        try {
+            eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
+            contractStatusEventPublisher.publishStatusChangeEvent(savedContract, "DRAFT", "DRAFT");
+        } catch (Exception e) {
+            logger.error("Failed to publish contract created event: {}", e.getMessage());
+        }
+        
         return savedContract;
     }
 

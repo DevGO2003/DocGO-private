@@ -53,12 +53,29 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 - Java đã có `RestResponse<T>` và `GlobalExceptionHandler` sinh đúng schema. Python service cần trả về cùng định dạng (đã có trong router của AI service; tiếp tục duy trì).
 - HTTP status:
   - 201 Created: tạo mới
-  - 200 OK: trả dữ liệu thành công
-  - 204 No Content: không có dữ liệu (Java hiện dùng `NoContentException` → handler trả 204)
+  - 200 OK: trả dữ liệu thành công (bao gồm cả trường hợp không có dữ liệu với statusCode 204)
   - 400 Bad Request: dữ liệu không hợp lệ (validation)
   - 404 Not Found: không tìm thấy tài nguyên
   - 409 Conflict: xung đột nghiệp vụ
   - 500 Internal Server Error: lỗi không lường trước
+
+**Lưu ý quan trọng về HTTP Status 204:**
+- KHÔNG BAO GIỜ trả về HTTP status 204 No Content
+- Thay vào đó, luôn trả về HTTP status 200 OK với `statusCode: 204` trong response body
+- Điều này đảm bảo tính nhất quán trong API response format và dễ dàng xử lý ở client
+- Ví dụ response khi không có dữ liệu:
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 204,
+  "shortMessage": "No Content",
+  "description": "Không có hợp đồng nào.",
+  "data": null,
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/contract-management-service/contracts"
+}
+```
 
 ## 5) Ví dụ mô hình hóa từ hiện trạng
 - Tạo hợp đồng (Java):
@@ -68,7 +85,7 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 
 - Danh sách hợp đồng (Java):
   - `GET /api/v1/contract-management-service/contracts?pageNumber=0&pageSize=10&sortBy=...`
-  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 204 No Content
+  - 200 + `RestResponse<PaginatedResponse<Contract>>` hoặc 200 với `statusCode: 204` khi không có dữ liệu
 
 - Lấy chi tiết (Java):
   - `GET /api/v1/contract-management-service/contracts/{id}` → 200 hoặc 404

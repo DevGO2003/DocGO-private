@@ -23,9 +23,19 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
         @ExceptionHandler(NoContentException.class)
-        public ResponseEntity<Void> handleNoContentException(NoContentException ex,
+        public ResponseEntity<RestResponse<Void>> handleNoContentException(NoContentException ex,
                         HttpServletRequest request) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+                RestResponse<Void> response = RestResponse.<Void>builder()
+                                .apiVersion("v1")
+                                .statusCode(204)
+                                .shortMessage("No Content")
+                                .description(ex.getMessage())
+                                .data(null)
+                                .timestamp(ZonedDateTime.now())
+                                .requestId(UUID.randomUUID().toString())
+                                .path(request.getRequestURI())
+                                .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)

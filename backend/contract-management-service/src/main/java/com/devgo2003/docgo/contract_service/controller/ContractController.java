@@ -12,6 +12,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractCreateRequest;
 import com.devgo2003.docgo.contract_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -101,10 +102,41 @@ public class ContractController {
         )
     )
     @PostMapping
-    public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody Contract contract) {
-        if (contract.getId() != null) {
+    public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
+        if (request.getContractNumber() == null) {
             throw new com.devgo2003.docgo.contract_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
         }
+        
+        // Convert DTO to Entity
+        Contract contract = new Contract();
+        contract.setContractNumber(request.getContractNumber());
+        contract.setTitle(request.getTitle());
+        contract.setStatus(Contract.ContractStatus.valueOf(request.getStatus()));
+        contract.setPartiesJson(request.getPartiesJson());
+        contract.setStartDate(request.getStartDate());
+        contract.setEndDate(request.getEndDate());
+        contract.setSystemId(request.getSystemId());
+        contract.setSummary(request.getSummary());
+        contract.setContractType(request.getContractType());
+        contract.setRiskLevel(request.getRiskLevel());
+        contract.setKeyTerms(request.getKeyTerms());
+        contract.setFavorableClauses(request.getFavorableClauses());
+        contract.setUnfavorableClauses(request.getUnfavorableClauses());
+        contract.setPaymentCurrency(request.getPaymentCurrency());
+        contract.setContractObject(request.getContractObject());
+        contract.setEffectiveDate(request.getEffectiveDate());
+        contract.setContractTerm(request.getContractTerm());
+        contract.setTotalValue(request.getTotalValue());
+        contract.setPaymentSchedule(request.getPaymentSchedule());
+        contract.setCurrency(request.getCurrency());
+        contract.setPaymentMethod(request.getPaymentMethod());
+        contract.setReminders(request.getReminders());
+        contract.setTerminationConditions(request.getTerminationConditions());
+        contract.setRiskAssessment(request.getRiskAssessment());
+        contract.setComplianceStatus(request.getComplianceStatus());
+        contract.setLegalReviewRequired(request.getLegalReviewRequired());
+        contract.setReviewDeadline(request.getReviewDeadline());
+        
         Contract created = contractService.createContract(contract);
         RestResponse<Contract> response = RestResponse.<Contract>builder()
                 .apiVersion("v1")
@@ -114,7 +146,7 @@ public class ContractController {
                 .data(created)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
+                .path(this.request.getRequestURI())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -369,7 +401,7 @@ public class ContractController {
         """
     )
     @PutMapping("/{id}")
-    public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable String id, @Valid @RequestBody Contract contract) {
+    public ResponseEntity<RestResponse<Contract>> updateContract(@PathVariable String id, @RequestBody Contract contract) {
         Contract updatedContract = contractService.updateContract(id, contract);
         RestResponse<Contract> response = RestResponse.<Contract>builder()
                 .apiVersion("v1")

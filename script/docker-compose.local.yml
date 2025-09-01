@@ -45,8 +45,8 @@ services:
     container_name: docgo-local-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: sapassword
       MONGO_INITDB_DATABASE: docgo_contract_service
     ports:
       - "27017:27017"
@@ -259,7 +259,7 @@ services:
       - "8003:8003"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/docgo_contract_service
+      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo_contract_service?authSource=admin
       - SERVER_PORT=8003
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - REDIS_HOST=redis
