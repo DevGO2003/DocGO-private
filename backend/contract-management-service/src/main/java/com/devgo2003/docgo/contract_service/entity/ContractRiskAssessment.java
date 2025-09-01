@@ -28,4 +28,8 @@ public class ContractRiskAssessment extends BaseEntity {
 
     @Field("assessment_date")
     private String assessmentDate;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

@@ -6,6 +6,7 @@ import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -23,6 +24,10 @@ public interface IContractService {
     ContractDetailResponseDto getContractWithDetailFormat(String id);
     ContractWithSummaryDto getContractWithSummary(String id);
     ContractDetailDto getContractWithDetails(String id);
+    
+    // New API response format
+    ContractResponseDto getContractWithNewFormat(String id);
+    Page<ContractResponseDto> getAllContractsWithNewFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted);
     
     // Get all operations with pagination
     Page<ContractDetailResponseDto> getAllContractsWithDetailFormat(int pageNumber, int pageSize, List<String> sortBy, List<String> sortDirection, boolean includeDeleted);

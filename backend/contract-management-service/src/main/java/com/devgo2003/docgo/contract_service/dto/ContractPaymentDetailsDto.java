@@ -9,8 +9,13 @@ import lombok.AllArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractUnfavorableClauseDto {
-    private String clauseName;
-    private String description;
-    private String riskTo;
+public class ContractPaymentDetailsDto {
+    private Double totalValue;
+    private String schedule;
+    private String currency;
+    private String paymentMethod;
 }
+
+
+
+

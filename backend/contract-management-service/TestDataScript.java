@@ -1,83 +1,57 @@
-package com.devgo2003.docgo.contract_service.script;
-
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.devgo2003.docgo.contract_service.service.IContractService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Script thủ công để tạo dữ liệu test cho Contract Service
- * Có thể gọi trực tiếp từ controller hoặc service khác
- */
-@Component
-public class ManualTestDataGenerator {
-
-    @Autowired
-    private ContractRepository contractRepository;
-
-    /**
-     * Tạo dữ liệu test mới (sẽ ghi đè dữ liệu cũ nếu có)
-     */
-    public void generateTestData() {
-        System.out.println("Bắt đầu tạo dữ liệu test mới...");
+@SpringBootApplication
+public class TestDataScript {
+    
+    public static void main(String[] args) {
+        ConfigurableApplicationContext context = SpringApplication.run(TestDataScript.class, args);
         
-        // Xóa dữ liệu cũ nếu có
-        contractRepository.deleteAll();
-        System.out.println("Đã xóa dữ liệu cũ.");
-        
-        List<Contract> testContracts = createTestContracts();
-        
-        for (Contract contract : testContracts) {
-            contractRepository.save(contract);
-            System.out.println("Đã tạo hợp đồng: " + contract.getContractNumber());
-        }
-        
-        System.out.println("Hoàn thành tạo " + testContracts.size() + " hợp đồng test.");
-    }
-
-    /**
-     * Tạo dữ liệu test mới nếu chưa có dữ liệu
-     */
-    public void generateTestDataIfEmpty() {
-        if (contractRepository.count() > 0) {
-            System.out.println("Database đã có dữ liệu, bỏ qua việc tạo test data.");
-            return;
-        }
-        
-        generateTestData();
-    }
-
-    /**
-     * Xóa tất cả dữ liệu test
-     */
-    public void clearTestData() {
-        System.out.println("Đang xóa tất cả dữ liệu test...");
-        contractRepository.deleteAll();
-        System.out.println("Đã xóa tất cả dữ liệu test.");
-    }
-
-    /**
-     * Hiển thị thống kê dữ liệu hiện tại
-     */
-    public void showDataStats() {
-        long totalContracts = contractRepository.count();
-        System.out.println("Tổng số hợp đồng trong database: " + totalContracts);
-        
-        if (totalContracts > 0) {
-            List<Contract> contracts = contractRepository.findAll();
-            System.out.println("Danh sách hợp đồng:");
-            for (Contract contract : contracts) {
-                System.out.println("- " + contract.getContractNumber() + ": " + contract.getTitle() + " (" + contract.getStatus() + ")");
+        try {
+            ContractRepository contractRepository = context.getBean(ContractRepository.class);
+            IContractService contractService = context.getBean(IContractService.class);
+            
+            System.out.println("=== BẮT ĐẦU TEST DỮ LIỆU ===");
+            
+            // Kiểm tra dữ liệu hiện tại
+            long currentCount = contractRepository.count();
+            System.out.println("Số hợp đồng hiện tại: " + currentCount);
+            
+            if (currentCount == 0) {
+                System.out.println("Tạo dữ liệu test...");
+                createTestData(contractRepository);
+                System.out.println("Đã tạo xong dữ liệu test!");
+            } else {
+                System.out.println("Đã có dữ liệu, bỏ qua việc tạo mới.");
             }
+            
+            // Test getAll
+            System.out.println("\n=== TEST GETALL ===");
+            testGetAll(contractService);
+            
+            // Hiển thị thống kê
+            System.out.println("\n=== THỐNG KÊ DỮ LIỆU ===");
+            showDataStats(contractRepository);
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            context.close();
         }
     }
-
-    private List<Contract> createTestContracts() {
+    
+    private static void createTestData(ContractRepository contractRepository) {
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = LocalDate.now();
         
@@ -115,8 +89,9 @@ public class ManualTestDataGenerator {
         contract1.setUpdatedBy("system");
         contract1.setCreatedAt(now.minusDays(30));
         contract1.setUpdatedAt(now.minusDays(30));
+        contract1
 
-        Contract contract2 = Contract.createNew();
+        Contract contract2 = new Contract();
         contract2.setContractNumber("CTR-2024-002");
         contract2.setTitle("Hợp đồng thuê văn phòng tại Tòa nhà Landmark");
         contract2.setStatus(Contract.ContractStatus.PENDING_APPROVAL);
@@ -150,8 +125,9 @@ public class ManualTestDataGenerator {
         contract2.setUpdatedBy("system");
         contract2.setCreatedAt(now.minusDays(15));
         contract2.setUpdatedAt(now.minusDays(15));
+        contract2
 
-        Contract contract3 = Contract.createNew();
+        Contract contract3 = new Contract();
         contract3.setContractNumber("CTR-2024-003");
         contract3.setTitle("Hợp đồng cung cấp nguyên vật liệu xây dựng");
         contract3.setStatus(Contract.ContractStatus.DRAFT);
@@ -185,8 +161,9 @@ public class ManualTestDataGenerator {
         contract3.setUpdatedBy("system");
         contract3.setCreatedAt(now.minusDays(7));
         contract3.setUpdatedAt(now.minusDays(7));
+        contract3
 
-        Contract contract4 = Contract.createNew();
+        Contract contract4 = new Contract();
         contract4.setContractNumber("CTR-2024-004");
         contract4.setTitle("Hợp đồng dịch vụ vận chuyển hàng hóa");
         contract4.setStatus(Contract.ContractStatus.ACTIVE);
@@ -220,8 +197,9 @@ public class ManualTestDataGenerator {
         contract4.setUpdatedBy("system");
         contract4.setCreatedAt(now.minusDays(60));
         contract4.setUpdatedAt(now.minusDays(60));
+        contract4
 
-        Contract contract5 = Contract.createNew();
+        Contract contract5 = new Contract();
         contract5.setContractNumber("CTR-2024-005");
         contract5.setTitle("Hợp đồng bảo hiểm nhân thọ cho nhân viên");
         contract5.setStatus(Contract.ContractStatus.PENDING);
@@ -255,7 +233,48 @@ public class ManualTestDataGenerator {
         contract5.setUpdatedBy("system");
         contract5.setCreatedAt(now.minusDays(3));
         contract5.setUpdatedAt(now.minusDays(3));
+        contract5
 
-        return Arrays.asList(contract1, contract2, contract3, contract4, contract5);
+        List<Contract> contracts = Arrays.asList(contract1, contract2, contract3, contract4, contract5);
+        
+        for (Contract contract : contracts) {
+            contractRepository.save(contract);
+            System.out.println("Đã tạo hợp đồng: " + contract.getContractNumber());
+        }
+    }
+    
+    private static void testGetAll(IContractService contractService) {
+        try {
+            Page<?> contractsPage = contractService.getAllContractsWithDetailFormat(0, 10, null, null, false);
+            
+            System.out.println("=== KẾT QUẢ GETALL ===");
+            System.out.println("Tổng số hợp đồng: " + contractsPage.getTotalElements());
+            System.out.println("Tổng số trang: " + contractsPage.getTotalPages());
+            System.out.println("Trang hiện tại: " + contractsPage.getNumber());
+            System.out.println("Kích thước trang: " + contractsPage.getSize());
+            System.out.println("Số hợp đồng trong trang này: " + contractsPage.getNumberOfElements());
+            
+            System.out.println("\n=== DANH SÁCH HỢP ĐỒNG ===");
+            contractsPage.getContent().forEach(contract -> {
+                System.out.println("- " + contract.toString());
+            });
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi khi test getAll: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private static void showDataStats(ContractRepository contractRepository) {
+        long totalContracts = contractRepository.count();
+        System.out.println("Tổng số hợp đồng trong database: " + totalContracts);
+        
+        if (totalContracts > 0) {
+            List<Contract> contracts = contractRepository.findAll();
+            System.out.println("Danh sách hợp đồng:");
+            for (Contract contract : contracts) {
+                System.out.println("- " + contract.getContractNumber() + ": " + contract.getTitle() + " (" + contract.getStatus() + ")");
+            }
+        }
     }
 }

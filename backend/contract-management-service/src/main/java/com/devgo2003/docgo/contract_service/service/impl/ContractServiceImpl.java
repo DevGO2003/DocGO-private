@@ -55,6 +55,15 @@ import org.springframework.data.domain.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.devgo2003.docgo.contract_service.dto.ContractPartyResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractPaymentDetailsDto;
+import com.devgo2003.docgo.contract_service.dto.ContractKeyClauseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractFavorableClauseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractUnfavorableClauseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractReminderDto;
+import com.devgo2003.docgo.contract_service.dto.ContractRiskAssessmentResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractComplianceStatusResponseDto;
+
 @Service
 public class ContractServiceImpl implements IContractService {
     private static final Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
@@ -572,14 +581,9 @@ public class ContractServiceImpl implements IContractService {
      */
     public ContractResponseDto getContractWithNewFormat(String id) {
         Contract contract = getContractOrThrow(id);
-        Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
-        List<ContractSummary> summaries = new ArrayList<>();
-        if (summaryOpt.isPresent()) {
-            summaries.add(summaryOpt.get());
-        }
         List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
         
-        return ContractResponseDto.fromContract(contract, summaries, parties);
+        return mapContractToResponseDto(contract, parties);
     }
 
     /**
@@ -590,13 +594,8 @@ public class ContractServiceImpl implements IContractService {
         
         List<ContractResponseDto> contractsWithNewFormat = contractsPage.getContent().stream()
                 .map(contract -> {
-                    Optional<ContractSummary> summaryOpt = summaryRepository.findByContractId(contract.getId());
-                    List<ContractSummary> summaries = new ArrayList<>();
-                    if (summaryOpt.isPresent()) {
-                        summaries.add(summaryOpt.get());
-                    }
                     List<ContractParty> parties = partyRepository.findByContractId(contract.getId());
-                    return ContractResponseDto.fromContract(contract, summaries, parties);
+                    return mapContractToResponseDto(contract, parties);
                 })
                 .collect(Collectors.toList());
         
@@ -605,6 +604,115 @@ public class ContractServiceImpl implements IContractService {
                 contractsPage.getPageable(),
                 contractsPage.getTotalElements()
         );
+    }
+
+    /**
+     * Map Contract entity sang ContractResponseDto theo cấu trúc mới
+     */
+    private ContractResponseDto mapContractToResponseDto(Contract contract, List<ContractParty> parties) {
+        // Parse tags từ string sang List
+        List<String> tags = new ArrayList<>();
+        if (contract.getTags() != null && !contract.getTags().trim().isEmpty()) {
+            tags = Arrays.asList(contract.getTags().split("\\s*,\\s*"));
+        }
+
+        // Map parties
+        List<ContractPartyResponseDto> partyDtos = parties.stream()
+                .map(party -> ContractPartyResponseDto.builder()
+                        .role(party.getPartyType())
+                        .name(party.getPartyName())
+                        .representative(party.getContactPerson())
+                        .taxCode(party.getTaxCode())
+                        .contact(party.getPhone())
+                        .address(party.getAddress())
+                        .businessLicense(null) // Không có field này trong ContractParty
+                        .build())
+                .collect(Collectors.toList());
+
+        // Map payment details
+        ContractPaymentDetailsDto paymentDetails = ContractPaymentDetailsDto.builder()
+                .totalValue(contract.getTotalValue() != null ? Double.parseDouble(contract.getTotalValue()) : null)
+                .schedule(contract.getPaymentSchedule())
+                .currency(contract.getCurrency())
+                .paymentMethod(contract.getPaymentMethod())
+                .build();
+
+        // Map key clauses
+        List<ContractKeyClauseDto> keyClauses = new ArrayList<>();
+        if (contract.getKeyTerms() != null && !contract.getKeyTerms().trim().isEmpty()) {
+            // Parse key terms từ string sang structured format
+            keyClauses.add(ContractKeyClauseDto.builder()
+                    .name("Key Terms")
+                    .description(contract.getKeyTerms())
+                    .source("Contract")
+                    .build());
+        }
+
+        // Map favorable clauses
+        List<ContractFavorableClauseDto> favorableClauses = new ArrayList<>();
+        if (contract.getFavorableClauses() != null && !contract.getFavorableClauses().trim().isEmpty()) {
+            favorableClauses.add(ContractFavorableClauseDto.builder()
+                    .clauseName("Favorable Clauses")
+                    .description(contract.getFavorableClauses())
+                    .benefitTo("Client")
+                    .build());
+        }
+
+        // Map unfavorable clauses
+        List<ContractUnfavorableClauseDto> unfavorableClauses = new ArrayList<>();
+        if (contract.getUnfavorableClauses() != null && !contract.getUnfavorableClauses().trim().isEmpty()) {
+            unfavorableClauses.add(ContractUnfavorableClauseDto.builder()
+                    .clauseName("Unfavorable Clauses")
+                    .description(contract.getUnfavorableClauses())
+                    .riskTo("Client")
+                    .build());
+        }
+
+        // Map reminders
+        List<ContractReminderDto> reminders = new ArrayList<>();
+        if (contract.getReminders() != null && !contract.getReminders().trim().isEmpty()) {
+            reminders.add(ContractReminderDto.builder()
+                    .type("General")
+                    .date(contract.getEffectiveDate())
+                    .content(contract.getReminders())
+                    .build());
+        }
+
+        // Map risk assessment
+        ContractRiskAssessmentResponseDto riskAssessment = ContractRiskAssessmentResponseDto.builder()
+                .riskLevel(contract.getRiskLevel())
+                .riskFactors(contract.getRiskAssessment() != null ? 
+                    Arrays.asList(contract.getRiskAssessment().split("\\s*,\\s*")) : new ArrayList<>())
+                .mitigationMeasures(new ArrayList<>()) // Có thể bổ sung sau
+                .build();
+
+        // Map compliance status
+        ContractComplianceStatusResponseDto complianceStatus = ContractComplianceStatusResponseDto.builder()
+                .status(contract.getComplianceStatus())
+                .issues(new ArrayList<>()) // Có thể bổ sung sau
+                .recommendations(new ArrayList<>()) // Có thể bổ sung sau
+                .build();
+
+        return ContractResponseDto.builder()
+                .id(contract.getId())
+                .contractNumber(contract.getContractNumber())
+                .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+                .contractType(contract.getContractType())
+                .title(contract.getTitle())
+                .tags(tags)
+                .parties(partyDtos)
+                .object(contract.getContractObject())
+                .effectiveDate(contract.getEffectiveDate())
+                .term(contract.getContractTerm())
+                .paymentDetails(paymentDetails)
+                .keyClauses(keyClauses)
+                .favorableClauses(favorableClauses)
+                .unfavorableClauses(unfavorableClauses)
+                .reminders(reminders)
+                .terminationConditions(contract.getTerminationConditions())
+                .riskAssessment(riskAssessment)
+                .complianceStatus(complianceStatus)
+                .build();
     }
 
     /**

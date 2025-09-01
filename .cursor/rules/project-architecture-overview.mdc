@@ -1,3 +1,29 @@
+---
+description: "Tổng quan kiến trúc dự án DocGO với các quy tắc chuẩn hóa cho microservices, API, và development workflow"
+autoAttachments:
+  - "*.java"
+  - "*.py"
+  - "*.yml"
+  - "*.yaml"
+  - "*.md"
+  - "*.mdx"
+  - "*.env*"
+  - "docker-compose*.yml"
+  - "Dockerfile*"
+  - "pom.xml"
+  - "requirements.txt"
+  - "package.json"
+  - "*.gradle"
+  - "*.kt"
+  - "*.xml"
+  - "*.properties"
+  - "*.sql"
+  - "*.sh"
+  - "*.bat"
+  - "*.ps1"
+alwaysApply: true
+---
+
 # DocGO Project Architecture - Overview
 
 The DocGO project uses microservices architecture with standardized rules divided into separate files for easy management and maintenance.

@@ -22,4 +22,9 @@ public class ContractAttachment extends BaseEntity {
 
     @Field("file_path")
     private String filePath;
+    
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

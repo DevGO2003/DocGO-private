@@ -118,7 +118,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             logger.info("Processing contract for file: {} with summary: {}", filename, summary);
             
             // Tạo hợp đồng mới trong database
-            Contract contract = new Contract();
+            Contract contract = Contract.createNew();
             contract.setTitle((String) contractSummary.get("title"));
             contract.setStatus(Contract.ContractStatus.DRAFT);
             contract.setSummary(summary);

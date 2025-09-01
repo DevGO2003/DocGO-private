@@ -28,4 +28,8 @@ public class ContractSummary extends BaseEntity {
 
     @Field("recommendations")
     private String recommendations;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

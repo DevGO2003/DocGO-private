@@ -61,7 +61,7 @@ public abstract class BaseEntity {
      */
     @Version
     @Field("version")
-    private Long version = 0L;
+    private Long version;
 
     // Getters / Setters
     public LocalDateTime getCreatedAt() {
@@ -129,5 +129,23 @@ public abstract class BaseEntity {
         this.isDeleted = false;
         this.deletedAt = null;
         this.deletedBy = null;
+    }
+    
+    /**
+     * Kiểm tra xem entity có phải là mới hay không
+     * Spring Data MongoDB sử dụng method này để xác định entity mới hay cũ
+     * Các class con cần override method này để trả về true nếu id == null
+     */
+    public abstract boolean isNew();
+    
+    /**
+     * Khởi tạo các giá trị mặc định cho entity mới
+     * Sử dụng method này để đảm bảo tính nhất quán khi tạo entity mới
+     */
+    protected void initializeNewEntity() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.isDeleted = false;
+        // Version sẽ được Spring Data MongoDB tự động set
     }
 }

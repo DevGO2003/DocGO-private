@@ -9,6 +9,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from schemas.response import RestResponse
+from schemas.contract_summary import ContractSummary, ContractSummaryResponse
 from bs4 import BeautifulSoup
 from pptx import Presentation
 from openpyxl import load_workbook
@@ -442,47 +443,53 @@ async def summarize_api(
         prompt = (
             "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
             '{\n'
-            '  "contract_summary": {\n'
-            '    "title": string,\n'
-            '    "tag": [string],\n'
-            '    "parties": [\n'
-            '      {"name": string, "role": string, "representative": string, "taxCode": string, "contact": string, "address": string, "businessLicense": string}, ...\n'
-            '    ],\n'
-            '    "object": string,\n'
-            '    "effectiveDate": string (yyyy-MM-dd),\n'
-            '    "term": string,\n'
-            '    "paymentDetails": {"totalValue": string, "schedule": string, "currency": string, "paymentMethod": string},\n'
-            '    "keyClauses": [\n'
-            '      {"name": string, "description": string, "source": string}, ...\n'
-            '    ],\n'
-            '    "favorableClauses": [\n'
-            '      {"clauseName": string, "description": string, "benefitTo": string}, ...\n'
-            '    ],\n'
-            '    "unfavorableClauses": [\n'
-            '      {"clauseName": string, "description": string, "riskTo": string}, ...\n'
-            '    ],\n'
-            '    "reminders": [\n'
-            '      {"type": "gia hạn|xem xét|hết hạn", "date": "yyyy-MM-dd hoặc null", "content": string}, ...\n'
-            '    ],\n'
-            '    "terminationConditions": string,\n'
-            '    "riskAssessment": {\n'
-            '      "riskLevel": "LOW|MEDIUM|HIGH",\n'
-            '      "riskFactors": [string],\n'
-            '      "mitigationMeasures": [string]\n'
-            '    },\n'
-            '    "complianceStatus": {\n'
-            '      "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
-            '      "issues": [string],\n'
-            '      "recommendations": [string]\n'
-            '    }\n'
+            '  "id": "string",\n'
+            '  "contractNumber": "string",\n'
+            '  "status": "string",\n'
+            '  "contractType": "string",\n'
+            '  "title": "string",\n'
+            '  "tag": ["string"],\n'
+            '  "parties": [\n'
+            '    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}, ...\n'
+            '  ],\n'
+            '  "object": "string",\n'
+            '  "effectiveDate": "string (ISO 8601)",\n'
+            '  "term": "string",\n'
+            '  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string},\n'
+            '  "keyClauses": [\n'
+            '    {"name": "string", "description": "string", "source": "string}, ...\n'
+            '  ],\n'
+            '  "favorableClauses": [\n'
+            '    {"clauseName": "string", "description": "string", "benefitTo": "string}, ...\n'
+            '  ],\n'
+            '  "unfavorableClauses": [\n'
+            '    {"clauseName": "string", "description": "string", "riskTo": "string}, ...\n'
+            '  ],\n'
+            '  "reminders": [\n'
+            '    {"type": "string", "date": "string (ISO 8601)", "content": "string}, ...\n'
+            '  ],\n'
+            '  "terminationConditions": "string",\n'
+            '  "riskAssessment": {\n'
+            '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
+            '      "riskFactors": ["string"],\n'
+            '      "mitigationMeasures": ["string"]\n'
+            '  },\n'
+            '  "complianceStatus": {\n'
+            '    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
+            '      "issues": ["string"],\n'
+            '      "recommendations": ["string"]\n'
             '  }\n'
             '}'
             "\nYêu cầu:\n"
             "1. Chỉ trả về đúng JSON hợp lệ, không giải thích thêm\n"
             "2. Nếu không thể tóm tắt được thông tin hợp lệ, hãy trả về 'KHÔNG_THỂ_TÓM_TẮT'\n"
-            "3. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (yyyy-MM-dd), nếu không có ngày cụ thể thì để date=null\n"
+            "3. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (ISO 8601), nếu không có ngày cụ thể thì để date=null\n"
             "4. Điền thông tin dựa trên nội dung hợp đồng, nếu không có thông tin thì để null hoặc mảng rỗng\n"
-            "5. Sử dụng camelCase cho tất cả các key\n\n"
+            "5. Sử dụng camelCase cho tất cả các key\n"
+            "6. totalValue phải là số (number), không phải chuỗi\n"
+            "7. effectiveDate và reminders.date phải theo định dạng ISO 8601 (yyyy-MM-ddTHH:mm:ssZ)\n"
+            "8. Thứ tự các trường trong parties: role trước, name sau\n"
+            "9. Tạo ID và contractNumber ngẫu nhiên\n\n"
             "Dưới đây là nội dung hợp đồng:"
         )
         answer = ask_gemini(api_key, content, prompt)
@@ -578,5 +585,106 @@ async def summarize_api(
         timestamp=datetime.now(),
         requestId=str(uuid.uuid4())
     )
+
+
+# API Test: Kiểm tra GEMINI_API_KEY
+@router.get("/test/get-geminiapikey", summary="Kiểm tra GEMINI_API_KEY mà hệ thống đọc được", tags=["Test"])
+async def test_gemini_api_key_api(request: Request):
+    """
+    🔹 Đầu vào
+    
+    Không có tham số đầu vào.
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: object
+    Mô tả: Thông tin về GEMINI_API_KEY và trạng thái hệ thống.
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1).
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: thành công, 500: lỗi server).
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả.
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả kiểm tra.
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu.
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu.
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi.
+    """
+    try:
+        # Lấy GEMINI_API_KEY từ biến môi trường
+        api_key = os.getenv("GEMINI_API_KEY")
+        
+        # Kiểm tra các biến môi trường khác
+        kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+        kafka_file_topic = os.getenv("KAFKA_FILE_EVENTS_TOPIC", "file.events")
+        kafka_ai_topic = os.getenv("KAFKA_AI_EVENTS_TOPIC", "ai.events")
+        
+        # Tạo response data
+        test_data = {
+            "geminiApiKey": {
+                "exists": api_key is not None,
+                "length": len(api_key) if api_key else 0,
+                "masked": f"{api_key[:8]}...{api_key[-4:]}" if api_key and len(api_key) > 12 else "N/A" if not api_key else api_key,
+                "status": "CONFIGURED" if api_key else "NOT_CONFIGURED"
+            },
+            "environment": {
+                "kafkaBootstrapServers": kafka_servers,
+                "kafkaFileEventsTopic": kafka_file_topic,
+                "kafkaAiEventsTopic": kafka_ai_topic,
+                "host": os.getenv("HOST", "0.0.0.0"),
+                "port": os.getenv("PORT", "8017"),
+                "debug": os.getenv("DEBUG", "false")
+            },
+            "systemInfo": {
+                "pythonPath": os.getcwd(),
+                "envFiles": {
+                    "dotenvLoaded": True,
+                    "envLocalExists": os.path.exists(".env.local"),
+                    "envExampleExists": os.path.exists("env_exmaple.txt")
+                }
+            }
+        }
+        
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Kiểm tra GEMINI_API_KEY thành công",
+            data=test_data,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=str(request.url)
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi kiểm tra GEMINI_API_KEY: {str(e)}",
+            data=None,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=str(request.url)
+        )
 
 

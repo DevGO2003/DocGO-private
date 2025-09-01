@@ -31,4 +31,8 @@ public class ContractPaymentDetail extends BaseEntity {
 
     @Field("payment_status")
     private String paymentStatus;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

@@ -43,4 +43,8 @@ public class ContractEvent extends BaseEntity {
 
     @Field("metadata")
     private String metadata;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

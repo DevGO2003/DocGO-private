@@ -28,4 +28,8 @@ public class ContractKeyTerm extends BaseEntity {
 
     @Field("importance_level")
     private String importanceLevel;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

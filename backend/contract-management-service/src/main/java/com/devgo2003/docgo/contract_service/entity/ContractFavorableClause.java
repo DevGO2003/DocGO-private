@@ -31,4 +31,9 @@ public class ContractFavorableClause extends BaseEntity {
 
     @Field("impact_assessment")
     private String impactAssessment;
+    
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

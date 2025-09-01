@@ -5,12 +5,18 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractUnfavorableClauseDto {
-    private String clauseName;
-    private String description;
-    private String riskTo;
+public class ContractRiskAssessmentResponseDto {
+    private String riskLevel;
+    private List<String> riskFactors;
+    private List<String> mitigationMeasures;
 }
+
+
+
+

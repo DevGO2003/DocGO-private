@@ -1,8 +1,3 @@
----
-description: API Standardization Rules for DocGO - URL, payload, response format
-globs: ["**/*.java", "**/*.py", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
-alwaysApply: true
----
 
 ### API Standardization for DocGO (applies to ai-processing-service and contract-management-service)
 
@@ -109,9 +104,36 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 - Router (Python): nhóm theo `tags` và prefix chung; tên hàm ngắn, rõ mục đích (`extract_api`, `summarize_api`).
 - Tên biến phản ánh ý nghĩa nghiệp vụ, tránh viết tắt.
 
-## 7) Bảo mật và versioning
+## 7) Thứ tự API trong Controller
+- **Luôn đặt API `getAll` (danh sách) ở trên API `getOne` (chi tiết)**
+- Thứ tự chuẩn trong Controller:
+  1. `@GetMapping` (getAll) - Lấy danh sách tất cả
+  2. `@GetMapping("/{id}")` (getOne) - Lấy chi tiết theo ID
+  3. `@PostMapping` (create) - Tạo mới
+  4. `@PutMapping("/{id}")` (update) - Cập nhật
+  5. `@DeleteMapping("/{id}")` (delete) - Xóa
+  6. Các API khác theo thứ tự logic nghiệp vụ
+
+- Ví dụ thứ tự đúng:
+```java
+@GetMapping                    // getAll - Luôn ở trên
+public ResponseEntity<...> getAllContracts(...) { ... }
+
+@GetMapping("/{id}")          // getOne - Luôn ở dưới getAll
+public ResponseEntity<...> getContract(@PathVariable String id) { ... }
+
+@PostMapping                  // create
+public ResponseEntity<...> createContract(...) { ... }
+```
+
+## 8) Bảo mật và versioning
 - Luôn đặt tiền tố `/api/v1/…`. Khi thay đổi lớn không tương thích, phát hành `/api/v2/…` song song.
 - Định nghĩa rõ header bảo mật (ví dụ JWT) ở tài liệu, ngay trong phần mô tả endpoint.
+
+---
+
+When adding new APIs in the above 2 services, please follow these rules to ensure consistency, readability and easy integration.
+
 
 ---
 

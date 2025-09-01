@@ -72,7 +72,7 @@ public class AiEventProcessingServiceImpl implements IAiEventProcessingService {
         
         // Tìm contract theo fileId hoặc tạo mới
         Contract contract = contractRepository.findBySystemId(fileInfo.getFileId())
-                .orElse(new Contract());
+                .orElse(Contract.createNew());
         
         // Cập nhật thông tin cơ bản
         if (contract.getId() == null) {

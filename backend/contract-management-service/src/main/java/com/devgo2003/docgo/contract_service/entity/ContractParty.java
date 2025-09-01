@@ -37,4 +37,8 @@ public class ContractParty extends BaseEntity {
 
     @Field("tax_code")
     private String taxCode;
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

@@ -28,4 +28,9 @@ public class ContractComplianceStatus extends BaseEntity {
 
     @Field("last_review_date")
     private String lastReviewDate;
+    
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

@@ -3,6 +3,7 @@ package com.devgo2003.docgo.contract_service.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 public class Contract extends BaseEntity {
 
     @Id
+    @MongoId
     private String id;
 
     @Field("contract_number")
@@ -138,5 +140,23 @@ public class Contract extends BaseEntity {
 
     public enum ProcessingStatus {
         PENDING, PROCESSING, COMPLETED, FAILED
+    }
+    
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
+    
+    /**
+     * Khởi tạo contract mới với các giá trị mặc định
+     * Sử dụng method này thay vì constructor để đảm bảo tính nhất quán
+     */
+    public static Contract createNew() {
+        Contract contract = new Contract();
+        contract.setId(null);
+        contract.initializeNewEntity();
+        contract.setAiProcessed(false);
+        contract.setProcessingStatus(ProcessingStatus.PENDING);
+        return contract;
     }
 }

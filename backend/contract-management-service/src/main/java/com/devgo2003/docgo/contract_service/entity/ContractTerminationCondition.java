@@ -28,4 +28,9 @@ public class ContractTerminationCondition extends BaseEntity {
 
     @Field("notice_period")
     private String noticePeriod;
+    
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
 }

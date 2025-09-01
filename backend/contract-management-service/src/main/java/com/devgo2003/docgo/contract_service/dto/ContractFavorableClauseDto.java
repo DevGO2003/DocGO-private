@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractFavorableClauseDto {
-    private String name;
+    private String clauseName;
     private String description;
-    private String source;
+    private String benefitTo;
 }

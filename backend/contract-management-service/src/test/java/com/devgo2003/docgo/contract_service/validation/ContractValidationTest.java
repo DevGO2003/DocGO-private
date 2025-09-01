@@ -112,7 +112,7 @@ public class ContractValidationTest {
     @Test
     void testContractBusinessValidation_Success() {
         // Given
-        Contract contract = new Contract();
+        Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
@@ -129,7 +129,7 @@ public class ContractValidationTest {
     @Test
     void testContractBusinessValidation_InvalidDates() {
         // Given
-        Contract contract = new Contract();
+        Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
@@ -150,7 +150,7 @@ public class ContractValidationTest {
     @Test
     void testContractBusinessValidation_PastStartDate() {
         // Given
-        Contract contract = new Contract();
+        Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
@@ -170,7 +170,7 @@ public class ContractValidationTest {
     @Test
     void testContractBusinessValidation_HighValueLowRisk() {
         // Given
-        Contract contract = new Contract();
+        Contract contract = Contract.createNew();
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);

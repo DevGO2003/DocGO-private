@@ -102,16 +102,16 @@ public class ContractDetailResponseDto {
                     } else if (clause instanceof ContractFavorableClauseDto) {
                         ContractFavorableClauseDto dto = (ContractFavorableClauseDto) clause;
                         return ContractClauseDto.builder()
-                                .name(dto.getName())
+                                .name(dto.getClauseName())
                                 .description(dto.getDescription())
-                                .source(dto.getSource())
+                                .source(dto.getBenefitTo())
                                 .build();
                     } else if (clause instanceof ContractUnfavorableClauseDto) {
                         ContractUnfavorableClauseDto dto = (ContractUnfavorableClauseDto) clause;
                         return ContractClauseDto.builder()
-                                .name(dto.getName())
+                                .name(dto.getClauseName())
                                 .description(dto.getDescription())
-                                .source(dto.getSource())
+                                .source(dto.getRiskTo())
                                 .build();
                     }
                     return null;

@@ -46,7 +46,7 @@ public class TestDataGenerator implements CommandLineRunner {
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = LocalDate.now();
         
-        Contract contract1 = new Contract();
+        Contract contract1 = Contract.createNew();
         contract1.setContractNumber("CTR-2024-001");
         contract1.setTitle("Hợp đồng cung cấp dịch vụ IT cho Công ty ABC");
         contract1.setStatus(Contract.ContractStatus.ACTIVE);
@@ -80,9 +80,8 @@ public class TestDataGenerator implements CommandLineRunner {
         contract1.setUpdatedBy("system");
         contract1.setCreatedAt(now.minusDays(30));
         contract1.setUpdatedAt(now.minusDays(30));
-        contract1.setVersion(1L);
 
-        Contract contract2 = new Contract();
+        Contract contract2 = Contract.createNew();
         contract2.setContractNumber("CTR-2024-002");
         contract2.setTitle("Hợp đồng thuê văn phòng tại Tòa nhà Landmark");
         contract2.setStatus(Contract.ContractStatus.PENDING_APPROVAL);
@@ -116,9 +115,8 @@ public class TestDataGenerator implements CommandLineRunner {
         contract2.setUpdatedBy("system");
         contract2.setCreatedAt(now.minusDays(15));
         contract2.setUpdatedAt(now.minusDays(15));
-        contract2.setVersion(1L);
 
-        Contract contract3 = new Contract();
+        Contract contract3 = Contract.createNew();
         contract3.setContractNumber("CTR-2024-003");
         contract3.setTitle("Hợp đồng cung cấp nguyên vật liệu xây dựng");
         contract3.setStatus(Contract.ContractStatus.DRAFT);
@@ -152,9 +150,8 @@ public class TestDataGenerator implements CommandLineRunner {
         contract3.setUpdatedBy("system");
         contract3.setCreatedAt(now.minusDays(7));
         contract3.setUpdatedAt(now.minusDays(7));
-        contract3.setVersion(1L);
 
-        Contract contract4 = new Contract();
+        Contract contract4 = Contract.createNew();
         contract4.setContractNumber("CTR-2024-004");
         contract4.setTitle("Hợp đồng dịch vụ vận chuyển hàng hóa");
         contract4.setStatus(Contract.ContractStatus.ACTIVE);
@@ -188,9 +185,8 @@ public class TestDataGenerator implements CommandLineRunner {
         contract4.setUpdatedBy("system");
         contract4.setCreatedAt(now.minusDays(60));
         contract4.setUpdatedAt(now.minusDays(60));
-        contract4.setVersion(1L);
 
-        Contract contract5 = new Contract();
+        Contract contract5 = Contract.createNew();
         contract5.setContractNumber("CTR-2024-005");
         contract5.setTitle("Hợp đồng bảo hiểm nhân thọ cho nhân viên");
         contract5.setStatus(Contract.ContractStatus.PENDING);
@@ -224,7 +220,6 @@ public class TestDataGenerator implements CommandLineRunner {
         contract5.setUpdatedBy("system");
         contract5.setCreatedAt(now.minusDays(3));
         contract5.setUpdatedAt(now.minusDays(3));
-        contract5.setVersion(1L);
 
         return Arrays.asList(contract1, contract2, contract3, contract4, contract5);
     }

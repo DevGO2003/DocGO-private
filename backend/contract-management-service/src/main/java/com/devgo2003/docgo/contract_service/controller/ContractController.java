@@ -152,17 +152,17 @@ public class ContractController {
     }
 
     @Operation(
-        summary = "Lấy danh sách hợp đồng với format mới nhất quán", 
+        summary = "Lấy danh sách tất cả hợp đồng với cấu trúc response mới", 
         description = """
         🔹 Đầu vào
         
         📄 pageNumber (tùy chọn, query)
         Loại: integer
-        Mô tả: Số trang (bắt đầu từ 0). Mặc định là 0.
+        Mô tả: Số trang (mặc định: 0).
         
         📄 pageSize (tùy chọn, query)
         Loại: integer
-        Mô tả: Số lượng hợp đồng trên mỗi trang. Mặc định là 10.
+        Mô tả: Kích thước trang (mặc định: 10).
         
         📄 sortBy (tùy chọn, query)
         Loại: List<String>
@@ -170,31 +170,17 @@ public class ContractController {
         
         📄 sortDirection (tùy chọn, query)
         Loại: List<String>
-        Mô tả: Hướng sắp xếp cho từng trường (ASC, DESC).
-        
-        📄 searchTerm (tùy chọn, query)
-        Loại: string
-        Mô tả: Từ khóa tìm kiếm trong hợp đồng.
+        Mô tả: Hướng sắp xếp (ASC/DESC).
         
         📄 includeDeleted (tùy chọn, query)
         Loại: boolean
-        Mô tả: Có bao gồm hợp đồng đã xóa hay không. Mặc định là false.
+        Mô tả: Có bao gồm các bản ghi đã xóa hay không (mặc định: false).
         
         🔹 Đầu ra
         
         📝 data
-        Loại: PaginatedResponse<ContractDetailResponseDto>
-        Mô tả: Danh sách hợp đồng với thông tin phân trang và format mới nhất quán với AI event structure, bao gồm:
-        - Thông tin cơ bản hợp đồng (id, contractNumber, title, status, contractType, riskLevel)
-        - Key terms với cấu trúc mới (name, description, source)
-        - Favorable clauses với cấu trúc mới (name, description, source)
-        - Unfavorable clauses với cấu trúc mới (name, description, source)
-        - Contract object, effective date, contract term
-        - Payment information với cấu trúc mới (totalValue, schedule, currency, method)
-        - Termination conditions
-        - Risk assessment với cấu trúc mới (riskLevel, riskFactors, mitigationMeasures)
-        - Compliance status với cấu trúc mới (status, issues, recommendations)
-        - Parties với cấu trúc mới (role, name, address)
+        Loại: PaginatedResponse<ContractResponseDto>
+        Mô tả: Danh sách hợp đồng với cấu trúc response mới.
         
         📊 apiVersion
         Loại: string
@@ -226,86 +212,66 @@ public class ContractController {
         """
     )
     @GetMapping
-    public ResponseEntity<RestResponse<PaginatedResponse<ContractDetailResponseDto>>> getAllContracts(
+    public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) List<String> sortBy,
             @RequestParam(required = false) List<String> sortDirection,
-            @RequestParam(required = false) String searchTerm,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
-
-        Page<ContractDetailResponseDto> contractsPage = contractService.getAllContractsWithDetailFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
-        if (contractsPage.getContent().isEmpty()) {
-            throw new NoContentException("Không có hợp đồng nào.");
-        }
-
-        RequestInfo requestInfo = RequestInfo.builder()
-                .page(pageNumber)
-                .size(pageSize)
-                .searchTerm(searchTerm)
-                .sortBy(sortBy)
-                .sortDirection(sortDirection)
+        
+        org.springframework.data.domain.Page<ContractResponseDto> contractsPage = 
+                contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+        
+        PaginatedResponse<ContractResponseDto> paginatedResponse = PaginatedResponse.<ContractResponseDto>builder()
+                .request(RequestInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .searchTerm(null)
+                        .sortBy(sortBy)
+                        .sortDirection(sortDirection)
+                        .build())
+                .result(ResultInfo.builder()
+                        .page(contractsPage.getNumber())
+                        .size(contractsPage.getSize())
+                        .totalElements(contractsPage.getTotalElements())
+                        .totalPages(contractsPage.getTotalPages())
+                        .first(contractsPage.isFirst())
+                        .last(contractsPage.isLast())
+                        .numberOfElements(contractsPage.getNumberOfElements())
+                        .empty(contractsPage.isEmpty())
+                        .sort(new ArrayList<>())
+                        .build())
+                .content(contractsPage.getContent())
                 .build();
-
-        List<SortInfo> sortInfoList = new ArrayList<>();
-        if (contractsPage.getSort().isSorted()) {
-            contractsPage.getSort().forEach(order -> {
-                sortInfoList.add(new SortInfo(order.getProperty(), order.getDirection().name()));
-            });
-        }
-
-        ResultInfo resultInfo = ResultInfo.builder()
-                .page(contractsPage.getNumber())
-                .size(contractsPage.getSize())
-                .totalElements(contractsPage.getTotalElements())
-                .totalPages(contractsPage.getTotalPages())
-                .first(contractsPage.isFirst())
-                .last(contractsPage.isLast())
-                .numberOfElements(contractsPage.getNumberOfElements())
-                .empty(contractsPage.isEmpty())
-                .sort(sortInfoList)
-                .build();
-
-        PaginatedResponse<ContractDetailResponseDto> paginatedResponse = new PaginatedResponse<>(requestInfo, resultInfo, contractsPage.getContent());
-
-        RestResponse<PaginatedResponse<ContractDetailResponseDto>> response = RestResponse.<PaginatedResponse<ContractDetailResponseDto>>builder()
+        
+        RestResponse<PaginatedResponse<ContractResponseDto>> response = RestResponse.<PaginatedResponse<ContractResponseDto>>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
-                .description("Danh sách hợp đồng đã được lấy thành công với format mới nhất quán với AI event structure.")
+                .description("Danh sách hợp đồng với cấu trúc response mới đã được lấy thành công.")
                 .data(paginatedResponse)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
-
+        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(
-        summary = "Lấy hợp đồng theo ID với format mới nhất quán", 
+        summary = "Lấy hợp đồng theo ID với cấu trúc response mới", 
         description = """
         🔹 Đầu vào
         
         🆔 id (bắt buộc, path)
-        Loại: Long
-        Mô tả: ID của hợp đồng cần lấy thông tin.
+        Loại: string
+        Mô tả: ID của hợp đồng cần lấy.
         
         🔹 Đầu ra
         
         📝 data
-        Loại: ContractDetailResponseDto
-        Mô tả: Thông tin hợp đồng với ID tương ứng, bao gồm:
-        - Thông tin cơ bản hợp đồng (id, contractNumber, title, status, contractType, riskLevel)
-        - Key terms với cấu trúc mới (name, description, source)
-        - Favorable clauses với cấu trúc mới (name, description, source)
-        - Unfavorable clauses với cấu trúc mới (name, description, source)
-        - Contract object, effective date, contract term
-        - Payment information với cấu trúc mới (totalValue, schedule, currency, method)
-        - Termination conditions
-        - Risk assessment với cấu trúc mới (riskLevel, riskFactors, mitigationMeasures)
-        - Compliance status với cấu trúc mới (status, issues, recommendations)
-        - Parties với cấu trúc mới (role, name, address)
+        Loại: ContractResponseDto
+        Mô tả: Thông tin hợp đồng với cấu trúc response mới.
         
         📊 apiVersion
         Loại: string
@@ -337,18 +303,19 @@ public class ContractController {
         """
     )
     @GetMapping("/{id}")
-    public ResponseEntity<RestResponse<ContractDetailResponseDto>> getContract(@PathVariable String id) {
-        ContractDetailResponseDto contract = contractService.getContractWithDetailFormat(id);
-        RestResponse<ContractDetailResponseDto> response = RestResponse.<ContractDetailResponseDto>builder()
+    public ResponseEntity<RestResponse<ContractResponseDto>> getContract(@PathVariable String id) {
+        ContractResponseDto contract = contractService.getContractWithNewFormat(id);
+        RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
-                .description("Thông tin hợp đồng đã được lấy thành công với format mới nhất quán với AI event structure.")
+                .description("Thông tin hợp đồng với cấu trúc response mới đã được lấy thành công.")
                 .data(contract)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
+        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
