@@ -36,6 +36,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPublisher;
 import com.devgo2003.docgo.contract_service.service.event.ContractEventPayload;
+import com.devgo2003.docgo.contract_service.service.event.ContractUpdatedEventPublisher;
 import com.devgo2003.docgo.contract_service.service.IContractService;
 import com.devgo2003.docgo.contract_service.service.IContractStatusEventPublisher;
 import com.devgo2003.docgo.contract_service.service.IContractValidationService;
@@ -96,6 +97,7 @@ public class ContractServiceImpl implements IContractService {
     private final ContractComplianceStatusRepository contractComplianceStatusRepository;
     private final ContractEventPublisher eventPublisher;
     private final IContractStatusEventPublisher contractStatusEventPublisher;
+    private final ContractUpdatedEventPublisher contractUpdatedEventPublisher;
     private final ObjectMapper objectMapper;
     private final IContractValidationService validationService;
 
@@ -123,6 +125,7 @@ public class ContractServiceImpl implements IContractService {
                            ContractComplianceStatusRepository contractComplianceStatusRepository,
                            ContractEventPublisher eventPublisher,
                            IContractStatusEventPublisher contractStatusEventPublisher,
+                           ContractUpdatedEventPublisher contractUpdatedEventPublisher,
                            ObjectMapper objectMapper,
                            IContractValidationService validationService) {
         this.contractRepository = contractRepository;
@@ -143,6 +146,7 @@ public class ContractServiceImpl implements IContractService {
         this.contractComplianceStatusRepository = contractComplianceStatusRepository;
         this.eventPublisher = eventPublisher;
         this.contractStatusEventPublisher = contractStatusEventPublisher;
+        this.contractUpdatedEventPublisher = contractUpdatedEventPublisher;
         this.objectMapper = objectMapper;
         this.validationService = validationService;
     }
@@ -955,6 +959,116 @@ public class ContractServiceImpl implements IContractService {
             logger.info("✅ Saved contract compliance status for contract ID: {} - status: {}", contractId, status);
         } catch (Exception e) {
             logger.error("❌ Error saving contract compliance status: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void createOrUpdateContractFromSummary(java.util.Map<String, Object> summaryData) {
+        try {
+            logger.info("Processing contract summary data: {}", summaryData);
+            
+            String fileId = (String) summaryData.get("fileId");
+            if (fileId == null) {
+                logger.error("File ID is missing from the summary data. Cannot process.");
+                return;
+            }
+
+            Contract contract = contractRepository.findBySystemId(fileId).orElse(new Contract());
+            boolean isNewContract = contract.getId() == null;
+
+            // Set basic contract information
+            contract.setSystemId(fileId);
+            contract.setTitle((String) summaryData.get("title"));
+            contract.setContractNumber((String) summaryData.get("contractNumber"));
+            contract.setSummary((String) summaryData.get("summaryText"));
+            contract.setContractType((String) summaryData.get("contractType"));
+            contract.setContractObject((String) summaryData.get("object"));
+            contract.setEffectiveDate((String) summaryData.get("effectiveDate"));
+            contract.setContractTerm((String) summaryData.get("term"));
+            contract.setTerminationConditions((String) summaryData.get("terminationConditions"));
+            
+            // Handle keyPoints safely
+            Object keyPointsObj = summaryData.get("keyPoints");
+            if (keyPointsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<String> keyPoints = (List<String>) keyPointsObj;
+                contract.setKeyTerms(String.join(", ", keyPoints));
+            }
+            
+            // Handle riskAssessment
+            Object riskObj = summaryData.get("riskAssessment");
+            if (riskObj instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> riskMap = (java.util.Map<String, Object>) riskObj;
+                contract.setRiskLevel((String) riskMap.get("riskLevel"));
+                Object riskFactorsObj = riskMap.get("riskFactors");
+                if (riskFactorsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> riskFactors = (List<String>) riskFactorsObj;
+                    contract.setRiskAssessment(String.join(", ", riskFactors));
+                }
+            }
+            
+            // Handle complianceStatus
+            Object complianceObj = summaryData.get("complianceStatus");
+            if (complianceObj instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> complianceMap = (java.util.Map<String, Object>) complianceObj;
+                contract.setComplianceStatus((String) complianceMap.get("status"));
+            }
+            
+            // Handle paymentDetails
+            Object paymentObj = summaryData.get("paymentDetails");
+            if (paymentObj instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> paymentMap = (java.util.Map<String, Object>) paymentObj;
+                Object totalValueObj = paymentMap.get("totalValue");
+                if (totalValueObj != null) {
+                    contract.setTotalValue(totalValueObj.toString());
+                }
+                contract.setPaymentSchedule((String) paymentMap.get("schedule"));
+                contract.setCurrency((String) paymentMap.get("currency"));
+                contract.setPaymentMethod((String) paymentMap.get("paymentMethod"));
+            }
+
+            contract.setAiProcessed(true);
+            contract.setProcessingStatus(Contract.ProcessingStatus.COMPLETED);
+
+            if (isNewContract) {
+                contract.setCreatedAt(LocalDateTime.now());
+                contract.setCreatedBy("ai-processing-service");
+                contract.setStatus(Contract.ContractStatus.DRAFT);
+                contract.setVersion(1L);
+            }
+
+            contract.setUpdatedAt(LocalDateTime.now());
+
+            Contract savedContract = contractRepository.save(contract);
+            logger.info("Successfully saved contract with ID: {}", savedContract.getId());
+
+            // Create contract event
+            ContractEvent event = new ContractEvent();
+            event.setContractId(savedContract.getId());
+            event.setEventType(isNewContract ? "CREATE_FROM_AI" : "UPDATE_FROM_AI");
+            event.setEventData("{\"message\": \"Contract " + (isNewContract ? "created" : "updated") + " from AI processing\"}");
+            event.setUserId("ai-processing-service");
+            eventRepository.save(event);
+
+            // Publish contract updated event
+            try {
+                eventPublisher.publishEvent(new ContractEventPayload(savedContract, isNewContract ? "created" : "updated"));
+                contractStatusEventPublisher.publishStatusChangeEvent(savedContract, 
+                    savedContract.getStatus().name(), savedContract.getStatus().name());
+                contractUpdatedEventPublisher.publishContractUpdatedEvent(savedContract, isNewContract ? "created" : "updated");
+                logger.info("Successfully published contract events for contract ID: {}", savedContract.getId());
+            } catch (Exception e) {
+                logger.error("Failed to publish contract events: {}", e.getMessage());
+            }
+
+        } catch (Exception e) {
+            logger.error("Error processing contract summary: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process contract summary", e);
         }
     }
 }

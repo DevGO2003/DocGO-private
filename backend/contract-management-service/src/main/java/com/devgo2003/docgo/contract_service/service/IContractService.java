@@ -69,4 +69,6 @@ public interface IContractService {
     void createOrUpdateContractRiskAssessment(String contractId, String riskLevel, List<String> riskFactors, List<String> mitigationMeasures);
 
     void createOrUpdateContractComplianceStatus(String contractId, String status, List<String> issues, List<String> recommendations);
+
+    void createOrUpdateContractFromSummary(java.util.Map<String, Object> summaryData);
 }

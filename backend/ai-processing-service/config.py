@@ -17,11 +17,19 @@ def get_gemini_api_key():
 def get_kafka_bootstrap_servers():
     return os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
-def get_kafka_file_events_topic():
-    return os.getenv("KAFKA_FILE_EVENTS_TOPIC", "file.events")
+# Consumer topic
+def get_kafka_file_uploaded_topic():
+    return os.getenv("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
 
-def get_kafka_ai_events_topic():
-    return os.getenv("KAFKA_AI_EVENTS_TOPIC", "ai.events")
+# Producer topics
+def get_kafka_text_extracted_topic():
+    return os.getenv("KAFKA_TEXT_EXTRACTED_TOPIC", "ai.text.extracted")
+
+def get_kafka_document_classified_topic():
+    return os.getenv("KAFKA_DOCUMENT_CLASSIFIED_TOPIC", "ai.document.classified")
+
+def get_kafka_contract_summary_topic():
+    return os.getenv("KAFKA_CONTRACT_SUMMARY_TOPIC", "contract.summary.updated")
 
 def get_kafka_client_id():
     return os.getenv("KAFKA_CLIENT_ID", "ai-processing-service")

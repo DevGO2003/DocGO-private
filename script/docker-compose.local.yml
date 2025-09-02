@@ -136,6 +136,15 @@ services:
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_FILE_UPLOADED_TOPIC=file.uploaded
+      - KAFKA_TEXT_EXTRACTED_TOPIC=ai.text.extracted
+      - KAFKA_DOCUMENT_CLASSIFIED_TOPIC=ai.document.classified
+      - KAFKA_CONTRACT_SUMMARY_TOPIC=contract.summary.updated
+      - KAFKA_FILE_EVENTS_TOPIC=file.uploaded
+      - KAFKA_TEXT_EXTRACTED_TOPIC=ai.text.extracted
+      - KAFKA_DOCUMENT_CLASSIFIED_TOPIC=ai.document.classified
+      - KAFKA_CONTRACT_SUMMARY_TOPIC=contract.summary.updated
+      - KAFKA_GFMS_EVENTS_TOPIC=file.record.created
       # Service URLs for all 19 microservices
       - API_GATEWAY_BFF_URL=http://localhost:8000
       - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8001
@@ -329,6 +338,7 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo_contract_service?authSource=admin
       - SERVER_PORT=8003
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_ENABLED=true
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:

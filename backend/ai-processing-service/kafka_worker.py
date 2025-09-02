@@ -8,8 +8,10 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 from config import (
     get_kafka_bootstrap_servers,
-    get_kafka_file_events_topic,
-    get_kafka_ai_events_topic,
+    get_kafka_file_uploaded_topic,
+    get_kafka_text_extracted_topic,
+    get_kafka_document_classified_topic,
+    get_kafka_contract_summary_topic,
     get_kafka_client_id,
 )
 from schemas.contract_summary import ContractSummary
@@ -20,8 +22,10 @@ from config import get_gemini_api_key
 class AIKafkaWorker:
     def __init__(self):
         self.bootstrap_servers: str = get_kafka_bootstrap_servers()
-        self.file_events_topic: str = get_kafka_file_events_topic()
-        self.ai_events_topic: str = get_kafka_ai_events_topic()
+        self.consumer_topic: str = get_kafka_file_uploaded_topic()
+        self.text_extracted_topic: str = get_kafka_text_extracted_topic()
+        self.document_classified_topic: str = get_kafka_document_classified_topic()
+        self.contract_summary_topic: str = get_kafka_contract_summary_topic()
         self.client_id: str = get_kafka_client_id()
         self.consumer: Optional[AIOKafkaConsumer] = None
         self.producer: Optional[AIOKafkaProducer] = None
@@ -31,7 +35,7 @@ class AIKafkaWorker:
     async def start(self) -> None:
         if self.consumer is None:
             self.consumer = AIOKafkaConsumer(
-                self.file_events_topic,
+                self.consumer_topic,
                 bootstrap_servers=self.bootstrap_servers,
                 group_id=f"{self.client_id}-group",
                 client_id=self.client_id,
@@ -98,7 +102,6 @@ class AIKafkaWorker:
         content_type = data.get("contentType", "").lower()
         folder = data.get("folder", "").lower()
 
-        # Heuristic to decide file type
         is_contract = any([
             "contract" in filename,
             "hopdong" in filename,
@@ -108,69 +111,24 @@ class AIKafkaWorker:
 
         file_type = "CONTRACT" if is_contract else "GENERAL"
 
-        # Publish AIProcessingStarted
-        started_event = {
-            "eventVersion": "v1",
-            "eventType": "AIProcessingStarted",
-            "eventId": uuid.uuid4().hex,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "source": "ai-processing-service",
-            "correlationId": event.get("correlationId") or uuid.uuid4().hex,
-            "actor": event.get("actor", {}),
-            "data": {
-                "fileId": data.get("fileId"),
-                "filename": data.get("filename"),
-                "fileType": file_type,
-                "key": data.get("key"),
-                "bucket": data.get("bucket"),
-                "url": data.get("url"),
-            },
-            "metadata": {"serviceVersion": "1.0.0"}
-        }
-        await self.producer.send_and_wait(self.ai_events_topic, started_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
-
-        # Simulate AI processing steps
         try:
-            # 1. Extract text if DOCX/PDF
-            if content_type in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
-                await self._publish_text_extracted(event, data, file_type)
-                
-                # 2. Classify document
-                await self._publish_classified(event, data, file_type)
-                
-                # 3. Generate summary if contract
-                if is_contract:
-                    await self._publish_summary_created(event, data, file_type)
+            # 1. Extract text
+            await self._publish_text_extracted(event, data, file_type)
+            
+            # 2. Classify document
+            await self._publish_classified(event, data, file_type)
+            
+            # 3. Generate summary if contract
+            if is_contract:
+                await self._publish_summary_created(event, data, file_type)
 
         except Exception as e:
             print(f"Error in AI processing: {e}")
 
-        # Publish AIProcessingCompleted
-        completed_event = {
-            "eventVersion": "v1",
-            "eventType": "AIProcessingCompleted",
-            "eventId": uuid.uuid4().hex,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "source": "ai-processing-service",
-            "correlationId": started_event["correlationId"],
-            "actor": event.get("actor", {}),
-            "data": {
-                "fileId": data.get("fileId"),
-                "filename": data.get("filename"),
-                "fileType": file_type,
-                "summaryAvailable": is_contract,
-                "textExtracted": content_type in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-                "classified": True,
-            },
-            "metadata": {"serviceVersion": "1.0.0"}
-        }
-        await self.producer.send_and_wait(self.ai_events_topic, completed_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
-
     async def _publish_text_extracted(self, event: dict, data: dict, file_type: str) -> None:
-        """Publish text-extracted event"""
         text_extracted_event = {
             "eventVersion": "v1",
-            "eventType": "TextExtracted",
+            "eventType": "ai.text.extracted",
             "eventId": uuid.uuid4().hex,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "source": "ai-processing-service",
@@ -188,14 +146,13 @@ class AIKafkaWorker:
             },
             "metadata": {"serviceVersion": "1.0.0"}
         }
-        await self.producer.send_and_wait(self.ai_events_topic, text_extracted_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+        await self.producer.send_and_wait(self.text_extracted_topic, text_extracted_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
         print(f"✅ Published TextExtracted for file: {data.get('filename')}")
 
     async def _publish_classified(self, event: dict, data: dict, file_type: str) -> None:
-        """Publish classified event"""
         classified_event = {
             "eventVersion": "v1",
-            "eventType": "Classified",
+            "eventType": "ai.document.classified",
             "eventId": uuid.uuid4().hex,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "source": "ai-processing-service",
@@ -212,84 +169,35 @@ class AIKafkaWorker:
             },
             "metadata": {"serviceVersion": "1.0.0"}
         }
-        await self.producer.send_and_wait(self.ai_events_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
+        await self.producer.send_and_wait(self.document_classified_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
         print(f"✅ Published Classified for file: {data.get('filename')} as {file_type}")
 
     async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
-        """Publish ContractSummaryPublished event theo schema chuẩn"""
         try:
-            # Lấy nội dung file để gửi cho AI
             content = await self._extract_file_content(data)
             
             if not content:
-                print(f"⚠️ Không thể trích xuất nội dung từ file: {data.get('filename')}")
+                print(f"⚠️ Could not extract content from file: {data.get('filename')}")
                 return
             
-            # Gọi AI để tóm tắt hợp đồng
             contract_summary = await self._generate_contract_summary(content, data.get('filename'))
             
             if not contract_summary:
-                print(f"⚠️ AI không thể tạo contract summary cho file: {data.get('filename')}")
+                print(f"⚠️ AI could not generate summary for: {data.get('filename')}")
                 return
                 
         except Exception as e:
-            print(f"❌ Lỗi khi tạo contract summary: {e}")
-            # Fallback: tạo contract summary cơ bản
-            contract_summary = {
-                "id": str(uuid.uuid4()),
-                "contractNumber": f"CTR-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
-                "status": "DRAFT",
-                "contractType": "UNKNOWN",
-                "title": f"Hợp đồng từ file: {data.get('filename')}",
-                "tags": ["contract", "unknown"],
-                "parties": [],
-                "object": "Không thể xác định đối tượng hợp đồng",
-                "effectiveDate": None,
-                "term": "Không xác định",
-                "paymentDetails": {
-                    "totalValue": 0,
-                    "schedule": "Không xác định",
-                    "currency": "VND",
-                    "paymentMethod": "Không xác định"
-                },
-                "keyClauses": [],
-                "favorableClauses": [],
-                "unfavorableClauses": [],
-                "reminders": [],
-                "terminationConditions": "Không xác định",
-                "riskAssessment": {
-                    "riskLevel": "LOW",
-                    "riskFactors": ["Không thể đánh giá"],
-                    "mitigationMeasures": ["Cần xem xét lại"]
-                },
-                "complianceStatus": {
-                    "status": "COMPLIANT",
-                    "issues": ["Không thể phân tích"],
-                    "recommendations": ["Cần kiểm tra lại tài liệu"]
-                }
-            }
+            print(f"❌ Error generating contract summary: {e}")
+            # Create fallback summary
+            contract_summary = self._create_fallback_summary(data)
 
-        # Chuẩn hóa field names theo schema (tags thay cho tag)
-        if isinstance(contract_summary, dict) and "tag" in contract_summary and "tags" not in contract_summary:
-            try:
-                tags_val = contract_summary.pop("tag")
-                contract_summary["tags"] = tags_val if isinstance(tags_val, list) else [tags_val]
-            except Exception:
-                contract_summary["tags"] = []
+        # Ensure fileId is included in the summary data
+        if "fileId" not in contract_summary:
+            contract_summary["fileId"] = data.get("fileId") or data.get("key") or str(uuid.uuid4())
 
-        # Nếu AI trả về nested { contract_summary: {...} } thì lấy phần bên trong
-        if isinstance(contract_summary, dict) and "contract_summary" in contract_summary:
-            inner = contract_summary.get("contract_summary")
-            if isinstance(inner, dict):
-                contract_summary = inner
-
-        # Đảm bảo tồn tại khóa tối thiểu theo schema
-        contract_summary.setdefault("tags", [])
-
-        # Build event theo schema ContractSummaryPublished
         event_payload = {
             "eventVersion": "v1",
-            "eventType": "ContractSummaryPublished",
+            "eventType": "contract.summary.updated",
             "eventId": str(uuid.uuid4()),
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "source": "ai-processing-service",
@@ -303,160 +211,79 @@ class AIKafkaWorker:
         }
 
         await self.producer.send_and_wait(
-            self.ai_events_topic,
+            self.contract_summary_topic,
             event_payload,
             key=str(data.get("fileId") or data.get("key") or "").encode("utf-8")
         )
-        print(f"✅ Published ContractSummaryPublished for contract: {data.get('filename')}")
+        print(f"✅ Published ContractSummary for contract: {data.get('filename')}")
 
     async def _extract_file_content(self, data: dict) -> str:
-        """Trích xuất nội dung từ file"""
-        try:
-            # Trong thực tế, bạn sẽ cần download file từ S3/MinIO và đọc nội dung
-            # Ở đây tôi giả lập việc trích xuất nội dung
-            filename = data.get('filename', '').lower()
-            content_type = data.get('contentType', '').lower()
-            
-            # Giả lập nội dung file (trong thực tế sẽ đọc từ file thật)
-            if content_type in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
-                # Giả lập nội dung hợp đồng
-                sample_content = f"""
-                HỢP ĐỒNG CUNG CẤP DỊCH VỤ PHẦN MỀM
+        # This is a simulation. In a real-world scenario, you would download the file from S3.
+        return f"Simulated content for {data.get('filename')}"
 
-                Điều 1: Nội dung hợp tác
-                Các bên thỏa thuận về việc cung cấp và sử dụng dịch vụ phát triển phần mềm quản lý nhà thuốc.
+    def _create_fallback_summary(self, data: dict) -> dict:
+        """Create a basic fallback summary when AI processing fails"""
+        return {
+            "fileId": data.get("fileId") or data.get("key") or str(uuid.uuid4()),
+            "contractNumber": f"CTR-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
+            "title": f"Contract from file: {data.get('filename', 'Unknown')}",
+            "contractType": "UNKNOWN",
+            "summaryText": f"Auto-generated summary for {data.get('filename', 'Unknown')}",
+            "keyPoints": ["Requires manual review"],
+            "object": "Unable to determine contract object",
+            "effectiveDate": None,
+            "term": "Unknown",
+            "paymentDetails": {
+                "totalValue": 0,
+                "schedule": "Unknown",
+                "currency": "VND",
+                "paymentMethod": "Unknown"
+            },
+            "riskAssessment": {
+                "riskLevel": "MEDIUM",
+                "riskFactors": ["Requires manual review"],
+                "mitigationMeasures": ["Manual contract review recommended"]
+            },
+            "complianceStatus": {
+                "status": "PENDING_REVIEW",
+                "issues": ["Automated processing incomplete"],
+                "recommendations": ["Manual review required"]
+            },
+            "terminationConditions": "Unknown",
+            "tags": ["auto-generated", "requires-review"]
+        }
 
-                Điều 2: Các bên tham gia
-                Bên A: Công ty TNHH Sử dụng Dịch vụ
-                - Đại diện: Bà Trần Thị Lan, Tổng Giám đốc
-                - Mã số thuế: 0123456789
-                - Địa chỉ: 456 Đường XYZ, Quận 3, TP.HCM
-
-                Bên B: Công ty Cổ phần Phát triển Phần mềm
-                - Đại diện: Ông Nguyễn Văn Dũng, Giám đốc
-                - Mã số thuế: 0109889002
-                - Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM
-
-                Điều 3: Đối tượng hợp đồng
-                Cung cấp dịch vụ phát triển phần mềm quản lý nhà thuốc.
-
-                Điều 4: Thời hạn hợp đồng
-                Hợp đồng có hiệu lực từ ngày 01/01/2024 trong thời hạn 6 năm.
-
-                Điều 5: Giá trị hợp đồng
-                Tổng giá trị: 4.500.000 VND
-                Phương thức thanh toán: Chuyển khoản ngân hàng
-                Lịch trình: Thanh toán 100% sau khi nghiệm thu.
-
-                Điều 6: Quyền và trách nhiệm
-                Bên A có quyền yêu cầu bên B cung cấp dịch vụ theo đúng cam kết.
-                Bên B có trách nhiệm bảo hành sản phẩm trong 12 tháng.
-
-                Điều 7: Điều khoản chấm dứt
-                Hợp đồng có thể bị chấm dứt nếu có vi phạm nghiêm trọng.
-
-                Điều 8: Bảo mật
-                Các bên cam kết bảo mật thông tin mật của nhau.
-                """
-                return sample_content
-            else:
-                return f"Nội dung file {filename} (định dạng: {content_type})"
-                
-        except Exception as e:
-            print(f"❌ Lỗi khi trích xuất nội dung file: {e}")
-            return None
-
-    async def _generate_contract_summary(self, content: str, filename: str) -> dict:
-        """Gọi AI để tạo contract summary"""
-        try:
-            api_key = get_gemini_api_key()
-            if not api_key:
-                print("⚠️ Không có Gemini API key")
-                return None
-
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.0-flash')
-            
-            prompt = (
-                "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
-                '{\n'
-                '  "id": "string",\n'
-                '  "contractNumber": "string",\n'
-                '  "status": "string",\n'
-                '  "contractType": "string",\n'
-                '  "title": "string",\n'
-                '  "tags": ["string"],\n'
-                '  "parties": [\n'
-                '    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}, ...\n'
-                '  ],\n'
-                '  "object": "string",\n'
-                '  "effectiveDate": "string (ISO 8601)",\n'
-                '  "term": "string",\n'
-                '  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
-                '  "keyClauses": [\n'
-                '    {"name": "string", "description": "string", "source": "string"}, ...\n'
-                '  ],\n'
-                '  "favorableClauses": [\n'
-                '    {"clauseName": "string", "description": "string", "benefitTo": "string"}, ...\n'
-                '  ],\n'
-                '  "unfavorableClauses": [\n'
-                '    {"clauseName": "string", "description": "string", "riskTo": "string"}, ...\n'
-                '  ],\n'
-                '  "reminders": [\n'
-                '    {"type": "string", "date": "string (ISO 8601)", "content": "string"}, ...\n'
-                '  ],\n'
-                '  "terminationConditions": "string",\n'
-                '  "riskAssessment": {\n'
-                '    "riskLevel": "LOW|MEDIUM|HIGH",\n'
-                '    "riskFactors": ["string"],\n'
-                '    "mitigationMeasures": ["string"]\n'
-                '  },\n'
-                '  "complianceStatus": {\n'
-                '    "status": "COMPLIANT|NON_COMPLIANT",\n'
-                '    "issues": ["string"],\n'
-                '    "recommendations": ["string"]\n'
-                '  }\n'
-                '}'
-                "\nYêu cầu:\n"
-                "1. Chỉ trả về đúng JSON hợp lệ, không giải thích thêm\n"
-                "2. Nếu không thể tóm tắt được thông tin hợp lệ, hãy trả về 'KHÔNG_THỂ_TÓM_TẮT'\n"
-                "3. Lưu ý: reminders chỉ có ngày nhắc nhở là ngày cụ thể (ISO 8601), nếu không có ngày cụ thể thì để date=null\n"
-                "4. Điền thông tin dựa trên nội dung hợp đồng, nếu không có thông tin thì để null hoặc mảng rỗng\n"
-                "5. Sử dụng camelCase cho tất cả các key\n"
-                "6. totalValue phải là số (number), không phải chuỗi\n"
-                "7. effectiveDate và reminders.date phải theo định dạng ISO 8601 (yyyy-MM-ddTHH:mm:ssZ)\n"
-                "8. Thứ tự các trường trong parties: role trước, name sau\n"
-                "9. Tạo ID và contractNumber ngẫu nhiên\n\n"
-                "Dưới đây là nội dung hợp đồng:\n" + content[:8000]
-            )
-
-            response = model.generate_content(prompt)
-            answer = response.text
-            
-            # Xử lý response từ AI
-            cleaned = answer.strip()
-            if cleaned.startswith('```json'):
-                cleaned = cleaned[7:]
-            if cleaned.startswith('```'):
-                cleaned = cleaned[3:]
-            if cleaned.endswith('```'):
-                cleaned = cleaned[:-3]
-            
-            # Parse JSON response
-            try:
-                summary_json = json.loads(cleaned)
-                print(f"✅ AI đã tạo contract summary cho file: {filename}")
-                return summary_json
-            except json.JSONDecodeError as e:
-                print(f"⚠️ Không thể parse JSON từ AI response: {e}")
-                print(f"AI response: {answer}")
-                return None
-                
-        except Exception as e:
-            print(f"❌ Lỗi khi gọi AI: {e}")
-            return None
+    async def _generate_contract_summary(self, content: str, filename: str) -> Optional[dict]:
+        # This is a simulation. In a real-world scenario, you would call a generative AI model.
+        return {
+            "fileId": str(uuid.uuid4()),
+            "contractNumber": f"CTR-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
+            "title": f"Contract from file: {filename}",
+            "contractType": "SERVICE_AGREEMENT",
+            "summaryText": f"AI-generated summary for {filename}",
+            "keyPoints": ["Service provision", "Payment terms", "Duration"],
+            "object": "Service provision agreement",
+            "effectiveDate": datetime.now(timezone.utc).isoformat(),
+            "term": "12 months",
+            "paymentDetails": {
+                "totalValue": 100000,
+                "schedule": "Monthly",
+                "currency": "VND",
+                "paymentMethod": "Bank transfer"
+            },
+            "riskAssessment": {
+                "riskLevel": "LOW",
+                "riskFactors": ["Standard terms"],
+                "mitigationMeasures": ["Regular review"]
+            },
+            "complianceStatus": {
+                "status": "COMPLIANT",
+                "issues": [],
+                "recommendations": ["Standard contract"]
+            },
+            "terminationConditions": "30 days notice",
+            "tags": ["ai-generated", "service-contract"]
+        }
 
 
 worker = AIKafkaWorker()
-
-

@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     
     # Kafka configuration
     kafka_bootstrap_servers: str = "localhost:9092"
-    kafka_file_events_topic: str = "file.events"
-    kafka_gfms_events_topic: str = "gfms.events"
+    kafka_file_events_topic: str = "file.uploaded"
+    kafka_gfms_events_topic: str = "file.record.created"
     kafka_client_id: str = "general-file-management-service"
     
     class Config:
