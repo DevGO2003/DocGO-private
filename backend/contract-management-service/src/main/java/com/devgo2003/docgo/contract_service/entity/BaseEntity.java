@@ -58,8 +58,8 @@ public abstract class BaseEntity {
 
     /**
      * Phiên bản bản ghi cho optimistic locking
+     * Temporarily removed @Version to avoid conflicts with mongoTemplate.insert()
      */
-    @Version
     @Field("version")
     private Long version;
 

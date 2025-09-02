@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.contract_service.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -15,7 +16,7 @@ import jakarta.validation.constraints.NotNull;
 @Document(collection = "contracts")
 @Getter
 @Setter
-public class Contract extends BaseEntity {
+public class Contract extends BaseEntity implements Persistable<String> {
 
     @Id
     @MongoId
@@ -144,7 +145,7 @@ public class Contract extends BaseEntity {
     
     @Override
     public boolean isNew() {
-        return this.id == null;
+        return this.getId() == null;
     }
     
     /**

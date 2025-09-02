@@ -48,6 +48,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -100,6 +101,7 @@ public class ContractServiceImpl implements IContractService {
     private final ContractUpdatedEventPublisher contractUpdatedEventPublisher;
     private final ObjectMapper objectMapper;
     private final IContractValidationService validationService;
+    private final MongoTemplate mongoTemplate;
 
     private static final Set<String> VALID_SORT_BY_PROPERTIES = new HashSet<>(Arrays.asList(
             "id", "contractNumber", "title", "status", "partiesJson", "startDate", "endDate", "systemId",
@@ -127,7 +129,8 @@ public class ContractServiceImpl implements IContractService {
                            IContractStatusEventPublisher contractStatusEventPublisher,
                            ContractUpdatedEventPublisher contractUpdatedEventPublisher,
                            ObjectMapper objectMapper,
-                           IContractValidationService validationService) {
+                           IContractValidationService validationService,
+                           MongoTemplate mongoTemplate) {
         this.contractRepository = contractRepository;
         this.attachmentRepository = attachmentRepository;
         this.eventRepository = eventRepository;
@@ -149,6 +152,7 @@ public class ContractServiceImpl implements IContractService {
         this.contractUpdatedEventPublisher = contractUpdatedEventPublisher;
         this.objectMapper = objectMapper;
         this.validationService = validationService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -1036,15 +1040,24 @@ public class ContractServiceImpl implements IContractService {
             contract.setProcessingStatus(Contract.ProcessingStatus.COMPLETED);
 
             if (isNewContract) {
+                // Ensure identifier present for versioned insert
+                contract.setId(java.util.UUID.randomUUID().toString());
                 contract.setCreatedAt(LocalDateTime.now());
                 contract.setCreatedBy("ai-processing-service");
                 contract.setStatus(Contract.ContractStatus.DRAFT);
-                contract.setVersion(1L);
+                // Provide minimal required fields
+                if (contract.getStartDate() == null) {
+                    contract.setStartDate(java.time.LocalDate.now());
+                }
+                // Let Mongo initialize version
+                contract.setVersion(null);
             }
 
             contract.setUpdatedAt(LocalDateTime.now());
 
-            Contract savedContract = contractRepository.save(contract);
+            Contract savedContract = isNewContract
+                ? mongoTemplate.insert(contract, "contracts")
+                : contractRepository.save(contract);
             logger.info("Successfully saved contract with ID: {}", savedContract.getId());
 
             // Create contract event
