@@ -288,14 +288,7 @@ services:
       - "8018:8018"
     env_file:
       - ../backend/general-file-management-service/.env
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8018
-      - PYTHONPATH=/app
-      - DATABASE_HOST=mariadb
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+
     volumes:
       - ../backend/general-file-management-service:/app
       - general_file_management_uploads_local:/app/uploads
