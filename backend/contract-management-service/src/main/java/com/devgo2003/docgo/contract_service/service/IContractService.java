@@ -7,6 +7,7 @@ import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.contract_service.dto.ContractSummaryDto;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
