@@ -7,12 +7,6 @@ services:
     image: bitnami/kafka:3.7
     container_name: docgo-local-kafka
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-        reservations:
-          cpus: '0.05'
     ports:
       - "9092:9092"   # Host access
     environment:
@@ -33,12 +27,6 @@ services:
     image: mariadb:11.2
     container_name: docgo-local-mariadb
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.15'
-        reservations:
-          cpus: '0.1'
     environment:
       MYSQL_ROOT_PASSWORD: sapassword
       MYSQL_DATABASE: docgo
@@ -57,12 +45,6 @@ services:
     image: mongo:7.0
     container_name: docgo-local-mongodb
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-        reservations:
-          cpus: '0.05'
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: sapassword
@@ -79,12 +61,6 @@ services:
     image: redis:7-alpine
     container_name: docgo-local-redis
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.05'
-        reservations:
-          cpus: '0.02'
     ports:
       - "6379:6379"
     volumes:
@@ -97,12 +73,6 @@ services:
     image: elasticsearch:8.11.0
     container_name: docgo-local-elasticsearch
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.15'
-        reservations:
-          cpus: '0.1'
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -119,12 +89,6 @@ services:
     image: node:18-alpine
     container_name: docgo-local-api-gateway-bff
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-        reservations:
-          cpus: '0.05'
     working_dir: /app
     ports:
       - "8000:8000"
@@ -136,15 +100,6 @@ services:
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - KAFKA_FILE_UPLOADED_TOPIC=file.uploaded
-      - KAFKA_TEXT_EXTRACTED_TOPIC=ai.text.extracted
-      - KAFKA_DOCUMENT_CLASSIFIED_TOPIC=ai.document.classified
-      - KAFKA_CONTRACT_SUMMARY_TOPIC=contract.summary.updated
-      - KAFKA_FILE_EVENTS_TOPIC=file.uploaded
-      - KAFKA_TEXT_EXTRACTED_TOPIC=ai.text.extracted
-      - KAFKA_DOCUMENT_CLASSIFIED_TOPIC=ai.document.classified
-      - KAFKA_CONTRACT_SUMMARY_TOPIC=contract.summary.updated
-      - KAFKA_GFMS_EVENTS_TOPIC=file.record.created
       # Service URLs for all 19 microservices
       - API_GATEWAY_BFF_URL=http://localhost:8000
       - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8001
@@ -182,12 +137,6 @@ services:
     image: python:3.11-slim
     container_name: docgo-local-user-management-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.08'
-        reservations:
-          cpus: '0.03'
     working_dir: /app
     ports:
       - "8002:8002"
@@ -217,12 +166,6 @@ services:
     image: openjdk:21-jdk-slim
     container_name: docgo-local-authentication-identity-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-        reservations:
-          cpus: '0.05'
     working_dir: /app
     ports:
       - "8001:8001"
@@ -253,12 +196,6 @@ services:
     image: python:3.11-slim
     container_name: docgo-local-file-storage-asset-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.08'
-        reservations:
-          cpus: '0.03'
     working_dir: /app
     ports:
       - "8012:8012"
@@ -290,12 +227,6 @@ services:
     image: python:3.11-slim
     container_name: docgo-local-ai-processing-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.08'
-        reservations:
-          cpus: '0.03'
     working_dir: /app
     ports:
       - "8017:8017"
@@ -324,12 +255,6 @@ services:
     image: openjdk:17-jdk-slim
     container_name: docgo-local-contract-management-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-        reservations:
-          cpus: '0.05'
     working_dir: /app
     ports:
       - "8003:8003"
@@ -358,12 +283,6 @@ services:
     image: python:3.11-slim
     container_name: docgo-local-general-file-management-service
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.08'
-        reservations:
-          cpus: '0.03'
     working_dir: /app
     ports:
       - "8018:8018"
