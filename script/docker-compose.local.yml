@@ -201,11 +201,11 @@ services:
       - "8012:8012"
     env_file:
       - ../backend/file-storage-asset-service/.env
+      - ../backend/file-storage-asset-service/.env.local
     environment:
       - HOST=0.0.0.0
       - PORT=8012
       - PYTHONPATH=/app
-      - DATABASE_HOST=mariadb
       - REDIS_HOST=redis
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
@@ -216,7 +216,6 @@ services:
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
     depends_on:
-      - mariadb
       - redis
       - elasticsearch
     networks:

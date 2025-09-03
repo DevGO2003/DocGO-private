@@ -24,313 +24,259 @@ class FileStorageService:
         self.s3_client = get_s3_client()
         self.bucket_name = get_bucket_name()
         self.malware_scanner = MalwareScanner()
-        
+
     def _generate_file_id(self) -> str:
         """Tạo ID duy nhất cho file"""
         return str(uuid.uuid4())
-    
+
     def _get_file_type(self, filename: str, content: bytes) -> FileType:
         """Xác định loại file dựa trên extension và magic bytes"""
-        # Kiểm tra extension trước
         ext = filename.lower().split('.')[-1] if '.' in filename else ''
-        
-        if ext == 'pdf':
-            return FileType.PDF
-        elif ext in ['docx', 'doc']:
-            return FileType.DOCX
-        elif ext == 'txt':
-            return FileType.TXT
-        elif ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
-            return FileType.IMAGE
-        
-        # Sử dụng filetype để kiểm tra content
+        if ext == 'pdf': return FileType.PDF
+        if ext in ['docx', 'doc']: return FileType.DOCX
+        if ext == 'txt': return FileType.TXT
+        if ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp']: return FileType.IMAGE
         try:
-            file_info = filetype.guess(content)
-            if file_info:
-                mime_type = file_info.mime
-                if 'pdf' in mime_type:
-                    return FileType.PDF
-                elif 'word' in mime_type or 'document' in mime_type:
-                    return FileType.DOCX
-                elif 'text' in mime_type:
-                    return FileType.TXT
-                elif 'image' in mime_type:
-                    return FileType.IMAGE
-        except:
+            kind = filetype.guess(content)
+            if kind:
+                mime = kind.mime
+                if 'pdf' in mime: return FileType.PDF
+                if 'word' in mime or 'document' in mime: return FileType.DOCX
+                if 'text' in mime: return FileType.TXT
+                if 'image' in mime: return FileType.IMAGE
+        except Exception:
             pass
-            
         return FileType.OTHER
-    
+
     def _calculate_checksum(self, content: bytes) -> str:
         """Tính MD5 checksum của file"""
         return hashlib.md5(content).hexdigest()
-    
+
     async def upload_file(self, file: UploadFile, user_id: Optional[str], folder: Optional[str] = None) -> FileInfo:
-        """Upload file lên S3 với malware scan và versioning"""
-        file_id = None
+        """Upload file lên S3, mỗi lần upload tạo một file_id mới."""
         s3_key = None
         try:
-            logger.info("📁 [FILE_SERVICE_START] Bắt đầu xử lý upload file - filename: %s, user_id: %s, folder: %s", 
-                        file.filename, user_id, folder)
-            
-            # Đọc nội dung file
-            logger.info("📖 [FILE_READ] Đang đọc nội dung file...")
             content = await file.read()
             original_name = file.filename or "unknown"
-            logger.info("✅ [FILE_READ_SUCCESS] Đã đọc file thành công - size: %s bytes", len(content))
-            
+            logger.info(f"[UPLOAD_START] Processing file: {original_name}, size: {len(content)} bytes")
+
             if is_s3_sanitize_keys():
-                # Chuẩn hóa tên file: thay khoảng trắng bằng _ và bỏ ký tự không an toàn
                 import re
                 name, ext = os.path.splitext(original_name)
                 safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._-")
                 original_name = (safe_name or "file") + ext
-                logger.info("🔒 [FILENAME_SANITIZATION] Tên file đã được chuẩn hóa: %s -> %s", file.filename, original_name)
-            
+
             folder_prefix = (folder.strip('/') + '/') if folder else ''
-            logger.info("📁 [FOLDER_PREFIX] Sử dụng folder prefix: %s", folder_prefix)
-            
-            # Tạo file ID và thông tin cơ bản
             file_id = self._generate_file_id()
             file_type = self._get_file_type(original_name, content)
             checksum = self._calculate_checksum(content)
             user_id_str = user_id or "public"
-            
-            logger.info("🆔 [FILE_INFO] Đã tạo thông tin file - file_id: %s, file_type: %s, checksum: %s, user_id: %s", 
-                        file_id, file_type.value, checksum, user_id_str)
-            
-            # Kiểm tra xem file đã tồn tại chưa (dựa trên checksum)
-            logger.info("🔍 [DUPLICATE_CHECK] Kiểm tra file trùng lặp dựa trên checksum...")
-            existing_file = await self._find_file_by_checksum(checksum, user_id_str)
-            if existing_file:
-                # Tạo version mới
-                version = existing_file.version + 1
-                logger.info("🔄 [VERSION_INCREMENT] File đã tồn tại, tạo version mới: %s", version)
-                if S3_KEY_STYLE == "simple":
-                    file_key = f"{folder_prefix}{original_name}"
-                else:
-                    file_key = f"{folder_prefix}users/{user_id_str}/files/{existing_file.file_id}/v{version}/{original_name}"
+            version = 1 # Mỗi lần upload là một file mới, phiên bản 1
+
+            if S3_KEY_STYLE == "simple":
+                s3_key = f"{folder_prefix}{original_name}"
             else:
-                version = 1
-                logger.info("🆕 [NEW_FILE] File mới, sử dụng version: %s", version)
-                if S3_KEY_STYLE == "simple":
-                    file_key = f"{folder_prefix}{original_name}"
-                else:
-                    file_key = f"{folder_prefix}users/{user_id_str}/files/{file_id}/v{version}/{original_name}"
-            
-            s3_key = file_key
-            logger.info("🗝️ [S3_KEY] Đã tạo S3 key: %s", s3_key)
-            
+                s3_key = f"{folder_prefix}users/{user_id_str}/files/{file_id}/v{version}/{original_name}"
+
+            logger.info(f"[S3_KEY_GEN] Generated S3 key: {s3_key}")
+
             if is_s3_enabled():
-                # Upload lên S3/Filebase
-                logger.info("☁️ [S3_UPLOAD_START] Bắt đầu upload lên S3/Filebase - bucket: %s, key: %s", self.bucket_name, s3_key)
-                safe_content_type = file.content_type or "application/octet-stream"
-                # original_name đã chuẩn hóa bên trên
-                # Chuẩn hóa metadata về ASCII để phù hợp yêu cầu của S3
-                ascii_name = (
-                    unicodedata.normalize('NFKD', original_name)
-                    .encode('ascii', 'ignore')
-                    .decode('ascii')
-                ) or "unknown"
+                ascii_name = unicodedata.normalize('NFKD', original_name).encode('ascii', 'ignore').decode('ascii') or "unknown"
                 b64_name = base64.b64encode(original_name.encode('utf-8')).decode('ascii')
                 
-                logger.info("📋 [S3_METADATA] Chuẩn bị metadata - content_type: %s, ascii_name: %s", safe_content_type, ascii_name)
-                
-                try:
-                    put_kwargs = {
-                        'Bucket': self.bucket_name,
-                        'Key': s3_key,
-                        'Body': content,
-                        'ContentType': safe_content_type,
+                put_kwargs = {
+                    'Bucket': self.bucket_name,
+                    'Key': s3_key,
+                    'Body': content,
+                    'ContentType': file.content_type or "application/octet-stream",
+                }
+                if not is_s3_metadata_minimal():
+                    put_kwargs['Metadata'] = {
+                        'file_id': file_id,
+                        'user_id': user_id_str,
+                        'original_filename': ascii_name,
+                        'original_filename_b64': b64_name,
+                        'file_type': str(file_type.value),
+                        'checksum': str(checksum),
+                        'version': str(version),
+                        'upload_time': datetime.utcnow().isoformat()
                     }
-                    if not is_s3_metadata_minimal():
-                        put_kwargs['Metadata'] = {
-                            'user_id': user_id_str,
-                            'original_filename': ascii_name,
-                            'original_filename_b64': b64_name,
-                            'file_type': str(file_type.value),
-                            'checksum': str(checksum),
-                            'version': str(version),
-                            'upload_time': datetime.utcnow().isoformat()
-                        }
-                        logger.info("📝 [S3_METADATA_EXTENDED] Sử dụng metadata mở rộng với %s trường", len(put_kwargs['Metadata']))
-                    
-                    self.s3_client.put_object(**put_kwargs)
-                    logger.info("✅ [S3_UPLOAD_SUCCESS] Đã upload file lên S3 thành công - bucket: %s, key: %s", self.bucket_name, s3_key)
-                    
-                except ClientError as e:
-                    err = e.response.get('Error', {}) if hasattr(e, 'response') else {}
-                    code = err.get('Code')
-                    message = err.get('Message')
-                    logger.error("❌ [S3_UPLOAD_FAILED] Lỗi upload lên S3 - code: %s, message: %s, bucket: %s, key: %s", 
-                                code, message, self.bucket_name, s3_key)
-                    raise HTTPException(
-                        status_code=500,
-                        detail=(
-                            f"S3 PutObject failed: code={code}, message={message}, "
-                            f"bucket={self.bucket_name}, key={s3_key}"
-                        )
-                    )
+                
+                self.s3_client.put_object(**put_kwargs)
+                logger.info(f"[S3_UPLOAD_SUCCESS] File uploaded to {self.bucket_name}/{s3_key}")
             else:
-                # Lưu local để test offline
-                logger.info("💾 [LOCAL_STORAGE] S3 không được bật, lưu file local - upload_dir: %s", UPLOAD_DIR)
+                # Lưu local
                 if S3_KEY_STYLE == "simple":
                     local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []))
                 else:
                     local_dir = os.path.join(UPLOAD_DIR, *(folder_prefix[:-1].split('/') if folder_prefix else []), 'users', user_id_str, 'files', file_id, f'v{version}')
-                
                 os.makedirs(local_dir, exist_ok=True)
                 local_path = os.path.join(local_dir, original_name)
-                logger.info("📁 [LOCAL_DIR] Đã tạo thư mục local: %s", local_dir)
-                
                 async with aiofiles.open(local_path, 'wb') as f:
                     await f.write(content)
-                logger.info("✅ [LOCAL_SAVE_SUCCESS] Đã lưu file local thành công - path: %s", local_path)
-                
-                # Với lưu local, vẫn trả về s3_key tương tự để dùng chung
-                file_key = os.path.relpath(local_path, start=UPLOAD_DIR).replace('\\', '/')
-                s3_key = file_key
-            
-            # Quét malware (bất đồng bộ)
-            logger.info("🛡️ [MALWARE_SCAN_START] Bắt đầu quét malware cho file...")
+                s3_key = os.path.relpath(local_path, start=UPLOAD_DIR).replace('\\', '/')
+                logger.info(f"[LOCAL_SAVE_SUCCESS] File saved to {local_path}")
+
             malware_result = await self.malware_scanner.scan_file(content)
-            logger.info("✅ [MALWARE_SCAN_COMPLETE] Hoàn thành quét malware - is_clean: %s, threat_name: %s", 
-                        malware_result.is_clean, malware_result.threat_name or "none")
-            
-            # Tạo file info
+            status = FileStatus.CLEAN if malware_result.is_clean else FileStatus.INFECTED
+
             file_info = FileInfo(
-                file_id=file_id if version == 1 else existing_file.file_id,
+                file_id=file_id,
                 filename=original_name,
                 file_size=len(content),
                 file_type=file_type,
-                status=FileStatus.CLEAN if malware_result.is_clean else FileStatus.INFECTED,
+                status=status,
                 version=version,
                 upload_time=datetime.utcnow(),
                 last_modified=datetime.utcnow(),
                 checksum=checksum,
                 malware_scan_result=malware_result.scan_details,
-                s3_key=file_key
+                s3_key=s3_key
             )
-            
-            logger.info("📋 [FILE_INFO_CREATED] Đã tạo FileInfo object - file_id: %s, status: %s, version: %s", 
-                        file_info.file_id, file_info.status.value, file_info.version)
-            
-            # Lưu metadata vào database (cần implement)
-            logger.info("💾 [DATABASE_SAVE] Lưu metadata file vào database...")
-            await self._save_file_metadata(file_info, user_id_str)
-            logger.info("✅ [DATABASE_SAVE_SUCCESS] Đã lưu metadata vào database")
-            
-            logger.info("🎉 [FILE_SERVICE_COMPLETE] Hoàn thành xử lý upload file - file_id: %s, s3_key: %s", 
-                        file_id, s3_key)
+            logger.info(f"[UPLOAD_COMPLETE] Successfully processed file_id: {file_id}")
             return file_info
-            
+        except ClientError as e:
+            logger.error(f"[S3_ERROR] S3 client error during upload: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"S3 Error: {e.response.get('Error', {}).get('Message', 'Unknown')}")
         except Exception as e:
-            logger.error("❌ [FILE_SERVICE_FAILED] Lỗi xử lý upload file - file_id: %s, s3_key: %s, error: %s", 
-                        file_id, s3_key, str(e))
-            logger.debug("🔍 [FILE_SERVICE_ERROR_DETAILS] Chi tiết lỗi:", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Lỗi upload file: {str(e)}")
-    
+            logger.error(f"[UPLOAD_FAILED] An unexpected error occurred: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Upload error: {str(e)}")
+
     async def download_file(self, file_id: str, user_id: str, version: int = 1) -> bytes:
-        """Download file từ S3"""
+        """Download file từ S3 dựa trên file_id và version."""
         try:
-            # Lấy thông tin file từ database
-            file_info = await self._get_file_info(file_id, user_id)
+            file_info = await self._get_file_info(file_id, user_id, version)
             if not file_info:
-                raise HTTPException(status_code=404, detail="Không tìm thấy file")
+                raise HTTPException(status_code=404, detail=f"File with id {file_id} and version {version} not found.")
             
-            # Tạo key để download
-            file_key = f"users/{user_id}/files/{file_id}/v{version}/{file_info.filename}"
-            
-            # Download từ S3
-            response = self.s3_client.get_object(Bucket=self.bucket_name, Key=file_key)
+            response = self.s3_client.get_object(Bucket=self.bucket_name, Key=file_info.s3_key)
             return response['Body'].read()
-            
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchKey':
-                raise HTTPException(status_code=404, detail="Không tìm thấy file")
-            raise HTTPException(status_code=500, detail=f"Lỗi download file: {str(e)}")
-    
+                raise HTTPException(status_code=404, detail="File version not found in S3.")
+            raise HTTPException(status_code=500, detail=f"S3 download error: {str(e)}")
+
     def generate_signed_url(self, file_id: str, user_id: str, expiration_minutes: int = 60) -> str:
-        """Tạo signed URL để download file"""
+        """Tạo signed URL để download phiên bản mới nhất của file."""
         try:
-            # Lấy thông tin file
-            file_info = self._get_file_info(file_id, user_id)
+            file_info = self._get_latest_file_info(file_id, user_id)
             if not file_info:
-                raise HTTPException(status_code=404, detail="Không tìm thấy file")
-            
-            # Tạo key
-            file_key = f"users/{user_id}/files/{file_id}/v{file_info.version}/{file_info.filename}"
-            
-            # Tạo signed URL
-            signed_url = self.s3_client.generate_presigned_url(
+                raise HTTPException(status_code=404, detail=f"File with id {file_id} not found.")
+
+            return self.s3_client.generate_presigned_url(
                 'get_object',
-                Params={
-                    'Bucket': self.bucket_name,
-                    'Key': file_key
-                },
+                Params={'Bucket': self.bucket_name, 'Key': file_info.s3_key},
                 ExpiresIn=expiration_minutes * 60
             )
-            
-            return signed_url
-            
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Lỗi tạo signed URL: {str(e)}")
-    
+            raise HTTPException(status_code=500, detail=f"Could not generate signed URL: {str(e)}")
+
     async def get_file_versions(self, file_id: str, user_id: str) -> List[FileVersion]:
-        """Lấy danh sách phiên bản của file"""
+        """Lấy danh sách phiên bản của file từ S3."""
+        if S3_KEY_STYLE == "simple":
+            raise HTTPException(status_code=501, detail="Versioning is not supported with 'simple' S3_KEY_STYLE.")
+        prefix = f"users/{user_id}/files/{file_id}/"
         try:
-            # Lấy từ database (cần implement)
-            versions = await self._get_file_versions_from_db(file_id, user_id)
-            return versions
+            response = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
+            if 'Contents' not in response:
+                return []
+
+            versions = []
+            for obj in response['Contents']:
+                key = obj['Key']
+                parts = key.split('/')
+                try:
+                    # .../files/{file_id}/v{version}/{filename}
+                    version_str = parts[-2]
+                    if version_str.startswith('v'):
+                        version = int(version_str[1:])
+                        versions.append(FileVersion(
+                            version=version,
+                            s3_key=key,
+                            file_size=obj.get('Size'),
+                            upload_time=obj.get('LastModified')
+                        ))
+                except (ValueError, IndexError):
+                    continue # Bỏ qua các key không đúng định dạng
+            return sorted(versions, key=lambda v: v.version)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Lỗi lấy phiên bản file: {str(e)}")
-    
+            raise HTTPException(status_code=500, detail=f"Error fetching file versions: {str(e)}")
+
     async def delete_file(self, file_id: str, user_id: str, version: Optional[int] = None) -> bool:
-        """Xóa file hoặc phiên bản cụ thể"""
+        """Xóa file hoặc phiên bản cụ thể từ S3."""
+        if S3_KEY_STYLE == "simple":
+            raise HTTPException(status_code=501, detail="Deletion by file_id is not supported with 'simple' S3_KEY_STYLE.")
+        
+        prefix_base = f"users/{user_id}/files/{file_id}/"
+        if version:
+            prefix_to_delete = f"{prefix_base}v{version}/"
+        else:
+            prefix_to_delete = prefix_base
+
         try:
-            if version:
-                # Xóa phiên bản cụ thể
-                file_key = f"users/{user_id}/files/{file_id}/v{version}/"
-            else:
-                # Xóa toàn bộ file và các phiên bản
-                file_key = f"users/{user_id}/files/{file_id}/"
-            
-            # Xóa từ S3
-            objects = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=file_key)
-            if 'Contents' in objects:
-                for obj in objects['Contents']:
-                    self.s3_client.delete_object(Bucket=self.bucket_name, Key=obj['Key'])
-            
-            # Xóa metadata từ database
-            await self._delete_file_metadata(file_id, user_id, version)
-            
+            objects_to_delete = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix_to_delete)
+            if 'Contents' not in objects_to_delete:
+                raise HTTPException(status_code=404, detail="File or version not found.")
+
+            delete_keys = [{'Key': obj['Key']} for obj in objects_to_delete['Contents']]
+            self.s3_client.delete_objects(Bucket=self.bucket_name, Delete={'Objects': delete_keys})
             return True
-            
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Lỗi xóa file: {str(e)}")
-    
-    # Các method helper (cần implement database)
-    async def _find_file_by_checksum(self, checksum: str, user_id: str) -> Optional[FileInfo]:
-        """Tìm file dựa trên checksum"""
-        # TODO: Implement database query
-        return None
-    
-    async def _save_file_metadata(self, file_info: FileInfo, user_id: str):
-        """Lưu metadata file vào database"""
-        # TODO: Implement database save
-        pass
-    
-    async def _get_file_info(self, file_id: str, user_id: str) -> Optional[FileInfo]:
-        """Lấy thông tin file từ database"""
-        # TODO: Implement database query
-        return None
-    
-    async def _get_file_versions_from_db(self, file_id: str, user_id: str) -> List[FileVersion]:
-        """Lấy phiên bản file từ database"""
-        # TODO: Implement database query
-        return []
-    
-    async def _delete_file_metadata(self, file_id: str, user_id: str, version: Optional[int] = None):
-        """Xóa metadata file từ database"""
-        # TODO: Implement database delete
-        pass
+            raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
+
+    def _get_latest_file_info(self, file_id: str, user_id: str) -> Optional[FileInfo]:
+        """Helper để lấy thông tin phiên bản mới nhất của file từ S3."""
+        if S3_KEY_STYLE == "simple": return None
+        prefix = f"users/{user_id}/files/{file_id}/"
+        try:
+            response = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
+            if 'Contents' not in response:
+                return None
+
+            latest_obj = max(response['Contents'], key=lambda obj: obj['LastModified'])
+            return self._s3_object_to_fileinfo(latest_obj['Key'])
+        except (ClientError, ValueError):
+            return None
+
+    async def _get_file_info(self, file_id: str, user_id: str, version: int) -> Optional[FileInfo]:
+        """Helper để lấy thông tin của một phiên bản file cụ thể từ S3."""
+        if S3_KEY_STYLE == "simple": return None
+        prefix = f"users/{user_id}/files/{file_id}/v{version}/"
+        try:
+            response = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix, MaxKeys=1)
+            if 'Contents' not in response or not response['Contents']:
+                return None
+            return self._s3_object_to_fileinfo(response['Contents'][0]['Key'])
+        except ClientError:
+            return None
+
+    def _s3_object_to_fileinfo(self, s3_key: str) -> Optional[FileInfo]:
+        """Chuyển đổi metadata từ S3 object thành đối tượng FileInfo."""
+        try:
+            obj_head = self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
+            meta = obj_head.get('Metadata', {})
+            
+            # Lấy filename từ key nếu không có trong metadata
+            filename = os.path.basename(s3_key)
+            if 'original_filename_b64' in meta:
+                try:
+                    filename = base64.b64decode(meta['original_filename_b64']).decode('utf-8')
+                except Exception:
+                    pass # Giữ lại filename từ key nếu decode lỗi
+            
+            return FileInfo(
+                file_id=meta.get('file_id', ''),
+                filename=filename,
+                file_size=obj_head.get('ContentLength'),
+                file_type=FileType(meta.get('file_type', 'OTHER')),
+                status=FileStatus.UNKNOWN, # Trạng thái scan không được lưu, cần quét lại nếu muốn
+                version=int(meta.get('version', '0')),
+                upload_time=datetime.fromisoformat(meta.get('upload_time')) if meta.get('upload_time') else obj_head.get('LastModified'),
+                last_modified=obj_head.get('LastModified'),
+                checksum=meta.get('checksum', ''),
+                s3_key=s3_key
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                return None
+            raise
