@@ -30,6 +30,7 @@ class ApiClient {
   private baseURL: string
 
   constructor() {
+    // Sử dụng API Gateway BFF thay vì gọi trực tiếp đến microservices
     this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -132,7 +133,7 @@ class ApiClient {
 // Create API client instance
 const apiClient = new ApiClient()
 
-// Contract Management API
+// Contract Management API - Sử dụng API Gateway
 export class ContractAPI {
   private basePath = '/api/v1/contract-management-service'
 
@@ -176,7 +177,7 @@ export class ContractAPI {
   }
 }
 
-// User Management API
+// User Management API - Sử dụng API Gateway
 export class UserAPI {
   private basePath = '/api/v1/user-management-service'
 
@@ -211,7 +212,7 @@ export class UserAPI {
   }
 }
 
-// AI Processing API
+// AI Processing API - Sử dụng API Gateway
 export class AIProcessingAPI {
   private basePath = '/api/v1/ai-processing-service'
 
@@ -248,7 +249,7 @@ export class AIProcessingAPI {
   }
 }
 
-// File Storage API
+// File Storage API - Sử dụng API Gateway
 export class FileStorageAPI {
   private basePath = '/api/v1/file-storage-asset-service'
 
@@ -284,7 +285,7 @@ export class FileStorageAPI {
   }
 }
 
-// Authentication API
+// Authentication API - Sử dụng API Gateway
 export class AuthAPI {
   private basePath = '/api/v1/authentication-identity-service'
 
@@ -310,6 +311,14 @@ export class AuthAPI {
 
   async resetPassword(token: string, newPassword: string) {
     return apiClient.post<any>(`${this.basePath}/auth/reset-password`, { token, newPassword })
+  }
+
+  async getProfile() {
+    return apiClient.get<any>(`${this.basePath}/auth/profile`)
+  }
+
+  async updateProfile(data: any) {
+    return apiClient.put<any>(`${this.basePath}/auth/profile`, data)
   }
 }
 
