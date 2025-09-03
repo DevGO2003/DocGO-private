@@ -215,62 +215,62 @@ class AIKafkaWorker:
 		return {
 			"fileId": data.get("fileId") or data.get("key") or str(uuid.uuid4()),
 			"contractNumber": f"CTR-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
-			"title": f"Contract from file: {data.get('filename', 'Unknown')}",
+			"title": f"Hợp đồng từ tệp: {data.get('filename', 'Không xác định')}",
 			"contractType": "UNKNOWN",
-			"summaryText": f"Auto-generated summary for {data.get('filename', 'Unknown')}",
-			"keyPoints": ["Requires manual review"],
-			"object": "Unable to determine contract object",
+			"summaryText": f"Tóm tắt tự động cho {data.get('filename', 'Không xác định')}",
+			"keyPoints": ["Cần rà soát thủ công"],
+			"object": "Không xác định rõ đối tượng hợp đồng",
 			"effectiveDate": None,
-			"term": "Unknown",
+			"term": "Không xác định",
 			"paymentDetails": {
 				"totalValue": 0,
-				"schedule": "Unknown",
+				"schedule": "Không xác định",
 				"currency": "VND",
-				"paymentMethod": "Unknown"
+				"paymentMethod": "Không xác định"
 			},
 			"riskAssessment": {
 				"riskLevel": "MEDIUM",
-				"riskFactors": ["Requires manual review"],
-				"mitigationMeasures": ["Manual contract review recommended"]
+				"riskFactors": ["Cần rà soát thủ công"],
+				"mitigationMeasures": ["Khuyến nghị rà soát hợp đồng thủ công"]
 			},
 			"complianceStatus": {
 				"status": "PENDING_REVIEW",
-				"issues": ["Automated processing incomplete"],
-				"recommendations": ["Manual review required"]
+				"issues": ["Xử lý tự động chưa đầy đủ"],
+				"recommendations": ["Cần rà soát thủ công"]
 			},
-			"terminationConditions": "Unknown",
-			"tags": ["auto-generated", "requires-review"]
+			"terminationConditions": "Không xác định",
+			"tags": ["tu-dong", "can-ra-soat"]
 		}
 
 	async def _generate_contract_summary(self, content: str, filename: str) -> Optional[dict]:
 		return {
 			"fileId": str(uuid.uuid4()),
 			"contractNumber": f"CTR-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
-			"title": f"Contract from file: {filename}",
+			"title": f"Hợp đồng từ tệp: {filename}",
 			"contractType": "SERVICE_AGREEMENT",
-			"summaryText": f"AI-generated summary for {filename}",
-			"keyPoints": ["Service provision", "Payment terms", "Duration"],
-			"object": "Service provision agreement",
+			"summaryText": f"Tóm tắt AI cho {filename}",
+			"keyPoints": ["Cung cấp dịch vụ", "Điều khoản thanh toán", "Thời hạn"],
+			"object": "Thỏa thuận cung cấp dịch vụ",
 			"effectiveDate": datetime.now(timezone.utc).isoformat(),
-			"term": "12 months",
+			"term": "12 tháng",
 			"paymentDetails": {
 				"totalValue": 100000,
-				"schedule": "Monthly",
+				"schedule": "Hàng tháng",
 				"currency": "VND",
-				"paymentMethod": "Bank transfer"
+				"paymentMethod": "Chuyển khoản ngân hàng"
 			},
 			"riskAssessment": {
 				"riskLevel": "LOW",
-				"riskFactors": ["Standard terms"],
-				"mitigationMeasures": ["Regular review"]
+				"riskFactors": ["Điều khoản tiêu chuẩn"],
+				"mitigationMeasures": ["Rà soát định kỳ"]
 			},
 			"complianceStatus": {
 				"status": "COMPLIANT",
 				"issues": [],
-				"recommendations": ["Standard contract"]
+				"recommendations": ["Hợp đồng tiêu chuẩn"]
 			},
-			"terminationConditions": "30 days notice",
-			"tags": ["ai-generated", "service-contract"]
+			"terminationConditions": "Thông báo trước 30 ngày",
+			"tags": ["ai-generated", "hop-dong-dich-vu"]
 		}
 
 

@@ -231,6 +231,7 @@ services:
       - "8017:8017"
     env_file:
       - ../backend/ai-processing-service/.env
+      - ../backend/ai-processing-service/.env.local
     environment:
       - HOST=0.0.0.0
       - PORT=8017
@@ -257,6 +258,7 @@ services:
     working_dir: /app
     env_file:
       - ../backend/ai-processing-service/.env
+      - ../backend/ai-processing-service/.env.local
     environment:
       - PYTHONPATH=/app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
