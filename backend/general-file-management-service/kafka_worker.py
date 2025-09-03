@@ -124,3 +124,16 @@ class GFMSKafkaWorker:
 
 # Singleton instance
 worker = GFMSKafkaWorker()
+
+async def _run_worker_forever() -> None:
+    try:
+        await worker.start()
+        while True:
+            await asyncio.sleep(3600)
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await worker.stop()
+
+if __name__ == "__main__":
+    asyncio.run(_run_worker_forever())

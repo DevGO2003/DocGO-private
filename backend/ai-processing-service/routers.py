@@ -38,7 +38,11 @@ def read_pdf(file_path: str) -> str:
 def ask_gemini(api_key: str, content: str, question: str) -> str:
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-2.0-flash')
-    prompt = f"Nội dung tài liệu:\n{content}\n\nCâu hỏi: {question}"
+    # Luôn ép AI trả lời bằng tiếng Việt
+    vietnamese_instruction = (
+        "YÊU CẦU NGHIÊM NGẶT: Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT, không dùng ngôn ngữ khác.\n"
+    )
+    prompt = f"{vietnamese_instruction}Nội dung tài liệu:\n{content}\n\nYêu cầu/Xử lý: {question}"
     response = model.generate_content(prompt)
     return response.text
 
@@ -245,6 +249,7 @@ async def classify_api(
             "research_paper", "invoice", "receipt", "policy", "manual", "letter", "report", "other"
         ]
         prompt = (
+            "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
             "Hãy phân loại loại tài liệu dưới đây. Chỉ trả về JSON hợp lệ với cấu trúc:\n"
             "{\n"
             "  \"documentType\": string, // một trong: contract, syllabus, curriculum, textbook, lecture_notes, assignment, research_paper, invoice, receipt, policy, manual, letter, report, other\n"
@@ -441,6 +446,7 @@ async def summarize_api(
     api_key = gemini_api_key or get_gemini_api_key()
     try:
         prompt = (
+            "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
             "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
             '{\n'
             '  "id": "string",\n'
@@ -536,7 +542,7 @@ async def summarize_api(
             cleaned = cleaned[3:]
         if cleaned.endswith('```'):
             cleaned = cleaned[:-3]
-        cleaned = cleaned.replace('\n', '').replace('\r', '').replace('\\', '')
+        # Giữ nguyên ký tự escape để không làm hỏng JSON; chỉ bỏ fence markdown
         
         data_out = answer  # Mặc định trả về text gốc
         
@@ -553,7 +559,7 @@ async def summarize_api(
                         if not date_val or not isinstance(date_val, str) or not date_val.strip():
                             r['date'] = None
                     # Sau đó loại bỏ reminders có date == None
-                    data_out['reminders'] = [r for r in data_out['reminders'] if r.get('date') is not None]
+                    # Giữ lại reminders ngay cả khi date=None để client có thể xử lý tiếp
             else:
                 data_out = summary_json
         except Exception as parse_error:

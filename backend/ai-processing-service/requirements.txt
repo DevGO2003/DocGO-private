@@ -10,3 +10,4 @@ beautifulsoup4
 python-pptx
 openpyxl
 striprtf
+httpx
