@@ -16,13 +16,15 @@ import {
 } from '@heroicons/react/24/outline'
 
 const navigation = [
-  { name: 'Trang chủ', href: '/', icon: HomeIcon },
-  { name: 'Hợp đồng', href: '/contracts', icon: DocumentTextIcon },
-  { name: 'Người dùng', href: '/users', icon: UserGroupIcon },
-  { name: 'Xử lý AI', href: '/ai-processing', icon: CogIcon },
-  { name: 'Báo cáo', href: '/reports', icon: ChartBarIcon },
-  { name: 'Tài liệu', href: '/documents', icon: DocumentDuplicateIcon },
-  { name: 'Lưu trữ', href: '/storage', icon: CloudArrowUpIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Tải lên', href: '/dashboard/tai-len', icon: CloudArrowUpIcon },
+  { name: 'Hợp đồng', href: '/dashboard/hop-dong', icon: DocumentTextIcon },
+  { name: 'Tạo hợp đồng', href: '/dashboard/tao-hop-dong', icon: DocumentDuplicateIcon },
+  { name: 'Đã duyệt', href: '/dashboard/da-duyet', icon: DocumentTextIcon },
+  { name: 'Thống kê', href: '/dashboard/thong-ke', icon: ChartBarIcon },
+  { name: 'Quản lý người dùng', href: '/dashboard/quan-ly-nguoi-dung', icon: UserGroupIcon },
+  { name: 'Phê duyệt tài khoản', href: '/dashboard/phe-duyet-tai-khoan', icon: CogIcon },
+  { name: 'Hướng dẫn', href: '/dashboard/huong-dan', icon: DocumentTextIcon },
 ]
 
 export default function Sidebar() {
@@ -50,7 +52,7 @@ export default function Sidebar() {
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <Link
                   key={item.name}
@@ -76,7 +78,7 @@ export default function Sidebar() {
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <Link
                   key={item.name}
