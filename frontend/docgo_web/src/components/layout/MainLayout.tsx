@@ -90,7 +90,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <MainLayout
     showSidebar={true}
-    showHeader={true}
+    showHeader={false}
     showFooter={false}
     sidebarCollapsed={false}
   >

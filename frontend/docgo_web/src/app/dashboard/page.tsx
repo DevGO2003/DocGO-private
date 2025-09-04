@@ -1,166 +1,183 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { 
-  DocumentTextIcon, 
-  UserGroupIcon, 
-  CogIcon, 
-  ChartBarIcon 
-} from '@heroicons/react/24/outline'
+import { useRouter } from 'next/navigation'
+
+// Hook dữ liệu đơn giản: dùng mock bây giờ, dễ chuyển sang API thật sau
+function useDashboardData() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState({
+    statusStats: [
+      { title: 'Chờ duyệt', value: 1, href: '/dashboard/hop-dong?status=pending' },
+      { title: 'Đã duyệt', value: 1, href: '/dashboard/da-duyet' },
+      { title: 'Từ chối', value: 1, href: '/dashboard/hop-dong?status=rejected' },
+      { title: 'Sắp hết hạn', value: 0, href: '/dashboard/hop-dong?status=expiring' },
+    ],
+    uploadsByMonth: [7, 14, 21, 28, 14, 7],
+    monthLabels: ['Tháng 2', 'Tháng 4', 'Tháng 6', 'Tháng 8', 'Tháng 10', 'Tháng 12'],
+    pieData: [33, 33, 34],
+    pieColors: ['#22c55e', '#f59e0b', '#ef4444'],
+    rejectReasons: [
+      { label: 'Giá trị vượt thẩm quyền', count: 2 },
+      { label: 'Thiếu thông tin', count: 0 },
+      { label: 'Không đúng quy định', count: 0 },
+      { label: 'Cần bổ sung tài liệu', count: 0 },
+      { label: 'Giá trị vượt thẩm quyền', count: 0 },
+    ],
+  })
+
+  useEffect(() => {
+    // Giả lập tải dữ liệu + hiệu ứng
+    const t = setTimeout(() => setLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Khi có backend thật, chỉ cần thay bằng API call, ví dụ:
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     try {
+  //       const res = await contractAPI.getContracts({ pageNumber: 0, pageSize: 1 })
+  //       // setData(prev => ({ ...prev, ...mappingFromAPI(res.data.data) }))
+  //     } catch (e: any) { setError('Không tải được dữ liệu') } finally { setLoading(false) }
+  //   }
+  //   fetchData()
+  // }, [])
+
+  return { ...data, loading, error }
+}
 
 export default function DashboardPage() {
-  const stats = [
-    {
-      title: 'Tổng hợp đồng',
-      value: '1,234',
-      change: '+12%',
-      changeType: 'increase',
-      icon: DocumentTextIcon,
-    },
-    {
-      title: 'Người dùng hoạt động',
-      value: '567',
-      change: '+8%',
-      changeType: 'increase',
-      icon: UserGroupIcon,
-    },
-    {
-      title: 'Tài liệu đã xử lý',
-      value: '890',
-      change: '+15%',
-      changeType: 'increase',
-      icon: CogIcon,
-    },
-    {
-      title: 'Báo cáo tạo',
-      value: '45',
-      change: '+5%',
-      changeType: 'increase',
-      icon: ChartBarIcon,
-    },
-  ]
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: 'contract',
-      action: 'Hợp đồng mới được tạo',
-      description: 'Hợp đồng cung cấp dịch vụ #CTR-001',
-      time: '2 giờ trước',
-      user: 'Nguyễn Văn A',
-    },
-    {
-      id: 2,
-      type: 'ai',
-      action: 'Xử lý AI hoàn thành',
-      description: 'Tài liệu "Báo cáo tài chính Q4" đã được tóm tắt',
-      time: '4 giờ trước',
-      user: 'Hệ thống AI',
-    },
-    {
-      id: 3,
-      type: 'user',
-      action: 'Người dùng mới đăng ký',
-      description: 'Tài khoản cho Trần Thị B đã được tạo',
-      time: '6 giờ trước',
-      user: 'Admin',
-    },
-  ]
+  const router = useRouter()
+  const { statusStats, uploadsByMonth, monthLabels, pieData, pieColors, rejectReasons, loading } = useDashboardData()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 50); return () => clearTimeout(t) }, [])
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Tổng quan về hoạt động của hệ thống DocGO
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-gray-400" />
+      <div className={`space-y-8 transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+        {/* 4 Ô thống kê trên cùng */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {statusStats.map((s, idx) => (
+            <Card
+              key={s.title}
+              className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer bg-gradient-to-br from-white to-gray-50 ${loading ? 'animate-pulse' : ''}`}
+              onClick={() => router.push(s.href)}
+              style={{ transitionDelay: `${idx * 60}ms` }}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base text-gray-700">{s.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <p className="text-xs text-green-600 mt-1">
-                  {stat.change} so với tháng trước
-                </p>
+                <div className="text-3xl font-bold text-gray-900">{s.value}</div>
+                <p className="text-sm text-primary-600 mt-2">Nhấp để xem chi tiết</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Hoạt động gần đây</CardTitle>
-            <CardDescription>
-              Các hoạt động mới nhất trong hệ thống
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                    {activity.type === 'contract' && <DocumentTextIcon className="h-4 w-4 text-primary-600" />}
-                    {activity.type === 'ai' && <CogIcon className="h-4 w-4 text-primary-600" />}
-                    {activity.type === 'user' && <UserGroupIcon className="h-4 w-4 text-primary-600" />}
+        {/* Hàng biểu đồ: cột (2/3) + tròn (1/3) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Biểu đồ cột: Hợp đồng tải lên theo tháng */}
+          <div className="lg:col-span-2">
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle>Hợp đồng tải lên theo tháng</CardTitle>
+                <CardDescription>Nhấp vào cột để xem chi tiết</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-8 gap-2 items-end h-56">
+                  {/* Trục Y */}
+                  <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2">
+                    {[28, 21, 14, 7, 0].map((t) => (
+                      <div key={t} className="h-0.5 translate-y-1/2">
+                        <span>{t}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-sm text-gray-600">{activity.description}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs text-gray-500">{activity.time}</span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">{activity.user}</span>
-                    </div>
+                  {/* Cột */}
+                  <div className="col-span-7 grid grid-cols-6 gap-4 h-full">
+                    {uploadsByMonth.map((val, idx) => (
+                      <div key={idx} className="flex flex-col items-center justify-end">
+                        <div
+                          className={`w-8 rounded bg-gradient-to-t from-primary-600 to-primary-400 shadow-sm hover:shadow-md transition-all duration-300 ${loading ? 'opacity-70' : ''}`}
+                          style={{ height: `${(val / 28) * 100}%`, transitionDelay: `${idx * 80}ms`, transform: mounted ? 'translateY(0)' : 'translateY(12px)' }}
+                          title={`${monthLabels[idx]}: ${val}`}
+                        />
+                        <span className="text-xs text-gray-600 mt-2">{monthLabels[idx]}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Thao tác nhanh</CardTitle>
-            <CardDescription>
-              Truy cập nhanh các tính năng chính
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
-                <DocumentTextIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Tạo hợp đồng</p>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
-                <CogIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Xử lý AI</p>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
-                <UserGroupIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Quản lý người dùng</p>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
-                <ChartBarIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Xem báo cáo</p>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Biểu đồ tròn: Phân bố trạng thái */}
+          <div className="lg:col-span-1">
+            <Card className="overflow-hidden h-full">
+              <CardHeader>
+                <CardTitle>Phân bố trạng thái</CardTitle>
+                <CardDescription>Nhấp vào phần để xem chi tiết</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-8">
+                  {/* Pie chart */}
+                  <div
+                    className="w-40 h-40 rounded-full shadow-sm"
+                    style={{
+                      backgroundImage: `conic-gradient(${pieColors[0]} 0 ${pieData[0]}%, ${pieColors[1]} ${pieData[0]}% ${pieData[0] + pieData[1]}%, ${pieColors[2]} ${pieData[0] + pieData[1]}% 100%)`,
+                    }}
+                    title={`Đã duyệt ${pieData[0]}% | Chờ duyệt ${pieData[1]}% | Từ chối ${pieData[2]}%`}
+                  />
+                  {/* Legend */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[0] }} /> Đã duyệt {pieData[0]}%</div>
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[1] }} /> Chờ duyệt {pieData[1]}%</div>
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[2] }} /> Từ chối {pieData[2]}%</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Biểu đồ cột: Lý do từ chối phổ biến (full width) */}
+        <div>
+          <Card className="overflow-hidden">
+            <CardHeader>
+              <CardTitle>Lý do từ chối phổ biến</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-8 gap-2 items-end h-64">
+                {/* Trục Y */}
+                <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2">
+                  {[8, 6, 4, 2, 0].map((t) => (
+                    <div key={t} className="h-0.5 translate-y-1/2">
+                      <span>{t}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Cột */}
+                <div className="col-span-7 grid grid-cols-5 gap-4 h-full">
+                  {rejectReasons.map((r, idx) => (
+                    <div key={r.label} className="flex flex-col items-center justify-end">
+                      <div
+                        className={`w-10 rounded bg-gradient-to-t from-red-600 to-red-400 shadow-sm hover:shadow-md transition-all duration-300 ${loading ? 'opacity-70' : ''}`}
+                        style={{ height: `${(r.count / 8) * 100}%`, transitionDelay: `${idx * 80}ms`, transform: mounted ? 'translateY(0)' : 'translateY(12px)' }}
+                        title={`${r.label}: ${r.count}`}
+                      />
+                      <span className="text-xs text-center text-gray-600 mt-2 break-words">{r.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-3">Giá trị vượt thẩm quyền — count: 2</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   )
