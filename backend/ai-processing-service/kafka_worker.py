@@ -179,7 +179,7 @@ class AIKafkaWorker:
 
 	async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
 		try:
-			content = await self._extract_file_content(data)
+			content = await self._extract_text_from_file(data)
 			if not content:
 				print(f"⚠️ Could not extract content from file: {data.get('filename')}")
 				return
