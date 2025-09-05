@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +17,6 @@ public class ContractEventsKafkaListener {
     private final IContractService contractService;
     private final ObjectMapper objectMapper;
 
-    @Autowired
     public ContractEventsKafkaListener(IContractService contractService, ObjectMapper objectMapper) {
         this.contractService = contractService;
         this.objectMapper = objectMapper;
@@ -31,12 +29,26 @@ public class ContractEventsKafkaListener {
     )
     public void handleContractSummaryUpdated(String eventJson) {
         try {
-            logger.info("Received contract.summary.updated event: {}", eventJson);
+            logger.info("📨 [CONTRACT_SUMMARY_RECEIVED] Received contract.summary.updated event: {}", eventJson);
 
             Map<String, Object> event = objectMapper.readValue(eventJson, new TypeReference<>() {});
 
             if (!"contract.summary.updated".equals(event.get("eventType"))) {
-                logger.warn("Ignoring event with unexpected type: {}", event.get("eventType"));
+                logger.warn("⏭️ [CONTRACT_SUMMARY_SKIP] Ignoring event with unexpected type: {}", event.get("eventType"));
+                return;
+            }
+
+            // Kiểm tra nguồn gốc event - chỉ xử lý từ AI service
+            String source = (String) event.get("source");
+            if (!"ai-processing-service".equals(source)) {
+                logger.warn("⚠️ [CONTRACT_SUMMARY_SOURCE_CHECK] Ignoring event from unexpected source: {} - chỉ xử lý từ ai-processing-service", source);
+                return;
+            }
+
+            // Kiểm tra timestamp để đảm bảo event mới
+            String timestamp = (String) event.get("timestamp");
+            if (timestamp == null) {
+                logger.warn("⚠️ [CONTRACT_SUMMARY_TIMESTAMP_CHECK] Event missing timestamp - bỏ qua để tránh xử lý event cũ");
                 return;
             }
 
@@ -44,17 +56,58 @@ public class ContractEventsKafkaListener {
             Map<String, Object> summaryData = (Map<String, Object>) event.get("data");
 
             if (summaryData == null) {
-                logger.error("Event data is null. Cannot process summary.");
+                logger.error("❌ [CONTRACT_SUMMARY_DATA_NULL] Event data is null. Cannot process summary.");
                 return;
             }
 
+            // Kiểm tra xem có đủ dữ liệu AI summary không
+            if (!isValidAISummary(summaryData)) {
+                logger.warn("⚠️ [CONTRACT_SUMMARY_INVALID_AI] Event không chứa dữ liệu AI summary hợp lệ - bỏ qua");
+                return;
+            }
+
+            logger.info("✅ [CONTRACT_SUMMARY_VALID] Event hợp lệ từ AI service - bắt đầu tạo contract");
             contractService.createOrUpdateContractFromSummary(summaryData);
 
-            logger.info("Successfully processed contract.summary.updated event for contract number: {}", summaryData.get("contractNumber"));
+            logger.info("✅ [CONTRACT_SUMMARY_SUCCESS] Successfully processed contract.summary.updated event for contract number: {}", summaryData.get("contractNumber"));
 
         } catch (Exception e) {
-            logger.error("Error processing contract.summary.updated event: {}", e.getMessage(), e);
+            logger.error("❌ [CONTRACT_SUMMARY_ERROR] Error processing contract.summary.updated event: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     * Kiểm tra xem summary data có chứa dữ liệu AI hợp lệ không
+     */
+    private boolean isValidAISummary(Map<String, Object> summaryData) {
+        // Kiểm tra các trường bắt buộc từ AI
+        String title = (String) summaryData.get("title");
+        String summary = (String) summaryData.get("summary");
+        String contractType = (String) summaryData.get("contractType");
+        
+        if (title == null || title.trim().isEmpty()) {
+            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty title");
+            return false;
+        }
+        
+        if (summary == null || summary.trim().isEmpty()) {
+            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty summary");
+            return false;
+        }
+        
+        if (contractType == null || contractType.trim().isEmpty()) {
+            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty contractType");
+            return false;
+        }
+        
+        // Kiểm tra xem có phải dữ liệu fallback không (từ AI service khi lỗi)
+        if ("UNKNOWN".equals(contractType) || "FALLBACK".equals(contractType)) {
+            logger.warn("⚠️ [AI_SUMMARY_CHECK] Detected fallback/unknown contract type - có thể AI service đang lỗi");
+            return false;
+        }
+        
+        logger.info("✅ [AI_SUMMARY_CHECK] AI summary data is valid - title: {}, type: {}", title, contractType);
+        return true;
     }
 }
 
