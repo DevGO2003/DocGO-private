@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 
@@ -72,16 +73,30 @@ export default function HopDongPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Danh sách hợp đồng</h1>
-            <p className="text-gray-600">Tìm kiếm, lọc theo trạng thái, loại và tags</p>
+        {/* Fancy Header */}
+        <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
+          <div className="relative z-10 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                Quản lý Hợp đồng
+              </h1>
+              <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/dashboard/tao-hop-dong" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
+                + Tạo hợp đồng
+              </Link>
+              <Link href="/dashboard/tao-nhanh" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
+                ⚡ Tạo nhanh (OCR)
+              </Link>
+            </div>
           </div>
+          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             {/* Search */}
             <div className="md:col-span-2">
@@ -132,7 +147,7 @@ export default function HopDongPage() {
                 <button
                   key={t}
                   onClick={() => toggleTag(t)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition ${active ? 'bg-primary-50 text-primary-700 border-primary-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition ${active ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                 >
                   <TagIcon className="h-4 w-4" />
                   {t}
@@ -157,14 +172,14 @@ export default function HopDongPage() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {items.map(c => (
-                  <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition">
+                  <Link key={c.id} href={`/dashboard/hop-dong/${c.id}`} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition block">
                     <div className="flex justify-between items-start gap-4">
-                      <h3 className="font-semibold text-gray-900 line-clamp-2">{c.title}</h3>
-                      <div className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">{c.status}</div>
+                      <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
+                      <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
                     </div>
                     <p className="mt-2 text-sm text-gray-600 line-clamp-3">{c.description || 'Không có mô tả'}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">{c.contractType}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{c.contractType}</span>
                       {c.tags?.slice(0,3).map(t => (
                         <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{t}</span>
                       ))}
@@ -174,7 +189,7 @@ export default function HopDongPage() {
                       <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
                       <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 
@@ -204,5 +219,26 @@ export default function HopDongPage() {
       </div>
     </DashboardLayout>
   )
+}
+
+function badgeClass(status: string) {
+  switch (status) {
+    case 'DRAFT':
+      return 'bg-gray-50 text-gray-700 border-gray-200'
+    case 'PENDING_REVIEW':
+      return 'bg-amber-50 text-amber-700 border-amber-200'
+    case 'APPROVED':
+      return 'bg-blue-50 text-blue-700 border-blue-200'
+    case 'ACTIVE':
+      return 'bg-green-50 text-green-700 border-green-200'
+    case 'EXPIRED':
+      return 'bg-rose-50 text-rose-700 border-rose-200'
+    case 'TERMINATED':
+      return 'bg-red-50 text-red-700 border-red-200'
+    case 'ARCHIVED':
+      return 'bg-slate-50 text-slate-700 border-slate-200'
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-200'
+  }
 }
 
