@@ -11,8 +11,11 @@ import filetype
 import aiofiles
 from fastapi import HTTPException, UploadFile
 import logging
+from datetime import datetime
 
 from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
+from schemas.file_response import FileResponseDto, FileDetailResponseDto
+from schemas.pagination import PaginatedResponse, RequestInfo, ResultInfo
 from services.malware_scanner import MalwareScanner
 from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR, S3_KEY_STYLE, is_s3_metadata_minimal, is_s3_sanitize_keys, S3_PUBLIC_BUCKET, build_public_url, get_presigned_get_url, get_s3_endpoint
 
@@ -352,3 +355,151 @@ class FileStorageService:
         except Exception as e:
             logger.error(f"[LIST_S3_FILES_ERROR] {e}")
             return {"files": [], "is_truncated": False, "next_continuation_token": None, "error": str(e)}
+
+    async def get_all_files_paginated(
+        self, 
+        page_number: int = 0, 
+        page_size: int = 10, 
+        sort_by: list = None, 
+        sort_direction: list = None, 
+        include_deleted: bool = False
+    ) -> PaginatedResponse[FileResponseDto]:
+        """
+        Lấy danh sách files với pagination theo chuẩn contract service
+        """
+        try:
+            # Validate sort parameters
+            valid_sort_fields = ['filename', 'size', 'created_at', 'updated_at', 'content_type']
+            if sort_by:
+                for field in sort_by:
+                    if field not in valid_sort_fields:
+                        raise HTTPException(status_code=400, detail=f"Invalid sort field: {field}")
+            
+            # Get files from S3
+            s3_result = await self.list_s3_files("", page_size * (page_number + 1))
+            files = s3_result.get('files', [])
+            
+            # Apply sorting
+            if sort_by and files:
+                for i, field in enumerate(sort_by):
+                    direction = sort_direction[i] if sort_direction and i < len(sort_direction) else 'asc'
+                    reverse = direction.lower() == 'desc'
+                    
+                    if field == 'filename':
+                        files.sort(key=lambda x: x.get('key', ''), reverse=reverse)
+                    elif field == 'size':
+                        files.sort(key=lambda x: x.get('size', 0), reverse=reverse)
+                    elif field == 'created_at':
+                        files.sort(key=lambda x: x.get('last_modified', ''), reverse=reverse)
+            
+            # Calculate pagination
+            total_elements = len(files)
+            total_pages = (total_elements + page_size - 1) // page_size
+            start_idx = page_number * page_size
+            end_idx = start_idx + page_size
+            page_files = files[start_idx:end_idx]
+            
+            # Convert to FileResponseDto
+            content = []
+            for file_info in page_files:
+                file_dto = FileResponseDto(
+                    id=file_info.get('key', ''),
+                    filename=file_info.get('key', ''),
+                    original_filename=file_info.get('key', '').split('/')[-1],
+                    content_type=file_info.get('content_type', 'application/octet-stream'),
+                    size=file_info.get('size', 0),
+                    status='ACTIVE',
+                    file_type='DOCUMENT',
+                    folder='/'.join(file_info.get('key', '').split('/')[:-1]) if '/' in file_info.get('key', '') else '',
+                    version=1,
+                    created_at=datetime.fromisoformat(file_info.get('last_modified', '').replace('Z', '+00:00')),
+                    updated_at=datetime.fromisoformat(file_info.get('last_modified', '').replace('Z', '+00:00')),
+                    s3_key=file_info.get('key', ''),
+                    bucket=self.bucket_name,
+                    url=file_info.get('url')
+                )
+                content.append(file_dto)
+            
+            # Build paginated response
+            request_info = RequestInfo(
+                page=page_number,
+                size=page_size,
+                sort_by=sort_by,
+                sort_direction=sort_direction
+            )
+            
+            result_info = ResultInfo(
+                page=page_number,
+                size=page_size,
+                total_elements=total_elements,
+                total_pages=total_pages,
+                first=page_number == 0,
+                last=page_number >= total_pages - 1,
+                number_of_elements=len(page_files),
+                empty=len(page_files) == 0
+            )
+            
+            return PaginatedResponse(
+                request=request_info,
+                result=result_info,
+                content=content
+            )
+            
+        except Exception as e:
+            logger.error(f"[GET_ALL_FILES_PAGINATED_FAILED] Error: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Error getting files: {e}")
+
+    async def get_file_by_key(self, key: str) -> FileDetailResponseDto:
+        """
+        Lấy thông tin chi tiết file theo key
+        """
+        try:
+            if not is_s3_enabled():
+                raise HTTPException(status_code=503, detail="S3 service not enabled")
+            
+            # Get file info from S3
+            try:
+                response = self.s3_client.head_object(Bucket=self.bucket_name, Key=key)
+            except ClientError as e:
+                if e.response['Error']['Code'] == '404':
+                    raise HTTPException(status_code=404, detail="File not found in S3")
+                raise HTTPException(status_code=500, detail=f"S3 error: {e}")
+            
+            # Generate URL
+            url = None
+            try:
+                if S3_PUBLIC_BUCKET:
+                    url = build_public_url(key)
+                else:
+                    url = get_presigned_get_url(key, expires_in_seconds=3600)
+            except Exception as url_error:
+                logger.warning(f"[URL_GENERATION_FAILED] Could not generate URL for {key}: {url_error}")
+            
+            # Convert to FileDetailResponseDto
+            file_dto = FileDetailResponseDto(
+                id=key,
+                filename=key,
+                original_filename=key.split('/')[-1],
+                content_type=response.get('ContentType', 'application/octet-stream'),
+                size=response['ContentLength'],
+                status='ACTIVE',
+                file_type='DOCUMENT',
+                folder='/'.join(key.split('/')[:-1]) if '/' in key else '',
+                version=1,
+                created_at=response['LastModified'],
+                updated_at=response['LastModified'],
+                s3_key=key,
+                bucket=self.bucket_name,
+                url=url,
+                metadata=response.get('Metadata', {}),
+                checksum=response['ETag'].strip('"'),
+                access_count=0
+            )
+            
+            return file_dto
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"[GET_FILE_BY_KEY_FAILED] Error getting file {key}: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Error getting file: {e}")

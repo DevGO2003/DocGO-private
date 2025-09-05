@@ -18,6 +18,8 @@ from schemas.file import (
     FileUploadResponse, SignedURLRequest, SignedURLResponse, FileVersion
 )
 from schemas.response import RestResponse
+from schemas.file_response import FileResponseDto, FileDetailResponseDto
+from schemas.pagination import PaginatedResponse
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO)
@@ -204,88 +206,93 @@ async def debug_s3_config(request: Request):
         path=request.url.path
     )
 
-@router.get("/files", summary="Lấy danh sách files từ S3 bucket")
-async def list_s3_files(
+@router.get("/files", summary="Lấy danh sách files với pagination chuẩn")
+async def get_all_files(
     request: Request,
-    prefix: Optional[str] = Query("", description="Prefix để lọc files (ví dụ: 'documents/')"),
-    max_keys: int = Query(100, description="Số lượng files tối đa trả về", ge=1, le=1000),
-    continuation_token: Optional[str] = Query(None, description="Token để phân trang (từ response trước)")
+    page_number: int = Query(0, description="Số trang (mặc định: 0)", ge=0),
+    page_size: int = Query(10, description="Kích thước trang (mặc định: 10)", ge=1, le=1000),
+    sort_by: Optional[List[str]] = Query(None, description="Danh sách các trường để sắp xếp"),
+    sort_direction: Optional[List[str]] = Query(None, description="Hướng sắp xếp (ASC/DESC)"),
+    include_deleted: bool = Query(False, description="Có bao gồm files đã xóa không")
 ):
     """
-    Lấy danh sách files trực tiếp từ S3 bucket với phân trang.
+    Lấy danh sách files với pagination theo chuẩn contract service.
+    
+    🔹 Đầu vào
+    📄 pageNumber (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số trang (mặc định: 0).
+    
+    📄 pageSize (tùy chọn, query)
+    Loại: integer
+    Mô tả: Kích thước trang (mặc định: 10).
+    
+    📄 sortBy (tùy chọn, query)
+    Loại: List<String>
+    Mô tả: Danh sách các trường để sắp xếp (filename, size, created_at, updated_at, content_type).
+    
+    📄 sortDirection (tùy chọn, query)
+    Loại: List<String>
+    Mô tả: Hướng sắp xếp (ASC/DESC).
+    
+    📄 includeDeleted (tùy chọn, query)
+    Loại: boolean
+    Mô tả: Có bao gồm files đã xóa không (mặc định: false).
+    
+    🔹 Đầu ra
+    📝 data
+    Loại: PaginatedResponse<FileResponseDto>
+    Mô tả: Danh sách files với cấu trúc response chuẩn.
     """
     try:
-        # Debug logging
-        from config import S3_BUCKET, S3_ENDPOINT
-        logger.info(f"[API_DEBUG] Router using bucket: {S3_BUCKET}, endpoint: {S3_ENDPOINT}")
-        
-        result = await file_service.list_s3_files(prefix, max_keys, continuation_token)
+        result = await file_service.get_all_files_paginated(
+            page_number, page_size, sort_by, sort_direction, include_deleted
+        )
         
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description=f"Đã lấy {result.get('total_count', 0)} files từ S3",
+            description=f"Đã lấy {result.result.number_of_elements} files từ S3",
             data=result,
             path=request.url.path
         )
     except Exception as e:
-        logger.error(f"[LIST_S3_FILES_FAILED] Error listing S3 files: {e}", exc_info=True)
+        logger.error(f"[GET_ALL_FILES_FAILED] Error getting files: {e}", exc_info=True)
         raise
 
-@router.get("/files/{key:path}", summary="Lấy thông tin chi tiết file từ S3")
-async def get_s3_file_info(
+@router.get("/files/{key:path}", summary="Lấy thông tin chi tiết file")
+async def get_file_by_key(
     request: Request,
-    key: str,
-    include_url: bool = Query(True, description="Có bao gồm URL trong response không")
+    key: str
 ):
     """
-    Lấy thông tin chi tiết của một file cụ thể từ S3 bucket.
+    Lấy thông tin chi tiết của một file cụ thể.
+    
+    🔹 Đầu vào
+    📄 key (bắt buộc, path)
+    Loại: string
+    Mô tả: Key của file trong S3 bucket.
+    
+    🔹 Đầu ra
+    📝 data
+    Loại: FileDetailResponseDto
+    Mô tả: Thông tin chi tiết của file bao gồm metadata, checksum, access count.
     """
     try:
-        if not is_s3_enabled():
-            raise HTTPException(status_code=503, detail="S3 service not enabled")
-        
-        # Lấy metadata từ S3
-        try:
-            response = file_service.s3_client.head_object(Bucket=file_service.bucket_name, Key=key)
-        except ClientError as e:
-            if e.response['Error']['Code'] == '404':
-                raise HTTPException(status_code=404, detail="File not found in S3")
-            raise HTTPException(status_code=500, detail=f"S3 error: {e}")
-        
-        file_info = {
-            'key': key,
-            'size': response['ContentLength'],
-            'last_modified': response['LastModified'].isoformat(),
-            'etag': response['ETag'].strip('"'),
-            'content_type': response.get('ContentType', 'application/octet-stream'),
-            'storage_class': response.get('StorageClass', 'STANDARD'),
-            'metadata': response.get('Metadata', {})
-        }
-        
-        # Thêm URL nếu được yêu cầu
-        if include_url:
-            try:
-                if S3_PUBLIC_BUCKET:
-                    file_info['url'] = build_public_url(key)
-                else:
-                    file_info['url'] = get_presigned_get_url(key, expires_in_seconds=3600)
-            except Exception as url_error:
-                logger.warning(f"[URL_GENERATION_FAILED] Could not generate URL for {key}: {url_error}")
-                file_info['url'] = None
+        result = await file_service.get_file_by_key(key)
         
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description=f"Đã lấy thông tin file '{key}' từ S3",
-            data=file_info,
+            description=f"Đã lấy thông tin chi tiết file '{key}'",
+            data=result,
             path=request.url.path
         )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[GET_S3_FILE_INFO_FAILED] Error getting S3 file info for {key}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error getting file info: {e}")
+        logger.error(f"[GET_FILE_BY_KEY_FAILED] Error getting file {key}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting file: {e}")
 
 @router.get("/files/{file_id}/versions", summary="Lấy danh sách phiên bản của file", response_model=RestResponse[List[FileVersion]])
 async def get_file_versions(
