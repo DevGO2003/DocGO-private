@@ -1,5 +1,0 @@
-[33mb6dba9f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mbackend-19/thaiGO[m[33m)[m feat: đồng bộ Docker configuration để chỉ sử dụng .env.local
-[33m4749374[m chore: update .gitignore and .cursorignore to track .env.example files
-[33ma2923d4[m feat: add example environment configuration files for services
-[33mbb4478d[m chore: remove obsolete environment files and update Docker Compose configuration
-[33me4f46d6[m[33m ([m[1;31morigin/backend-19/thaiGO[m[33m)[m chore: update .cursorignore and .gitignore for environment file tracking
