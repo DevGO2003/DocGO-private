@@ -1,0 +1,41 @@
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success",
+  "description": "Đã lấy 3 files từ S3",
+  "data": {
+    "files": [
+      {
+        "key": "documents/20200730015029-HD01_Hop_dong_cung_cap_dich_vu_ERP_LINK.pdf",
+        "size": 782523,
+        "last_modified": "2024-01-15T10:30:00.000Z",
+        "etag": "abc123def456789",
+        "storage_class": "STANDARD",
+        "url": "https://docgo-assets.s3.filebase.com/documents/20200730015029-HD01_Hop_dong_cung_cap_dich_vu_ERP_LINK.pdf"
+      },
+      {
+        "key": "documents/contract-template.docx",
+        "size": 245760,
+        "last_modified": "2024-01-15T09:15:00.000Z",
+        "etag": "def456ghi789012",
+        "storage_class": "STANDARD",
+        "url": "https://docgo-assets.s3.filebase.com/documents/contract-template.docx"
+      },
+      {
+        "key": "documents/legal-agreement.pdf",
+        "size": 1536000,
+        "last_modified": "2024-01-14T16:45:00.000Z",
+        "etag": "ghi789jkl012345",
+        "storage_class": "STANDARD",
+        "url": "https://docgo-assets.s3.filebase.com/documents/legal-agreement.pdf"
+      }
+    ],
+    "is_truncated": false,
+    "next_continuation_token": null,
+    "total_count": 3,
+    "prefix": "documents/"
+  },
+  "timestamp": "2024-01-15T10:35:00.000Z",
+  "requestId": "123e4567-e89b-12d3-a456-426614174000",
+  "path": "/api/v1/file-storage-asset-service/files/s3"
+}

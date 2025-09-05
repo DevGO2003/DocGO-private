@@ -8,12 +8,23 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-# Load .env from service directory first, then fallback to CWD
-_service_env = Path(__file__).resolve().parent / ".env"
-if _service_env.exists():
-	load_dotenv(dotenv_path=_service_env, override=False)
+# Load .env files in priority order: .env.local > .env > default lookup
+_service_dir = Path(__file__).resolve().parent
+_env_local = _service_dir / "env" / ".env.local"
+_env_file = _service_dir / "env" / ".env"
+
+# Load .env.local first (highest priority)
+if _env_local.exists():
+	load_dotenv(dotenv_path=_env_local, override=False)
+	print(f"✅ Loaded .env.local from {_env_local}")
+# Then load .env if exists
+elif _env_file.exists():
+	load_dotenv(dotenv_path=_env_file, override=False)
+	print(f"✅ Loaded .env from {_env_file}")
+# Finally fallback to default lookup (CWD)
 else:
 	load_dotenv()  # fallback to default lookup (CWD)
+	print("✅ Loaded .env from CWD")
 
 
 def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -33,6 +44,15 @@ S3_ADDRESSING_STYLE: str = get_env("S3_ADDRESSING_STYLE", "virtual")  # virtual 
 S3_KEY_STYLE: str = get_env("S3_KEY_STYLE", "detailed")  # detailed | simple
 S3_METADATA_MINIMAL: bool = get_env("S3_METADATA_MINIMAL", "false").lower() == "true"
 S3_SANITIZE_KEYS: bool = get_env("S3_SANITIZE_KEYS", "true").lower() == "true"
+
+# Debug S3 configuration
+print(f"🔧 S3 Configuration:")
+print(f"   S3_ENABLED: {S3_ENABLED}")
+print(f"   S3_ENDPOINT: {S3_ENDPOINT}")
+print(f"   S3_REGION: {S3_REGION}")
+print(f"   S3_BUCKET: {S3_BUCKET}")
+print(f"   S3_PUBLIC_BUCKET: {S3_PUBLIC_BUCKET}")
+print(f"   S3_ADDRESSING_STYLE: {S3_ADDRESSING_STYLE}")
 
 s3_client = boto3.client(
 	"s3",

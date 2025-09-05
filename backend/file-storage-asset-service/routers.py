@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Response, Request
+from botocore.exceptions import ClientError
 from typing import List, Optional
 from uuid import uuid4
 import os
@@ -181,6 +182,110 @@ async def create_signed_url(
     except Exception as e:
         logger.error(f"[SIGNED_URL_FAILED] Error for file {file_id}: {e}", exc_info=True)
         raise
+
+@router.get("/debug/s3-config", summary="Debug S3 configuration")
+async def debug_s3_config(request: Request):
+    """
+    Debug endpoint để kiểm tra S3 configuration.
+    """
+    from config import S3_BUCKET, S3_ENDPOINT, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
+    
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="S3 Configuration Debug",
+        data={
+            "bucket": S3_BUCKET,
+            "endpoint": S3_ENDPOINT,
+            "region": S3_REGION,
+            "access_key_id": S3_ACCESS_KEY_ID[:10] + "..." if S3_ACCESS_KEY_ID else None,
+            "secret_key": S3_SECRET_ACCESS_KEY[:10] + "..." if S3_SECRET_ACCESS_KEY else None
+        },
+        path=request.url.path
+    )
+
+@router.get("/files", summary="Lấy danh sách files từ S3 bucket")
+async def list_s3_files(
+    request: Request,
+    prefix: Optional[str] = Query("", description="Prefix để lọc files (ví dụ: 'documents/')"),
+    max_keys: int = Query(100, description="Số lượng files tối đa trả về", ge=1, le=1000),
+    continuation_token: Optional[str] = Query(None, description="Token để phân trang (từ response trước)")
+):
+    """
+    Lấy danh sách files trực tiếp từ S3 bucket với phân trang.
+    """
+    try:
+        # Debug logging
+        from config import S3_BUCKET, S3_ENDPOINT
+        logger.info(f"[API_DEBUG] Router using bucket: {S3_BUCKET}, endpoint: {S3_ENDPOINT}")
+        
+        result = await file_service.list_s3_files(prefix, max_keys, continuation_token)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy {result.get('total_count', 0)} files từ S3",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[LIST_S3_FILES_FAILED] Error listing S3 files: {e}", exc_info=True)
+        raise
+
+@router.get("/files/{key:path}", summary="Lấy thông tin chi tiết file từ S3")
+async def get_s3_file_info(
+    request: Request,
+    key: str,
+    include_url: bool = Query(True, description="Có bao gồm URL trong response không")
+):
+    """
+    Lấy thông tin chi tiết của một file cụ thể từ S3 bucket.
+    """
+    try:
+        if not is_s3_enabled():
+            raise HTTPException(status_code=503, detail="S3 service not enabled")
+        
+        # Lấy metadata từ S3
+        try:
+            response = file_service.s3_client.head_object(Bucket=file_service.bucket_name, Key=key)
+        except ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                raise HTTPException(status_code=404, detail="File not found in S3")
+            raise HTTPException(status_code=500, detail=f"S3 error: {e}")
+        
+        file_info = {
+            'key': key,
+            'size': response['ContentLength'],
+            'last_modified': response['LastModified'].isoformat(),
+            'etag': response['ETag'].strip('"'),
+            'content_type': response.get('ContentType', 'application/octet-stream'),
+            'storage_class': response.get('StorageClass', 'STANDARD'),
+            'metadata': response.get('Metadata', {})
+        }
+        
+        # Thêm URL nếu được yêu cầu
+        if include_url:
+            try:
+                if S3_PUBLIC_BUCKET:
+                    file_info['url'] = build_public_url(key)
+                else:
+                    file_info['url'] = get_presigned_get_url(key, expires_in_seconds=3600)
+            except Exception as url_error:
+                logger.warning(f"[URL_GENERATION_FAILED] Could not generate URL for {key}: {url_error}")
+                file_info['url'] = None
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy thông tin file '{key}' từ S3",
+            data=file_info,
+            path=request.url.path
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[GET_S3_FILE_INFO_FAILED] Error getting S3 file info for {key}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting file info: {e}")
 
 @router.get("/files/{file_id}/versions", summary="Lấy danh sách phiên bản của file", response_model=RestResponse[List[FileVersion]])
 async def get_file_versions(

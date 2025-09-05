@@ -14,7 +14,7 @@ import logging
 
 from schemas.file import FileStatus, FileType, FileInfo, FileVersion, MalwareScanResult
 from services.malware_scanner import MalwareScanner
-from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR, S3_KEY_STYLE, is_s3_metadata_minimal, is_s3_sanitize_keys
+from config import get_s3_client, get_bucket_name, is_s3_enabled, UPLOAD_DIR, S3_KEY_STYLE, is_s3_metadata_minimal, is_s3_sanitize_keys, S3_PUBLIC_BUCKET, build_public_url, get_presigned_get_url, get_s3_endpoint
 
 # Cấu hình logging
 logger = logging.getLogger(__name__)
@@ -280,3 +280,75 @@ class FileStorageService:
             if e.response['Error']['Code'] == '404':
                 return None
             raise
+
+    async def list_s3_files(self, prefix: str = "", max_keys: int = 1000, 
+                           continuation_token: Optional[str] = None) -> dict:
+        """
+        Lấy danh sách files từ S3 bucket.
+        """
+        try:
+            if not is_s3_enabled():
+                return {"files": [], "is_truncated": False, "next_continuation_token": None}
+            
+            # Tạo S3 client mới để đảm bảo sử dụng config mới nhất
+            from config import S3_ENDPOINT, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_REGION, S3_ADDRESSING_STYLE, S3_BUCKET
+            import boto3
+            from botocore.client import Config
+            
+            s3_client = boto3.client(
+                "s3",
+                endpoint_url=S3_ENDPOINT,
+                aws_access_key_id=S3_ACCESS_KEY_ID,
+                aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+                region_name=S3_REGION,
+                config=Config(signature_version="s3v4", s3={"addressing_style": S3_ADDRESSING_STYLE}),
+            )
+            
+            # Debug logging
+            logger.info(f"[S3_LIST_DEBUG] Using bucket: {S3_BUCKET}, endpoint: {S3_ENDPOINT}")
+            
+            list_params = {
+                'Bucket': S3_BUCKET,
+                'MaxKeys': max_keys
+            }
+            
+            if prefix:
+                list_params['Prefix'] = prefix
+            if continuation_token:
+                list_params['ContinuationToken'] = continuation_token
+            
+            response = s3_client.list_objects_v2(**list_params)
+            
+            files = []
+            for obj in response.get('Contents', []):
+                file_info = {
+                    'key': obj['Key'],
+                    'size': obj['Size'],
+                    'last_modified': obj['LastModified'].isoformat(),
+                    'etag': obj['ETag'].strip('"'),
+                    'storage_class': obj.get('StorageClass', 'STANDARD')
+                }
+                
+                # Thêm URL cho file
+                try:
+                    if S3_PUBLIC_BUCKET:
+                        file_info['url'] = build_public_url(obj['Key'])
+                    else:
+                        file_info['url'] = get_presigned_get_url(obj['Key'], expires_in_seconds=3600)
+                except Exception as url_error:
+                    logger.warning(f"[URL_GENERATION_FAILED] Could not generate URL for {obj['Key']}: {url_error}")
+                    file_info['url'] = None
+                
+                files.append(file_info)
+            
+            return {
+                'files': files,
+                'is_truncated': response.get('IsTruncated', False),
+                'next_continuation_token': response.get('NextContinuationToken'),
+                'total_count': len(files),
+                'prefix': prefix
+            }
+            
+        except Exception as e:
+            logger.error(f"[LIST_S3_FILES_ERROR] {e}")
+            return {"files": [], "is_truncated": False, "next_continuation_token": None, "error": str(e)}
