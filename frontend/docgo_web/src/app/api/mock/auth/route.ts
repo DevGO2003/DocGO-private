@@ -13,14 +13,20 @@ export async function POST(req: Request) {
   ]
 
   if (action === 'login') {
-    const found = users.find(u => u.email === body?.email)
-    if (!found) {
+    const email = body?.email as string | undefined
+    // Cho phép đăng nhập với bất kỳ email nào; nếu không tồn tại trong danh sách mặc định, tạo user mock mới (PENDING)
+    let user = users.find(u => u.email === email)
+    if (!user && email) {
+      const localPart = email.split('@')[0] || 'User'
+      user = { id: crypto.randomUUID(), email, name: localPart, role: 'STAFF', status: 'PENDING' }
+    }
+    if (!user) {
       return new Response(JSON.stringify({
-        apiVersion: 'v1', statusCode: 404, shortMessage: 'Not Found', description: 'Email không tồn tại', data: null, timestamp: now, requestId: crypto.randomUUID(), path: '/api/mock/auth?action=login'
-      }), { status: 404, headers: { 'Content-Type': 'application/json' } })
+        apiVersion: 'v1', statusCode: 400, shortMessage: 'Bad Request', description: 'Thiếu email đăng nhập', data: null, timestamp: now, requestId: crypto.randomUUID(), path: '/api/mock/auth?action=login'
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } })
     }
     return new Response(JSON.stringify({
-      apiVersion: 'v1', statusCode: 200, shortMessage: 'Success', description: 'Đăng nhập thành công', data: { token: 'mock-token', user: found }, timestamp: now, requestId: crypto.randomUUID(), path: '/api/mock/auth?action=login'
+      apiVersion: 'v1', statusCode: 200, shortMessage: 'Success', description: 'Đăng nhập thành công', data: { token: 'mock-token', user }, timestamp: now, requestId: crypto.randomUUID(), path: '/api/mock/auth?action=login'
     }), { status: 200, headers: { 'Content-Type': 'application/json' } })
   }
 
