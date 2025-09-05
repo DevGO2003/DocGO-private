@@ -93,7 +93,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ../backend/api-gateway-bff/env/.env
+      - ../backend/api-gateway-bff/env/.env.local
     environment:
       - NODE_ENV=development
       - PORT=8000
@@ -141,7 +141,7 @@ services:
     ports:
       - "8002:8002"
     env_file:
-      - ../backend/user-management-service/env/.env
+      - ../backend/user-management-service/env/.env.local
     environment:
       - HOST=0.0.0.0
       - PORT=8002
@@ -170,7 +170,7 @@ services:
     ports:
       - "8001:8001"
     env_file:
-      - ../backend/authentication-identity-service/env/.env
+      - ../backend/authentication-identity-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8001
@@ -200,7 +200,6 @@ services:
     ports:
       - "8012:8012"
     env_file:
-      - ../backend/file-storage-asset-service/env/.env
       - ../backend/file-storage-asset-service/env/.env.local
     environment:
       - HOST=0.0.0.0
@@ -230,7 +229,6 @@ services:
     ports:
       - "8017:8017"
     env_file:
-      - ../backend/ai-processing-service/env/.env
       - ../backend/ai-processing-service/env/.env.local
     environment:
       - HOST=0.0.0.0
@@ -257,7 +255,6 @@ services:
     restart: unless-stopped
     working_dir: /app
     env_file:
-      - ../backend/ai-processing-service/env/.env
       - ../backend/ai-processing-service/env/.env.local
     environment:
       - PYTHONPATH=/app
@@ -314,7 +311,7 @@ services:
     ports:
       - "8018:8018"
     env_file:
-      - ../backend/general-file-management-service/env/.env
+      - ../backend/general-file-management-service/env/.env.local
 
     volumes:
       - ../backend/general-file-management-service:/app
@@ -335,7 +332,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     env_file:
-      - ../backend/general-file-management-service/env/.env
+      - ../backend/general-file-management-service/env/.env.local
     environment:
       - PYTHONPATH=/app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
