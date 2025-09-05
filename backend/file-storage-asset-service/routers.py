@@ -90,6 +90,9 @@ async def upload_file_with_scan(
                 }
             }
             await producer.send_and_wait(KAFKA_FILE_UPLOADED_TOPIC, event_payload)
+            logger.info(
+                f"[KAFKA_PUBLISH_SUCCESS] topic={KAFKA_FILE_UPLOADED_TOPIC} payload={json.dumps(event_payload, ensure_ascii=False)}"
+            )
         except Exception as kafka_error:
             logger.error(f"[KAFKA_PUBLISH_FAILED] Could not publish event: {kafka_error}")
 

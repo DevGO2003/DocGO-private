@@ -1,5 +1,6 @@
 import os
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import Optional
 
 class Settings(BaseSettings):
@@ -24,7 +25,12 @@ class Settings(BaseSettings):
     # File storage configuration
     upload_dir: str = "./uploads"
     max_file_size: int = 100 * 1024 * 1024  # 100MB
-    allowed_file_types: list = ["pdf", "docx", "txt", "jpg", "png", "xlsx"]
+    # Use a simple string to avoid EnvSettingsSource attempting JSON parse
+    allowed_file_types_raw: str = "pdf,docx,txt,jpg,png,xlsx"
+
+    @property
+    def allowed_file_types(self) -> list[str]:
+        return [x.strip() for x in (self.allowed_file_types_raw or "").split(",") if x.strip()]
     
     # Search configuration
     elasticsearch_url: str = "http://localhost:9200"

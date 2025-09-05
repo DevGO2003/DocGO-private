@@ -7,6 +7,7 @@ from typing import Optional
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 from config import settings
+import logging
 
 
 class GFMSKafkaWorker:
@@ -32,7 +33,7 @@ class GFMSKafkaWorker:
                 value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             )
             await self.consumer.start()
-            print(f"GFMS Kafka consumer started. topic={self.file_events_topic} bootstrap={self.bootstrap_servers}")
+            logging.info(f"[GFMS_CONSUMER_STARTED] topic={self.file_events_topic} bootstrap={self.bootstrap_servers}")
 
         if self.producer is None:
             self.producer = AIOKafkaProducer(
@@ -42,7 +43,7 @@ class GFMSKafkaWorker:
                 acks="all",
             )
             await self.producer.start()
-            print(f"GFMS Kafka producer started. topic={self.gfms_events_topic} bootstrap={self.bootstrap_servers}")
+            logging.info(f"[GFMS_PRODUCER_STARTED] topic={self.gfms_events_topic} bootstrap={self.bootstrap_servers}")
 
         self._stopping = False
         self._task = asyncio.create_task(self._consume_loop())
@@ -78,10 +79,10 @@ class GFMSKafkaWorker:
                     continue
                 if event.get("eventType") != "FileUploaded":
                     continue
-
+                logging.info(f"[GFMS_CONSUME_EVENT] topic={self.file_events_topic} payload={json.dumps(event, ensure_ascii=False)}")
                 await self._handle_file_uploaded(event)
             except Exception as err:
-                print(f"GFMS consume_loop error: {err}")
+                logging.error(f"[GFMS_CONSUME_ERROR] {err}")
                 # best-effort; keep the loop alive
                 continue
 
@@ -119,7 +120,7 @@ class GFMSKafkaWorker:
 
         key_bytes = str(file_record.get("fileId") or file_record.get("key") or "").encode("utf-8")
         await self.producer.send_and_wait(self.gfms_events_topic, file_record_created_event, key=key_bytes)
-        print(f"✅ GFMS Published FileRecordCreated for file: {file_record.get('filename')}")
+        logging.info(f"[GFMS_PUBLISH_SUCCESS] topic={self.gfms_events_topic} payload={json.dumps(file_record_created_event, ensure_ascii=False)}")
 
 
 # Singleton instance

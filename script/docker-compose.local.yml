@@ -191,23 +191,7 @@ services:
     networks:
       - docgo_network_local
 
-  # AI Processing Kafka Worker (consumes file.uploaded, emits ai.* and contract.summary.updated)
-  ai-processing-worker:
-    image: python:3.11-slim
-    container_name: docgo-local-ai-processing-worker
-    restart: unless-stopped
-    working_dir: /app
-    env_file:
-      - ../backend/ai-processing-service/env/.env.local
-    volumes:
-      - ../backend/ai-processing-service:/app
-      - ai_processing_results_local:/app/results
-    command: >
-      sh -c "pip install -r requirements.txt && python kafka_worker.py"
-    depends_on:
-      - kafka
-    networks:
-      - docgo_network_local
+
 
   # Contract Management Service (Spring Boot) - Backend Service with Hot Reload
   contract-management-service:
@@ -241,7 +225,11 @@ services:
       - "8018:8018"
     env_file:
       - ../backend/general-file-management-service/env/.env.local
-
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_FILE_EVENTS_TOPIC=file.uploaded
+      - KAFKA_GFMS_EVENTS_TOPIC=file.record.created
+      - KAFKA_CLIENT_ID=general-file-management-service
     volumes:
       - ../backend/general-file-management-service:/app
       - general_file_management_uploads_local:/app/uploads
@@ -254,22 +242,7 @@ services:
     networks:
       - docgo_network_local
 
-  # General File Management Kafka Worker (consumes file.uploaded, emits file.record.created)
-  general-file-management-worker:
-    image: python:3.11-slim
-    container_name: docgo-local-general-file-management-worker
-    restart: unless-stopped
-    working_dir: /app
-    env_file:
-      - ../backend/general-file-management-service/env/.env.local
-    volumes:
-      - ../backend/general-file-management-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python kafka_worker.py"
-    depends_on:
-      - kafka
-    networks:
-      - docgo_network_local
+
 
 volumes:
   mariadb_data_local:
