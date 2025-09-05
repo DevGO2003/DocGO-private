@@ -298,7 +298,20 @@ class AIKafkaWorker:
 				f"Nội dung hợp đồng (rút gọn):\n{content[:8000]}\n"
 			)
 			response = model.generate_content(prompt)
-			answer = (response.text or "").strip()
+			# Log chi tiết kết quả từ Gemini để dễ debug
+			try:
+				logging.info(f"[AI_GEMINI_RAW] has_text={bool(getattr(response, 'text', None))} candidates={len(getattr(response, 'candidates', []) or [])}")
+				if getattr(response, 'candidates', None):
+					first_candidate = response.candidates[0]
+					finish_reason = getattr(getattr(first_candidate, 'finish_reason', None), 'name', None)
+					logging.info(f"[AI_GEMINI_META] finish_reason={finish_reason}")
+			except Exception as meta_err:
+				logging.warning(f"[AI_GEMINI_META_PARSE_FAILED] {meta_err}")
+
+			answer = (getattr(response, 'text', None) or "").strip()
+			if not answer:
+				logging.warning("[AI_GEMINI_EMPTY_TEXT] Gemini trả về text rỗng hoặc None")
+				return None
 			cleaned = answer
 			if cleaned.startswith('```json'):
 				cleaned = cleaned[7:]
@@ -306,7 +319,11 @@ class AIKafkaWorker:
 				cleaned = cleaned[3:]
 			if cleaned.endswith('```'):
 				cleaned = cleaned[:-3]
-			parsed = json.loads(cleaned)
+			try:
+				parsed = json.loads(cleaned)
+			except Exception as parse_err:
+				logging.error(f"[AI_GEMINI_JSON_PARSE_ERROR] {parse_err}; snippet={cleaned[:500]}")
+				return None
 			# Bổ sung title mặc định nếu thiếu
 			if isinstance(parsed, dict) and 'title' not in parsed:
 				parsed['title'] = f"Hợp đồng từ tệp: {filename}"
@@ -315,7 +332,7 @@ class AIKafkaWorker:
 				parsed['fileId'] = str(uuid.uuid4())
 			return parsed
 		except Exception as e:
-			logging.warning(f"[AI_GEMINI_FALLBACK] Using fallback summary due to: {e}")
+			logging.exception(f"[AI_GEMINI_FALLBACK] Using fallback summary due to exception: {e}")
 			return None
 
 
