@@ -94,32 +94,6 @@ services:
       - "8000:8000"
     env_file:
       - ../backend/api-gateway-bff/env/.env.local
-    environment:
-      - NODE_ENV=development
-      - PORT=8000
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      # Service URLs for all 19 microservices
-      - API_GATEWAY_BFF_URL=http://localhost:8000
-      - AUTHENTICATION_SERVICE_URL=http://authentication-identity-service:8001
-      - USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8002
-      - CONTRACT_MANAGEMENT_SERVICE_URL=http://contract-management-service:8003
-      - VERSIONING_DOCUMENT_HISTORY_SERVICE_URL=http://versioning-document-history-service:8004
-      - COMMENTING_COLLABORATION_SERVICE_URL=http://commenting-collaboration-service:8005
-      - APPROVAL_WORKFLOW_SERVICE_URL=http://approval-workflow-service:8006
-      - REMINDER_SCHEDULER_SERVICE_URL=http://reminder-scheduler-service:8007
-      - ESIGNATURE_INTEGRATION_SERVICE_URL=http://esignature-integration-service:8008
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8009
-      - REPORTING_ANALYTICS_SERVICE_URL=http://reporting-analytics-service:8010
-      - OCR_DOCUMENT_EXTRACTION_SERVICE_URL=http://ocr-document-extraction-service:8011
-      - FILE_STORAGE_SERVICE_URL=http://file-storage-asset-service:8012
-      - AUDIT_ACTIVITY_LOG_SERVICE_URL=http://audit-activity-log-service:8013
-      - INTEGRATION_CONNECTORS_SERVICE_URL=http://integration-connectors-service:8014
-      - BATCH_ETL_SERVICE_URL=http://batch-etl-service:8015
-      - HEALTH_MONITORING_AGENT_URL=http://health-monitoring-agent:8016
-      - AI_PROCESSING_SERVICE_URL=http://ai-processing-service:8017
-      - GENERAL_FILE_MANAGEMENT_SERVICE_URL=http://general-file-management-service:8018
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
@@ -142,14 +116,6 @@ services:
       - "8002:8002"
     env_file:
       - ../backend/user-management-service/env/.env.local
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8002
-      - PYTHONPATH=/app
-      - DATABASE_HOST=mariadb
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/user-management-service:/app
     command: >
@@ -171,15 +137,6 @@ services:
       - "8001:8001"
     env_file:
       - ../backend/authentication-identity-service/env/.env.local
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8001
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/docgo
-      - SPRING_DATASOURCE_USERNAME=docgo_user
-      - SPRING_DATASOURCE_PASSWORD=docgo_password
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/authentication-identity-service:/app
     command: >
@@ -201,13 +158,6 @@ services:
       - "8012:8012"
     env_file:
       - ../backend/file-storage-asset-service/env/.env.local
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8012
-      - PYTHONPATH=/app
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/file-storage-asset-service:/app
       - file_storage_uploads_local:/app/uploads
@@ -230,13 +180,6 @@ services:
       - "8017:8017"
     env_file:
       - ../backend/ai-processing-service/env/.env.local
-    environment:
-      - HOST=0.0.0.0
-      - PORT=8017
-      - PYTHONPATH=/app
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
@@ -256,13 +199,6 @@ services:
     working_dir: /app
     env_file:
       - ../backend/ai-processing-service/env/.env.local
-    environment:
-      - PYTHONPATH=/app
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - KAFKA_FILE_UPLOADED_TOPIC=file.uploaded
-      - KAFKA_TEXT_EXTRACTED_TOPIC=ai.text.extracted
-      - KAFKA_DOCUMENT_CLASSIFIED_TOPIC=ai.document.classified
-      - KAFKA_CONTRACT_SUMMARY_TOPIC=contract.summary.updated
     volumes:
       - ../backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
@@ -281,15 +217,8 @@ services:
     working_dir: /app
     ports:
       - "8003:8003"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo_contract_service?authSource=admin
-      - SERVER_PORT=8003
-      - SPRING_KAFKA_ENABLED=true
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - SPRING_KAFKA_ENABLED=true
-      - REDIS_HOST=redis
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    env_file:
+      - ../backend/contract-management-service/env/.env.local
     volumes:
       - ../backend/contract-management-service:/app
       - ../backend/contract-management-service/uploads:/app/uploads
@@ -333,9 +262,6 @@ services:
     working_dir: /app
     env_file:
       - ../backend/general-file-management-service/env/.env.local
-    environment:
-      - PYTHONPATH=/app
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ../backend/general-file-management-service:/app
     command: >
