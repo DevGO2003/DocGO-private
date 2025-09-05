@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from config import (
 	get_kafka_bootstrap_servers,
@@ -40,9 +42,11 @@ class AIKafkaWorker:
 				group_id=f"{self.client_id}-group",
 				client_id=self.client_id,
 				enable_auto_commit=True,
+				auto_offset_reset="latest",
 				value_deserializer=lambda v: json.loads(v.decode("utf-8")),
 			)
 			await self.consumer.start()
+			logging.info(f"[AI_CONSUMER_STARTED] topic={self.consumer_topic} bootstrap={self.bootstrap_servers}")
 
 		if self.producer is None:
 			self.producer = AIOKafkaProducer(
@@ -52,6 +56,7 @@ class AIKafkaWorker:
 				acks="all",
 			)
 			await self.producer.start()
+			logging.info(f"[AI_PRODUCER_STARTED] bootstrap={self.bootstrap_servers}")
 
 		self._stopping = False
 		self._task = asyncio.create_task(self._consume_loop())
@@ -87,10 +92,10 @@ class AIKafkaWorker:
 					continue
 				if event.get("eventType") != "FileUploaded":
 					continue
-
+				logging.info(f"[AI_CONSUME_EVENT] topic={self.consumer_topic} payload={json.dumps(event, ensure_ascii=False)}")
 				await self._handle_file_uploaded(event)
 			except Exception:
-				# best-effort; avoid crashing the loop
+				logging.exception("[AI_CONSUME_ERROR] error while consuming event")
 				continue
 
 	async def _handle_file_uploaded(self, event: dict) -> None:
@@ -98,9 +103,9 @@ class AIKafkaWorker:
 			return
 
 		data = event.get("data", {})
-		filename = data.get("filename", "").lower()
-		content_type = data.get("contentType", "").lower()
-		folder = data.get("folder", "").lower()
+		filename = (data.get("filename") or "").lower()
+		content_type = (data.get("contentType") or "").lower()
+		folder = (data.get("folder") or "").lower()
 
 		is_contract = any([
 			"contract" in filename,
@@ -144,7 +149,7 @@ class AIKafkaWorker:
 			"metadata": {"serviceVersion": "1.0.0"}
 		}
 		await self.producer.send_and_wait(self.text_extracted_topic, text_extracted_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
-		print(f"✅ Published TextExtracted for file: {data.get('filename')}")
+		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.text_extracted_topic} payload={json.dumps(text_extracted_event, ensure_ascii=False)}")
 
 	async def _publish_classified(self, event: dict, data: dict, file_type: str) -> None:
 		classified_event = {
@@ -167,7 +172,7 @@ class AIKafkaWorker:
 			"metadata": {"serviceVersion": "1.0.0"}
 		}
 		await self.producer.send_and_wait(self.document_classified_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
-		print(f"✅ Published Classified for file: {data.get('filename')} as {file_type}")
+		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.document_classified_topic} payload={json.dumps(classified_event, ensure_ascii=False)}")
 
 	async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
 		try:
@@ -205,7 +210,7 @@ class AIKafkaWorker:
 			event_payload,
 			key=str(data.get("fileId") or data.get("key") or "").encode("utf-8")
 		)
-		print(f"✅ Published ContractSummary for contract: {data.get('filename')}")
+		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.contract_summary_topic} payload={json.dumps(event_payload, ensure_ascii=False)}")
 
 	async def _extract_file_content(self, data: dict) -> str:
 		# Simulation placeholder
