@@ -49,7 +49,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */
-    // @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "contract-management-service-group")
+    // @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.updated}", groupId = "contract-management-service-group")
     public void handleSummaryCreated(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);

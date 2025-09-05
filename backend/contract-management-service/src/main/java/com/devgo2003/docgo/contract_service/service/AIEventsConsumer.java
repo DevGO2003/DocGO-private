@@ -27,7 +27,7 @@ public class AIEventsConsumer {
     private String contractEventsTopic;
 
     // @KafkaListener(
-    //         topics = "${app.kafka.topic.ai-events:ai.events}",
+    //         topics = "${app.kafka.topic.contract-summary:contract.summary.updated}",
     //         groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
     //         containerFactory = "kafkaListenerContainerFactory"
     // )

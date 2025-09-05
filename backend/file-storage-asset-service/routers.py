@@ -8,7 +8,7 @@ import json
 from aiokafka import AIOKafkaProducer
 
 from config import (
-    S3_BUCKET, get_presigned_get_url, KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_EVENTS_TOPIC,
+    S3_BUCKET, get_presigned_get_url, KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_UPLOADED_TOPIC,
     KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD, MAX_FILE_SIZE, ALLOWED_FILE_TYPES,
     is_s3_enabled, S3_PUBLIC_BUCKET, build_public_url
 )
@@ -89,7 +89,7 @@ async def upload_file_with_scan(
                     "version": file_info.version
                 }
             }
-            await producer.send_and_wait(KAFKA_FILE_EVENTS_TOPIC, event_payload)
+            await producer.send_and_wait(KAFKA_FILE_UPLOADED_TOPIC, event_payload)
         except Exception as kafka_error:
             logger.error(f"[KAFKA_PUBLISH_FAILED] Could not publish event: {kafka_error}")
 

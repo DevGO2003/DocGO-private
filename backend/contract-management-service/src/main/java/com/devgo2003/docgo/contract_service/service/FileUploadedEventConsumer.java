@@ -24,7 +24,7 @@ public class FileUploadedEventConsumer {
      * Consume FileUploaded events từ File Storage Service
      */
     // @KafkaListener(
-    //     topics = "${app.kafka.topic.file-events:file.events}",
+    //     topics = "${app.kafka.topic.file-uploaded:file.uploaded}",
     //     groupId = "${spring.kafka.consumer.group-id:contract-service-group}",
     //     containerFactory = "kafkaListenerContainerFactory"
     // )

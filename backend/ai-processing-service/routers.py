@@ -641,8 +641,10 @@ async def test_gemini_api_key_api(request: Request):
         
         # Kiểm tra các biến môi trường khác
         kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-        kafka_file_topic = os.getenv("KAFKA_FILE_EVENTS_TOPIC", "file.events")
-        kafka_ai_topic = os.getenv("KAFKA_AI_EVENTS_TOPIC", "ai.events")
+        kafka_file_topic = os.getenv("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
+        kafka_text_topic = os.getenv("KAFKA_TEXT_EXTRACTED_TOPIC", "ai.text.extracted")
+        kafka_doc_topic = os.getenv("KAFKA_DOCUMENT_CLASSIFIED_TOPIC", "ai.document.classified")
+        kafka_contract_topic = os.getenv("KAFKA_CONTRACT_SUMMARY_TOPIC", "contract.summary.updated")
         
         # Tạo response data
         test_data = {
@@ -654,8 +656,10 @@ async def test_gemini_api_key_api(request: Request):
             },
             "environment": {
                 "kafkaBootstrapServers": kafka_servers,
-                "kafkaFileEventsTopic": kafka_file_topic,
-                "kafkaAiEventsTopic": kafka_ai_topic,
+                "kafkaFileUploadedTopic": kafka_file_topic,
+                "kafkaTextExtractedTopic": kafka_text_topic,
+                "kafkaDocumentClassifiedTopic": kafka_doc_topic,
+                "kafkaContractSummaryTopic": kafka_contract_topic,
                 "host": os.getenv("HOST", "0.0.0.0"),
                 "port": os.getenv("PORT", "8017"),
                 "debug": os.getenv("DEBUG", "false")
