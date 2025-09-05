@@ -55,3 +55,10 @@ document/**/*.pptx
 **/contract_uploads/
 **/results/
 backend/api-gateway-bff/logs/
+
+# KHÔNG ignore file .env* để Cursor AI có thể track
+# (Git vẫn ignore chúng qua .gitignore)
+# Explicitly include .env files for Cursor AI
+!**/.env
+!**/.env.local
+!**/.env.*.local
