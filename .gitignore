@@ -6,6 +6,10 @@
 .env.production
 .env.staging
 .env.*.local
+# Exception: .env.example should be tracked as template
+!.env.example
+# Exception: env/ directory should be tracked (contains .env.example)
+!**/env/
 
 # IDE/Editor
 .vscode/
@@ -69,6 +73,8 @@ MANIFEST
 venv/
 env/
 ENV/
+# Exception: env/ directory in microservices should be tracked (contains .env.example)
+!backend/*/env/
 .venv/
 
 # Java

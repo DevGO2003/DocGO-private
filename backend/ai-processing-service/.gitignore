@@ -25,6 +25,8 @@ MANIFEST
 venv/
 env/
 ENV/
+# Exception: env/ directory should be tracked (contains .env.example)
+!env/
 .venv/
 .env
 

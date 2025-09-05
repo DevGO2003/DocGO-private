@@ -62,3 +62,4 @@ backend/api-gateway-bff/logs/
 !**/.env
 !**/.env.local
 !**/.env.*.local
+!**/.env.example
