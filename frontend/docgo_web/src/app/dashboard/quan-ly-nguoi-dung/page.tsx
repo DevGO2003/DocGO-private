@@ -7,6 +7,9 @@ export default function QuanLyNguoiDungPage() {
   const [users, setUsers] = useState<Array<{ id: string; name: string; email: string; role: string; status: string }>>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [role, setRole] = useState('')
+  const [status, setStatus] = useState('')
 
   useEffect(() => {
     const load = async () => {
@@ -24,6 +27,13 @@ export default function QuanLyNguoiDungPage() {
     }
     load()
   }, [])
+
+  const filtered = users.filter(u =>
+    (!query || (u.name?.toLowerCase().includes(query.toLowerCase()) || u.email?.toLowerCase().includes(query.toLowerCase()))) &&
+    (!role || u.role === role) &&
+    (!status || u.status === status)
+  )
+
   return (
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
@@ -42,17 +52,17 @@ export default function QuanLyNguoiDungPage() {
             <button className="px-3 py-2 text-sm rounded-md bg-violet-600 text-white hover:bg-violet-700">+ Thêm người dùng</button>
           </div>
           <div className="p-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <input className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" placeholder="Tên / Email" />
-            <select className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-              <option>Tất cả vai trò</option>
-              <option>Admin</option>
-              <option>Reviewer</option>
-              <option>User</option>
+            <input value={query} onChange={e=>setQuery(e.target.value)} className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" placeholder="Tên / Email" />
+            <select value={role} onChange={e=>setRole(e.target.value)} className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+              <option value="">Tất cả vai trò</option>
+              <option value="Admin">Admin</option>
+              <option value="Reviewer">Reviewer</option>
+              <option value="User">User</option>
             </select>
-            <select className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-              <option>Tất cả trạng thái</option>
-              <option>Active</option>
-              <option>Locked</option>
+            <select value={status} onChange={e=>setStatus(e.target.value)} className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+              <option value="">Tất cả trạng thái</option>
+              <option value="Active">Active</option>
+              <option value="Locked">Locked</option>
             </select>
             <button className="px-4 py-2 rounded-md bg-gray-800 text-white hover:bg-black">Tìm</button>
           </div>
@@ -80,7 +90,7 @@ export default function QuanLyNguoiDungPage() {
                   <td className="px-4 py-3 text-right"><div className="h-4 w-24 bg-gray-200 rounded ml-auto" /></td>
                 </tr>
               ))}
-              {!loading && users.map(u => (
+              {!loading && filtered.map(u => (
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">{u.name}</td>
                   <td className="px-4 py-3">{u.email}</td>

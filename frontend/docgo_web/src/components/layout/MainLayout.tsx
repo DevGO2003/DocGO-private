@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import Sidebar from '../Sidebar'
+import { useAuth } from '@/hooks/useAuth'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -87,16 +90,39 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }
 
 // Layout variants
-export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <MainLayout
-    showSidebar={true}
-    showHeader={false}
-    showFooter={false}
-    sidebarCollapsed={false}
-  >
-    {children}
-  </MainLayout>
-)
+export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, token, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && (!token || !user)) {
+      router.replace('/auth/login')
+    }
+  }, [loading, token, user, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900" />
+      </div>
+    )
+  }
+
+  if (!token || !user) {
+    return null
+  }
+
+  return (
+    <MainLayout
+      showSidebar={true}
+      showHeader={false}
+      showFooter={false}
+      sidebarCollapsed={false}
+    >
+      {children}
+    </MainLayout>
+  )
+}
 
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <MainLayout
