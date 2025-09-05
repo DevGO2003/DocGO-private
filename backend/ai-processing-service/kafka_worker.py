@@ -248,35 +248,75 @@ class AIKafkaWorker:
 		}
 
 	async def _generate_contract_summary(self, content: str, filename: str) -> Optional[dict]:
-		return {
-			"fileId": str(uuid.uuid4()),
-			"contractNumber": f"CTR-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
-			"title": f"Hợp đồng từ tệp: {filename}",
-			"contractType": "SERVICE_AGREEMENT",
-			"summaryText": f"Tóm tắt AI cho {filename}",
-			"keyPoints": ["Cung cấp dịch vụ", "Điều khoản thanh toán", "Thời hạn"],
-			"object": "Thỏa thuận cung cấp dịch vụ",
-			"effectiveDate": datetime.now(timezone.utc).isoformat(),
-			"term": "12 tháng",
-			"paymentDetails": {
-				"totalValue": 100000,
-				"schedule": "Hàng tháng",
-				"currency": "VND",
-				"paymentMethod": "Chuyển khoản ngân hàng"
-			},
-			"riskAssessment": {
-				"riskLevel": "LOW",
-				"riskFactors": ["Điều khoản tiêu chuẩn"],
-				"mitigationMeasures": ["Rà soát định kỳ"]
-			},
-			"complianceStatus": {
-				"status": "COMPLIANT",
-				"issues": [],
-				"recommendations": ["Hợp đồng tiêu chuẩn"]
-			},
-			"terminationConditions": "Thông báo trước 30 ngày",
-			"tags": ["ai-generated", "hop-dong-dich-vu"]
-		}
+		"""Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
+		try:
+			api_key = get_gemini_api_key()
+			genai.configure(api_key=api_key)
+			model = genai.GenerativeModel('gemini-2.0-flash')
+			prompt = (
+				"Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
+				"Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
+				'{\n'
+				'  "id": "string",\n'
+				'  "contractNumber": "string",\n'
+				'  "status": "string",\n'
+				'  "contractType": "string",\n'
+				'  "title": "string",\n'
+				'  "tags": ["string"],\n'
+				'  "parties": [\n'
+				'    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}\n'
+				'  ],\n'
+				'  "object": "string",\n'
+				'  "effectiveDate": "string (ISO 8601)",\n'
+				'  "term": "string",\n'
+				'  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
+				'  "keyClauses": [\n'
+				'    {"name": "string", "description": "string", "source": "string"}\n'
+				'  ],\n'
+				'  "favorableClauses": [\n'
+				'    {"clauseName": "string", "description": "string", "benefitTo": "string"}\n'
+				'  ],\n'
+				'  "unfavorableClauses": [\n'
+				'    {"clauseName": "string", "description": "string", "riskTo": "string"}\n'
+				'  ],\n'
+				'  "reminders": [\n'
+				'    {"type": "string", "date": "string (ISO 8601)", "content": "string"}\n'
+				'  ],\n'
+				'  "terminationConditions": "string",\n'
+				'  "riskAssessment": {\n'
+				'    "riskLevel": "LOW|MEDIUM|HIGH",\n'
+				'    "riskFactors": ["string"],\n'
+				'    "mitigationMeasures": ["string"]\n'
+				'  },\n'
+				'  "complianceStatus": {\n'
+				'    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
+				'    "issues": ["string"],\n'
+				'    "recommendations": ["string"]\n'
+				'  }\n'
+				'}\n'
+				"Chỉ trả về JSON hợp lệ, không kèm markdown.\n\n"
+				f"Nội dung hợp đồng (rút gọn):\n{content[:8000]}\n"
+			)
+			response = model.generate_content(prompt)
+			answer = (response.text or "").strip()
+			cleaned = answer
+			if cleaned.startswith('```json'):
+				cleaned = cleaned[7:]
+			if cleaned.startswith('```'):
+				cleaned = cleaned[3:]
+			if cleaned.endswith('```'):
+				cleaned = cleaned[:-3]
+			parsed = json.loads(cleaned)
+			# Bổ sung title mặc định nếu thiếu
+			if isinstance(parsed, dict) and 'title' not in parsed:
+				parsed['title'] = f"Hợp đồng từ tệp: {filename}"
+			# Bổ sung fileId nếu thiếu
+			if 'fileId' not in parsed:
+				parsed['fileId'] = str(uuid.uuid4())
+			return parsed
+		except Exception as e:
+			logging.warning(f"[AI_GEMINI_FALLBACK] Using fallback summary due to: {e}")
+			return None
 
 
 worker = AIKafkaWorker()
