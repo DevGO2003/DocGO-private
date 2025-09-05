@@ -22,19 +22,20 @@ error_count=0
 
 for service in "${services[@]}"; do
     service_path="$backend_path/$service"
-    env_example_path="$service_path/env_exmaple.txt"
-    env_local_path="$service_path/env.local"
+    env_path="$service_path/env"
+    env_example_path="$env_path/.env.example"
+    env_local_path="$env_path/.env.local"
     
     if [ -f "$env_example_path" ]; then
         if cp "$env_example_path" "$env_local_path"; then
-            echo "✅ Đã tạo env.local cho $service"
+            echo "✅ Đã tạo .env.local cho $service"
             ((success_count++))
         else
             echo "❌ Lỗi khi tạo env.local cho $service"
             ((error_count++))
         fi
     else
-        echo "⚠️ Không tìm thấy env_exmaple.txt trong $service"
+        echo "⚠️ Không tìm thấy .env.example trong $service"
     fi
 done
 

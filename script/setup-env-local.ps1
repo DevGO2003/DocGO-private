@@ -20,14 +20,15 @@ $errorCount = 0
 
 foreach ($service in $services) {
     $servicePath = Join-Path $backendPath $service
-    $envExamplePath = Join-Path $servicePath "env_exmaple.txt"
-    $envLocalPath = Join-Path $servicePath "env.local"
+    $envPath = Join-Path $servicePath "env"
+    $envExamplePath = Join-Path $envPath ".env.example"
+    $envLocalPath = Join-Path $envPath ".env.local"
     
     if (Test-Path $envExamplePath) {
         try {
-            # Copy env_exmaple.txt thành env.local
+            # Copy .env.example thành .env.local
             Copy-Item -Path $envExamplePath -Destination $envLocalPath -Force
-            Write-Host "✅ Đã tạo env.local cho $service" -ForegroundColor Green
+            Write-Host "✅ Đã tạo .env.local cho $service" -ForegroundColor Green
             $successCount++
         }
         catch {
@@ -36,7 +37,7 @@ foreach ($service in $services) {
         }
     }
     else {
-        Write-Host "⚠️ Không tìm thấy env_exmaple.txt trong $service" -ForegroundColor Yellow
+        Write-Host "⚠️ Không tìm thấy .env.example trong $service" -ForegroundColor Yellow
     }
 }
 

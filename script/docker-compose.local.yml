@@ -93,7 +93,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ../backend/api-gateway-bff/.env
+      - ../backend/api-gateway-bff/env/.env
     environment:
       - NODE_ENV=development
       - PORT=8000
@@ -141,7 +141,7 @@ services:
     ports:
       - "8002:8002"
     env_file:
-      - ../backend/user-management-service/.env
+      - ../backend/user-management-service/env/.env
     environment:
       - HOST=0.0.0.0
       - PORT=8002
@@ -170,7 +170,7 @@ services:
     ports:
       - "8001:8001"
     env_file:
-      - ../backend/authentication-identity-service/.env
+      - ../backend/authentication-identity-service/env/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8001
@@ -200,8 +200,8 @@ services:
     ports:
       - "8012:8012"
     env_file:
-      - ../backend/file-storage-asset-service/.env
-      - ../backend/file-storage-asset-service/.env.local
+      - ../backend/file-storage-asset-service/env/.env
+      - ../backend/file-storage-asset-service/env/.env.local
     environment:
       - HOST=0.0.0.0
       - PORT=8012
@@ -230,8 +230,8 @@ services:
     ports:
       - "8017:8017"
     env_file:
-      - ../backend/ai-processing-service/.env
-      - ../backend/ai-processing-service/.env.local
+      - ../backend/ai-processing-service/env/.env
+      - ../backend/ai-processing-service/env/.env.local
     environment:
       - HOST=0.0.0.0
       - PORT=8017
@@ -257,8 +257,8 @@ services:
     restart: unless-stopped
     working_dir: /app
     env_file:
-      - ../backend/ai-processing-service/.env
-      - ../backend/ai-processing-service/.env.local
+      - ../backend/ai-processing-service/env/.env
+      - ../backend/ai-processing-service/env/.env.local
     environment:
       - PYTHONPATH=/app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
@@ -314,7 +314,7 @@ services:
     ports:
       - "8018:8018"
     env_file:
-      - ../backend/general-file-management-service/.env
+      - ../backend/general-file-management-service/env/.env
 
     volumes:
       - ../backend/general-file-management-service:/app
@@ -335,7 +335,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     env_file:
-      - ../backend/general-file-management-service/.env
+      - ../backend/general-file-management-service/env/.env
     environment:
       - PYTHONPATH=/app
       - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
