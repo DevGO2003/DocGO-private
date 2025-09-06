@@ -23,11 +23,23 @@ class AIProcessingService:
         return (
             "Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
             "YÊU CẦU PHÂN TÍCH:\n"
-            "1. Đọc kỹ từng điều khoản để trích xuất thông tin chính xác\n"
-            "2. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
-            "3. Đánh giá rủi ro dựa trên nội dung thực tế\n"
-            "4. Đưa ra khuyến nghị tuân thủ pháp luật\n"
-            "5. Trích xuất đầy đủ thông tin các bên tham gia\n\n"
+            "1. ĐỌC KỸ từng dòng văn bản để trích xuất thông tin CHÍNH XÁC\n"
+            "2. Tìm kiếm và trích xuất thông tin cụ thể từ văn bản thực tế\n"
+            "3. KHÔNG sử dụng dấu \"...\" hoặc \"……\" - phải trích xuất thông tin thực tế\n"
+            "4. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
+            "5. Đánh giá rủi ro dựa trên nội dung thực tế\n"
+            "6. Đưa ra khuyến nghị tuân thủ pháp luật\n\n"
+            "THÔNG TIN CẦN TRÍCH XUẤT:\n"
+            "- Tên công ty/tổ chức tham gia (Bên A, Bên B)\n"
+            "- Tên người đại diện và chức vụ\n"
+            "- Địa chỉ cụ thể của các bên\n"
+            "- Mã số thuế (nếu có)\n"
+            "- Số điện thoại, email (nếu có)\n"
+            "- Số hợp đồng (nếu có)\n"
+            "- Ngày ký hợp đồng\n"
+            "- Giá trị hợp đồng (số tiền cụ thể)\n"
+            "- Thời hạn hợp đồng\n"
+            "- Đối tượng hợp đồng (sản phẩm/dịch vụ cụ thể)\n\n"
             "TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
             '{\n'
             '  "id": "unique_id_for_this_contract",\n'
@@ -51,7 +63,7 @@ class AIProcessingService:
             '  "effectiveDate": "ngày có hiệu lực (ISO 8601)",\n'
             '  "term": "thời hạn hợp đồng cụ thể",\n'
             '  "paymentDetails": {\n'
-            '    "totalValue": 0,\n'
+            '    "totalValue": "giá trị hợp đồng chi tiết từ văn bản",\n'
             '    "schedule": "lịch thanh toán chi tiết",\n'
             '    "currency": "đơn vị tiền tệ",\n'
             '    "paymentMethod": "phương thức thanh toán"\n'
@@ -79,13 +91,15 @@ class AIProcessingService:
             '  }\n'
             '}\n\n'
             "LƯU Ý QUAN TRỌNG:\n"
-            "- Trích xuất thông tin CHÍNH XÁC từ văn bản, không bịa đặt\n"
-            "- ĐỌC KỸ từng dòng để tìm thông tin cụ thể, không để null nếu có trong văn bản\n"
+            "- PHẢI trích xuất thông tin CHÍNH XÁC từ văn bản, KHÔNG được bịa đặt\n"
+            "- KHÔNG sử dụng dấu \"...\" hoặc \"……\" - phải tìm thông tin thực tế\n"
+            "- Nếu văn bản có dấu \"...\" thì bỏ qua và tìm thông tin khác\n"
+            "- ĐỌC KỸ từng dòng để tìm thông tin cụ thể\n"
             "- Tìm kiếm tên công ty, địa chỉ, mã số thuế, số điện thoại trong văn bản\n"
             "- Trích xuất số hợp đồng, ngày ký, giá trị từ văn bản thực tế\n"
             "- Phân tích kỹ các điều khoản để xác định điều có lợi/bất lợi\n"
             "- Đánh giá rủi ro dựa trên nội dung thực tế\n"
-                   "- totalValue có thể là mô tả chi tiết, ví dụ: \"100.000.000 VNĐ (Chưa bao gồm thuế)\" hoặc \"50.000 USD\"\n"
+            "- totalValue có thể là mô tả chi tiết, ví dụ: \"100.000.000 VNĐ (Chưa bao gồm thuế)\" hoặc \"50.000 USD\"\n"
             "- Nếu không tìm thấy thông tin cụ thể, dùng \"Chưa xác định\" thay vì null\n"
             "- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
             f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
