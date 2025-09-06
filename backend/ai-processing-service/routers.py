@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request
+from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query
 from docx import Document
 import PyPDF2
 import os

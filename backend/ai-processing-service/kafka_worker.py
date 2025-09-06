@@ -38,8 +38,16 @@ class AIKafkaWorker:
 
 	async def start(self) -> None:
 		if self.consumer is None:
+			# Subscribe to multiple topics for the full AI pipeline
+			topics = [
+				self.consumer_topic,  # file.uploaded
+				"ai.text.extraction.requested",
+				"ai.text.extracted", 
+				"ai.summary.creation.requested"
+			]
+			
 			self.consumer = AIOKafkaConsumer(
-				self.consumer_topic,
+				*topics,
 				bootstrap_servers=self.bootstrap_servers,
 				group_id=f"{self.client_id}-group",
 				client_id=self.client_id,
@@ -48,7 +56,7 @@ class AIKafkaWorker:
 				value_deserializer=lambda v: json.loads(v.decode("utf-8")),
 			)
 			await self.consumer.start()
-			logging.info(f"[AI_CONSUMER_STARTED] topic={self.consumer_topic} bootstrap={self.bootstrap_servers}")
+			logging.info(f"[AI_CONSUMER_STARTED] topics={topics} bootstrap={self.bootstrap_servers}")
 
 		if self.producer is None:
 			self.producer = AIOKafkaProducer(
@@ -92,10 +100,21 @@ class AIKafkaWorker:
 				event = msg.value
 				if not isinstance(event, dict):
 					continue
-				if event.get("eventType") != "FileUploaded":
-					continue
-				logging.info(f"[AI_CONSUME_EVENT] topic={self.consumer_topic} payload={json.dumps(event, ensure_ascii=False)}")
-				await self._handle_file_uploaded(event)
+				
+				event_type = event.get("eventType")
+				logging.info(f"[AI_CONSUME_EVENT] topic={self.consumer_topic} eventType={event_type} payload={json.dumps(event, ensure_ascii=False)}")
+				
+				if event_type == "FileUploaded":
+					await self._handle_file_uploaded(event)
+				elif event_type == "ai.text.extraction.requested":
+					await self._handle_text_extraction_requested(event)
+				elif event_type == "ai.text.extracted":
+					await self._handle_text_extracted(event)
+				elif event_type == "ai.summary.creation.requested":
+					await self._handle_summary_creation_requested(event)
+				else:
+					logging.info(f"[AI_CONSUME_SKIP] Unhandled event type: {event_type}")
+					
 			except Exception:
 				logging.exception("[AI_CONSUME_ERROR] error while consuming event")
 				continue
@@ -105,20 +124,11 @@ class AIKafkaWorker:
 			return
 
 		data = event.get("data", {})
-		filename = (data.get("filename") or "").lower()
+		filename = data.get("filename") or ""
+		filename_lower = filename.lower()
 		content_type = (data.get("contentType") or "").lower()
 		folder = (data.get("folder") or "").lower()
 		file_url = data.get("fileUrl")
-
-		# Check if this is a contract based on filename, folder, or content type
-		is_contract = any([
-			"contract" in filename,
-			"hopdong" in filename,
-			folder.startswith("contracts"),
-			content_type in ("application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
-		])
-
-		file_type = "CONTRACT" if is_contract else "GENERAL"
 
 		try:
 			# 1. Download file from URL if available
@@ -132,27 +142,136 @@ class AIKafkaWorker:
 				logging.warning(f"[AI_MISSING_URL] No fileUrl in event data: {data}")
 				return
 
-			# 2. Extract text from downloaded content
-			extracted_text = await self._extract_text_from_content(file_content, filename, content_type)
-			if not extracted_text:
-				logging.warning(f"[AI_EXTRACT_FAILED] Could not extract text from file: {filename}")
-				return
+			# 2. Quick classification using filename and content type (no need to extract text yet)
+			file_type = "GENERAL"
+			confidence = 0.8
+			
+			# Enhanced contract detection
+			contract_indicators = [
+				"contract" in filename_lower,
+				"hopdong" in filename_lower,
+				"hợp đồng" in filename_lower,
+				"hop-dong" in filename_lower,
+				folder.startswith("contracts"),
+				"hd" in filename_lower,
+				content_type in ("application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+			]
+			
+			if any(contract_indicators):
+				file_type = "CONTRACT"
+				confidence = 0.9
+				logging.info(f"[AI_CONTRACT_DETECTED] Contract detected for: {filename}")
 
-			# 3. Classify document using AI
-			classification_result = await self._classify_document_with_gemini(extracted_text, filename, content_type)
-			file_type = classification_result.get("classification", file_type)
-			confidence = classification_result.get("confidence", 0.8)
-
-			# 4. Publish events
-			await self._publish_text_extracted(event, data, file_type, extracted_text, confidence)
+			# 3. Publish classification event
 			await self._publish_classified(event, data, file_type, confidence)
 			
-			# 5. Generate summary if contract
+			# 4. If it's a contract, trigger the full AI pipeline
 			if file_type == "CONTRACT":
-				await self._publish_summary_created(event, data, file_type, extracted_text)
+				logging.info(f"[AI_CONTRACT_PIPELINE] Starting full AI pipeline for contract: {filename}")
+				# Store file content for later use and trigger extract event
+				await self._publish_text_extraction_request(event, data, file_content)
+			else:
+				logging.info(f"[AI_GENERAL_DOCUMENT] Document classified as general: {filename}")
 
 		except Exception as e:
 			logging.error(f"[AI_PROCESSING_ERROR] Error in AI processing: {e}", exc_info=True)
+			await self._publish_error_event(event, data, str(e))
+
+	async def _handle_text_extraction_requested(self, event: dict) -> None:
+		"""
+		Handle ai.text.extraction.requested event - extract text using Gemini
+		"""
+		if not self.producer:
+			return
+			
+		data = event.get("data", {})
+		file_id = data.get("fileId")
+		filename = data.get("filename")
+		content_type = data.get("contentType")
+		file_content_hex = data.get("fileContent")
+		
+		if not all([file_id, filename, content_type, file_content_hex]):
+			logging.warning(f"[AI_EXTRACT_MISSING_DATA] Missing required data in extraction request: {data}")
+			return
+		
+		logging.info(f"[AI_EXTRACT_START] fileId={file_id} filename={filename} contentType={content_type}")
+		
+		try:
+			# Convert hex back to bytes
+			file_content = bytes.fromhex(file_content_hex)
+			
+			# Extract text using Gemini AI
+			extracted_text = await self._extract_text_with_gemini(file_content, filename, content_type)
+			
+			if extracted_text:
+				# Publish text extracted event
+				await self._publish_text_extracted(event, data, "CONTRACT", extracted_text, 0.95)
+				
+				# Trigger summary creation
+				await self._publish_summary_creation_request(event, data, extracted_text)
+			else:
+				logging.warning(f"[AI_EXTRACT_FAILED] Could not extract text from: {filename}")
+				await self._publish_error_event(event, data, "Text extraction failed")
+				
+		except Exception as e:
+			logging.error(f"[AI_EXTRACT_ERROR] Error in text extraction: {e}", exc_info=True)
+			await self._publish_error_event(event, data, str(e))
+
+	async def _handle_text_extracted(self, event: dict) -> None:
+		"""
+		Handle ai.text.extracted event - trigger summary creation
+		"""
+		if not self.producer:
+			return
+			
+		data = event.get("data", {})
+		extracted_text = data.get("extractedText")
+		
+		if not extracted_text:
+			logging.warning(f"[AI_SUMMARY_MISSING_TEXT] No extracted text in event: {data}")
+			return
+		
+		logging.info(f"[AI_SUMMARY_TRIGGER] Triggering summary creation for extracted text")
+		
+		try:
+			# Trigger summary creation
+			await self._publish_summary_creation_request(event, data, extracted_text)
+		except Exception as e:
+			logging.error(f"[AI_SUMMARY_TRIGGER_ERROR] Error triggering summary: {e}", exc_info=True)
+			await self._publish_error_event(event, data, str(e))
+
+	async def _handle_summary_creation_requested(self, event: dict) -> None:
+		"""
+		Handle ai.summary.creation.requested event - create summary using Gemini
+		"""
+		if not self.producer:
+			return
+			
+		data = event.get("data", {})
+		file_id = data.get("fileId")
+		filename = data.get("filename")
+		extracted_text = data.get("extractedText")
+		
+		if not all([file_id, filename, extracted_text]):
+			logging.warning(f"[AI_SUMMARY_MISSING_DATA] Missing required data in summary request: {data}")
+			return
+		
+		logging.info(f"[AI_SUMMARY_START] fileId={file_id} filename={filename}")
+		
+		try:
+			# Create summary using Gemini
+			summary_result = await self._create_summary_with_gemini(extracted_text, filename)
+			
+			if summary_result:
+				# Publish summary created event
+				await self._publish_summary_created(event, data, "CONTRACT", extracted_text)
+				logging.info(f"[AI_SUMMARY_SUCCESS] Summary created for: {filename}")
+			else:
+				logging.warning(f"[AI_SUMMARY_FAILED] Could not create summary for: {filename}")
+				await self._publish_error_event(event, data, "Summary creation failed")
+				
+		except Exception as e:
+			logging.error(f"[AI_SUMMARY_ERROR] Error in summary creation: {e}", exc_info=True)
 			await self._publish_error_event(event, data, str(e))
 
 	async def _download_file_from_url(self, file_url: str) -> Optional[bytes]:
@@ -173,9 +292,178 @@ class AIKafkaWorker:
 			logging.error(f"[AI_DOWNLOAD_ERROR] Error downloading from {file_url}: {e}")
 			return None
 
+	async def _extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
+		"""
+		Extract text from file content using Gemini AI
+		"""
+		try:
+			# Configure Gemini
+			genai.configure(api_key=get_gemini_api_key())
+			model = genai.GenerativeModel('gemini-1.5-flash')
+			
+			# Create extraction prompt
+			extraction_prompt = f"""
+			Hãy trích xuất toàn bộ nội dung văn bản từ file {filename} (loại: {content_type}).
+			
+			Yêu cầu:
+			- Trích xuất chính xác 100% nội dung văn bản
+			- Giữ nguyên format, xuống dòng, khoảng trắng
+			- Không bỏ sót bất kỳ ký tự nào
+			- Nếu có bảng, giữ nguyên cấu trúc bảng
+			- Nếu có danh sách, giữ nguyên format danh sách
+			
+			Chỉ trả về nội dung văn bản thuần túy, không thêm giải thích hay comment.
+			"""
+			
+			# For PDF and DOCX, we need to extract text first, then use Gemini to clean it up
+			if content_type == "application/pdf":
+				# Basic PDF extraction first
+				import io
+				import PyPDF2
+				
+				pdf_file = io.BytesIO(content)
+				pdf_reader = PyPDF2.PdfReader(pdf_file)
+				
+				raw_text = ""
+				for page_num in range(len(pdf_reader.pages)):
+					page = pdf_reader.pages[page_num]
+					raw_text += page.extract_text() + "\n"
+				
+				if raw_text.strip():
+					# Use Gemini to clean up the extracted text
+					response = model.generate_content(f"{extraction_prompt}\n\nNội dung đã trích xuất:\n{raw_text}")
+					return response.text.strip()
+				else:
+					return f"[PDF_NO_TEXT] Could not extract text from PDF {filename}"
+					
+			elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+				# Basic DOCX extraction first
+				import io
+				from docx import Document
+				
+				docx_file = io.BytesIO(content)
+				doc = Document(docx_file)
+				
+				raw_text = ""
+				for paragraph in doc.paragraphs:
+					raw_text += paragraph.text + "\n"
+				
+				if raw_text.strip():
+					# Use Gemini to clean up the extracted text
+					response = model.generate_content(f"{extraction_prompt}\n\nNội dung đã trích xuất:\n{raw_text}")
+					return response.text.strip()
+				else:
+					return f"[DOCX_NO_TEXT] Could not extract text from DOCX {filename}"
+					
+			elif content_type.startswith("text/"):
+				# Plain text files
+				raw_text = content.decode('utf-8', errors='ignore')
+				response = model.generate_content(f"{extraction_prompt}\n\nNội dung file:\n{raw_text}")
+				return response.text.strip()
+			else:
+				# Try to decode as text for other types
+				raw_text = content.decode('utf-8', errors='ignore')
+				response = model.generate_content(f"{extraction_prompt}\n\nNội dung file:\n{raw_text}")
+				return response.text.strip()
+				
+		except Exception as e:
+			logging.error(f"[AI_GEMINI_EXTRACT_ERROR] Error extracting text with Gemini from {filename}: {e}")
+			return f"[GEMINI_EXTRACT_ERROR] Error extracting text from {filename}: {str(e)}"
+
+	async def _create_summary_with_gemini(self, extracted_text: str, filename: str) -> dict:
+		"""
+		Create contract summary using Gemini AI
+		"""
+		try:
+			# Configure Gemini
+			genai.configure(api_key=get_gemini_api_key())
+			model = genai.GenerativeModel('gemini-1.5-flash')
+			
+			# Create summary prompt
+			summary_prompt = f"""
+			Hãy tạo tóm tắt chi tiết cho hợp đồng sau:
+			
+			Tên file: {filename}
+			Nội dung hợp đồng:
+			{extracted_text[:5000]}...
+			
+			Yêu cầu tóm tắt:
+			- Thông tin cơ bản về hợp đồng (số hợp đồng, loại hợp đồng, tiêu đề)
+			- Các bên tham gia (tên, đại diện, địa chỉ, mã số thuế, thông tin liên hệ)
+			- Nội dung chính của hợp đồng
+			- Thời hạn và điều khoản quan trọng
+			- Giá trị hợp đồng và phương thức thanh toán
+			- Điều kiện chấm dứt hợp đồng
+			- Đánh giá rủi ro và khuyến nghị
+			
+			Trả về kết quả dưới dạng JSON với cấu trúc sau:
+			{{
+				"title": "Tiêu đề hợp đồng",
+				"contractNumber": "Số hợp đồng",
+				"contractType": "Loại hợp đồng",
+				"parties": [
+					{{
+						"role": "Bên A/Bên B",
+						"name": "Tên công ty/tổ chức",
+						"representative": "Người đại diện",
+						"taxCode": "Mã số thuế",
+						"contact": "Thông tin liên hệ",
+						"address": "Địa chỉ",
+						"businessLicense": "Giấy phép kinh doanh"
+					}}
+				],
+				"object": "Đối tượng hợp đồng",
+				"effectiveDate": "Ngày có hiệu lực",
+				"term": "Thời hạn hợp đồng",
+				"paymentDetails": {{
+					"totalValue": 0,
+					"schedule": "Lịch thanh toán",
+					"currency": "Đơn vị tiền tệ",
+					"paymentMethod": "Phương thức thanh toán"
+				}},
+				"keyClauses": ["Điều khoản quan trọng 1", "Điều khoản quan trọng 2"],
+				"favorableClauses": ["Điều khoản có lợi"],
+				"unfavorableClauses": ["Điều khoản bất lợi"],
+				"reminders": ["Nhắc nhở quan trọng"],
+				"terminationConditions": "Điều kiện chấm dứt",
+				"riskAssessment": {{
+					"riskLevel": "LOW/MEDIUM/HIGH",
+					"riskFactors": ["Yếu tố rủi ro"],
+					"mitigationMeasures": ["Biện pháp giảm thiểu"]
+				}},
+				"complianceStatus": {{
+					"status": "COMPLIANT/REVIEW_REQUIRED/NON_COMPLIANT",
+					"issues": ["Vấn đề tuân thủ"],
+					"recommendations": ["Khuyến nghị"]
+				}}
+			}}
+			"""
+			
+			response = model.generate_content(summary_prompt)
+			summary_text = response.text.strip()
+			
+			# Parse JSON response
+			try:
+				import re
+				json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
+				if json_match:
+					summary_result = json.loads(json_match.group())
+					logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
+					return summary_result
+				else:
+					logging.warning(f"[AI_GEMINI_SUMMARY_PARSE_FAILED] Could not parse JSON from Gemini response: {filename}")
+					return {"title": filename, "summary": "Không thể tạo tóm tắt tự động"}
+			except json.JSONDecodeError as e:
+				logging.error(f"[AI_GEMINI_SUMMARY_JSON_ERROR] JSON parsing error for {filename}: {e}")
+				return {"title": filename, "summary": "Lỗi khi phân tích tóm tắt"}
+				
+		except Exception as e:
+			logging.error(f"[AI_GEMINI_SUMMARY_ERROR] Error creating summary with Gemini for {filename}: {e}")
+			return {"title": filename, "summary": f"Lỗi khi tạo tóm tắt: {str(e)}"}
+
 	async def _extract_text_from_content(self, content: bytes, filename: str, content_type: str) -> str:
 		"""
-		Extract text from file content based on content type
+		Extract text from file content based on content type (legacy method)
 		"""
 		try:
 			if content_type == "application/pdf":
@@ -247,6 +535,39 @@ class AIKafkaWorker:
 		except Exception as e:
 			logging.error(f"[AI_CLASSIFY_ERROR] Error classifying document {filename}: {e}")
 			return {"classification": "GENERAL", "confidence": 0.5, "reasoning": f"Error: {str(e)}"}
+
+	async def _publish_text_extraction_request(self, event: dict, data: dict, file_content: bytes) -> None:
+		"""
+		Publish text extraction request event for contract processing
+		"""
+		if not self.producer:
+			return
+			
+		try:
+			extract_event = {
+				"eventVersion": "v1",
+				"eventType": "ai.text.extraction.requested",
+				"eventId": uuid.uuid4().hex,
+				"timestamp": datetime.now(timezone.utc).isoformat(),
+				"source": "ai-processing-service",
+				"correlationId": event.get("correlationId") or uuid.uuid4().hex,
+				"actor": event.get("actor", {}),
+				"data": {
+					"fileId": data.get("fileId"),
+					"filename": data.get("filename"),
+					"contentType": data.get("contentType"),
+					"fileSize": len(file_content),
+					"key": data.get("key"),
+					"bucket": data.get("bucket"),
+					"fileContent": file_content.hex()  # Store as hex string for JSON serialization
+				},
+				"metadata": {"serviceVersion": "1.0.0"}
+			}
+			
+			await self.producer.send_and_wait("ai.text.extraction.requested", extract_event)
+			logging.info(f"[AI_PUBLISH_SUCCESS] topic=ai.text.extraction.requested payload={json.dumps(extract_event, ensure_ascii=False)}")
+		except Exception as e:
+			logging.error(f"[AI_PUBLISH_ERROR] Failed to publish text extraction request: {e}")
 
 	async def _publish_error_event(self, event: dict, data: dict, error_message: str) -> None:
 		"""
@@ -330,6 +651,38 @@ class AIKafkaWorker:
 		}
 		await self.producer.send_and_wait(self.document_classified_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
 		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.document_classified_topic} payload={json.dumps(classified_event, ensure_ascii=False)}")
+
+	async def _publish_summary_creation_request(self, event: dict, data: dict, extracted_text: str) -> None:
+		"""
+		Publish summary creation request event
+		"""
+		if not self.producer:
+			return
+			
+		try:
+			summary_request_event = {
+				"eventVersion": "v1",
+				"eventType": "ai.summary.creation.requested",
+				"eventId": uuid.uuid4().hex,
+				"timestamp": datetime.now(timezone.utc).isoformat(),
+				"source": "ai-processing-service",
+				"correlationId": event.get("correlationId") or uuid.uuid4().hex,
+				"actor": event.get("actor", {}),
+				"data": {
+					"fileId": data.get("fileId"),
+					"filename": data.get("filename"),
+					"contentType": data.get("contentType"),
+					"extractedText": extracted_text,
+					"key": data.get("key"),
+					"bucket": data.get("bucket")
+				},
+				"metadata": {"serviceVersion": "1.0.0"}
+			}
+			
+			await self.producer.send_and_wait("ai.summary.creation.requested", summary_request_event)
+			logging.info(f"[AI_PUBLISH_SUCCESS] topic=ai.summary.creation.requested payload={json.dumps(summary_request_event, ensure_ascii=False)}")
+		except Exception as e:
+			logging.error(f"[AI_PUBLISH_ERROR] Failed to publish summary creation request: {e}")
 
 	async def _publish_summary_created(self, event: dict, data: dict, file_type: str, extracted_text: str = None) -> None:
 		try:
