@@ -848,90 +848,95 @@ Nguyễn Văn A                            Trần Thị B
 			logging.error(f"[AI_EXTRACT_ERROR] {e}")
 			return f"Lỗi đọc file {data.get('filename', 'unknown')}: {e}"
 
+	def _get_contract_summary_prompt(self, content: str, filename: str) -> str:
+		"""Tạo prompt chuẩn cho việc tóm tắt hợp đồng - dùng chung cho API và Event"""
+		return (
+			"Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
+			"YÊU CẦU PHÂN TÍCH:\n"
+			"1. Đọc kỹ từng điều khoản để trích xuất thông tin chính xác\n"
+			"2. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
+			"3. Đánh giá rủi ro dựa trên nội dung thực tế\n"
+			"4. Đưa ra khuyến nghị tuân thủ pháp luật\n"
+			"5. Trích xuất đầy đủ thông tin các bên tham gia\n\n"
+			"TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
+			'{\n'
+			'  "id": "unique_id_for_this_contract",\n'
+			'  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
+			'  "status": null,\n'
+			'  "contractType": "loại hợp đồng cụ thể",\n'
+			'  "title": "tiêu đề đầy đủ của hợp đồng",\n'
+			'  "tags": ["các từ khóa liên quan"],\n'
+			'  "parties": [\n'
+			'    {\n'
+			'      "role": "vai trò cụ thể (Bên A/Bên B)",\n'
+			'      "name": "tên công ty/tổ chức thực tế",\n'
+			'      "representative": "tên người đại diện thực tế",\n'
+			'      "taxCode": "mã số thuế thực tế",\n'
+			'      "contact": "thông tin liên hệ thực tế",\n'
+			'      "address": "địa chỉ thực tế",\n'
+			'      "businessLicense": null\n'
+			'    }\n'
+			'  ],\n'
+			'  "object": "đối tượng hợp đồng chi tiết",\n'
+			'  "effectiveDate": "ngày có hiệu lực (ISO 8601)",\n'
+			'  "term": "thời hạn hợp đồng cụ thể",\n'
+			'  "paymentDetails": {\n'
+			'    "totalValue": 0,\n'
+			'    "schedule": "lịch thanh toán chi tiết",\n'
+			'    "currency": "đơn vị tiền tệ",\n'
+			'    "paymentMethod": "phương thức thanh toán"\n'
+			'  },\n'
+			'  "keyClauses": [\n'
+			'    {\n'
+			'      "name": "tên điều khoản",\n'
+			'      "description": "mô tả chi tiết nội dung",\n'
+			'      "source": "điều số tham chiếu"\n'
+			'    }\n'
+			'  ],\n'
+			'  "favorableClauses": [\n'
+			'    {\n'
+			'      "clauseName": "tên điều khoản có lợi",\n'
+			'      "description": "mô tả lợi ích",\n'
+			'      "benefitTo": "bên được hưởng lợi"\n'
+			'    }\n'
+			'  ],\n'
+			'  "unfavorableClauses": [\n'
+			'    {\n'
+			'      "clauseName": "tên điều khoản bất lợi",\n'
+			'      "description": "mô tả rủi ro",\n'
+			'      "riskTo": "bên chịu rủi ro"\n'
+			'    }\n'
+			'  ],\n'
+			'  "reminders": [],\n'
+			'  "terminationConditions": "các điều kiện chấm dứt hợp đồng",\n'
+			'  "riskAssessment": {\n'
+			'    "riskLevel": "LOW|MEDIUM|HIGH",\n'
+			'    "riskFactors": ["các yếu tố rủi ro cụ thể"],\n'
+			'    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro"]\n'
+			'  },\n'
+			'  "complianceStatus": {\n'
+			'    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
+			'    "issues": ["các vấn đề tuân thủ pháp luật"],\n'
+			'    "recommendations": ["khuyến nghị cải thiện"]\n'
+			'  }\n'
+			'}\n\n'
+			"LƯU Ý QUAN TRỌNG:\n"
+			"- Trích xuất thông tin CHÍNH XÁC từ văn bản, không bịa đặt\n"
+			"- Nếu thông tin không có trong hợp đồng, để null hoặc mảng rỗng\n"
+			"- Phân tích kỹ các điều khoản để xác định điều có lợi/bất lợi\n"
+			"- Đánh giá rủi ro dựa trên nội dung thực tế\n"
+			"- totalValue PHẢI là số nguyên (không có dấu phẩy, dấu chấm), ví dụ: 1000000 thay vì \"1,000,000\"\n"
+			"- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
+			f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
+		)
+
 	async def _generate_contract_summary(self, content: str, filename: str) -> Optional[dict]:
 		"""Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
 		try:
 			api_key = get_gemini_api_key()
 			genai.configure(api_key=api_key)
 			model = genai.GenerativeModel('gemini-1.5-flash')
-			prompt = (
-				"Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
-				"YÊU CẦU PHÂN TÍCH:\n"
-				"1. Đọc kỹ từng điều khoản để trích xuất thông tin chính xác\n"
-				"2. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
-				"3. Đánh giá rủi ro dựa trên nội dung thực tế\n"
-				"4. Đưa ra khuyến nghị tuân thủ pháp luật\n"
-				"5. Trích xuất đầy đủ thông tin các bên tham gia\n\n"
-				"TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
-				'{\n'
-				'  "id": "unique_id_for_this_contract",\n'
-				'  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
-				'  "status": null,\n'
-				'  "contractType": "loại hợp đồng cụ thể",\n'
-				'  "title": "tiêu đề đầy đủ của hợp đồng",\n'
-				'  "tags": ["các từ khóa liên quan"],\n'
-				'  "parties": [\n'
-				'    {\n'
-				'      "role": "vai trò cụ thể (Bên A/Bên B)",\n'
-				'      "name": "tên công ty/tổ chức thực tế",\n'
-				'      "representative": "tên người đại diện thực tế",\n'
-				'      "taxCode": "mã số thuế thực tế",\n'
-				'      "contact": "thông tin liên hệ thực tế",\n'
-				'      "address": "địa chỉ thực tế",\n'
-				'      "businessLicense": null\n'
-				'    }\n'
-				'  ],\n'
-				'  "object": "đối tượng hợp đồng chi tiết",\n'
-				'  "effectiveDate": "ngày có hiệu lực (ISO 8601)",\n'
-				'  "term": "thời hạn hợp đồng cụ thể",\n'
-				'  "paymentDetails": {\n'
-				'    "totalValue": "tổng giá trị số",\n'
-				'    "schedule": "lịch thanh toán chi tiết",\n'
-				'    "currency": "đơn vị tiền tệ",\n'
-				'    "paymentMethod": "phương thức thanh toán"\n'
-				'  },\n'
-				'  "keyClauses": [\n'
-				'    {\n'
-				'      "name": "tên điều khoản",\n'
-				'      "description": "mô tả chi tiết nội dung",\n'
-				'      "source": "điều số tham chiếu"\n'
-				'    }\n'
-				'  ],\n'
-				'  "favorableClauses": [\n'
-				'    {\n'
-				'      "clauseName": "tên điều khoản có lợi",\n'
-				'      "description": "mô tả lợi ích",\n'
-				'      "benefitTo": "bên được hưởng lợi"\n'
-				'    }\n'
-				'  ],\n'
-				'  "unfavorableClauses": [\n'
-				'    {\n'
-				'      "clauseName": "tên điều khoản bất lợi",\n'
-				'      "description": "mô tả rủi ro",\n'
-				'      "riskTo": "bên chịu rủi ro"\n'
-				'    }\n'
-				'  ],\n'
-				'  "reminders": [],\n'
-				'  "terminationConditions": "các điều kiện chấm dứt hợp đồng",\n'
-				'  "riskAssessment": {\n'
-				'    "riskLevel": "LOW|MEDIUM|HIGH",\n'
-				'    "riskFactors": ["các yếu tố rủi ro cụ thể"],\n'
-				'    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro"]\n'
-				'  },\n'
-				'  "complianceStatus": {\n'
-				'    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
-				'    "issues": ["các vấn đề tuân thủ pháp luật"],\n'
-				'    "recommendations": ["khuyến nghị cải thiện"]\n'
-				'  }\n'
-				'}\n\n'
-				"LƯU Ý QUAN TRỌNG:\n"
-				"- Trích xuất thông tin CHÍNH XÁC từ văn bản, không bịa đặt\n"
-				"- Nếu thông tin không có trong hợp đồng, để null hoặc mảng rỗng\n"
-				"- Phân tích kỹ các điều khoản để xác định điều có lợi/bất lợi\n"
-				"- Đánh giá rủi ro dựa trên nội dung thực tế\n"
-				"- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
-				f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
-			)
+			prompt = self._get_contract_summary_prompt(content, filename)
 			response = model.generate_content(prompt)
 			# Log chi tiết kết quả từ Gemini để dễ debug
 			try:
@@ -987,6 +992,21 @@ Nguyễn Văn A                            Trần Thị B
 			if 'fileId' not in parsed:
 				parsed['fileId'] = str(uuid.uuid4())
 			
+			# Add summary field for contract management service compatibility
+			if 'summary' not in parsed:
+				# Create a summary from key clauses and object
+				summary_parts = []
+				if parsed.get('object'):
+					summary_parts.append(f"Đối tượng: {parsed['object']}")
+				if parsed.get('keyClauses') and len(parsed['keyClauses']) > 0:
+					summary_parts.append(f"Các điều khoản chính: {', '.join([clause.get('name', '') for clause in parsed['keyClauses'][:3]])}")
+				if parsed.get('term'):
+					summary_parts.append(f"Thời hạn: {parsed['term']}")
+				if parsed.get('paymentDetails', {}).get('totalValue'):
+					summary_parts.append(f"Giá trị: {parsed['paymentDetails']['totalValue']}")
+				
+				parsed['summary'] = ". ".join(summary_parts) if summary_parts else f"Tóm tắt hợp đồng {filename}"
+			
 			# Ensure arrays are properly initialized
 			for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
 				if field not in parsed or not isinstance(parsed[field], list):
@@ -995,6 +1015,25 @@ Nguyễn Văn A                            Trần Thị B
 			# Ensure nested objects are properly initialized
 			if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
 				parsed['paymentDetails'] = {"totalValue": 0, "schedule": "", "currency": "VNĐ", "paymentMethod": ""}
+			
+			# Ensure totalValue is an integer
+			if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
+				total_value = parsed['paymentDetails']['totalValue']
+				if isinstance(total_value, str):
+					# Remove commas, dots, and non-numeric characters except digits
+					cleaned_value = ''.join(filter(str.isdigit, str(total_value)))
+					if cleaned_value:
+						try:
+							parsed['paymentDetails']['totalValue'] = int(cleaned_value)
+						except ValueError:
+							parsed['paymentDetails']['totalValue'] = 0
+					else:
+						parsed['paymentDetails']['totalValue'] = 0
+				elif isinstance(total_value, float):
+					# Convert float to int
+					parsed['paymentDetails']['totalValue'] = int(total_value)
+				elif not isinstance(total_value, int):
+					parsed['paymentDetails']['totalValue'] = 0
 			
 			if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
 				parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}

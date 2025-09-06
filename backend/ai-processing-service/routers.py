@@ -766,43 +766,77 @@ async def process_file_from_url(
         except:
             classification_result = {"classification": "GENERAL", "confidence": 0.5, "reasoning": "JSON parsing error"}
         
-        # Generate summary if it's a contract
+        # Generate summary if it's a contract using shared prompt
         summary_result = None
         if classification_result.get("classification") == "CONTRACT":
-            summary_prompt = f"""
-            Tạo tóm tắt cho hợp đồng sau:
-            
-            Tên file: {filename}
-            Nội dung: {extracted_text[:3000]}...
-            
-            Hãy tạo tóm tắt bao gồm:
-            - Thông tin cơ bản về hợp đồng
-            - Các bên tham gia
-            - Nội dung chính
-            - Thời hạn và điều khoản quan trọng
-            
-            Trả về kết quả dưới dạng JSON:
-            {{
-                "title": "Tiêu đề hợp đồng",
-                "parties": ["Bên A", "Bên B"],
-                "summary": "Tóm tắt nội dung",
-                "key_terms": ["Điều khoản 1", "Điều khoản 2"],
-                "duration": "Thời hạn hợp đồng",
-                "value": "Giá trị hợp đồng"
-            }}
-            """
+            # Import worker to use shared prompt function
+            from .kafka_worker import AIKafkaWorker
+            worker = AIKafkaWorker()
+            summary_prompt = worker._get_contract_summary_prompt(extracted_text, filename)
             
             summary_response = model.generate_content(summary_prompt)
             summary_text = summary_response.text.strip()
             
             try:
-                json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
-                if json_match:
-                    summary_result = json.loads(json_match.group())
-                else:
-                    summary_result = {"title": filename, "summary": "Không thể tạo tóm tắt tự động"}
-            except:
-                summary_result = {"title": filename, "summary": "Lỗi khi tạo tóm tắt"}
+                # Clean up response text
+                cleaned = summary_text
+                if cleaned.startswith('```json'):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith('```'):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith('```'):
+                    cleaned = cleaned[:-3]
+                cleaned = cleaned.strip()
+                
+                # Try to find JSON in the response
+                json_start = cleaned.find('{')
+                json_end = cleaned.rfind('}') + 1
+                if json_start >= 0 and json_end > json_start:
+                    cleaned = cleaned[json_start:json_end]
+                
+                summary_result = json.loads(cleaned)
+                
+                # Ensure required fields exist with proper defaults
+                if 'id' not in summary_result or not summary_result['id']:
+                    summary_result['id'] = str(uuid.uuid4())
+                if 'title' not in summary_result or not summary_result['title']:
+                    summary_result['title'] = f"Hợp đồng từ tệp: {filename}"
+                if 'fileId' not in summary_result:
+                    summary_result['fileId'] = str(uuid.uuid4())
+                
+                # Add summary field for contract management service compatibility
+                if 'summary' not in summary_result:
+                    # Create a summary from key clauses and object
+                    summary_parts = []
+                    if summary_result.get('object'):
+                        summary_parts.append(f"Đối tượng: {summary_result['object']}")
+                    if summary_result.get('keyClauses') and len(summary_result['keyClauses']) > 0:
+                        summary_parts.append(f"Các điều khoản chính: {', '.join([clause.get('name', '') for clause in summary_result['keyClauses'][:3]])}")
+                    if summary_result.get('term'):
+                        summary_parts.append(f"Thời hạn: {summary_result['term']}")
+                    if summary_result.get('paymentDetails', {}).get('totalValue'):
+                        summary_parts.append(f"Giá trị: {summary_result['paymentDetails']['totalValue']}")
+                    
+                    summary_result['summary'] = ". ".join(summary_parts) if summary_parts else f"Tóm tắt hợp đồng {filename}"
+                
+                # Ensure arrays are properly initialized
+                for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
+                    if field not in summary_result or not isinstance(summary_result[field], list):
+                        summary_result[field] = []
+                
+                # Ensure nested objects are properly initialized
+                if 'paymentDetails' not in summary_result or not isinstance(summary_result['paymentDetails'], dict):
+                    summary_result['paymentDetails'] = {"totalValue": 0, "schedule": "", "currency": "VNĐ", "paymentMethod": ""}
+                
+                if 'riskAssessment' not in summary_result or not isinstance(summary_result['riskAssessment'], dict):
+                    summary_result['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
+                
+                if 'complianceStatus' not in summary_result or not isinstance(summary_result['complianceStatus'], dict):
+                    summary_result['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
+                    
+            except Exception as e:
+                logging.error(f"[AI_SUMMARY_PARSE_ERROR] Error parsing summary: {e}")
+                summary_result = {"title": filename, "summary": f"Lỗi khi tạo tóm tắt: {str(e)}"}
         
         # Prepare result
         result = {
