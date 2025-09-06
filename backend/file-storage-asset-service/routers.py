@@ -70,7 +70,17 @@ async def upload_file_with_scan(
 
         file_info = await file_service.upload_file(file, user_id_effective, folder)
 
-        # Gửi sự kiện Kafka (best-effort)
+        # Generate file URL
+        file_url = None
+        try:
+            if S3_PUBLIC_BUCKET:
+                file_url = build_public_url(file_info.s3_key)
+            else:
+                file_url = get_presigned_get_url(file_info.s3_key, expires_in_seconds=3600)
+        except Exception as url_error:
+            logger.warning(f"[URL_GENERATION_FAILED] Could not generate URL for {file_info.s3_key}: {url_error}")
+
+        # Gửi sự kiện Kafka (best-effort) với URL
         try:
             producer = await get_kafka_producer()
             event_payload = {
@@ -89,7 +99,8 @@ async def upload_file_with_scan(
                     "bucket": S3_BUCKET,
                     "key": file_info.s3_key,
                     "folder": folder,
-                    "version": file_info.version
+                    "version": file_info.version,
+                    "fileUrl": file_url
                 }
             }
             await producer.send_and_wait(KAFKA_FILE_UPLOADED_TOPIC, event_payload)
@@ -110,7 +121,10 @@ async def upload_file_with_scan(
                 file_type=file_info.file_type,
                 status=file_info.status,
                 upload_time=file_info.upload_time,
-                message="File đã được upload thành công"
+                message="File đã được upload thành công",
+                s3_key=file_info.s3_key,
+                bucket=S3_BUCKET,
+                file_url=file_url
             ),
             path=request.url.path
         )

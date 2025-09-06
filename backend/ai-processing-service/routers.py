@@ -697,4 +697,149 @@ async def test_gemini_api_key_api(request: Request):
             path=str(request.url)
         )
 
+@router.post("/process-url", summary="Xử lý file từ URL với AI")
+async def process_file_from_url(
+    request: Request,
+    file_url: str = Query(..., description="URL của file cần xử lý"),
+    filename: str = Query(..., description="Tên file"),
+    content_type: str = Query("application/pdf", description="Loại file"),
+    file_id: str = Query(None, description="ID của file (tùy chọn)")
+):
+    """
+    Xử lý file từ URL: tải về, extract text, classify và summary
+    """
+    try:
+        # Download file from URL
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=400, detail=f"Không thể tải file từ URL: HTTP {response.status}")
+                
+                file_content = await response.read()
+                logging.info(f"[AI_URL_PROCESS] Downloaded {len(file_content)} bytes from {file_url}")
+        
+        # Extract text from content
+        extracted_text = ""
+        if content_type == "application/pdf":
+            extracted_text = f"[PDF_CONTENT_PLACEHOLDER] Content from {filename} (PDF text extraction not implemented yet)"
+        elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            extracted_text = f"[DOCX_CONTENT_PLACEHOLDER] Content from {filename} (DOCX text extraction not implemented yet)"
+        elif content_type.startswith("text/"):
+            extracted_text = file_content.decode('utf-8', errors='ignore')
+        else:
+            extracted_text = file_content.decode('utf-8', errors='ignore')
+        
+        # Classify document using Gemini
+        genai.configure(api_key=get_gemini_api_key())
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        classification_prompt = f"""
+        Phân loại tài liệu sau đây:
+        
+        Tên file: {filename}
+        Loại file: {content_type}
+        Nội dung: {extracted_text[:2000]}...
+        
+        Hãy phân loại tài liệu này thành một trong hai loại:
+        - CONTRACT: Nếu đây là hợp đồng, thỏa thuận, hoặc tài liệu pháp lý
+        - GENERAL: Nếu đây là tài liệu thông thường khác
+        
+        Trả về kết quả dưới dạng JSON:
+        {{
+            "classification": "CONTRACT" hoặc "GENERAL",
+            "confidence": 0.0-1.0,
+            "reasoning": "Lý do phân loại"
+        }}
+        """
+        
+        classification_response = model.generate_content(classification_prompt)
+        classification_text = classification_response.text.strip()
+        
+        # Parse classification result
+        try:
+            import re
+            json_match = re.search(r'\{.*\}', classification_text, re.DOTALL)
+            if json_match:
+                classification_result = json.loads(json_match.group())
+            else:
+                classification_result = {"classification": "GENERAL", "confidence": 0.5, "reasoning": "Could not parse AI response"}
+        except:
+            classification_result = {"classification": "GENERAL", "confidence": 0.5, "reasoning": "JSON parsing error"}
+        
+        # Generate summary if it's a contract
+        summary_result = None
+        if classification_result.get("classification") == "CONTRACT":
+            summary_prompt = f"""
+            Tạo tóm tắt cho hợp đồng sau:
+            
+            Tên file: {filename}
+            Nội dung: {extracted_text[:3000]}...
+            
+            Hãy tạo tóm tắt bao gồm:
+            - Thông tin cơ bản về hợp đồng
+            - Các bên tham gia
+            - Nội dung chính
+            - Thời hạn và điều khoản quan trọng
+            
+            Trả về kết quả dưới dạng JSON:
+            {{
+                "title": "Tiêu đề hợp đồng",
+                "parties": ["Bên A", "Bên B"],
+                "summary": "Tóm tắt nội dung",
+                "key_terms": ["Điều khoản 1", "Điều khoản 2"],
+                "duration": "Thời hạn hợp đồng",
+                "value": "Giá trị hợp đồng"
+            }}
+            """
+            
+            summary_response = model.generate_content(summary_prompt)
+            summary_text = summary_response.text.strip()
+            
+            try:
+                json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
+                if json_match:
+                    summary_result = json.loads(json_match.group())
+                else:
+                    summary_result = {"title": filename, "summary": "Không thể tạo tóm tắt tự động"}
+            except:
+                summary_result = {"title": filename, "summary": "Lỗi khi tạo tóm tắt"}
+        
+        # Prepare result
+        result = {
+            "file_id": file_id or str(uuid.uuid4()),
+            "filename": filename,
+            "content_type": content_type,
+            "file_url": file_url,
+            "file_size": len(file_content),
+            "extracted_text": extracted_text[:500] + "..." if len(extracted_text) > 500 else extracted_text,
+            "classification": classification_result,
+            "summary": summary_result,
+            "processing_time": datetime.now(timezone.utc).isoformat()
+        }
+        
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã xử lý file '{filename}' từ URL thành công",
+            data=result,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=str(request.url)
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"[AI_URL_PROCESS_ERROR] Error processing file from URL: {e}", exc_info=True)
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi xử lý file từ URL: {str(e)}",
+            data=None,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=str(request.url)
+        )
 

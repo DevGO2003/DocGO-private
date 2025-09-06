@@ -25,6 +25,9 @@ class FileUploadResponse(BaseModel):
     status: FileStatus = Field(..., description="Trạng thái file")
     upload_time: datetime = Field(..., description="Thời gian upload")
     message: str = Field(..., description="Thông báo kết quả")
+    s3_key: Optional[str] = Field(None, description="S3 key của file")
+    bucket: Optional[str] = Field(None, description="S3 bucket chứa file")
+    file_url: Optional[str] = Field(None, description="URL để truy cập file")
 
 class FileInfo(BaseModel):
     file_id: str = Field(..., description="ID duy nhất của file")

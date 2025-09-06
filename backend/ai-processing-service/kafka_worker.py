@@ -3,6 +3,8 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
+import aiohttp
+import io
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import logging
@@ -106,7 +108,9 @@ class AIKafkaWorker:
 		filename = (data.get("filename") or "").lower()
 		content_type = (data.get("contentType") or "").lower()
 		folder = (data.get("folder") or "").lower()
+		file_url = data.get("fileUrl")
 
+		# Check if this is a contract based on filename, folder, or content type
 		is_contract = any([
 			"contract" in filename,
 			"hopdong" in filename,
@@ -117,19 +121,169 @@ class AIKafkaWorker:
 		file_type = "CONTRACT" if is_contract else "GENERAL"
 
 		try:
-			# 1. Extract text
-			await self._publish_text_extracted(event, data, file_type)
-			# 2. Classify document
-			await self._publish_classified(event, data, file_type)
-			# 3. Generate summary if contract
-			if is_contract:
-				await self._publish_summary_created(event, data, file_type)
-		except Exception as e:
-			print(f"Error in AI processing: {e}")
+			# 1. Download file from URL if available
+			file_content = None
+			if file_url:
+				file_content = await self._download_file_from_url(file_url)
+				if not file_content:
+					logging.warning(f"[AI_DOWNLOAD_FAILED] Could not download file from URL: {file_url}")
+					return
+			else:
+				logging.warning(f"[AI_MISSING_URL] No fileUrl in event data: {data}")
+				return
 
-	async def _publish_text_extracted(self, event: dict, data: dict, file_type: str) -> None:
-		# Đọc nội dung thật từ file PDF
-		extracted_text = await self._extract_text_from_file(data)
+			# 2. Extract text from downloaded content
+			extracted_text = await self._extract_text_from_content(file_content, filename, content_type)
+			if not extracted_text:
+				logging.warning(f"[AI_EXTRACT_FAILED] Could not extract text from file: {filename}")
+				return
+
+			# 3. Classify document using AI
+			classification_result = await self._classify_document_with_gemini(extracted_text, filename, content_type)
+			file_type = classification_result.get("classification", file_type)
+			confidence = classification_result.get("confidence", 0.8)
+
+			# 4. Publish events
+			await self._publish_text_extracted(event, data, file_type, extracted_text, confidence)
+			await self._publish_classified(event, data, file_type, confidence)
+			
+			# 5. Generate summary if contract
+			if file_type == "CONTRACT":
+				await self._publish_summary_created(event, data, file_type, extracted_text)
+
+		except Exception as e:
+			logging.error(f"[AI_PROCESSING_ERROR] Error in AI processing: {e}", exc_info=True)
+			await self._publish_error_event(event, data, str(e))
+
+	async def _download_file_from_url(self, file_url: str) -> Optional[bytes]:
+		"""
+		Download file content from URL
+		"""
+		try:
+			async with aiohttp.ClientSession() as session:
+				async with session.get(file_url) as response:
+					if response.status == 200:
+						content = await response.read()
+						logging.info(f"[AI_DOWNLOAD_SUCCESS] Downloaded {len(content)} bytes from {file_url}")
+						return content
+					else:
+						logging.error(f"[AI_DOWNLOAD_FAILED] HTTP {response.status} from {file_url}")
+						return None
+		except Exception as e:
+			logging.error(f"[AI_DOWNLOAD_ERROR] Error downloading from {file_url}: {e}")
+			return None
+
+	async def _extract_text_from_content(self, content: bytes, filename: str, content_type: str) -> str:
+		"""
+		Extract text from file content based on content type
+		"""
+		try:
+			if content_type == "application/pdf":
+				# TODO: Implement PDF text extraction
+				# For now, return a placeholder
+				return f"[PDF_CONTENT_PLACEHOLDER] Content from {filename} (PDF text extraction not implemented yet)"
+			elif content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+				# TODO: Implement DOCX text extraction
+				# For now, return a placeholder
+				return f"[DOCX_CONTENT_PLACEHOLDER] Content from {filename} (DOCX text extraction not implemented yet)"
+			elif content_type.startswith("text/"):
+				# Plain text files
+				return content.decode('utf-8', errors='ignore')
+			else:
+				# Try to decode as text for other types
+				return content.decode('utf-8', errors='ignore')
+		except Exception as e:
+			logging.error(f"[AI_EXTRACT_ERROR] Error extracting text from {filename}: {e}")
+			return ""
+
+	async def _classify_document_with_gemini(self, content: str, filename: str, content_type: str) -> dict:
+		"""
+		Use Gemini AI to classify document
+		"""
+		try:
+			# Configure Gemini
+			genai.configure(api_key=get_gemini_api_key())
+			model = genai.GenerativeModel('gemini-1.5-flash')
+			
+			# Create classification prompt
+			prompt = f"""
+			Phân loại tài liệu sau đây:
+			
+			Tên file: {filename}
+			Loại file: {content_type}
+			Nội dung: {content[:2000]}...
+			
+			Hãy phân loại tài liệu này thành một trong hai loại:
+			- CONTRACT: Nếu đây là hợp đồng, thỏa thuận, hoặc tài liệu pháp lý
+			- GENERAL: Nếu đây là tài liệu thông thường khác
+			
+			Trả về kết quả dưới dạng JSON:
+			{{
+				"classification": "CONTRACT" hoặc "GENERAL",
+				"confidence": 0.0-1.0,
+				"reasoning": "Lý do phân loại"
+			}}
+			"""
+			
+			response = model.generate_content(prompt)
+			result_text = response.text.strip()
+			
+			# Try to parse JSON response
+			try:
+				import re
+				json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+				if json_match:
+					result = json.loads(json_match.group())
+					return result
+			except:
+				pass
+			
+			# Fallback parsing
+			if "CONTRACT" in result_text.upper():
+				return {"classification": "CONTRACT", "confidence": 0.8, "reasoning": "Detected contract keywords"}
+			else:
+				return {"classification": "GENERAL", "confidence": 0.7, "reasoning": "General document"}
+				
+		except Exception as e:
+			logging.error(f"[AI_CLASSIFY_ERROR] Error classifying document {filename}: {e}")
+			return {"classification": "GENERAL", "confidence": 0.5, "reasoning": f"Error: {str(e)}"}
+
+	async def _publish_error_event(self, event: dict, data: dict, error_message: str) -> None:
+		"""
+		Publish error event when processing fails
+		"""
+		if not self.producer:
+			return
+			
+		error_event = {
+			"eventVersion": "v1",
+			"eventType": "ai.processing.failed",
+			"eventId": uuid.uuid4().hex,
+			"timestamp": datetime.now(timezone.utc).isoformat(),
+			"source": "ai-processing-service",
+			"correlationId": event.get("correlationId") or uuid.uuid4().hex,
+			"actor": event.get("actor", {}),
+			"data": {
+				"fileId": data.get("fileId"),
+				"filename": data.get("filename"),
+				"error": error_message,
+				"key": data.get("key"),
+				"bucket": data.get("bucket"),
+			},
+			"metadata": {"serviceVersion": "1.0.0"}
+		}
+		
+		await self.producer.send_and_wait(
+			self.text_extracted_topic, 
+			error_event, 
+			key=str(data.get("fileId") or data.get("key") or "").encode("utf-8")
+		)
+		logging.error(f"[AI_ERROR_PUBLISHED] {error_message}")
+
+	async def _publish_text_extracted(self, event: dict, data: dict, file_type: str, extracted_text: str = None, confidence: float = 0.95) -> None:
+		# Use provided extracted text or fallback to old method
+		if not extracted_text:
+			extracted_text = await self._extract_text_from_file(data)
 		
 		text_extracted_event = {
 			"eventVersion": "v1",
@@ -145,7 +299,7 @@ class AIKafkaWorker:
 				"fileType": file_type,
 				"extractedText": extracted_text,
 				"extractionMethod": "AI/OCR",
-				"confidence": 0.95,
+				"confidence": confidence,
 				"key": data.get("key"),
 				"bucket": data.get("bucket"),
 			},
@@ -154,7 +308,7 @@ class AIKafkaWorker:
 		await self.producer.send_and_wait(self.text_extracted_topic, text_extracted_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
 		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.text_extracted_topic} payload={json.dumps(text_extracted_event, ensure_ascii=False)}")
 
-	async def _publish_classified(self, event: dict, data: dict, file_type: str) -> None:
+	async def _publish_classified(self, event: dict, data: dict, file_type: str, confidence: float = 0.92) -> None:
 		classified_event = {
 			"eventVersion": "v1",
 			"eventType": "ai.document.classified",
@@ -167,7 +321,7 @@ class AIKafkaWorker:
 				"fileId": data.get("fileId"),
 				"filename": data.get("filename"),
 				"classification": file_type,
-				"confidence": 0.92,
+				"confidence": confidence,
 				"categories": ["document", file_type.lower()],
 				"key": data.get("key"),
 				"bucket": data.get("bucket"),
@@ -177,11 +331,12 @@ class AIKafkaWorker:
 		await self.producer.send_and_wait(self.document_classified_topic, classified_event, key=str(data.get("fileId") or data.get("key") or "").encode("utf-8"))
 		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.document_classified_topic} payload={json.dumps(classified_event, ensure_ascii=False)}")
 
-	async def _publish_summary_created(self, event: dict, data: dict, file_type: str) -> None:
+	async def _publish_summary_created(self, event: dict, data: dict, file_type: str, extracted_text: str = None) -> None:
 		try:
-			content = await self._extract_text_from_file(data)
+			# Use provided extracted text or fallback to old method
+			content = extracted_text or await self._extract_text_from_file(data)
 			if not content:
-				print(f"⚠️ Could not extract content from file: {data.get('filename')}")
+				logging.warning(f"[AI_SUMMARY_FAILED] Could not extract content from file: {data.get('filename')}")
 				return
 			contract_summary = await self._generate_contract_summary(content, data.get('filename'))
 			if not contract_summary:

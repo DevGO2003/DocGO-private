@@ -11,3 +11,4 @@ python-pptx
 openpyxl
 striprtf
 httpx
+aiohttp
