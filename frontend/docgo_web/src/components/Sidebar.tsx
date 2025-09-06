@@ -17,7 +17,11 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   CheckCircleIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  WrenchScrewdriverIcon,
+  ClipboardDocumentListIcon,
+  ArrowPathIcon,
+  CodeBracketIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -25,6 +29,7 @@ const navigation = [
   { name: 'Tải lên', href: '/dashboard/tai-len', icon: CloudArrowUpIcon },
   { name: 'Hợp đồng', href: '/dashboard/hop-dong', icon: DocumentTextIcon },
   { name: 'Tạo hợp đồng', href: '/dashboard/tao-hop-dong', icon: DocumentDuplicateIcon },
+  { name: 'Tạo nhanh', href: '/dashboard/tao-nhanh', icon: PencilSquareIcon },
   { name: 'Chữ ký điện tử', href: '/dashboard/chu-ky-dien-tu', icon: PencilSquareIcon },
   { name: 'Bình luận & Cộng tác', href: '/dashboard/binh-luan-cong-tac', icon: ChatBubbleLeftRightIcon },
   { name: 'Phiên bản hợp đồng', href: '/dashboard/phien-ban-hop-dong', icon: ClockIcon },
@@ -34,6 +39,10 @@ const navigation = [
   { name: 'Thống kê', href: '/dashboard/thong-ke', icon: ChartBarIcon },
   { name: 'Quản lý người dùng', href: '/dashboard/quan-ly-nguoi-dung', icon: UserGroupIcon },
   { name: 'Phê duyệt tài khoản', href: '/dashboard/phe-duyet-tai-khoan', icon: CogIcon },
+  { name: 'Lịch sử hoạt động', href: '/dashboard/lich-su-hoat-dong', icon: ClipboardDocumentListIcon },
+  { name: 'Backup & Restore', href: '/dashboard/backup-restore', icon: ArrowPathIcon },
+  { name: 'API Documentation', href: '/dashboard/api-docs', icon: CodeBracketIcon },
+  { name: 'Cài đặt', href: '/dashboard/cai-dat', icon: WrenchScrewdriverIcon },
   { name: 'Hướng dẫn', href: '/dashboard/huong-dan', icon: DocumentTextIcon },
 ]
 
