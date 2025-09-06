@@ -36,6 +36,93 @@ public class AuthController {
     }
 
     @Operation(
+        summary = "Lấy danh sách tài khoản",
+        description = """
+        🔹 Đầu vào
+
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (bắt đầu từ 0).
+
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số lượng bản ghi mỗi trang (mặc định 10).
+
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt).
+
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp (ASC/DESC, mặc định: DESC).
+
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm theo username, email, fullName.
+
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Có bao gồm tài khoản đã xóa không (mặc định: false).
+
+        🔹 Đầu ra
+
+        📝 data
+        Loại: PaginatedResponse<User>
+        Mô tả: Danh sách tài khoản với thông tin phân trang.
+
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK).
+
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """
+    )
+    @GetMapping
+    public ResponseEntity<RestResponse<Object>> getAllUsers(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        // TODO: Implement get all users logic
+        RestResponse<Object> response = RestResponse.<Object>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Danh sách tài khoản đã được lấy thành công.")
+                .data(null) // Placeholder
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
         summary = "Tạo tài khoản mới", 
         description = """
         🔹 Đầu vào

@@ -1,13 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.openapi.utils import get_openapi
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import uvicorn
 import os
 from dotenv import load_dotenv
 
 from config.database import init_db
-from routers import users, approvals
+from routers import users, approvals, roles
+from middleware.exception_handler import (
+    http_exception_handler,
+    validation_exception_handler,
+    general_exception_handler
+)
 
 # Load environment variables
 load_dotenv()
@@ -52,6 +59,7 @@ app.add_middleware(
 # Include routers
 app.include_router(users.router, prefix="/api/v1/user-management-service")
 app.include_router(approvals.router, prefix="/api/v1/user-management-service")
+app.include_router(roles.router, prefix="/api/v1/user-management-service")
 
 @app.on_event("startup")
 async def startup_event():
@@ -79,29 +87,11 @@ async def health_check():
         "database": "connected"  # You can add actual DB health check here
     }
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    """Custom HTTP exception handler"""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": exc.detail,
-            "status_code": exc.status_code,
-            "path": str(request.url)
-        }
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
-    """General exception handler"""
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal server error",
-            "detail": str(exc),
-            "path": str(request.url)
-        }
-    )
+# Add exception handlers theo chuẩn DocGO
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 if __name__ == "__main__":
     host = os.getenv("HOST", "0.0.0.0")

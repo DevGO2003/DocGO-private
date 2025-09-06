@@ -54,6 +54,50 @@ public class User extends BaseEntity {
     @Column(name = "account_locked_until")
     private LocalDateTime accountLockedUntil;
 
+    /**
+     * Tên đầy đủ của người dùng
+     */
+    @Column(name = "full_name")
+    private String fullName;
+
+    /**
+     * Phòng ban
+     */
+    @Column(name = "department")
+    private String department;
+
+    /**
+     * Chức vụ
+     */
+    @Column(name = "position")
+    private String position;
+
+    /**
+     * URL avatar
+     */
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    /**
+     * Cấp độ phê duyệt (1: employee, 2: manager, 3: director, 4: admin)
+     */
+    @Column(name = "approval_level")
+    @Builder.Default
+    private Integer approvalLevel = 1;
+
+    /**
+     * Giá trị hợp đồng tối đa có thể phê duyệt (VNĐ)
+     */
+    @Column(name = "max_contract_value")
+    @Builder.Default
+    private Long maxContractValue = 0L;
+
+    /**
+     * Metadata bổ sung (JSON)
+     */
+    @Column(name = "metadata_json", columnDefinition = "TEXT")
+    private String metadataJson;
+
     // Additional methods for user management
     public void incrementFailedLoginAttempts() {
         this.failedLoginAttempts++;
@@ -80,5 +124,44 @@ public class User extends BaseEntity {
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
         this.failedLoginAttempts = 0;
+    }
+
+    /**
+     * Kiểm tra xem user có quyền phê duyệt hợp đồng với giá trị này không
+     */
+    public boolean canApproveContract(Long contractValue) {
+        return this.maxContractValue >= contractValue;
+    }
+
+    /**
+     * Lấy approval level theo role
+     */
+    public Integer getApprovalLevelByRole() {
+        return switch (this.role) {
+            case ADMIN -> 4;
+            case DIRECTOR -> 3;
+            case MANAGER, LEGAL, FINANCE -> 2;
+            case EMPLOYEE -> 1;
+        };
+    }
+
+    /**
+     * Lấy max contract value theo role
+     */
+    public Long getMaxContractValueByRole() {
+        return switch (this.role) {
+            case ADMIN -> Long.MAX_VALUE; // Không giới hạn
+            case DIRECTOR -> 1_000_000_000L; // 1 tỷ VNĐ
+            case MANAGER, LEGAL, FINANCE -> 1_000_000_000L; // 1 tỷ VNĐ
+            case EMPLOYEE -> 0L; // Không có quyền phê duyệt
+        };
+    }
+
+    /**
+     * Cập nhật thông tin từ role
+     */
+    public void updateFromRole() {
+        this.approvalLevel = getApprovalLevelByRole();
+        this.maxContractValue = getMaxContractValueByRole();
     }
 } 
