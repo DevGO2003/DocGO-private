@@ -149,6 +149,26 @@ class AIProcessingService:
                 if key in obj and (obj[key] is None or obj[key] == ""):
                     obj[key] = "Chưa xác định"
             
+            # Normalize Unicode characters to avoid encoding issues
+            def normalize_unicode_text(text):
+                if isinstance(text, str):
+                    # Replace ellipsis and other problematic Unicode characters
+                    text = text.replace('…', '...')
+                    text = text.replace('–', '-')
+                    text = text.replace('"', '"')
+                    text = text.replace('"', '"')
+                    text = text.replace(''', "'")
+                    text = text.replace(''', "'")
+                return text
+            
+            def normalize_object(obj):
+                if isinstance(obj, dict):
+                    return {k: normalize_object(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [normalize_object(item) for item in obj]
+                else:
+                    return normalize_unicode_text(obj)
+            
             # Replace null values in main fields
             replace_null_with_unknown(parsed, 'contractNumber')
             replace_null_with_unknown(parsed, 'contractType')
@@ -210,6 +230,9 @@ class AIProcessingService:
             
             if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
                 parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
+            
+            # Normalize Unicode characters in the entire parsed object
+            parsed = normalize_object(parsed)
             
             logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
             return parsed
