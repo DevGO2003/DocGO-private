@@ -36,6 +36,11 @@ export default function HopDongPage() {
   const [page, setPage] = useState<number>(0)
   const [pageSize, setPageSize] = useState<number>(9)
   const [totalPages, setTotalPages] = useState<number>(1)
+  const [sortBy, setSortBy] = useState<string>('createdAt')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedItems, setSelectedItems] = useState<number[]>([])
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams()
@@ -45,8 +50,10 @@ export default function HopDongPage() {
     if (status !== 'ALL') params.set('status', status)
     if (type !== 'ALL') params.set('type', type)
     if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
+    params.set('sortBy', sortBy)
+    params.set('sortDirection', sortDirection)
     return params.toString()
-  }, [page, pageSize, search, status, type, selectedTags])
+  }, [page, pageSize, search, status, type, selectedTags, sortBy, sortDirection])
 
   const fetchData = async () => {
     setLoading(true)
@@ -68,6 +75,22 @@ export default function HopDongPage() {
   const toggleTag = (t: string) => {
     setPage(0)
     setSelectedTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
+  }
+
+  const toggleSelectItem = (id: number) => {
+    setSelectedItems(prev => 
+      prev.includes(id) 
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    )
+  }
+
+  const selectAll = () => {
+    setSelectedItems(items.map(item => item.id))
+  }
+
+  const clearSelection = () => {
+    setSelectedItems([])
   }
 
   return (
@@ -139,6 +162,45 @@ export default function HopDongPage() {
             </div>
           </div>
 
+          {/* Advanced Options */}
+          <div className="mt-4 flex items-center justify-between">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              <span>{showAdvanced ? 'Ẩn' : 'Hiện'} tùy chọn nâng cao</span>
+              <span className={`transform transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>▼</span>
+            </button>
+            
+            {showAdvanced && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Sắp xếp theo:</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="rounded-lg border-gray-300 py-1 px-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="createdAt">Ngày tạo</option>
+                    <option value="title">Tên hợp đồng</option>
+                    <option value="status">Trạng thái</option>
+                    <option value="totalValue">Giá trị</option>
+                    <option value="effectiveDate">Ngày hiệu lực</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Thứ tự:</label>
+                  <button
+                    onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                  >
+                    {sortDirection === 'asc' ? '↑ Tăng dần' : '↓ Giảm dần'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
             {TAGS.map(t => {
@@ -157,6 +219,51 @@ export default function HopDongPage() {
           </div>
         </div>
 
+        {/* Content Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <span className="text-sm text-gray-600">
+              {items.length} hợp đồng
+              {selectedItems.length > 0 && ` · ${selectedItems.length} đã chọn`}
+            </span>
+          </div>
+          
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={clearSelection}
+                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+              >
+                Bỏ chọn
+              </button>
+              <button className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                🗑️ Xóa ({selectedItems.length})
+              </button>
+              <button className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                📤 Gửi duyệt ({selectedItems.length})
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Content */}
         <div>
           {loading ? (
@@ -168,30 +275,108 @@ export default function HopDongPage() {
             <div className="text-center py-16">
               <p className="text-gray-600">Không tìm thấy hợp đồng phù hợp.</p>
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {items.map(c => (
-                  <Link key={c.id} href={`/dashboard/hop-dong/${c.id}`} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition block">
-                    <div className="flex justify-between items-start gap-4">
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {items.map(c => (
+                <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
+                  <div className="absolute top-4 left-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(c.id)}
+                      onChange={() => toggleSelectItem(c.id)}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                  </div>
+                  <Link href={`/dashboard/hop-dong/${c.id}`} className="block">
+                    <div className="flex justify-between items-start gap-4 ml-6">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-3">{c.description || 'Không có mô tả'}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 ml-6">
                       <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{c.contractType}</span>
                       {c.tags?.slice(0,3).map(t => (
                         <span key={t} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{t}</span>
                       ))}
                     </div>
-                    <div className="mt-4 text-sm text-gray-500 space-y-1">
+                    <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
                       <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
                       <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
                       <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
                     </div>
                   </Link>
-                ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === items.length && items.length > 0}
+                          onChange={selectedItems.length === items.length ? clearSelection : selectAll}
+                          className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hợp đồng</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá trị</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hiệu lực</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {items.map(c => (
+                      <tr key={c.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.includes(c.id)}
+                            onChange={() => toggleSelectItem(c.id)}
+                            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <Link href={`/dashboard/hop-dong/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                              {c.title}
+                            </Link>
+                            <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {c.tags?.slice(0,2).map(t => (
+                                <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">#{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{c.contractType}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{c.totalValue.toLocaleString('vi-VN')} {c.currency}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <Link href={`/dashboard/hop-dong/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+                              Xem
+                            </Link>
+                            <button className="text-gray-400 hover:text-gray-600 text-sm">
+                              ⋮
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            </div>
+          )}
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -213,8 +398,6 @@ export default function HopDongPage() {
                   </button>
                 </div>
               )}
-            </>
-          )}
         </div>
       </div>
     </DashboardLayout>
@@ -241,4 +424,6 @@ function badgeClass(status: string) {
       return 'bg-gray-50 text-gray-700 border-gray-200'
   }
 }
+
+
 

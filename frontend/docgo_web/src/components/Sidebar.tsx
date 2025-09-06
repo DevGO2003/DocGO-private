@@ -12,7 +12,11 @@ import {
   DocumentDuplicateIcon,
   CloudArrowUpIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  PencilSquareIcon,
+  ChatBubbleLeftRightIcon,
+  ClockIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -20,6 +24,10 @@ const navigation = [
   { name: 'Tải lên', href: '/dashboard/tai-len', icon: CloudArrowUpIcon },
   { name: 'Hợp đồng', href: '/dashboard/hop-dong', icon: DocumentTextIcon },
   { name: 'Tạo hợp đồng', href: '/dashboard/tao-hop-dong', icon: DocumentDuplicateIcon },
+  { name: 'Chữ ký điện tử', href: '/dashboard/chu-ky-dien-tu', icon: PencilSquareIcon },
+  { name: 'Bình luận & Cộng tác', href: '/dashboard/binh-luan-cong-tac', icon: ChatBubbleLeftRightIcon },
+  { name: 'Phiên bản hợp đồng', href: '/dashboard/phien-ban-hop-dong', icon: ClockIcon },
+  { name: 'Luồng phê duyệt', href: '/dashboard/luong-phe-duyet', icon: CheckCircleIcon },
   { name: 'Đã duyệt', href: '/dashboard/da-duyet', icon: DocumentTextIcon },
   { name: 'Thống kê', href: '/dashboard/thong-ke', icon: ChartBarIcon },
   { name: 'Quản lý người dùng', href: '/dashboard/quan-ly-nguoi-dung', icon: UserGroupIcon },

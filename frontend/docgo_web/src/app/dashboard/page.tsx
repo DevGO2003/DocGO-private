@@ -52,20 +52,17 @@ function useDashboardData() {
 export default function DashboardPage() {
   const router = useRouter()
   const { statusStats, uploadsByMonth, monthLabels, pieData, pieColors, rejectReasons, loading } = useDashboardData()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 50); return () => clearTimeout(t) }, [])
 
   return (
     <DashboardLayout>
-      <div className={`space-y-8 transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="space-y-8">
         {/* 4 Ô thống kê trên cùng */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statusStats.map((s, idx) => (
             <Card
               key={s.title}
-              className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer bg-gradient-to-br from-white to-gray-50 ${loading ? 'animate-pulse' : ''}`}
+              className="hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer bg-gradient-to-br from-white to-gray-50"
               onClick={() => router.push(s.href)}
-              style={{ transitionDelay: `${idx * 60}ms` }}
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-gray-700">{s.title}</CardTitle>
@@ -102,8 +99,8 @@ export default function DashboardPage() {
                     {uploadsByMonth.map((val, idx) => (
                       <div key={idx} className="flex flex-col items-center justify-end">
                         <div
-                          className={`w-8 rounded bg-gradient-to-t from-primary-600 to-primary-400 shadow-sm hover:shadow-md transition-all duration-300 ${loading ? 'opacity-70' : ''}`}
-                          style={{ height: `${(val / 28) * 100}%`, transitionDelay: `${idx * 80}ms`, transform: mounted ? 'translateY(0)' : 'translateY(12px)' }}
+                          className="w-8 rounded bg-gradient-to-t from-primary-600 to-primary-400 shadow-sm hover:shadow-md transition-all duration-300"
+                          style={{ height: `${(val / 28) * 100}%` }}
                           title={`${monthLabels[idx]}: ${val}`}
                         />
                         <span className="text-xs text-gray-600 mt-2">{monthLabels[idx]}</span>
@@ -165,8 +162,8 @@ export default function DashboardPage() {
                   {rejectReasons.map((r, idx) => (
                     <div key={r.label} className="flex flex-col items-center justify-end">
                       <div
-                        className={`w-10 rounded bg-gradient-to-t from-red-600 to-red-400 shadow-sm hover:shadow-md transition-all duration-300 ${loading ? 'opacity-70' : ''}`}
-                        style={{ height: `${(r.count / 8) * 100}%`, transitionDelay: `${idx * 80}ms`, transform: mounted ? 'translateY(0)' : 'translateY(12px)' }}
+                        className="w-10 rounded bg-gradient-to-t from-red-600 to-red-400 shadow-sm hover:shadow-md transition-all duration-300"
+                        style={{ height: `${(r.count / 8) * 100}%` }}
                         title={`${r.label}: ${r.count}`}
                       />
                       <span className="text-xs text-center text-gray-600 mt-2 break-words">{r.label}</span>

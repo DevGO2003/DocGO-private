@@ -109,7 +109,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   }
 
   if (!token || !user) {
-    return null
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Cần đăng nhập</h2>
+          <p className="text-gray-600">Vui lòng đăng nhập để truy cập trang này.</p>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -45,9 +45,17 @@ function writeStorage(data: { token: string | null; user: AuthUser | null }) {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(() => readStorage().user)
-  const [token, setToken] = useState<string | null>(() => readStorage().token)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const stored = readStorage()
+    setUser(stored.user)
+    setToken(stored.token)
+    setLoading(false)
+  }, [])
 
   useEffect(() => {
     writeStorage({ token, user })

@@ -36,6 +36,7 @@ export default function TaoHopDongPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [responseData, setResponseData] = useState<any>(null)
   const [jsonErrors, setJsonErrors] = useState<{[key: string]: string}>({})
+  const [success, setSuccess] = useState(false)
 
   // JSON validation helper
   const validateJson = (value: string, fieldName: string) => {
@@ -97,6 +98,19 @@ export default function TaoHopDongPage() {
         title: title.trim(),
         creatorId: Number(creatorId),
         status: 'DRAFT', // Default status
+        contractType: contractType || 'Hợp đồng lao động',
+        tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        object: object || '',
+        effectiveDate: effectiveDate || new Date().toISOString().split('T')[0],
+        term: term || '12 tháng',
+        terminationConditions: terminationConditions || '',
+        content: content || '',
+        paymentDetails: {
+          totalValue: Number(paymentTotalValue) || 0,
+          currency: paymentCurrency || 'VND',
+          schedule: paymentSchedule || 'Thanh toán 1 lần',
+          paymentMethod: paymentMethod || 'Chuyển khoản'
+        }
       }
 
       // Optional basic fields
@@ -145,6 +159,34 @@ export default function TaoHopDongPage() {
       const data = json?.data ?? json
       setResponseData(data)
       setMessage('Tạo hợp đồng thành công!')
+      setSuccess(true)
+      
+      // Reset form after successful submission
+      setTimeout(() => {
+        setTitle('')
+        setCreatorId('')
+        setContractType('')
+        setTags('')
+        setObject('')
+        setEffectiveDate('')
+        setTerm('')
+        setTerminationConditions('')
+        setContent('')
+        setPaymentTotalValue('')
+        setPaymentCurrency('VND')
+        setPaymentSchedule('')
+        setPaymentMethod('Chuyển khoản')
+        setParties('')
+        setKeyClauses('')
+        setFavorableClauses('')
+        setUnfavorableClauses('')
+        setReminders('')
+        setRiskAssessment('')
+        setComplianceStatus('')
+        setSuccess(false)
+        setMessage(null)
+        setResponseData(null)
+      }, 3000)
     } catch (err: any) {
       setMessage(`Có lỗi xảy ra: ${err?.message || String(err)}`)
     } finally {
@@ -758,6 +800,48 @@ export default function TaoHopDongPage() {
               </div>
             </div>
           </form>
+
+          {/* Success/Error Messages */}
+          {message && (
+            <div className={`rounded-2xl border p-6 shadow-lg ${
+              success 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}>
+              <div className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                  success ? 'bg-emerald-100' : 'bg-red-100'
+                }`}>
+                  {success ? (
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <h3 className={`font-semibold ${success ? 'text-emerald-900' : 'text-red-900'}`}>
+                    {success ? 'Thành công!' : 'Có lỗi xảy ra'}
+                  </h3>
+                  <p className="text-sm mt-1">{message}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {responseData && (
+            <div className="rounded-2xl border bg-blue-50 border-blue-200 p-6 shadow-lg">
+              <h3 className="font-semibold text-blue-900 mb-3">Thông tin hợp đồng đã tạo:</h3>
+              <div className="bg-white rounded-lg p-4 border border-blue-200">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+                  {JSON.stringify(responseData, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
 
           </div>
         </div>
