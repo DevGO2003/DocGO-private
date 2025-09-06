@@ -985,19 +985,92 @@ public class ContractServiceImpl implements IContractService {
             contract.setSystemId(fileId);
             contract.setTitle((String) summaryData.get("title"));
             contract.setContractNumber((String) summaryData.get("contractNumber"));
-            contract.setSummary((String) summaryData.get("summaryText"));
+            contract.setSummary((String) summaryData.get("summary"));
             contract.setContractType((String) summaryData.get("contractType"));
             contract.setContractObject((String) summaryData.get("object"));
             contract.setEffectiveDate((String) summaryData.get("effectiveDate"));
             contract.setContractTerm((String) summaryData.get("term"));
             contract.setTerminationConditions((String) summaryData.get("terminationConditions"));
             
-            // Handle keyPoints safely
-            Object keyPointsObj = summaryData.get("keyPoints");
-            if (keyPointsObj instanceof List) {
+            // Map tags
+            Object tagsObj = summaryData.get("tags");
+            if (tagsObj instanceof List) {
                 @SuppressWarnings("unchecked")
-                List<String> keyPoints = (List<String>) keyPointsObj;
-                contract.setKeyTerms(String.join(", ", keyPoints));
+                List<String> tags = (List<String>) tagsObj;
+                contract.setTags(String.join(", ", tags));
+            }
+            
+            // Map parties information
+            Object partiesObj = summaryData.get("parties");
+            if (partiesObj instanceof List) {
+                try {
+                    String partiesJson = objectMapper.writeValueAsString(partiesObj);
+                    contract.setPartiesJson(partiesJson);
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize parties data: {}", e.getMessage());
+                }
+            }
+            
+            // Handle keyClauses
+            Object keyClausesObj = summaryData.get("keyClauses");
+            if (keyClausesObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> keyClauses = (List<Object>) keyClausesObj;
+                StringBuilder keyTermsBuilder = new StringBuilder();
+                for (Object clause : keyClauses) {
+                    if (clause instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
+                        String name = (String) clauseMap.get("name");
+                        String description = (String) clauseMap.get("description");
+                        if (name != null && description != null) {
+                            keyTermsBuilder.append(name).append(": ").append(description).append("; ");
+                        }
+                    }
+                }
+                contract.setKeyTerms(keyTermsBuilder.toString());
+            }
+            
+            // Handle favorableClauses
+            Object favorableClausesObj = summaryData.get("favorableClauses");
+            if (favorableClausesObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> favorableClauses = (List<Object>) favorableClausesObj;
+                StringBuilder favorableBuilder = new StringBuilder();
+                for (Object clause : favorableClauses) {
+                    if (clause instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
+                        String clauseName = (String) clauseMap.get("clauseName");
+                        String description = (String) clauseMap.get("description");
+                        String benefitTo = (String) clauseMap.get("benefitTo");
+                        if (clauseName != null && description != null) {
+                            favorableBuilder.append(clauseName).append(" (").append(benefitTo != null ? benefitTo : "N/A").append("): ").append(description).append("; ");
+                        }
+                    }
+                }
+                contract.setFavorableClauses(favorableBuilder.toString());
+            }
+            
+            // Handle unfavorableClauses
+            Object unfavorableClausesObj = summaryData.get("unfavorableClauses");
+            if (unfavorableClausesObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> unfavorableClauses = (List<Object>) unfavorableClausesObj;
+                StringBuilder unfavorableBuilder = new StringBuilder();
+                for (Object clause : unfavorableClauses) {
+                    if (clause instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
+                        String clauseName = (String) clauseMap.get("clauseName");
+                        String description = (String) clauseMap.get("description");
+                        String riskTo = (String) clauseMap.get("riskTo");
+                        if (clauseName != null && description != null) {
+                            unfavorableBuilder.append(clauseName).append(" (").append(riskTo != null ? riskTo : "N/A").append("): ").append(description).append("; ");
+                        }
+                    }
+                }
+                contract.setUnfavorableClauses(unfavorableBuilder.toString());
             }
             
             // Handle riskAssessment
@@ -1006,12 +1079,29 @@ public class ContractServiceImpl implements IContractService {
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> riskMap = (java.util.Map<String, Object>) riskObj;
                 contract.setRiskLevel((String) riskMap.get("riskLevel"));
+                
+                StringBuilder riskAssessmentBuilder = new StringBuilder();
+                
+                // Add risk factors
                 Object riskFactorsObj = riskMap.get("riskFactors");
                 if (riskFactorsObj instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<String> riskFactors = (List<String>) riskFactorsObj;
-                    contract.setRiskAssessment(String.join(", ", riskFactors));
+                    riskAssessmentBuilder.append("Risk Factors: ").append(String.join(", ", riskFactors));
                 }
+                
+                // Add mitigation measures
+                Object mitigationObj = riskMap.get("mitigationMeasures");
+                if (mitigationObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> mitigationMeasures = (List<String>) mitigationObj;
+                    if (riskAssessmentBuilder.length() > 0) {
+                        riskAssessmentBuilder.append(" | ");
+                    }
+                    riskAssessmentBuilder.append("Mitigation: ").append(String.join(", ", mitigationMeasures));
+                }
+                
+                contract.setRiskAssessment(riskAssessmentBuilder.toString());
             }
             
             // Handle complianceStatus
@@ -1019,7 +1109,13 @@ public class ContractServiceImpl implements IContractService {
             if (complianceObj instanceof java.util.Map) {
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> complianceMap = (java.util.Map<String, Object>) complianceObj;
-                contract.setComplianceStatus((String) complianceMap.get("status"));
+                String status = (String) complianceMap.get("status");
+                contract.setComplianceStatus(status);
+                
+                // Set legal review required based on compliance status
+                if ("REVIEW_REQUIRED".equals(status) || "NON_COMPLIANT".equals(status)) {
+                    contract.setLegalReviewRequired(true);
+                }
             }
             
             // Handle paymentDetails
@@ -1034,6 +1130,27 @@ public class ContractServiceImpl implements IContractService {
                 contract.setPaymentSchedule((String) paymentMap.get("schedule"));
                 contract.setCurrency((String) paymentMap.get("currency"));
                 contract.setPaymentMethod((String) paymentMap.get("paymentMethod"));
+            }
+            
+            // Handle reminders
+            Object remindersObj = summaryData.get("reminders");
+            if (remindersObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> reminders = (List<Object>) remindersObj;
+                StringBuilder remindersBuilder = new StringBuilder();
+                for (Object reminder : reminders) {
+                    if (reminder instanceof java.util.Map) {
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> reminderMap = (java.util.Map<String, Object>) reminder;
+                        String type = (String) reminderMap.get("type");
+                        String date = (String) reminderMap.get("date");
+                        String content = (String) reminderMap.get("content");
+                        if (content != null) {
+                            remindersBuilder.append(type != null ? type + ": " : "").append(content).append("; ");
+                        }
+                    }
+                }
+                contract.setReminders(remindersBuilder.toString());
             }
 
             contract.setAiProcessed(true);
