@@ -188,17 +188,33 @@ class AIKafkaWorker:
 		file_id = data.get("fileId")
 		filename = data.get("filename")
 		content_type = data.get("contentType")
-		file_content_hex = data.get("fileContent")
+		file_url = data.get("fileUrl")
 		
-		if not all([file_id, filename, content_type, file_content_hex]):
+		if not all([file_id, filename, content_type]):
 			logging.warning(f"[AI_EXTRACT_MISSING_DATA] Missing required data in extraction request: {data}")
 			return
 		
 		logging.info(f"[AI_EXTRACT_START] fileId={file_id} filename={filename} contentType={content_type}")
 		
 		try:
-			# Convert hex back to bytes
-			file_content = bytes.fromhex(file_content_hex)
+			# Try to get file content from cache first
+			file_content = None
+			if hasattr(self, '_file_cache') and file_id in self._file_cache:
+				file_content = self._file_cache[file_id]
+				logging.info(f"[AI_FILE_CACHE_HIT] Retrieved file content from cache for {file_id}")
+			elif file_url:
+				# Fallback: download from URL
+				file_content = await self._download_file_from_url(file_url)
+				logging.info(f"[AI_FILE_DOWNLOAD_FALLBACK] Downloaded file content from URL for {file_id}")
+			else:
+				logging.error(f"[AI_EXTRACT_NO_CONTENT] No file content available for {file_id}")
+				await self._publish_error_event(event, data, "No file content available")
+				return
+			
+			if not file_content:
+				logging.error(f"[AI_EXTRACT_NO_CONTENT] Could not get file content for {file_id}")
+				await self._publish_error_event(event, data, "Could not get file content")
+				return
 			
 			# Extract text using Gemini AI
 			extracted_text = await self._extract_text_with_gemini(file_content, filename, content_type)
@@ -209,6 +225,11 @@ class AIKafkaWorker:
 				
 				# Trigger summary creation
 				await self._publish_summary_creation_request(event, data, extracted_text)
+				
+				# Clean up cache
+				if hasattr(self, '_file_cache') and file_id in self._file_cache:
+					del self._file_cache[file_id]
+					logging.info(f"[AI_FILE_CACHE_CLEANUP] Removed file content from cache for {file_id}")
 			else:
 				logging.warning(f"[AI_EXTRACT_FAILED] Could not extract text from: {filename}")
 				await self._publish_error_event(event, data, "Text extraction failed")
@@ -544,6 +565,15 @@ class AIKafkaWorker:
 			return
 			
 		try:
+			# Store file content in memory cache instead of sending via Kafka
+			file_id = data.get("fileId")
+			if file_id:
+				# Store in a simple in-memory cache (in production, use Redis)
+				if not hasattr(self, '_file_cache'):
+					self._file_cache = {}
+				self._file_cache[file_id] = file_content
+				logging.info(f"[AI_FILE_CACHED] Cached file content for {file_id}, size: {len(file_content)} bytes")
+			
 			extract_event = {
 				"eventVersion": "v1",
 				"eventType": "ai.text.extraction.requested",
@@ -559,7 +589,7 @@ class AIKafkaWorker:
 					"fileSize": len(file_content),
 					"key": data.get("key"),
 					"bucket": data.get("bucket"),
-					"fileContent": file_content.hex()  # Store as hex string for JSON serialization
+					"fileUrl": data.get("fileUrl")  # Use URL instead of content
 				},
 				"metadata": {"serviceVersion": "1.0.0"}
 			}
