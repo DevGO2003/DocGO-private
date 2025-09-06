@@ -16,7 +16,8 @@ import {
   PencilSquareIcon,
   ChatBubbleLeftRightIcon,
   ClockIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Bình luận & Cộng tác', href: '/dashboard/binh-luan-cong-tac', icon: ChatBubbleLeftRightIcon },
   { name: 'Phiên bản hợp đồng', href: '/dashboard/phien-ban-hop-dong', icon: ClockIcon },
   { name: 'Luồng phê duyệt', href: '/dashboard/luong-phe-duyet', icon: CheckCircleIcon },
+  { name: 'Quyền sửa theo vai trò', href: '/dashboard/quyen-sua-theo-vai-tro', icon: ShieldCheckIcon },
   { name: 'Đã duyệt', href: '/dashboard/da-duyet', icon: DocumentTextIcon },
   { name: 'Thống kê', href: '/dashboard/thong-ke', icon: ChartBarIcon },
   { name: 'Quản lý người dùng', href: '/dashboard/quan-ly-nguoi-dung', icon: UserGroupIcon },
