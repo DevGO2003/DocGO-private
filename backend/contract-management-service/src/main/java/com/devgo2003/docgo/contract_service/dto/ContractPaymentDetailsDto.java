@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractPaymentDetailsDto {
-    private Double totalValue;
+    private String totalValue;
     private String schedule;
     private String currency;
     private String paymentMethod;

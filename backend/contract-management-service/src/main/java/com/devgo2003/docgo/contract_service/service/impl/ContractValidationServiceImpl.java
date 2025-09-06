@@ -133,14 +133,11 @@ public class ContractValidationServiceImpl implements IContractValidationService
      */
     private void validateContractValue(String totalValue, String currency) {
         if (StringUtils.hasText(totalValue)) {
-            try {
-                double value = Double.parseDouble(totalValue);
-                if (value <= 0) {
-                    throw new InvalidInputException("Contract value must be greater than 0");
-                }
-            } catch (NumberFormatException e) {
-                throw new InvalidInputException("Invalid contract value format");
+            // Just validate that it's not empty and has reasonable length
+            if (totalValue.trim().length() > 500) {
+                throw new InvalidInputException("Contract value description is too long");
             }
+            // Allow any format as it can be descriptive like "100.000VND (Chưa bao gồm phí)"
         }
         
         if (StringUtils.hasText(currency) && !CURRENCY_PATTERN.matcher(currency).matches()) {

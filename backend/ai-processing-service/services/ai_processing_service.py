@@ -7,7 +7,7 @@ import json
 import uuid
 from typing import Optional, Dict, Any
 import google.generativeai as genai
-from .config import get_gemini_api_key
+from config import get_gemini_api_key
 
 
 class AIProcessingService:
@@ -85,7 +85,7 @@ class AIProcessingService:
             "- Trích xuất số hợp đồng, ngày ký, giá trị từ văn bản thực tế\n"
             "- Phân tích kỹ các điều khoản để xác định điều có lợi/bất lợi\n"
             "- Đánh giá rủi ro dựa trên nội dung thực tế\n"
-            "- totalValue PHẢI là số nguyên (không có dấu phẩy, dấu chấm), ví dụ: 1000000 thay vì \"1,000,000\"\n"
+                   "- totalValue có thể là mô tả chi tiết, ví dụ: \"100.000.000 VNĐ (Chưa bao gồm thuế)\" hoặc \"50.000 USD\"\n"
             "- Nếu không tìm thấy thông tin cụ thể, dùng \"Chưa xác định\" thay vì null\n"
             "- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
             f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
@@ -180,26 +180,16 @@ class AIProcessingService:
             
             # Ensure nested objects are properly initialized
             if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
-                parsed['paymentDetails'] = {"totalValue": 0, "schedule": "", "currency": "VNĐ", "paymentMethod": ""}
+                parsed['paymentDetails'] = {"totalValue": "Chưa xác định", "schedule": "Chưa xác định", "currency": "VNĐ", "paymentMethod": "Chưa xác định"}
             
-            # Ensure totalValue is an integer
+            # Ensure totalValue is a string (can be descriptive like "100.000VND (Chưa bao gồm phí)")
             if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
                 total_value = parsed['paymentDetails']['totalValue']
-                if isinstance(total_value, str):
-                    # Remove commas, dots, and non-numeric characters except digits
-                    cleaned_value = ''.join(filter(str.isdigit, str(total_value)))
-                    if cleaned_value:
-                        try:
-                            parsed['paymentDetails']['totalValue'] = int(cleaned_value)
-                        except ValueError:
-                            parsed['paymentDetails']['totalValue'] = 0
-                    else:
-                        parsed['paymentDetails']['totalValue'] = 0
-                elif isinstance(total_value, float):
-                    # Convert float to int
-                    parsed['paymentDetails']['totalValue'] = int(total_value)
-                elif not isinstance(total_value, int):
-                    parsed['paymentDetails']['totalValue'] = 0
+                if total_value is None or total_value == "":
+                    parsed['paymentDetails']['totalValue'] = "Chưa xác định"
+                else:
+                    # Keep as string to preserve descriptive format
+                    parsed['paymentDetails']['totalValue'] = str(total_value)
             
             if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
                 parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}

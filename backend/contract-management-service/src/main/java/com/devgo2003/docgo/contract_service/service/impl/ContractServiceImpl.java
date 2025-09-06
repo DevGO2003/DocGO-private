@@ -661,7 +661,7 @@ public class ContractServiceImpl implements IContractService {
 
         // Map payment details
         ContractPaymentDetailsDto paymentDetails = ContractPaymentDetailsDto.builder()
-                .totalValue(contract.getTotalValue() != null ? Double.parseDouble(contract.getTotalValue()) : null)
+                .totalValue(contract.getTotalValue())
                 .schedule(contract.getPaymentSchedule())
                 .currency(contract.getCurrency())
                 .paymentMethod(contract.getPaymentMethod())
