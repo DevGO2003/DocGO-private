@@ -853,50 +853,84 @@ Nguyễn Văn A                            Trần Thị B
 		try:
 			api_key = get_gemini_api_key()
 			genai.configure(api_key=api_key)
-			model = genai.GenerativeModel('gemini-2.0-flash')
+			model = genai.GenerativeModel('gemini-1.5-flash')
 			prompt = (
-				"Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
-				"Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
+				"Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
+				"YÊU CẦU PHÂN TÍCH:\n"
+				"1. Đọc kỹ từng điều khoản để trích xuất thông tin chính xác\n"
+				"2. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
+				"3. Đánh giá rủi ro dựa trên nội dung thực tế\n"
+				"4. Đưa ra khuyến nghị tuân thủ pháp luật\n"
+				"5. Trích xuất đầy đủ thông tin các bên tham gia\n\n"
+				"TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
 				'{\n'
-				'  "id": "string",\n'
-				'  "contractNumber": "string",\n'
-				'  "status": "string",\n'
-				'  "contractType": "string",\n'
-				'  "title": "string",\n'
-				'  "tags": ["string"],\n'
+				'  "id": "unique_id_for_this_contract",\n'
+				'  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
+				'  "status": null,\n'
+				'  "contractType": "loại hợp đồng cụ thể",\n'
+				'  "title": "tiêu đề đầy đủ của hợp đồng",\n'
+				'  "tags": ["các từ khóa liên quan"],\n'
 				'  "parties": [\n'
-				'    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}\n'
+				'    {\n'
+				'      "role": "vai trò cụ thể (Bên A/Bên B)",\n'
+				'      "name": "tên công ty/tổ chức thực tế",\n'
+				'      "representative": "tên người đại diện thực tế",\n'
+				'      "taxCode": "mã số thuế thực tế",\n'
+				'      "contact": "thông tin liên hệ thực tế",\n'
+				'      "address": "địa chỉ thực tế",\n'
+				'      "businessLicense": null\n'
+				'    }\n'
 				'  ],\n'
-				'  "object": "string",\n'
-				'  "effectiveDate": "string (ISO 8601)",\n'
-				'  "term": "string",\n'
-				'  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
+				'  "object": "đối tượng hợp đồng chi tiết",\n'
+				'  "effectiveDate": "ngày có hiệu lực (ISO 8601)",\n'
+				'  "term": "thời hạn hợp đồng cụ thể",\n'
+				'  "paymentDetails": {\n'
+				'    "totalValue": "tổng giá trị số",\n'
+				'    "schedule": "lịch thanh toán chi tiết",\n'
+				'    "currency": "đơn vị tiền tệ",\n'
+				'    "paymentMethod": "phương thức thanh toán"\n'
+				'  },\n'
 				'  "keyClauses": [\n'
-				'    {"name": "string", "description": "string", "source": "string"}\n'
+				'    {\n'
+				'      "name": "tên điều khoản",\n'
+				'      "description": "mô tả chi tiết nội dung",\n'
+				'      "source": "điều số tham chiếu"\n'
+				'    }\n'
 				'  ],\n'
 				'  "favorableClauses": [\n'
-				'    {"clauseName": "string", "description": "string", "benefitTo": "string"}\n'
+				'    {\n'
+				'      "clauseName": "tên điều khoản có lợi",\n'
+				'      "description": "mô tả lợi ích",\n'
+				'      "benefitTo": "bên được hưởng lợi"\n'
+				'    }\n'
 				'  ],\n'
 				'  "unfavorableClauses": [\n'
-				'    {"clauseName": "string", "description": "string", "riskTo": "string"}\n'
+				'    {\n'
+				'      "clauseName": "tên điều khoản bất lợi",\n'
+				'      "description": "mô tả rủi ro",\n'
+				'      "riskTo": "bên chịu rủi ro"\n'
+				'    }\n'
 				'  ],\n'
-				'  "reminders": [\n'
-				'    {"type": "string", "date": "string (ISO 8601)", "content": "string"}\n'
-				'  ],\n'
-				'  "terminationConditions": "string",\n'
+				'  "reminders": [],\n'
+				'  "terminationConditions": "các điều kiện chấm dứt hợp đồng",\n'
 				'  "riskAssessment": {\n'
 				'    "riskLevel": "LOW|MEDIUM|HIGH",\n'
-				'    "riskFactors": ["string"],\n'
-				'    "mitigationMeasures": ["string"]\n'
+				'    "riskFactors": ["các yếu tố rủi ro cụ thể"],\n'
+				'    "mitigationMeasures": ["các biện pháp giảm thiểu rủi ro"]\n'
 				'  },\n'
 				'  "complianceStatus": {\n'
 				'    "status": "COMPLIANT|NON_COMPLIANT|REVIEW_REQUIRED",\n'
-				'    "issues": ["string"],\n'
-				'    "recommendations": ["string"]\n'
+				'    "issues": ["các vấn đề tuân thủ pháp luật"],\n'
+				'    "recommendations": ["khuyến nghị cải thiện"]\n'
 				'  }\n'
-				'}\n'
-				"Chỉ trả về JSON hợp lệ, không kèm markdown.\n\n"
-				f"Nội dung hợp đồng (rút gọn):\n{content[:8000]}\n"
+				'}\n\n'
+				"LƯU Ý QUAN TRỌNG:\n"
+				"- Trích xuất thông tin CHÍNH XÁC từ văn bản, không bịa đặt\n"
+				"- Nếu thông tin không có trong hợp đồng, để null hoặc mảng rỗng\n"
+				"- Phân tích kỹ các điều khoản để xác định điều có lợi/bất lợi\n"
+				"- Đánh giá rủi ro dựa trên nội dung thực tế\n"
+				"- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
+				f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
 			)
 			response = model.generate_content(prompt)
 			# Log chi tiết kết quả từ Gemini để dễ debug
@@ -913,6 +947,8 @@ Nguyễn Văn A                            Trần Thị B
 			if not answer:
 				logging.warning("[AI_GEMINI_EMPTY_TEXT] Gemini trả về text rỗng hoặc None")
 				return None
+			
+			# Clean up response text
 			cleaned = answer
 			if cleaned.startswith('```json'):
 				cleaned = cleaned[7:]
@@ -920,17 +956,53 @@ Nguyễn Văn A                            Trần Thị B
 				cleaned = cleaned[3:]
 			if cleaned.endswith('```'):
 				cleaned = cleaned[:-3]
+			cleaned = cleaned.strip()
+			
+			# Try to find JSON in the response
+			json_start = cleaned.find('{')
+			json_end = cleaned.rfind('}') + 1
+			if json_start >= 0 and json_end > json_start:
+				cleaned = cleaned[json_start:json_end]
+			
+			logging.info(f"[AI_GEMINI_RESPONSE] Raw response length: {len(answer)}, Cleaned length: {len(cleaned)}")
+			
 			try:
 				parsed = json.loads(cleaned)
+				logging.info(f"[AI_GEMINI_JSON_SUCCESS] Successfully parsed JSON with keys: {list(parsed.keys()) if isinstance(parsed, dict) else 'Not a dict'}")
 			except Exception as parse_err:
-				logging.error(f"[AI_GEMINI_JSON_PARSE_ERROR] {parse_err}; snippet={cleaned[:500]}")
+				logging.error(f"[AI_GEMINI_JSON_PARSE_ERROR] {parse_err}")
+				logging.error(f"[AI_GEMINI_JSON_SNIPPET] First 1000 chars: {cleaned[:1000]}")
 				return None
-			# Bổ sung title mặc định nếu thiếu
-			if isinstance(parsed, dict) and 'title' not in parsed:
+			
+			# Validate and enhance the parsed JSON
+			if not isinstance(parsed, dict):
+				logging.error("[AI_GEMINI_JSON_NOT_DICT] Parsed result is not a dictionary")
+				return None
+			
+			# Ensure required fields exist with proper defaults
+			if 'id' not in parsed or not parsed['id']:
+				parsed['id'] = str(uuid.uuid4())
+			if 'title' not in parsed or not parsed['title']:
 				parsed['title'] = f"Hợp đồng từ tệp: {filename}"
-			# Bổ sung fileId nếu thiếu
 			if 'fileId' not in parsed:
 				parsed['fileId'] = str(uuid.uuid4())
+			
+			# Ensure arrays are properly initialized
+			for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
+				if field not in parsed or not isinstance(parsed[field], list):
+					parsed[field] = []
+			
+			# Ensure nested objects are properly initialized
+			if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
+				parsed['paymentDetails'] = {"totalValue": 0, "schedule": "", "currency": "VNĐ", "paymentMethod": ""}
+			
+			if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
+				parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
+			
+			if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
+				parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
+			
+			logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
 			return parsed
 		except Exception as e:
 			logging.exception(f"[AI_GEMINI_FALLBACK] Using fallback summary due to exception: {e}")
