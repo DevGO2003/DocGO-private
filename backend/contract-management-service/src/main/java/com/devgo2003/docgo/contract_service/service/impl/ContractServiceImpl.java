@@ -59,6 +59,10 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -667,35 +671,85 @@ public class ContractServiceImpl implements IContractService {
                 .paymentMethod(contract.getPaymentMethod())
                 .build();
 
-        // Map key clauses
+        // Map key clauses - parse from JSON if available, otherwise from string
         List<ContractKeyClauseDto> keyClauses = new ArrayList<>();
         if (contract.getKeyTerms() != null && !contract.getKeyTerms().trim().isEmpty()) {
-            // Parse key terms từ string sang structured format
+            try {
+                // Try to parse as JSON first
+                ObjectMapper mapper = new ObjectMapper();
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> keyClausesList = mapper.readValue(contract.getKeyTerms(), 
+                    new TypeReference<List<Map<String, Object>>>() {});
+                
+                for (Map<String, Object> clause : keyClausesList) {
+                    keyClauses.add(ContractKeyClauseDto.builder()
+                            .name((String) clause.get("name"))
+                            .description((String) clause.get("description"))
+                            .source((String) clause.get("source"))
+                            .build());
+                }
+            } catch (Exception e) {
+                // Fallback to string format
             keyClauses.add(ContractKeyClauseDto.builder()
                     .name("Key Terms")
                     .description(contract.getKeyTerms())
                     .source("Contract")
                     .build());
+            }
         }
 
-        // Map favorable clauses
+        // Map favorable clauses - parse from JSON if available, otherwise from string
         List<ContractFavorableClauseDto> favorableClauses = new ArrayList<>();
         if (contract.getFavorableClauses() != null && !contract.getFavorableClauses().trim().isEmpty()) {
+            try {
+                // Try to parse as JSON first
+                ObjectMapper mapper = new ObjectMapper();
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> favorableClausesList = mapper.readValue(contract.getFavorableClauses(), 
+                    new TypeReference<List<Map<String, Object>>>() {});
+                
+                for (Map<String, Object> clause : favorableClausesList) {
+                    favorableClauses.add(ContractFavorableClauseDto.builder()
+                            .clauseName((String) clause.get("clauseName"))
+                            .description((String) clause.get("description"))
+                            .benefitTo((String) clause.get("benefitTo"))
+                            .build());
+                }
+            } catch (Exception e) {
+                // Fallback to string format
             favorableClauses.add(ContractFavorableClauseDto.builder()
                     .clauseName("Favorable Clauses")
                     .description(contract.getFavorableClauses())
                     .benefitTo("Client")
                     .build());
+            }
         }
 
-        // Map unfavorable clauses
+        // Map unfavorable clauses - parse from JSON if available, otherwise from string
         List<ContractUnfavorableClauseDto> unfavorableClauses = new ArrayList<>();
         if (contract.getUnfavorableClauses() != null && !contract.getUnfavorableClauses().trim().isEmpty()) {
+            try {
+                // Try to parse as JSON first
+                ObjectMapper mapper = new ObjectMapper();
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> unfavorableClausesList = mapper.readValue(contract.getUnfavorableClauses(), 
+                    new TypeReference<List<Map<String, Object>>>() {});
+                
+                for (Map<String, Object> clause : unfavorableClausesList) {
+                    unfavorableClauses.add(ContractUnfavorableClauseDto.builder()
+                            .clauseName((String) clause.get("clauseName"))
+                            .description((String) clause.get("description"))
+                            .riskTo((String) clause.get("riskTo"))
+                            .build());
+                }
+            } catch (Exception e) {
+                // Fallback to string format
             unfavorableClauses.add(ContractUnfavorableClauseDto.builder()
                     .clauseName("Unfavorable Clauses")
                     .description(contract.getUnfavorableClauses())
                     .riskTo("Client")
                     .build());
+            }
         }
 
         // Map reminders
@@ -708,20 +762,78 @@ public class ContractServiceImpl implements IContractService {
                     .build());
         }
 
-        // Map risk assessment
+        // Map risk assessment - parse from JSON if available, otherwise from string
         ContractRiskAssessmentResponseDto riskAssessment = ContractRiskAssessmentResponseDto.builder()
                 .riskLevel(contract.getRiskLevel())
-                .riskFactors(contract.getRiskAssessment() != null ? 
-                    Arrays.asList(contract.getRiskAssessment().split("\\s*,\\s*")) : new ArrayList<>())
-                .mitigationMeasures(new ArrayList<>()) // Có thể bổ sung sau
+                .riskFactors(new ArrayList<>())
+                .mitigationMeasures(new ArrayList<>())
                 .build();
 
-        // Map compliance status
+        if (contract.getRiskAssessment() != null && !contract.getRiskAssessment().trim().isEmpty()) {
+            try {
+                // Try to parse as JSON first
+                ObjectMapper mapper = new ObjectMapper();
+                @SuppressWarnings("unchecked")
+                Map<String, Object> riskMap = mapper.readValue(contract.getRiskAssessment(), 
+                    new TypeReference<Map<String, Object>>() {});
+                
+                riskAssessment.setRiskLevel((String) riskMap.get("riskLevel"));
+                
+                Object riskFactorsObj = riskMap.get("riskFactors");
+                if (riskFactorsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> riskFactors = (List<String>) riskFactorsObj;
+                    riskAssessment.setRiskFactors(riskFactors);
+                }
+                
+                Object mitigationMeasuresObj = riskMap.get("mitigationMeasures");
+                if (mitigationMeasuresObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> mitigationMeasures = (List<String>) mitigationMeasuresObj;
+                    riskAssessment.setMitigationMeasures(mitigationMeasures);
+                }
+            } catch (Exception e) {
+                // Fallback to string format
+                riskAssessment.setRiskFactors(Arrays.asList(contract.getRiskAssessment().split("\\s*,\\s*")));
+            }
+        }
+
+        // Map compliance status - parse from JSON if available, otherwise from string
         ContractComplianceStatusResponseDto complianceStatus = ContractComplianceStatusResponseDto.builder()
                 .status(contract.getComplianceStatus())
-                .issues(new ArrayList<>()) // Có thể bổ sung sau
-                .recommendations(new ArrayList<>()) // Có thể bổ sung sau
+                .issues(new ArrayList<>())
+                .recommendations(new ArrayList<>())
                 .build();
+        
+        // Try to parse compliance status from JSON if available
+        if (contract.getComplianceStatus() != null && !contract.getComplianceStatus().trim().isEmpty()) {
+            try {
+                // Try to parse as JSON first
+                ObjectMapper mapper = new ObjectMapper();
+                @SuppressWarnings("unchecked")
+                Map<String, Object> complianceMap = mapper.readValue(contract.getComplianceStatus(), 
+                    new TypeReference<Map<String, Object>>() {});
+                
+                complianceStatus.setStatus((String) complianceMap.get("status"));
+                
+                Object issuesObj = complianceMap.get("issues");
+                if (issuesObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> issues = (List<String>) issuesObj;
+                    complianceStatus.setIssues(issues);
+                }
+                
+                Object recommendationsObj = complianceMap.get("recommendations");
+                if (recommendationsObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<String> recommendations = (List<String>) recommendationsObj;
+                    complianceStatus.setRecommendations(recommendations);
+                }
+            } catch (Exception e) {
+                // Keep as string status only
+                complianceStatus.setStatus(contract.getComplianceStatus());
+            }
+        }
 
         return ContractResponseDto.builder()
                 .id(contract.getId())
@@ -985,7 +1097,7 @@ public class ContractServiceImpl implements IContractService {
             contract.setSystemId(fileId);
             contract.setTitle((String) summaryData.get("title"));
             contract.setContractNumber((String) summaryData.get("contractNumber"));
-            contract.setSummary((String) summaryData.get("summary"));
+            // Summary field is no longer used - removed
             contract.setContractType((String) summaryData.get("contractType"));
             contract.setContractObject((String) summaryData.get("object"));
             contract.setEffectiveDate((String) summaryData.get("effectiveDate"));
@@ -1000,121 +1112,86 @@ public class ContractServiceImpl implements IContractService {
                 contract.setTags(String.join(", ", tags));
             }
             
-            // Map parties information
+            // Map parties information - store as JSON and create individual party records
             Object partiesObj = summaryData.get("parties");
             if (partiesObj instanceof List) {
                 try {
                     String partiesJson = objectMapper.writeValueAsString(partiesObj);
                     contract.setPartiesJson(partiesJson);
+                    
+                    // Parties will be saved after contract is persisted
                 } catch (Exception e) {
                     logger.warn("Failed to serialize parties data: {}", e.getMessage());
                 }
             }
             
-            // Handle keyClauses
+            // Handle keyClauses - store as JSON
             Object keyClausesObj = summaryData.get("keyClauses");
             if (keyClausesObj instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> keyClauses = (List<Object>) keyClausesObj;
-                StringBuilder keyTermsBuilder = new StringBuilder();
-                for (Object clause : keyClauses) {
-                    if (clause instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
-                        String name = (String) clauseMap.get("name");
-                        String description = (String) clauseMap.get("description");
-                        if (name != null && description != null) {
-                            keyTermsBuilder.append(name).append(": ").append(description).append("; ");
-                        }
-                    }
+                try {
+                    String keyClausesJson = objectMapper.writeValueAsString(keyClausesObj);
+                    contract.setKeyTerms(keyClausesJson);
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize keyClauses data: {}", e.getMessage());
                 }
-                contract.setKeyTerms(keyTermsBuilder.toString());
             }
             
-            // Handle favorableClauses
+            // Handle favorableClauses - store as JSON
             Object favorableClausesObj = summaryData.get("favorableClauses");
             if (favorableClausesObj instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> favorableClauses = (List<Object>) favorableClausesObj;
-                StringBuilder favorableBuilder = new StringBuilder();
-                for (Object clause : favorableClauses) {
-                    if (clause instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
-                        String clauseName = (String) clauseMap.get("clauseName");
-                        String description = (String) clauseMap.get("description");
-                        String benefitTo = (String) clauseMap.get("benefitTo");
-                        if (clauseName != null && description != null) {
-                            favorableBuilder.append(clauseName).append(" (").append(benefitTo != null ? benefitTo : "N/A").append("): ").append(description).append("; ");
-                        }
-                    }
+                try {
+                    String favorableClausesJson = objectMapper.writeValueAsString(favorableClausesObj);
+                    contract.setFavorableClauses(favorableClausesJson);
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize favorableClauses data: {}", e.getMessage());
                 }
-                contract.setFavorableClauses(favorableBuilder.toString());
             }
             
-            // Handle unfavorableClauses
+            // Handle unfavorableClauses - store as JSON
             Object unfavorableClausesObj = summaryData.get("unfavorableClauses");
             if (unfavorableClausesObj instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> unfavorableClauses = (List<Object>) unfavorableClausesObj;
-                StringBuilder unfavorableBuilder = new StringBuilder();
-                for (Object clause : unfavorableClauses) {
-                    if (clause instanceof java.util.Map) {
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> clauseMap = (java.util.Map<String, Object>) clause;
-                        String clauseName = (String) clauseMap.get("clauseName");
-                        String description = (String) clauseMap.get("description");
-                        String riskTo = (String) clauseMap.get("riskTo");
-                        if (clauseName != null && description != null) {
-                            unfavorableBuilder.append(clauseName).append(" (").append(riskTo != null ? riskTo : "N/A").append("): ").append(description).append("; ");
-                        }
-                    }
+                try {
+                    String unfavorableClausesJson = objectMapper.writeValueAsString(unfavorableClausesObj);
+                    contract.setUnfavorableClauses(unfavorableClausesJson);
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize unfavorableClauses data: {}", e.getMessage());
                 }
-                contract.setUnfavorableClauses(unfavorableBuilder.toString());
             }
             
-            // Handle riskAssessment
+            // Handle riskAssessment - store as JSON
             Object riskObj = summaryData.get("riskAssessment");
             if (riskObj instanceof java.util.Map) {
+                try {
+                    String riskAssessmentJson = objectMapper.writeValueAsString(riskObj);
+                    contract.setRiskAssessment(riskAssessmentJson);
+                    
+                    // Also set riskLevel for backward compatibility
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> riskMap = (java.util.Map<String, Object>) riskObj;
                 contract.setRiskLevel((String) riskMap.get("riskLevel"));
-                
-                StringBuilder riskAssessmentBuilder = new StringBuilder();
-                
-                // Add risk factors
-                Object riskFactorsObj = riskMap.get("riskFactors");
-                if (riskFactorsObj instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<String> riskFactors = (List<String>) riskFactorsObj;
-                    riskAssessmentBuilder.append("Risk Factors: ").append(String.join(", ", riskFactors));
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize riskAssessment data: {}", e.getMessage());
                 }
-                
-                // Add mitigation measures
-                Object mitigationObj = riskMap.get("mitigationMeasures");
-                if (mitigationObj instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<String> mitigationMeasures = (List<String>) mitigationObj;
-                    if (riskAssessmentBuilder.length() > 0) {
-                        riskAssessmentBuilder.append(" | ");
-                    }
-                    riskAssessmentBuilder.append("Mitigation: ").append(String.join(", ", mitigationMeasures));
-                }
-                
-                contract.setRiskAssessment(riskAssessmentBuilder.toString());
             }
             
-            // Handle complianceStatus
+            // Handle complianceStatus - store as JSON
             Object complianceObj = summaryData.get("complianceStatus");
             if (complianceObj instanceof java.util.Map) {
+                try {
+                    String complianceStatusJson = objectMapper.writeValueAsString(complianceObj);
+                    contract.setComplianceStatus(complianceStatusJson);
+                    
+                    // Also set status for backward compatibility
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> complianceMap = (java.util.Map<String, Object>) complianceObj;
                 String status = (String) complianceMap.get("status");
-                contract.setComplianceStatus(status);
                 
                 // Set legal review required based on compliance status
                 if ("REVIEW_REQUIRED".equals(status) || "NON_COMPLIANT".equals(status)) {
                     contract.setLegalReviewRequired(true);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to serialize complianceStatus data: {}", e.getMessage());
                 }
             }
             
@@ -1176,6 +1253,36 @@ public class ContractServiceImpl implements IContractService {
                 ? mongoTemplate.insert(contract, "contracts")
                 : contractRepository.save(contract);
             logger.info("Successfully saved contract with ID: {}", savedContract.getId());
+
+            // Now save parties after contract is persisted
+            if (partiesObj instanceof List) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> partiesList = (List<Map<String, Object>>) partiesObj;
+                    
+                    // Clear existing parties for this contract
+                    partyRepository.deleteByContractId(savedContract.getId());
+                    
+                    // Create party records based on actual parties from contract content
+                    for (Map<String, Object> partyData : partiesList) {
+                        if (partyData instanceof Map) {
+                            ContractParty party = new ContractParty();
+                            party.setContractId(savedContract.getId());
+                            party.setPartyType((String) partyData.get("role"));
+                            party.setPartyName((String) partyData.get("name"));
+                            party.setContactPerson((String) partyData.get("representative"));
+                            party.setTaxCode((String) partyData.get("taxCode"));
+                            party.setPhone((String) partyData.get("contact"));
+                            party.setAddress((String) partyData.get("address"));
+                            
+                            partyRepository.save(party);
+                            logger.info("Saved party: {} - {}", party.getPartyType(), party.getPartyName());
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to save parties: {}", e.getMessage(), e);
+                }
+            }
 
             // Create contract event
             ContractEvent event = new ContractEvent();

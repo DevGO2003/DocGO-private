@@ -28,7 +28,10 @@ class AIProcessingService:
             "3. KHÔNG sử dụng dấu \"...\" hoặc \"……\" - phải trích xuất thông tin thực tế\n"
             "4. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
             "5. Đánh giá rủi ro dựa trên nội dung thực tế\n"
-            "6. Đưa ra khuyến nghị tuân thủ pháp luật\n\n"
+            "6. Đưa ra khuyến nghị tuân thủ pháp luật\n"
+            "7. QUAN TRỌNG: Nếu không tìm thấy thông tin cụ thể, hãy trả về null thay vì \"Chưa xác định\"\n"
+            "8. Đảm bảo mỗi điều khoản trong keyClauses, favorableClauses, unfavorableClauses là một object riêng biệt\n"
+            "9. riskFactors và mitigationMeasures phải là danh sách chi tiết từng yếu tố\n\n"
             "THÔNG TIN CẦN TRÍCH XUẤT:\n"
             "- Tên công ty/tổ chức tham gia (Bên A, Bên B)\n"
             "- Tên người đại diện và chức vụ\n"
@@ -42,7 +45,6 @@ class AIProcessingService:
             "- Đối tượng hợp đồng (sản phẩm/dịch vụ cụ thể)\n\n"
             "TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
             '{\n'
-            '  "id": "unique_id_for_this_contract",\n'
             '  "contractNumber": "số hợp đồng thực tế từ văn bản",\n'
             '  "status": null,\n'
             '  "contractType": "loại hợp đồng cụ thể",\n'
@@ -50,12 +52,12 @@ class AIProcessingService:
             '  "tags": ["các từ khóa liên quan"],\n'
             '  "parties": [\n'
             '    {\n'
-            '      "role": "vai trò cụ thể (Bên A/Bên B)",\n'
-            '      "name": "tên công ty/tổ chức thực tế",\n'
-            '      "representative": "tên người đại diện thực tế",\n'
-            '      "taxCode": "mã số thuế thực tế",\n'
-            '      "contact": "thông tin liên hệ thực tế",\n'
-            '      "address": "địa chỉ thực tế",\n'
+            '      "role": "vai trò thực tế từ hợp đồng (Bên A, Bên B, Bên mua, Bên bán, v.v.)",\n'
+            '      "name": "tên công ty/tổ chức thực tế từ hợp đồng",\n'
+            '      "representative": "tên người đại diện thực tế từ hợp đồng",\n'
+            '      "taxCode": "mã số thuế thực tế từ hợp đồng",\n'
+            '      "contact": "thông tin liên hệ thực tế từ hợp đồng",\n'
+            '      "address": "địa chỉ thực tế từ hợp đồng",\n'
             '      "businessLicense": null\n'
             '    }\n'
             '  ],\n'
@@ -137,17 +139,21 @@ class AIProcessingService:
             parsed = json.loads(cleaned)
             
             # Ensure required fields exist with proper defaults
-            if 'id' not in parsed or not parsed['id']:
-                parsed['id'] = str(uuid.uuid4())
             if 'title' not in parsed or not parsed['title']:
                 parsed['title'] = f"Hợp đồng từ tệp: {filename}"
             if 'fileId' not in parsed:
                 parsed['fileId'] = str(uuid.uuid4())
             
-            # Replace null values with "Chưa xác định" for better data quality
-            def replace_null_with_unknown(obj, key):
-                if key in obj and (obj[key] is None or obj[key] == ""):
-                    obj[key] = "Chưa xác định"
+            # Remove unnecessary fields
+            if 'id' in parsed:
+                del parsed['id']
+            if 'summary' in parsed:
+                del parsed['summary']
+            
+            # Replace "Chưa xác định" with null for better data quality
+            def replace_unknown_with_null(obj, key):
+                if key in obj and obj[key] == "Chưa xác định":
+                    obj[key] = None
             
             # Normalize Unicode characters to avoid encoding issues
             def normalize_unicode_text(text):
@@ -169,43 +175,35 @@ class AIProcessingService:
                 else:
                     return normalize_unicode_text(obj)
             
-            # Replace null values in main fields
-            replace_null_with_unknown(parsed, 'contractNumber')
-            replace_null_with_unknown(parsed, 'contractType')
-            replace_null_with_unknown(parsed, 'object')
-            replace_null_with_unknown(parsed, 'effectiveDate')
-            replace_null_with_unknown(parsed, 'term')
-            replace_null_with_unknown(parsed, 'terminationConditions')
+            # Replace "Chưa xác định" with null in main fields
+            replace_unknown_with_null(parsed, 'contractNumber')
+            replace_unknown_with_null(parsed, 'contractType')
+            replace_unknown_with_null(parsed, 'object')
+            replace_unknown_with_null(parsed, 'effectiveDate')
+            replace_unknown_with_null(parsed, 'term')
+            replace_unknown_with_null(parsed, 'terminationConditions')
             
-            # Replace null values in parties
-            if 'parties' in parsed and isinstance(parsed['parties'], list):
-                for party in parsed['parties']:
-                    if isinstance(party, dict):
-                        replace_null_with_unknown(party, 'name')
-                        replace_null_with_unknown(party, 'representative')
-                        replace_null_with_unknown(party, 'taxCode')
-                        replace_null_with_unknown(party, 'contact')
-                        replace_null_with_unknown(party, 'address')
+            # Process parties from AI response - keep actual parties from contract content
+            if 'parties' not in parsed or not isinstance(parsed['parties'], list):
+                parsed['parties'] = []
             
-            # Replace null values in paymentDetails
+            # Replace "Chưa xác định" with null in parties
+            for party in parsed['parties']:
+                if isinstance(party, dict):
+                    replace_unknown_with_null(party, 'name')
+                    replace_unknown_with_null(party, 'representative')
+                    replace_unknown_with_null(party, 'taxCode')
+                    replace_unknown_with_null(party, 'contact')
+                    replace_unknown_with_null(party, 'address')
+            
+            # Replace "Chưa xác định" with null in paymentDetails
             if 'paymentDetails' in parsed and isinstance(parsed['paymentDetails'], dict):
-                replace_null_with_unknown(parsed['paymentDetails'], 'schedule')
-                replace_null_with_unknown(parsed['paymentDetails'], 'currency')
-                replace_null_with_unknown(parsed['paymentDetails'], 'paymentMethod')
+                replace_unknown_with_null(parsed['paymentDetails'], 'totalValue')
+                replace_unknown_with_null(parsed['paymentDetails'], 'schedule')
+                replace_unknown_with_null(parsed['paymentDetails'], 'currency')
+                replace_unknown_with_null(parsed['paymentDetails'], 'paymentMethod')
             
-            # Add summary field for contract management service compatibility
-            if 'summary' not in parsed:
-                summary_parts = []
-                if parsed.get('object'):
-                    summary_parts.append(f"Đối tượng: {parsed['object']}")
-                if parsed.get('keyClauses') and len(parsed['keyClauses']) > 0:
-                    summary_parts.append(f"Các điều khoản chính: {', '.join([clause.get('name', '') for clause in parsed['keyClauses'][:3]])}")
-                if parsed.get('term'):
-                    summary_parts.append(f"Thời hạn: {parsed['term']}")
-                if parsed.get('paymentDetails', {}).get('totalValue'):
-                    summary_parts.append(f"Giá trị: {parsed['paymentDetails']['totalValue']}")
-                
-                parsed['summary'] = ". ".join(summary_parts) if summary_parts else f"Tóm tắt hợp đồng {filename}"
+            # Summary field is no longer needed - removed
             
             # Ensure arrays are properly initialized
             for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
@@ -214,13 +212,13 @@ class AIProcessingService:
             
             # Ensure nested objects are properly initialized
             if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
-                parsed['paymentDetails'] = {"totalValue": "Chưa xác định", "schedule": "Chưa xác định", "currency": "VNĐ", "paymentMethod": "Chưa xác định"}
+                parsed['paymentDetails'] = {"totalValue": None, "schedule": None, "currency": None, "paymentMethod": None}
             
-            # Ensure totalValue is a string (can be descriptive like "100.000VND (Chưa bao gồm phí)")
+            # Ensure totalValue is properly handled
             if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
                 total_value = parsed['paymentDetails']['totalValue']
-                if total_value is None or total_value == "":
-                    parsed['paymentDetails']['totalValue'] = "Chưa xác định"
+                if total_value is None or total_value == "" or total_value == "Chưa xác định":
+                    parsed['paymentDetails']['totalValue'] = None
                 else:
                     # Keep as string to preserve descriptive format
                     parsed['paymentDetails']['totalValue'] = str(total_value)

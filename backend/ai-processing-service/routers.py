@@ -448,21 +448,23 @@ async def summarize_api(
     try:
         prompt = (
             "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
-            "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau: "
+            "Hãy phân tích và tóm tắt hợp đồng dưới đây thành một JSON với cấu trúc như sau:\n"
+            "QUAN TRỌNG: Nếu không tìm thấy thông tin cụ thể, hãy trả về null thay vì \"Chưa xác định\"\n"
+            "Đảm bảo mỗi điều khoản trong keyClauses, favorableClauses, unfavorableClauses là một object riêng biệt\n"
+            "riskFactors và mitigationMeasures phải là danh sách chi tiết từng yếu tố\n\n"
             '{\n'
-            '  "id": "string",\n'
             '  "contractNumber": "string",\n'
-            '  "status": "string",\n'
+            '  "status": null,\n'
             '  "contractType": "string",\n'
             '  "title": "string",\n'
             '  "tags": ["string"],\n'
             '  "parties": [\n'
-            '    {"role": "string", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": "string"}, ...\n'
+            '    {"role": "vai trò thực tế từ hợp đồng", "name": "string", "representative": "string", "taxCode": "string", "contact": "string", "address": "string", "businessLicense": null}\n'
             '  ],\n'
             '  "object": "string",\n'
             '  "effectiveDate": "string (ISO 8601)",\n'
             '  "term": "string",\n'
-            '  "paymentDetails": {"totalValue": "number", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
+            '  "paymentDetails": {"totalValue": "string", "schedule": "string", "currency": "string", "paymentMethod": "string"},\n'
             '  "keyClauses": [\n'
             '    {"name": "string", "description": "string", "source": "string"}, ...\n'
             '  ],\n'

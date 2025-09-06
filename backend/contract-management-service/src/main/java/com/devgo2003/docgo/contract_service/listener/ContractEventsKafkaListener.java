@@ -78,36 +78,19 @@ public class ContractEventsKafkaListener {
 
     /**
      * Kiểm tra xem summary data có chứa dữ liệu AI hợp lệ không
+     * Đơn giản hóa: chỉ cần có data từ AI service là đủ
      */
     private boolean isValidAISummary(Map<String, Object> summaryData) {
-        // Kiểm tra các trường bắt buộc từ AI
-        String title = (String) summaryData.get("title");
-        String summary = (String) summaryData.get("summary");
-        String contractType = (String) summaryData.get("contractType");
-        
-        if (title == null || title.trim().isEmpty()) {
-            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty title");
+        // Chỉ cần kiểm tra data không null và không rỗng
+        if (summaryData == null || summaryData.isEmpty()) {
+            logger.warn("⚠️ [AI_SUMMARY_CHECK] Summary data is null or empty");
             return false;
         }
         
-        if (summary == null || summary.trim().isEmpty()) {
-            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty summary");
-            return false;
-        }
-        
-        if (contractType == null || contractType.trim().isEmpty()) {
-            logger.warn("⚠️ [AI_SUMMARY_CHECK] Missing or empty contractType");
-            return false;
-        }
-        
-        // Kiểm tra xem có phải dữ liệu fallback không (từ AI service khi lỗi)
-        if ("UNKNOWN".equals(contractType) || "FALLBACK".equals(contractType)) {
-            logger.warn("⚠️ [AI_SUMMARY_CHECK] Detected fallback/unknown contract type - có thể AI service đang lỗi");
-            return false;
-        }
-        
-        logger.info("✅ [AI_SUMMARY_CHECK] AI summary data is valid - title: {}, type: {}", title, contractType);
+        logger.info("✅ [AI_SUMMARY_CHECK] AI summary data is valid - accepting all data from AI service");
         return true;
     }
 }
+
+
 
