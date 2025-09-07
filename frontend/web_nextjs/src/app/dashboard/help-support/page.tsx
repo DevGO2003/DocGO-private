@@ -21,7 +21,7 @@ interface SupportTicket {
   category: 'BUG' | 'FEATURE' | 'QUESTION' | 'OTHER'
 }
 
-export default function TroGiupHoTroPage() {
+export default function HelpSupportPage() {
   const [activeTab, setActiveTab] = useState<'faq' | 'ticket' | 'contact'>('faq')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<'ALL' | 'GENERAL' | 'CONTRACT' | 'TECHNICAL' | 'ACCOUNT'>('ALL')
