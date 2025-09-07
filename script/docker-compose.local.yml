@@ -266,23 +266,7 @@ services:
     networks:
       - docgo_network_local
 
-  # Commenting Collaboration Service (FastAPI) - Backend Service with Hot Reload
-  commenting-collaboration-service:
-    image: python:3.11-slim
-    container_name: docgo-local-commenting-collaboration-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8005:8005"
-    volumes:
-      - ../backend/commenting-collaboration-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8005 --reload"
-    depends_on:
-      - mariadb
-      - redis
-    networks:
-      - docgo_network_local
+  
 
   # Approval Workflow Service (FastAPI) - Backend Service with Hot Reload
   approval-workflow-service:
