@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Generic, TypeVar
 from datetime import datetime, timezone
 import uuid
+from .services.versioning_service import VersioningService, init_db
 
 
 def iso_now() -> str:
@@ -23,6 +24,8 @@ def build_envelope(status_code: int, short_message: str, description: str, data,
 
 
 router = APIRouter(prefix="/api/v1/versioning-document-history-service", tags=["Versioning Document History Service"])
+service = VersioningService()
+init_db()
 
 
 class Snapshot(BaseModel):
@@ -110,16 +113,28 @@ async def healthz():
     ),
 )
 async def list_snapshots(request: Request, pageNumber: int = 0, pageSize: int = 10, searchTerm: Optional[str] = None, contractId: Optional[str] = None):
-    items: List[Snapshot] = []
-    if not items:
+    result = service.list_snapshots(pageNumber, pageSize, searchTerm, contractId)
+    if result.total_elements == 0:
         return build_envelope(204, "No Content", "Không có snapshot nào.", None, request.url.path, str(uuid.uuid4()))
 
     resp = PaginatedResponse[Snapshot](
-        pageNumber=pageNumber,
-        pageSize=pageSize,
-        totalElements=0,
-        totalPages=0,
-        items=items,
+        pageNumber=result.page_number,
+        pageSize=result.page_size,
+        totalElements=result.total_elements,
+        totalPages=result.total_pages,
+        items=[
+            Snapshot(
+                snapshotId=s.snapshot_id,
+                contractId=s.contract_id,
+                version=s.version,
+                createdAt=s.created_at.isoformat() if s.created_at else iso_now(),
+                createdBy=s.created_by,
+                checksum=s.checksum,
+                size=s.size,
+                note=s.note,
+            )
+            for s in result.items
+        ],
     )
     return build_envelope(200, "Success", "Lấy danh sách snapshot thành công.", resp.model_dump(), request.url.path, str(uuid.uuid4()))
 
@@ -136,9 +151,21 @@ async def list_snapshots(request: Request, pageNumber: int = 0, pageSize: int = 
     ),
 )
 async def get_history(request: Request, contractId: str):
-    events: List[HistoryEvent] = []
-    if not events:
+    orm_events = service.get_history(contractId)
+    if not orm_events:
         return build_envelope(204, "No Content", "Không có lịch sử nào.", None, request.url.path, str(uuid.uuid4()))
+    events = [
+        HistoryEvent(
+            eventId=e.event_id,
+            contractId=e.contract_id,
+            version=e.version,
+            eventType=e.event_type,
+            actor=e.actor,
+            timestamp=e.timestamp.isoformat() if e.timestamp else iso_now(),
+            metadata={}
+        )
+        for e in orm_events
+    ]
     return build_envelope(200, "Success", "Lấy lịch sử thành công.", [e.model_dump() for e in events], request.url.path, str(uuid.uuid4()))
 
 
@@ -155,12 +182,8 @@ async def get_history(request: Request, contractId: str):
     ),
 )
 async def compute_diff(request: Request, contractId: str, payload: DiffRequest = Body(...)):
-    result = DiffResult(
-        leftVersion=payload.leftVersion,
-        rightVersion=payload.rightVersion,
-        summary="Không có thay đổi.",
-        changes=[],
-    )
+    diff_dict = service.compute_diff(contractId, payload.leftVersion, payload.rightVersion, payload.mode)
+    result = DiffResult(**diff_dict)
     return build_envelope(200, "Success", "Tính diff thành công.", result.model_dump(), request.url.path, str(uuid.uuid4()))
 
 
@@ -177,13 +200,8 @@ async def compute_diff(request: Request, contractId: str, payload: DiffRequest =
     ),
 )
 async def restore_version(request: Request, contractId: str, payload: RestoreRequest = Body(...)):
-    result = RestoreResult(
-        contractId=contractId,
-        restoredFromVersion=payload.version,
-        newVersion=payload.version + 1,
-        status="restored",
-        note=payload.reason,
-    )
+    restored = service.restore_version(contractId, payload.version, payload.reason, actor="system")
+    result = RestoreResult(**restored)
     return build_envelope(200, "Success", "Khôi phục phiên bản thành công.", result.model_dump(), request.url.path, str(uuid.uuid4()))
 
 
