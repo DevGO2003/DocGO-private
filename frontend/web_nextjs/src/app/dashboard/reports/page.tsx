@@ -18,7 +18,7 @@ interface ReportTemplate {
   }[]
 }
 
-export default function BaoCaoPage() {
+export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<'templates' | 'history' | 'scheduled'>('templates')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [reportParams, setReportParams] = useState<Record<string, any>>({})
