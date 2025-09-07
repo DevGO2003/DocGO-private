@@ -31,7 +31,7 @@ interface ContractVersion {
   content: any
 }
 
-export default function PhienBanHopDongPage() {
+export default function ContractVersionsPage() {
   const [versions, setVersions] = useState<ContractVersion[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,7 +45,7 @@ export default function PhienBanHopDongPage() {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    const loadVersions = async () => {
+    const fetchContractVersions = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -58,7 +58,7 @@ export default function PhienBanHopDongPage() {
         setLoading(false)
       }
     }
-    loadVersions()
+    fetchContractVersions()
   }, [])
 
   const filteredVersions = versions.filter(version => {
