@@ -15,7 +15,7 @@ interface Notification {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
 }
 
-export default function ThongBaoPage() {
+export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState<'ALL' | 'UNREAD' | 'READ'>('ALL')
@@ -114,10 +114,10 @@ export default function ThongBaoPage() {
   ]
 
   useEffect(() => {
-    loadNotifications()
+    fetchNotifications()
   }, [filter, typeFilter])
 
-  const loadNotifications = async () => {
+  const fetchNotifications = async () => {
     setLoading(true)
     try {
       // Mock API call
