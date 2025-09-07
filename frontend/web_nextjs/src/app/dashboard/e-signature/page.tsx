@@ -28,7 +28,7 @@ interface Signer {
   order: number
 }
 
-export default function ChuKyDienTuPage() {
+export default function ESignaturePage() {
   const [requests, setRequests] = useState<SignatureRequest[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +39,7 @@ export default function ChuKyDienTuPage() {
   const [filter, setFilter] = useState<'ALL' | 'DRAFT' | 'SENT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'>('ALL')
 
   useEffect(() => {
-    const loadRequests = async () => {
+    const fetchSignatureRequests = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -52,7 +52,7 @@ export default function ChuKyDienTuPage() {
         setLoading(false)
       }
     }
-    loadRequests()
+    fetchSignatureRequests()
   }, [])
 
   const filteredRequests = requests.filter(req => filter === 'ALL' || req.status === filter)
