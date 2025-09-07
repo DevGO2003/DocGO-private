@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 
-export default function CaiDatPage() {
+export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
   const [settings, setSettings] = useState({
     general: {
