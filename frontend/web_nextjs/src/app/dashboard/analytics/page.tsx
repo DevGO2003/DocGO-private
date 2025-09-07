@@ -18,13 +18,13 @@ const Cell = dynamic(() => import('recharts').then(m => m.Cell), { ssr: false })
 const BarChart = dynamic(() => import('recharts').then(m => m.BarChart), { ssr: false })
 const Bar = dynamic(() => import('recharts').then(m => m.Bar), { ssr: false })
 
-export default function ThongKePage() {
+export default function AnalyticsPage() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const load = async () => {
+    const fetchStats = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -37,7 +37,7 @@ export default function ThongKePage() {
         setLoading(false)
       }
     }
-    load()
+    fetchStats()
   }, [])
   return (
     <DashboardLayout>
