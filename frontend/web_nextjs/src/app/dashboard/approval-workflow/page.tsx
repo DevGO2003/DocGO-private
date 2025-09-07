@@ -47,7 +47,7 @@ interface ApprovalStep {
   maxValue?: number
 }
 
-export default function LuongPheDuyetPage() {
+export default function ApprovalWorkflowPage() {
   const [flows, setFlows] = useState<ApprovalFlow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,7 +59,7 @@ export default function LuongPheDuyetPage() {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    const loadFlows = async () => {
+    const fetchApprovalFlows = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -72,7 +72,7 @@ export default function LuongPheDuyetPage() {
         setLoading(false)
       }
     }
-    loadFlows()
+    fetchApprovalFlows()
   }, [])
 
   const filteredFlows = flows.filter(flow => {
