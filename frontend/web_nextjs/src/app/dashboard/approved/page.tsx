@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 
-export default function DaDuyetPage() {
+export default function ApprovedPage() {
   const [items, setItems] = useState<Array<{ id: string; title: string; status: string; approvedAt?: string }>>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const load = async () => {
+    const fetchApprovedItems = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -23,7 +23,7 @@ export default function DaDuyetPage() {
         setLoading(false)
       }
     }
-    load()
+    fetchApprovedItems()
   }, [])
   return (
     <DashboardLayout>
