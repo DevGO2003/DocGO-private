@@ -4,7 +4,7 @@ import React from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useState, useRef, useCallback } from 'react'
 
-export default function TaiLenPage() {
+export default function UploadPage() {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null)
 	const [isDragging, setIsDragging] = useState(false)
 	const [isUploading, setIsUploading] = useState(false)
