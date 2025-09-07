@@ -16,7 +16,7 @@ interface ApprovalRequest {
   documents?: string[]
 }
 
-export default function PheDuyetTaiKhoanPage() {
+export default function AccountApprovalPage() {
   const [items, setItems] = useState<ApprovalRequest[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +26,7 @@ export default function PheDuyetTaiKhoanPage() {
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null)
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING')
 
-  const load = useCallback(async () => {
+  const fetchApprovalRequests = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -40,7 +40,7 @@ export default function PheDuyetTaiKhoanPage() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { fetchApprovalRequests() }, [fetchApprovalRequests])
 
   const filteredItems = items.filter(item => filter === 'ALL' || item.status === filter)
 
@@ -65,7 +65,7 @@ export default function PheDuyetTaiKhoanPage() {
     setShowDetailModal(true)
   }
 
-  const act = async (id: string, action: 'approve' | 'reject', reason?: string) => {
+  const processApprovalRequest = async (id: string, action: 'approve' | 'reject', reason?: string) => {
     try {
       setBusyId(id)
       const res = await fetch('/api/mock/approvals', {
@@ -94,7 +94,7 @@ export default function PheDuyetTaiKhoanPage() {
     
     try {
       for (const id of selectedItems) {
-        await act(id, action)
+        await processApprovalRequest(id, action)
       }
       setSelectedItems([])
     } catch (error) {
@@ -162,7 +162,7 @@ export default function PheDuyetTaiKhoanPage() {
                   </button>
                 </div>
               )}
-              <button onClick={load} className="px-3 py-2 text-sm rounded-md bg-amber-600 text-white hover:bg-amber-700">
+              <button onClick={fetchApprovalRequests} className="px-3 py-2 text-sm rounded-md bg-amber-600 text-white hover:bg-amber-700">
                 🔄 Làm mới
               </button>
             </div>
@@ -249,14 +249,14 @@ export default function PheDuyetTaiKhoanPage() {
                         {item.status === 'PENDING' && (
                           <>
                             <button
-                              onClick={() => act(item.id, 'approve')}
+                              onClick={() => processApprovalRequest(item.id, 'approve')}
                               disabled={busyId === item.id}
                               className="px-2 py-1 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
                             >
                               {busyId === item.id ? 'Đang duyệt...' : 'Duyệt'}
                             </button>
                             <button
-                              onClick={() => act(item.id, 'reject')}
+                              onClick={() => processApprovalRequest(item.id, 'reject')}
                               disabled={busyId === item.id}
                               className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                             >
@@ -370,7 +370,7 @@ export default function PheDuyetTaiKhoanPage() {
                   </button>
                   <button
                     onClick={() => {
-                      act(selectedRequest.id, 'approve')
+                      processApprovalRequest(selectedRequest.id, 'approve')
                       setShowDetailModal(false)
                       setSelectedRequest(null)
                     }}
@@ -381,7 +381,7 @@ export default function PheDuyetTaiKhoanPage() {
                   <button
                     onClick={() => {
                       const reason = prompt('Nhập lý do từ chối (tùy chọn):')
-                      act(selectedRequest.id, 'reject', reason || undefined)
+                      processApprovalRequest(selectedRequest.id, 'reject', reason || undefined)
                       setShowDetailModal(false)
                       setSelectedRequest(null)
                     }}
