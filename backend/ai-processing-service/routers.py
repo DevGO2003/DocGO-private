@@ -501,7 +501,27 @@ async def summarize_api(
             "9. Tạo ID và contractNumber ngẫu nhiên\n\n"
             "Dưới đây là nội dung hợp đồng:"
         )
-        answer = ask_gemini(api_key, content, prompt)
+        
+        # Use shared AI service instead of creating new Gemini configuration
+        ai_service = AIProcessingService()
+        answer = ai_service.generate_contract_summary(content, file.filename if file else "text_input")
+        
+        # Handle AI service response
+        if answer is None:
+            # AI service failed to generate summary
+            return RestResponse(
+                statusCode=422,
+                shortMessage="Unprocessable Entity",
+                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
+                data=None,
+                path=request.url.path,
+                timestamp=datetime.now(),
+                requestId=str(uuid.uuid4())
+            )
+        
+        # Convert dict result back to string for compatibility
+        if isinstance(answer, dict):
+            answer = json.dumps(answer, ensure_ascii=False, indent=2)
         
         # Kiểm tra xem AI có trả về thông báo lỗi không
         error_indicators = [
@@ -531,7 +551,7 @@ async def summarize_api(
                 statusCode=422,
                 shortMessage="Unprocessable Entity",
                 description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
-                data=answer,
+                data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
                 requestId=str(uuid.uuid4())

@@ -37,7 +37,9 @@ class AIKafkaWorker:
 		self._task: Optional[asyncio.Task] = None
 		self._stopping: bool = False
 		self._file_cache = {}  # In-memory cache for file content
-		self.ai_service = AIProcessingService()  # Use shared AI service
+		
+		# Initialize shared AI service to avoid multiple Gemini API configurations
+		self.ai_service = AIProcessingService()
 
 	async def start(self) -> None:
 		if self.consumer is None:
@@ -318,28 +320,11 @@ class AIKafkaWorker:
 
 	async def _extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
 		"""
-		Extract text from file content using Gemini AI
+		Extract text from file content using basic extraction to avoid rate limiting
 		"""
 		try:
-			# Configure Gemini
-			genai.configure(api_key=get_gemini_api_key())
-			model = genai.GenerativeModel('gemini-1.5-flash')
-			
-			# Create extraction prompt
-			extraction_prompt = f"""
-			Hãy trích xuất toàn bộ nội dung văn bản từ file {filename} (loại: {content_type}).
-			
-			Yêu cầu:
-			- Trích xuất chính xác 100% nội dung văn bản
-			- Giữ nguyên format, xuống dòng, khoảng trắng
-			- Không bỏ sót bất kỳ ký tự nào
-			- Nếu có bảng, giữ nguyên cấu trúc bảng
-			- Nếu có danh sách, giữ nguyên format danh sách
-			
-			Chỉ trả về nội dung văn bản thuần túy, không thêm giải thích hay comment.
-			"""
-			
-			# For PDF and DOCX, we need to extract text first, then use Gemini to clean it up
+			# Use basic extraction without Gemini to avoid rate limiting
+			# For now, use basic extraction and let the shared service handle Gemini calls
 			if content_type == "application/pdf":
 				# Basic PDF extraction first
 				import io
@@ -354,9 +339,7 @@ class AIKafkaWorker:
 					raw_text += page.extract_text() + "\n"
 				
 				if raw_text.strip():
-					# Use Gemini to clean up the extracted text
-					response = model.generate_content(f"{extraction_prompt}\n\nNội dung đã trích xuất:\n{raw_text}")
-					return response.text.strip()
+					return raw_text.strip()
 				else:
 					return f"[PDF_NO_TEXT] Could not extract text from PDF {filename}"
 					
@@ -373,113 +356,35 @@ class AIKafkaWorker:
 					raw_text += paragraph.text + "\n"
 				
 				if raw_text.strip():
-					# Use Gemini to clean up the extracted text
-					response = model.generate_content(f"{extraction_prompt}\n\nNội dung đã trích xuất:\n{raw_text}")
-					return response.text.strip()
+					return raw_text.strip()
 				else:
 					return f"[DOCX_NO_TEXT] Could not extract text from DOCX {filename}"
 					
 			elif content_type.startswith("text/"):
 				# Plain text files
-				raw_text = content.decode('utf-8', errors='ignore')
-				response = model.generate_content(f"{extraction_prompt}\n\nNội dung file:\n{raw_text}")
-				return response.text.strip()
+				return content.decode('utf-8', errors='ignore')
 			else:
 				# Try to decode as text for other types
-				raw_text = content.decode('utf-8', errors='ignore')
-				response = model.generate_content(f"{extraction_prompt}\n\nNội dung file:\n{raw_text}")
-				return response.text.strip()
+				return content.decode('utf-8', errors='ignore')
 				
 		except Exception as e:
-			logging.error(f"[AI_GEMINI_EXTRACT_ERROR] Error extracting text with Gemini from {filename}: {e}")
-			return f"[GEMINI_EXTRACT_ERROR] Error extracting text from {filename}: {str(e)}"
+			logging.error(f"[AI_EXTRACT_ERROR] Error extracting text from {filename}: {e}")
+			return f"[EXTRACT_ERROR] Error extracting text from {filename}: {str(e)}"
 
 	async def _create_summary_with_gemini(self, extracted_text: str, filename: str) -> dict:
 		"""
-		Create contract summary using Gemini AI
+		Create contract summary using shared AI service to avoid rate limiting
 		"""
 		try:
-			# Configure Gemini
-			genai.configure(api_key=get_gemini_api_key())
-			model = genai.GenerativeModel('gemini-1.5-flash')
+			# Use shared AI service instead of creating new Gemini configuration
+			summary_result = self.ai_service.generate_contract_summary(extracted_text, filename)
 			
-			# Create summary prompt
-			summary_prompt = f"""
-			Hãy tạo tóm tắt chi tiết cho hợp đồng sau:
-			
-			Tên file: {filename}
-			Nội dung hợp đồng:
-			{extracted_text[:5000]}...
-			
-			Yêu cầu tóm tắt:
-			- Thông tin cơ bản về hợp đồng (số hợp đồng, loại hợp đồng, tiêu đề)
-			- Các bên tham gia (tên, đại diện, địa chỉ, mã số thuế, thông tin liên hệ)
-			- Nội dung chính của hợp đồng
-			- Thời hạn và điều khoản quan trọng
-			- Giá trị hợp đồng và phương thức thanh toán
-			- Điều kiện chấm dứt hợp đồng
-			- Đánh giá rủi ro và khuyến nghị
-			
-			Trả về kết quả dưới dạng JSON với cấu trúc sau:
-			{{
-				"title": "Tiêu đề hợp đồng",
-				"contractNumber": "Số hợp đồng",
-				"contractType": "Loại hợp đồng",
-				"parties": [
-					{{
-						"role": "Bên A/Bên B",
-						"name": "Tên công ty/tổ chức",
-						"representative": "Người đại diện",
-						"taxCode": "Mã số thuế",
-						"contact": "Thông tin liên hệ",
-						"address": "Địa chỉ",
-						"businessLicense": "Giấy phép kinh doanh"
-					}}
-				],
-				"object": "Đối tượng hợp đồng",
-				"effectiveDate": "Ngày có hiệu lực",
-				"term": "Thời hạn hợp đồng",
-				"paymentDetails": {{
-					"totalValue": 0,
-					"schedule": "Lịch thanh toán",
-					"currency": "Đơn vị tiền tệ",
-					"paymentMethod": "Phương thức thanh toán"
-				}},
-				"keyClauses": ["Điều khoản quan trọng 1", "Điều khoản quan trọng 2"],
-				"favorableClauses": ["Điều khoản có lợi"],
-				"unfavorableClauses": ["Điều khoản bất lợi"],
-				"reminders": ["Nhắc nhở quan trọng"],
-				"terminationConditions": "Điều kiện chấm dứt",
-				"riskAssessment": {{
-					"riskLevel": "LOW/MEDIUM/HIGH",
-					"riskFactors": ["Yếu tố rủi ro"],
-					"mitigationMeasures": ["Biện pháp giảm thiểu"]
-				}},
-				"complianceStatus": {{
-					"status": "COMPLIANT/REVIEW_REQUIRED/NON_COMPLIANT",
-					"issues": ["Vấn đề tuân thủ"],
-					"recommendations": ["Khuyến nghị"]
-				}}
-			}}
-			"""
-			
-			response = model.generate_content(summary_prompt)
-			summary_text = response.text.strip()
-			
-			# Parse JSON response
-			try:
-				import re
-				json_match = re.search(r'\{.*\}', summary_text, re.DOTALL)
-				if json_match:
-					summary_result = json.loads(json_match.group())
-					logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
-					return summary_result
-				else:
-					logging.warning(f"[AI_GEMINI_SUMMARY_PARSE_FAILED] Could not parse JSON from Gemini response: {filename}")
-					return {"title": filename, "summary": "Không thể tạo tóm tắt tự động"}
-			except json.JSONDecodeError as e:
-				logging.error(f"[AI_GEMINI_SUMMARY_JSON_ERROR] JSON parsing error for {filename}: {e}")
-				return {"title": filename, "summary": "Lỗi khi phân tích tóm tắt"}
+			if summary_result:
+				logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
+				return summary_result
+			else:
+				logging.warning(f"[AI_GEMINI_SUMMARY_FAILED] Could not create summary for: {filename}")
+				return {"title": filename, "summary": "Không thể tạo tóm tắt tự động"}
 				
 		except Exception as e:
 			logging.error(f"[AI_GEMINI_SUMMARY_ERROR] Error creating summary with Gemini for {filename}: {e}")
@@ -510,51 +415,12 @@ class AIKafkaWorker:
 
 	async def _classify_document_with_gemini(self, content: str, filename: str, content_type: str) -> dict:
 		"""
-		Use Gemini AI to classify document
+		Use shared AI service to classify document to avoid rate limiting
 		"""
 		try:
-			# Configure Gemini
-			genai.configure(api_key=get_gemini_api_key())
-			model = genai.GenerativeModel('gemini-1.5-flash')
-			
-			# Create classification prompt
-			prompt = f"""
-			Phân loại tài liệu sau đây:
-			
-			Tên file: {filename}
-			Loại file: {content_type}
-			Nội dung: {content[:2000]}...
-			
-			Hãy phân loại tài liệu này thành một trong hai loại:
-			- CONTRACT: Nếu đây là hợp đồng, thỏa thuận, hoặc tài liệu pháp lý
-			- GENERAL: Nếu đây là tài liệu thông thường khác
-			
-			Trả về kết quả dưới dạng JSON:
-			{{
-				"classification": "CONTRACT" hoặc "GENERAL",
-				"confidence": 0.0-1.0,
-				"reasoning": "Lý do phân loại"
-			}}
-			"""
-			
-			response = model.generate_content(prompt)
-			result_text = response.text.strip()
-			
-			# Try to parse JSON response
-			try:
-				import re
-				json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
-				if json_match:
-					result = json.loads(json_match.group())
-					return result
-			except:
-				pass
-			
-			# Fallback parsing
-			if "CONTRACT" in result_text.upper():
-				return {"classification": "CONTRACT", "confidence": 0.8, "reasoning": "Detected contract keywords"}
-			else:
-				return {"classification": "GENERAL", "confidence": 0.7, "reasoning": "General document"}
+			# Use shared AI service instead of creating new Gemini configuration
+			result = self.ai_service.classify_document(content, filename)
+			return result
 				
 		except Exception as e:
 			logging.error(f"[AI_CLASSIFY_ERROR] Error classifying document {filename}: {e}")

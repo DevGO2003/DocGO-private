@@ -11,12 +11,42 @@ from config import get_gemini_api_key
 
 
 class AIProcessingService:
-    """Service xử lý AI chung cho cả API và Event handler"""
+    """Service xử lý AI chung cho cả API và Event handler - Singleton pattern"""
+    
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AIProcessingService, cls).__new__(cls)
+        return cls._instance
     
     def __init__(self):
-        self.api_key = get_gemini_api_key()
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        if not self._initialized:
+            self.api_key = get_gemini_api_key()
+            genai.configure(api_key=self.api_key)
+            # Try different models in order of preference
+            models_to_try = [
+                'gemini-2.0-flash',
+                'gemini-1.5-flash',
+                'gemini-1.5-pro',
+                'gemini-1.0-pro'
+            ]
+            
+            model_initialized = False
+            for model_name in models_to_try:
+                try:
+                    self.model = genai.GenerativeModel(model_name)
+                    logging.info(f"[AI_SERVICE_SINGLETON] AIProcessingService initialized with {model_name}")
+                    model_initialized = True
+                    break
+                except Exception as e:
+                    logging.warning(f"[AI_MODEL_FALLBACK] Failed to initialize {model_name}: {e}")
+                    continue
+            
+            if not model_initialized:
+                raise Exception("Could not initialize any Gemini model")
+            self._initialized = True
     
     def get_contract_summary_prompt(self, content: str, filename: str) -> str:
         """Tạo prompt chuẩn cho việc tóm tắt hợp đồng - dùng chung cho API và Event"""
@@ -104,140 +134,227 @@ class AIProcessingService:
             "- totalValue có thể là mô tả chi tiết, ví dụ: \"100.000.000 VNĐ (Chưa bao gồm thuế)\" hoặc \"50.000 USD\"\n"
             "- Nếu không tìm thấy thông tin cụ thể, dùng \"Chưa xác định\" thay vì null\n"
             "- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
-            f"NỘI DUNG HỢP ĐỒNG:\n{content[:10000]}\n"
+            f"Hợp đồng:\n{content[:2000]}\n"
         )
     
     def generate_contract_summary(self, content: str, filename: str) -> Optional[Dict[str, Any]]:
         """Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
-        try:
-            prompt = self.get_contract_summary_prompt(content, filename)
-            response = self.model.generate_content(prompt)
-            
-            if not response.text:
-                logging.warning(f"[AI_GEMINI_EMPTY] Empty response for: {filename}")
-                return None
-            
-            # Parse JSON response
-            summary_text = response.text.strip()
-            
-            # Clean up response text
-            cleaned = summary_text
-            if cleaned.startswith('```json'):
-                cleaned = cleaned[7:]
-            if cleaned.startswith('```'):
-                cleaned = cleaned[3:]
-            if cleaned.endswith('```'):
-                cleaned = cleaned[:-3]
-            cleaned = cleaned.strip()
-            
-            # Try to find JSON in the response
-            json_start = cleaned.find('{')
-            json_end = cleaned.rfind('}') + 1
-            if json_start >= 0 and json_end > json_start:
-                cleaned = cleaned[json_start:json_end]
-            
-            parsed = json.loads(cleaned)
-            
-            # Ensure required fields exist with proper defaults
-            if 'title' not in parsed or not parsed['title']:
-                parsed['title'] = f"Hợp đồng từ tệp: {filename}"
-            if 'fileId' not in parsed:
-                parsed['fileId'] = str(uuid.uuid4())
-            
-            # Remove unnecessary fields
-            if 'id' in parsed:
-                del parsed['id']
-            if 'summary' in parsed:
-                del parsed['summary']
-            
-            # Replace "Chưa xác định" with null for better data quality
-            def replace_unknown_with_null(obj, key):
-                if key in obj and obj[key] == "Chưa xác định":
-                    obj[key] = None
-            
-            # Normalize Unicode characters to avoid encoding issues
-            def normalize_unicode_text(text):
-                if isinstance(text, str):
-                    # Replace ellipsis and other problematic Unicode characters
-                    text = text.replace('…', '...')
-                    text = text.replace('–', '-')
-                    text = text.replace('"', '"')
-                    text = text.replace('"', '"')
-                    text = text.replace(''', "'")
-                    text = text.replace(''', "'")
-                return text
-            
-            def normalize_object(obj):
-                if isinstance(obj, dict):
-                    return {k: normalize_object(v) for k, v in obj.items()}
-                elif isinstance(obj, list):
-                    return [normalize_object(item) for item in obj]
+        import time
+        import random
+        
+        max_retries = 3
+        base_delay = 5  # seconds
+        
+        logging.info(f"[AI_SUMMARY_START] Starting summary generation for: {filename}")
+        
+        for attempt in range(max_retries):
+            try:
+                prompt = self.get_contract_summary_prompt(content, filename)
+                logging.info(f"[AI_SUMMARY_ATTEMPT] Attempt {attempt + 1}/{max_retries} for: {filename}")
+                response = self.model.generate_content(prompt)
+                
+                if not response.text:
+                    logging.warning(f"[AI_GEMINI_EMPTY] Empty response for: {filename}")
+                    return None
+                
+                # Parse JSON response
+                summary_text = response.text.strip()
+                
+                # Clean up response text
+                cleaned = summary_text
+                if cleaned.startswith('```json'):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith('```'):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith('```'):
+                    cleaned = cleaned[:-3]
+                cleaned = cleaned.strip()
+                
+                # Try to find JSON in the response
+                json_start = cleaned.find('{')
+                json_end = cleaned.rfind('}') + 1
+                if json_start >= 0 and json_end > json_start:
+                    cleaned = cleaned[json_start:json_end]
+                
+                parsed = json.loads(cleaned)
+                
+                # Ensure required fields exist with proper defaults
+                if 'title' not in parsed or not parsed['title']:
+                    parsed['title'] = f"Hợp đồng từ tệp: {filename}"
+                if 'fileId' not in parsed:
+                    parsed['fileId'] = str(uuid.uuid4())
+                
+                # Remove unnecessary fields
+                if 'id' in parsed:
+                    del parsed['id']
+                if 'summary' in parsed:
+                    del parsed['summary']
+                
+                # Replace "Chưa xác định" with null for better data quality
+                def replace_unknown_with_null(obj, key):
+                    if key in obj and obj[key] == "Chưa xác định":
+                        obj[key] = None
+                
+                # Normalize Unicode characters to avoid encoding issues
+                def normalize_unicode_text(text):
+                    if isinstance(text, str):
+                        # Replace ellipsis and other problematic Unicode characters
+                        text = text.replace('…', '...')
+                        text = text.replace('–', '-')
+                        text = text.replace('"', '"')
+                        text = text.replace('"', '"')
+                        text = text.replace(''', "'")
+                        text = text.replace(''', "'")
+                    return text
+                
+                def normalize_object(obj):
+                    if isinstance(obj, dict):
+                        return {k: normalize_object(v) for k, v in obj.items()}
+                    elif isinstance(obj, list):
+                        return [normalize_object(item) for item in obj]
+                    else:
+                        return normalize_unicode_text(obj)
+                
+                # Replace "Chưa xác định" with null in main fields
+                replace_unknown_with_null(parsed, 'contractNumber')
+                replace_unknown_with_null(parsed, 'contractType')
+                replace_unknown_with_null(parsed, 'object')
+                replace_unknown_with_null(parsed, 'effectiveDate')
+                replace_unknown_with_null(parsed, 'term')
+                replace_unknown_with_null(parsed, 'terminationConditions')
+                
+                # Process parties from AI response - keep actual parties from contract content
+                if 'parties' not in parsed or not isinstance(parsed['parties'], list):
+                    parsed['parties'] = []
+                
+                # Replace "Chưa xác định" with null in parties
+                for party in parsed['parties']:
+                    if isinstance(party, dict):
+                        replace_unknown_with_null(party, 'name')
+                        replace_unknown_with_null(party, 'representative')
+                        replace_unknown_with_null(party, 'taxCode')
+                        replace_unknown_with_null(party, 'contact')
+                        replace_unknown_with_null(party, 'address')
+                
+                # Replace "Chưa xác định" with null in paymentDetails
+                if 'paymentDetails' in parsed and isinstance(parsed['paymentDetails'], dict):
+                    replace_unknown_with_null(parsed['paymentDetails'], 'totalValue')
+                    replace_unknown_with_null(parsed['paymentDetails'], 'schedule')
+                    replace_unknown_with_null(parsed['paymentDetails'], 'currency')
+                    replace_unknown_with_null(parsed['paymentDetails'], 'paymentMethod')
+                
+                # Summary field is no longer needed - removed
+                
+                # Ensure arrays are properly initialized
+                for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
+                    if field not in parsed or not isinstance(parsed[field], list):
+                        parsed[field] = []
+                
+                # Ensure nested objects are properly initialized
+                if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
+                    parsed['paymentDetails'] = {"totalValue": None, "schedule": None, "currency": None, "paymentMethod": None}
+                
+                # Ensure totalValue is properly handled
+                if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
+                    total_value = parsed['paymentDetails']['totalValue']
+                    if total_value is None or total_value == "" or total_value == "Chưa xác định":
+                        parsed['paymentDetails']['totalValue'] = None
+                    else:
+                        # Keep as string to preserve descriptive format
+                        parsed['paymentDetails']['totalValue'] = str(total_value)
+                
+                if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
+                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
+                
+                if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
+                    parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
+                
+                # Normalize Unicode characters in the entire parsed object
+                parsed = normalize_object(parsed)
+                
+                logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
+                return parsed
+                
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                    if attempt < max_retries - 1:
+                        # Calculate delay with exponential backoff and jitter
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                        logging.warning(f"[AI_RATE_LIMIT_RETRY] Rate limit hit, retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        logging.error(f"[AI_RATE_LIMIT_EXHAUSTED] All retry attempts exhausted for: {filename}")
+                        return self._create_fallback_summary(content, filename)
                 else:
-                    return normalize_unicode_text(obj)
-            
-            # Replace "Chưa xác định" with null in main fields
-            replace_unknown_with_null(parsed, 'contractNumber')
-            replace_unknown_with_null(parsed, 'contractType')
-            replace_unknown_with_null(parsed, 'object')
-            replace_unknown_with_null(parsed, 'effectiveDate')
-            replace_unknown_with_null(parsed, 'term')
-            replace_unknown_with_null(parsed, 'terminationConditions')
-            
-            # Process parties from AI response - keep actual parties from contract content
-            if 'parties' not in parsed or not isinstance(parsed['parties'], list):
-                parsed['parties'] = []
-            
-            # Replace "Chưa xác định" with null in parties
-            for party in parsed['parties']:
-                if isinstance(party, dict):
-                    replace_unknown_with_null(party, 'name')
-                    replace_unknown_with_null(party, 'representative')
-                    replace_unknown_with_null(party, 'taxCode')
-                    replace_unknown_with_null(party, 'contact')
-                    replace_unknown_with_null(party, 'address')
-            
-            # Replace "Chưa xác định" with null in paymentDetails
-            if 'paymentDetails' in parsed and isinstance(parsed['paymentDetails'], dict):
-                replace_unknown_with_null(parsed['paymentDetails'], 'totalValue')
-                replace_unknown_with_null(parsed['paymentDetails'], 'schedule')
-                replace_unknown_with_null(parsed['paymentDetails'], 'currency')
-                replace_unknown_with_null(parsed['paymentDetails'], 'paymentMethod')
-            
-            # Summary field is no longer needed - removed
-            
-            # Ensure arrays are properly initialized
-            for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
-                if field not in parsed or not isinstance(parsed[field], list):
-                    parsed[field] = []
-            
-            # Ensure nested objects are properly initialized
-            if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
-                parsed['paymentDetails'] = {"totalValue": None, "schedule": None, "currency": None, "paymentMethod": None}
-            
-            # Ensure totalValue is properly handled
-            if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
-                total_value = parsed['paymentDetails']['totalValue']
-                if total_value is None or total_value == "" or total_value == "Chưa xác định":
-                    parsed['paymentDetails']['totalValue'] = None
-                else:
-                    # Keep as string to preserve descriptive format
-                    parsed['paymentDetails']['totalValue'] = str(total_value)
-            
-            if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
-                parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
-            
-            if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
-                parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
-            
-            # Normalize Unicode characters in the entire parsed object
-            parsed = normalize_object(parsed)
-            
-            logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
-            return parsed
-            
-        except Exception as e:
-            logging.exception(f"[AI_GEMINI_FALLBACK] Using fallback summary due to exception: {e}")
-            return None
+                    logging.exception(f"[AI_GEMINI_FALLBACK] Using fallback summary due to exception: {e}")
+                    return self._create_fallback_summary(content, filename)
+        
+        return self._create_fallback_summary(content, filename)
+    
+    def _create_fallback_summary(self, content: str, filename: str) -> Dict[str, Any]:
+        """Tạo summary cơ bản khi không thể gọi Gemini"""
+        logging.info(f"[AI_FALLBACK_SUMMARY] Creating fallback summary for: {filename}")
+        
+        # Extract basic information using simple text processing
+        lines = content.split('\n')
+        title = "Hợp đồng không xác định"
+        parties = []
+        
+        # Try to find title
+        for line in lines:
+            if "HỢP ĐỒNG" in line.upper() or "CONTRACT" in line.upper():
+                title = line.strip()
+                break
+        
+        # Try to find parties
+        for i, line in enumerate(lines):
+            if "Bên" in line and ("cho thuê" in line.lower() or "thuê" in line.lower() or "A" in line or "B" in line):
+                party_name = line.strip()
+                if party_name:
+                    parties.append({
+                        "role": party_name,
+                        "name": "Chưa xác định",
+                        "representative": "Chưa xác định",
+                        "taxCode": None,
+                        "contact": None,
+                        "address": None
+                    })
+        
+        return {
+            "title": title,
+            "contractNumber": None,
+            "contractType": "Hợp đồng",
+            "parties": parties if parties else [
+                {"role": "Bên A", "name": "Chưa xác định", "representative": "Chưa xác định", "taxCode": None, "contact": None, "address": None},
+                {"role": "Bên B", "name": "Chưa xác định", "representative": "Chưa xác định", "taxCode": None, "contact": None, "address": None}
+            ],
+            "object": "Chưa xác định",
+            "effectiveDate": None,
+            "term": "Chưa xác định",
+            "paymentDetails": {
+                "totalValue": None,
+                "schedule": None,
+                "currency": None,
+                "paymentMethod": None
+            },
+            "keyClauses": [],
+            "favorableClauses": [],
+            "unfavorableClauses": [],
+            "reminders": [],
+            "terminationConditions": "Chưa xác định",
+            "riskAssessment": {
+                "riskLevel": "MEDIUM",
+                "riskFactors": ["Không thể phân tích chi tiết"],
+                "mitigationMeasures": ["Cần xem xét kỹ hợp đồng"]
+            },
+            "complianceStatus": {
+                "status": "REVIEW_REQUIRED",
+                "issues": ["Cần phân tích chi tiết"],
+                "recommendations": ["Xem xét kỹ các điều khoản"]
+            }
+        }
     
     def classify_document(self, content: str, filename: str) -> Dict[str, Any]:
         """Phân loại tài liệu sử dụng Gemini AI"""
