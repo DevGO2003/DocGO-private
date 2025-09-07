@@ -4,7 +4,7 @@ import React from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useState } from 'react'
 
-export default function TaoHopDongPage() {
+export default function CreateContractPage() {
   // Basic contract info
   const [title, setTitle] = useState('')
   const [creatorId, setCreatorId] = useState<string>('')
