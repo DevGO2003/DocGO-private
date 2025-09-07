@@ -18,7 +18,7 @@ interface CalendarEvent {
   isAllDay: boolean
 }
 
-export default function LichPage() {
+export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<'month' | 'week' | 'day'>('month')
@@ -111,10 +111,10 @@ export default function LichPage() {
   ]
 
   useEffect(() => {
-    loadEvents()
+    fetchCalendarEvents()
   }, [selectedDate, view])
 
-  const loadEvents = async () => {
+  const fetchCalendarEvents = async () => {
     setLoading(true)
     try {
       // Mock API call
