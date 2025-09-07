@@ -30,7 +30,7 @@ interface User {
   lastLogin?: string
 }
 
-export default function QuyenSuaTheoVaiTroPage() {
+export default function RoleBasedPermissionsPage() {
   const [permissions, setPermissions] = useState<Permission[]>([])
   const [roles, setRoles] = useState<Role[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -43,7 +43,7 @@ export default function QuyenSuaTheoVaiTroPage() {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
 
   useEffect(() => {
-    const loadData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -69,7 +69,7 @@ export default function QuyenSuaTheoVaiTroPage() {
         setLoading(false)
       }
     }
-    loadData()
+    fetchData()
   }, [])
 
   const handleCreateRole = async (roleData: any) => {
