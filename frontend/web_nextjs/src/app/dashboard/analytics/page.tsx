@@ -11,7 +11,8 @@ const XAxis = dynamic(() => import('recharts').then(m => m.XAxis), { ssr: false 
 const YAxis = dynamic(() => import('recharts').then(m => m.YAxis), { ssr: false })
 const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid), { ssr: false })
 const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false })
-const Legend = dynamic(() => import('recharts').then(m => m.Legend), { ssr: false })
+// Import Legend directly to avoid type issues
+import { Legend } from 'recharts'
 const PieChart = dynamic(() => import('recharts').then(m => m.PieChart), { ssr: false })
 const Pie = dynamic(() => import('recharts').then(m => m.Pie), { ssr: false })
 const Cell = dynamic(() => import('recharts').then(m => m.Cell), { ssr: false })

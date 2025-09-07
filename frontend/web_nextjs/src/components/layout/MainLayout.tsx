@@ -91,14 +91,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
 // Layout variants
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token, loading } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!token || !user)) {
+    if (!loading && !user) {
       router.replace('/auth/login')
     }
-  }, [loading, token, user, router])
+  }, [loading, user, router])
 
   if (loading) {
     return (
@@ -108,7 +108,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     )
   }
 
-  if (!token || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
