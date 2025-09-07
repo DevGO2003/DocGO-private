@@ -15,7 +15,7 @@ interface ActivityLog {
   status: 'SUCCESS' | 'FAILED' | 'WARNING'
 }
 
-export default function LichSuHoatDongPage() {
+export default function ActivityHistoryPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
@@ -121,10 +121,10 @@ export default function LichSuHoatDongPage() {
   ]
 
   useEffect(() => {
-    loadLogs()
+    fetchActivityLogs()
   }, [filters, currentPage])
 
-  const loadLogs = async () => {
+  const fetchActivityLogs = async () => {
     setLoading(true)
     try {
       // Mock API call
