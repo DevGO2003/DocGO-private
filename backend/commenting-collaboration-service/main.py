@@ -1,32 +1,72 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
-import os
+from starlette.responses import JSONResponse
+from datetime import datetime, timezone
+import uuid
 
-from routers import collab
+from .routers import router as collab_router
+
+
+def iso_now() -> str:
+	return datetime.now(timezone.utc).isoformat()
+
+
+def build_envelope(status_code: int, short_message: str, description: str, data, path: str, request_id: str):
+	return {
+		"apiVersion": "v1",
+		"statusCode": status_code,
+		"shortMessage": short_message,
+		"description": description,
+		"data": data,
+		"timestamp": iso_now(),
+		"requestId": request_id,
+		"path": path,
+	}
 
 
 app = FastAPI(
-    title=os.getenv("APP_NAME", "Commenting Collaboration Service"),
-    version=os.getenv("APP_VERSION", "1.0.0"),
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_version="3.0.3",
+	title="Commenting Collaboration Service",
+	description="Dịch vụ thread/comment cho DocGO",
+	version="1.0.0",
 )
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+	CORSMiddleware,
+	allow_origins=["*"],
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
 )
 
-app.include_router(collab.router, prefix="/api/v1/commenting-collaboration-service")
+
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+	request.state.request_id = str(uuid.uuid4())
+	try:
+		response = await call_next(request)
+		return response
+	except Exception:
+		envelope = build_envelope(
+			500,
+			"Internal Server Error",
+			"Đã xảy ra lỗi không lường trước.",
+			None,
+			request.url.path,
+			request.state.request_id,
+		)
+		return JSONResponse(status_code=500, content=envelope)
 
 
 @app.get("/")
-async def root():
-    return RedirectResponse(url="/docs", status_code=302)
+async def root(request: Request):
+	return build_envelope(200, "Success", "Commenting Collaboration Service is running.", {"service": "commenting-collaboration-service"}, request.url.path, request.state.request_id)
+
+
+@app.get("/healthz")
+async def healthz():
+	return {"status": "ok"}
+
+
+app.include_router(collab_router)
 
 
