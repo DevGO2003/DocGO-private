@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 
-export default function TaoNhanhPage() {
+export default function QuickCreatePage() {
   const [dragActive, setDragActive] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [textInput, setTextInput] = useState('')
