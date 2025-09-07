@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 
-export default function HuongDanPage() {
+export default function GuidePage() {
   const [activeSection, setActiveSection] = useState('overview')
 
   const sections = [
