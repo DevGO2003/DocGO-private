@@ -32,7 +32,7 @@ interface Comment {
   mentions?: string[]
 }
 
-export default function BinhLuanCongTacPage() {
+export default function CollaborationCommentsPage() {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +44,7 @@ export default function BinhLuanCongTacPage() {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    const loadComments = async () => {
+    const fetchComments = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -57,7 +57,7 @@ export default function BinhLuanCongTacPage() {
         setLoading(false)
       }
     }
-    loadComments()
+    fetchComments()
   }, [])
 
   const filteredComments = comments.filter(comment => {
