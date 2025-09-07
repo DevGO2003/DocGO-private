@@ -146,7 +146,7 @@ class KafkaService {
           {
             key: event.type,
             value: JSON.stringify(event),
-            timestamp: Date.now(),
+            timestamp: Date.now().toString(),
           },
         ],
       });
