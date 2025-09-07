@@ -302,12 +302,12 @@ export default function APIDocsPage() {
     }
   ]
 
-  const filteredEndpoints = endpoints.filter(endpoint =>
+  const filteredApiEndpoints = endpoints.filter(endpoint =>
     endpoint.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
     endpoint.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const getMethodColor = (method: string) => {
+  const getHttpMethodColor = (method: string) => {
     switch (method) {
       case 'GET':
         return 'bg-green-100 text-green-800 border-green-200'
@@ -348,19 +348,19 @@ export default function APIDocsPage() {
               />
             </div>
             <div className="text-sm text-gray-500">
-              {filteredEndpoints.length} endpoint{filteredEndpoints.length !== 1 ? 's' : ''}
+              {filteredApiEndpoints.length} endpoint{filteredApiEndpoints.length !== 1 ? 's' : ''}
             </div>
           </div>
         </div>
 
         {/* API Endpoints */}
         <div className="space-y-4">
-          {filteredEndpoints.map((endpoint) => (
+          {filteredApiEndpoints.map((endpoint) => (
             <div key={endpoint.id} className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getMethodColor(endpoint.method)}`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getHttpMethodColor(endpoint.method)}`}>
                       {endpoint.method}
                     </span>
                     <code className="text-lg font-mono text-gray-900">{endpoint.path}</code>
