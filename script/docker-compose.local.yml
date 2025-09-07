@@ -266,6 +266,139 @@ services:
     networks:
       - docgo_network_local
 
+  # OCR Document Extraction Service (FastAPI) - Backend Service with Hot Reload
+  ocr-document-extraction-service:
+    image: python:3.11-slim
+    container_name: docgo-local-ocr-document-extraction-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8011:8011"
+    env_file:
+      - ../backend/ocr-document-extraction-service/env/.env.local
+    volumes:
+      - ../backend/ocr-document-extraction-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8011 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # eSignature Integration Service (FastAPI) - Backend Service with Hot Reload
+  esignature-integration-service:
+    image: python:3.11-slim
+    container_name: docgo-local-esignature-integration-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8008:8008"
+    env_file:
+      - ../backend/esignature-integration-service/env/.env.local
+    volumes:
+      - ../backend/esignature-integration-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8008 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Notification Service (FastAPI) - Backend Service with Hot Reload
+  notification-service:
+    image: python:3.11-slim
+    container_name: docgo-local-notification-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8009:8009"
+    env_file:
+      - ../backend/notification-service/env/.env.local
+    volumes:
+      - ../backend/notification-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8009 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Reporting & Analytics Service (FastAPI) - Backend Service with Hot Reload
+  reporting-analytics-service:
+    image: python:3.11-slim
+    container_name: docgo-local-reporting-analytics-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8010:8010"
+    env_file:
+      - ../backend/reporting-analytics-service/env/.env.local
+    volumes:
+      - ../backend/reporting-analytics-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8010 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Integration Connectors Service (FastAPI) - Backend Service with Hot Reload
+  integration-connectors-service:
+    image: python:3.11-slim
+    container_name: docgo-local-integration-connectors-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8014:8014"
+    env_file:
+      - ../backend/integration-connectors-service/env/.env.local
+    volumes:
+      - ../backend/integration-connectors-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8014 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Batch ETL Service (FastAPI) - Backend Service with Hot Reload
+  batch-etl-service:
+    image: python:3.11-slim
+    container_name: docgo-local-batch-etl-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8015:8015"
+    env_file:
+      - ../backend/batch-etl-service/env/.env.local
+    volumes:
+      - ../backend/batch-etl-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8015 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Health Monitoring Agent (FastAPI) - Backend Service with Hot Reload
+  health-monitoring-agent:
+    image: python:3.11-slim
+    container_name: docgo-local-health-monitoring-agent
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8016:8016"
+    env_file:
+      - ../backend/health-monitoring-agent/env/.env.local
+    volumes:
+      - ../backend/health-monitoring-agent:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8016 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
   
 
   # Approval Workflow Service (FastAPI) - Backend Service with Hot Reload
