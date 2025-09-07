@@ -21,7 +21,11 @@ import {
   WrenchScrewdriverIcon,
   ClipboardDocumentListIcon,
   ArrowPathIcon,
-  CodeBracketIcon
+  CodeBracketIcon,
+  BellIcon,
+  CalendarDaysIcon,
+  DocumentChartBarIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -37,11 +41,15 @@ const navigation = [
   { name: 'Quyền sửa theo vai trò', href: '/dashboard/quyen-sua-theo-vai-tro', icon: ShieldCheckIcon },
   { name: 'Đã duyệt', href: '/dashboard/da-duyet', icon: DocumentTextIcon },
   { name: 'Thống kê', href: '/dashboard/thong-ke', icon: ChartBarIcon },
+  { name: 'Báo cáo', href: '/dashboard/bao-cao', icon: DocumentChartBarIcon },
   { name: 'Quản lý người dùng', href: '/dashboard/quan-ly-nguoi-dung', icon: UserGroupIcon },
   { name: 'Phê duyệt tài khoản', href: '/dashboard/phe-duyet-tai-khoan', icon: CogIcon },
+  { name: 'Thông báo', href: '/dashboard/thong-bao', icon: BellIcon },
+  { name: 'Lịch', href: '/dashboard/lich', icon: CalendarDaysIcon },
   { name: 'Lịch sử hoạt động', href: '/dashboard/lich-su-hoat-dong', icon: ClipboardDocumentListIcon },
   { name: 'Backup & Restore', href: '/dashboard/backup-restore', icon: ArrowPathIcon },
   { name: 'API Documentation', href: '/dashboard/api-docs', icon: CodeBracketIcon },
+  { name: 'Trợ giúp & Hỗ trợ', href: '/dashboard/tro-giup-ho-tro', icon: QuestionMarkCircleIcon },
   { name: 'Cài đặt', href: '/dashboard/cai-dat', icon: WrenchScrewdriverIcon },
   { name: 'Hướng dẫn', href: '/dashboard/huong-dan', icon: DocumentTextIcon },
 ]
