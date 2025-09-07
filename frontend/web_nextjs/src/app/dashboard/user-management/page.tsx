@@ -15,7 +15,7 @@ interface User {
   permissions?: string[]
 }
 
-export default function QuanLyNguoiDungPage() {
+export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +28,7 @@ export default function QuanLyNguoiDungPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const load = async () => {
+    const fetchUsers = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -41,7 +41,7 @@ export default function QuanLyNguoiDungPage() {
         setLoading(false)
       }
     }
-    load()
+    fetchUsers()
   }, [])
 
   const filtered = users.filter(u =>
@@ -129,8 +129,8 @@ export default function QuanLyNguoiDungPage() {
         <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
           <div className="absolute inset-0 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-pink-50 opacity-50" />
           <div className="relative px-6 py-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý người dùng</h1>
-            <p className="mt-1 text-gray-600">Tạo, chỉnh sửa, khóa và phân quyền người dùng.</p>
+        <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+            <p className="mt-1 text-gray-600">Create, edit, suspend, and manage user permissions.</p>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500" />
         </div>
@@ -138,34 +138,34 @@ export default function QuanLyNguoiDungPage() {
         {/* Search and Actions */}
         <div className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
           <div className="border-b px-5 py-4 flex items-center justify-between bg-gray-50/60">
-            <h2 className="text-base font-semibold text-gray-900">Tìm kiếm & Lọc</h2>
+            <h2 className="text-base font-semibold text-gray-900">Search & Filter</h2>
             <div className="flex items-center gap-2">
               {selectedUsers.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{selectedUsers.length} đã chọn</span>
+                  <span className="text-sm text-gray-600">{selectedUsers.length} selected</span>
                   <button
                     onClick={() => handleBulkAction('activate')}
                     className="px-3 py-1 text-xs rounded-md bg-green-600 text-white hover:bg-green-700"
                   >
-                    Kích hoạt
+                    Activate
                   </button>
                   <button
                     onClick={() => handleBulkAction('deactivate')}
                     className="px-3 py-1 text-xs rounded-md bg-gray-600 text-white hover:bg-gray-700"
                   >
-                    Vô hiệu hóa
+                    Deactivate
                   </button>
                   <button
                     onClick={() => handleBulkAction('delete')}
                     className="px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700"
                   >
-                    Xóa
+                    Delete
                   </button>
                   <button
                     onClick={clearSelection}
                     className="px-3 py-1 text-xs rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    Bỏ chọn
+                    Clear Selection
                   </button>
                 </div>
               )}
@@ -182,14 +182,14 @@ export default function QuanLyNguoiDungPage() {
               value={query} 
               onChange={e=>setQuery(e.target.value)} 
               className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" 
-              placeholder="Tên / Email" 
+              placeholder="Name / Email" 
             />
             <select 
               value={role} 
               onChange={e=>setRole(e.target.value)} 
               className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
-              <option value="">Tất cả vai trò</option>
+              <option value="">All Roles</option>
               <option value="ADMIN">Admin</option>
               <option value="MANAGER">Manager</option>
               <option value="STAFF">Staff</option>
@@ -201,7 +201,7 @@ export default function QuanLyNguoiDungPage() {
               onChange={e=>setStatus(e.target.value)} 
               className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
-              <option value="">Tất cả trạng thái</option>
+              <option value="">All Statuses</option>
               <option value="ACTIVE">Active</option>
               <option value="INACTIVE">Inactive</option>
               <option value="PENDING">Pending</option>

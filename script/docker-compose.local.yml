@@ -246,6 +246,26 @@ services:
     networks:
       - docgo_network_local
 
+  # Web Next.js Frontend - with Hot Reload
+  web-nextjs:
+    image: node:18-alpine
+    container_name: docgo-local-web-nextjs
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../frontend/web_nextjs/env/.env.local
+    volumes:
+      - ../frontend/web_nextjs:/app
+      - /app/node_modules
+    command: >
+      sh -c "npm install && npm run dev"
+    depends_on:
+      - api-gateway-bff
+    networks:
+      - docgo_network_local
+
 
 
 volumes:

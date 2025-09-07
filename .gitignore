@@ -11,6 +11,16 @@
 # Exception: env/ directory should be tracked (contains .env.example)
 !**/env/
 
+# Ignore sensitive environment files inside env/ directories
+**/env/.env
+**/env/.env.local
+**/env/.env.production
+**/env/.env.staging
+
+# But DO track the example file
+!**/env/.env.example
+
+
 # IDE/Editor
 .vscode/
 .idea/

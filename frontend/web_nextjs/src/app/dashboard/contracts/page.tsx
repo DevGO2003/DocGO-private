@@ -26,7 +26,7 @@ const STATUS = ['ALL','DRAFT','PENDING_REVIEW','APPROVED','ACTIVE','EXPIRED','TE
 const TYPES = ['ALL','Dịch vụ','Mua bán','Hợp tác','Lao động','Bảo mật','Khác'] as const
 const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
 
-export default function HopDongPage() {
+export default function ContractsPage() {
   const [items, setItems] = useState<ContractItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
@@ -106,10 +106,10 @@ export default function HopDongPage() {
               <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/tao-hop-dong" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
+              <Link href="/dashboard/create-contract" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
                 + Tạo hợp đồng
               </Link>
-              <Link href="/dashboard/tao-nhanh" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
+              <Link href="/dashboard/quick-create" className="px-4 py-2 rounded-lg bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 shadow-sm">
                 ⚡ Tạo nhanh (OCR)
               </Link>
             </div>
@@ -287,7 +287,7 @@ export default function HopDongPage() {
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
                   </div>
-                  <Link href={`/dashboard/hop-dong/${c.id}`} className="block">
+                  <Link href={`/dashboard/contracts/${c.id}`} className="block">
                     <div className="flex justify-between items-start gap-4 ml-6">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
@@ -343,7 +343,7 @@ export default function HopDongPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <Link href={`/dashboard/hop-dong/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                            <Link href={`/dashboard/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
                               {c.title}
                             </Link>
                             <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
@@ -362,7 +362,7 @@ export default function HopDongPage() {
                         <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <Link href={`/dashboard/hop-dong/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+                            <Link href={`/dashboard/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
                               Xem
                             </Link>
                             <button className="text-gray-400 hover:text-gray-600 text-sm">
