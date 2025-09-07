@@ -106,15 +106,17 @@ public class AuthController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestHeader("Authorization") String authorization) {
         
         // TODO: Implement get all users logic
+        boolean hasData = false; // Placeholder until service implemented
         RestResponse<Object> response = RestResponse.<Object>builder()
                 .apiVersion("v1")
-                .statusCode(HttpStatus.OK.value())
-                .shortMessage("Success")
-                .description("Danh sách tài khoản đã được lấy thành công.")
-                .data(null) // Placeholder
+                .statusCode(hasData ? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value())
+                .shortMessage(hasData ? "Success" : "No Content")
+                .description(hasData ? "Danh sách tài khoản đã được lấy thành công." : "Không có tài khoản nào.")
+                .data(hasData ? new Object() : null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())

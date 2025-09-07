@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 import os
@@ -17,6 +17,7 @@ from schemas.user import (
     UserSearchParams,
     UserProfileWithApproval
 )
+from schemas.response import RestResponse
 from models.user_approval import ApprovalStatus
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -24,7 +25,8 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.post("/", response_model=UserProfileResponse, status_code=201)
 async def create_user(
     user_data: UserProfileCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Create a new user profile"""
     try:
@@ -39,7 +41,8 @@ async def create_user(
 async def get_user(
     user_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get user profile by ID"""
     user = UserService.get_user_profile(db, user_id, system_id)
@@ -51,7 +54,8 @@ async def get_user(
 async def get_user_by_email(
     email: str,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get user profile by email"""
     user = UserService.get_user_by_email(db, email, system_id)
@@ -64,7 +68,8 @@ async def update_user(
     user_id: int,
     user_data: UserProfileUpdate,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Update user profile"""
     user = UserService.update_user_profile(db, user_id, system_id, user_data)
@@ -72,42 +77,70 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.delete("/{user_id}", status_code=204)
+@router.delete("/{user_id}")
 async def delete_user(
     user_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Delete user profile"""
     success = UserService.delete_user_profile(db, user_id, system_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
+    return RestResponse[None](
+        statusCode=200,
+        shortMessage="Success",
+        description="User deleted successfully",
+        data=None,
+        path=f"/api/v1/user-management-service/users/{user_id}"
+    )
 
-@router.get("/", response_model=UserProfileList)
+@router.get("/", response_model=RestResponse[UserProfileList])
 async def search_users(
+    request: Request,
     system_id: str = Query(..., description="System identifier"),
-    full_name: Optional[str] = Query(None, description="Search by full name"),
-    email: Optional[str] = Query(None, description="Search by email"),
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Page size"),
-    db: Session = Depends(get_db)
+    searchTerm: Optional[str] = Query(None, description="Free text search across full_name/email"),
+    pageNumber: int = Query(0, ge=0, description="Page number (0-based)"),
+    pageSize: int = Query(10, ge=1, le=100, description="Page size"),
+    sortBy: Optional[str] = Query(None, description="Sort by field"),
+    sortDirection: Optional[str] = Query(None, description="Sort direction ASC/DESC"),
+    includeDeleted: Optional[bool] = Query(False, description="Include soft-deleted records"),
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Search users with pagination and filtering"""
     search_params = UserSearchParams(
         system_id=system_id,
-        full_name=full_name,
-        email=email,
-        page=page,
-        size=size
+        full_name=searchTerm,
+        email=searchTerm,
+        page=pageNumber + 1,
+        size=pageSize
     )
-    return UserService.search_users(db, search_params)
+    result = UserService.search_users(db, search_params)
+    if result.total == 0:
+        return RestResponse[UserProfileList](
+            statusCode=204,
+            shortMessage="No Content",
+            description="Không có người dùng nào.",
+            data=None,
+            path=request.url.path
+        )
+    return RestResponse[UserProfileList](
+        statusCode=200,
+        shortMessage="Success",
+        description="Danh sách người dùng được lấy thành công.",
+        data=result,
+        path=request.url.path
+    )
 
 @router.post("/{user_id}/avatar", response_model=UserProfileResponse)
 async def upload_avatar(
     user_id: int,
     system_id: str = Form(..., description="System identifier"),
     file: UploadFile = File(..., description="Avatar image file"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Upload user avatar"""
     # Validate file type
@@ -153,11 +186,12 @@ async def upload_avatar(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading avatar: {str(e)}")
 
-@router.delete("/{user_id}/avatar", status_code=204)
+@router.delete("/{user_id}/avatar")
 async def delete_avatar(
     user_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Delete user avatar"""
     user = UserService.get_user_profile(db, user_id, system_id)
@@ -176,12 +210,20 @@ async def delete_avatar(
     user.avatar_url = None
     user.updated_at = datetime.utcnow()
     db.commit()
+    return RestResponse[None](
+        statusCode=200,
+        shortMessage="Success",
+        description="Avatar deleted successfully",
+        data=None,
+        path=f"/api/v1/user-management-service/users/{user_id}/avatar"
+    )
 
 @router.get("/{user_id}/with-approval", response_model=UserProfileWithApproval)
 async def get_user_with_approval(
     user_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get user profile with approval status"""
     user = UserService.get_user_profile(db, user_id, system_id)
@@ -213,7 +255,8 @@ async def get_user_with_approval(
 @router.get("/{user_id}/roles")
 async def get_user_roles(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get user roles from Identity Service"""
     try:
@@ -225,7 +268,8 @@ async def get_user_roles(
 @router.get("/system/{system_id}/with-approvals")
 async def get_users_with_approvals(
     system_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get all users with their approval status for a system"""
     users_with_approvals = UserService.get_users_with_approval_status(db, system_id)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Header, Request
 from sqlalchemy.orm import Session
 from typing import List
 from config.database import get_db
@@ -11,7 +11,9 @@ from schemas.user import UserProfileResponse
 router = APIRouter(prefix="/roles", tags=["Roles & Permissions"])
 
 @router.get("/", response_model=RestResponse[List[RoleDetail]])
-async def get_all_roles():
+async def get_all_roles(
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
+):
     """
     🔹 Đầu vào
     Không có tham số đầu vào.
@@ -32,7 +34,8 @@ async def get_all_roles():
 
 @router.get("/{role_name}", response_model=RestResponse[RoleDetail])
 async def get_role_details(
-    role_name: RoleEnum = Path(..., description="Tên vai trò")
+    role_name: RoleEnum = Path(..., description="Tên vai trò"),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """
     🔹 Đầu vào
@@ -61,7 +64,8 @@ async def get_role_details(
 async def update_user_role(
     user_id: int,
     new_role: RoleEnum,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """
     🔹 Đầu vào
@@ -93,7 +97,8 @@ async def update_user_role(
 @router.get("/users/{user_id}/role", response_model=RestResponse[RoleEnum])
 async def get_user_role(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """
     🔹 Đầu vào
@@ -121,7 +126,8 @@ async def get_user_role(
 @router.get("/users/{user_id}/permissions", response_model=RestResponse[List[PermissionEnum]])
 async def get_user_permissions(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """
     🔹 Đầu vào

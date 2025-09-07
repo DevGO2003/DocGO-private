@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -20,7 +20,8 @@ router = APIRouter(prefix="/approvals", tags=["Approvals"])
 @router.post("/", response_model=UserApprovalResponse, status_code=201)
 async def create_approval(
     approval_data: UserApprovalCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Create a new approval record"""
     try:
@@ -35,7 +36,8 @@ async def create_approval(
 async def get_approval(
     approval_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get approval by ID"""
     approval = ApprovalService.get_approval(db, approval_id, system_id)
@@ -47,7 +49,8 @@ async def get_approval(
 async def get_approval_by_user(
     user_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get approval by user ID"""
     approval = ApprovalService.get_approval_by_user(db, user_id, system_id)
@@ -60,7 +63,8 @@ async def update_approval(
     approval_id: int,
     approval_data: UserApprovalUpdate,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Update approval status"""
     try:
@@ -81,26 +85,40 @@ async def update_approval(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@router.delete("/{approval_id}", status_code=204)
+@router.delete("/{approval_id}")
 async def delete_approval(
     approval_id: int,
     system_id: str = Query(..., description="System identifier"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Delete approval record"""
     success = ApprovalService.delete_approval(db, approval_id, system_id)
     if not success:
         raise HTTPException(status_code=404, detail="Approval not found")
+    return RestResponse[None](
+        statusCode=200,
+        shortMessage="Success",
+        description="Approval deleted successfully",
+        data=None,
+        path=f"/api/v1/user-management-service/approvals/{approval_id}"
+    )
 
-@router.get("/", response_model=UserApprovalList)
+@router.get("/", response_model=RestResponse[UserApprovalList])
 async def search_approvals(
+    request: Request,
     system_id: str = Query(..., description="System identifier"),
+    searchTerm: Optional[str] = Query(None, description="Free text search"),
     status: Optional[ApprovalStatus] = Query(None, description="Filter by approval status"),
     user_id: Optional[int] = Query(None, description="Filter by user ID"),
     approver_id: Optional[int] = Query(None, description="Filter by approver ID"),
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Page size"),
-    db: Session = Depends(get_db)
+    pageNumber: int = Query(0, ge=0, description="Page number (0-based)"),
+    pageSize: int = Query(10, ge=1, le=100, description="Page size"),
+    sortBy: Optional[str] = Query(None, description="Sort by field"),
+    sortDirection: Optional[str] = Query(None, description="Sort direction ASC/DESC"),
+    includeDeleted: Optional[bool] = Query(False, description="Include soft-deleted records"),
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Search approvals with pagination and filtering"""
     search_params = ApprovalSearchParams(
@@ -108,15 +126,31 @@ async def search_approvals(
         status=status,
         user_id=user_id,
         approver_id=approver_id,
-        page=page,
-        size=size
+        page=pageNumber + 1,
+        size=pageSize
     )
-    return ApprovalService.search_approvals(db, search_params)
+    result = ApprovalService.search_approvals(db, search_params)
+    if result.total == 0:
+        return RestResponse[UserApprovalList](
+            statusCode=204,
+            shortMessage="No Content",
+            description="Không có phê duyệt nào.",
+            data=None,
+            path=request.url.path
+        )
+    return RestResponse[UserApprovalList](
+        statusCode=200,
+        shortMessage="Success",
+        description="Danh sách phê duyệt được lấy thành công.",
+        data=result,
+        path=request.url.path
+    )
 
 @router.post("/bulk", response_model=list[UserApprovalResponse])
 async def bulk_update_approvals(
     bulk_request: BulkApprovalRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Bulk update approval status for multiple users"""
     try:
@@ -137,7 +171,8 @@ async def bulk_update_approvals(
 @router.get("/statistics/{system_id}")
 async def get_approval_statistics(
     system_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get approval statistics for a system"""
     try:
@@ -155,7 +190,8 @@ async def approve_user(
     system_id: str = Query(..., description="System identifier"),
     approver_id: int = Query(..., description="ID of the approver"),
     notes: Optional[str] = Query(None, description="Approval notes"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Approve a user (shortcut endpoint)"""
     try:
@@ -189,7 +225,8 @@ async def reject_user(
     system_id: str = Query(..., description="System identifier"),
     approver_id: int = Query(..., description="ID of the approver"),
     notes: str = Query(..., description="Rejection reason (required)"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Reject a user (shortcut endpoint)"""
     try:
@@ -220,31 +257,33 @@ async def reject_user(
 @router.get("/pending/{system_id}")
 async def get_pending_approvals(
     system_id: str,
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Page size"),
-    db: Session = Depends(get_db)
+    pageNumber: int = Query(0, ge=0, description="Page number (0-based)"),
+    pageSize: int = Query(10, ge=1, le=100, description="Page size"),
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get pending approvals for a system"""
     search_params = ApprovalSearchParams(
         system_id=system_id,
         status=ApprovalStatus.PENDING,
-        page=page,
-        size=size
+        page=pageNumber + 1,
+        size=pageSize
     )
     return ApprovalService.search_approvals(db, search_params)
 
 @router.get("/approved/{system_id}")
 async def get_approved_users(
     system_id: str,
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Page size"),
-    db: Session = Depends(get_db)
+    pageNumber: int = Query(0, ge=0, description="Page number (0-based)"),
+    pageSize: int = Query(10, ge=1, le=100, description="Page size"),
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., description="Authorization: Bearer <token>")
 ):
     """Get approved users for a system"""
     search_params = ApprovalSearchParams(
         system_id=system_id,
         status=ApprovalStatus.APPROVED,
-        page=page,
-        size=size
+        page=pageNumber + 1,
+        size=pageSize
     )
     return ApprovalService.search_approvals(db, search_params)
