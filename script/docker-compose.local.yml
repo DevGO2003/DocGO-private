@@ -203,12 +203,15 @@ services:
     working_dir: /app
     ports:
       - "8004:8004"
+    environment:
+      - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo
     volumes:
       - ../backend/versioning-document-history-service:/app
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8004 --reload"
     depends_on:
       - redis
+      - mariadb
     networks:
       - docgo_network_local
 
@@ -260,6 +263,63 @@ services:
       - mariadb
       - redis
       - elasticsearch
+    networks:
+      - docgo_network_local
+
+  # Approval Workflow Service (FastAPI) - Backend Service with Hot Reload
+  approval-workflow-service:
+    image: python:3.11-slim
+    container_name: docgo-local-approval-workflow-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8006:8006"
+    env_file:
+      - ../backend/approval-workflow-service/env/.env.local
+    volumes:
+      - ../backend/approval-workflow-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8006 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Commenting Collaboration Service (FastAPI) - Backend Service with Hot Reload
+  commenting-collaboration-service:
+    image: python:3.11-slim
+    container_name: docgo-local-commenting-collaboration-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8005:8005"
+    env_file:
+      - ../backend/commenting-collaboration-service/env/.env.local
+    volumes:
+      - ../backend/commenting-collaboration-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8005 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
+  # Reminder Scheduler Service (FastAPI) - Backend Service with Hot Reload
+  reminder-scheduler-service:
+    image: python:3.11-slim
+    container_name: docgo-local-reminder-scheduler-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8007:8007"
+    env_file:
+      - ../backend/reminder-scheduler-service/env/.env.local
+    volumes:
+      - ../backend/reminder-scheduler-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8007 --reload"
+    depends_on:
+      - redis
     networks:
       - docgo_network_local
 
