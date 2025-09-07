@@ -61,6 +61,10 @@ async def add_request_id(request: Request, call_next):
 async def root(request: Request):
     return build_envelope(200, "Success", "Versioning Document History Service is running.", {"service": "versioning-document-history-service"}, request.url.path, request.state.request_id)
 
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok"}
+
 
 app.include_router(versioning_router)
 

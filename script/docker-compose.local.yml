@@ -195,6 +195,23 @@ services:
     networks:
       - docgo_network_local
 
+  # Versioning Document History Service (FastAPI) - Backend Service with Hot Reload
+  versioning-document-history-service:
+    image: python:3.11-slim
+    container_name: docgo-local-versioning-document-history-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8004:8004"
+    volumes:
+      - ../backend/versioning-document-history-service:/app
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8004 --reload"
+    depends_on:
+      - redis
+    networks:
+      - docgo_network_local
+
 
 
   # Contract Management Service (Spring Boot) - Backend Service with Hot Reload
