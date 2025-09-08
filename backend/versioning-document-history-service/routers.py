@@ -1,3 +1,59 @@
+from fastapi import APIRouter, Request, HTTPException, Query
+from typing import Optional
+from datetime import datetime
+import uuid
+
+from schemas.response import RestResponse
+from schemas.versioning import (
+    Snapshot, HistoryEvent, DiffRequest, DiffResult, RestoreRequest, RestoreResult,
+    PaginatedSnapshots
+)
+from services.versioning_service import VersioningService
+
+
+router = APIRouter(tags=["Versioning Document History Service"])
+service = VersioningService()
+
+
+@router.get("/snapshots", summary="Danh sách snapshots")
+async def list_snapshots(request: Request,
+    pageNumber: int = Query(0, ge=0),
+    pageSize: int = Query(10, ge=1, le=100),
+    contractId: Optional[str] = None,
+    createdBy: Optional[str] = None
+):
+    result = service.list_snapshots(contractId, createdBy, pageNumber, pageSize)
+    if result.number_of_elements == 0:
+        return RestResponse(statusCode=204, shortMessage="No Content", description="Không có snapshot.", data=None, path=request.url.path)
+    return RestResponse(statusCode=200, shortMessage="Success", description=f"Đã lấy {result.number_of_elements} snapshots", data=PaginatedSnapshots(result=result), path=request.url.path)
+
+
+@router.get("/{contract_id}/history", summary="Lịch sử phiên bản")
+async def get_history(request: Request, contract_id: str,
+    fromTime: Optional[str] = None,
+    toTime: Optional[str] = None,
+    actor: Optional[str] = None,
+    eventType: Optional[str] = None
+):
+    events = service.get_history(contract_id, fromTime, toTime, actor, eventType)
+    if not events:
+        return RestResponse(statusCode=204, shortMessage="No Content", description="Không có lịch sử.", data=None, path=request.url.path)
+    return RestResponse(statusCode=200, shortMessage="Success", description=f"Đã lấy {len(events)} sự kiện", data=events, path=request.url.path)
+
+
+@router.post("/{contract_id}/diff", summary="So sánh hai phiên bản")
+async def diff_versions(request: Request, contract_id: str, body: DiffRequest):
+    diff = service.compute_diff(contract_id, body.leftVersion, body.rightVersion, body.mode)
+    return RestResponse(statusCode=200, shortMessage="Success", description="So sánh hai phiên bản", data=diff, path=request.url.path)
+
+
+@router.put("/{contract_id}/restore", summary="Khôi phục về phiên bản chỉ định")
+async def restore_version(request: Request, contract_id: str, body: RestoreRequest):
+    restored = service.restore_version(contract_id, body.version, body.reason, body.actorId)
+    if restored is None:
+        raise HTTPException(status_code=404, detail="Không tìm thấy hợp đồng/phiên bản")
+    return RestResponse(statusCode=200, shortMessage="Success", description="Khôi phục phiên bản thành công", data=restored, path=request.url.path)
+
 from fastapi import APIRouter, Request, Body
 from pydantic import BaseModel, Field
 from typing import List, Optional, Generic, TypeVar

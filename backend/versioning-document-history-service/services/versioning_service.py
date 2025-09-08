@@ -1,3 +1,56 @@
+from typing import Dict, List, Optional
+from datetime import datetime
+
+from schemas.versioning import (
+    Snapshot, HistoryEvent, DiffResult, ChangeItem, PageResult, RestoreResult
+)
+
+
+class VersioningService:
+    def __init__(self) -> None:
+        self.snapshots: Dict[str, Snapshot] = {}
+        self.history: Dict[str, List[HistoryEvent]] = {}
+
+    def list_snapshots(self, contract_id: Optional[str], created_by: Optional[str], page: int, size: int) -> PageResult:
+        data = list(self.snapshots.values())
+        if contract_id:
+            data = [s for s in data if s.contractId == contract_id]
+        if created_by:
+            data = [s for s in data if s.createdBy == created_by]
+        total = len(data)
+        start = page * size
+        end = start + size
+        page_data = data[start:end]
+        return PageResult(
+            content=page_data,
+            total_elements=total,
+            total_pages=(total + size - 1) // size,
+            page_number=page,
+            page_size=size,
+            number_of_elements=len(page_data),
+        )
+
+    def get_history(self, contract_id: str, from_time: Optional[str], to_time: Optional[str], actor: Optional[str], event_type: Optional[str]) -> List[HistoryEvent]:
+        events = self.history.get(contract_id, [])
+        if actor:
+            events = [e for e in events if e.actor == actor]
+        if event_type:
+            events = [e for e in events if e.eventType == event_type]
+        return events
+
+    def compute_diff(self, contract_id: str, left: int, right: int, mode: str) -> DiffResult:
+        # Placeholder: return a simple diff result
+        changes = [
+            ChangeItem(path="/section/1", changeType="MODIFIED", before="text A", after="text B"),
+        ]
+        return DiffResult(leftVersion=left, rightVersion=right, summary=f"{len(changes)} changes", changes=changes)
+
+    def restore_version(self, contract_id: str, version: int, reason: Optional[str], actor_id: Optional[str]) -> Optional[RestoreResult]:
+        # Placeholder: pretend to restore and create a new version
+        restored_from = version
+        new_version = version + 1
+        return RestoreResult(contractId=contract_id, restoredFromVersion=restored_from, newVersion=new_version, status="RESTORED", note=reason)
+
 from __future__ import annotations
 
 from typing import List, Optional
