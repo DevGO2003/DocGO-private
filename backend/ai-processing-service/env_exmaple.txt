@@ -1,0 +1,22 @@
+# AI Processing Service Environment Variables
+
+# Service Configuration
+HOST=0.0.0.0
+PORT=8017
+PYTHONPATH=/app
+
+# Gemini AI Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# File Upload Configuration
+MAX_FILE_SIZE=50MB
+SUPPORTED_FORMATS=docx,pdf,txt
+
+# Results Directory
+RESULTS_DIR=results
+
+# Kafka
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_FILE_EVENTS_TOPIC=file.events
+KAFKA_AI_EVENTS_TOPIC=ai.events
+KAFKA_CLIENT_ID=ai-processing-service
