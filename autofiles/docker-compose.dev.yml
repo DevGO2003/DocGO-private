@@ -1,0 +1,321 @@
+version: '3.8'
+
+services:
+  # API Gateway BFF (Next.js)
+  api-gateway-bff:
+    build: ./backend/api-gateway-bff
+    ports:
+      - "8000:3000"
+    volumes:
+      - ./backend/api-gateway-bff:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  # Authentication Identity Service (Spring Boot)
+  authentication-identity-service:
+    build: ./backend/authentication-identity-service
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/authentication-identity-service:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # User Management Service (FastAPI)
+  user-management-service:
+    build: ./backend/user-management-service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend/user-management-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - DB_DRIVER=mariadb+pymysql
+      - DB_PORT=3306
+      - DB_USER=docgo_user
+      - DB_PASSWORD=docgo_password
+      - DB_NAME=docgo_user_service
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Contract Management Service (Spring Boot)
+  contract-management-service:
+    build: ./backend/contract-management-service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/contract-management-service:/app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Versioning Document History Service (FastAPI)
+  versioning-document-history-service:
+    build: ./backend/versioning-document-history-service
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend/versioning-document-history-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Commenting Collaboration Service (FastAPI)
+  commenting-collaboration-service:
+    build: ./backend/commenting-collaboration-service
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend/commenting-collaboration-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Approval Workflow Service (FastAPI)
+  approval-workflow-service:
+    build: ./backend/approval-workflow-service
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend/approval-workflow-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Reminder Scheduler Service (FastAPI)
+  reminder-scheduler-service:
+    build: ./backend/reminder-scheduler-service
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./backend/reminder-scheduler-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # E-Signature Integration Service (FastAPI)
+  esignature-integration-service:
+    build: ./backend/esignature-integration-service
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./backend/esignature-integration-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Notification Service (FastAPI)
+  notification-service:
+    build: ./backend/notification-service
+    ports:
+      - "8009:8009"
+    volumes:
+      - ./backend/notification-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Reporting Analytics Service (FastAPI)
+  reporting-analytics-service:
+    build: ./backend/reporting-analytics-service
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./backend/reporting-analytics-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # OCR Document Extraction Service (FastAPI)
+  ocr-document-extraction-service:
+    build: ./backend/ocr-document-extraction-service
+    ports:
+      - "8011:8011"
+    volumes:
+      - ./backend/ocr-document-extraction-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # File Storage Asset Service (FastAPI)
+  file-storage-asset-service:
+    build: ./backend/file-storage-asset-service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend/file-storage-asset-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Audit Activity Log Service (FastAPI)
+  audit-activity-log-service:
+    build: ./backend/audit-activity-log-service
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./backend/audit-activity-log-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # Integration Connectors Service (FastAPI)
+  integration-connectors-service:
+    build: ./backend/integration-connectors-service
+    ports:
+      - "8014:8014"
+    volumes:
+      - ./backend/integration-connectors-service:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Batch ETL Service (FastAPI)
+  batch-etl-service:
+    build: ./backend/batch-etl-service
+    ports:
+      - "8015:8015"
+    volumes:
+      - ./backend/batch-etl-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # Health Monitoring Agent (FastAPI)
+  health-monitoring-agent:
+    build: ./backend/health-monitoring-agent
+    ports:
+      - "8016:8016"
+    volumes:
+      - ./backend/health-monitoring-agent:/app
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # AI Processing Service (FastAPI)
+  ai-processing-service:
+    build: ./backend/ai-processing-service
+    ports:
+      - "8017:8017"
+    volumes:
+      - ./backend/ai-processing-service:/app
+    environment:
+      - DATABASE_HOST=mongodb
+      - REDIS_HOST=redis
+    depends_on:
+      - mongodb
+      - redis
+
+  # General File Management Service (FastAPI)
+  general-file-management-service:
+    build: ./backend/general-file-management-service
+    ports:
+      - "8018:8018"
+    volumes:
+      - ./backend/general-file-management-service:/app
+      - ./backend/general-file-management-service/uploads:/app/uploads
+    environment:
+      - DATABASE_HOST=mariadb
+      - REDIS_HOST=redis
+    depends_on:
+      - mariadb
+      - redis
+
+  # Database Services
+  mariadb:
+    image: mariadb:11.2
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=sapassword
+      - MYSQL_DATABASE=docgo
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=docgo
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Elasticsearch for search functionality
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+volumes:
+  mariadb_data:
+  mongodb_data:
+  redis_data:
+  elasticsearch_data:
