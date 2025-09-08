@@ -45,6 +45,7 @@ document/**/*.xls
 document/**/*.xlsx
 document/**/*.ppt
 document/**/*.pptx
+document/**/*.drawio
 **/*.zip
 **/*.rar
 **/*.7z
