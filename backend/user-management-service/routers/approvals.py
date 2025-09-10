@@ -14,6 +14,7 @@ from schemas.approval import (
     BulkApprovalRequest
 )
 from models.user_approval import ApprovalStatus
+from schemas.response import RestResponse
 
 router = APIRouter(prefix="/approvals", tags=["Approvals"])
 

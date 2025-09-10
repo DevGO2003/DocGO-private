@@ -413,24 +413,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       let response;
+      const fwdHeaders: any = {};
+      if (req.headers['authorization']) {
+        fwdHeaders['Authorization'] = req.headers['authorization'] as string;
+      }
       switch (method.toUpperCase()) {
         case 'GET':
-          response = await service.get(endpoint, { params: queryParams });
+          response = await service.get(endpoint, { params: queryParams, headers: fwdHeaders });
           break;
         case 'POST':
           response = await service.post(endpoint, parsedBody, {
             params: queryParams,
-            headers: { 'Content-Type': req.headers['content-type'] as string }
+            headers: { 'Content-Type': req.headers['content-type'] as string, ...fwdHeaders }
           });
           break;
         case 'PUT':
           response = await service.put(endpoint, parsedBody, {
             params: queryParams,
-            headers: { 'Content-Type': req.headers['content-type'] as string }
+            headers: { 'Content-Type': req.headers['content-type'] as string, ...fwdHeaders }
           });
           break;
         case 'DELETE':
-          response = await service.delete(endpoint, { params: queryParams });
+          response = await service.delete(endpoint, { params: queryParams, headers: fwdHeaders });
           break;
         default:
           return res.status(405).json({

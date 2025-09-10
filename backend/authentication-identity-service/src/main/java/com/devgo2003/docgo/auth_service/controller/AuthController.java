@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -100,6 +102,7 @@ public class AuthController {
         """
     )
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RestResponse<Object>> getAllUsers(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -121,6 +124,37 @@ public class AuthController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Lấy thông tin người dùng hiện tại",
+        description = "Trả về thông tin user dựa trên token hiện tại"
+    )
+    @GetMapping("/me")
+    public ResponseEntity<RestResponse<AuthResponse.UserInfo>> me(Authentication authentication) {
+        String username = authentication.getName();
+        var userOpt = authService.findByUsername(username);
+        RestResponse<AuthResponse.UserInfo> response = userOpt.map(u -> RestResponse.<AuthResponse.UserInfo>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Lấy thông tin người dùng thành công.")
+                .data(new AuthResponse.UserInfo(u.getUserId(), u.getUsername(), u.getEmail(), u.getRole().name()))
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build())
+            .orElse(RestResponse.<AuthResponse.UserInfo>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .shortMessage("Not Found")
+                .description("Không tìm thấy người dùng.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -479,14 +513,27 @@ public class AuthController {
     )
     @PostMapping("/{id}/refresh")
     public ResponseEntity<RestResponse<AuthResponse>> refreshToken(@PathVariable Long id, @RequestHeader("Authorization") String refreshToken) {
-        // TODO: Implement refresh token logic
-        AuthResponse authResponse = new AuthResponse(); // Placeholder
+        String token = refreshToken.replace("Bearer ", "");
+        // For simplicity, re-issue access token from refresh subject
+        var claims = authService.parseRefreshClaims(token);
+        var username = claims.getSubject();
+        var userOpt = authService.findByUsername(username);
+        AuthResponse body;
+        if (userOpt.isPresent()) {
+            var user = userOpt.get();
+            var userInfo = new AuthResponse.UserInfo(user.getUserId(), user.getUsername(), user.getEmail(), user.getRole().name());
+            var access = authService.generateAccessFor(user);
+            var newRefresh = authService.generateRefreshFor(user);
+            body = new AuthResponse(true, "Token refreshed", access, userInfo, newRefresh);
+        } else {
+            body = new AuthResponse(false, "Invalid refresh token", null, null, null);
+        }
         RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
                 .description("Token đã được làm mới thành công.")
-                .data(authResponse)
+                .data(body)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
@@ -544,12 +591,43 @@ public class AuthController {
     )
     @PostMapping("/{id}/logout")
     public ResponseEntity<RestResponse<Void>> logout(@PathVariable Long id, @RequestHeader("Authorization") String token) {
-        // TODO: Implement logout logic
+        // Blacklist current access token until its expiry
+        String raw = token.replace("Bearer ", "");
+        try {
+            var claims = authService.parseRefreshClaims(raw);
+            var expiry = claims.getExpiration().toInstant();
+            authService.blacklist(raw, expiry);
+        } catch (Exception ignored) {}
         RestResponse<Void> response = RestResponse.<Void>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
                 .description("Đăng xuất thành công.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Thu hồi tất cả token của người dùng",
+        description = "Tăng tokenVersion để vô hiệu hóa tất cả token hiện tại của user"
+    )
+    @PostMapping("/{id}/revoke")
+    public ResponseEntity<RestResponse<Void>> revokeAll(@PathVariable Long id) {
+        var userOpt = authService.findById(id);
+        if (userOpt.isPresent()) {
+            var user = userOpt.get();
+            user.setTokenVersion(user.getTokenVersion() + 1);
+            authService.save(user);
+        }
+        RestResponse<Void> response = RestResponse.<Void>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Đã thu hồi tất cả token của người dùng.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())

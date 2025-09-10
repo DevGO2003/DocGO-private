@@ -36,7 +36,7 @@ public class User extends BaseEntity {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false, columnDefinition = "VARCHAR(20)")
     private Role role;
 
     @Column(name = "status", nullable = false)
@@ -97,6 +97,10 @@ public class User extends BaseEntity {
      */
     @Column(name = "metadata_json", columnDefinition = "TEXT")
     private String metadataJson;
+
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private Integer tokenVersion = 0;
 
     // Additional methods for user management
     public void incrementFailedLoginAttempts() {

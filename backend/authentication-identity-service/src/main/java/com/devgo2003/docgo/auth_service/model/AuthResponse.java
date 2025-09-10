@@ -7,12 +7,20 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AuthResponse {
     private boolean success;
     private String message;
-    private String token; // For future JWT implementation
+    private String token; // access token
     private UserInfo user;
+    private String refreshToken; // newly added refresh token
+
+    public AuthResponse(boolean success, String message, String token, UserInfo user, String refreshToken) {
+        this.success = success;
+        this.message = message;
+        this.token = token;
+        this.user = user;
+        this.refreshToken = refreshToken;
+    }
     
     @Data
     @NoArgsConstructor

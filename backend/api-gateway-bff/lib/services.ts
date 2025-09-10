@@ -36,7 +36,7 @@ class ServiceManager {
     this.addService('authentication', {
       name: 'authentication-identity-service',
       url: selectUrl(process.env.AUTHENTICATION_SERVICE_URL, 'http://authentication-identity-service:8001', 'http://localhost:8001'),
-      healthCheck: '/actuator/health',
+      healthCheck: '/api/v1/authentication-identity-service/auth/health',
       timeout: 10000
     });
 
@@ -273,9 +273,7 @@ class ServiceManager {
     }
 
     try {
-      const response: AxiosResponse<RestResponse<any>> = await service.get('/api/v1/authentication-identity-service/auth/login', {
-        data: loginRequest
-      });
+      const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/authentication-identity-service/auth/login', loginRequest);
       return response.data;
     } catch (error: any) {
       logger.error('❌ Authentication failed:', error.response?.data || error.message);

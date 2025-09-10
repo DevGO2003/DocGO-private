@@ -12,7 +12,6 @@ import com.devgo2003.docgo.contract_service.common.exception.ConflictException;
 import com.devgo2003.docgo.contract_service.common.exception.InvalidInputException;
 import com.devgo2003.docgo.contract_service.common.exception.NoContentException;
 import com.devgo2003.docgo.contract_service.common.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,6 @@ public class ContractService {
             "createdAt", "createdBy", "deletedAt", "deletedBy", "isDeleted", "version"
     ));
 
-    @Autowired
     public ContractService(ContractRepository contractRepository,
                            ContractAttachmentRepository attachmentRepository,
                            ContractEventRepository eventRepository,
@@ -55,7 +53,7 @@ public class ContractService {
     /**
      * Hàm tiện ích để lấy contract hoặc ném ResourceNotFoundException
      */
-    private Contract getContractOrThrow(Long id) {
+    private Contract getContractOrThrow(String id) {
         return contractRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng với ID: " + id));
     }
@@ -71,14 +69,15 @@ public class ContractService {
         event.setContractId(savedContract.getId());
         event.setEventType("CREATE");
         event.setEventData("{\"message\": \"Tạo hợp đồng mới\"}");
-        event.setActor("system");
+        event.setUserName("system");
+        event.setTimestamp(LocalDateTime.now());
 
         eventRepository.save(event);
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "created"));
         return savedContract;
     }
 
-    public Optional<Contract> getContract(Long id) {
+    public Optional<Contract> getContract(String id) {
         return contractRepository.findById(id);
     }
 
@@ -121,7 +120,7 @@ public class ContractService {
     }
 
     @Transactional
-    public Contract updateContract(Long id, Contract updatedContract) {
+    public Contract updateContract(String id, Contract updatedContract) {
         Contract existingContract = getContractOrThrow(id);
 
         if (existingContract.getIsDeleted()) {
@@ -141,7 +140,8 @@ public class ContractService {
         event.setContractId(savedContract.getId());
         event.setEventType("UPDATE");
         event.setEventData("{\"message\": \"Cập nhật hợp đồng\"}");
-        event.setActor("system");
+        event.setUserName("system");
+        event.setTimestamp(LocalDateTime.now());
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(savedContract, "updated"));
@@ -149,7 +149,7 @@ public class ContractService {
     }
 
     @Transactional
-    public void softDeleteContract(Long id) {
+    public void softDeleteContract(String id) {
         Contract contract = getContractOrThrow(id);
 
         if (contract.getIsDeleted()) {
@@ -164,14 +164,15 @@ public class ContractService {
         event.setContractId(contract.getId());
         event.setEventType("SOFT_DELETE");
         event.setEventData("{\"message\": \"Xóa mềm hợp đồng\"}");
-        event.setActor("system");
+        event.setUserName("system");
+        event.setTimestamp(LocalDateTime.now());
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(contract, "soft_deleted"));
     }
 
     @Transactional
-    public void restoreContract(Long id) {
+    public void restoreContract(String id) {
         Contract contract = getContractOrThrow(id);
 
         if (!contract.getIsDeleted()) {
@@ -186,14 +187,15 @@ public class ContractService {
         event.setContractId(contract.getId());
         event.setEventType("RESTORE");
         event.setEventData("{\"message\": \"Khôi phục hợp đồng\"}");
-        event.setActor("system");
+        event.setUserName("system");
+        event.setTimestamp(LocalDateTime.now());
         eventRepository.save(event);
 
         eventPublisher.publishEvent(new ContractEventPayload(contract, "restored"));
     }
 
     @Transactional
-    public ContractAttachment addAttachment(Long contractId, ContractAttachment attachment) {
+    public ContractAttachment addAttachment(String contractId, ContractAttachment attachment) {
         Contract contract = getContractOrThrow(contractId);
 
         if (contract.getIsDeleted()) {
@@ -206,23 +208,24 @@ public class ContractService {
         ContractEvent event = new ContractEvent();
         event.setContractId(contractId);
         event.setEventType("ATTACHMENT_ADD");
-        event.setEventData("{\"file_id\": \"" + savedAttachment.getFileId() + "\", \"file_name\": \"" + savedAttachment.getFileName() + "\"}");
-        event.setActor("system");
+        event.setEventData("{\"file_id\": \"" + savedAttachment.getId() + "\", \"file_name\": \"" + savedAttachment.getFileName() + "\"}");
+        event.setUserName("system");
+        event.setTimestamp(LocalDateTime.now());
         eventRepository.save(event);
 
         return savedAttachment;
     }
 
-    public List<ContractAttachment> getAttachments(Long contractId) {
+    public List<ContractAttachment> getAttachments(String contractId) {
         getContractOrThrow(contractId);
-        List<ContractAttachment> attachments = attachmentRepository.findByContractIdAndIsDeletedFalse(contractId);
+        List<ContractAttachment> attachments = attachmentRepository.findByContractId(contractId);
         if (attachments.isEmpty()) {
             throw new NoContentException("Không tìm thấy file đính kèm nào cho hợp đồng này.");
         }
         return attachments;
     }
 
-    public List<ContractEvent> getContractEvents(Long contractId) {
-        return eventRepository.findByContractIdOrderByEventTimeDesc(contractId);
+    public List<ContractEvent> getContractEvents(String contractId) {
+        return eventRepository.findByContractIdOrderByTimestampDesc(contractId);
     }
 }
