@@ -45,6 +45,14 @@ export default function LoginPage() {
     }
   }
 
+  const handleGoogleLogin = () => {
+    setIsLoading(true)
+    // Redirect to backend OAuth2 endpoint (call Auth service directly)
+    const baseUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+    const oauthUrl = `${baseUrl}/oauth2/authorization/google`
+    window.location.href = oauthUrl
+  }
+
   const features = [
     'Quản lý hợp đồng thông minh',
     'Xử lý tài liệu bằng AI',
@@ -199,7 +207,8 @@ export default function LoginPage() {
                       type="button"
                       variant="outline"
                       className="w-full"
-                      onClick={() => console.log('Google login')}
+                      onClick={handleGoogleLogin}
+                      disabled={isLoading}
                     >
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path
@@ -219,7 +228,7 @@ export default function LoginPage() {
                           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                         />
                       </svg>
-                      Đăng nhập với Google
+                      {isLoading ? 'Đang xử lý...' : 'Đăng nhập với Google'}
                     </Button>
                   </div>
 

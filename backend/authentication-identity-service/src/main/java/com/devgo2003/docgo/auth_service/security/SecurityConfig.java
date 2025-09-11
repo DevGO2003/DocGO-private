@@ -47,7 +47,7 @@ public class SecurityConfig {
         
         http
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
@@ -69,7 +69,12 @@ public class SecurityConfig {
             http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
             )
-            .oauth2Login(oauth2 -> oauth2.successHandler(successHandler));
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(successHandler)
+                .failureHandler((request, response, exception) -> {
+                    response.sendRedirect("http://localhost:3000/auth/login?error=oauth_failed");
+                })
+            );
         }
 
         return http.build();

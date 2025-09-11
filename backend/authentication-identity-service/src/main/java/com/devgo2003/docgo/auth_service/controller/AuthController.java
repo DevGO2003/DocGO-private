@@ -756,4 +756,27 @@ public class AuthController {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @Operation(
+        summary = "Test OAuth2 Google Login", 
+        description = "Endpoint để test OAuth2 Google login flow"
+    )
+    @GetMapping("/oauth2/test")
+    public ResponseEntity<RestResponse<String>> testOAuth2() {
+        String googleClientId = System.getenv().getOrDefault("GOOGLE_CLIENT_ID", "");
+        boolean oauth2Enabled = googleClientId != null && !googleClientId.trim().isEmpty();
+        
+        RestResponse<String> response = RestResponse.<String>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("OAuth2 test endpoint")
+                .data("OAuth2 Google enabled: " + oauth2Enabled + 
+                      (oauth2Enabled ? " | Client ID: " + googleClientId.substring(0, 20) + "..." : ""))
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
