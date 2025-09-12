@@ -21,23 +21,37 @@ export default function OAuthCallbackPage() {
         const currentUrl = window.location.href
         
         // Check if this is a successful OAuth callback
-        if (currentUrl.includes('/login/oauth2/code/google')) {
+        if (currentUrl.includes('/login/oauth2/code/google') || currentUrl.includes('/oauth/callback')) {
           // The backend OAuth2LoginSuccessHandler should have already processed the OAuth
           // and redirected with token data in the URL or set cookies
           
           // Try to extract token from URL parameters or make a request to get user info
           const token = searchParams.get('token')
           const refreshToken = searchParams.get('refreshToken')
+          const success = searchParams.get('success')
+          const username = searchParams.get('username')
           
-          if (token) {
-            // Store tokens and redirect to dashboard
+          if (token && success === 'true') {
+            // Store tokens and user info
             localStorage.setItem('auth_token', token)
             if (refreshToken) {
               localStorage.setItem('refresh_token', refreshToken)
             }
             
+            // Create user object from OAuth data
+            const userData = {
+              userId: username, // Use username as userId for OAuth users
+              username: username,
+              email: username, // OAuth users typically use email as username
+              role: 'EMPLOYEE' // Default role for OAuth users
+            }
+            localStorage.setItem('user_data', JSON.stringify(userData))
+            
+            // Update auth context
+            setAuthData(userData)
+            
             setStatus('success')
-            setMessage('Đăng nhập Google thành công!')
+            setMessage(`Đăng nhập Google thành công! Chào mừng ${username}`)
             
             // Redirect to dashboard after a short delay
             setTimeout(() => {

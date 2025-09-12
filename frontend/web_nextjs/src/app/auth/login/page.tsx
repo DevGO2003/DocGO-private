@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -22,6 +22,7 @@ import {
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [oauthEnabled, setOauthEnabled] = useState<boolean | null>(null)
   const { login } = useAuth()
   const router = useRouter()
 
@@ -52,6 +53,26 @@ export default function LoginPage() {
     const oauthUrl = `${baseUrl}/oauth2/authorization/google`
     window.location.href = oauthUrl
   }
+
+  useEffect(() => {
+    const checkOauth = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+        const url = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`
+        const res = await fetch(url)
+        if (!res.ok) {
+          setOauthEnabled(false)
+          return
+        }
+        const json = await res.json()
+        const enabled = typeof json?.data === 'string' ? json.data.toLowerCase().includes('true') : !!json?.data
+        setOauthEnabled(enabled)
+      } catch {
+        setOauthEnabled(false)
+      }
+    }
+    checkOauth()
+  }, [])
 
   const features = [
     'Quản lý hợp đồng thông minh',
@@ -208,7 +229,7 @@ export default function LoginPage() {
                       variant="outline"
                       className="w-full"
                       onClick={handleGoogleLogin}
-                      disabled={isLoading}
+                      disabled={isLoading || oauthEnabled === false}
                     >
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path
@@ -230,6 +251,11 @@ export default function LoginPage() {
                       </svg>
                       {isLoading ? 'Đang xử lý...' : 'Đăng nhập với Google'}
                     </Button>
+                    {oauthEnabled === false && (
+                      <p className="text-xs text-red-600 text-center">
+                        Google OAuth hiện đang tắt. Vui lòng đăng nhập bằng tài khoản hoặc bật GOOGLE_CLIENT_ID/SECRET ở backend.
+                      </p>
+                    )}
                   </div>
 
                   {/* Register Link */}

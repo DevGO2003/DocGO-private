@@ -12,6 +12,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<boolean>
   logout: () => void
   refreshToken: () => Promise<void>
+  setAuthData: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -109,6 +110,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const setAuthData = (user: User) => {
+    setUser(user)
+  }
+
   const value: AuthContextType = {
     user,
     loading,
@@ -116,6 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     register,
     logout,
     refreshToken,
+    setAuthData,
   }
 
   return React.createElement(AuthContext.Provider, { value }, children)
