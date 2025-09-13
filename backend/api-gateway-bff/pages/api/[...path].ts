@@ -314,7 +314,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (fullPath.startsWith('authentication-identity-service')) {
       serviceKey = 'authentication';
-      endpoint = `/api/v1/${fullPath}`;
+      // Remove service name from path and add proper API prefix
+      const pathWithoutService = fullPath.replace('authentication-identity-service/', '');
+      endpoint = `/api/v1/authentication-identity-service/${pathWithoutService}`;
     } else if (fullPath.startsWith('user-management-service')) {
       serviceKey = 'user-management';
       endpoint = `/api/v1/${fullPath}`;
@@ -436,6 +438,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case 'DELETE':
           response = await service.delete(endpoint, { params: queryParams, headers: fwdHeaders });
           break;
+        case 'OPTIONS':
+          // Handle CORS preflight requests
+          res.status(200);
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+          res.setHeader('Access-Control-Max-Age', '86400');
+          return res.end();
         default:
           return res.status(405).json({
             error: 'Method not allowed',

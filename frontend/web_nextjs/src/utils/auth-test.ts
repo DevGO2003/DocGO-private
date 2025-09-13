@@ -15,7 +15,7 @@ export class AuthIntegrationTester {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
   }
 
   // Test backend connectivity

@@ -97,8 +97,8 @@ export default function LoginPage() {
       }
       
       // Redirect to backend OAuth2 endpoint (call Auth service directly)
-      const baseUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
-      const oauthUrl = `${baseUrl}/oauth2/authorize/google`
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const oauthUrl = `${baseUrl}/api/v1/authentication-identity-service/oauth2/authorize/google`
       
       // Add a small delay to show loading state
       setTimeout(() => {
@@ -129,7 +129,7 @@ export default function LoginPage() {
       // Optional: keep runtime probe if explicitly enabled
       const checkOauth = async () => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
+          const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
           const url = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`
           const res = await fetch(url, {
             method: 'GET',

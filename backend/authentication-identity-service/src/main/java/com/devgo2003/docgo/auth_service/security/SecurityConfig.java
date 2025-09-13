@@ -48,42 +48,65 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService, userRepository);
         
+        // Build the list of permitted paths
+        final String[] permittedPaths;
+        if (googleClientId != null && !googleClientId.trim().isEmpty()) {
+            permittedPaths = new String[]{
+                "/",
+                "/docs",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/api/v1/authentication-identity-service/auth/login",
+                "/api/v1/authentication-identity-service/auth/register",
+                "/api/v1/authentication-identity-service/auth/refresh",
+                "/api/v1/authentication-identity-service/auth/logout",
+                "/api/v1/authentication-identity-service/auth/health",
+                "/api/v1/authentication-identity-service/auth/oauth2/test",
+                "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
+                "/api/v1/authentication-identity-service/auth/oauth2/callback/google",
+                "/oauth2/**",
+                "/login/oauth2/**"
+            };
+        } else {
+            permittedPaths = new String[]{
+                "/",
+                "/docs",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/api/v1/authentication-identity-service/auth/login",
+                "/api/v1/authentication-identity-service/auth/register",
+                "/api/v1/authentication-identity-service/auth/refresh",
+                "/api/v1/authentication-identity-service/auth/logout",
+                "/api/v1/authentication-identity-service/auth/health",
+                "/api/v1/authentication-identity-service/auth/oauth2/test",
+                "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
+                "/api/v1/authentication-identity-service/auth/oauth2/callback/google"
+            };
+        }
+        
         http
             .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/docs",
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/api/v1/authentication-identity-service/auth/login",
-                    "/api/v1/authentication-identity-service/auth/register",
-                    "/api/v1/authentication-identity-service/auth/refresh",
-                    "/api/v1/authentication-identity-service/auth/logout",
-                    "/api/v1/authentication-identity-service/auth/health",
-                    "/api/v1/authentication-identity-service/auth/oauth2/test",
-                    "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
-                    "/api/v1/authentication-identity-service/auth/oauth2/callback/google"
-                ).permitAll()
+                .requestMatchers(permittedPaths).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Only enable OAuth2 if Google client ID is provided
+        // Temporarily disable OAuth2 to fix startup issues
+        // TODO: Re-enable OAuth2 after fixing Spring Security configuration
+        /*
         if (googleClientId != null && !googleClientId.trim().isEmpty()) {
             OAuth2LoginSuccessHandler successHandler = new OAuth2LoginSuccessHandler(userRepository, jwtUtil);
-            http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
+            http.oauth2Login(oauth2 -> oauth2
                 .successHandler(successHandler)
                 .failureHandler((request, response, exception) -> {
                     response.sendRedirect("http://localhost:3000/auth/login?error=oauth_failed");
                 })
             );
         }
+        */
 
         return http.build();
     }

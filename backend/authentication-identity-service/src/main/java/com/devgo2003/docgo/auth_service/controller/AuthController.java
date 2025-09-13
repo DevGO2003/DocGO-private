@@ -849,42 +849,6 @@ public class AuthController {
         }
     }
 
-    @Operation(
-        summary = "Lấy thông tin profile", 
-        description = "Lấy thông tin profile của user hiện tại"
-    )
-    @GetMapping("/me")
-    public ResponseEntity<RestResponse<AuthResponse>> getProfile(Authentication authentication) {
-        String username = authentication.getName();
-        var userOpt = authService.findByUsername(username);
-        
-        RestResponse<AuthResponse> response = userOpt.map(u -> {
-            AuthResponse.UserInfo userInfo = createUserInfoFromUser(u);
-            AuthResponse authResponse = new AuthResponse(true, "Profile retrieved successfully", null, userInfo, null);
-            
-            return RestResponse.<AuthResponse>builder()
-                    .apiVersion("v1")
-                    .statusCode(HttpStatus.OK.value())
-                    .shortMessage("Success")
-                    .description("Lấy thông tin profile thành công.")
-                    .data(authResponse)
-                    .timestamp(ZonedDateTime.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path(request.getRequestURI())
-                    .build();
-        })
-        .orElse(RestResponse.<AuthResponse>builder()
-            .apiVersion("v1")
-            .statusCode(HttpStatus.NOT_FOUND.value())
-            .shortMessage("Not Found")
-            .description("Không tìm thấy người dùng.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     /**
      * Helper method to create UserInfo from User entity
