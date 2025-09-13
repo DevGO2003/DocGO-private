@@ -468,6 +468,10 @@ services:
       - "3000:3000"
     env_file:
       - ../frontend/web_nextjs/env/.env.local
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=development
     volumes:
       - ../frontend/web_nextjs:/app
       - /app/node_modules

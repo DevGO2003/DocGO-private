@@ -64,6 +64,7 @@ public class SecurityConfig {
                 "/api/v1/authentication-identity-service/auth/oauth2/test",
                 "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
                 "/api/v1/authentication-identity-service/auth/oauth2/callback/google",
+                "/api/v1/authentication-identity-service/oauth2/**",
                 "/oauth2/**",
                 "/login/oauth2/**"
             };
@@ -80,7 +81,8 @@ public class SecurityConfig {
                 "/api/v1/authentication-identity-service/auth/health",
                 "/api/v1/authentication-identity-service/auth/oauth2/test",
                 "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
-                "/api/v1/authentication-identity-service/auth/oauth2/callback/google"
+                "/api/v1/authentication-identity-service/auth/oauth2/callback/google",
+                "/api/v1/authentication-identity-service/oauth2/**"
             };
         }
         
@@ -94,9 +96,7 @@ public class SecurityConfig {
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Temporarily disable OAuth2 to fix startup issues
-        // TODO: Re-enable OAuth2 after fixing Spring Security configuration
-        /*
+        // Enable OAuth2 configuration
         if (googleClientId != null && !googleClientId.trim().isEmpty()) {
             OAuth2LoginSuccessHandler successHandler = new OAuth2LoginSuccessHandler(userRepository, jwtUtil);
             http.oauth2Login(oauth2 -> oauth2
@@ -106,7 +106,6 @@ public class SecurityConfig {
                 })
             );
         }
-        */
 
         return http.build();
     }

@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   creator: 'DevGO2003',
   publisher: 'DevGO2003',
   robots: 'index, follow',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'DocGO - Quản lý tài liệu và hợp đồng thông minh',
     description: 'Nền tảng quản lý tài liệu và hợp đồng thông minh, giúp doanh nghiệp tối ưu hóa quy trình làm việc.',
@@ -40,8 +45,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi">
-      <body className={inter.className}>
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
+      <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
           {children}
           <Toaster 
