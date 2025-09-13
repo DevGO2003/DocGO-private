@@ -96,15 +96,20 @@ export default function LoginPage() {
         return
       }
       
-      // Redirect to backend OAuth2 endpoint (call Auth service directly)
+      // Get Google OAuth URL from backend
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-      const oauthUrl = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/authorization/google`
+      const apiUrl = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/authorization/google`
       
-      // Add a small delay to show loading state
-      setTimeout(() => {
-        try {
+      try {
+        // Call API to get Google OAuth URL
+        const response = await fetch(apiUrl)
+        const data = await response.json()
+        
+        if (data.statusCode === 200 && data.data) {
+          const googleOAuthUrl = data.data
+          
           // Open Google OAuth in new tab
-          const newWindow = window.open(oauthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
+          const newWindow = window.open(googleOAuthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
           
           if (!newWindow) {
             setOauthError('Không thể mở cửa sổ đăng nhập Google. Vui lòng cho phép popup.')
@@ -121,12 +126,16 @@ export default function LoginPage() {
             }
           }, 1000);
           
-        } catch (redirectError) {
-          console.error('OAuth redirect error:', redirectError)
-          setOauthError('Không thể chuyển hướng đến Google OAuth')
+        } else {
+          setOauthError('Không thể lấy Google OAuth URL: ' + (data.description || 'Unknown error'))
           setOauthLoading(false)
         }
-      }, 500)
+        
+      } catch (error) {
+        console.error('OAuth setup error:', error)
+        setOauthError('Không thể kết nối đến server OAuth')
+        setOauthLoading(false)
+      }
     } catch (error: any) {
       console.error('OAuth setup error:', error)
       
