@@ -103,7 +103,24 @@ export default function LoginPage() {
       // Add a small delay to show loading state
       setTimeout(() => {
         try {
-          window.location.href = oauthUrl
+          // Open Google OAuth in new tab
+          const newWindow = window.open(oauthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
+          
+          if (!newWindow) {
+            setOauthError('Không thể mở cửa sổ đăng nhập Google. Vui lòng cho phép popup.')
+            setOauthLoading(false)
+            return
+          }
+          
+          // Listen for the new window to close or receive message
+          const checkClosed = setInterval(() => {
+            if (newWindow.closed) {
+              clearInterval(checkClosed);
+              // Refresh the page or check login status
+              window.location.reload();
+            }
+          }, 1000);
+          
         } catch (redirectError) {
           console.error('OAuth redirect error:', redirectError)
           setOauthError('Không thể chuyển hướng đến Google OAuth')
