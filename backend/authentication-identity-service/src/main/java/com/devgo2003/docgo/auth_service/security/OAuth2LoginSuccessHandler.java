@@ -8,6 +8,8 @@ import com.devgo2003.docgo.auth_service.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -20,6 +22,8 @@ import java.util.UUID;
 
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginSuccessHandler.class);
+    
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
@@ -30,62 +34,178 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("[{}] OAuth2 authentication success started", requestId);
+        
         try {
+            // Validate authentication object
+            if (authentication == null || authentication.getPrincipal() == null) {
+                logger.error("[{}] Authentication or principal is null", requestId);
+                redirectToError(response, "authentication_null", requestId);
+                return;
+            }
+
             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
-            String email = (String) oAuth2User.getAttributes().getOrDefault("email", "");
-            String name = (String) oAuth2User.getAttributes().getOrDefault("name", "");
-            String username = email != null && !email.isEmpty() ? email : name;
-
-            // Log OAuth2 user info for debugging
-            System.out.println("OAuth2 User Info:");
-            System.out.println("Email: " + email);
-            System.out.println("Name: " + name);
-            System.out.println("Username: " + username);
-            System.out.println("All attributes: " + oAuth2User.getAttributes());
-
-            // Find or create user
-            User user = userRepository.findByUsername(username)
-                    .orElseGet(() -> {
-                        System.out.println("Creating new user for OAuth2: " + username);
-                        return userRepository.save(User.builder()
-                                .username(username)
-                                .email(email)
-                                .passwordHash("") // OAuth2 users don't need password
-                                .role(Role.EMPLOYEE)
-                                .status(UserStatus.ACTIVE)
-                                .build());
-                    });
-
-            // Generate JWT tokens
-            AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(user.getUserId(), user.getUsername(), user.getEmail(), user.getRole().name());
-            String accessToken = jwtUtil.generateAccessToken(user.getUsername(), Map.of(
-                    "userId", user.getUserId(),
-                    "role", user.getRole().name()
-            ));
-            String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
-
-            System.out.println("Generated tokens for user: " + username);
-            System.out.println("Access token: " + accessToken.substring(0, 20) + "...");
-
-            // Redirect to frontend with tokens as URL parameters
-            String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000") + 
-                    "/auth/oauth/callback" +
-                    "?token=" + java.net.URLEncoder.encode(accessToken, "UTF-8") +
-                    "&refreshToken=" + java.net.URLEncoder.encode(refreshToken, "UTF-8") +
-                    "&success=true" +
-                    "&username=" + java.net.URLEncoder.encode(username, "UTF-8");
+            Map<String, Object> attributes = oAuth2User.getAttributes();
             
-            System.out.println("Redirecting to: " + frontendUrl);
+            if (attributes == null || attributes.isEmpty()) {
+                logger.error("[{}] OAuth2 user attributes are null or empty", requestId);
+                redirectToError(response, "attributes_empty", requestId);
+                return;
+            }
+
+            // Extract user information with validation
+            String email = extractStringAttribute(attributes, "email", requestId);
+            String name = extractStringAttribute(attributes, "name", requestId);
+            String username = determineUsername(email, name, requestId);
+
+            if (username == null || username.trim().isEmpty()) {
+                logger.error("[{}] Username cannot be determined from OAuth2 attributes", requestId);
+                redirectToError(response, "username_required", requestId);
+                return;
+            }
+
+            logger.info("[{}] OAuth2 User Info - Email: {}, Name: {}, Username: {}", 
+                       requestId, email, name, username);
+            logger.debug("[{}] OAuth2 All attributes: {}", requestId, attributes);
+
+            // Find or create user with error handling
+            User user = findOrCreateUser(username, email, requestId);
+            if (user == null) {
+                logger.error("[{}] Failed to find or create user: {}", requestId, username);
+                redirectToError(response, "user_creation_failed", requestId);
+                return;
+            }
+
+            // Generate JWT tokens with error handling
+            String accessToken = generateAccessToken(user, requestId);
+            String refreshToken = generateRefreshToken(user, requestId);
+
+            if (accessToken == null || refreshToken == null) {
+                logger.error("[{}] Failed to generate tokens for user: {}", requestId, username);
+                redirectToError(response, "token_generation_failed", requestId);
+                return;
+            }
+
+            logger.info("[{}] Successfully generated tokens for user: {}", requestId, username);
+            logger.debug("[{}] Access token preview: {}...", requestId, accessToken.substring(0, Math.min(20, accessToken.length())));
+
+            // Redirect to frontend with tokens
+            String frontendUrl = buildRedirectUrl(accessToken, refreshToken, username, requestId);
+            logger.info("[{}] Redirecting to frontend: {}", requestId, frontendUrl);
+            
             response.sendRedirect(frontendUrl);
             
         } catch (Exception e) {
-            System.err.println("OAuth2 success handler error: " + e.getMessage());
-            e.printStackTrace();
-            
-            // Redirect to frontend with error
+            logger.error("[{}] OAuth2 success handler error: {}", requestId, e.getMessage(), e);
+            redirectToError(response, "oauth_error", requestId);
+        }
+    }
+
+    private String extractStringAttribute(Map<String, Object> attributes, String key, String requestId) {
+        try {
+            Object value = attributes.get(key);
+            if (value == null) {
+                logger.warn("[{}] Attribute '{}' is null", requestId, key);
+                return "";
+            }
+            return value.toString();
+        } catch (Exception e) {
+            logger.warn("[{}] Error extracting attribute '{}': {}", requestId, key, e.getMessage());
+            return "";
+        }
+    }
+
+    private String determineUsername(String email, String name, String requestId) {
+        if (email != null && !email.trim().isEmpty()) {
+            logger.debug("[{}] Using email as username: {}", requestId, email);
+            return email;
+        } else if (name != null && !name.trim().isEmpty()) {
+            logger.debug("[{}] Using name as username: {}", requestId, name);
+            return name;
+        } else {
+            logger.warn("[{}] Both email and name are empty, cannot determine username", requestId);
+            return null;
+        }
+    }
+
+    private User findOrCreateUser(String username, String email, String requestId) {
+        try {
+            return userRepository.findByUsername(username)
+                    .orElseGet(() -> {
+                        logger.info("[{}] Creating new OAuth2 user: {}", requestId, username);
+                        try {
+                            User newUser = User.builder()
+                                    .username(username)
+                                    .email(email)
+                                    .passwordHash("") // OAuth2 users don't need password
+                                    .role(Role.EMPLOYEE)
+                                    .status(UserStatus.ACTIVE)
+                                    .build();
+                            User savedUser = userRepository.save(newUser);
+                            logger.info("[{}] Successfully created new OAuth2 user: {}", requestId, username);
+                            return savedUser;
+                        } catch (Exception e) {
+                            logger.error("[{}] Failed to create new OAuth2 user: {}", requestId, e.getMessage(), e);
+                            return null;
+                        }
+                    });
+        } catch (Exception e) {
+            logger.error("[{}] Error finding/creating user: {}", requestId, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String generateAccessToken(User user, String requestId) {
+        try {
+            AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                user.getUserId(), 
+                user.getUsername(), 
+                user.getEmail(), 
+                user.getRole().name()
+            );
+            return jwtUtil.generateAccessToken(user.getUsername(), Map.of(
+                    "userId", user.getUserId(),
+                    "role", user.getRole().name()
+            ));
+        } catch (Exception e) {
+            logger.error("[{}] Error generating access token: {}", requestId, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String generateRefreshToken(User user, String requestId) {
+        try {
+            return jwtUtil.generateRefreshToken(user.getUsername());
+        } catch (Exception e) {
+            logger.error("[{}] Error generating refresh token: {}", requestId, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String buildRedirectUrl(String accessToken, String refreshToken, String username, String requestId) {
+        try {
+            String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000");
+            return frontendUrl + "/auth/oauth/callback" +
+                    "?token=" + java.net.URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
+                    "&refreshToken=" + java.net.URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
+                    "&success=true" +
+                    "&username=" + java.net.URLEncoder.encode(username, StandardCharsets.UTF_8) +
+                    "&requestId=" + requestId;
+        } catch (Exception e) {
+            logger.error("[{}] Error building redirect URL: {}", requestId, e.getMessage(), e);
+            return System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000") + "/auth/login?error=url_build_failed";
+        }
+    }
+
+    private void redirectToError(HttpServletResponse response, String errorCode, String requestId) {
+        try {
             String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000") + 
-                    "/auth/login?error=oauth_error";
+                    "/auth/login?error=" + errorCode + "&requestId=" + requestId;
+            logger.info("[{}] Redirecting to error page: {}", requestId, frontendUrl);
             response.sendRedirect(frontendUrl);
+        } catch (Exception e) {
+            logger.error("[{}] Failed to redirect to error page: {}", requestId, e.getMessage(), e);
         }
     }
 }

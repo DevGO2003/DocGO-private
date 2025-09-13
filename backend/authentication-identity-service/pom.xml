@@ -47,6 +47,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
+		<!-- Kafka for event publishing -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
 		<!-- OAuth2 Resource Server for JWT validation -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

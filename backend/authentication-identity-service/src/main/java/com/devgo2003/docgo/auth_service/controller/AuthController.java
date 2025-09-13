@@ -4,6 +4,8 @@ import com.devgo2003.docgo.auth_service.common.response.RestResponse;
 import com.devgo2003.docgo.auth_service.model.AuthRequest;
 import com.devgo2003.docgo.auth_service.model.AuthResponse;
 import com.devgo2003.docgo.auth_service.model.LoginRequest;
+import com.devgo2003.docgo.auth_service.model.RefreshTokenRequest;
+import com.devgo2003.docgo.auth_service.model.LogoutRequest;
 import com.devgo2003.docgo.auth_service.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -140,7 +142,7 @@ public class AuthController {
                 .statusCode(HttpStatus.OK.value())
                 .shortMessage("Success")
                 .description("Lấy thông tin người dùng thành công.")
-                .data(new AuthResponse.UserInfo(u.getUserId(), u.getUsername(), u.getEmail(), u.getRole().name()))
+                .data(createUserInfoFromUser(u))
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
@@ -204,7 +206,7 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<RestResponse<AuthResponse>> createUser(@Valid @RequestBody AuthRequest authRequest) {
-        AuthResponse created = authService.register(authRequest.getUsername(), authRequest.getEmail(), authRequest.getPassword());
+        AuthResponse created = authService.registerWithEvents(authRequest.getUsername(), authRequest.getEmail(), authRequest.getPassword(), request);
         RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.CREATED.value())
@@ -264,7 +266,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<RestResponse<AuthResponse>> getUser(@Valid @RequestBody LoginRequest loginRequest) {
-        AuthResponse authResponse = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        AuthResponse authResponse = authService.loginWithEvents(loginRequest.getUsername(), loginRequest.getPassword(), request);
         RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())
@@ -778,5 +780,143 @@ public class AuthController {
                 .path(request.getRequestURI())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Làm mới token", 
+        description = "Làm mới access token bằng refresh token"
+    )
+    @PostMapping("/refresh")
+    public ResponseEntity<RestResponse<AuthResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        String refreshToken = "Bearer " + refreshTokenRequest.getRefreshToken();
+        AuthResponse authResponse = authService.refreshTokenWithEvents(refreshToken, request);
+        
+        RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
+                .apiVersion("v1")
+                .statusCode(authResponse.isSuccess() ? HttpStatus.OK.value() : HttpStatus.UNAUTHORIZED.value())
+                .shortMessage(authResponse.isSuccess() ? "Success" : "Unauthorized")
+                .description(authResponse.isSuccess() ? "Token đã được làm mới thành công." : authResponse.getMessage())
+                .data(authResponse.isSuccess() ? authResponse : null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        
+        return new ResponseEntity<>(response, authResponse.isSuccess() ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(
+        summary = "Đăng xuất", 
+        description = "Đăng xuất và vô hiệu hóa token"
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<RestResponse<AuthResponse>> logout(@Valid @RequestBody LogoutRequest logoutRequest, Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            var userOpt = authService.findByUsername(username);
+            
+            if (userOpt.isPresent()) {
+                authService.logoutWithEvents(userOpt.get(), logoutRequest.getAccessToken(), request);
+            }
+            
+            AuthResponse authResponse = new AuthResponse(true, "Logout successful", null, null, null);
+            
+            RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.OK.value())
+                    .shortMessage("Success")
+                    .description("Đăng xuất thành công.")
+                    .data(authResponse)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            AuthResponse authResponse = new AuthResponse(true, "Logout successful", null, null, null);
+            
+            RestResponse<AuthResponse> response = RestResponse.<AuthResponse>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.OK.value())
+                    .shortMessage("Success")
+                    .description("Đăng xuất thành công.")
+                    .data(authResponse)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @Operation(
+        summary = "Lấy thông tin profile", 
+        description = "Lấy thông tin profile của user hiện tại"
+    )
+    @GetMapping("/me")
+    public ResponseEntity<RestResponse<AuthResponse>> getProfile(Authentication authentication) {
+        String username = authentication.getName();
+        var userOpt = authService.findByUsername(username);
+        
+        RestResponse<AuthResponse> response = userOpt.map(u -> {
+            AuthResponse.UserInfo userInfo = createUserInfoFromUser(u);
+            AuthResponse authResponse = new AuthResponse(true, "Profile retrieved successfully", null, userInfo, null);
+            
+            return RestResponse.<AuthResponse>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.OK.value())
+                    .shortMessage("Success")
+                    .description("Lấy thông tin profile thành công.")
+                    .data(authResponse)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+        })
+        .orElse(RestResponse.<AuthResponse>builder()
+            .apiVersion("v1")
+            .statusCode(HttpStatus.NOT_FOUND.value())
+            .shortMessage("Not Found")
+            .description("Không tìm thấy người dùng.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Helper method to create UserInfo from User entity
+     */
+    private AuthResponse.UserInfo createUserInfoFromUser(com.devgo2003.docgo.auth_service.entity.User user) {
+        // Extract firstName and lastName from fullName if available
+        String firstName = "";
+        String lastName = "";
+        if (user.getFullName() != null && !user.getFullName().trim().isEmpty()) {
+            String[] nameParts = user.getFullName().trim().split("\\s+");
+            if (nameParts.length > 0) {
+                firstName = nameParts[0];
+                if (nameParts.length > 1) {
+                    lastName = String.join(" ", java.util.Arrays.copyOfRange(nameParts, 1, nameParts.length));
+                }
+            }
+        }
+
+        return new AuthResponse.UserInfo(
+            user.getUserId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getRole().name(),
+            firstName,
+            lastName,
+            user.getStatus().name(),
+            user.getFullName(),
+            user.getDepartment(),
+            user.getPosition(),
+            user.getAvatarUrl(),
+            user.getApprovalLevel(),
+            user.getMaxContractValue()
+        );
     }
 }

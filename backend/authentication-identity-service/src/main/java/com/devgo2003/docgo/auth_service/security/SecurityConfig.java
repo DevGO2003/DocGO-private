@@ -60,9 +60,12 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/api/v1/authentication-identity-service/auth/login",
                     "/api/v1/authentication-identity-service/auth/register",
-                    "/api/v1/authentication-identity-service/auth/*/refresh",
+                    "/api/v1/authentication-identity-service/auth/refresh",
+                    "/api/v1/authentication-identity-service/auth/logout",
                     "/api/v1/authentication-identity-service/auth/health",
-                    "/api/v1/authentication-identity-service/auth/oauth2/test"
+                    "/api/v1/authentication-identity-service/auth/oauth2/test",
+                    "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
+                    "/api/v1/authentication-identity-service/auth/oauth2/callback/google"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
@@ -88,14 +91,32 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
+        
+        // Allow specific origins for production, wildcard for development
+        String corsOrigin = System.getenv().getOrDefault("CORS_ORIGIN", "*");
+        if ("*".equals(corsOrigin)) {
+            configuration.addAllowedOriginPattern("*");
+        } else {
+            configuration.addAllowedOrigin(corsOrigin);
+        }
+        
+        // Allow common HTTP methods
         configuration.addAllowedMethod("GET");
         configuration.addAllowedMethod("POST");
         configuration.addAllowedMethod("PUT");
         configuration.addAllowedMethod("DELETE");
         configuration.addAllowedMethod("OPTIONS");
+        configuration.addAllowedMethod("PATCH");
+        
+        // Allow all headers
         configuration.addAllowedHeader("*");
+        
+        // Allow credentials for OAuth2
         configuration.setAllowCredentials(true);
+        
+        // Cache preflight response for 1 hour
+        configuration.setMaxAge(3600L);
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -169,28 +169,8 @@ export interface StoredFile {
   accessCount: number
 }
 
-// Authentication types
-export interface LoginCredentials {
-  username: string
-  password: string
-}
-
-export interface RegisterData {
-  username: string
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  role?: UserRole
-}
-
-export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  expiresIn: number
-  tokenType: string
-  user: User
-}
+// Re-export authentication types from auth.ts
+export * from './auth'
 
 // Form types
 export interface FormField {

@@ -63,7 +63,28 @@ class ApiClient {
       (response: AxiosResponse) => {
         return response
       },
-      (error) => {
+      async (error) => {
+        const originalRequest = error.config
+        
+        // Handle 401 errors with token refresh
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true
+          
+          try {
+            const refreshSuccess = await this.handleUnauthorized()
+            if (refreshSuccess) {
+              // Retry the original request with new token
+              const newToken = this.getAuthToken()
+              if (newToken) {
+                originalRequest.headers.Authorization = `Bearer ${newToken}`
+                return this.client(originalRequest)
+              }
+            }
+          } catch (retryError) {
+            console.error('Request retry failed:', retryError)
+          }
+        }
+        
         this.handleApiError(error)
         return Promise.reject(error)
       }
@@ -72,6 +93,23 @@ class ApiClient {
 
   private getAuthToken(): string | null {
     if (typeof window !== 'undefined') {
+      // Try to get from new storage format first
+      try {
+        const authData = localStorage.getItem('docgo_auth_v1')
+        if (authData) {
+          const parsed = JSON.parse(authData)
+          if (parsed.tokenData?.accessToken) {
+            return parsed.tokenData.accessToken
+          }
+          if (parsed.accessToken) {
+            return parsed.accessToken
+          }
+        }
+      } catch (error) {
+        console.warn('Error reading auth token from storage:', error)
+      }
+      
+      // Fallback to legacy storage
       return localStorage.getItem('auth_token')
     }
     return null
@@ -79,9 +117,29 @@ class ApiClient {
 
   private handleApiError(error: any) {
     const status = error.response?.status
-    const message = error.response?.data?.description || 'Đã xảy ra lỗi'
+    const responseData = error.response?.data
+    
+    // Handle backend RestResponse format
+    let message = 'Đã xảy ra lỗi'
+    let shortMessage = 'Error'
+    
+    if (responseData) {
+      message = responseData.description || responseData.message || message
+      shortMessage = responseData.shortMessage || shortMessage
+    }
+
+    // Handle validation errors
+    if (responseData?.errors && Array.isArray(responseData.errors)) {
+      const validationErrors = responseData.errors
+        .map((err: any) => `${err.field}: ${err.message}`)
+        .join(', ')
+      message = `Lỗi validation: ${validationErrors}`
+    }
 
     switch (status) {
+      case 400:
+        toast.error(message)
+        break
       case 401:
         this.handleUnauthorized()
         break
@@ -91,6 +149,12 @@ class ApiClient {
       case 404:
         toast.error('Không tìm thấy tài nguyên')
         break
+      case 409:
+        toast.error(message || 'Xung đột dữ liệu')
+        break
+      case 422:
+        toast.error(message || 'Dữ liệu không hợp lệ')
+        break
       case 500:
         toast.error('Lỗi server, vui lòng thử lại sau')
         break
@@ -99,13 +163,53 @@ class ApiClient {
     }
   }
 
-  private handleUnauthorized() {
+  private async handleUnauthorized() {
     if (typeof window !== 'undefined') {
+      // Try to refresh token before redirecting
+      try {
+        const refreshToken = localStorage.getItem('refresh_token')
+        if (refreshToken) {
+          const refreshResponse = await this.client.post(`${this.baseURL}/api/v1/authentication-identity-service/auth/refresh`, { refreshToken })
+          const refreshData = refreshResponse.data?.data
+          
+          if (refreshData?.accessToken) {
+            // Update stored tokens
+            const authData = localStorage.getItem('docgo_auth_v1')
+            if (authData) {
+              const parsed = JSON.parse(authData)
+              parsed.accessToken = refreshData.accessToken
+              parsed.tokenData = {
+                ...parsed.tokenData,
+                accessToken: refreshData.accessToken,
+                refreshToken: refreshData.refreshToken || refreshToken,
+                expiresAt: Date.now() + (refreshData.expiresIn * 1000),
+                tokenType: refreshData.tokenType || 'Bearer'
+              }
+              localStorage.setItem('docgo_auth_v1', JSON.stringify(parsed))
+            }
+            
+            // Update legacy storage
+            localStorage.setItem('auth_token', refreshData.accessToken)
+            if (refreshData.refreshToken) {
+              localStorage.setItem('refresh_token', refreshData.refreshToken)
+            }
+            
+            // Retry the original request
+            return true
+          }
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError)
+      }
+      
+      // If refresh fails, clear all auth data and redirect
+      localStorage.removeItem('docgo_auth_v1')
       localStorage.removeItem('auth_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_data')
       window.location.href = '/auth/login'
     }
+    return false
   }
 
   // Generic request methods
@@ -285,40 +389,74 @@ export class FileStorageAPI {
   }
 }
 
-// Authentication API - Sử dụng API Gateway
+// Authentication API - Updated to use API Gateway proxy
 export class AuthAPI {
   private basePath = '/api/v1/authentication-identity-service'
 
   async login(credentials: { username: string; password: string }) {
-    return apiClient.post<any>(`${this.basePath}/auth/login`, credentials)
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/login`, credentials)
   }
 
-  async register(userData: any) {
-    return apiClient.post<any>(`${this.basePath}/auth/register`, userData)
+  async register(userData: {
+    username: string
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+    role?: string
+  }) {
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/register`, userData)
   }
 
   async refreshToken(refreshToken: string) {
-    return apiClient.post<any>(`${this.basePath}/auth/refresh`, { refreshToken })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/refresh`, { refreshToken })
   }
 
-  async logout() {
-    return apiClient.post<any>(`${this.basePath}/auth/logout`)
+  async logout(refreshToken?: string) {
+    const body = refreshToken ? { refreshToken } : {}
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/logout`, body)
   }
 
   async forgotPassword(email: string) {
-    return apiClient.post<any>(`${this.basePath}/auth/forgot-password`, { email })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/forgot-password`, { email })
   }
 
   async resetPassword(token: string, newPassword: string) {
-    return apiClient.post<any>(`${this.basePath}/auth/reset-password`, { token, newPassword })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/reset-password`, { token, newPassword })
   }
 
   async getProfile() {
-    return apiClient.get<any>(`${this.basePath}/auth/profile`)
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/auth/me`)
   }
 
-  async updateProfile(data: any) {
-    return apiClient.put<any>(`${this.basePath}/auth/profile`, data)
+  async updateProfile(data: {
+    firstName?: string
+    lastName?: string
+    email?: string
+    phone?: string
+    department?: string
+    position?: string
+    avatar?: string
+  }) {
+    return apiClient.put<ApiResponse<any>>(`${this.basePath}/auth/profile`, data)
+  }
+
+  async changePassword(data: { oldPassword: string; newPassword: string }) {
+    return apiClient.put<ApiResponse<any>>(`${this.basePath}/auth/change-password`, data)
+  }
+
+  // OAuth endpoints
+  async getOAuthStatus() {
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/auth/oauth2/test`)
+  }
+
+  async initiateOAuth(provider: string) {
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/oauth2/authorize/${provider}`)
+  }
+
+  // Token validation
+  async validateToken(token: string) {
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/validate`, { token })
   }
 }
 

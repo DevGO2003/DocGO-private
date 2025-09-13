@@ -64,3 +64,10 @@ backend/api-gateway-bff/logs/
 !**/.env.local
 !**/.env.*.local
 !**/.env.example
+
+# Ngăn chặn file MD tự động tạo (trừ README và How to run)
+**/*.md
+!README.md
+!**/README.md
+!**/How to run this microservice.md
+!prompt/**/*.md

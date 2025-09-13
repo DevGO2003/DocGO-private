@@ -1,126 +1,249 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { authAPI } from '@/lib/api'
-
-type Role = 'ADMIN' | 'MANAGER' | 'STAFF' | 'USER' | 'VIEWER'
-type Status = 'APPROVED' | 'PENDING' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
-
-export interface AuthUser {
-  id: string
-  email: string
-  name: string
-  role: Role
-  status: Status
-}
-
-interface AuthContextValue {
-  user: AuthUser | null
-  token: string | null
-  loading: boolean
-  login: (data: { email?: string; username?: string; password?: string }) => Promise<boolean>
-  register: (data: { email: string; username?: string; password?: string; name?: string }) => Promise<boolean>
-  logout: () => Promise<void>
-}
+import { authAPI } from '../lib/api'
+import TokenManager from '../utils/token-manager'
+import { 
+  User, 
+  UserRole, 
+  UserStatus, 
+  LoginCredentials, 
+  RegisterData, 
+  AuthResponse, 
+  AuthContextValue, 
+  OAuthUserData,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  AuthError,
+  TokenData,
+  TokenValidationResult,
+  RefreshTokenResponse
+} from '../types/auth'
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'docgo_auth_v1'
 
-function readStorage(): { token: string | null; user: AuthUser | null } {
-  if (typeof window === 'undefined') return { token: null, user: null }
+function readStorage(): { accessToken: string | null; user: User | null; tokenData: TokenData | null } {
+  if (typeof window === 'undefined') return { accessToken: null, user: null, tokenData: null }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { token: null, user: null }
-    return JSON.parse(raw)
-  } catch {
-    return { token: null, user: null }
+    if (!raw) return { accessToken: null, user: null, tokenData: null }
+    const parsed = JSON.parse(raw)
+    
+    // Check if we have the new format with tokenData
+    if (parsed.tokenData && parsed.tokenData.accessToken) {
+      const tokenData = parsed.tokenData as TokenData
+      // Validate token format and expiration
+      if (tokenData.accessToken && typeof tokenData.accessToken === 'string' && tokenData.accessToken.length > 10) {
+        // Check if token is expired
+        if (tokenData.expiresAt && Date.now() < tokenData.expiresAt) {
+          return {
+            accessToken: tokenData.accessToken,
+            user: parsed.user,
+            tokenData: tokenData
+          }
+        } else {
+          // Token expired, clear storage
+          clearStorage()
+          return { accessToken: null, user: null, tokenData: null }
+        }
+      }
+    }
+    
+    // Legacy format support
+    if (parsed.token && typeof parsed.token === 'string' && parsed.token.length > 10) {
+      return {
+        accessToken: parsed.token,
+        user: parsed.user,
+        tokenData: null
+      }
+    }
+    
+    // If token is invalid, clear storage
+    clearStorage()
+    return { accessToken: null, user: null, tokenData: null }
+  } catch (error) {
+    console.error('Error reading auth storage:', error)
+    clearStorage()
+    return { accessToken: null, user: null, tokenData: null }
   }
 }
 
-function writeStorage(data: { token: string | null; user: AuthUser | null }) {
+function writeStorage(data: { accessToken: string | null; user: User | null; tokenData?: TokenData | null }) {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  } catch {}
+    // Validate data before storing
+    if (data.accessToken && typeof data.accessToken === 'string' && data.accessToken.length > 10) {
+      const storageData = {
+        accessToken: data.accessToken,
+        user: data.user,
+        tokenData: data.tokenData
+      }
+      
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData))
+      
+      // Also sync with legacy storage keys for backward compatibility
+      window.localStorage.setItem('auth_token', data.accessToken)
+      if (data.user) {
+        window.localStorage.setItem('user_data', JSON.stringify(data.user))
+      }
+      
+      // Store refresh token separately if available
+      if (data.tokenData?.refreshToken) {
+        window.localStorage.setItem('refresh_token', data.tokenData.refreshToken)
+      }
+    } else {
+      clearStorage()
+    }
+  } catch (error) {
+    console.error('Error writing auth storage:', error)
+  }
+}
+
+function clearStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(STORAGE_KEY)
+    window.localStorage.removeItem('auth_token')
+    window.localStorage.removeItem('refresh_token')
+    window.localStorage.removeItem('user_data')
+  } catch (error) {
+    console.error('Error clearing auth storage:', error)
+  }
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [tokenData, setTokenData] = useState<TokenData | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
   // Load from localStorage on mount
   useEffect(() => {
     const stored = readStorage()
     setUser(stored.user)
-    setToken(stored.token)
+    setAccessToken(stored.accessToken)
+    setTokenData(stored.tokenData)
+    
+    // Cleanup expired tokens on mount
+    TokenManager.cleanupExpiredTokens()
+    
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    writeStorage({ token, user })
-  }, [token, user])
+    writeStorage({ accessToken, user, tokenData })
+  }, [accessToken, user, tokenData])
+
+  // Token validation and expiration checking
+  const validateToken = useCallback((): TokenValidationResult => {
+    if (!accessToken || !tokenData) {
+      return { isValid: false, isExpired: true }
+    }
+
+    const now = Date.now()
+    const expiresAt = tokenData.expiresAt
+    const isExpired = expiresAt ? now >= expiresAt : false
+    const timeUntilExpiry = expiresAt ? expiresAt - now : 0
+
+    return {
+      isValid: !isExpired && accessToken.length > 10,
+      isExpired,
+      expiresAt,
+      timeUntilExpiry: timeUntilExpiry > 0 ? timeUntilExpiry : 0
+    }
+  }, [accessToken, tokenData])
+
+  const isTokenExpired = useCallback((): boolean => {
+    return validateToken().isExpired
+  }, [validateToken])
 
   const fetchCurrentUser = useCallback(async () => {
     setLoading(true)
     try {
       const res = await authAPI.getProfile()
-      const current = (res.data?.data as any)?.user ?? res.data?.data
-      if (current) setUser(current as AuthUser)
-    } catch {
-      // ignore
+      const current = res.data?.data as unknown as User
+      if (current) setUser(current)
+    } catch (error) {
+      console.error('Error fetching current user:', error)
+      // If profile fetch fails, clear auth data
+      setAccessToken(null)
+      setTokenData(null)
+      setUser(null)
+      clearStorage()
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    // If there is a token in storage, try to fetch current user (mock)
-    if (token && !user) {
+    // If there is a token in storage, try to fetch current user
+    if (accessToken && !user && !isTokenExpired()) {
       fetchCurrentUser()
+    } else if (isTokenExpired()) {
+      // Token expired, try to refresh
+      refreshToken()
     }
-  }, [token, user, fetchCurrentUser])
+  }, [accessToken, user, fetchCurrentUser, isTokenExpired])
 
-  const login = useCallback(async (data: { email?: string; username?: string; password?: string }) => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
     setLoading(true)
     try {
-      const credentials = {
-        username: data.username || (data.email || ''),
-        password: data.password || '',
+      const res = await authAPI.login(credentials)
+      const authData = res.data?.data as unknown as AuthResponse
+      
+      if (!authData) {
+        throw new Error('Invalid response from server')
       }
-      const res = await authAPI.login(credentials as any)
-      const payload = res.data?.data as any
-      const tok = payload?.accessToken as string
-      const refresh = payload?.refreshToken as string | undefined
-      const usr = (payload?.user || payload) as AuthUser
-      setToken(tok)
-      setUser(usr)
-      // sync with global storage used by axios interceptors
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('auth_token', tok || '')
-        if (refresh) window.localStorage.setItem('refresh_token', refresh)
-        window.localStorage.setItem('user_data', JSON.stringify(usr))
+      
+      const { accessToken, refreshToken, expiresIn, tokenType, user } = authData
+      
+      // Validate token before storing
+      if (!accessToken || typeof accessToken !== 'string' || accessToken.length < 10) {
+        throw new Error('Invalid token received')
       }
+      
+      // Calculate expiration time
+      const expiresAt = Date.now() + (expiresIn * 1000)
+      
+      // Create token data object
+      const newTokenData: TokenData = {
+        accessToken,
+        refreshToken,
+        expiresAt,
+        tokenType: tokenType || 'Bearer'
+      }
+      
+      setAccessToken(accessToken)
+      setTokenData(newTokenData)
+      setUser(user)
+      
       return true
-    } catch {
+    } catch (error) {
+      console.error('Login error:', error)
       return false
     } finally {
       setLoading(false)
     }
   }, [])
 
-  const register = useCallback(async (data: { email: string; username?: string; password?: string; name?: string }) => {
+  const register = useCallback(async (data: RegisterData): Promise<boolean> => {
     setLoading(true)
     try {
       await authAPI.register({
-        username: data.username || data.email,
+        username: data.username,
         email: data.email,
         password: data.password,
-        name: data.name || data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role,
       })
       return true
-    } catch {
+    } catch (error) {
+      console.error('Register error:', error)
       return false
     } finally {
       setLoading(false)
@@ -130,21 +253,179 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(async () => {
     setLoading(true)
     try {
-      await authAPI.logout()
-    } finally {
-      setToken(null)
-      setUser(null)
-      writeStorage({ token: null, user: null })
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem('auth_token')
-        window.localStorage.removeItem('refresh_token')
-        window.localStorage.removeItem('user_data')
+      // Send refresh token to backend for logout
+      const refreshTokenValue = tokenData?.refreshToken || 
+        (typeof window !== 'undefined' ? window.localStorage.getItem('refresh_token') : null)
+      
+      if (refreshTokenValue) {
+        await authAPI.logout(refreshTokenValue)
       }
+    } catch (error) {
+      console.error('Logout API error:', error)
+      // Continue with local logout even if API call fails
+    } finally {
+      setAccessToken(null)
+      setTokenData(null)
+      setUser(null)
+      clearStorage()
+      setLoading(false)
+    }
+  }, [tokenData])
+
+  const setAuthData = useCallback((userData: OAuthUserData) => {
+    try {
+      // Validate user data
+      if (userData && typeof userData === 'object') {
+        const authUser: User = {
+          id: userData.id || userData.userId || userData.username || '',
+          username: userData.username || '',
+          email: userData.email || userData.username || '',
+          firstName: userData.name?.split(' ')[0] || userData.username || '',
+          lastName: userData.name?.split(' ').slice(1).join(' ') || '',
+          fullName: userData.name || userData.username || '',
+          role: userData.role || UserRole.USER,
+          status: userData.status || UserStatus.ACTIVE,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        setUser(authUser)
+        
+        // Get token from localStorage if available
+        const storedToken = typeof window !== 'undefined' ? 
+          window.localStorage.getItem('auth_token') : null
+        if (storedToken && storedToken.length > 10) {
+          setAccessToken(storedToken)
+        }
+      }
+    } catch (error) {
+      console.error('Error setting auth data:', error)
+    }
+  }, [])
+
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const refreshTokenValue = tokenData?.refreshToken || 
+        (typeof window !== 'undefined' ? window.localStorage.getItem('refresh_token') : null)
+      
+      if (!refreshTokenValue) {
+        console.warn('No refresh token available')
+        return false
+      }
+      
+      // Call refresh token API
+      const res = await authAPI.refreshToken(refreshTokenValue)
+      const refreshData = res.data?.data as unknown as RefreshTokenResponse
+      
+      if (!refreshData) {
+        throw new Error('Invalid refresh response from server')
+      }
+      
+      const { accessToken, refreshToken: newRefreshToken, expiresIn, tokenType } = refreshData
+      
+      if (accessToken && accessToken.length > 10) {
+        // Calculate new expiration time
+        const expiresAt = Date.now() + (expiresIn * 1000)
+        
+        // Create new token data object
+        const newTokenData: TokenData = {
+          accessToken,
+          refreshToken: newRefreshToken || refreshTokenValue,
+          expiresAt,
+          tokenType: tokenType || 'Bearer'
+        }
+        
+        setAccessToken(accessToken)
+        setTokenData(newTokenData)
+        
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Token refresh error:', error)
+      // If refresh fails, logout user
+      logout()
+      return false
+    }
+  }, [tokenData, logout])
+
+  const updateProfile = useCallback(async (data: UpdateProfileRequest): Promise<boolean> => {
+    setLoading(true)
+    try {
+      const res = await authAPI.updateProfile(data)
+      const updatedUser = res.data?.data as unknown as User
+      if (updatedUser) {
+        setUser(updatedUser)
+      }
+      return true
+    } catch (error) {
+      console.error('Update profile error:', error)
+      return false
+    } finally {
       setLoading(false)
     }
   }, [])
 
-  const value = useMemo<AuthContextValue>(() => ({ user, token, loading, login, register, logout }), [user, token, loading, login, register, logout])
+  const changePassword = useCallback(async (data: ChangePasswordRequest): Promise<boolean> => {
+    setLoading(true)
+    try {
+      await authAPI.changePassword(data)
+      return true
+    } catch (error) {
+      console.error('Change password error:', error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const forgotPassword = useCallback(async (email: string): Promise<boolean> => {
+    setLoading(true)
+    try {
+      await authAPI.forgotPassword(email)
+      return true
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const resetPassword = useCallback(async (data: ResetPasswordRequest): Promise<boolean> => {
+    setLoading(true)
+    try {
+      await authAPI.resetPassword(data.token, data.newPassword)
+      return true
+    } catch (error) {
+      console.error('Reset password error:', error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const isAuthenticated = useMemo(() => {
+    return !!(accessToken && user && accessToken.length > 10 && !isTokenExpired())
+  }, [accessToken, user, isTokenExpired])
+
+  const value = useMemo<AuthContextValue>(() => ({ 
+    user, 
+    accessToken, 
+    loading, 
+    isAuthenticated,
+    login, 
+    register, 
+    logout, 
+    setAuthData, 
+    refreshToken, 
+    updateProfile,
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    validateToken,
+    isTokenExpired
+  }), [user, accessToken, loading, isAuthenticated, login, register, logout, setAuthData, refreshToken, updateProfile, changePassword, forgotPassword, resetPassword, validateToken, isTokenExpired])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

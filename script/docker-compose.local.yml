@@ -471,10 +471,16 @@ services:
     volumes:
       - ../frontend/web_nextjs:/app
       - /app/node_modules
+      - /app/.next
     command: >
       sh -c "npm install && npm run dev"
     depends_on:
       - api-gateway-bff
+      - authentication-identity-service
+      - user-management-service
+      - contract-management-service
+      - ai-processing-service
+      - file-storage-asset-service
     networks:
       - docgo_network_local
 
