@@ -57,13 +57,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
-		<!-- Optional: OAuth2 client if needed for external providers - TEMPORARILY DISABLED -->
-		<!--
+		<!-- Optional: OAuth2 client if needed for external providers -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
-		-->
 		<!-- JJWT for creating/verifying JWT tokens -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

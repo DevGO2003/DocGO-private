@@ -783,6 +783,55 @@ public class AuthController {
     }
 
     @Operation(
+        summary = "Initiate Google OAuth2 Login", 
+        description = "Endpoint để khởi tạo Google OAuth2 login flow"
+    )
+    @GetMapping("/oauth2/authorization/google")
+    public ResponseEntity<RestResponse<String>> initiateGoogleOAuth() {
+        String googleClientId = System.getenv().getOrDefault("GOOGLE_CLIENT_ID", "");
+        String redirectUri = System.getenv().getOrDefault("GOOGLE_REDIRECT_URIS", "");
+        
+        if (googleClientId == null || googleClientId.trim().isEmpty()) {
+            RestResponse<String> response = RestResponse.<String>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .shortMessage("Bad Request")
+                    .description("Google OAuth2 not configured")
+                    .data("Google OAuth2 client ID not configured")
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        
+        // Build Google OAuth2 authorization URL
+        String state = UUID.randomUUID().toString();
+        String scope = "openid profile email";
+        String responseType = "code";
+        String clientId = googleClientId;
+        String redirectUriParam = redirectUri != null && !redirectUri.trim().isEmpty() ? 
+            redirectUri : "http://localhost:8000/api/v1/authentication-identity-service/oauth2/callback/google";
+        
+        String authUrl = String.format(
+            "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=%s&scope=%s&state=%s",
+            clientId, redirectUriParam, responseType, scope, state
+        );
+        
+        RestResponse<String> response = RestResponse.<String>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.OK.value())
+                .shortMessage("Success")
+                .description("Google OAuth2 authorization URL generated")
+                .data(authUrl)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
         summary = "Làm mới token", 
         description = "Làm mới access token bằng refresh token"
     )

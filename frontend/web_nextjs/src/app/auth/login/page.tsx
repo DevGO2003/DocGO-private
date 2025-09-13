@@ -98,7 +98,7 @@ export default function LoginPage() {
       
       // Redirect to backend OAuth2 endpoint (call Auth service directly)
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-      const oauthUrl = `${baseUrl}/api/v1/authentication-identity-service/oauth2/authorize/google`
+      const oauthUrl = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/authorization/google`
       
       // Add a small delay to show loading state
       setTimeout(() => {
