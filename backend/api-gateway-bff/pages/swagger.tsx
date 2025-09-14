@@ -127,10 +127,18 @@ export default function SwaggerPage() {
       
       if (isDocker) {
         // Nếu chạy trên Docker, sử dụng tên container
-        targetUrl = `http://${serviceInfo.container}/docs`;
+        if (serviceName === 'Authentication Identity Service') {
+          targetUrl = `http://${serviceInfo.container}/swagger-ui/index.html`;
+        } else {
+          targetUrl = `http://${serviceInfo.container}/docs`;
+        }
       } else {
         // Nếu chạy trên localhost, sử dụng port
-        targetUrl = `http://localhost:${serviceInfo.port}/docs`;
+        if (serviceName === 'Authentication Identity Service') {
+          targetUrl = `http://localhost:${serviceInfo.port}/swagger-ui/index.html`;
+        } else {
+          targetUrl = `http://localhost:${serviceInfo.port}/docs`;
+        }
       }
       
       // Mở trong tab mới
@@ -231,23 +239,8 @@ export default function SwaggerPage() {
             <p>Chi tiết API endpoints và schemas cho {selectedService}</p>
           </div>
 
-          {/* API Endpoints Preview - Chỉ hiển thị khi service hoạt động */}
-          {selectedService === 'API Gateway BFF' ? (
-            <div className="api-endpoints-preview">
-              <h3>🔗 API Endpoints chính</h3>
-              <div className="endpoints-grid">
-                {serviceConnectionMapping[selectedService as keyof typeof serviceConnectionMapping]?.endpoints.map((endpoint, index) => (
-                  <div key={index} className="endpoint-item">
-                    <span className={`method-badge method-${endpoint.method.toLowerCase()}`}>
-                      {endpoint.method}
-                    </span>
-                    <code className="endpoint-path">{endpoint.path}</code>
-                    <span className="endpoint-description">{endpoint.description}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
+          {/* Service Status Notice - Chỉ hiển thị cho các services khác API Gateway */}
+          {selectedService !== 'API Gateway BFF' && (
             <div className="service-status-notice">
               <div className="notice-icon">⚠️</div>
               <div className="notice-content">
