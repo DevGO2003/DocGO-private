@@ -23,22 +23,25 @@ volumes:
 - **Chạy toàn bộ service backend**: Khi cần chạy nhiều service, sử dụng docker-compose để khởi động đồng thời
 - **Hot reload**: Code thay đổi trên máy host sẽ được reflect ngay trong container (không cần rebuild image)
 - **Ưu điểm**: Phát triển nhanh, không cần rebuild image mỗi khi sửa code, dễ debug
-- **File cấu hình**: Sử dụng `autofiles/docker-compose.dev.yml` cho development mode với volume mount
-- **Script hỗ trợ**: Có sẵn `autofiles/docker-dev.bat` và `autofiles/docker-dev.ps1` để chạy nhanh
+- **File cấu hình**: Sử dụng `script/docker-compose.dev.yml` cho development mode với volume mount
+- **Script hỗ trợ**: Có sẵn `script/docker-dev.bat` và `script/docker-dev.ps1` để chạy nhanh
 - **Port mapping**: Tuân thủ quy tắc port cố định theo tên nhánh (8000-8017)
 
-### Quy tắc lệnh Docker Local:
-- **`docker local`**: Chỉ khởi động những service có file được chỉnh sửa (smart restart)
-- **`docker local --new`**: Chạy script Docker local từ đầu (restart toàn bộ hệ thống)
+### Quy tắc lệnh Docker Development:
+- **`docker dev`**: Khởi động development environment với hot reload và hybrid approach
+- **`docker dev --new`**: Khởi động mới (xóa cache, rebuild toàn bộ)
+- **`docker dev --down`**: Dừng tất cả services
+- **`docker dev --logs`**: Xem logs tất cả services
+- **`docker dev --status`**: Xem trạng thái services
 
 ### Development workflow:
-1. **Lần đầu hoặc khi cần restart toàn bộ**: Chạy `docker local --new`
-2. **Khi chỉnh sửa code**: Chạy `docker local` để restart service tương ứng
+1. **Lần đầu hoặc khi cần restart toàn bộ**: Chạy `docker dev --new`
+2. **Khi chỉnh sửa code**: Chạy `docker dev` để khởi động development environment
 3. Sửa code trực tiếp trên máy host
 4. Code thay đổi được sync ngay vào container
 5. Service tự động reload (nếu có hot reload)
-6. Xem logs: `docker-compose -f autofiles/docker-compose.dev.yml logs -f`
-7. Dừng: `docker-compose -f autofiles/docker-compose.dev.yml down`
+6. Xem logs: `docker-compose -f script/docker-compose.dev.yml logs -f`
+7. Dừng: `docker-compose -f script/docker-compose.dev.yml down`
 
 ## Quy tắc cấu trúc Docker
 
