@@ -239,8 +239,8 @@ export default function SwaggerPage() {
             <p>Chi tiết API endpoints và schemas cho {selectedService}</p>
           </div>
 
-          {/* Service Status Notice - Chỉ hiển thị cho các services khác API Gateway */}
-          {selectedService !== 'API Gateway BFF' && (
+          {/* Service Status Notice - Chỉ hiển thị cho Contract Management Service (không có SpringDoc) */}
+          {selectedService === 'Contract Management Service' && (
             <div className="service-status-notice">
               <div className="notice-icon">⚠️</div>
               <div className="notice-content">
