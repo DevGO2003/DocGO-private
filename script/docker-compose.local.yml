@@ -69,7 +69,7 @@ services:
       - /app/node_modules
       - npm_cache:/root/.npm
     command: >
-      sh -c "npm ci --cache /root/.npm && npm run dev"
+      sh -c "npm install --cache /root/.npm && npm run dev"
     depends_on:
       redis:
         condition: service_healthy
