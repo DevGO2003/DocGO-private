@@ -7,7 +7,7 @@ import serviceManager from '@/lib/services';
 
 const SPRING_SERVICES = new Set<string>([
   'authentication',
-  'contract-management',
+  // 'contract-management', // Tạm thời bỏ vì không có SpringDoc OpenAPI
 ]);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

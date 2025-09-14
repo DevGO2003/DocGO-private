@@ -40,50 +40,22 @@ API Gateway Backend for Frontend (BFF) sử dụng Next.js và Kafka để kết
 
 **Base URL**: \`/api/v1/{service-name}/...\`
 
-**Available Services (19 microservices)**:
+**Available Services (5 microservices đang chạy)**:
 - \`authentication-identity-service\` (Port 8001) - Spring Boot
-- \`user-management-service\` (Port 8002) - FastAPI  
-- \`contract-management-service\` (Port 8003) - Spring Boot
-- \`versioning-document-history-service\` (Port 8004) - FastAPI
-- \`commenting-collaboration-service\` (Port 8005) - FastAPI
-- \`approval-workflow-service\` (Port 8006) - FastAPI
-- \`reminder-scheduler-service\` (Port 8007) - FastAPI
-- \`esignature-integration-service\` (Port 8008) - FastAPI
-- \`notification-service\` (Port 8009) - FastAPI
-- \`reporting-analytics-service\` (Port 8010) - FastAPI
-- \`ocr-document-extraction-service\` (Port 8011) - FastAPI
-- \`file-storage-asset-service\` (Port 8012) - FastAPI
-- \`audit-activity-log-service\` (Port 8013) - FastAPI
-- \`integration-connectors-service\` (Port 8014) - FastAPI
-- \`batch-etl-service\` (Port 8015) - FastAPI
-- \`health-monitoring-agent\` (Port 8016) - FastAPI
-- \`ai-processing-service\` (Port 8017) - FastAPI
-- \`general-file-management-service\` (Port 8018) - FastAPI
+- \`contract-management-service\` (Port 8002) - Spring Boot
+- \`ai-processing-service\` (Port 8003) - FastAPI
+- \`file-storage-asset-service\` (Port 8004) - FastAPI
 
 **Port Mapping**:
 - API Gateway BFF: 8000
-- Authentication Service: 8001
-- User Management Service: 8002
-- Contract Management Service: 8003
-- Versioning Document History: 8004
-- Commenting Collaboration: 8005
-- Approval Workflow: 8006
-- Reminder Scheduler: 8007
-- E-Signature Integration: 8008
-- Notification Service: 8009
-- Reporting Analytics: 8010
-- OCR Document Extraction: 8011
-- File Storage Asset: 8012
-- Audit Activity Log: 8013
-- Integration Connectors: 8014
-- Batch ETL Service: 8015
-- Health Monitoring Agent: 8016
-- AI Processing Service: 8017
-- General File Management: 8018
+- Authentication Identity Service: 8001
+- Contract Management Service: 8002
+- AI Processing Service: 8003
+- File Storage Asset Service: 8004
 
 **Technology Distribution**:
 - Spring Boot (Java): 2 services
-- FastAPI (Python): 16 services  
+- FastAPI (Python): 2 services  
 - Next.js (Node.js): 1 service
       `,
       contact: {

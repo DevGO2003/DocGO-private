@@ -35,7 +35,7 @@ class ServiceManager {
     // Authentication Identity Service (Spring Boot) - Port 8001
     this.addService('authentication', {
       name: 'authentication-identity-service',
-      url: selectUrl(process.env.AUTHENTICATION_SERVICE_URL, 'http://authentication-identity-service:8001', 'http://localhost:8001'),
+      url: selectUrl(process.env.AUTHENTICATION_SERVICE_URL, 'http://authentication-identity-service:8000', 'http://localhost:8001'),
       healthCheck: '/api/v1/authentication-identity-service/auth/health',
       timeout: 10000
     });
@@ -48,10 +48,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // Contract Management Service (Spring Boot) - Port 8003
+    // Contract Management Service (Spring Boot) - Port 8002
     this.addService('contract-management', {
       name: 'contract-management-service',
-      url: selectUrl(process.env.CONTRACT_MANAGEMENT_SERVICE_URL, 'http://contract-management-service:8003', 'http://localhost:8003'),
+      url: selectUrl(process.env.CONTRACT_MANAGEMENT_SERVICE_URL, 'http://contract-management-service:8000', 'http://localhost:8002'),
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -120,10 +120,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // File Storage Asset Service (FastAPI) - Port 8012
+    // File Storage Asset Service (FastAPI) - Port 8004
     this.addService('file-storage', {
       name: 'file-storage-asset-service',
-      url: selectUrl(process.env.FILE_STORAGE_SERVICE_URL, 'http://file-storage-asset-service:8012', 'http://localhost:8012'),
+      url: selectUrl(process.env.FILE_STORAGE_SERVICE_URL, 'http://file-storage-asset-service:8000', 'http://localhost:8004'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -160,10 +160,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // AI Processing Service (FastAPI) - Port 8017
+    // AI Processing Service (FastAPI) - Port 8003
     this.addService('ai-processing', {
       name: 'ai-processing-service',
-      url: selectUrl(process.env.AI_PROCESSING_SERVICE_URL, 'http://ai-processing-service:8017', 'http://localhost:8017'),
+      url: selectUrl(process.env.AI_PROCESSING_SERVICE_URL, 'http://ai-processing-service:8000', 'http://localhost:8003'),
       healthCheck: '/health',
       timeout: 10000
     });
