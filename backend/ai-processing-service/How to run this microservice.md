@@ -50,16 +50,17 @@ cd backend/ai-processing-service
 python -m venv venv
 ./venv/Scripts/Activate.ps1
 pip install -r requirements.txt
-Copy-Item env_exmaple.txt .env -Force
-# Chỉnh sửa file .env với các giá trị thực tế
-uvicorn main:app --reload --port 8003
+# Copy file env từ thư mục env
+Copy-Item env/.env.example env/.env -Force
+# Chỉnh sửa file env/.env với các giá trị thực tế
+uvicorn main:app --reload --port 8017
 ```
 
 Run (Docker):
 ```bash
 cd backend/ai-processing-service
 docker build -t ai-processing-service .
-docker run -p 8003:8003 --env-file .env ai-processing-service
+docker run -p 8017:8000 --env-file env/.env ai-processing-service
 ```
 
 Features:
@@ -80,5 +81,5 @@ API Endpoints:
 - `GET /api/v1/ai-processing-service/batch/status/{job_id}` - Trạng thái batch job
 - `POST /api/v1/ai-processing-service/events/handle` - Xử lý events
 
-Docs: `http://localhost:8003/docs#/`
+Docs: `http://localhost:8017/docs#/`
 

@@ -10,11 +10,11 @@
 **Bước 1: Cấu hình môi trường**
 ```powershell
 cd backend/file-storage-asset-service
-Copy-Item env.example .env -Force
+Copy-Item env/.env.example env/.env -Force
 ```
 
-**Bước 2: Chỉnh sửa file .env**
-Mở file `.env` và cập nhật các thông tin sau:
+**Bước 2: Chỉnh sửa file env/.env**
+Mở file `env/.env` và cập nhật các thông tin sau:
 ```env
 # S3 / Filebase Configuration
 S3_ENDPOINT=https://s3.filebase.com

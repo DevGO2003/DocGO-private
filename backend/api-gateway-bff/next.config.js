@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+// Load environment variables from env directory
+require('./lib/env-loader');
+
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['kafkajs', 'winston']

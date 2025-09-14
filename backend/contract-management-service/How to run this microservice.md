@@ -24,16 +24,16 @@ mvn clean install
 ```
 
 ### 2. Cấu hình database
-Tạo file `.env` từ `env.example`:
+Tạo file `.env` từ `env/.env.example`:
 ```bash
 # Windows PowerShell
-Copy-Item env.example .env -Force
+Copy-Item env/.env.example env/.env -Force
 
 # Linux/Mac
-cp env.example .env
+cp env/.env.example env/.env
 ```
 
-Cập nhật thông tin database trong file `.env`:
+Cập nhật thông tin database trong file `env/.env`:
 ```properties
 DB_HOST=localhost
 DB_PORT=3306
@@ -98,7 +98,7 @@ mvn spring-boot:run
 ```
 
 Ứng dụng sẽ chạy tại: http://localhost:8003
-API Documentation: http://localhost:8003/docs
+API Documentation: http://localhost:8003/docs#/
 
 ## Cách 2: Chạy với Docker
 
