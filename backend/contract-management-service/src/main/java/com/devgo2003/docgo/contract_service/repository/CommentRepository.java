@@ -86,6 +86,12 @@ public interface CommentRepository extends MongoRepository<Comment, String> {
     @Query("{ 'contractId': ?0, 'isPinned': true, 'isDeleted': false }")
     long countPinnedCommentsByContractId(String contractId);
     
+    long countByContractIdAndCommentTypeAndIsDeletedFalse(String contractId, Comment.CommentType commentType);
+    
+    long countByContractIdAndPriorityAndIsDeletedFalse(String contractId, Comment.CommentPriority priority);
+    
+    long countByContractIdAndVisibility(String contractId, Comment.CommentVisibility visibility);
+    
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
     @Query("{ 'contractId': ?0, 'isResolved': false, 'isDeleted': false }")

@@ -144,6 +144,10 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     @Query("{ 'contractId': ?0, 'recurrencePattern': 'NONE', 'isDeleted': false }")
     long countNonRecurringRemindersByContractId(String contractId);
     
+    long countByContractIdAndReminderTypeAndIsDeletedFalse(String contractId, Reminder.ReminderType reminderType);
+    
+    long countByContractIdAndPriorityAndIsDeletedFalse(String contractId, Reminder.ReminderPriority priority);
+    
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")

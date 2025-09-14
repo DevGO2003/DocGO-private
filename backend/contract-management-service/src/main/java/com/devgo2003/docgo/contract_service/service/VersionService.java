@@ -101,6 +101,13 @@ public class VersionService {
     }
 
     /**
+     * Lấy version không cần approval
+     */
+    public List<Version> getNoApprovalRequiredVersionsByContractId(String contractId) {
+        return versionRepository.findNoApprovalRequiredVersionsByContractId(contractId);
+    }
+
+    /**
      * Lấy version theo previous version ID
      */
     public List<Version> getVersionsByPreviousVersionId(String previousVersionId) {

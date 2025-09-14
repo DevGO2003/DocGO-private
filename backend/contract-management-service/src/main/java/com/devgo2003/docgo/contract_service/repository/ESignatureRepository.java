@@ -164,6 +164,10 @@ public interface ESignatureRepository extends MongoRepository<ESignature, String
     @Query("{ 'contractId': ?0, 'complianceVerified': false, 'isDeleted': false }")
     long countComplianceUnverifiedSignaturesByContractId(String contractId);
     
+    long countBySignatureTypeAndIsDeletedFalse(ESignature.SignatureType signatureType);
+    
+    long countByVerificationMethodAndIsDeletedFalse(ESignature.VerificationMethod verificationMethod);
+    
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'PENDING', 'isDeleted': false }")

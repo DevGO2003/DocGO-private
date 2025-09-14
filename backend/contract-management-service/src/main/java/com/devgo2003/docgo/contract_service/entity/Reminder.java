@@ -187,6 +187,13 @@ public class Reminder extends BaseEntity {
         this.contract = contract;
     }
 
+    public void setContractId(String contractId) {
+        if (this.contract == null) {
+            this.contract = new Contract();
+        }
+        this.contract.setId(contractId);
+    }
+
     public String getTitle() {
         return title;
     }

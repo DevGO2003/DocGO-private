@@ -197,6 +197,10 @@ public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
     @Query("{ 'contractId': ?0, 'isExported': false, 'isDeleted': false }")
     long countUnexportedLogsByContractId(String contractId);
     
+    long countByContractIdAndStatusAndIsDeletedFalse(String contractId, AuditLog.AuditStatus status);
+    
+    long countByContractIdAndSeverityAndIsDeletedFalse(String contractId, AuditLog.SeverityLevel severity);
+    
     boolean existsByContractIdAndIsDeletedFalse(String contractId);
     
     @Query("{ 'contractId': ?0, 'status': 'SUCCESS', 'isDeleted': false }")

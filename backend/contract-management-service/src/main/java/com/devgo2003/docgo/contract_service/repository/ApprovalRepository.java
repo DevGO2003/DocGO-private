@@ -115,6 +115,11 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
      * Đếm số approval theo contract ID và status
      */
     long countByContractIdAndStatusAndIsDeletedFalse(String contractId, Approval.ApprovalStatus status);
+    
+    /**
+     * Đếm số approval theo contract ID
+     */
+    long countByContractIdAndIsDeletedFalse(String contractId);
 
     /**
      * Đếm số approval theo approver ID và status
