@@ -11,3 +11,4 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
   res.status(200).send(faviconSvg)
 }
+

@@ -41,6 +41,12 @@ services:
     volumes:
       - mariadb_data_local:/var/lib/mysql
       - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psapassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - docgo_network_local
 
@@ -69,6 +75,12 @@ services:
       - "6379:6379"
     volumes:
       - redis_data_local:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - docgo_network_local
 
@@ -85,6 +97,12 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data_local:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
       - docgo_network_local
 
@@ -101,12 +119,16 @@ services:
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
+      - npm_cache:/root/.npm
     command: >
-      sh -c "npm install && npm run dev"
+      sh -c "npm ci --cache /root/.npm && npm run dev"
     depends_on:
-      - mariadb
-      - redis
-      - elasticsearch
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     networks:
       - docgo_network_local
 
@@ -133,7 +155,10 @@ services:
 
   # Authentication & Identity Service (Spring Boot) - Backend Service with Hot Reload
   authentication-identity-service:
-    image: openjdk:21-jdk-slim
+    build:
+      context: ../backend/authentication-identity-service
+      dockerfile: Dockerfile
+      target: builder
     container_name: docgo-local-authentication-identity-service
     restart: unless-stopped
     working_dir: /app
@@ -143,12 +168,16 @@ services:
       - ../backend/authentication-identity-service/env/.env.local
     volumes:
       - ../backend/authentication-identity-service:/app
+      - maven_cache:/root/.m2
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
     depends_on:
-      - mariadb
-      - redis
-      - elasticsearch
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     networks:
       - docgo_network_local
 
@@ -176,7 +205,10 @@ services:
 
   # AI Processing Service (FastAPI) - Backend Service with Hot Reload
   ai-processing-service:
-    image: python:3.11-slim
+    build:
+      context: ../backend/ai-processing-service
+      dockerfile: Dockerfile
+      target: deps
     container_name: docgo-local-ai-processing-service
     restart: unless-stopped
     working_dir: /app
@@ -187,11 +219,14 @@ services:
     volumes:
       - ../backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
+      - pip_cache:/root/.cache/pip
     command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
+      sh -c "python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
     depends_on:
-      - redis
-      - elasticsearch
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     networks:
       - docgo_network_local
 
@@ -506,6 +541,13 @@ volumes:
   file_storage_temp_local:
     driver: local
   general_file_management_uploads_local:
+    driver: local
+  # Cache volumes for faster builds
+  maven_cache:
+    driver: local
+  npm_cache:
+    driver: local
+  pip_cache:
     driver: local
 
 networks:
