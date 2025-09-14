@@ -7,7 +7,7 @@ import serviceManager from '@/lib/services';
 
 const SPRING_SERVICES = new Set<string>([
   'authentication',
-  // 'contract-management', // Tạm thời bỏ vì không có SpringDoc OpenAPI
+  'contract-management', // Đã có SpringDoc OpenAPI
 ]);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         Accept: 'application/json',
         'User-Agent': 'API-Gateway-BFF/1.0.0'
       },
-      timeout: 15000
+      timeout: 30000
     });
     const endTime = Date.now();
     

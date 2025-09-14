@@ -130,14 +130,14 @@ export default function SwaggerPage() {
         if (serviceName === 'Authentication Identity Service') {
           targetUrl = `http://${serviceInfo.container}/swagger-ui/index.html`;
         } else {
-          targetUrl = `http://${serviceInfo.container}/docs`;
+        targetUrl = `http://${serviceInfo.container}/docs`;
         }
       } else {
         // Nếu chạy trên localhost, sử dụng port
         if (serviceName === 'Authentication Identity Service') {
           targetUrl = `http://localhost:${serviceInfo.port}/swagger-ui/index.html`;
         } else {
-          targetUrl = `http://localhost:${serviceInfo.port}/docs`;
+        targetUrl = `http://localhost:${serviceInfo.port}/docs`;
         }
       }
       
@@ -202,7 +202,7 @@ export default function SwaggerPage() {
                 <div className="service-card-header">
                   <span className="service-icon">{serviceInfo.icon}</span>
                   <h3>{serviceName}</h3>
-                </div>
+                    </div>
                 <div className="service-card-body">
                   <p className="service-description">{serviceInfo.description}</p>
                   <div className="service-meta">
@@ -220,32 +220,32 @@ export default function SwaggerPage() {
                   >
                     📖 Xem Docs
                   </button>
-                </div>
-              </div>
+                    </div>
+                  </div>
             ))}
-          </div>
-
+              </div>
+              
           {error && (
             <div className="error-message">
               ⚠️ {error}
-            </div>
+                    </div>
           )}
-        </div>
-
+              </div>
+              
         {/* API Documentation Section */}
         <div id="api-documentation" className="api-documentation-section">
           <div className="api-section-header">
             <h2>📚 API Documentation - {selectedService}</h2>
             <p>Chi tiết API endpoints và schemas cho {selectedService}</p>
-          </div>
-
-          {/* Service Status Notice - Chỉ hiển thị cho Contract Management Service (không có SpringDoc) */}
-          {selectedService === 'Contract Management Service' && (
+              </div>
+              
+          {/* Service Status Notice - Tạm thời tắt để Contract Management Service hoạt động bình thường */}
+          {false && (
             <div className="service-status-notice">
               <div className="notice-icon">⚠️</div>
               <div className="notice-content">
                 <h3>Service đang bảo trì</h3>
-                <p>API endpoints preview tạm thời không khả dụng cho {selectedService}.</p>
+                <p>API endpoints preview tạm thời không khả dụng cho service này.</p>
                 <p>Vui lòng sử dụng nút <strong>"📖 Xem Docs"</strong> để truy cập tài liệu trực tiếp từ service.</p>
               </div>
             </div>
@@ -253,25 +253,25 @@ export default function SwaggerPage() {
 
           {/* Swagger UI */}
           <div className="swagger-ui-container">
-            <SwaggerUI 
-              spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
-              docExpansion="list"
-              defaultModelsExpandDepth={2}
-              defaultModelExpandDepth={2}
-              displayOperationId={false}
-              displayRequestDuration={true}
-              filter={true}
-              showExtensions={true}
-              showCommonExtensions={true}
-              tryItOutEnabled={true}
-              requestInterceptor={(request: any) => {
-                return request;
-              }}
-              responseInterceptor={(response: any) => {
-                console.log('Swagger Response:', response);
-                return response;
-              }}
-            />
+        <SwaggerUI 
+          spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
+          docExpansion="list"
+          defaultModelsExpandDepth={2}
+          defaultModelExpandDepth={2}
+          displayOperationId={false}
+          displayRequestDuration={true}
+          filter={true}
+          showExtensions={true}
+          showCommonExtensions={true}
+          tryItOutEnabled={true}
+          requestInterceptor={(request: any) => {
+            return request;
+          }}
+          responseInterceptor={(response: any) => {
+            console.log('Swagger Response:', response);
+            return response;
+          }}
+        />
           </div>
         </div>
       </div>
@@ -306,7 +306,7 @@ export default function SwaggerPage() {
           font-size: 1.3rem;
           opacity: 0.9;
         }
-
+        
         /* Service Cards Navigation */
         .service-cards-nav {
           display: grid;
@@ -368,7 +368,7 @@ export default function SwaggerPage() {
           font-size: 2rem;
           margin-right: 15px;
         }
-
+        
         .service-card h3 {
           margin: 0;
           color: #333;
@@ -417,7 +417,7 @@ export default function SwaggerPage() {
           font-weight: 500;
           transition: all 0.3s ease;
         }
-
+        
         .view-docs-btn:hover {
           transform: scale(1.05);
           box-shadow: 0 3px 10px rgba(0,0,0,0.2);
@@ -499,7 +499,7 @@ export default function SwaggerPage() {
           margin: 0 0 8px 0;
           line-height: 1.4;
         }
-
+        
         .notice-content p:last-child {
           margin-bottom: 0;
         }
