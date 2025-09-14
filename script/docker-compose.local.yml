@@ -3,27 +3,9 @@
 # Kiến trúc tối giản: 5 services + MongoDB + Redis + Kafka
 
 services:
-  # MongoDB - Database chính (thay thế MariaDB)
-  mongodb:
-    image: mongo:7.0
-    container_name: docgo-local-mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: sapassword
-      MONGO_INITDB_DATABASE: docgo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data_local:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - docgo_network_local
+  # MongoDB Atlas - Database chính (Cloud)
+  # Sử dụng MongoDB Atlas thay vì MongoDB local
+  # Connection: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
 
   # Redis - Cache và Message Queue
   redis:
@@ -89,8 +71,6 @@ services:
     command: >
       sh -c "npm ci --cache /root/.npm && npm run dev"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -111,7 +91,7 @@ services:
       - ../backend/authentication-identity-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_auth?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=
@@ -121,8 +101,6 @@ services:
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -143,7 +121,7 @@ services:
       - ../backend/contract-management-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_contract_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=
@@ -155,8 +133,6 @@ services:
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -174,7 +150,7 @@ services:
       - ../backend/ai-processing-service/env/.env.local
     environment:
       - ENVIRONMENT=development
-      - MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_ai_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
@@ -185,8 +161,6 @@ services:
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -204,7 +178,7 @@ services:
       - ../backend/file-storage-asset-service/env/.env.local
     environment:
       - ENVIRONMENT=development
-      - MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_file_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
@@ -216,8 +190,6 @@ services:
     command: >
       sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
-      mongodb:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -225,8 +197,6 @@ services:
 
 volumes:
   # Data volumes
-  mongodb_data_local:
-    driver: local
   redis_data_local:
     driver: local
   ai_processing_results_local:

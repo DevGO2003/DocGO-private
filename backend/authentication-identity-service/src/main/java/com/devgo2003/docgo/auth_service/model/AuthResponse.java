@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.auth_service.model;
 
-import com.devgo2003.docgo.auth_service.entity.User;
+import com.devgo2003.docgo.auth_service.entity.UserMongo;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -113,6 +114,21 @@ public class AuthResponse {
             this.avatarUrl = avatarUrl;
             this.approvalLevel = approvalLevel;
             this.maxContractValue = maxContractValue;
+        }
+        
+        // Constructor for UserMongo
+        public UserInfo(String id, String username, String email, String firstName, String lastName, 
+                       Set<String> roleIds, com.devgo2003.docgo.auth_service.entity.UserStatus status) {
+            this.id = id;
+            this.userId = null; // Not applicable for MongoDB
+            this.username = username;
+            this.email = email;
+            this.role = roleIds != null && !roleIds.isEmpty() ? roleIds.iterator().next() : "employee";
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.status = status != null ? status.name() : "ACTIVE";
+            this.approvalLevel = 1;
+            this.maxContractValue = 0L;
         }
     }
 }

@@ -60,8 +60,7 @@ public class Reminder extends BaseEntity {
     @Field("assigned_to_email")
     private String assignedToEmail;
 
-    @Field("created_by")
-    private String createdBy;
+    // createdBy field inherited from BaseEntity
 
     @Field("created_by_name")
     private String createdByName;
@@ -298,13 +297,7 @@ public class Reminder extends BaseEntity {
         this.assignedToEmail = assignedToEmail;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+    // getCreatedBy() and setCreatedBy() methods inherited from BaseEntity
 
     public String getCreatedByName() {
         return createdByName;
