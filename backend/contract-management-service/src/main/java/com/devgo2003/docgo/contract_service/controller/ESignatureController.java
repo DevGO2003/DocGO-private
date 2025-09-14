@@ -98,17 +98,6 @@ public class ESignatureController {
         return ResponseBuilder.success(eSignatures, "Lấy danh sách e-signature declined thành công");
     }
 
-    @GetMapping("/contracts/{contractId}/esignatures/expired")
-    @Operation(summary = "Lấy e-signature đã expired", description = "Lấy danh sách e-signature đã hết hạn")
-    public ResponseEntity<RestResponse<List<ESignature>>> getExpiredSignatures(@PathVariable String contractId) {
-        List<ESignature> eSignatures = eSignatureService.getExpiredSignaturesByContractId(contractId);
-        
-        if (eSignatures.isEmpty()) {
-            return ResponseBuilder.noContent("Không có e-signature nào đã expired");
-        }
-        
-        return ResponseBuilder.success(eSignatures, "Lấy danh sách e-signature expired thành công");
-    }
 
     @GetMapping("/contracts/{contractId}/esignatures/verified")
     @Operation(summary = "Lấy e-signature đã verified", description = "Lấy danh sách e-signature đã xác thực")

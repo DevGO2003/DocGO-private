@@ -73,10 +73,6 @@ public class ReminderService {
         return reminderRepository.findByContractIdAndPriorityAndIsDeletedFalse(contractId, priority);
     }
 
-    public List<Reminder> getEscalatedRemindersByContractId(String contractId) {
-        return reminderRepository.findEscalatedRemindersByContractId(contractId);
-    }
-
     public List<Reminder> getNonEscalatedRemindersByContractId(String contractId) {
         return reminderRepository.findNonEscalatedRemindersByContractId(contractId);
     }
@@ -392,10 +388,6 @@ public class ReminderService {
         return reminderRepository.countEscalatedRemindersByContractId(contractId);
     }
 
-    public long countEscalatedRemindersByContractId(String contractId) {
-        return reminderRepository.countEscalatedRemindersByContractId(contractId);
-    }
-
     public long countNonEscalatedRemindersByContractId(String contractId) {
         return reminderRepository.countNonEscalatedRemindersByContractId(contractId);
     }
@@ -438,10 +430,6 @@ public class ReminderService {
 
     public boolean existsFailedRemindersByContractId(String contractId) {
         return reminderRepository.existsFailedRemindersByContractId(contractId);
-    }
-
-    public boolean existsEscalatedRemindersByContractId(String contractId) {
-        return reminderRepository.existsEscalatedRemindersByContractId(contractId);
     }
 
     public boolean existsEscalatedRemindersByContractId(String contractId) {

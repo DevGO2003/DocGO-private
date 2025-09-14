@@ -92,12 +92,6 @@ public class VersionService {
         return versionRepository.findCurrentVersionsByContractId(contractId);
     }
 
-    /**
-     * Lấy version theo isPublished
-     */
-    public List<Version> getPublishedVersionsByContractId(String contractId) {
-        return versionRepository.findPublishedVersionsByContractId(contractId);
-    }
 
     /**
      * Lấy version theo approval required

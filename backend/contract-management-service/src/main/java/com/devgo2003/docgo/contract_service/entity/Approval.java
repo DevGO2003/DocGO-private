@@ -115,6 +115,14 @@ public class Approval extends BaseEntity {
         this.contract = contract;
     }
 
+    public void setContractId(String contractId) {
+        if (contractId != null) {
+            Contract contract = new Contract();
+            contract.setId(contractId);
+            this.contract = contract;
+        }
+    }
+
     public String getApproverId() {
         return approverId;
     }

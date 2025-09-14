@@ -150,7 +150,7 @@ public class AuditLog extends BaseEntity {
         this.description = description;
         this.userId = userId;
         this.userName = userName;
-        this.severity = SeverityLevel.INFO;
+        this.severity = SeverityLevel.LOW;
         this.status = AuditStatus.SUCCESS;
         this.isSensitive = false;
         this.complianceRequired = false;
@@ -172,6 +172,14 @@ public class AuditLog extends BaseEntity {
 
     public void setContract(Contract contract) {
         this.contract = contract;
+    }
+
+    public void setContractId(String contractId) {
+        if (contractId != null) {
+            Contract contract = new Contract();
+            contract.setId(contractId);
+            this.contract = contract;
+        }
     }
 
     public String getEventType() {

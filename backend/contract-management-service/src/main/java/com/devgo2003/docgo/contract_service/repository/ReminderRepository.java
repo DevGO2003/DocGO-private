@@ -41,8 +41,6 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     
     List<Reminder> findByContractIdAndPriorityAndIsDeletedFalse(String contractId, Reminder.ReminderPriority priority);
     
-    @Query("{ 'contractId': ?0, 'isEscalated': true, 'isDeleted': false }")
-    List<Reminder> findEscalatedRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'isEscalated': false, 'isDeleted': false }")
     List<Reminder> findNonEscalatedRemindersByContractId(String contractId);
@@ -130,8 +128,6 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     @Query("{ 'contractId': ?0, 'status': 'ESCALATED', 'isDeleted': false }")
     long countEscalatedRemindersByContractId(String contractId);
     
-    @Query("{ 'contractId': ?0, 'isEscalated': true, 'isDeleted': false }")
-    long countEscalatedRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'isEscalated': false, 'isDeleted': false }")
     long countNonEscalatedRemindersByContractId(String contractId);
@@ -168,8 +164,6 @@ public interface ReminderRepository extends MongoRepository<Reminder, String> {
     @Query("{ 'contractId': ?0, 'status': 'ESCALATED', 'isDeleted': false }")
     boolean existsEscalatedRemindersByContractId(String contractId);
     
-    @Query("{ 'contractId': ?0, 'isEscalated': true, 'isDeleted': false }")
-    boolean existsEscalatedRemindersByContractId(String contractId);
     
     @Query("{ 'contractId': ?0, 'isEscalated': false, 'isDeleted': false }")
     boolean existsNonEscalatedRemindersByContractId(String contractId);

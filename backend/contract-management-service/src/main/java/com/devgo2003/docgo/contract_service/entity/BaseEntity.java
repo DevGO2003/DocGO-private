@@ -142,7 +142,7 @@ public abstract class BaseEntity {
      * Khởi tạo các giá trị mặc định cho entity mới
      * Sử dụng method này để đảm bảo tính nhất quán khi tạo entity mới
      */
-    protected void initializeNewEntity() {
+    public void initializeNewEntity() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isDeleted = false;

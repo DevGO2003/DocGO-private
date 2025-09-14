@@ -144,6 +144,11 @@ public class Contract extends BaseEntity implements Persistable<String> {
     }
     
     @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
     public boolean isNew() {
         return this.getId() == null;
     }
@@ -154,7 +159,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
      */
     public static Contract createNew() {
         Contract contract = new Contract();
-        contract.setId(null);
+        contract.id = null;
         contract.initializeNewEntity();
         contract.setAiProcessed(false);
         contract.setProcessingStatus(ProcessingStatus.PENDING);

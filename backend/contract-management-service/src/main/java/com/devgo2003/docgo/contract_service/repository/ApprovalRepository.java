@@ -60,14 +60,29 @@ public interface ApprovalRepository extends MongoRepository<Approval, String> {
     List<Approval> findByApproverIdAndStatusAndIsDeletedFalse(String approverId, Approval.ApprovalStatus status);
 
     /**
+     * Tìm approval theo approver ID
+     */
+    List<Approval> findByApproverIdAndIsDeletedFalse(String approverId);
+
+    /**
      * Tìm approval theo approver email và status
      */
     List<Approval> findByApproverEmailAndStatusAndIsDeletedFalse(String approverEmail, Approval.ApprovalStatus status);
 
     /**
+     * Tìm approval theo approver email
+     */
+    List<Approval> findByApproverEmailAndIsDeletedFalse(String approverEmail);
+
+    /**
      * Tìm approval theo approver role và status
      */
     List<Approval> findByApproverRoleAndStatusAndIsDeletedFalse(String approverRole, Approval.ApprovalStatus status);
+
+    /**
+     * Tìm approval theo approver role
+     */
+    List<Approval> findByApproverRoleAndIsDeletedFalse(String approverRole);
 
     /**
      * Tìm approval sắp hết hạn

@@ -4,6 +4,7 @@ import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.response.ValidationErrorResponse;
 import com.devgo2003.docgo.contract_service.common.response.ErrorDetail;
 import com.devgo2003.docgo.contract_service.common.response.ErrorResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -16,8 +17,8 @@ public class ResponseBuilder {
 
     private static final String API_VERSION = "v1";
 
-    public static <T> RestResponse<T> success(T data, String shortMessage, String description) {
-        return RestResponse.<T>builder()
+    public static <T> ResponseEntity<RestResponse<T>> success(T data, String shortMessage, String description) {
+        RestResponse<T> response = RestResponse.<T>builder()
                 .apiVersion(API_VERSION)
                 .statusCode(200)
                 .shortMessage(shortMessage)
@@ -27,10 +28,15 @@ public class ResponseBuilder {
                 .requestId(generateRequestId())
                 .path(getCurrentPath())
                 .build();
+        return ResponseEntity.ok(response);
     }
 
-    public static <T> RestResponse<T> success(T data) {
+    public static <T> ResponseEntity<RestResponse<T>> success(T data) {
         return success(data, "Success", "Yêu cầu đã được xử lý thành công.");
+    }
+
+    public static <T> ResponseEntity<RestResponse<T>> success(T data, String description) {
+        return success(data, "Success", description);
     }
 
     public static RestResponse<ErrorResponse> validationError(List<ErrorDetail> errors, String shortMessage, String description) {
@@ -69,6 +75,34 @@ public class ResponseBuilder {
 
     public static <T> RestResponse<T> error(int statusCode, String shortMessage, String description) {
         return error(statusCode, shortMessage, description, null);
+    }
+
+    public static <T> ResponseEntity<RestResponse<T>> noContent(String description) {
+        RestResponse<T> response = RestResponse.<T>builder()
+                .apiVersion(API_VERSION)
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description(description)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(generateRequestId())
+                .path(getCurrentPath())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    public static <T> ResponseEntity<RestResponse<T>> notFound(String description) {
+        RestResponse<T> response = RestResponse.<T>builder()
+                .apiVersion(API_VERSION)
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description(description)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(generateRequestId())
+                .path(getCurrentPath())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     private static String generateRequestId() {

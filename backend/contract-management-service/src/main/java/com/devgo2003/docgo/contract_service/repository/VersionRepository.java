@@ -153,46 +153,6 @@ public interface VersionRepository extends MongoRepository<Version, String> {
     @Query("{ 'contractId': ?0, 'isCurrent': true, 'isDeleted': false }")
     List<Version> findCurrentVersionsByContractId(String contractId);
 
-    /**
-     * Tìm version theo contract ID và isPublished = true
-     */
-    @Query("{ 'contractId': ?0, 'isPublished': true, 'isDeleted': false }")
-    List<Version> findPublishedVersionsByContractId(String contractId);
-
-    /**
-     * Tìm version theo contract ID và isPublished = false
-     */
-    @Query("{ 'contractId': ?0, 'isPublished': false, 'isDeleted': false }")
-    List<Version> findUnpublishedVersionsByContractId(String contractId);
-
-    /**
-     * Tìm version theo contract ID và approval required = true
-     */
-    @Query("{ 'contractId': ?0, 'approvalRequired': true, 'isDeleted': false }")
-    List<Version> findApprovalRequiredVersionsByContractId(String contractId);
-
-    /**
-     * Tìm version theo contract ID và approval required = false
-     */
-    @Query("{ 'contractId': ?0, 'approvalRequired': false, 'isDeleted': false }")
-    List<Version> findNoApprovalRequiredVersionsByContractId(String contractId);
-
-    /**
-     * Tìm version theo contract ID và change type
-     */
-    List<Version> findByContractIdAndChangeTypeAndIsDeletedFalse(String contractId, Version.ChangeType changeType);
-
-    /**
-     * Tìm version theo contract ID và change type (sắp xếp theo thời gian tạo)
-     */
-    @Query("{ 'contractId': ?0, 'changeType': ?1, 'isDeleted': false }")
-    List<Version> findByContractIdAndChangeTypeOrderByCreatedAtDesc(String contractId, Version.ChangeType changeType);
-
-    /**
-     * Tìm version theo contract ID và change type (sắp xếp theo version number)
-     */
-    @Query("{ 'contractId': ?0, 'changeType': ?1, 'isDeleted': false }")
-    List<Version> findByContractIdAndChangeTypeOrderByVersionNumberDesc(String contractId, Version.ChangeType changeType);
 
     /**
      * Tìm version theo contract ID và previous version ID
