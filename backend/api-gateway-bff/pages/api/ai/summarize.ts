@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = req.headers['x-user-token'] as string
 
     // Get file or text from request
-    const file = req.body.file || req.file
+    const file = req.body.file || (req as any).file
     const text = req.body.text
 
     if (!file && !text) {

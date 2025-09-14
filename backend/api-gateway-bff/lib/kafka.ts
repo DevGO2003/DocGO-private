@@ -101,6 +101,9 @@ class KafkaService {
         case 'AUTH_FAILED':
           await this.handleAuthFailed(event);
           break;
+        case 'GATEWAY_ERROR':
+          await this.handleGatewayError(event);
+          break;
         default:
           logger.warn(`⚠️ Unknown event type: ${event.type}`);
       }
@@ -178,6 +181,34 @@ class KafkaService {
     };
 
     await this.publishEvent('auth-events', event);
+  }
+
+  private async handleGatewayError(event: KafkaEvent): Promise<void> {
+    const payload = event.payload;
+    
+    logger.error(`🚨 Gateway Error Event:`, {
+      error: payload.error,
+      url: payload.url,
+      method: payload.method,
+      timestamp: payload.timestamp,
+      requestId: event.requestId
+    });
+
+    // Publish to error monitoring topic
+    const errorEvent: KafkaEvent = {
+      type: 'GATEWAY_ERROR',
+      payload: {
+        error: payload.error,
+        url: payload.url,
+        method: payload.method,
+        timestamp: payload.timestamp,
+        severity: 'ERROR'
+      },
+      timestamp: new Date().toISOString(),
+      requestId: event.requestId,
+    };
+
+    await this.publishEvent('error-events', errorEvent);
   }
 
   isKafkaConnected(): boolean {

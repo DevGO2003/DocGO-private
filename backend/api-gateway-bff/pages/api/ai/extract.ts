@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = req.headers['x-user-token'] as string
 
     // Get file from request (assuming it's already processed by multer or similar)
-    const file = req.body.file || req.file
+    const file = req.body.file || (req as any).file
 
     if (!file) {
       const requestId = generateRequestId()

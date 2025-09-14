@@ -72,7 +72,7 @@ export interface KafkaMessage {
 }
 
 export interface KafkaEvent {
-  type: 'USER_CREATED' | 'USER_UPDATED' | 'USER_DELETED' | 'AUTH_SUCCESS' | 'AUTH_FAILED';
+  type: 'USER_CREATED' | 'USER_UPDATED' | 'USER_DELETED' | 'AUTH_SUCCESS' | 'AUTH_FAILED' | 'GATEWAY_ERROR';
   payload: any;
   timestamp: string;
   requestId: string;

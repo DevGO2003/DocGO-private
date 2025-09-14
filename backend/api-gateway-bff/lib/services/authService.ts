@@ -151,6 +151,17 @@ class AuthService {
     }
   }
 
+  async healthCheck(): Promise<boolean> {
+    try {
+      const response = await this.client.get(
+        '/api/v1/authentication-identity-service/health'
+      );
+      return response.status === 200;
+    } catch (error) {
+      return false;
+    }
+  }
+
   private handleError(error: any, message: string): Error {
     if (error.response) {
       // Server responded with error status

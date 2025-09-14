@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authService } from './lib/services/authService'
+import serviceManager from './lib/services'
 import { createErrorResponse, generateRequestId, AuthenticationError, AuthorizationError } from './lib/utils/errorHandler'
 
 // Rate limiting configuration
@@ -246,13 +247,13 @@ async function checkServiceHealth(serviceName: string): Promise<boolean> {
     
     switch (serviceName) {
       case 'contract':
-        isHealthy = await authService.healthCheck()
+        isHealthy = await serviceManager.checkServiceHealth('contract-management-service')
         break
       case 'ai':
-        isHealthy = await authService.healthCheck()
+        isHealthy = await serviceManager.checkServiceHealth('ai-processing-service')
         break
       case 'file':
-        isHealthy = await authService.healthCheck()
+        isHealthy = await serviceManager.checkServiceHealth('file-storage-asset-service')
         break
       default:
         isHealthy = true
