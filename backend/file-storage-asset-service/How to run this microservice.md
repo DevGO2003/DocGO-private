@@ -3,6 +3,8 @@
 **Prerequisites:**
 - Python 3.11+
 - S3-compatible storage (Filebase recommended)
+- MongoDB Atlas hoặc MongoDB local
+- Redis Cloud hoặc Redis local
 - ClamAV (tùy chọn, cho malware scanning)
 
 **Bước 1: Cấu hình môi trường**
@@ -35,43 +37,66 @@ MAX_FILE_SIZE=104857600
 ALLOWED_FILE_TYPES=pdf,docx,txt,jpg,jpeg,png,gif
 UPLOAD_DIR=uploads
 TEMP_DIR=temp
+
+# MongoDB Configuration
+MONGODB_URL=mongodb://localhost:27017
+MONGODB_DATABASE=docgo_file_storage
+MONGODB_FILES_COLLECTION=files
+MONGODB_ASSETS_COLLECTION=assets
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
+REDIS_DB=0
+REDIS_PASSWORD=
 ```
 
-**Bước 3: Tạo bucket S3**
-Trước khi chạy service, bạn cần tạo bucket `docgo-assets` trong Filebase hoặc S3 của bạn.
+**Bước 3: Tạo bucket S3 và cấu hình database**
+Trước khi chạy service, bạn cần:
+1. Tạo bucket `docgo-assets` trong Filebase hoặc S3 của bạn
+2. Cấu hình MongoDB (Atlas hoặc local)
+3. Cấu hình Redis (Cloud hoặc local)
 
 **Bước 4: Cài đặt và chạy**
 ```powershell
 python -m venv venv
 ./venv/Scripts/Activate.ps1
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8017
+uvicorn main:app --reload --port 8018
 ```
 
-**Docs:** `http://localhost:8017/docs#/`
+**Docs:** `http://localhost:8018/docs#/`
 
 ## API Endpoints
 
-### 🔹 File Management
+### 🔹 File Management (Core)
 - `POST /api/v1/file-storage-asset-service/files` - Upload file
 - `GET /api/v1/file-storage-asset-service/files` - Liệt kê files (có phân trang)
-- `GET /api/v1/file-storage-asset-service/files/{key}/url` - Tạo presigned URL
-- `DELETE /api/v1/file-storage-asset-service/files/{key}` - Xóa file
-
-### 🔹 S3 Direct Operations
-- `GET /api/v1/file-storage-asset-service/files/s3` - Lấy danh sách files trực tiếp từ S3
-- `GET /api/v1/file-storage-asset-service/files/s3/{key}` - Lấy thông tin chi tiết file từ S3
-
-### 🔹 Advanced File Operations
-- `POST /api/v1/file-storage-asset-service/files/upload-with-scan` - Upload với malware scan
 - `GET /api/v1/file-storage-asset-service/files/{file_id}/download` - Download file
 - `POST /api/v1/file-storage-asset-service/files/{file_id}/signed-url` - Tạo signed URL
 - `GET /api/v1/file-storage-asset-service/files/{file_id}/versions` - Lấy phiên bản file
 - `DELETE /api/v1/file-storage-asset-service/files/{file_id}` - Xóa file/phiên bản
 
-### 🔹 Malware Scanning
-- `POST /api/v1/file-storage-asset-service/scan/directory` - Quét malware thư mục
-- `POST /api/v1/file-storage-asset-service/scan/statistics` - Thống kê quét malware
+### 🔹 General File Management
+- `POST /api/v1/file-storage-asset-service/files/organize` - Tổ chức file vào thư mục
+- `POST /api/v1/file-storage-asset-service/files/share` - Chia sẻ file
+- `GET /api/v1/file-storage-asset-service/files/search` - Tìm kiếm files
+- `GET /api/v1/file-storage-asset-service/files/{file_id}/metadata` - Lấy metadata file
+- `POST /api/v1/file-storage-asset-service/files/backup` - Sao lưu files
+
+### 🔹 File Processing
+- `POST /api/v1/file-storage-asset-service/process/convert` - Chuyển đổi file
+- `POST /api/v1/file-storage-asset-service/process/compress` - Nén file
+- `POST /api/v1/file-storage-asset-service/process/extract` - Giải nén file
+- `POST /api/v1/file-storage-asset-service/process/validate` - Kiểm tra file
+
+### 🔹 Asset Management
+- `POST /api/v1/file-storage-asset-service/assets` - Tạo asset
+- `GET /api/v1/file-storage-asset-service/assets/{asset_id}` - Lấy thông tin asset
+- `PUT /api/v1/file-storage-asset-service/assets/{asset_id}` - Cập nhật asset
+- `DELETE /api/v1/file-storage-asset-service/assets/{asset_id}` - Xóa asset
+- `GET /api/v1/file-storage-asset-service/assets` - Lấy danh sách assets
+- `GET /api/v1/file-storage-asset-service/assets/{asset_id}/versions` - Lấy phiên bản asset
+- `PUT /api/v1/file-storage-asset-service/assets/{asset_id}/restore` - Khôi phục asset
 
 ## 🔗 S3 Direct Operations
 
@@ -122,11 +147,37 @@ GET /api/v1/file-storage-asset-service/files/s3/documents/contract.pdf?include_u
 }
 ```
 
+## 🚀 Tính năng mới
+
+### File Processing
+- **Chuyển đổi file**: Hỗ trợ chuyển đổi giữa các định dạng (PDF, DOCX, TXT, JPG, PNG)
+- **Nén file**: Nén file với mức độ nén tùy chọn (1-9)
+- **Giải nén file**: Hỗ trợ ZIP, RAR và các định dạng archive khác
+- **Kiểm tra file**: Validation file và phát hiện lỗi
+
+### Asset Management
+- **Quản lý asset**: Tạo, cập nhật, xóa asset từ file
+- **Phân loại asset**: Hỗ trợ các danh mục (document, image, video, audio, archive)
+- **Versioning**: Quản lý phiên bản asset
+- **Tìm kiếm**: Tìm kiếm asset theo tên, mô tả, tags
+
+### General File Management
+- **Tổ chức file**: Sắp xếp file vào thư mục
+- **Chia sẻ file**: Chia sẻ file với quyền truy cập
+- **Backup**: Sao lưu nhiều file cùng lúc
+- **Metadata**: Lấy thông tin chi tiết file
+
+### Database Integration
+- **MongoDB**: Lưu trữ metadata file và asset
+- **Redis**: Cache và session management
+- **S3/Filebase**: Lưu trữ file thực tế
+
 **Lưu ý quan trọng:**
 - Đảm bảo bucket `docgo-assets` đã được tạo trong S3/Filebase trước khi chạy service
+- Cấu hình MongoDB và Redis trước khi chạy service
 - Nếu không có ClamAV, set `USE_CLAMD=false` trong file `.env`
 - Service sẽ tự động tạo thư mục `uploads/` và `temp/` nếu chưa tồn tại
 - Tất cả API đều trả về format `RestResponse` chuẩn hóa
-- Prefix mặc định cho files là `documents/` thay vì `assets/`
-- S3 APIs trả về thông tin trực tiếp từ S3, không qua database local
+- Port mới: 8018 (thay vì 8012)
+- Tích hợp đầy đủ MongoDB và Redis cho quản lý file nâng cao
 

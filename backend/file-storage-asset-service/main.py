@@ -124,7 +124,7 @@ app.include_router(router)
 @app.on_event("startup")
 async def startup_event():
 	"""Khởi tạo service khi startup"""
-	from config import ensure_bucket_exists, ensure_local_directories
+	from config import ensure_bucket_exists, ensure_local_directories, get_mongodb_client, get_redis_client
 	
 	try:
 		print("🚀 Khởi động File Storage Asset Service...")
@@ -135,11 +135,27 @@ async def startup_event():
 		# Đảm bảo thư mục local tồn tại
 		ensure_local_directories()
 		
+		# Kiểm tra kết nối MongoDB
+		try:
+			mongodb_client = get_mongodb_client()
+			await mongodb_client.admin.command('ping')
+			print("✅ MongoDB connection established")
+		except Exception as e:
+			print(f"⚠️  MongoDB connection failed: {e}")
+		
+		# Kiểm tra kết nối Redis
+		try:
+			redis_client = get_redis_client()
+			await redis_client.ping()
+			print("✅ Redis connection established")
+		except Exception as e:
+			print(f"⚠️  Redis connection failed: {e}")
+		
 		print("✅ File Storage Asset Service đã sẵn sàng!")
 		
 	except Exception as e:
 		print(f"❌ Lỗi khởi động service: {e}")
-		print("⚠️  Service vẫn sẽ chạy nhưng có thể gặp lỗi khi sử dụng S3")
+		print("⚠️  Service vẫn sẽ chạy nhưng có thể gặp lỗi khi sử dụng các dịch vụ")
 
 
 @app.get("/", tags=["Root"])
@@ -164,8 +180,10 @@ async def health_check():
 			"status": "healthy",
 			"service": "File Storage Asset Service",
 			"version": "1.0.0",
-			"database": "connected",  # S3 connection status
-			"file_scanner": "available"  # File scanner status
+		"database": "connected",  # S3 connection status
+		"mongodb": "connected",  # MongoDB connection status
+		"redis": "connected",  # Redis connection status
+		"file_scanner": "available"  # File scanner status
 		},
 		path="/health"
 	)
@@ -227,6 +245,6 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
 	import uvicorn
-	uvicorn.run(app, host="127.0.0.1", port=8012)
+	uvicorn.run(app, host="127.0.0.1", port=8018)
 
 

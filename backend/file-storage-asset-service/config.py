@@ -6,6 +6,8 @@ from botocore.client import Config
 from botocore.exceptions import ClientError, NoCredentialsError
 from dotenv import load_dotenv
 from pathlib import Path
+import motor.motor_asyncio
+import redis.asyncio as redis
 
 
 # Load .env files in priority order: .env.local > .env > default lookup
@@ -35,9 +37,9 @@ def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
 # S3 / Filebase configuration
 S3_ENDPOINT: str = get_env("S3_ENDPOINT")
 S3_REGION: str = get_env("S3_REGION")
-S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY_ID")
-S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_ACCESS_KEY")
-S3_BUCKET: str = get_env("S3_BUCKET")
+S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY", get_env("S3_ACCESS_KEY_ID"))
+S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_KEY", get_env("S3_SECRET_ACCESS_KEY"))
+S3_BUCKET: str = get_env("S3_BUCKET_NAME", get_env("S3_BUCKET"))
 S3_ENABLED: bool = get_env("S3_ENABLED", "true").lower() == "true"
 S3_PUBLIC_BUCKET: bool = get_env("S3_PUBLIC_BUCKET", "false").lower() == "true"
 S3_ADDRESSING_STYLE: str = get_env("S3_ADDRESSING_STYLE", "virtual")  # virtual | path
@@ -155,9 +157,54 @@ UPLOAD_DIR: str = get_env("UPLOAD_DIR", "uploads")
 TEMP_DIR: str = get_env("TEMP_DIR", "temp")
 
 
+# MongoDB configuration
+MONGODB_URL: str = get_env("MONGODB_ATLAS_URI", get_env("MONGODB_URL", "mongodb://localhost:27017"))
+MONGODB_DATABASE: str = get_env("MONGODB_DATABASE", "docgo_file_storage")
+MONGODB_FILES_COLLECTION: str = get_env("MONGODB_FILES_COLLECTION", "files")
+MONGODB_ASSETS_COLLECTION: str = get_env("MONGODB_ASSETS_COLLECTION", "assets")
+
+# Redis configuration
+REDIS_URL: str = get_env("REDIS_URL", "redis://localhost:6379")
+REDIS_DB: int = int(get_env("REDIS_DB", "0"))
+REDIS_PASSWORD: Optional[str] = get_env("REDIS_CLOUD_PASSWORD", get_env("REDIS_PASSWORD"))
+
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS: str = get_env("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 KAFKA_FILE_UPLOADED_TOPIC: str = get_env("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
 KAFKA_CLIENT_ID: str = get_env("KAFKA_CLIENT_ID", "file-storage-asset-service")
 KAFKA_MESSAGE_KEY_FIELD: str = get_env("KAFKA_MESSAGE_KEY_FIELD", "key")  # key | fileId | filename
+
+# MongoDB client
+mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
+mongodb_database = mongodb_client[MONGODB_DATABASE]
+files_collection = mongodb_database[MONGODB_FILES_COLLECTION]
+assets_collection = mongodb_database[MONGODB_ASSETS_COLLECTION]
+
+# Redis client
+redis_client = redis.from_url(
+    REDIS_URL,
+    db=REDIS_DB,
+    password=REDIS_PASSWORD,
+    decode_responses=True
+)
+
+def get_mongodb_client():
+    """Get MongoDB client instance."""
+    return mongodb_client
+
+def get_mongodb_database():
+    """Get MongoDB database instance."""
+    return mongodb_database
+
+def get_files_collection():
+    """Get files collection instance."""
+    return files_collection
+
+def get_assets_collection():
+    """Get assets collection instance."""
+    return assets_collection
+
+def get_redis_client():
+    """Get Redis client instance."""
+    return redis_client
 

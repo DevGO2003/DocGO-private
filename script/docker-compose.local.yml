@@ -1,56 +1,9 @@
-# Docker Compose Local - Backend Services with Hot Reload
+# Docker Compose Local - Simplified Architecture (5 Services + Infrastructure)
 # Tên container: docgo-local
+# Kiến trúc tối giản: 5 services + MongoDB + Redis + Kafka
 
 services:
-  # Kafka (KRaft mode) for local testing
-  kafka:
-    image: bitnami/kafka:3.7
-    container_name: docgo-local-kafka
-    restart: unless-stopped
-    ports:
-      - "9092:9092"   # Host access
-    environment:
-      - KAFKA_ENABLE_KRAFT=yes
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_NODE_ID=1
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9094
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9094,INTERNAL://:29092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      # Increase message size limits for large file processing
-      - KAFKA_CFG_MESSAGE_MAX_BYTES=10485760  # 10MB
-      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=10485760  # 10MB
-      - KAFKA_CFG_MAX_REQUEST_SIZE=10485760  # 10MB
-    networks:
-      - docgo_network_local
-
-  # Database - MariaDB (Infrastructure - No volume mounting)
-  mariadb:
-    image: mariadb:11.2
-    container_name: docgo-local-mariadb
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: sapassword
-      MYSQL_DATABASE: docgo
-      MYSQL_USER: docgo_user
-      MYSQL_PASSWORD: docgo_password
-    ports:
-      - "3307:3306"
-    volumes:
-      - mariadb_data_local:/var/lib/mysql
-      - ../database/init_user_db.sql:/docker-entrypoint-initdb.d/init_user_db.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psapassword"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - docgo_network_local
-
-  # MongoDB for Contract Management Service
+  # MongoDB - Database chính (thay thế MariaDB)
   mongodb:
     image: mongo:7.0
     container_name: docgo-local-mongodb
@@ -58,15 +11,21 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: sapassword
-      MONGO_INITDB_DATABASE: docgo_contract_service
+      MONGO_INITDB_DATABASE: docgo
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data_local:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - docgo_network_local
 
-  # Redis for caching, session management and message broker
+  # Redis - Cache và Message Queue
   redis:
     image: redis:7-alpine
     container_name: docgo-local-redis
@@ -84,29 +43,30 @@ services:
     networks:
       - docgo_network_local
 
-  # Elasticsearch for search and indexing
-  elasticsearch:
-    image: elasticsearch:8.11.0
-    container_name: docgo-local-elasticsearch
+  # Kafka - Message Broker (tùy chọn, có thể bỏ nếu không cần)
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: docgo-local-kafka
     restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch_data_local:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      - "9092:9092"
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9094
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9094,INTERNAL://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_MESSAGE_MAX_BYTES=10485760  # 10MB
+      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=10485760  # 10MB
+      - KAFKA_CFG_MAX_REQUEST_SIZE=10485760  # 10MB
     networks:
       - docgo_network_local
 
-  # API Gateway BFF (Next.js) - Backend Service with Hot Reload
+  # API Gateway BFF (Next.js) - Port 8000
   api-gateway-bff:
     image: node:18-alpine
     container_name: docgo-local-api-gateway-bff
@@ -116,6 +76,12 @@ services:
       - "8000:8000"
     env_file:
       - ../backend/api-gateway-bff/env/.env.local
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_URL=http://authentication-identity-service:8001
+      - CONTRACT_SERVICE_URL=http://contract-management-service:8002
+      - AI_SERVICE_URL=http://ai-processing-service:8003
+      - FILE_SERVICE_URL=http://file-storage-service:8004
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
@@ -123,37 +89,14 @@ services:
     command: >
       sh -c "npm ci --cache /root/.npm && npm run dev"
     depends_on:
-      mariadb:
+      mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
     networks:
       - docgo_network_local
 
-  # User Management Service (FastAPI) - Backend Service with Hot Reload
-  user-management-service:
-    image: python:3.11-slim
-    container_name: docgo-local-user-management-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8002:8002"
-    env_file:
-      - ../backend/user-management-service/env/.env.local
-    volumes:
-      - ../backend/user-management-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload"
-    depends_on:
-      - mariadb
-      - redis
-      - elasticsearch
-    networks:
-      - docgo_network_local
-
-  # Authentication & Identity Service (Spring Boot) - Backend Service with Hot Reload
+  # Authentication & Identity Service (Spring Boot) - Port 8001
   authentication-identity-service:
     build:
       context: ../backend/authentication-identity-service
@@ -163,376 +106,128 @@ services:
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "8001:8001"
+      - "8001:8000"
     env_file:
       - ../backend/authentication-identity-service/env/.env.local
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=
     volumes:
       - ../backend/authentication-identity-service:/app
       - maven_cache:/root/.m2
     command: >
-      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8001'"
+      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
-      mariadb:
+      mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
-      elasticsearch:
+    networks:
+      - docgo_network_local
+
+  # Contract Management Service (Spring Boot) - Port 8002
+  contract-management-service:
+    build:
+      context: ../backend/contract-management-service
+      dockerfile: Dockerfile
+      target: builder
+    container_name: docgo-local-contract-management-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8002:8000"
+    env_file:
+      - ../backend/contract-management-service/env/.env.local
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=
+      - AI_SERVICE_URL=http://ai-processing-service:8003
+      - FILE_SERVICE_URL=http://file-storage-service:8004
+    volumes:
+      - ../backend/contract-management-service:/app
+      - maven_cache:/root/.m2
+    command: >
+      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - docgo_network_local
 
-  # File Storage Asset Service (FastAPI) - Backend Service with Hot Reload
-  file-storage-asset-service:
-    image: python:3.11-slim
-    container_name: docgo-local-file-storage-asset-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8012:8012"
-    env_file:
-      - ../backend/file-storage-asset-service/env/.env.local
-    volumes:
-      - ../backend/file-storage-asset-service:/app
-      - file_storage_uploads_local:/app/uploads
-      - file_storage_temp_local:/app/temp
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8012 --reload"
-    depends_on:
-      - redis
-      - elasticsearch
-    networks:
-      - docgo_network_local
-
-  # AI Processing Service (FastAPI) - Backend Service with Hot Reload
+  # AI Processing + Notification Service (FastAPI) - Port 8003
   ai-processing-service:
-    build:
-      context: ../backend/ai-processing-service
-      dockerfile: Dockerfile
-      target: deps
+    image: python:3.11-slim
     container_name: docgo-local-ai-processing-service
     restart: unless-stopped
     working_dir: /app
     ports:
-      - "8017:8017"
+      - "8003:8000"
     env_file:
       - ../backend/ai-processing-service/env/.env.local
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
     volumes:
       - ../backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
       - pip_cache:/root/.cache/pip
     command: >
-      sh -c "python -m uvicorn main:app --host 0.0.0.0 --port 8017 --reload"
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
+      mongodb:
+        condition: service_healthy
       redis:
         condition: service_healthy
-      elasticsearch:
+    networks:
+      - docgo_network_local
+
+  # File Storage Service (FastAPI) - Port 8004
+  file-storage-service:
+    image: python:3.11-slim
+    container_name: docgo-local-file-storage-service
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8004:8000"
+    env_file:
+      - ../backend/file-storage-asset-service/env/.env.local
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://root:sapassword@mongodb:27017/docgo?authSource=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    volumes:
+      - ../backend/file-storage-asset-service:/app
+      - file_storage_uploads_local:/app/uploads
+      - file_storage_temp_local:/app/temp
+      - pip_cache:/root/.cache/pip
+    command: >
+      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - docgo_network_local
 
-  # Versioning Document History Service (FastAPI) - Backend Service with Hot Reload
-  versioning-document-history-service:
-    image: python:3.11-slim
-    container_name: docgo-local-versioning-document-history-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8004:8004"
-    environment:
-      - DATABASE_URL=mysql+pymysql://docgo_user:docgo_password@mariadb:3306/docgo
-    volumes:
-      - ../backend/versioning-document-history-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8004 --reload"
-    depends_on:
-      - redis
-      - mariadb
-    networks:
-      - docgo_network_local
-
-
-
-  # Contract Management Service (Spring Boot) - Backend Service with Hot Reload
-  contract-management-service:
-    image: openjdk:17-jdk-slim
-    container_name: docgo-local-contract-management-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8003:8003"
-    env_file:
-      - ../backend/contract-management-service/env/.env.local
-    volumes:
-      - ../backend/contract-management-service:/app
-      - ../backend/contract-management-service/uploads:/app/uploads
-    command: >
-      sh -c "chmod +x ./mvnw && ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8003'"
-    depends_on:
-      - mongodb
-      - redis
-      - elasticsearch
-    networks:
-      - docgo_network_local
-
-  # General File Management Service (FastAPI) - Backend Service with Hot Reload
-  general-file-management-service:
-    image: python:3.11-slim
-    container_name: docgo-local-general-file-management-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8018:8018"
-    env_file:
-      - ../backend/general-file-management-service/env/.env.local
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - KAFKA_FILE_EVENTS_TOPIC=file.uploaded
-      - KAFKA_GFMS_EVENTS_TOPIC=file.record.created
-      - KAFKA_CLIENT_ID=general-file-management-service
-    volumes:
-      - ../backend/general-file-management-service:/app
-      - general_file_management_uploads_local:/app/uploads
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8018 --reload"
-    depends_on:
-      - mariadb
-      - redis
-      - elasticsearch
-    networks:
-      - docgo_network_local
-
-  # OCR Document Extraction Service (FastAPI) - Backend Service with Hot Reload
-  ocr-document-extraction-service:
-    image: python:3.11-slim
-    container_name: docgo-local-ocr-document-extraction-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8011:8011"
-    env_file:
-      - ../backend/ocr-document-extraction-service/env/.env.local
-    volumes:
-      - ../backend/ocr-document-extraction-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8011 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # eSignature Integration Service (FastAPI) - Backend Service with Hot Reload
-  esignature-integration-service:
-    image: python:3.11-slim
-    container_name: docgo-local-esignature-integration-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8008:8008"
-    env_file:
-      - ../backend/esignature-integration-service/env/.env.local
-    volumes:
-      - ../backend/esignature-integration-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8008 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Notification Service (FastAPI) - Backend Service with Hot Reload
-  notification-service:
-    image: python:3.11-slim
-    container_name: docgo-local-notification-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8009:8009"
-    env_file:
-      - ../backend/notification-service/env/.env.local
-    volumes:
-      - ../backend/notification-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8009 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Reporting & Analytics Service (FastAPI) - Backend Service with Hot Reload
-  reporting-analytics-service:
-    image: python:3.11-slim
-    container_name: docgo-local-reporting-analytics-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8010:8010"
-    env_file:
-      - ../backend/reporting-analytics-service/env/.env.local
-    volumes:
-      - ../backend/reporting-analytics-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8010 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Integration Connectors Service (FastAPI) - Backend Service with Hot Reload
-  integration-connectors-service:
-    image: python:3.11-slim
-    container_name: docgo-local-integration-connectors-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8014:8014"
-    env_file:
-      - ../backend/integration-connectors-service/env/.env.local
-    volumes:
-      - ../backend/integration-connectors-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8014 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Batch ETL Service (FastAPI) - Backend Service with Hot Reload
-  batch-etl-service:
-    image: python:3.11-slim
-    container_name: docgo-local-batch-etl-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8015:8015"
-    env_file:
-      - ../backend/batch-etl-service/env/.env.local
-    volumes:
-      - ../backend/batch-etl-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8015 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Health Monitoring Agent (FastAPI) - Backend Service with Hot Reload
-  health-monitoring-agent:
-    image: python:3.11-slim
-    container_name: docgo-local-health-monitoring-agent
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8016:8016"
-    env_file:
-      - ../backend/health-monitoring-agent/env/.env.local
-    volumes:
-      - ../backend/health-monitoring-agent:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8016 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  
-
-  # Approval Workflow Service (FastAPI) - Backend Service with Hot Reload
-  approval-workflow-service:
-    image: python:3.11-slim
-    container_name: docgo-local-approval-workflow-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8006:8006"
-    env_file:
-      - ../backend/approval-workflow-service/env/.env.local
-    volumes:
-      - ../backend/approval-workflow-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8006 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Commenting Collaboration Service (FastAPI) - Backend Service with Hot Reload
-  commenting-collaboration-service:
-    image: python:3.11-slim
-    container_name: docgo-local-commenting-collaboration-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8005:8005"
-    env_file:
-      - ../backend/commenting-collaboration-service/env/.env.local
-    volumes:
-      - ../backend/commenting-collaboration-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8005 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Reminder Scheduler Service (FastAPI) - Backend Service with Hot Reload
-  reminder-scheduler-service:
-    image: python:3.11-slim
-    container_name: docgo-local-reminder-scheduler-service
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "8007:8007"
-    env_file:
-      - ../backend/reminder-scheduler-service/env/.env.local
-    volumes:
-      - ../backend/reminder-scheduler-service:/app
-    command: >
-      sh -c "pip install -r requirements.txt && python -m uvicorn main:app --host 0.0.0.0 --port 8007 --reload"
-    depends_on:
-      - redis
-    networks:
-      - docgo_network_local
-
-  # Web Next.js Frontend - with Hot Reload
-  web-nextjs:
-    image: node:18-alpine
-    container_name: docgo-local-web-nextjs
-    restart: unless-stopped
-    working_dir: /app
-    ports:
-      - "3000:3000"
-    env_file:
-      - ../frontend/web_nextjs/env/.env.local
-    environment:
-      - WATCHPACK_POLLING=true
-      - CHOKIDAR_USEPOLLING=true
-      - NODE_ENV=development
-    volumes:
-      - ../frontend/web_nextjs:/app
-      - /app/node_modules
-      - /app/.next
-    command: >
-      sh -c "npm install && npm run dev"
-    depends_on:
-      - api-gateway-bff
-      - authentication-identity-service
-      - user-management-service
-      - contract-management-service
-      - ai-processing-service
-      - file-storage-asset-service
-    networks:
-      - docgo_network_local
-
-
-
 volumes:
-  mariadb_data_local:
-    driver: local
+  # Data volumes
   mongodb_data_local:
     driver: local
   redis_data_local:
-    driver: local
-  elasticsearch_data_local:
     driver: local
   ai_processing_results_local:
     driver: local
@@ -540,8 +235,7 @@ volumes:
     driver: local
   file_storage_temp_local:
     driver: local
-  general_file_management_uploads_local:
-    driver: local
+  
   # Cache volumes for faster builds
   maven_cache:
     driver: local

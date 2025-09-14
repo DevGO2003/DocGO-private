@@ -1,0 +1,24 @@
+{
+  "name": "docgo-test-suite",
+  "version": "1.0.0",
+  "description": "Test suite for DocGO Simplified Architecture",
+  "scripts": {
+    "test": "jest",
+    "test:integration": "jest test/integration.test.js",
+    "test:performance": "jest test/performance.test.js",
+    "test:api-gateway": "jest test/api-gateway.test.js",
+    "test:all": "jest --coverage",
+    "health-check": "node test/health-check.js"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0",
+    "axios": "^1.4.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
+  }
+}

@@ -1,23 +1,20 @@
 # Hướng dẫn chạy API Gateway BFF
 
 ## Mô tả
-API Gateway BFF (Backend for Frontend) sử dụng Next.js và Kafka để kết nối và quản lý các microservice của DocGO, bao gồm:
+API Gateway BFF (Backend for Frontend) sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO:
 - `authentication-identity-service` (Spring Boot) - Port 8001
-- `user-management-service` (FastAPI) - Port 8002
-- `contract-management-service` (Spring Boot) - Port 8003
-- `ai-processing-service` (FastAPI) - Port 8017
-- `file-storage-asset-service` (FastAPI) - Port 8012
+- `contract-management-service` (Spring Boot) - Port 8002  
+- `ai-processing-service` (FastAPI) - Port 8003
+- `file-storage-service` (FastAPI) - Port 8004
 
 ## Yêu cầu hệ thống
 - Node.js 18.0.0 trở lên
 - npm hoặc yarn
-- Kafka broker (localhost:9092)
-- Các microservice đang chạy:
+- 4 microservices đang chạy:
   - Authentication Service: http://localhost:8001
-  - User Management Service: http://localhost:8002
-  - Contract Management Service: http://localhost:8003
-  - AI Processing Service: http://localhost:8017
-  - File Storage Service: http://localhost:8012
+  - Contract Management Service: http://localhost:8002
+  - AI Processing Service: http://localhost:8003
+  - File Storage Service: http://localhost:8004
 
 ## Cài đặt
 
@@ -44,11 +41,10 @@ PORT=8000
 NODE_ENV=development
 
 # Service URLs
-AUTHENTICATION_SERVICE_URL=http://localhost:8001
-USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
-CONTRACT_MANAGEMENT_SERVICE_URL=http://localhost:8003
-AI_PROCESSING_SERVICE_URL=http://localhost:8017
-FILE_STORAGE_SERVICE_URL=http://localhost:8012
+AUTH_SERVICE_URL=http://localhost:8001
+CONTRACT_SERVICE_URL=http://localhost:8002
+AI_SERVICE_URL=http://localhost:8003
+FILE_SERVICE_URL=http://localhost:8004
 
 # Kafka Configuration
 KAFKA_BROKERS=localhost:9092
@@ -105,58 +101,68 @@ npm start
 - Kiểm tra trạng thái của tất cả các service và Kafka
 
 ### 3. API Endpoints
-- Base URL: http://localhost:8000/api/v1/
-- Authentication: `/authentication-identity-service/auth/*`
-- User Management: `/user-management-service/*`
-- Contract Management: `/contract-management-service/*`
-- AI Processing: `/ai-processing-service/*`
-- File Storage: `/file-storage-asset-service/*`
-- User Management: `/user-management-service/*`
+- Base URL: http://localhost:8000/api/
+- Authentication: `/api/auth/*`
+- Contract Management: `/api/contracts/*`
+- AI Processing: `/api/ai/*`
+- File Storage: `/api/files/*`
+- Health Check: `/api/health`
 
 ## Cấu trúc thư mục
 ```
 api-gateway-bff/
 ├── lib/                    # Thư viện và utilities
-│   ├── kafka.ts          # Quản lý kết nối Kafka
-│   ├── logger.ts         # Cấu hình logging
-│   ├── services.ts       # Quản lý kết nối microservice
-│   └── middleware.ts     # Middleware xử lý request
+│   ├── services/          # Service clients
+│   │   ├── authService.ts
+│   │   ├── contractService.ts
+│   │   ├── aiService.ts
+│   │   └── fileService.ts
+│   └── utils/             # Utilities
+│       ├── apiClient.ts
+│       ├── errorHandler.ts
+│       └── circuitBreaker.ts
 ├── pages/                 # Next.js pages và API routes
 │   ├── api/              # API endpoints
-│   │   ├── [...path].ts  # Proxy route chính
+│   │   ├── auth/         # Authentication routes
+│   │   ├── contracts/    # Contract management routes
+│   │   ├── ai/           # AI processing routes
+│   │   ├── files/        # File storage routes
 │   │   └── health.ts     # Health check endpoint
 │   └── index.tsx         # Trang chủ
-├── types/                 # TypeScript type definitions
+├── middleware.ts          # Next.js middleware
 ├── package.json           # Dependencies và scripts
 ├── next.config.js         # Cấu hình Next.js
 ├── tsconfig.json          # Cấu hình TypeScript
-└── env_example.txt        # Template biến môi trường
+└── How to run this microservice.md
 ```
 
 ## Tính năng chính
 
-### 1. Service Discovery & Routing
-- Tự động phát hiện và định tuyến request đến microservice phù hợp
+### 1. API Gateway & Routing
+- Tự động định tuyến request đến 4 microservices
 - Hỗ trợ tất cả HTTP methods (GET, POST, PUT, DELETE)
 - Xử lý query parameters và request body
+- Load balancing và failover
 
-### 2. Kafka Integration
-- Publish events khi có thay đổi từ các service
-- Subscribe và xử lý events từ các topic
-- Logging và monitoring real-time
+### 2. Authentication & Authorization
+- JWT token validation
+- Role-based access control
+- Token refresh mechanism
+- Secure header forwarding
 
 ### 3. Middleware Stack
-- Rate limiting (100 requests/15 minutes)
-- JWT authentication
+- Rate limiting (60 requests/minute)
 - CORS handling
 - Request logging
-- Error handling
+- Error handling với RestResponse format
+- Circuit breaker pattern
 
 ### 4. Health Monitoring
-- Kiểm tra trạng thái tất cả microservice
-- Monitoring Kafka connection
+- Kiểm tra trạng thái tất cả microservices
+- Service health caching
 - Uptime tracking
 - Performance metrics
+- Circuit breaker status
 
 ## Troubleshooting
 

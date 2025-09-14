@@ -1,0 +1,130 @@
+# Docker Compose Simplified - 5 Core Services Only
+# Database: MongoDB Atlas (Cloud)
+# Message Queue: Redis Cloud (Cloud)
+# Tên container: docgo-simplified
+
+version: '3.8'
+
+services:
+  # API Gateway + BFF (Next.js)
+  api-gateway-bff:
+    build: 
+      context: ../backend/api-gateway-bff
+      dockerfile: Dockerfile
+    container_name: docgo-simplified-api-gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+      - AUTH_SERVICE_URL=http://auth-service:8001
+      - CONTRACT_SERVICE_URL=http://contract-service:8002
+      - AI_SERVICE_URL=http://ai-service:8003
+      - FILE_SERVICE_URL=http://file-service:8004
+    volumes:
+      - ../backend/api-gateway-bff:/app
+      - /app/node_modules
+    networks:
+      - docgo_network_simplified
+
+  # Authentication & Identity Service (Spring Boot)
+  authentication-identity-service:
+    build: 
+      context: ../backend/authentication-identity-service
+      dockerfile: Dockerfile
+    container_name: docgo-simplified-auth-service
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=${MONGODB_ATLAS_URI}
+      - SPRING_REDIS_HOST=${REDIS_CLOUD_HOST}
+      - SPRING_REDIS_PORT=${REDIS_CLOUD_PORT}
+      - SPRING_REDIS_PASSWORD=${REDIS_CLOUD_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ../backend/authentication-identity-service:/app
+    networks:
+      - docgo_network_simplified
+
+  # Contract Management Service (Spring Boot) - Tích hợp tất cả chức năng contract
+  contract-management-service:
+    build: 
+      context: ../backend/contract-management-service
+      dockerfile: Dockerfile
+    container_name: docgo-simplified-contract-service
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=${MONGODB_ATLAS_URI}
+      - SPRING_REDIS_HOST=${REDIS_CLOUD_HOST}
+      - SPRING_REDIS_PORT=${REDIS_CLOUD_PORT}
+      - SPRING_REDIS_PASSWORD=${REDIS_CLOUD_PASSWORD}
+      - AI_SERVICE_URL=http://ai-service:8003
+      - FILE_SERVICE_URL=http://file-service:8004
+    volumes:
+      - ../backend/contract-management-service:/app
+    networks:
+      - docgo_network_simplified
+
+  # AI Processing + Notification Service (FastAPI)
+  ai-processing-service:
+    build: 
+      context: ../backend/ai-processing-service
+      dockerfile: Dockerfile
+    container_name: docgo-simplified-ai-service
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=${MONGODB_ATLAS_URI}
+      - REDIS_HOST=${REDIS_CLOUD_HOST}
+      - REDIS_PORT=${REDIS_CLOUD_PORT}
+      - REDIS_PASSWORD=${REDIS_CLOUD_PASSWORD}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    volumes:
+      - ../backend/ai-processing-service:/app
+      - ../backend/ai-processing-service/results:/app/results
+    networks:
+      - docgo_network_simplified
+
+  # File Storage Service (FastAPI)
+  file-storage-service:
+    build: 
+      context: ../backend/file-storage-asset-service
+      dockerfile: Dockerfile
+    container_name: docgo-simplified-file-service
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=${MONGODB_ATLAS_URI}
+      - REDIS_HOST=${REDIS_CLOUD_HOST}
+      - REDIS_PORT=${REDIS_CLOUD_PORT}
+      - REDIS_PASSWORD=${REDIS_CLOUD_PASSWORD}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+    volumes:
+      - ../backend/file-storage-asset-service:/app
+      - ../backend/file-storage-asset-service/uploads:/app/uploads
+    networks:
+      - docgo_network_simplified
+
+networks:
+  docgo_network_simplified:
+    driver: bridge
+    name: docgo_network_simplified
+
+# Không cần volumes vì sử dụng cloud database và message queue

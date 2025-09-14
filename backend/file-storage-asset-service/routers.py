@@ -14,8 +14,16 @@ from config import (
     is_s3_enabled, S3_PUBLIC_BUCKET, build_public_url
 )
 from services.file_service import FileStorageService
+from services.general_file_service import GeneralFileService
+from services.processing_service import FileProcessingService
+from services.asset_service import AssetService
 from schemas.file import (
     FileUploadResponse, SignedURLRequest, SignedURLResponse, FileVersion
+)
+from schemas.general_schemas import (
+    FileProcessingRequest, FileProcessingResponse, AssetCreateRequest, AssetUpdateRequest,
+    AssetResponse, GeneralFileRequest, GeneralFileResponse, FileSearchRequest,
+    FileBackupRequest, FileBackupResponse, FileMetadataResponse
 )
 from schemas.response import RestResponse
 from schemas.file_response import FileResponseDto, FileDetailResponseDto
@@ -27,8 +35,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Storage Asset Service"])
 
-# Khởi tạo service
+# Khởi tạo services
 file_service = FileStorageService()
+general_file_service = GeneralFileService()
+processing_service = FileProcessingService()
+asset_service = AssetService()
 
 # Kafka producer singleton
 _producer: Optional[AIOKafkaProducer] = None
@@ -355,3 +366,412 @@ async def delete_file(
     except Exception as e:
         logger.error(f"[DELETE_FAILED] Error for file {file_id}: {e}", exc_info=True)
         raise
+
+# ==================== GENERAL FILE MANAGEMENT ENDPOINTS ====================
+
+@router.post("/files/organize", summary="Tổ chức file vào thư mục")
+async def organize_file(
+    request: Request,
+    file_id: str = Query(..., description="ID của file cần tổ chức"),
+    folder_path: str = Query(..., description="Đường dẫn thư mục đích"),
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Tổ chức file vào thư mục cụ thể.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await general_file_service.organize_file(file_id, folder_path, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"File đã được tổ chức vào thư mục '{folder_path}'",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[ORGANIZE_FAILED] Error organizing file {file_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error organizing file: {str(e)}")
+
+@router.post("/files/share", summary="Chia sẻ file")
+async def share_file(
+    request: Request,
+    file_id: str = Query(..., description="ID của file cần chia sẻ"),
+    user_id: Optional[str] = Query(None, description="ID của user"),
+    permissions: Optional[Dict[str, List[str]]] = None
+):
+    """
+    Chia sẻ file với quyền truy cập.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        share_token = await general_file_service.share_file(file_id, user_id_effective, permissions)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="File đã được chia sẻ thành công",
+            data={"share_token": share_token},
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[SHARE_FAILED] Error sharing file {file_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error sharing file: {str(e)}")
+
+@router.get("/files/search", summary="Tìm kiếm files")
+async def search_files(
+    request: Request,
+    query: Optional[str] = Query(None, description="Từ khóa tìm kiếm"),
+    category: Optional[str] = Query(None, description="Danh mục"),
+    file_type: Optional[str] = Query(None, description="Loại file"),
+    user_id: Optional[str] = Query(None, description="ID của user"),
+    page: int = Query(0, description="Số trang", ge=0),
+    size: int = Query(10, description="Kích thước trang", ge=1, le=100)
+):
+    """
+    Tìm kiếm files theo các tiêu chí.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        search_request = FileSearchRequest(
+            query=query,
+            category=category,
+            file_type=file_type
+        )
+        
+        results = await general_file_service.search_files(search_request, user_id_effective, page, size)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Tìm thấy {len(results)} files",
+            data=results,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[SEARCH_FAILED] Error searching files: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error searching files: {str(e)}")
+
+@router.get("/files/{file_id}/metadata", summary="Lấy metadata file")
+async def get_file_metadata(
+    request: Request,
+    file_id: str,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Lấy metadata chi tiết của file.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        metadata = await general_file_service.get_file_metadata(file_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy metadata file '{file_id}'",
+            data=metadata,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[METADATA_FAILED] Error getting metadata for file {file_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting metadata: {str(e)}")
+
+@router.post("/files/backup", summary="Sao lưu files")
+async def backup_files(
+    request: Request,
+    backup_request: FileBackupRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Tạo backup cho danh sách files.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await general_file_service.backup_files(backup_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã tạo backup cho {result.file_count} files",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[BACKUP_FAILED] Error creating backup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error creating backup: {str(e)}")
+
+# ==================== FILE PROCESSING ENDPOINTS ====================
+
+@router.post("/process/convert", summary="Chuyển đổi file")
+async def convert_file(
+    request: Request,
+    processing_request: FileProcessingRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Chuyển đổi định dạng file.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await processing_service.convert_file(processing_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="File đã được chuyển đổi thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[CONVERT_FAILED] Error converting file: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error converting file: {str(e)}")
+
+@router.post("/process/compress", summary="Nén file")
+async def compress_file(
+    request: Request,
+    processing_request: FileProcessingRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Nén file với mức độ nén tùy chọn.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await processing_service.compress_file(processing_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="File đã được nén thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[COMPRESS_FAILED] Error compressing file: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error compressing file: {str(e)}")
+
+@router.post("/process/extract", summary="Giải nén file")
+async def extract_file(
+    request: Request,
+    processing_request: FileProcessingRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Giải nén file archive (ZIP, RAR).
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await processing_service.extract_file(processing_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="File đã được giải nén thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[EXTRACT_FAILED] Error extracting file: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error extracting file: {str(e)}")
+
+@router.post("/process/validate", summary="Kiểm tra file")
+async def validate_file(
+    request: Request,
+    file_id: str = Query(..., description="ID của file cần kiểm tra"),
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Kiểm tra tính hợp lệ của file.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await processing_service.validate_file(file_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="File đã được kiểm tra",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[VALIDATE_FAILED] Error validating file {file_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error validating file: {str(e)}")
+
+# ==================== ASSET MANAGEMENT ENDPOINTS ====================
+
+@router.post("/assets", summary="Tạo asset")
+async def create_asset(
+    request: Request,
+    asset_request: AssetCreateRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Tạo asset mới từ file.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.create_asset(asset_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=201,
+            shortMessage="Created",
+            description="Asset đã được tạo thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[CREATE_ASSET_FAILED] Error creating asset: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error creating asset: {str(e)}")
+
+@router.get("/assets/{asset_id}", summary="Lấy thông tin asset")
+async def get_asset(
+    request: Request,
+    asset_id: str,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Lấy thông tin chi tiết asset.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.get_asset(asset_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy thông tin asset '{asset_id}'",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[GET_ASSET_FAILED] Error getting asset {asset_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting asset: {str(e)}")
+
+@router.put("/assets/{asset_id}", summary="Cập nhật asset")
+async def update_asset(
+    request: Request,
+    asset_id: str,
+    asset_request: AssetUpdateRequest,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Cập nhật thông tin asset.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.update_asset(asset_id, asset_request, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Asset đã được cập nhật thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[UPDATE_ASSET_FAILED] Error updating asset {asset_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error updating asset: {str(e)}")
+
+@router.delete("/assets/{asset_id}", summary="Xóa asset")
+async def delete_asset(
+    request: Request,
+    asset_id: str,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Xóa asset (soft delete).
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.delete_asset(asset_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Asset đã được xóa thành công",
+            data={"success": result},
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[DELETE_ASSET_FAILED] Error deleting asset {asset_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error deleting asset: {str(e)}")
+
+@router.get("/assets", summary="Lấy danh sách assets")
+async def list_assets(
+    request: Request,
+    user_id: Optional[str] = Query(None, description="ID của user"),
+    page: int = Query(0, description="Số trang", ge=0),
+    size: int = Query(10, description="Kích thước trang", ge=1, le=100),
+    category: Optional[str] = Query(None, description="Danh mục"),
+    status: Optional[str] = Query(None, description="Trạng thái"),
+    search: Optional[str] = Query(None, description="Từ khóa tìm kiếm")
+):
+    """
+    Lấy danh sách assets với phân trang và lọc.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.list_assets(
+            user_id_effective, page, size, category, status, search
+        )
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy {len(result)} assets",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[LIST_ASSETS_FAILED] Error listing assets: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error listing assets: {str(e)}")
+
+@router.get("/assets/{asset_id}/versions", summary="Lấy phiên bản asset")
+async def get_asset_versions(
+    request: Request,
+    asset_id: str,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Lấy danh sách tất cả phiên bản của asset.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.get_asset_versions(asset_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description=f"Đã lấy {len(result)} phiên bản của asset",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[GET_VERSIONS_FAILED] Error getting versions for asset {asset_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting versions: {str(e)}")
+
+@router.put("/assets/{asset_id}/restore", summary="Khôi phục asset")
+async def restore_asset(
+    request: Request,
+    asset_id: str,
+    user_id: Optional[str] = Query(None, description="ID của user")
+):
+    """
+    Khôi phục asset đã xóa.
+    """
+    try:
+        user_id_effective = user_id or "public"
+        result = await asset_service.restore_asset(asset_id, user_id_effective)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Asset đã được khôi phục thành công",
+            data=result,
+            path=request.url.path
+        )
+    except Exception as e:
+        logger.error(f"[RESTORE_ASSET_FAILED] Error restoring asset {asset_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error restoring asset: {str(e)}")

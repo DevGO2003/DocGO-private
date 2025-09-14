@@ -6,14 +6,18 @@ from pydantic import ValidationError
 from fastapi.openapi.utils import get_openapi
 import routers
 import os
+import asyncio
 from datetime import datetime
 import uuid
 from kafka_worker import worker
+from services.notification_service import NotificationService
+from services.batch_service import BatchService
+from services.event_service import EventService
 
 app = FastAPI(
     title="AI Processing Service",
-    description="Một dịch vụ xử lý tài liệu sử dụng AI.",
-    version="1.0.0",
+    description="Một dịch vụ xử lý tài liệu sử dụng AI với tích hợp notification, batch processing và event handling.",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_version="3.0.3"
@@ -29,6 +33,11 @@ app.add_middleware(
 )
 
 app.include_router(routers.router)
+
+# Initialize services
+notification_service = NotificationService()
+batch_service = BatchService()
+event_service = EventService()
 
 # Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
 def custom_openapi():
@@ -72,16 +81,35 @@ async def health_check():
 @app.on_event("startup")
 async def on_startup():
     try:
+        # Initialize all services
+        await notification_service.initialize()
+        await batch_service.initialize()
+        await event_service.initialize()
+        
+        # Start event processing
+        await event_service.start_event_processing()
+        
+        # Start Kafka worker
         await worker.start()
-    except Exception:
-        # Không chặn service nếu Kafka không sẵn sàng
+        
+        print("AI Processing Service started successfully with all integrations")
+    except Exception as e:
+        print(f"Error during startup: {e}")
+        # Không chặn service nếu một số service không sẵn sàng
         pass
 
 @app.on_event("shutdown")
 async def on_shutdown():
     try:
+        # Stop all services
+        await notification_service.close()
+        await batch_service.close()
+        await event_service.close()
         await worker.stop()
-    except Exception:
+        
+        print("AI Processing Service shutdown completed")
+    except Exception as e:
+        print(f"Error during shutdown: {e}")
         pass
 
 @app.exception_handler(RequestValidationError)
@@ -156,4 +184,4 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8017)
+    uvicorn.run(app, host="0.0.0.0", port=8003)

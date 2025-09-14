@@ -1,160 +1,125 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import serviceManager from '@/lib/services';
-import kafkaService from '@/lib/kafka';
-import logger from '@/lib/logger';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { serviceClients } from '../../lib/utils/apiClient'
+import { createErrorResponse, generateRequestId } from '../../lib/utils/errorHandler'
 
-/**
- * @swagger
- * /api/health:
- *   get:
- *     summary: Kiểm tra trạng thái sức khỏe của API Gateway và tất cả 19 microservices
- *     description: |
- *       ## 🔍 Health Check Endpoint
- *       
- *       Endpoint này kiểm tra trạng thái sức khỏe của:
- *       - API Gateway BFF (Port 8000)
- *       - Tất cả 19 microservices đã được cấu hình
- *       - Kết nối Kafka
- *       
- *       ### 🔹 Đầu vào
- *       🚫 Không có tham số đầu vào
- *       
- *       ### 🔹 Đầu ra
- *       📊 **HealthStatus**
- *       Loại: object
- *       Mô tả: Trạng thái tổng thể của hệ thống
- *       
- *       ### 📋 Response Codes
- *       - **200 OK**: Tất cả service đều khỏe mạnh
- *       - **503 Service Unavailable**: Một số service không khỏe mạnh
- *       - **500 Internal Server Error**: Lỗi trong quá trình kiểm tra
- *       
- *       ### 🔗 Related Endpoints
- *       - `GET /api/v1/{service-name}/health` - Health check từng service cụ thể
- *       
- *     tags: [API Gateway BFF]
- *     responses:
- *       200:
- *         description: Tất cả 19 microservices đều khỏe mạnh
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/HealthStatus'
- *             example:
- *               status: "healthy"
- *               service: "API Gateway BFF"
- *               timestamp: "2025-08-23T11:00:00.000Z"
- *               uptime: 3600.5
- *               services:
- *                 "api-gateway-bff": true
- *                 "authentication": true
- *                 "user-management": true
- *                 "contract-management": true
- *                 "versioning-document-history": true
- *                 "commenting-collaboration": true
- *                 "approval-workflow": true
- *                 "reminder-scheduler": true
- *                 "esignature-integration": true
- *                 "notification": true
- *                 "reporting-analytics": true
- *                 "ocr-document-extraction": true
- *                 "file-storage": true
- *                 "audit-activity-log": true
- *                 "integration-connectors": true
- *                 "batch-etl": true
- *                 "health-monitoring-agent": true
- *                 "ai-processing": true
- *                 "general-file-management": true
- *               kafka: true
- *               version: "1.0.0"
- *       503:
- *         description: Một số microservices không khỏe mạnh
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/HealthStatus'
- *             example:
- *               status: "degraded"
- *               service: "API Gateway BFF"
- *               timestamp: "2025-08-23T11:00:00.000Z"
- *               uptime: 3600.5
- *               services:
- *                 "api-gateway-bff": true
- *                 "authentication": true
- *                 "user-management": false
- *                 "contract-management": true
- *                 "versioning-document-history": true
- *                 "commenting-collaboration": true
- *                 "approval-workflow": true
- *                 "reminder-scheduler": true
- *                 "esignature-integration": true
- *                 "notification": true
- *                 "reporting-analytics": true
- *                 "ocr-document-extraction": true
- *                 "file-storage": true
- *                 "audit-activity-log": true
- *                 "integration-connectors": true
- *                 "batch-etl": true
- *                 "health-monitoring-agent": true
- *                 "ai-processing": true
- *                 "general-file-management": true
- *               kafka: true
- *               version: "1.0.0"
- *       500:
- *         description: Lỗi trong quá trình kiểm tra
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               error: "Internal Server Error"
- *               message: "Health check failed"
- *               statusCode: 500
- */
+interface ServiceHealth {
+  name: string
+  status: 'healthy' | 'unhealthy' | 'unknown'
+  responseTime?: number
+  lastCheck: string
+  error?: string
+}
+
+interface HealthResponse {
+  apiVersion: string
+  statusCode: number
+  shortMessage: string
+  description: string
+  data: {
+    overall: 'healthy' | 'degraded' | 'unhealthy'
+    services: ServiceHealth[]
+    timestamp: string
+    uptime: number
+  }
+  timestamp: string
+  requestId: string
+  path: string
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({
+      apiVersion: 'v1',
+      statusCode: 405,
+      shortMessage: 'Method Not Allowed',
+      description: 'Only GET method is allowed',
+      data: null,
+      timestamp: new Date().toISOString(),
+      requestId: generateRequestId(),
+      path: req.url || '/api/health'
+    })
   }
 
   try {
-    // Check all services health
-    const servicesHealth = await serviceManager.checkAllServicesHealth();
-    
-    // Check Kafka connection
-    const kafkaHealth = kafkaService.isKafkaConnected();
+    const startTime = Date.now()
+    const services: ServiceHealth[] = []
 
-    const healthStatus = {
-      status: 'healthy',
-      service: 'API Gateway BFF',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      services: servicesHealth,
-      kafka: kafkaHealth,
-      version: '1.0.0'
-    };
+    // Check each service health
+    const serviceChecks = await Promise.allSettled([
+      checkServiceHealth('auth', serviceClients.auth),
+      checkServiceHealth('contract', serviceClients.contract),
+      checkServiceHealth('ai', serviceClients.ai),
+      checkServiceHealth('file', serviceClients.file)
+    ])
+
+    // Process results
+    serviceChecks.forEach((result, index) => {
+      const serviceNames = ['auth', 'contract', 'ai', 'file']
+      const serviceName = serviceNames[index]
+
+      if (result.status === 'fulfilled') {
+        services.push(result.value)
+      } else {
+        services.push({
+          name: serviceName,
+          status: 'unhealthy',
+          lastCheck: new Date().toISOString(),
+          error: result.reason?.message || 'Unknown error'
+        })
+      }
+    })
 
     // Determine overall health
-    const allServicesHealthy = Object.values(servicesHealth).every(healthy => healthy);
-    const overallHealth = allServicesHealthy && kafkaHealth;
+    const healthyServices = services.filter(s => s.status === 'healthy').length
+    const totalServices = services.length
+    const overall = healthyServices === totalServices ? 'healthy' : 
+                   healthyServices > 0 ? 'degraded' : 'unhealthy'
 
-    if (!overallHealth) {
-      healthStatus.status = 'degraded';
-      return res.status(503).json(healthStatus);
+    const response: HealthResponse = {
+      apiVersion: 'v1',
+      statusCode: overall === 'healthy' ? 200 : overall === 'degraded' ? 200 : 503,
+      shortMessage: overall === 'healthy' ? 'Healthy' : 
+                   overall === 'degraded' ? 'Degraded' : 'Unhealthy',
+      description: `API Gateway health check completed. ${healthyServices}/${totalServices} services healthy.`,
+      data: {
+        overall,
+        services,
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      },
+      timestamp: new Date().toISOString(),
+      requestId: generateRequestId(),
+      path: req.url || '/api/health'
     }
 
-    logger.info('✅ Health check passed');
-    return res.status(200).json(healthStatus);
+    return res.status(200).json(response)
 
-  } catch (error) {
-    logger.error('❌ Health check failed:', error);
-    
-    return res.status(500).json({
+  } catch (error: any) {
+    console.error('[Health Check] Error:', error)
+    return res.status(200).json(createErrorResponse(error, req as any))
+  }
+}
+
+async function checkServiceHealth(name: string, client: any): Promise<ServiceHealth> {
+  const startTime = Date.now()
+  
+  try {
+    const isHealthy = await client.healthCheck()
+    const responseTime = Date.now() - startTime
+
+    return {
+      name,
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      responseTime,
+      lastCheck: new Date().toISOString()
+    }
+  } catch (error: any) {
+    return {
+      name,
       status: 'unhealthy',
-      service: 'API Gateway BFF',
-      timestamp: new Date().toISOString(),
-      error: 'Health check failed',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+      responseTime: Date.now() - startTime,
+      lastCheck: new Date().toISOString(),
+      error: error.message || 'Health check failed'
+    }
   }
 }

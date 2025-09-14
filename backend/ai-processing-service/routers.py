@@ -16,6 +16,22 @@ from openpyxl import load_workbook
 from striprtf.striprtf import rtf_to_text
 import csv
 from services.ai_processing_service import AIProcessingService
+from services.notification_service import NotificationService
+from services.batch_service import BatchService
+from services.event_service import EventService
+from schemas.notification_schemas import (
+    NotificationRequest, NotificationHistoryRequest, NotificationTemplate,
+    EmailNotificationRequest, SMSNotificationRequest, PushNotificationRequest,
+    WebSocketNotificationRequest
+)
+from schemas.batch_schemas import (
+    BatchJobRequest, BatchJobStatusRequest, BatchJobListRequest,
+    BatchJobCancelRequest, BatchJobRetryRequest, BatchProcessingRequest
+)
+from schemas.event_schemas import (
+    EventHandlerRequest, EventSubscriptionRequest, EventPublishRequest,
+    EventHistoryRequest
+)
 
 router = APIRouter(prefix="/api/v1/ai-processing-service")
 
@@ -800,5 +816,504 @@ async def process_file_from_url(
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
             path=str(request.url)
+        )
+
+# ==================== NOTIFICATION APIs ====================
+
+# Initialize services (will be initialized in main.py)
+notification_service = NotificationService()
+batch_service = BatchService()
+event_service = EventService()
+
+@router.post("/notifications/send", summary="Gửi notification", tags=["Notification Service"])
+async def send_notification_api(
+    request: Request,
+    notification_request: NotificationRequest
+):
+    """
+    🔹 Đầu vào
+    
+    📧 notification_request (bắt buộc, body)
+    Loại: NotificationRequest
+    Mô tả: Thông tin notification cần gửi (email, SMS, push, websocket)
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: NotificationResponse
+    Mô tả: Kết quả gửi notification với trạng thái và thông tin chi tiết
+    """
+    try:
+        await notification_service.initialize()
+        result = await notification_service.send_notification(notification_request)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Gửi notification thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi gửi notification: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.get("/notifications/history", summary="Lịch sử notification", tags=["Notification Service"])
+async def get_notification_history_api(
+    request: Request,
+    page: int = Query(1, ge=1, description="Số trang"),
+    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
+    notification_type: str = Query(None, description="Loại notification"),
+    status: str = Query(None, description="Trạng thái notification"),
+    start_date: str = Query(None, description="Ngày bắt đầu (ISO format)"),
+    end_date: str = Query(None, description="Ngày kết thúc (ISO format)")
+):
+    """
+    🔹 Đầu vào
+    
+    📄 page (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số trang (mặc định: 1)
+    
+    📄 limit (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: NotificationHistoryResponse
+    Mô tả: Danh sách notification với phân trang
+    """
+    try:
+        await notification_service.initialize()
+        
+        # Parse dates if provided
+        start_dt = None
+        end_dt = None
+        if start_date:
+            start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+        if end_date:
+            end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+        
+        result = await notification_service.get_notification_history(
+            page=page,
+            limit=limit,
+            notification_type=notification_type,
+            status=status,
+            start_date=start_dt,
+            end_date=end_dt
+        )
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Lấy lịch sử notification thành công",
+            data=result,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi lấy lịch sử notification: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.post("/notifications/templates", summary="Tạo notification template", tags=["Notification Service"])
+async def create_notification_template_api(
+    request: Request,
+    template: NotificationTemplate
+):
+    """
+    🔹 Đầu vào
+    
+    📧 template (bắt buộc, body)
+    Loại: NotificationTemplate
+    Mô tả: Thông tin template notification cần tạo
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: NotificationTemplate
+    Mô tả: Template đã được tạo với ID và timestamp
+    """
+    try:
+        await notification_service.initialize()
+        result = await notification_service.create_notification_template(template)
+        
+        return RestResponse(
+            statusCode=201,
+            shortMessage="Created",
+            description="Tạo notification template thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi tạo notification template: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+# ==================== BATCH PROCESSING APIs ====================
+
+@router.post("/batch/process", summary="Xử lý hàng loạt", tags=["Batch Processing Service"])
+async def process_batch_api(
+    request: Request,
+    batch_request: BatchProcessingRequest
+):
+    """
+    🔹 Đầu vào
+    
+    📦 batch_request (bắt buộc, body)
+    Loại: BatchProcessingRequest
+    Mô tả: Thông tin batch processing cần thực hiện
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: BatchProcessingResponse
+    Mô tả: Kết quả tạo batch job với ID và thông tin xử lý
+    """
+    try:
+        await batch_service.initialize()
+        
+        # Tạo batch job
+        job_request = BatchJobRequest(
+            type="ai_processing",
+            name=f"Batch processing {len(batch_request.files)} files",
+            description=f"Xử lý {batch_request.processing_type} cho {len(batch_request.files)} files",
+            data={
+                "files": batch_request.files,
+                "processing_type": batch_request.processing_type,
+                "options": batch_request.options or {},
+                "callback_url": batch_request.callback_url
+            }
+        )
+        
+        job = await batch_service.create_batch_job(job_request)
+        
+        # Bắt đầu xử lý job
+        asyncio.create_task(batch_service.process_batch_job(job.id))
+        
+        result = BatchProcessingResponse(
+            job_id=job.id,
+            total_files=len(batch_request.files),
+            estimated_time=len(batch_request.files) * 30,  # 30 seconds per file
+            status_url=f"/api/v1/ai-processing-service/batch/status/{job.id}"
+        )
+        
+        return RestResponse(
+            statusCode=201,
+            shortMessage="Created",
+            description="Tạo batch job thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi tạo batch job: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.get("/batch/status/{job_id}", summary="Trạng thái batch job", tags=["Batch Processing Service"])
+async def get_batch_job_status_api(
+    request: Request,
+    job_id: str
+):
+    """
+    🔹 Đầu vào
+    
+    🆔 job_id (bắt buộc, path)
+    Loại: string
+    Mô tả: ID của batch job cần kiểm tra
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: BatchJobResponse
+    Mô tả: Trạng thái chi tiết của batch job
+    """
+    try:
+        await batch_service.initialize()
+        result = await batch_service.get_batch_job_status(job_id)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Lấy trạng thái batch job thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except ValueError as e:
+        return RestResponse(
+            statusCode=404,
+            shortMessage="Not Found",
+            description=str(e),
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi lấy trạng thái batch job: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.get("/batch/jobs", summary="Danh sách batch jobs", tags=["Batch Processing Service"])
+async def get_batch_jobs_api(
+    request: Request,
+    page: int = Query(1, ge=1, description="Số trang"),
+    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
+    job_type: str = Query(None, description="Loại job"),
+    status: str = Query(None, description="Trạng thái job"),
+    priority: str = Query(None, description="Độ ưu tiên job")
+):
+    """
+    🔹 Đầu vào
+    
+    📄 page (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số trang (mặc định: 1)
+    
+    📄 limit (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: BatchJobListResponse
+    Mô tả: Danh sách batch jobs với phân trang
+    """
+    try:
+        await batch_service.initialize()
+        result = await batch_service.get_batch_jobs(
+            page=page,
+            limit=limit,
+            job_type=job_type,
+            status=status,
+            priority=priority
+        )
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Lấy danh sách batch jobs thành công",
+            data=result,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi lấy danh sách batch jobs: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+# ==================== EVENT HANDLING APIs ====================
+
+@router.post("/events/handle", summary="Xử lý events", tags=["Event Service"])
+async def handle_event_api(
+    request: Request,
+    event_request: EventHandlerRequest
+):
+    """
+    🔹 Đầu vào
+    
+    📧 event_request (bắt buộc, body)
+    Loại: EventHandlerRequest
+    Mô tả: Event cần xử lý
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: EventHandlerResponse
+    Mô tả: Kết quả xử lý event
+    """
+    try:
+        await event_service.initialize()
+        
+        # Handle event based on type
+        if event_request.event.eventType == "file.uploaded":
+            result = await event_service.handle_file_uploaded_event(event_request)
+        elif event_request.event.eventType == "ai.processing.completed":
+            result = await event_service.handle_ai_processing_completed_event(event_request)
+        elif event_request.event.eventType == "notification.sent":
+            result = await event_service.handle_notification_sent_event(event_request)
+        else:
+            result = EventHandlerResponse(
+                success=False,
+                message=f"Unsupported event type: {event_request.event.eventType}",
+                processed_at=datetime.now(timezone.utc),
+                retry_count=event_request.retry_count
+            )
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Xử lý event thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi xử lý event: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.post("/events/publish", summary="Publish event", tags=["Event Service"])
+async def publish_event_api(
+    request: Request,
+    event_request: EventPublishRequest
+):
+    """
+    🔹 Đầu vào
+    
+    📧 event_request (bắt buộc, body)
+    Loại: EventPublishRequest
+    Mô tả: Event cần publish
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: EventPublishResponse
+    Mô tả: Kết quả publish event
+    """
+    try:
+        await event_service.initialize()
+        result = await event_service.publish_event(event_request)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Publish event thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi publish event: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+
+@router.get("/events/history", summary="Lịch sử events", tags=["Event Service"])
+async def get_event_history_api(
+    request: Request,
+    page: int = Query(1, ge=1, description="Số trang"),
+    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
+    event_type: str = Query(None, description="Loại event"),
+    source: str = Query(None, description="Nguồn event"),
+    status: str = Query(None, description="Trạng thái event")
+):
+    """
+    🔹 Đầu vào
+    
+    📄 page (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số trang (mặc định: 1)
+    
+    📄 limit (tùy chọn, query)
+    Loại: integer
+    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+    
+    🔹 Đầu ra
+    
+    📝 data
+    Loại: EventHistoryResponse
+    Mô tả: Danh sách events với phân trang
+    """
+    try:
+        await event_service.initialize()
+        result = await event_service.get_event_history(
+            page=page,
+            limit=limit,
+            event_type=event_type,
+            source=source,
+            status=status
+        )
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Lấy lịch sử events thành công",
+            data=result.model_dump(),
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi lấy lịch sử events: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(timezone.utc),
+            requestId=str(uuid.uuid4())
         )
 
