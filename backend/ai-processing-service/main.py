@@ -10,7 +10,7 @@ import asyncio
 from datetime import datetime
 import uuid
 from kafka_worker import worker
-from services.notification_service import NotificationService
+# from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
 
@@ -35,7 +35,7 @@ app.add_middleware(
 app.include_router(routers.router)
 
 # Initialize services
-notification_service = NotificationService()
+# notification_service = NotificationService()
 batch_service = BatchService()
 event_service = EventService()
 
@@ -82,7 +82,7 @@ async def health_check():
 async def on_startup():
     try:
         # Initialize all services
-        await notification_service.initialize()
+        # await notification_service.initialize()
         await batch_service.initialize()
         await event_service.initialize()
         
@@ -102,7 +102,7 @@ async def on_startup():
 async def on_shutdown():
     try:
         # Stop all services
-        await notification_service.close()
+        # await notification_service.close()
         await batch_service.close()
         await event_service.close()
         await worker.stop()

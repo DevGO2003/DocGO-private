@@ -1,6 +1,6 @@
 package com.devgo2003.docgo.auth_service.security;
 
-import com.devgo2003.docgo.auth_service.repository.UserRepository;
+import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,9 +10,9 @@ import java.util.Collections;
 
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserMongoRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
+    public CustomUserDetailsService(UserMongoRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return User.withUsername(user.getUsername())
-                .password(user.getPasswordHash())
+                .password(user.getPassword())
                 .authorities(Collections.emptyList())
                 .build();
     }

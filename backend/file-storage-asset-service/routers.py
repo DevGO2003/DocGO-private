@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Response, Request
 from botocore.exceptions import ClientError
-from typing import List, Optional
+from typing import List, Optional, Dict
 from uuid import uuid4
 import os
 from datetime import datetime, timedelta
@@ -15,7 +15,7 @@ from config import (
 )
 from services.file_service import FileStorageService
 from services.general_file_service import GeneralFileService
-from services.processing_service import FileProcessingService
+# from services.processing_service import FileProcessingService
 from services.asset_service import AssetService
 from schemas.file import (
     FileUploadResponse, SignedURLRequest, SignedURLResponse, FileVersion
@@ -38,7 +38,7 @@ router = APIRouter(prefix="/api/v1/file-storage-asset-service", tags=["File Stor
 # Khởi tạo services
 file_service = FileStorageService()
 general_file_service = GeneralFileService()
-processing_service = FileProcessingService()
+# processing_service = FileProcessingService()
 asset_service = AssetService()
 
 # Kafka producer singleton
@@ -502,102 +502,103 @@ async def backup_files(
         raise HTTPException(status_code=500, detail=f"Error creating backup: {str(e)}")
 
 # ==================== FILE PROCESSING ENDPOINTS ====================
+# TEMPORARILY DISABLED - Missing rarfile dependency
 
-@router.post("/process/convert", summary="Chuyển đổi file")
-async def convert_file(
-    request: Request,
-    processing_request: FileProcessingRequest,
-    user_id: Optional[str] = Query(None, description="ID của user")
-):
-    """
-    Chuyển đổi định dạng file.
-    """
-    try:
-        user_id_effective = user_id or "public"
-        result = await processing_service.convert_file(processing_request, user_id_effective)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="File đã được chuyển đổi thành công",
-            data=result,
-            path=request.url.path
-        )
-    except Exception as e:
-        logger.error(f"[CONVERT_FAILED] Error converting file: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error converting file: {str(e)}")
+# @router.post("/process/convert", summary="Chuyển đổi file")
+# async def convert_file(
+#     request: Request,
+#     processing_request: FileProcessingRequest,
+#     user_id: Optional[str] = Query(None, description="ID của user")
+# ):
+#     """
+#     Chuyển đổi định dạng file.
+#     """
+#     try:
+#         user_id_effective = user_id or "public"
+#         result = await processing_service.convert_file(processing_request, user_id_effective)
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="File đã được chuyển đổi thành công",
+#             data=result,
+#             path=request.url.path
+#         )
+#     except Exception as e:
+#         logger.error(f"[CONVERT_FAILED] Error converting file: {e}", exc_info=True)
+#         raise HTTPException(status_code=500, detail=f"Error converting file: {str(e)}")
 
-@router.post("/process/compress", summary="Nén file")
-async def compress_file(
-    request: Request,
-    processing_request: FileProcessingRequest,
-    user_id: Optional[str] = Query(None, description="ID của user")
-):
-    """
-    Nén file với mức độ nén tùy chọn.
-    """
-    try:
-        user_id_effective = user_id or "public"
-        result = await processing_service.compress_file(processing_request, user_id_effective)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="File đã được nén thành công",
-            data=result,
-            path=request.url.path
-        )
-    except Exception as e:
-        logger.error(f"[COMPRESS_FAILED] Error compressing file: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error compressing file: {str(e)}")
+# @router.post("/process/compress", summary="Nén file")
+# async def compress_file(
+#     request: Request,
+#     processing_request: FileProcessingRequest,
+#     user_id: Optional[str] = Query(None, description="ID của user")
+# ):
+#     """
+#     Nén file với mức độ nén tùy chọn.
+#     """
+#     try:
+#         user_id_effective = user_id or "public"
+#         result = await processing_service.compress_file(processing_request, user_id_effective)
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="File đã được nén thành công",
+#             data=result,
+#             path=request.url.path
+#         )
+#     except Exception as e:
+#         logger.error(f"[COMPRESS_FAILED] Error compressing file: {e}", exc_info=True)
+#         raise HTTPException(status_code=500, detail=f"Error compressing file: {str(e)}")
 
-@router.post("/process/extract", summary="Giải nén file")
-async def extract_file(
-    request: Request,
-    processing_request: FileProcessingRequest,
-    user_id: Optional[str] = Query(None, description="ID của user")
-):
-    """
-    Giải nén file archive (ZIP, RAR).
-    """
-    try:
-        user_id_effective = user_id or "public"
-        result = await processing_service.extract_file(processing_request, user_id_effective)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="File đã được giải nén thành công",
-            data=result,
-            path=request.url.path
-        )
-    except Exception as e:
-        logger.error(f"[EXTRACT_FAILED] Error extracting file: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error extracting file: {str(e)}")
+# @router.post("/process/extract", summary="Giải nén file")
+# async def extract_file(
+#     request: Request,
+#     processing_request: FileProcessingRequest,
+#     user_id: Optional[str] = Query(None, description="ID của user")
+# ):
+#     """
+#     Giải nén file archive (ZIP, RAR).
+#     """
+#     try:
+#         user_id_effective = user_id or "public"
+#         result = await processing_service.extract_file(processing_request, user_id_effective)
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="File đã được giải nén thành công",
+#             data=result,
+#             path=request.url.path
+#         )
+#     except Exception as e:
+#         logger.error(f"[EXTRACT_FAILED] Error extracting file: {e}", exc_info=True)
+#         raise HTTPException(status_code=500, detail=f"Error extracting file: {str(e)}")
 
-@router.post("/process/validate", summary="Kiểm tra file")
-async def validate_file(
-    request: Request,
-    file_id: str = Query(..., description="ID của file cần kiểm tra"),
-    user_id: Optional[str] = Query(None, description="ID của user")
-):
-    """
-    Kiểm tra tính hợp lệ của file.
-    """
-    try:
-        user_id_effective = user_id or "public"
-        result = await processing_service.validate_file(file_id, user_id_effective)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="File đã được kiểm tra",
-            data=result,
-            path=request.url.path
-        )
-    except Exception as e:
-        logger.error(f"[VALIDATE_FAILED] Error validating file {file_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error validating file: {str(e)}")
+# @router.post("/process/validate", summary="Kiểm tra file")
+# async def validate_file(
+#     request: Request,
+#     file_id: str = Query(..., description="ID của file cần kiểm tra"),
+#     user_id: Optional[str] = Query(None, description="ID của user")
+# ):
+#     """
+#     Kiểm tra tính hợp lệ của file.
+#     """
+#     try:
+#         user_id_effective = user_id or "public"
+#         result = await processing_service.validate_file(file_id, user_id_effective)
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="File đã được kiểm tra",
+#             data=result,
+#             path=request.url.path
+#         )
+#     except Exception as e:
+#         logger.error(f"[VALIDATE_FAILED] Error validating file {file_id}: {e}", exc_info=True)
+#         raise HTTPException(status_code=500, detail=f"Error validating file: {str(e)}")
 
 # ==================== ASSET MANAGEMENT ENDPOINTS ====================
 

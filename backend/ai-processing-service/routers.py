@@ -16,14 +16,14 @@ from openpyxl import load_workbook
 from striprtf.striprtf import rtf_to_text
 import csv
 from services.ai_processing_service import AIProcessingService
-from services.notification_service import NotificationService
+# from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
-from schemas.notification_schemas import (
-    NotificationRequest, NotificationHistoryRequest, NotificationTemplate,
-    EmailNotificationRequest, SMSNotificationRequest, PushNotificationRequest,
-    WebSocketNotificationRequest
-)
+# from schemas.notification_schemas import (
+#     NotificationRequest, NotificationHistoryRequest, NotificationTemplate,
+#     EmailNotificationRequest, SMSNotificationRequest, PushNotificationRequest,
+#     WebSocketNotificationRequest
+# )
 from schemas.batch_schemas import (
     BatchJobRequest, BatchJobStatusRequest, BatchJobListRequest,
     BatchJobCancelRequest, BatchJobRetryRequest, BatchProcessingRequest
@@ -819,165 +819,166 @@ async def process_file_from_url(
         )
 
 # ==================== NOTIFICATION APIs ====================
+# TEMPORARILY DISABLED - Missing twilio dependency
 
 # Initialize services (will be initialized in main.py)
-notification_service = NotificationService()
+# notification_service = NotificationService()
 batch_service = BatchService()
 event_service = EventService()
 
-@router.post("/notifications/send", summary="Gửi notification", tags=["Notification Service"])
-async def send_notification_api(
-    request: Request,
-    notification_request: NotificationRequest
-):
-    """
-    🔹 Đầu vào
-    
-    📧 notification_request (bắt buộc, body)
-    Loại: NotificationRequest
-    Mô tả: Thông tin notification cần gửi (email, SMS, push, websocket)
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: NotificationResponse
-    Mô tả: Kết quả gửi notification với trạng thái và thông tin chi tiết
-    """
-    try:
-        await notification_service.initialize()
-        result = await notification_service.send_notification(notification_request)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="Gửi notification thành công",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi gửi notification: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
+# @router.post("/notifications/send", summary="Gửi notification", tags=["Notification Service"])
+# async def send_notification_api(
+#     request: Request,
+#     notification_request: NotificationRequest
+# ):
+#     """
+#     🔹 Đầu vào
+#     
+#     📧 notification_request (bắt buộc, body)
+#     Loại: NotificationRequest
+#     Mô tả: Thông tin notification cần gửi (email, SMS, push, websocket)
+#     
+#     🔹 Đầu ra
+#     
+#     📝 data
+#     Loại: NotificationResponse
+#     Mô tả: Kết quả gửi notification với trạng thái và thông tin chi tiết
+#     """
+#     try:
+#         await notification_service.initialize()
+#         result = await notification_service.send_notification(notification_request)
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="Gửi notification thành công",
+#             data=result.model_dump(),
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
+#         
+#     except Exception as e:
+#         return RestResponse(
+#             statusCode=500,
+#             shortMessage="Internal Server Error",
+#             description=f"Lỗi khi gửi notification: {str(e)}",
+#             data=None,
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
 
-@router.get("/notifications/history", summary="Lịch sử notification", tags=["Notification Service"])
-async def get_notification_history_api(
-    request: Request,
-    page: int = Query(1, ge=1, description="Số trang"),
-    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
-    notification_type: str = Query(None, description="Loại notification"),
-    status: str = Query(None, description="Trạng thái notification"),
-    start_date: str = Query(None, description="Ngày bắt đầu (ISO format)"),
-    end_date: str = Query(None, description="Ngày kết thúc (ISO format)")
-):
-    """
-    🔹 Đầu vào
-    
-    📄 page (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số trang (mặc định: 1)
-    
-    📄 limit (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: NotificationHistoryResponse
-    Mô tả: Danh sách notification với phân trang
-    """
-    try:
-        await notification_service.initialize()
-        
-        # Parse dates if provided
-        start_dt = None
-        end_dt = None
-        if start_date:
-            start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
-        if end_date:
-            end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
-        
-        result = await notification_service.get_notification_history(
-            page=page,
-            limit=limit,
-            notification_type=notification_type,
-            status=status,
-            start_date=start_dt,
-            end_date=end_dt
-        )
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description="Lấy lịch sử notification thành công",
-            data=result,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi lấy lịch sử notification: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
+# @router.get("/notifications/history", summary="Lịch sử notification", tags=["Notification Service"])
+# async def get_notification_history_api(
+#     request: Request,
+#     page: int = Query(1, ge=1, description="Số trang"),
+#     limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
+#     notification_type: str = Query(None, description="Loại notification"),
+#     status: str = Query(None, description="Trạng thái notification"),
+#     start_date: str = Query(None, description="Ngày bắt đầu (ISO format)"),
+#     end_date: str = Query(None, description="Ngày kết thúc (ISO format)")
+# ):
+#     """
+#     🔹 Đầu vào
+#     
+#     📄 page (tùy chọn, query)
+#     Loại: integer
+#     Mô tả: Số trang (mặc định: 1)
+#     
+#     📄 limit (tùy chọn, query)
+#     Loại: integer
+#     Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+#     
+#     🔹 Đầu ra
+#     
+#     📝 data
+#     Loại: NotificationHistoryResponse
+#     Mô tả: Danh sách notification với phân trang
+#     """
+#     try:
+#         await notification_service.initialize()
+#         
+#         # Parse dates if provided
+#         start_dt = None
+#         end_dt = None
+#         if start_date:
+#             start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+#         if end_date:
+#             end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+#         
+#         result = await notification_service.get_notification_history(
+#             page=page,
+#             limit=limit,
+#             notification_type=notification_type,
+#             status=status,
+#             start_date=start_dt,
+#             end_date=end_dt
+#         )
+#         
+#         return RestResponse(
+#             statusCode=200,
+#             shortMessage="Success",
+#             description="Lấy lịch sử notification thành công",
+#             data=result,
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
+#         
+#     except Exception as e:
+#         return RestResponse(
+#             statusCode=500,
+#             shortMessage="Internal Server Error",
+#             description=f"Lỗi khi lấy lịch sử notification: {str(e)}",
+#             data=None,
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
 
-@router.post("/notifications/templates", summary="Tạo notification template", tags=["Notification Service"])
-async def create_notification_template_api(
-    request: Request,
-    template: NotificationTemplate
-):
-    """
-    🔹 Đầu vào
-    
-    📧 template (bắt buộc, body)
-    Loại: NotificationTemplate
-    Mô tả: Thông tin template notification cần tạo
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: NotificationTemplate
-    Mô tả: Template đã được tạo với ID và timestamp
-    """
-    try:
-        await notification_service.initialize()
-        result = await notification_service.create_notification_template(template)
-        
-        return RestResponse(
-            statusCode=201,
-            shortMessage="Created",
-            description="Tạo notification template thành công",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi tạo notification template: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
+# @router.post("/notifications/templates", summary="Tạo notification template", tags=["Notification Service"])
+# async def create_notification_template_api(
+#     request: Request,
+#     template: NotificationTemplate
+# ):
+#     """
+#     🔹 Đầu vào
+#     
+#     📧 template (bắt buộc, body)
+#     Loại: NotificationTemplate
+#     Mô tả: Thông tin template notification cần tạo
+#     
+#     🔹 Đầu ra
+#     
+#     📝 data
+#     Loại: NotificationTemplate
+#     Mô tả: Template đã được tạo với ID và timestamp
+#     """
+#     try:
+#         await notification_service.initialize()
+#         result = await notification_service.create_notification_template(template)
+#         
+#         return RestResponse(
+#             statusCode=201,
+#             shortMessage="Created",
+#             description="Tạo notification template thành công",
+#             data=result.model_dump(),
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
+#         
+#     except Exception as e:
+#         return RestResponse(
+#             statusCode=500,
+#             shortMessage="Internal Server Error",
+#             description=f"Lỗi khi tạo notification template: {str(e)}",
+#             data=None,
+#             path=request.url.path,
+#             timestamp=datetime.now(timezone.utc),
+#             requestId=str(uuid.uuid4())
+#         )
 
 # ==================== BATCH PROCESSING APIs ====================
 
