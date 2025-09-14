@@ -35,7 +35,7 @@ class ServiceManager {
     // Authentication Identity Service (Spring Boot) - Port 8001
     this.addService('authentication', {
       name: 'authentication-identity-service',
-      url: selectUrl(process.env.AUTHENTICATION_SERVICE_URL, 'http://docgo-local-authentication-identity-service:8000', 'http://localhost:8001'),
+      url: selectUrl(process.env.AUTH_SERVICE_URL, 'http://docgo-local-authentication-identity-service:8000', 'http://localhost:8001'),
       healthCheck: '/api/v1/authentication-identity-service/auth/health',
       timeout: 10000
     });
@@ -51,7 +51,7 @@ class ServiceManager {
     // Contract Management Service (Spring Boot) - Port 8002
     this.addService('contract-management', {
       name: 'contract-management-service',
-      url: selectUrl(process.env.CONTRACT_MANAGEMENT_SERVICE_URL, 'http://docgo-local-contract-management-service:8000', 'http://localhost:8002'),
+      url: selectUrl(process.env.CONTRACT_SERVICE_URL, 'http://docgo-local-contract-management-service:8000', 'http://localhost:8002'),
       healthCheck: '/actuator/health',
       timeout: 10000
     });
@@ -122,8 +122,8 @@ class ServiceManager {
 
     // File Storage Asset Service (FastAPI) - Port 8004
     this.addService('file-storage', {
-      name: 'file-storage-asset-service',
-      url: selectUrl(process.env.FILE_STORAGE_SERVICE_URL, 'http://docgo-local-file-storage-service:8000', 'http://localhost:8004'),
+      name: 'file-storage-service',
+      url: selectUrl(process.env.FILE_SERVICE_URL, 'http://file-storage-service:8000', 'http://localhost:8004'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -163,7 +163,7 @@ class ServiceManager {
     // AI Processing Service (FastAPI) - Port 8003
     this.addService('ai-processing', {
       name: 'ai-processing-service',
-      url: selectUrl(process.env.AI_PROCESSING_SERVICE_URL, 'http://docgo-local-ai-processing-service:8000', 'http://localhost:8003'),
+      url: selectUrl(process.env.AI_SERVICE_URL, 'http://docgo-local-ai-processing-service:8000', 'http://localhost:8003'),
       healthCheck: '/health',
       timeout: 10000
     });
@@ -178,6 +178,11 @@ class ServiceManager {
   }
 
   private addService(key: string, config: ServiceConfig): void {
+    console.log(`[DEBUG] 🔧 Initializing service: ${key}`);
+    console.log(`[DEBUG] 🌐 Service URL: ${config.url}`);
+    console.log(`[DEBUG] ⏱️  Timeout: ${config.timeout}ms`);
+    console.log(`[DEBUG] 🏥 Health Check: ${config.healthCheck}`);
+    
     const axiosInstance = axios.create({
       baseURL: config.url,
       timeout: config.timeout,

@@ -60,10 +60,10 @@ services:
       - ../backend/api-gateway-bff/env/.env.local
     environment:
       - NODE_ENV=development
-      - AUTH_SERVICE_URL=http://authentication-identity-service:8001
-      - CONTRACT_SERVICE_URL=http://contract-management-service:8002
-      - AI_SERVICE_URL=http://ai-processing-service:8003
-      - FILE_SERVICE_URL=http://file-storage-service:8004
+      - AUTH_SERVICE_URL=http://authentication-identity-service:8000
+      - CONTRACT_SERVICE_URL=http://contract-management-service:8000
+      - AI_SERVICE_URL=http://ai-processing-service:8000
+      - FILE_SERVICE_URL=http://file-storage-service:8000
     volumes:
       - ../backend/api-gateway-bff:/app
       - /app/node_modules
