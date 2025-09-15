@@ -57,7 +57,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ../backend/api-gateway-bff/env/.env.local
+      - backend/api-gateway-bff/env/.env.local
     environment:
       - NODE_ENV=development
       - AUTH_SERVICE_URL=http://authentication-identity-service:8000
@@ -65,7 +65,7 @@ services:
       - AI_SERVICE_URL=http://ai-processing-service:8000
       - FILE_SERVICE_URL=http://file-storage-service:8000
     volumes:
-      - ../backend/api-gateway-bff:/app
+      - backend/api-gateway-bff:/app
       - /app/node_modules
       - npm_cache:/root/.npm
     command: >
@@ -79,7 +79,7 @@ services:
   # Authentication & Identity Service (Spring Boot) - Port 8001
   authentication-identity-service:
     build:
-      context: ../backend/authentication-identity-service
+      context: backend/authentication-identity-service
       dockerfile: Dockerfile
       target: builder
     container_name: docgo-local-authentication-identity-service
@@ -88,7 +88,7 @@ services:
     ports:
       - "8001:8000"
     env_file:
-      - ../backend/authentication-identity-service/env/.env.local
+      - backend/authentication-identity-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATA_MONGODB_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_auth?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
@@ -96,7 +96,7 @@ services:
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=
     volumes:
-      - ../backend/authentication-identity-service:/app
+      - backend/authentication-identity-service:/app
       - maven_cache:/root/.m2
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
@@ -109,7 +109,7 @@ services:
   # Contract Management Service (Spring Boot) - Port 8002
   contract-management-service:
     build:
-      context: ../backend/contract-management-service
+      context: backend/contract-management-service
       dockerfile: Dockerfile
       target: builder
     container_name: docgo-local-contract-management-service
@@ -118,7 +118,7 @@ services:
     ports:
       - "8002:8000"
     env_file:
-      - ../backend/contract-management-service/env/.env.local
+      - backend/contract-management-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATA_MONGODB_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_contract_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
@@ -128,7 +128,7 @@ services:
       - AI_SERVICE_URL=http://ai-processing-service:8003
       - FILE_SERVICE_URL=http://file-storage-service:8004
     volumes:
-      - ../backend/contract-management-service:/app
+      - backend/contract-management-service:/app
       - maven_cache:/root/.m2
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
@@ -147,7 +147,7 @@ services:
     ports:
       - "8003:8000"
     env_file:
-      - ../backend/ai-processing-service/env/.env.local
+      - backend/ai-processing-service/env/.env.local
     environment:
       - ENVIRONMENT=development
       - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_ai_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
@@ -155,7 +155,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
     volumes:
-      - ../backend/ai-processing-service:/app
+      - backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
       - pip_cache:/root/.cache/pip
     command: >
@@ -175,7 +175,7 @@ services:
     ports:
       - "8004:8000"
     env_file:
-      - ../backend/file-storage-asset-service/env/.env.local
+      - backend/file-storage-asset-service/env/.env.local
     environment:
       - ENVIRONMENT=development
       - MONGODB_ATLAS_URI=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/docgo_file_service?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
@@ -183,7 +183,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
     volumes:
-      - ../backend/file-storage-asset-service:/app
+      - backend/file-storage-asset-service:/app
       - file_storage_uploads_local:/app/uploads
       - file_storage_temp_local:/app/temp
       - pip_cache:/root/.cache/pip
