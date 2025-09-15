@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/approvals")
-@Tag(name = "API Quáº£n lÃ½ PhÃª duyá»‡t", description = "CÃ¡c API Ä‘á»ƒ quáº£n lÃ½ quy trÃ¬nh phÃª duyá»‡t há»£p Ä‘á»“ng trong há»‡ thá»‘ng DocGO")
+@Tag(name = "API Quản lý Phê duyệt", description = "Các API để quản lý quy trình phê duyệt hợp đồng trong hệ thống DocGO")
 public class ApprovalController {
 
     private final ApprovalService approvalService;
@@ -33,67 +33,62 @@ public class ApprovalController {
 
     @GetMapping
     @Operation(
-        summary = "Láº¥y danh sÃ¡ch táº¥t cáº£ phÃª duyá»‡t", 
+        summary = "Lấy danh sách tất cả phê duyệt", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ“„ pageNumber (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: Sá»‘ trang (máº·c Ä‘á»‹nh: 0)
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số[object Object]n        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
         
-        ðŸ“„ pageSize (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: KÃ­ch thÆ°á»›c trang (máº·c Ä‘á»‹nh: 10)
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
         
-        ðŸ“„ sortBy (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: TrÆ°á»ng sáº¯p xáº¿p (máº·c Ä‘á»‹nh: createdAt)
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
         
-        ðŸ“„ sortDirection (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: HÆ°á»›ng sáº¯p xáº¿p: ASC hoáº·c DESC (máº·c Ä‘á»‹nh: DESC)
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
         
-        ðŸ“„ searchTerm (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: Tá»« khÃ³a tÃ¬m kiáº¿m
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
         
-        ðŸ“„ includeDeleted (tÃ¹y chá»n, query)
-        Loáº¡i: boolean
-        MÃ´ táº£: Bao gá»“m báº£n ghi Ä‘Ã£ xÃ³a (máº·c Ä‘á»‹nh: false)
+        🔹 Đầu ra
         
-        ðŸ”¹ Äáº§u ra
+        📦 data
+        Loại: PaginatedResponse<Approval>
+        Mô tả: Danh sách phê duyệt có phân trang
         
-        ðŸ“ data
-        Loáº¡i: PaginatedResponse<Approval>
-        MÃ´ táº£: Danh sÃ¡ch phÃª duyá»‡t cÃ³ phÃ¢n trang
+        🧾 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔧 statusCode
+        Loại: integer
+        Mô tả: ma[object Object] shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 204: No Content)
+        📝 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🆔 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
-        
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
-        
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<List<Approval>>> getAllApprovals(
@@ -111,7 +106,7 @@ public class ApprovalController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ phÃª duyá»‡t nÃ o.")
+                .description("Không có phê duyệt nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -125,7 +120,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch phÃª duyá»‡t thÃ nh cÃ´ng.")
+            .description("Lấy danh sách phê duyệt thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -137,47 +132,43 @@ public class ApprovalController {
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Láº¥y chi tiáº¿t phÃª duyá»‡t", 
+        summary = "Lấy chi tiết phê duyệt", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ”— id (báº¯t buá»™c, path)
-        Loáº¡i: string
-        MÃ´ táº£: ID cá»§a phÃª duyá»‡t cáº§n láº¥y
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của phê duyệt cần lấy
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Approval
-        MÃ´ táº£: ThÃ´ng tin chi tiáº¿t phÃª duyá»‡t
+        📦 data
+        Loại: Approval
+        Mô tả: Thông tin chi tiết phê duyệt
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🧾 apiVersion
+        Loại: string
+        [object Object]n        Mô tả: ma trạng thái HTTP (200: OK, 404: Not Found)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 404: Not Found)
+        📨 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        📝 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🆔 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
-        
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Approval>> getApproval(@PathVariable String id) {
@@ -188,7 +179,7 @@ public class ApprovalController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y phÃª duyá»‡t vá»›i ID: " + id)
+                .description("Không tìm thấy phê duyệt với ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -202,7 +193,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y chi tiáº¿t phÃª duyá»‡t thÃ nh cÃ´ng.")
+            .description("Lấy chi tiết phê duyệt thành công.")
             .data(approval.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -214,47 +205,43 @@ public class ApprovalController {
 
     @PostMapping
     @Operation(
-        summary = "Táº¡o phÃª duyá»‡t má»›i", 
+        summary = "Tạo phê duyệt mới", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ“„ approval (báº¯t buá»™c, body)
-        Loáº¡i: ApprovalCreateRequest
-        MÃ´ táº£: ThÃ´ng tin phÃª duyá»‡t cáº§n táº¡o (contractId, approverId, approverName, approverEmail, approverRole, priority, dueDate, approvalOrder, isRequired)
+        📄 approval (bắt buộc, body)
+        Loại: ApprovalCreateRequest
+        Mô tả: Thông tin phê duyệt cần tạo (contractId, approverId, approverName, approverEmail, approverRole, priority, dueDate, approvalOrder, isRequired)
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Approval
-        MÃ´ táº£: ThÃ´ng tin phÃª duyá»‡t Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
+        📦 data
+        Loại: Approval
+        Mô tả: Thông tin phê duyệt đã được tạo thành công
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🧾 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (201: Created)
+        🔧 statusCode
+        Loại: integer
+        Mô tả: ma trạng thái HTTP (2[object Object]ô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        📝 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🆔 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
-        
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Approval>> createApproval(@RequestBody ApprovalCreateRequest request) {
@@ -264,7 +251,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o phÃª duyá»‡t thÃ nh cÃ´ng.")
+            .description("Tạo phê duyệt thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -275,7 +262,7 @@ public class ApprovalController {
     }
 
     @PostMapping("/contracts/{contractId}/approve")
-    @Operation(summary = "PhÃª duyá»‡t há»£p Ä‘á»“ng", description = "Táº¡o approval má»›i cho contract")
+    @Operation(summary = "Phê duyệt hợp đồng", description = "Tạo approval mới cho contract")
     public ResponseEntity<RestResponse<Approval>> createApproval(
             @PathVariable String contractId,
             @RequestParam String approverId,
@@ -291,7 +278,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o approval thÃ nh cÃ´ng.")
+            .description("Tạo approval thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -302,7 +289,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals")
-    @Operation(summary = "Láº¥y danh sÃ¡ch approval theo contract ID", description = "Láº¥y táº¥t cáº£ approval cá»§a contract")
+    @Operation(summary = "Lấy danh sách approval theo contract ID", description = "Lấy tất cả approval của contract")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByContractId(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getApprovalsByContractId(contractId);
         
@@ -311,7 +298,7 @@ public class ApprovalController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ approval nÃ o cho contract nÃ y.")
+                .description("Không có approval nào cho contract này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -325,7 +312,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -336,7 +323,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/{id}")
-    @Operation(summary = "Láº¥y approval theo ID", description = "Láº¥y chi tiáº¿t approval")
+    @Operation(summary = "Lấy approval theo ID", description = "Lấy chi tiết approval")
     public ResponseEntity<RestResponse<Approval>> getApprovalById(@PathVariable String id) {
         Optional<Approval> approval = approvalService.getApprovalById(id);
         
@@ -345,7 +332,7 @@ public class ApprovalController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y approval.")
+                .description("Không tìm thấy approval.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -355,11 +342,11 @@ public class ApprovalController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Approval> response = RestResponse.<Approval>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y approval thÃ nh cÃ´ng.")
+            .description("Lấy approval thành công.")
             .data(approval.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -370,16 +357,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/pending")
-    @Operation(summary = "Láº¥y approval Ä‘ang pending", description = "Láº¥y danh sÃ¡ch approval Ä‘ang chá» phÃª duyá»‡t")
+    @Operation(summary = "Lấy approval đang pending", description = "Lấy danh sách approval đang chờ phê duyệt")
     public ResponseEntity<RestResponse<List<Approval>>> getPendingApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getPendingApprovalsByContractId(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o Ä‘ang pending.")
+            .description("Không có approval nào đang pending.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -393,7 +380,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval pending thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval pending thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -404,16 +391,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/approved")
-    @Operation(summary = "Láº¥y approval Ä‘Ã£ approved", description = "Láº¥y danh sÃ¡ch approval Ä‘Ã£ Ä‘Æ°á»£c phÃª duyá»‡t")
+    @Operation(summary = "Lấy approval đã approved", description = "Lấy danh sách approval đã được phê duyệt")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getApprovedApprovalsByContractId(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o Ä‘Ã£ Ä‘Æ°á»£c phÃª duyá»‡t.")
+            .description("Không có approval nào đã được phê duyệt.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -427,7 +414,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval approved thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval approved thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -438,16 +425,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/rejected")
-    @Operation(summary = "Láº¥y approval Ä‘Ã£ rejected", description = "Láº¥y danh sÃ¡ch approval Ä‘Ã£ bá»‹ tá»« chá»‘i")
+    @Operation(summary = "Lấy approval đã rejected", description = "Lấy danh sách approval đã bị từ chối")
     public ResponseEntity<RestResponse<List<Approval>>> getRejectedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getRejectedApprovalsByContractId(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o bá»‹ tá»« chá»‘i.")
+            .description("Không có approval nào bị từ chối.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -461,7 +448,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval rejected thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval rejected thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -472,16 +459,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/approver/{approverId}")
-    @Operation(summary = "Láº¥y approval theo approver ID", description = "Láº¥y danh sÃ¡ch approval cá»§a approver")
+    @Operation(summary = "Lấy approval theo approver ID", description = "Lấy danh sách approval của approver")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverId(@PathVariable String approverId) {
         List<Approval> approvals = approvalService.getApprovalsByApproverId(approverId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o cá»§a approver nÃ y.")
+            .description("Không có approval nào của approver này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -495,7 +482,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval cá»§a approver thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval của approver thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -506,16 +493,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/approver/email/{approverEmail}")
-    @Operation(summary = "Láº¥y approval theo approver email", description = "Láº¥y danh sÃ¡ch approval cá»§a approver email")
+    @Operation(summary = "Lấy approval theo approver email", description = "Lấy danh sách approval của approver email")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverEmail(@PathVariable String approverEmail) {
         List<Approval> approvals = approvalService.getApprovalsByApproverEmail(approverEmail);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o cá»§a approver email nÃ y.")
+            .description("Không có approval nào của approver email này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -529,7 +516,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval cá»§a approver email thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval của approver email thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -540,16 +527,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/approver/role/{approverRole}")
-    @Operation(summary = "Láº¥y approval theo approver role", description = "Láº¥y danh sÃ¡ch approval cá»§a approver role")
+    @Operation(summary = "Lấy approval theo approver role", description = "Lấy danh sách approval của approver role")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverRole(@PathVariable String approverRole) {
         List<Approval> approvals = approvalService.getApprovalsByApproverRole(approverRole);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o cá»§a approver role nÃ y.")
+            .description("Không có approval nào của approver role này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -563,7 +550,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval cá»§a approver role thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval của approver role thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -574,16 +561,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/expiring")
-    @Operation(summary = "Láº¥y approval sáº¯p háº¿t háº¡n", description = "Láº¥y danh sÃ¡ch approval sáº¯p háº¿t háº¡n")
+    @Operation(summary = "Lấy approval sắp hết hạn", description = "Lấy danh sách approval sắp hết hạn")
     public ResponseEntity<RestResponse<List<Approval>>> getExpiringApprovals(@RequestParam LocalDateTime dueDate) {
         List<Approval> approvals = approvalService.getExpiringApprovals(dueDate);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o sáº¯p háº¿t háº¡n.")
+            .description("Không có approval nào sắp hết hạn.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -597,7 +584,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval sáº¯p háº¿t háº¡n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval sắp hết hạn thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -608,16 +595,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/expired")
-    @Operation(summary = "Láº¥y approval Ä‘Ã£ háº¿t háº¡n", description = "Láº¥y danh sÃ¡ch approval Ä‘Ã£ háº¿t háº¡n")
+    @Operation(summary = "Lấy approval đã hết hạn", description = "Lấy danh sách approval đã hết hạn")
     public ResponseEntity<RestResponse<List<Approval>>> getExpiredApprovals(@RequestParam LocalDateTime currentTime) {
         List<Approval> approvals = approvalService.getExpiredApprovals(currentTime);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o Ä‘Ã£ háº¿t háº¡n.")
+            .description("Không có approval nào đã hết hạn.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -631,7 +618,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval Ä‘Ã£ háº¿t háº¡n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval đã hết hạn thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -642,16 +629,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/priority/{priority}")
-    @Operation(summary = "Láº¥y approval theo priority", description = "Láº¥y danh sÃ¡ch approval theo má»©c Ä‘á»™ Æ°u tiÃªn")
+    @Operation(summary = "Lấy approval theo priority", description = "Lấy danh sách approval theo mức độ ưu tiên")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByPriority(@PathVariable Approval.ApprovalPriority priority) {
         List<Approval> approvals = approvalService.getApprovalsByPriority(priority);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o vá»›i priority nÃ y.")
+            .description("Không có approval nào với priority này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -665,7 +652,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval theo priority thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval theo priority thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -676,16 +663,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/order/{approvalOrder}")
-    @Operation(summary = "Láº¥y approval theo thá»© tá»±", description = "Láº¥y danh sÃ¡ch approval theo thá»© tá»± phÃª duyá»‡t")
+    @Operation(summary = "Lấy approval theo thứ tự", description = "Lấy danh sách approval theo thứ tự phê duyệt")
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByOrder(@PathVariable String contractId, @PathVariable Integer approvalOrder) {
         List<Approval> approvals = approvalService.getApprovalsByOrder(contractId, approvalOrder);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o vá»›i thá»© tá»± nÃ y.")
+            .description("Không có approval nào với thứ tự này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -699,7 +686,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval theo thá»© tá»± thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval theo thứ tự thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -710,16 +697,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/required")
-    @Operation(summary = "Láº¥y approval báº¯t buá»™c", description = "Láº¥y danh sÃ¡ch approval báº¯t buá»™c")
+    @Operation(summary = "Lấy approval bắt buộc", description = "Lấy danh sách approval bắt buộc")
     public ResponseEntity<RestResponse<List<Approval>>> getRequiredApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getRequiredApprovalsByContractId(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval báº¯t buá»™c nÃ o.")
+            .description("Không có approval bắt buộc nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -733,7 +720,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval báº¯t buá»™c thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval bắt buộc thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -744,16 +731,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/optional")
-    @Operation(summary = "Láº¥y approval tÃ¹y chá»n", description = "Láº¥y danh sÃ¡ch approval tÃ¹y chá»n")
+    @Operation(summary = "Lấy approval tùy chọn", description = "Lấy danh sách approval tùy chọn")
     public ResponseEntity<RestResponse<List<Approval>>> getOptionalApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getOptionalApprovalsByContractId(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval tÃ¹y chá»n nÃ o.")
+            .description("Không có approval tùy chọn nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -767,7 +754,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval tÃ¹y chá»n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval tùy chọn thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -778,19 +765,19 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/due-date")
-    @Operation(summary = "Láº¥y approval theo due date", description = "Láº¥y danh sÃ¡ch approval trong khoáº£ng due date")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDateRange(
+    @Operation(summary = "Lấy approval theo due date", description = "Lấy danh sách approval trong khoảng due date")
+    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDaterange(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
             @RequestParam LocalDateTime endDate) {
-        List<Approval> approvals = approvalService.getApprovalsByDueDateRange(contractId, startDate, endDate);
+        List<Approval> approvals = approvalService.getApprovalsByDueDaterange(contractId, startDate, endDate);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o trong khoáº£ng thá»i gian nÃ y.")
+            .description("Không có approval nào trong khoảng thời gian này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -804,7 +791,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval theo due date thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval theo due date thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -815,18 +802,18 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/upcoming-due")
-    @Operation(summary = "Láº¥y approval sáº¯p Ä‘áº¿n háº¡n", description = "Láº¥y danh sÃ¡ch approval sáº¯p Ä‘áº¿n háº¡n")
+    @Operation(summary = "Lấy approval sắp đến hạn", description = "Lấy danh sách approval sắp đến hạn")
     public ResponseEntity<RestResponse<List<Approval>>> getUpcomingDueApprovals(
             @PathVariable String contractId,
             @RequestParam LocalDateTime dueDate) {
         List<Approval> approvals = approvalService.getUpcomingDueApprovals(contractId, dueDate);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o sáº¯p Ä‘áº¿n háº¡n.")
+            .description("Không có approval nào sắp đến hạn.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -840,7 +827,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval sáº¯p Ä‘áº¿n háº¡n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval sắp đến hạn thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -851,16 +838,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/notified")
-    @Operation(summary = "Láº¥y approval Ä‘Ã£ Ä‘Æ°á»£c notify", description = "Láº¥y danh sÃ¡ch approval Ä‘Ã£ Ä‘Æ°á»£c thÃ´ng bÃ¡o")
+    @Operation(summary = "Lấy approval đã được notify", description = "Lấy danh sách approval đã được thông báo")
     public ResponseEntity<RestResponse<List<Approval>>> getNotifiedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getNotifiedApprovals(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o Ä‘Ã£ Ä‘Æ°á»£c thÃ´ng bÃ¡o.")
+            .description("Không có approval nào đã được thông báo.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -874,7 +861,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval Ä‘Ã£ Ä‘Æ°á»£c notify thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval đã được notify thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -885,16 +872,16 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/unnotified")
-    @Operation(summary = "Láº¥y approval chÆ°a Ä‘Æ°á»£c notify", description = "Láº¥y danh sÃ¡ch approval chÆ°a Ä‘Æ°á»£c thÃ´ng bÃ¡o")
+    @Operation(summary = "Lấy approval chưa được notify", description = "Lấy danh sách approval chưa được thông báo")
     public ResponseEntity<RestResponse<List<Approval>>> getUnnotifiedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getUnnotifiedApprovals(contractId);
         
         if (approvals.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ approval nÃ o chÆ°a Ä‘Æ°á»£c thÃ´ng bÃ¡o.")
+            .description("Không có approval nào chưa được thông báo.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -908,7 +895,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch approval chÆ°a Ä‘Æ°á»£c notify thÃ nh cÃ´ng.")
+            .description("Lấy danh sách approval chưa được notify thành công.")
             .data(approvals)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -919,7 +906,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/approve")
-    @Operation(summary = "PhÃª duyá»‡t approval", description = "PhÃª duyá»‡t approval vá»›i comments")
+    @Operation(summary = "Phê duyệt approval", description = "Phê duyệt approval với comments")
     public ResponseEntity<RestResponse<Approval>> approveApproval(
             @PathVariable String id,
             @RequestParam String comments) {
@@ -929,7 +916,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("PhÃª duyá»‡t approval thÃ nh cÃ´ng.")
+            .description("Phê duyệt approval thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -940,7 +927,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/reject")
-    @Operation(summary = "Tá»« chá»‘i approval", description = "Tá»« chá»‘i approval vá»›i lÃ½ do")
+    @Operation(summary = "Từ chối approval", description = "Từ chối approval với lý do")
     public ResponseEntity<RestResponse<Approval>> rejectApproval(
             @PathVariable String id,
             @RequestParam String rejectionReason) {
@@ -950,7 +937,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Tá»« chá»‘i approval thÃ nh cÃ´ng.")
+            .description("Từ chối approval thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -961,7 +948,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/cancel")
-    @Operation(summary = "Há»§y approval", description = "Há»§y approval")
+    @Operation(summary = "Hủy approval", description = "Hủy approval")
     public ResponseEntity<RestResponse<Approval>> cancelApproval(@PathVariable String id) {
         Approval approval = approvalService.cancelApproval(id);
         
@@ -969,7 +956,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Há»§y approval thÃ nh cÃ´ng.")
+            .description("Hủy approval thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -980,7 +967,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/expire")
-    @Operation(summary = "ÄÃ¡nh dáº¥u approval háº¿t háº¡n", description = "ÄÃ¡nh dáº¥u approval Ä‘Ã£ háº¿t háº¡n")
+    @Operation(summary = "Đánh dấu approval hết hạn", description = "Đánh dấu approval đã hết hạn")
     public ResponseEntity<RestResponse<Approval>> markApprovalAsExpired(@PathVariable String id) {
         Approval approval = approvalService.markApprovalAsExpired(id);
         
@@ -988,7 +975,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("ÄÃ¡nh dáº¥u approval háº¿t háº¡n thÃ nh cÃ´ng.")
+            .description("Đánh dấu approval hết hạn thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -999,7 +986,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/increment-reminder")
-    @Operation(summary = "TÄƒng reminder count", description = "TÄƒng sá»‘ láº§n nháº¯c nhá»Ÿ")
+    @Operation(summary = "Tăng reminder count", description = "Tăng số lần nhắc nhở")
     public ResponseEntity<RestResponse<Approval>> incrementReminderCount(@PathVariable String id) {
         Approval approval = approvalService.incrementReminderCount(id);
         
@@ -1007,7 +994,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("TÄƒng reminder count thÃ nh cÃ´ng.")
+            .description("Tăng reminder count thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1018,7 +1005,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/notify")
-    @Operation(summary = "ÄÃ¡nh dáº¥u Ä‘Ã£ notify", description = "ÄÃ¡nh dáº¥u approval Ä‘Ã£ Ä‘Æ°á»£c thÃ´ng bÃ¡o")
+    @Operation(summary = "Đánh dấu đã notify", description = "Đánh dấu approval đã được thông báo")
     public ResponseEntity<RestResponse<Approval>> setNotificationTime(@PathVariable String id) {
         Approval approval = approvalService.setNotificationTime(id);
         
@@ -1026,7 +1013,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("ÄÃ¡nh dáº¥u Ä‘Ã£ notify thÃ nh cÃ´ng.")
+            .description("Đánh dấu đã notify thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1037,7 +1024,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/due-date")
-    @Operation(summary = "Cáº­p nháº­t due date", description = "Cáº­p nháº­t ngÃ y háº¿t háº¡n")
+    @Operation(summary = "Cập nhật due date", description = "Cập nhật ngày hết hạn")
     public ResponseEntity<RestResponse<Approval>> setDueDate(
             @PathVariable String id,
             @RequestParam LocalDateTime dueDate) {
@@ -1047,7 +1034,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t due date thÃ nh cÃ´ng.")
+            .description("Cập nhật due date thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1058,7 +1045,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/priority")
-    @Operation(summary = "Cáº­p nháº­t priority", description = "Cáº­p nháº­t má»©c Ä‘á»™ Æ°u tiÃªn")
+    @Operation(summary = "Cập nhật priority", description = "Cập nhật mức độ ưu tiên")
     public ResponseEntity<RestResponse<Approval>> setPriority(
             @PathVariable String id,
             @RequestParam Approval.ApprovalPriority priority) {
@@ -1068,7 +1055,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t priority thÃ nh cÃ´ng.")
+            .description("Cập nhật priority thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1079,7 +1066,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/order")
-    @Operation(summary = "Cáº­p nháº­t approval order", description = "Cáº­p nháº­t thá»© tá»± phÃª duyá»‡t")
+    @Operation(summary = "Cập nhật approval order", description = "Cập nhật thứ tự phê duyệt")
     public ResponseEntity<RestResponse<Approval>> setApprovalOrder(
             @PathVariable String id,
             @RequestParam Integer approvalOrder) {
@@ -1089,7 +1076,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t approval order thÃ nh cÃ´ng.")
+            .description("Cập nhật approval order thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1100,7 +1087,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/required")
-    @Operation(summary = "Cáº­p nháº­t isRequired", description = "Cáº­p nháº­t tráº¡ng thÃ¡i báº¯t buá»™c")
+    @Operation(summary = "Cập nhật isRequired", description = "Cập nhật trạng thái bắt buộc")
     public ResponseEntity<RestResponse<Approval>> setIsRequired(
             @PathVariable String id,
             @RequestParam Boolean isRequired) {
@@ -1110,7 +1097,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t isRequired thÃ nh cÃ´ng.")
+            .description("Cập nhật isRequired thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1121,17 +1108,17 @@ public class ApprovalController {
     }
 
     @DeleteMapping("/approvals/{id}")
-    @Operation(summary = "XÃ³a approval", description = "Soft delete approval")
+    @Operation(summary = "Xóa approval", description = "Soft delete approval")
     public ResponseEntity<RestResponse<Void>> deleteApproval(
             @PathVariable String id,
             @RequestParam String deletedBy) {
         approvalService.deleteApproval(id, deletedBy);
         
-        RestResponse<Approval> response = RestResponse.<Approval>builder()
+        RestResponse<Void> response = RestResponse.<Void>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ³a approval thÃ nh cÃ´ng.")
+            .description("Xóa approval thành công.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1142,7 +1129,7 @@ public class ApprovalController {
     }
 
     @PutMapping("/approvals/{id}/restore")
-    @Operation(summary = "KhÃ´i phá»¥c approval", description = "KhÃ´i phá»¥c approval Ä‘Ã£ xÃ³a")
+    @Operation(summary = "Khôi phục approval", description = "Khôi phục approval đã xóa")
     public ResponseEntity<RestResponse<Approval>> restoreApproval(@PathVariable String id) {
         Approval approval = approvalService.restoreApproval(id);
         
@@ -1150,7 +1137,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("KhÃ´i phá»¥c approval thÃ nh cÃ´ng.")
+            .description("Khôi phục approval thành công.")
             .data(approval)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1161,7 +1148,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/count")
-    @Operation(summary = "Äáº¿m sá»‘ approval", description = "Äáº¿m sá»‘ lÆ°á»£ng approval theo status")
+    @Operation(summary = "Đếm số approval", description = "Đếm số lượng approval theo status")
     public ResponseEntity<RestResponse<Long>> countApprovalsByContractIdAndStatus(
             @PathVariable String contractId,
             @RequestParam Approval.ApprovalStatus status) {
@@ -1171,7 +1158,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ approval thÃ nh cÃ´ng.")
+            .description("Đếm số approval thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1182,7 +1169,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/approver/{approverId}/count")
-    @Operation(summary = "Äáº¿m sá»‘ approval cá»§a approver", description = "Äáº¿m sá»‘ lÆ°á»£ng approval cá»§a approver theo status")
+    @Operation(summary = "Đếm số approval của approver", description = "Đếm số lượng approval của approver theo status")
     public ResponseEntity<RestResponse<Long>> countApprovalsByApproverIdAndStatus(
             @PathVariable String approverId,
             @RequestParam Approval.ApprovalStatus status) {
@@ -1192,7 +1179,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ approval cá»§a approver thÃ nh cÃ´ng.")
+            .description("Đếm số approval của approver thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1203,7 +1190,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-pending")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval pending", description = "Kiá»ƒm tra contract cÃ³ approval Ä‘ang pending khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval pending", description = "Kiểm tra contract có approval đang pending không")
     public ResponseEntity<RestResponse<Boolean>> hasPendingApprovals(@PathVariable String contractId) {
         boolean hasPending = approvalService.hasPendingApprovals(contractId);
         
@@ -1211,7 +1198,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval pending thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval pending thành công.")
             .data(hasPending)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1222,7 +1209,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-approved")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval approved", description = "Kiá»ƒm tra contract cÃ³ approval Ä‘Ã£ approved khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval approved", description = "Kiểm tra contract có approval đã approved không")
     public ResponseEntity<RestResponse<Boolean>> hasApprovedApprovals(@PathVariable String contractId) {
         boolean hasApproved = approvalService.hasApprovedApprovals(contractId);
         
@@ -1230,7 +1217,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval approved thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval approved thành công.")
             .data(hasApproved)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1241,7 +1228,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-rejected")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval rejected", description = "Kiá»ƒm tra contract cÃ³ approval Ä‘Ã£ rejected khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval rejected", description = "Kiểm tra contract có approval đã rejected không")
     public ResponseEntity<RestResponse<Boolean>> hasRejectedApprovals(@PathVariable String contractId) {
         boolean hasRejected = approvalService.hasRejectedApprovals(contractId);
         
@@ -1249,7 +1236,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval rejected thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval rejected thành công.")
             .data(hasRejected)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1260,7 +1247,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-expired")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval expired", description = "Kiá»ƒm tra contract cÃ³ approval Ä‘Ã£ háº¿t háº¡n khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval expired", description = "Kiểm tra contract có approval đã hết hạn không")
     public ResponseEntity<RestResponse<Boolean>> hasExpiredApprovals(@PathVariable String contractId) {
         boolean hasExpired = approvalService.hasExpiredApprovals(contractId);
         
@@ -1268,7 +1255,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval expired thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval expired thành công.")
             .data(hasExpired)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1279,7 +1266,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-expiring")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval expiring", description = "Kiá»ƒm tra contract cÃ³ approval sáº¯p háº¿t háº¡n khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval expiring", description = "Kiểm tra contract có approval sắp hết hạn không")
     public ResponseEntity<RestResponse<Boolean>> hasExpiringApprovals(
             @PathVariable String contractId,
             @RequestParam LocalDateTime dueDate) {
@@ -1289,7 +1276,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval expiring thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval expiring thành công.")
             .data(hasExpiring)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1300,17 +1287,17 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/needs-reminder")
-    @Operation(summary = "Kiá»ƒm tra cáº§n reminder", description = "Kiá»ƒm tra contract cÃ³ approval cáº§n nháº¯c nhá»Ÿ khÃ´ng")
+    @Operation(summary = "Kiểm tra cần reminder", description = "Kiểm tra contract có approval cần nhắc nhở không")
     public ResponseEntity<RestResponse<Boolean>> hasApprovalsNeedingReminder(
             @PathVariable String contractId,
             @RequestParam Integer reminderCount) {
         boolean needsReminder = approvalService.hasApprovalsNeedingReminder(contractId, reminderCount);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cáº§n reminder thÃ nh cÃ´ng.")
+            .description("Kiểm tra cần reminder thành công.")
             .data(needsReminder)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1321,7 +1308,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/by-role/{approverRole}")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval theo role", description = "Kiá»ƒm tra contract cÃ³ approval theo role khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval theo role", description = "Kiểm tra contract có approval theo role không")
     public ResponseEntity<RestResponse<Boolean>> hasApprovalsByRole(
             @PathVariable String contractId,
             @PathVariable String approverRole) {
@@ -1331,7 +1318,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval theo role thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval theo role thành công.")
             .data(hasByRole)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1342,7 +1329,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/by-role-status")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ approval theo role vÃ  status", description = "Kiá»ƒm tra contract cÃ³ approval theo role vÃ  status khÃ´ng")
+    @Operation(summary = "Kiểm tra có approval theo role và status", description = "Kiểm tra contract có approval theo role và status không")
     public ResponseEntity<RestResponse<Boolean>> hasApprovalsByRoleAndStatus(
             @PathVariable String contractId,
             @RequestParam String approverRole,
@@ -1353,7 +1340,7 @@ public class ApprovalController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra approval theo role vÃ  status thÃ nh cÃ´ng.")
+            .description("Kiểm tra approval theo role và status thành công.")
             .data(hasByRoleAndStatus)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1363,4 +1350,5 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
+
 

@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.contract_service.controller;
+﻿package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.service.ReportService;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
@@ -68,7 +68,7 @@ public class ReportController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        Mô tả: ma trạng thái HTTP (200: OK, 204: No Content)
         
         📋 shortMessage
         Loại: string
@@ -282,3 +282,5 @@ public class ReportController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
+
+

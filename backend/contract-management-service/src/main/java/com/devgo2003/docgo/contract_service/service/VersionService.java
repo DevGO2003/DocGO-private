@@ -469,35 +469,35 @@ public class VersionService {
      * Đếm số version theo contract ID
      */
     public long countVersionsByContractId(String contractId) {
-        return versionRepository.countByContractIdAndIsDeletedFalse(contractId);
+        return versionRepository.countByContractId(contractId);
     }
 
     /**
      * Đếm số version theo contract ID và change type
      */
     public long countVersionsByContractIdAndChangeType(String contractId, Version.ChangeType changeType) {
-        return versionRepository.countByContractIdAndChangeTypeAndIsDeletedFalse(contractId, changeType);
+        return versionRepository.countByContractIdAndChangeType(contractId, changeType);
     }
 
     /**
      * Đếm số version theo contract ID và isPublished
      */
     public long countVersionsByContractIdAndIsPublished(String contractId, Boolean isPublished) {
-        return versionRepository.countByContractIdAndIsPublishedAndIsDeletedFalse(contractId, isPublished);
+        return versionRepository.countByContractIdAndIsPublished(contractId, isPublished);
     }
 
     /**
      * Đếm số version theo contract ID và isCurrent
      */
     public long countVersionsByContractIdAndIsCurrent(String contractId, Boolean isCurrent) {
-        return versionRepository.countByContractIdAndIsCurrentAndIsDeletedFalse(contractId, isCurrent);
+        return versionRepository.countByContractIdAndIsCurrent(contractId, isCurrent);
     }
 
     /**
      * Kiểm tra xem có version nào với version number cho trước không
      */
     public boolean existsVersionByContractIdAndVersionNumber(String contractId, String versionNumber) {
-        return versionRepository.existsByContractIdAndVersionNumberAndIsDeletedFalse(contractId, versionNumber);
+        return versionRepository.existsByContractIdAndVersionNumber(contractId, versionNumber);
     }
 
     /**

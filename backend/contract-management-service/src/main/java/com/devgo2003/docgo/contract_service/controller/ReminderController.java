@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.contract_service.controller;
+﻿package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Reminder;
 import com.devgo2003.docgo.contract_service.service.ReminderService;
@@ -72,7 +72,7 @@ public class ReminderController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        Mô tả: ma trạng thái HTTP (200: OK, 204: No Content)
         
         📋 shortMessage
         Loại: string
@@ -106,7 +106,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getAllReminders();
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -120,7 +120,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -156,7 +156,7 @@ public class ReminderController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        Mô tả: ma trạng thái HTTP (200: OK, 404: Not Found)
         
         📋 shortMessage
         Loại: string
@@ -233,7 +233,7 @@ public class ReminderController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (201: Created)
+        Mô tả: ma trạng thái HTTP (201: Created)
         
         📋 shortMessage
         Loại: string
@@ -304,7 +304,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -318,7 +318,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -372,7 +372,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getPendingRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -386,7 +386,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -406,7 +406,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getCompletedRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -420,7 +420,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -440,7 +440,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getEscalatedRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -454,7 +454,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -474,7 +474,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getDueReminders(currentTime);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -488,7 +488,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -508,7 +508,7 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getOverdueReminders(currentTime);
         
         if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -522,7 +522,7 @@ public class ReminderController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -698,3 +698,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
+
+
+
+

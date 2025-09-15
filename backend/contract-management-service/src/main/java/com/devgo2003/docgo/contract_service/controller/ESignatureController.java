@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/esignatures")
-@Tag(name = "API Quáº£n lÃ½ Chá»¯ kÃ½ Ä‘iá»‡n tá»­", description = "CÃ¡c API Ä‘á»ƒ quáº£n lÃ½ chá»¯ kÃ½ Ä‘iá»‡n tá»­ trong há»‡ thá»‘ng DocGO")
+@Tag(name = "API Quản lý chữ ký điện tử", description = "Các API để quản lý chữ ký điện tử trong hệ thống DocGO")
 public class ESignatureController {
 
     private final ESignatureService eSignatureService;
@@ -33,68 +33,8 @@ public class ESignatureController {
 
     @GetMapping
     @Operation(
-        summary = "Láº¥y danh sÃ¡ch táº¥t cáº£ chá»¯ kÃ½ Ä‘iá»‡n tá»­", 
-        description = """
-        ðŸ”¹ Äáº§u vÃ o
-        
-        ðŸ“„ pageNumber (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: Sá»‘ trang (máº·c Ä‘á»‹nh: 0)
-        
-        ðŸ“„ pageSize (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: KÃ­ch thÆ°á»›c trang (máº·c Ä‘á»‹nh: 10)
-        
-        ðŸ“„ sortBy (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: TrÆ°á»ng sáº¯p xáº¿p (máº·c Ä‘á»‹nh: createdAt)
-        
-        ðŸ“„ sortDirection (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: HÆ°á»›ng sáº¯p xáº¿p: ASC hoáº·c DESC (máº·c Ä‘á»‹nh: DESC)
-        
-        ðŸ“„ searchTerm (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: Tá»« khÃ³a tÃ¬m kiáº¿m
-        
-        ðŸ“„ includeDeleted (tÃ¹y chá»n, query)
-        Loáº¡i: boolean
-        MÃ´ táº£: Bao gá»“m báº£n ghi Ä‘Ã£ xÃ³a (máº·c Ä‘á»‹nh: false)
-        
-        ðŸ”¹ Äáº§u ra
-        
-        ðŸ“ data
-        Loáº¡i: List<ESignature>
-        MÃ´ táº£: Danh sÃ¡ch chá»¯ kÃ½ Ä‘iá»‡n tá»­
-        
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
-        
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 204: No Content)
-        
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
-        
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
-        
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
-        
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
-        
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
-        """
+        summary = "Lấy danh sách chữ ký điện tử",
+        description = "Hỗ trợ query phân trang: pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted"
     )
     public ResponseEntity<RestResponse<List<ESignature>>> getAllESignatures(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -111,7 +51,7 @@ public class ESignatureController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ chá»¯ kÃ½ Ä‘iá»‡n tá»­ nÃ o.")
+                .description("Không có chữ ký điện tử nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -125,7 +65,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch chá»¯ kÃ½ Ä‘iá»‡n tá»­ thÃ nh cÃ´ng.")
+            .description("Lấy danh sách chữ ký điện tử thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -137,47 +77,47 @@ public class ESignatureController {
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Láº¥y chi tiáº¿t chá»¯ kÃ½ Ä‘iá»‡n tá»­", 
+        summary = "Lấy chi tiết chữ ký điện tử", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ”— id (báº¯t buá»™c, path)
-        Loáº¡i: string
-        MÃ´ táº£: ID cá»§a chá»¯ kÃ½ Ä‘iá»‡n tá»­ cáº§n láº¥y
+        🔸 id (bắt buộc, path)
+        Loại: string
+        mô tả: ID của chữ ký điện tử cần lấy
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: ESignature
-        MÃ´ táº£: ThÃ´ng tin chi tiáº¿t chá»¯ kÃ½ Ä‘iá»‡n tá»­
+        🔸 data
+        Loại: ESignature
+        mô tả: Thông tin chi tiết chữ ký điện tử
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔸 apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 404: Not Found)
+        🔸 statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (200: OK, 404: Not Found)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        🔸 shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🔸 description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🔸 timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        🔸 requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        🔸 path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<ESignature>> getESignature(@PathVariable String id) {
@@ -188,7 +128,7 @@ public class ESignatureController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y chá»¯ kÃ½ Ä‘iá»‡n tá»­ vá»›i ID: " + id)
+                .description("Không tìm thấy chữ ký điện tử với ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -202,7 +142,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y chi tiáº¿t chá»¯ kÃ½ Ä‘iá»‡n tá»­ thÃ nh cÃ´ng.")
+            .description("Lấy chi tiết chữ ký điện tử thành công.")
             .data(eSignature.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -214,47 +154,47 @@ public class ESignatureController {
 
     @PostMapping
     @Operation(
-        summary = "Táº¡o chá»¯ kÃ½ Ä‘iá»‡n tá»­ má»›i", 
+        summary = "Tạo chữ ký điện tử mới", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ“„ eSignature (báº¯t buá»™c, body)
-        Loáº¡i: ESignatureCreateRequest
-        MÃ´ táº£: ThÃ´ng tin chá»¯ kÃ½ Ä‘iá»‡n tá»­ cáº§n táº¡o (contractId, signerId, signerName, signerEmail, signatureType, signatureData)
+        🔸 eSignature (bắt buộc, body)
+        Loại: ESignatureCreateRequest
+        mô tả: Thông tin chữ ký điện tử cần tạo (contractId, signerId, signerName, signerEmail, signatureType, signatureData)
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: ESignature
-        MÃ´ táº£: ThÃ´ng tin chá»¯ kÃ½ Ä‘iá»‡n tá»­ Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
+        🔸 data
+        Loại: ESignature
+        mô tả: Thông tin chữ ký điện tử đã được tạo thành công
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔸 apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (201: Created)
+        🔸 statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (201: Created)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        🔸 shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🔸 description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🔸 timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        🔸 requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        🔸 path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<ESignature>> createESignature(@RequestBody ESignatureCreateRequest request) {
@@ -264,7 +204,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o chá»¯ kÃ½ Ä‘iá»‡n tá»­ thÃ nh cÃ´ng.")
+            .description("Tạo chữ ký điện tử thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -275,7 +215,7 @@ public class ESignatureController {
     }
 
     @PostMapping("/contracts/{contractId}/esignature")
-    @Operation(summary = "Táº¡o e-signature má»›i", description = "Táº¡o e-signature má»›i cho contract")
+    @Operation(summary = "Tạo e-signature mới", description = "Tạo e-signature mới cho contract")
     public ResponseEntity<RestResponse<ESignature>> createESignature(
             @PathVariable String contractId,
             @RequestParam String signerId,
@@ -290,7 +230,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o e-signature thÃ nh cÃ´ng.")
+            .description("Tạo e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -301,7 +241,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures")
-    @Operation(summary = "Láº¥y danh sÃ¡ch e-signature", description = "Láº¥y táº¥t cáº£ e-signature cá»§a contract")
+    @Operation(summary = "Lấy danh sách e-signature", description = "Lấy tất cả e-signature của contract")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesByContractId(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractId(contractId);
         
@@ -310,7 +250,7 @@ public class ESignatureController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ e-signature nÃ o cho contract nÃ y.")
+                .description("Không có e-signature nào cho contract này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -324,7 +264,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -335,7 +275,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/{id}")
-    @Operation(summary = "Láº¥y e-signature theo ID", description = "Láº¥y chi tiáº¿t e-signature")
+    @Operation(summary = "Lấy e-signature theo ID", description = "Lấy chi tiết e-signature")
     public ResponseEntity<RestResponse<ESignature>> getESignatureById(@PathVariable String id) {
         Optional<ESignature> eSignature = eSignatureService.getESignatureById(id);
         
@@ -344,7 +284,7 @@ public class ESignatureController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y e-signature.")
+                .description("Không tìm thấy e-signature.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -358,7 +298,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y e-signature thÃ nh cÃ´ng.")
+            .description("Lấy e-signature thành công.")
             .data(eSignature.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -369,16 +309,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/pending")
-    @Operation(summary = "Láº¥y e-signature Ä‘ang pending", description = "Láº¥y danh sÃ¡ch e-signature Ä‘ang chá» kÃ½")
+    @Operation(summary = "Lấy e-signature đang pending", description = "Lấy danh sách e-signature đang chờ ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getPendingSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getPendingSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘ang pending.")
+            .description("Không có e-signature nào đang pending.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -392,7 +332,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature pending thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature pending thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -403,16 +343,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/signed")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ signed", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ kÃ½")
+    @Operation(summary = "Lấy e-signature đã signed", description = "Lấy danh sách e-signature đã ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getSignedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getSignedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ signed.")
+            .description("Không có e-signature nào đã signed.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -426,7 +366,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature signed thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature signed thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -437,16 +377,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/declined")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ declined", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ tá»« chá»‘i")
+    @Operation(summary = "Lấy e-signature đã declined", description = "Lấy danh sách e-signature đã từ chối")
     public ResponseEntity<RestResponse<List<ESignature>>> getDeclinedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getDeclinedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ declined.")
+            .description("Không có e-signature nào đã declined.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -460,7 +400,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature declined thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature declined thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -472,16 +412,16 @@ public class ESignatureController {
 
 
     @GetMapping("/contracts/{contractId}/esignatures/verified")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ verified", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ xÃ¡c thá»±c")
+    @Operation(summary = "Lấy e-signature đã verified", description = "Lấy danh sách e-signature đã xác thực")
     public ResponseEntity<RestResponse<List<ESignature>>> getVerifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getVerifiedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ verified.")
+            .description("Không có e-signature nào đã verified.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -495,7 +435,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature verified thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature verified thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -506,16 +446,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/required")
-    @Operation(summary = "Láº¥y e-signature báº¯t buá»™c", description = "Láº¥y danh sÃ¡ch e-signature báº¯t buá»™c")
+    @Operation(summary = "Lấy e-signature bắt buộc", description = "Lấy danh sách e-signature bắt buộc")
     public ResponseEntity<RestResponse<List<ESignature>>> getRequiredSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getRequiredSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature báº¯t buá»™c nÃ o.")
+            .description("Không có e-signature bắt buộc nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -529,7 +469,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature báº¯t buá»™c thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature bắt buộc thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -540,16 +480,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/optional")
-    @Operation(summary = "Láº¥y e-signature tÃ¹y chá»n", description = "Láº¥y danh sÃ¡ch e-signature tÃ¹y chá»n")
+    @Operation(summary = "Lấy e-signature tùy chọn", description = "Lấy danh sách e-signature tùy chọn")
     public ResponseEntity<RestResponse<List<ESignature>>> getOptionalSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getOptionalSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature tÃ¹y chá»n nÃ o.")
+            .description("Không có e-signature tùy chọn nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -563,7 +503,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature tÃ¹y chá»n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature tùy chọn thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -574,16 +514,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/consented")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ consent", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ Ä‘á»“ng Ã½")
+    @Operation(summary = "Lấy e-signature đã consent", description = "Lấy danh sách e-signature đã đồng ý")
     public ResponseEntity<RestResponse<List<ESignature>>> getConsentedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getConsentedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ consent.")
+            .description("Không có e-signature nào đã consent.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -597,7 +537,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ consent thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature đã consent thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -608,16 +548,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/unconsented")
-    @Operation(summary = "Láº¥y e-signature chÆ°a consent", description = "Láº¥y danh sÃ¡ch e-signature chÆ°a Ä‘á»“ng Ã½")
+    @Operation(summary = "Lấy e-signature chưa consent", description = "Lấy danh sách e-signature chưa đồng ý")
     public ResponseEntity<RestResponse<List<ESignature>>> getUnconsentedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getUnconsentedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o chÆ°a consent.")
+            .description("Không có e-signature nào chưa consent.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -627,11 +567,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature chÆ°a consent thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature chưa consent thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -642,16 +582,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/compliance-verified")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ compliance verified", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ xÃ¡c thá»±c compliance")
+    @Operation(summary = "Lấy e-signature đã compliance verified", description = "Lấy danh sách e-signature đã xác thực compliance")
     public ResponseEntity<RestResponse<List<ESignature>>> getComplianceVerifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getComplianceVerifiedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ compliance verified.")
+            .description("Không có e-signature nào đã compliance verified.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -661,11 +601,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ compliance verified thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature đã compliance verified thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -676,16 +616,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/compliance-unverified")
-    @Operation(summary = "Láº¥y e-signature chÆ°a compliance verified", description = "Láº¥y danh sÃ¡ch e-signature chÆ°a xÃ¡c thá»±c compliance")
+    @Operation(summary = "Lấy e-signature chưa compliance verified", description = "Lấy danh sách e-signature chưa xác thực compliance")
     public ResponseEntity<RestResponse<List<ESignature>>> getComplianceUnverifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getComplianceUnverifiedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o chÆ°a compliance verified.")
+            .description("Không có e-signature nào chưa compliance verified.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -695,11 +635,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature chÆ°a compliance verified thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature chưa compliance verified thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -710,16 +650,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/signer/{signerId}")
-    @Operation(summary = "Láº¥y e-signature theo signer ID", description = "Láº¥y danh sÃ¡ch e-signature cá»§a signer")
+    @Operation(summary = "Lấy e-signature theo signer ID", description = "Lấy danh sách e-signature của signer")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignerId(@PathVariable String signerId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerId(signerId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o cá»§a signer nÃ y.")
+            .description("Không có e-signature nào của signer này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -729,11 +669,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature cá»§a signer thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature của signer thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -744,16 +684,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/signer/email/{signerEmail}")
-    @Operation(summary = "Láº¥y e-signature theo signer email", description = "Láº¥y danh sÃ¡ch e-signature cá»§a signer email")
+    @Operation(summary = "Lấy e-signature theo signer email", description = "Lấy danh sách e-signature của signer email")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignerEmail(@PathVariable String signerEmail) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerEmail(signerEmail);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o cá»§a signer email nÃ y.")
+            .description("Không có e-signature nào của signer email này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -763,11 +703,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature cá»§a signer email thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature của signer email thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -778,16 +718,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/type/{signatureType}")
-    @Operation(summary = "Láº¥y e-signature theo signature type", description = "Láº¥y danh sÃ¡ch e-signature theo loáº¡i chá»¯ kÃ½")
+    @Operation(summary = "Lấy e-signature theo signature type", description = "Lấy danh sách e-signature theo loại chữ ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignatureType(@PathVariable ESignature.SignatureType signatureType) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignatureType(signatureType);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o vá»›i signature type nÃ y.")
+            .description("Không có e-signature nào với signature type này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -797,11 +737,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature theo signature type thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature theo signature type thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -812,16 +752,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/verification-method/{verificationMethod}")
-    @Operation(summary = "Láº¥y e-signature theo verification method", description = "Láº¥y danh sÃ¡ch e-signature theo phÆ°Æ¡ng thá»©c xÃ¡c thá»±c")
+    @Operation(summary = "Lấy e-signature theo verification method", description = "Lấy danh sách e-signature theo phương thức xác thực")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesByVerificationMethod(@PathVariable ESignature.VerificationMethod verificationMethod) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByVerificationMethod(verificationMethod);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o vá»›i verification method nÃ y.")
+            .description("Không có e-signature nào với verification method này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -831,11 +771,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature theo verification method thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature theo verification method thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -846,16 +786,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/order-by-signature-order")
-    @Operation(summary = "Láº¥y e-signature sáº¯p xáº¿p theo signature order", description = "Láº¥y danh sÃ¡ch e-signature sáº¯p xáº¿p theo thá»© tá»± kÃ½")
+    @Operation(summary = "Lấy e-signature sắp xếp theo signature order", description = "Lấy danh sách e-signature sắp xếp theo thứ tự ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesOrderBySignatureOrder(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignatureOrder(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o.")
+            .description("Không có e-signature nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -865,11 +805,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature sáº¯p xáº¿p theo signature order thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature sắp xếp theo signature order thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -880,16 +820,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/order-by-signed-at")
-    @Operation(summary = "Láº¥y e-signature sáº¯p xáº¿p theo thá»i gian kÃ½", description = "Láº¥y danh sÃ¡ch e-signature sáº¯p xáº¿p theo thá»i gian kÃ½")
+    @Operation(summary = "Lấy e-signature sắp xếp theo thời gian ký", description = "Lấy danh sách e-signature sắp xếp theo thời gian ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesOrderBySignedAt(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignedAt(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o.")
+            .description("Không có e-signature nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -899,11 +839,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature sáº¯p xáº¿p theo thá»i gian kÃ½ thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature sắp xếp theo thời gian ký thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -914,7 +854,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/signed-between")
-    @Operation(summary = "Láº¥y e-signature theo thá»i gian kÃ½", description = "Láº¥y danh sÃ¡ch e-signature trong khoáº£ng thá»i gian kÃ½")
+    @Operation(summary = "Lấy e-signature theo thời gian ký", description = "Lấy danh sách e-signature trong khoảng thời gian ký")
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -922,11 +862,11 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignedAtBetween(startDate, endDate);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o trong khoáº£ng thá»i gian kÃ½ nÃ y.")
+            .description("Không có e-signature nào trong khoảng thời gian ký này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -936,11 +876,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature theo thá»i gian kÃ½ thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature theo thời gian ký thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -951,16 +891,16 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/expired")
-    @Operation(summary = "Láº¥y e-signature Ä‘Ã£ expired", description = "Láº¥y danh sÃ¡ch e-signature Ä‘Ã£ háº¿t háº¡n")
+    @Operation(summary = "Lấy e-signature đã expired", description = "Lấy danh sách e-signature đã hết hạn")
     public ResponseEntity<RestResponse<List<ESignature>>> getExpiredSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getExpiredSignatures(LocalDateTime.now());
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o Ä‘Ã£ expired.")
+            .description("Không có e-signature nào đã expired.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -970,11 +910,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature expired thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature expired thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -985,18 +925,18 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/expiring")
-    @Operation(summary = "Láº¥y e-signature sáº¯p expired", description = "Láº¥y danh sÃ¡ch e-signature sáº¯p háº¿t háº¡n")
+    @Operation(summary = "Lấy e-signature sắp expired", description = "Lấy danh sách e-signature sắp hết hạn")
     public ResponseEntity<RestResponse<List<ESignature>>> getExpiringSignatures(
             @PathVariable String contractId,
             @RequestParam LocalDateTime dueDate) {
         List<ESignature> eSignatures = eSignatureService.getExpiringSignatures(dueDate);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o sáº¯p expired.")
+            .description("Không có e-signature nào sắp expired.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1006,11 +946,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature expiring thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature expiring thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1021,18 +961,18 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/high-verification-attempts")
-    @Operation(summary = "Láº¥y e-signature cÃ³ verification attempts cao", description = "Láº¥y danh sÃ¡ch e-signature cÃ³ verification attempts cao")
+    @Operation(summary = "Lấy e-signature có verification attempts cao", description = "Lấy danh sách e-signature có verification attempts cao")
     public ResponseEntity<RestResponse<List<ESignature>>> getSignaturesWithHighVerificationAttempts(
             @PathVariable String contractId,
             @RequestParam Integer maxAttempts) {
         List<ESignature> eSignatures = eSignatureService.getSignaturesWithHighVerificationAttempts(maxAttempts);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o cÃ³ verification attempts cao.")
+            .description("Không có e-signature nào có verification attempts cao.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1042,11 +982,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature cÃ³ verification attempts cao thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature có verification attempts cao thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1057,18 +997,18 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/with-reminders")
-    @Operation(summary = "Láº¥y e-signature cÃ³ reminders", description = "Láº¥y danh sÃ¡ch e-signature cÃ³ reminders")
+    @Operation(summary = "Lấy e-signature có reminders", description = "Lấy danh sách e-signature có reminders")
     public ResponseEntity<RestResponse<List<ESignature>>> getSignaturesWithReminders(
             @PathVariable String contractId,
             @RequestParam Integer reminderCount) {
         List<ESignature> eSignatures = eSignatureService.getSignaturesWithReminders(reminderCount);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ e-signature nÃ o cÃ³ reminders.")
+            .description("Không có e-signature nào có reminders.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1078,11 +1018,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch e-signature cÃ³ reminders thÃ nh cÃ´ng.")
+            .description("Lấy danh sách e-signature có reminders thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1093,21 +1033,21 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/sign")
-    @Operation(summary = "KÃ½ e-signature", description = "KÃ½ e-signature")
+    @Operation(summary = "Ký e-signature", description = "Ký e-signature")
     public ResponseEntity<RestResponse<ESignature>> signESignature(
             @PathVariable String id,
             @RequestParam String signatureData,
             @RequestParam String signatureImage,
             @RequestParam String ipAddress,
-            @RequestParam String userAgent,
+            @RequestParam String useragent,
             @RequestBody Map<String, Object> deviceInfo) {
-        ESignature eSignature = eSignatureService.signESignature(id, signatureData, signatureImage, ipAddress, userAgent, deviceInfo);
+        ESignature eSignature = eSignatureService.signESignature(id, signatureData, signatureImage, ipAddress, useragent, deviceInfo);
         
         RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("KÃ½ e-signature thÃ nh cÃ´ng.")
+            .description("Ký e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1118,7 +1058,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/decline")
-    @Operation(summary = "Tá»« chá»‘i e-signature", description = "Tá»« chá»‘i e-signature")
+    @Operation(summary = "Từ chối e-signature", description = "Từ chối e-signature")
     public ResponseEntity<RestResponse<ESignature>> declineESignature(
             @PathVariable String id,
             @RequestParam String declineReason) {
@@ -1128,7 +1068,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Tá»« chá»‘i e-signature thÃ nh cÃ´ng.")
+            .description("Từ chối e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1139,7 +1079,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/verify")
-    @Operation(summary = "XÃ¡c thá»±c e-signature", description = "XÃ¡c thá»±c e-signature")
+    @Operation(summary = "Xác thực e-signature", description = "Xác thực e-signature")
     public ResponseEntity<RestResponse<ESignature>> verifyESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.verifyESignature(id);
         
@@ -1147,7 +1087,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ¡c thá»±c e-signature thÃ nh cÃ´ng.")
+            .description("Xác thực e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1158,7 +1098,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/fail-verification")
-    @Operation(summary = "XÃ¡c thá»±c e-signature tháº¥t báº¡i", description = "XÃ¡c thá»±c e-signature tháº¥t báº¡i")
+    @Operation(summary = "Xác thực e-signature thất bại", description = "Xác thực e-signature thất bại")
     public ResponseEntity<RestResponse<ESignature>> failVerificationESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.failVerificationESignature(id);
         
@@ -1166,7 +1106,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ¡c thá»±c e-signature tháº¥t báº¡i thÃ nh cÃ´ng.")
+            .description("Xác thực e-signature thất bại thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1177,7 +1117,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/expire")
-    @Operation(summary = "ÄÃ¡nh dáº¥u e-signature háº¿t háº¡n", description = "ÄÃ¡nh dáº¥u e-signature Ä‘Ã£ háº¿t háº¡n")
+    @Operation(summary = "Đánh dấu e-signature hết hạn", description = "Đánh dấu e-signature đã hết hạn")
     public ResponseEntity<RestResponse<ESignature>> expireESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.expireESignature(id);
         
@@ -1185,7 +1125,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("ÄÃ¡nh dáº¥u e-signature háº¿t háº¡n thÃ nh cÃ´ng.")
+            .description("Đánh dấu e-signature hết hạn thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1196,7 +1136,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/cancel")
-    @Operation(summary = "Há»§y e-signature", description = "Há»§y e-signature")
+    @Operation(summary = "Hủy e-signature", description = "Hủy e-signature")
     public ResponseEntity<RestResponse<ESignature>> cancelESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.cancelESignature(id);
         
@@ -1204,7 +1144,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Há»§y e-signature thÃ nh cÃ´ng.")
+            .description("Hủy e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1215,7 +1155,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/increment-reminder")
-    @Operation(summary = "TÄƒng reminder count", description = "TÄƒng sá»‘ láº§n nháº¯c nhá»Ÿ")
+    @Operation(summary = "Tăng reminder count", description = "Tăng số lần nhắc nhở")
     public ResponseEntity<RestResponse<ESignature>> incrementReminderCount(@PathVariable String id) {
         ESignature eSignature = eSignatureService.incrementReminderCount(id);
         
@@ -1223,7 +1163,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("TÄƒng reminder count thÃ nh cÃ´ng.")
+            .description("Tăng reminder count thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1234,7 +1174,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/give-consent")
-    @Operation(summary = "Äá»“ng Ã½ e-signature", description = "Äá»“ng Ã½ e-signature")
+    @Operation(summary = "Đồng ý e-signature", description = "Đồng ý e-signature")
     public ResponseEntity<RestResponse<ESignature>> giveLegalConsent(@PathVariable String id) {
         ESignature eSignature = eSignatureService.giveLegalConsent(id);
         
@@ -1242,7 +1182,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äá»“ng Ã½ e-signature thÃ nh cÃ´ng.")
+            .description("Đồng ý e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1253,7 +1193,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/verify-compliance")
-    @Operation(summary = "XÃ¡c thá»±c compliance", description = "XÃ¡c thá»±c compliance")
+    @Operation(summary = "Xác thực compliance", description = "Xác thực compliance")
     public ResponseEntity<RestResponse<ESignature>> verifyCompliance(
             @PathVariable String id,
             @RequestParam String verifiedBy) {
@@ -1263,7 +1203,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ¡c thá»±c compliance thÃ nh cÃ´ng.")
+            .description("Xác thực compliance thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1274,7 +1214,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/signature-order")
-    @Operation(summary = "Cáº­p nháº­t signature order", description = "Cáº­p nháº­t thá»© tá»± kÃ½")
+    @Operation(summary = "Cập nhật signature order", description = "Cập nhật thứ tự ký")
     public ResponseEntity<RestResponse<ESignature>> setSignatureOrder(
             @PathVariable String id,
             @RequestParam Integer signatureOrder) {
@@ -1284,7 +1224,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t signature order thÃ nh cÃ´ng.")
+            .description("Cập nhật signature order thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1295,7 +1235,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/required")
-    @Operation(summary = "Cáº­p nháº­t isRequired", description = "Cáº­p nháº­t tráº¡ng thÃ¡i báº¯t buá»™c")
+    @Operation(summary = "Cập nhật isRequired", description = "Cập nhật trạng thái bắt buộc")
     public ResponseEntity<RestResponse<ESignature>> setIsRequired(
             @PathVariable String id,
             @RequestParam Boolean isRequired) {
@@ -1305,7 +1245,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t isRequired thÃ nh cÃ´ng.")
+            .description("Cập nhật isRequired thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1316,7 +1256,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/expires-at")
-    @Operation(summary = "Cáº­p nháº­t expires at", description = "Cáº­p nháº­t thá»i gian háº¿t háº¡n")
+    @Operation(summary = "Cập nhật expires at", description = "Cập nhật thời gian hết hạn")
     public ResponseEntity<RestResponse<ESignature>> setExpiresAt(
             @PathVariable String id,
             @RequestParam LocalDateTime expiresAt) {
@@ -1326,7 +1266,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t expires at thÃ nh cÃ´ng.")
+            .description("Cập nhật expires at thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1337,7 +1277,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/verification-method")
-    @Operation(summary = "Cáº­p nháº­t verification method", description = "Cáº­p nháº­t phÆ°Æ¡ng thá»©c xÃ¡c thá»±c")
+    @Operation(summary = "Cập nhật verification method", description = "Cập nhật phương thức xác thực")
     public ResponseEntity<RestResponse<ESignature>> setVerificationMethod(
             @PathVariable String id,
             @RequestParam ESignature.VerificationMethod verificationMethod) {
@@ -1347,7 +1287,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t verification method thÃ nh cÃ´ng.")
+            .description("Cập nhật verification method thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1358,7 +1298,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/verification-code")
-    @Operation(summary = "Cáº­p nháº­t verification code", description = "Cáº­p nháº­t mÃ£ xÃ¡c thá»±c")
+    @Operation(summary = "Cập nhật verification code", description = "Cập nhật mã xác thực")
     public ResponseEntity<RestResponse<ESignature>> setVerificationCode(
             @PathVariable String id,
             @RequestParam String verificationCode) {
@@ -1368,7 +1308,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t verification code thÃ nh cÃ´ng.")
+            .description("Cập nhật verification code thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1379,7 +1319,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/certificate-data")
-    @Operation(summary = "Cáº­p nháº­t certificate data", description = "Cáº­p nháº­t dá»¯ liá»‡u chá»©ng chá»‰")
+    @Operation(summary = "Cập nhật certificate data", description = "Cập nhật dữ liệu chứng chỉ")
     public ResponseEntity<RestResponse<ESignature>> setCertificateData(
             @PathVariable String id,
             @RequestParam String certificateData,
@@ -1393,7 +1333,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t certificate data thÃ nh cÃ´ng.")
+            .description("Cập nhật certificate data thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1404,7 +1344,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/location-info")
-    @Operation(summary = "Cáº­p nháº­t location info", description = "Cáº­p nháº­t thÃ´ng tin vá»‹ trÃ­")
+    @Operation(summary = "Cập nhật location info", description = "Cập nhật thông tin vị trí")
     public ResponseEntity<RestResponse<ESignature>> setLocationInfo(
             @PathVariable String id,
             @RequestBody Map<String, Object> locationInfo) {
@@ -1414,7 +1354,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t location info thÃ nh cÃ´ng.")
+            .description("Cập nhật location info thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1425,7 +1365,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/audit-trail")
-    @Operation(summary = "Cáº­p nháº­t audit trail", description = "Cáº­p nháº­t audit trail")
+    @Operation(summary = "Cập nhật audit trail", description = "Cập nhật audit trail")
     public ResponseEntity<RestResponse<ESignature>> setAuditTrail(
             @PathVariable String id,
             @RequestParam String auditTrail) {
@@ -1435,7 +1375,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t audit trail thÃ nh cÃ´ng.")
+            .description("Cập nhật audit trail thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1446,17 +1386,17 @@ public class ESignatureController {
     }
 
     @DeleteMapping("/esignatures/{id}")
-    @Operation(summary = "XÃ³a e-signature", description = "Soft delete e-signature")
+    @Operation(summary = "Xóa e-signature", description = "Soft delete e-signature")
     public ResponseEntity<RestResponse<Void>> deleteESignature(
             @PathVariable String id,
             @RequestParam String deletedBy) {
         eSignatureService.deleteESignature(id, deletedBy);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Void> response = RestResponse.<Void>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ³a e-signature thÃ nh cÃ´ng.")
+            .description("Xóa e-signature thành công.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1467,7 +1407,7 @@ public class ESignatureController {
     }
 
     @PutMapping("/esignatures/{id}/restore")
-    @Operation(summary = "KhÃ´i phá»¥c e-signature", description = "KhÃ´i phá»¥c e-signature Ä‘Ã£ xÃ³a")
+    @Operation(summary = "Khôi phục e-signature", description = "Khôi phục e-signature đã xóa")
     public ResponseEntity<RestResponse<ESignature>> restoreESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.restoreESignature(id);
         
@@ -1475,7 +1415,7 @@ public class ESignatureController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("KhÃ´i phá»¥c e-signature thÃ nh cÃ´ng.")
+            .description("Khôi phục e-signature thành công.")
             .data(eSignature)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1486,15 +1426,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature")
+    @Operation(summary = "Đếm số e-signature", description = "Đếm số lượng e-signature")
     public ResponseEntity<RestResponse<Long>> countESignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countESignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1505,17 +1445,17 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-by-status")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature theo status", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature theo status")
+    @Operation(summary = "Đếm số e-signature theo status", description = "Đếm số lượng e-signature theo status")
     public ResponseEntity<RestResponse<Long>> countESignaturesByContractIdAndStatus(
             @PathVariable String contractId,
             @RequestParam ESignature.SignatureStatus status) {
         long count = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature theo status thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature theo status thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1526,15 +1466,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/signer/{signerId}/count")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature cá»§a signer", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature cá»§a signer")
+    @Operation(summary = "Đếm số e-signature của signer", description = "Đếm số lượng e-signature của signer")
     public ResponseEntity<RestResponse<Long>> countESignaturesBySignerId(@PathVariable String signerId) {
         long count = eSignatureService.countESignaturesBySignerId(signerId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature cá»§a signer thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature của signer thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1545,15 +1485,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-pending")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature pending", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘ang pending")
+    @Operation(summary = "Đếm số e-signature pending", description = "Đếm số lượng e-signature đang pending")
     public ResponseEntity<RestResponse<Long>> countPendingSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countPendingSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature pending thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature pending thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1564,15 +1504,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-signed")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature signed", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ signed")
+    @Operation(summary = "Đếm số e-signature signed", description = "Đếm số lượng e-signature đã signed")
     public ResponseEntity<RestResponse<Long>> countSignedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countSignedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature signed thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature signed thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1583,15 +1523,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-declined")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature declined", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ declined")
+    @Operation(summary = "Đếm số e-signature declined", description = "Đếm số lượng e-signature đã declined")
     public ResponseEntity<RestResponse<Long>> countDeclinedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countDeclinedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature declined thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature declined thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1602,15 +1542,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-expired")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature expired", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ expired")
+    @Operation(summary = "Đếm số e-signature expired", description = "Đếm số lượng e-signature đã expired")
     public ResponseEntity<RestResponse<Long>> countExpiredSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countExpiredSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature expired thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature expired thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1621,15 +1561,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-verified")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature verified", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ verified")
+    @Operation(summary = "Đếm số e-signature verified", description = "Đếm số lượng e-signature đã verified")
     public ResponseEntity<RestResponse<Long>> countVerifiedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature verified thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature verified thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1640,15 +1580,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-required")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature required", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature báº¯t buá»™c")
+    @Operation(summary = "Đếm số e-signature required", description = "Đếm số lượng e-signature bắt buộc")
     public ResponseEntity<RestResponse<Long>> countRequiredSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countRequiredSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature required thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature required thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1659,15 +1599,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-optional")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature optional", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature tÃ¹y chá»n")
+    @Operation(summary = "Đếm số e-signature optional", description = "Đếm số lượng e-signature tùy chọn")
     public ResponseEntity<RestResponse<Long>> countOptionalSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countOptionalSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature optional thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature optional thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1678,15 +1618,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-consented")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature consented", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ consented")
+    @Operation(summary = "Đếm số e-signature consented", description = "Đếm số lượng e-signature đã consented")
     public ResponseEntity<RestResponse<Long>> countConsentedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countConsentedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature consented thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature consented thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1697,15 +1637,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-unconsented")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature unconsented", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature chÆ°a consented")
+    @Operation(summary = "Đếm số e-signature unconsented", description = "Đếm số lượng e-signature chưa consented")
     public ResponseEntity<RestResponse<Long>> countUnconsentedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countUnconsentedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature unconsented thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature unconsented thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1716,15 +1656,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-compliance-verified")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature compliance verified", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature Ä‘Ã£ compliance verified")
+    @Operation(summary = "Đếm số e-signature compliance verified", description = "Đếm số lượng e-signature đã compliance verified")
     public ResponseEntity<RestResponse<Long>> countComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countComplianceVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature compliance verified thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature compliance verified thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1735,15 +1675,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-compliance-unverified")
-    @Operation(summary = "Äáº¿m sá»‘ e-signature compliance unverified", description = "Äáº¿m sá»‘ lÆ°á»£ng e-signature chÆ°a compliance verified")
+    @Operation(summary = "Đếm số e-signature compliance unverified", description = "Đếm số lượng e-signature chưa compliance verified")
     public ResponseEntity<RestResponse<Long>> countComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countComplianceUnverifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ e-signature compliance unverified thÃ nh cÃ´ng.")
+            .description("Đếm số e-signature compliance unverified thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1754,15 +1694,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature", description = "Kiá»ƒm tra contract cÃ³ e-signature khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature", description = "Kiểm tra contract có e-signature không")
     public ResponseEntity<RestResponse<Boolean>> existsESignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsESignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1773,15 +1713,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-pending")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature pending", description = "Kiá»ƒm tra contract cÃ³ e-signature pending khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature pending", description = "Kiểm tra contract có e-signature pending không")
     public ResponseEntity<RestResponse<Boolean>> existsPendingSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsPendingSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature pending thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature pending thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1792,15 +1732,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-signed")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature signed", description = "Kiá»ƒm tra contract cÃ³ e-signature signed khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature signed", description = "Kiểm tra contract có e-signature signed không")
     public ResponseEntity<RestResponse<Boolean>> existsSignedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsSignedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature signed thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature signed thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1811,15 +1751,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-declined")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature declined", description = "Kiá»ƒm tra contract cÃ³ e-signature declined khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature declined", description = "Kiểm tra contract có e-signature declined không")
     public ResponseEntity<RestResponse<Boolean>> existsDeclinedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsDeclinedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature declined thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature declined thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1830,15 +1770,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-expired")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature expired", description = "Kiá»ƒm tra contract cÃ³ e-signature expired khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature expired", description = "Kiểm tra contract có e-signature expired không")
     public ResponseEntity<RestResponse<Boolean>> existsExpiredSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsExpiredSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature expired thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature expired thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1849,15 +1789,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-verified")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature verified", description = "Kiá»ƒm tra contract cÃ³ e-signature verified khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature verified", description = "Kiểm tra contract có e-signature verified không")
     public ResponseEntity<RestResponse<Boolean>> existsVerifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature verified thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature verified thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1868,15 +1808,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-required")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature required", description = "Kiá»ƒm tra contract cÃ³ e-signature required khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature required", description = "Kiểm tra contract có e-signature required không")
     public ResponseEntity<RestResponse<Boolean>> existsRequiredSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsRequiredSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature required thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature required thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1887,15 +1827,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-optional")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature optional", description = "Kiá»ƒm tra contract cÃ³ e-signature optional khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature optional", description = "Kiểm tra contract có e-signature optional không")
     public ResponseEntity<RestResponse<Boolean>> existsOptionalSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsOptionalSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature optional thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature optional thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1906,15 +1846,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-consented")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature consented", description = "Kiá»ƒm tra contract cÃ³ e-signature consented khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature consented", description = "Kiểm tra contract có e-signature consented không")
     public ResponseEntity<RestResponse<Boolean>> existsConsentedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsConsentedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature consented thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature consented thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1925,15 +1865,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-unconsented")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature unconsented", description = "Kiá»ƒm tra contract cÃ³ e-signature unconsented khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature unconsented", description = "Kiểm tra contract có e-signature unconsented không")
     public ResponseEntity<RestResponse<Boolean>> existsUnconsentedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsUnconsentedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature unconsented thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature unconsented thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1944,15 +1884,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-compliance-verified")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature compliance verified", description = "Kiá»ƒm tra contract cÃ³ e-signature compliance verified khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature compliance verified", description = "Kiểm tra contract có e-signature compliance verified không")
     public ResponseEntity<RestResponse<Boolean>> existsComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsComplianceVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature compliance verified thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature compliance verified thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1963,15 +1903,15 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/exists-compliance-unverified")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ e-signature compliance unverified", description = "Kiá»ƒm tra contract cÃ³ e-signature compliance unverified khÃ´ng")
+    @Operation(summary = "Kiểm tra có e-signature compliance unverified", description = "Kiểm tra contract có e-signature compliance unverified không")
     public ResponseEntity<RestResponse<Boolean>> existsComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsComplianceUnverifiedSignaturesByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ e-signature compliance unverified thÃ nh cÃ´ng.")
+            .description("Kiểm tra có e-signature compliance unverified thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1981,4 +1921,3 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
-

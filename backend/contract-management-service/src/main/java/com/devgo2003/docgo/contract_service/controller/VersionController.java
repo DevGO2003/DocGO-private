@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/versions")
-@Tag(name = "API Quáº£n lÃ½ PhiÃªn báº£n", description = "CÃ¡c API Ä‘á»ƒ quáº£n lÃ½ phiÃªn báº£n há»£p Ä‘á»“ng trong há»‡ thá»‘ng DocGO")
+@Tag(name = "API Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
 public class VersionController {
 
     private final VersionService versionService;
@@ -33,67 +33,67 @@ public class VersionController {
 
     @GetMapping
     @Operation(
-        summary = "Láº¥y danh sÃ¡ch táº¥t cáº£ phiÃªn báº£n", 
+        summary = "Lấy danh sách tất cả phiên bản", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ“„ pageNumber (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: Sá»‘ trang (máº·c Ä‘á»‹nh: 0)
+        🔸 pageNumber (tùy chọn, query)
+        Loại: integer
+        mô tả: Số trang (mặc định: 0)
         
-        ðŸ“„ pageSize (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: KÃ­ch thÆ°á»›c trang (máº·c Ä‘á»‹nh: 10)
+        🔸 pageSize (tùy chọn, query)
+        Loại: integer
+        mô tả: kích thước trang (mặc định: 10)
         
-        ðŸ“„ sortBy (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: TrÆ°á»ng sáº¯p xáº¿p (máº·c Ä‘á»‹nh: createdAt)
+        🔸 sortBy (tùy chọn, query)
+        Loại: string
+        mô tả: Trường sắp xếp (mặc định: createdAt)
         
-        ðŸ“„ sortDirection (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: HÆ°á»›ng sáº¯p xáº¿p: ASC hoáº·c DESC (máº·c Ä‘á»‹nh: DESC)
+        🔸 sortDirection (tùy chọn, query)
+        Loại: string
+        mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
         
-        ðŸ“„ searchTerm (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: Tá»« khÃ³a tÃ¬m kiáº¿m
+        🔸 searchTerm (tùy chọn, query)
+        Loại: string
+        mô tả: Từ khóa tìm kiếm
         
-        ðŸ“„ includeDeleted (tÃ¹y chá»n, query)
-        Loáº¡i: boolean
-        MÃ´ táº£: Bao gá»“m báº£n ghi Ä‘Ã£ xÃ³a (máº·c Ä‘á»‹nh: false)
+        🔸 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: List<Version>
-        MÃ´ táº£: Danh sÃ¡ch phiÃªn báº£n
+        🔸 data
+        Loại: List<Version>
+        mô tả: Danh sách phiên bản
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔸 apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 204: No Content)
+        🔸 statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (200: OK, 204: No Content)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        🔸 shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🔸 description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🔸 timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        🔸 requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        🔸 path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<List<Version>>> getAllVersions(
@@ -111,7 +111,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ phiÃªn báº£n nÃ o.")
+                .description("Không có phiên bản nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -125,7 +125,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch phiÃªn báº£n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách phiên bản thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -137,47 +137,47 @@ public class VersionController {
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Láº¥y chi tiáº¿t phiÃªn báº£n", 
+        summary = "Lấy chi tiết phiên bản", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ”— id (báº¯t buá»™c, path)
-        Loáº¡i: string
-        MÃ´ táº£: ID cá»§a phiÃªn báº£n cáº§n láº¥y
+        🔸 id (bắt buộc, path)
+        Loại: string
+        mô tả: ID của phiên bản cần lấy
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Version
-        MÃ´ táº£: ThÃ´ng tin chi tiáº¿t phiÃªn báº£n
+        🔸 data
+        Loại: Version
+        mô tả: Thông tin chi tiết phiên bản
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔸 apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 404: Not Found)
+        🔸 statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (200: OK, 404: Not Found)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        🔸 shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🔸 description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🔸 timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        🔸 requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        🔸 path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Version>> getVersion(@PathVariable String id) {
@@ -188,7 +188,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y phiÃªn báº£n vá»›i ID: " + id)
+                .description("Không tìm thấy phiên bản với ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -202,7 +202,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y chi tiáº¿t phiÃªn báº£n thÃ nh cÃ´ng.")
+            .description("Lấy chi tiết phiên bản thành công.")
             .data(version.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -214,47 +214,47 @@ public class VersionController {
 
     @PostMapping
     @Operation(
-        summary = "Táº¡o phiÃªn báº£n má»›i", 
+        summary = "Tạo phiên bản mới", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        🔹 Đầu vào
         
-        ðŸ“„ version (báº¯t buá»™c, body)
-        Loáº¡i: VersionCreateRequest
-        MÃ´ táº£: ThÃ´ng tin phiÃªn báº£n cáº§n táº¡o (contractId, versionNumber, changeDescription, changeType, createdBy)
+        🔸 version (bắt buộc, body)
+        Loại: VersionCreateRequest
+        mô tả: Thông tin phiên bản cần tạo (contractId, versionNumber, changeDescription, changeType, createdBy)
         
-        ðŸ”¹ Äáº§u ra
+        🔹 Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Version
-        MÃ´ táº£: ThÃ´ng tin phiÃªn báº£n Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
+        🔸 data
+        Loại: Version
+        mô tả: Thông tin phiên bản đã được tạo thành công
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        🔸 apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (201: Created)
+        🔸 statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (201: Created)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        🔸 shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        🔸 description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        🔸 timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        🔸 requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        🔸 path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Version>> createVersion(@RequestBody VersionCreateRequest request) {
@@ -264,7 +264,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o phiÃªn báº£n thÃ nh cÃ´ng.")
+            .description("Tạo phiên bản thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -275,7 +275,7 @@ public class VersionController {
     }
 
     @PostMapping("/contracts/{contractId}/versions")
-    @Operation(summary = "Táº¡o version má»›i", description = "Táº¡o version má»›i cho contract")
+    @Operation(summary = "Tạo version mới", description = "Tạo version mới cho contract")
     public ResponseEntity<RestResponse<Version>> createVersion(
             @PathVariable String contractId,
             @RequestParam String versionNumber,
@@ -289,7 +289,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o version thÃ nh cÃ´ng.")
+            .description("Tạo version thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -300,7 +300,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions")
-    @Operation(summary = "Láº¥y danh sÃ¡ch version", description = "Láº¥y táº¥t cáº£ version cá»§a contract")
+    @Operation(summary = "Lấy danh sách version", description = "Lấy tất cả version của contract")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByContractId(@PathVariable String contractId) {
         List<Version> versions = versionService.getVersionsByContractId(contractId);
         
@@ -309,7 +309,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o cho contract nÃ y.")
+                .description("Không có version nào cho contract này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -323,7 +323,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -334,7 +334,7 @@ public class VersionController {
     }
 
     @GetMapping("/versions/{id}")
-    @Operation(summary = "Láº¥y version theo ID", description = "Láº¥y chi tiáº¿t version")
+    @Operation(summary = "Lấy version theo ID", description = "Lấy chi tiết version")
     public ResponseEntity<RestResponse<Version>> getVersionById(@PathVariable String id) {
         Optional<Version> version = versionService.getVersionById(id);
         
@@ -343,7 +343,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y version vá»›i ID: " + id)
+                .description("Không tìm thấy version với ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -357,7 +357,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y version thÃ nh cÃ´ng.")
+            .description("Lấy version thành công.")
             .data(version.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -368,7 +368,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/current")
-    @Operation(summary = "Láº¥y version hiá»‡n táº¡i", description = "Láº¥y version hiá»‡n táº¡i cá»§a contract")
+    @Operation(summary = "Lấy version hiện tại", description = "Lấy version hiện tại của contract")
     public ResponseEntity<RestResponse<Version>> getCurrentVersion(@PathVariable String contractId) {
         Optional<Version> version = versionService.getCurrentVersionByContractId(contractId);
         
@@ -377,7 +377,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng cÃ³ version hiá»‡n táº¡i cho contract: " + contractId)
+                .description("Không có version hiện tại cho contract: " + contractId)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -391,7 +391,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y version hiá»‡n táº¡i thÃ nh cÃ´ng.")
+            .description("Lấy version hiện tại thành công.")
             .data(version.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -402,7 +402,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/published")
-    @Operation(summary = "Láº¥y version Ä‘Ã£ published", description = "Láº¥y danh sÃ¡ch version Ä‘Ã£ published")
+    @Operation(summary = "Lấy version đã published", description = "Lấy danh sách version đã published")
     public ResponseEntity<RestResponse<List<Version>>> getPublishedVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getPublishedVersionsByContractId(contractId);
         
@@ -411,7 +411,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o Ä‘Ã£ published.")
+                .description("Không có version nào đã published.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -425,7 +425,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version published thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version published thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -436,7 +436,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/unpublished")
-    @Operation(summary = "Láº¥y version chÆ°a published", description = "Láº¥y danh sÃ¡ch version chÆ°a published")
+    @Operation(summary = "Lấy version chưa published", description = "Lấy danh sách version chưa published")
     public ResponseEntity<RestResponse<List<Version>>> getUnpublishedVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getUnpublishedVersionsByContractId(contractId);
         
@@ -445,7 +445,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o chÆ°a published.")
+                .description("Không có version nào chưa published.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -459,7 +459,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version unpublished thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version unpublished thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -470,7 +470,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}")
-    @Operation(summary = "Láº¥y version theo change type", description = "Láº¥y danh sÃ¡ch version theo loáº¡i thay Ä‘á»•i")
+    @Operation(summary = "Lấy version theo change type", description = "Lấy danh sách version theo loại thay đổi")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByChangeType(
             @PathVariable String contractId,
             @PathVariable Version.ChangeType changeType) {
@@ -481,7 +481,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o vá»›i change type nÃ y.")
+                .description("Không có version nào với change type này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -495,7 +495,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo change type thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo change type thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -506,7 +506,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/current-list")
-    @Operation(summary = "Láº¥y danh sÃ¡ch version hiá»‡n táº¡i", description = "Láº¥y danh sÃ¡ch version Ä‘ang lÃ  current")
+    @Operation(summary = "Lấy danh sách version hiện tại", description = "Lấy danh sách version đang là current")
     public ResponseEntity<RestResponse<List<Version>>> getCurrentVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getCurrentVersionsByContractId(contractId);
         
@@ -515,7 +515,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o Ä‘ang lÃ  current.")
+                .description("Không có version nào đang là current.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -529,7 +529,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version current thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version current thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -540,7 +540,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-list")
-    @Operation(summary = "Láº¥y danh sÃ¡ch version published", description = "Láº¥y danh sÃ¡ch version Ä‘Ã£ published")
+    @Operation(summary = "Lấy danh sách version published", description = "Lấy danh sách version đã published")
     public ResponseEntity<RestResponse<List<Version>>> getPublishedVersionsList(@PathVariable String contractId) {
         List<Version> versions = versionService.getPublishedVersionsByContractId(contractId);
         
@@ -549,7 +549,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o Ä‘Ã£ published.")
+                .description("Không có version nào đã published.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -563,7 +563,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version published thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version published thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -574,7 +574,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/approval-required")
-    @Operation(summary = "Láº¥y version cáº§n approval", description = "Láº¥y danh sÃ¡ch version cáº§n phÃª duyá»‡t")
+    @Operation(summary = "Lấy version cần approval", description = "Lấy danh sách version cần phê duyệt")
     public ResponseEntity<RestResponse<List<Version>>> getApprovalRequiredVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getApprovalRequiredVersionsByContractId(contractId);
         
@@ -583,7 +583,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o cáº§n approval.")
+                .description("Không có version nào cần approval.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -597,7 +597,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version cáº§n approval thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version cần approval thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -608,7 +608,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/no-approval-required")
-    @Operation(summary = "Láº¥y version khÃ´ng cáº§n approval", description = "Láº¥y danh sÃ¡ch version khÃ´ng cáº§n phÃª duyá»‡t")
+    @Operation(summary = "Lấy version không cần approval", description = "Lấy danh sách version không cần phê duyệt")
     public ResponseEntity<RestResponse<List<Version>>> getNoApprovalRequiredVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getNoApprovalRequiredVersionsByContractId(contractId);
         
@@ -617,7 +617,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o khÃ´ng cáº§n approval.")
+                .description("Không có version nào không cần approval.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -631,7 +631,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version khÃ´ng cáº§n approval thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version không cần approval thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -642,7 +642,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/previous/{previousVersionId}")
-    @Operation(summary = "Láº¥y version theo previous version", description = "Láº¥y danh sÃ¡ch version theo previous version ID")
+    @Operation(summary = "Lấy version theo previous version", description = "Lấy danh sách version theo previous version ID")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByPreviousVersionId(
             @PathVariable String contractId,
             @PathVariable String previousVersionId) {
@@ -653,7 +653,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o vá»›i previous version nÃ y.")
+                .description("Không có version nào với previous version này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -667,7 +667,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo previous version thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo previous version thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -678,7 +678,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/order-by-version")
-    @Operation(summary = "Láº¥y version sáº¯p xáº¿p theo version number", description = "Láº¥y danh sÃ¡ch version sáº¯p xáº¿p theo version number")
+    @Operation(summary = "Lấy version sắp xếp theo version number", description = "Lấy danh sách version sắp xếp theo version number")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsOrderByVersionNumber(@PathVariable String contractId) {
         List<Version> versions = versionService.getVersionsByContractIdOrderByVersionNumber(contractId);
         
@@ -687,7 +687,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o.")
+                .description("Không có version nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -701,7 +701,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version sáº¯p xáº¿p theo version number thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version sắp xếp theo version number thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -712,7 +712,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/order-by-created")
-    @Operation(summary = "Láº¥y version sáº¯p xáº¿p theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch version sáº¯p xáº¿p theo thá»i gian táº¡o")
+    @Operation(summary = "Lấy version sắp xếp theo thời gian tạo", description = "Lấy danh sách version sắp xếp theo thời gian tạo")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsOrderByCreatedAt(@PathVariable String contractId) {
         List<Version> versions = versionService.getVersionsByContractIdOrderByCreatedAt(contractId);
         
@@ -721,7 +721,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o.")
+                .description("Không có version nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -735,7 +735,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version sáº¯p xáº¿p theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version sắp xếp theo thời gian tạo thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -746,7 +746,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/created-between")
-    @Operation(summary = "Láº¥y version theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch version trong khoáº£ng thá»i gian táº¡o")
+    @Operation(summary = "Lấy version theo thời gian tạo", description = "Lấy danh sách version trong khoảng thời gian tạo")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByCreatedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -758,7 +758,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o trong khoáº£ng thá»i gian nÃ y.")
+                .description("Không có version nào trong khoảng thời gian này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -772,7 +772,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo thời gian tạo thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -783,7 +783,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-between")
-    @Operation(summary = "Láº¥y version theo thá»i gian published", description = "Láº¥y danh sÃ¡ch version trong khoáº£ng thá»i gian published")
+    @Operation(summary = "Lấy version theo thời gian published", description = "Lấy danh sách version trong khoảng thời gian published")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByPublishedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -795,7 +795,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o trong khoáº£ng thá»i gian published nÃ y.")
+                .description("Không có version nào trong khoảng thời gian published này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -809,7 +809,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo thá»i gian published thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo thời gian published thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -820,7 +820,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/approved-between")
-    @Operation(summary = "Láº¥y version theo thá»i gian approved", description = "Láº¥y danh sÃ¡ch version trong khoáº£ng thá»i gian approved")
+    @Operation(summary = "Lấy version theo thời gian approved", description = "Lấy danh sách version trong khoảng thời gian approved")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByApprovedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -832,7 +832,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o trong khoáº£ng thá»i gian approved nÃ y.")
+                .description("Không có version nào trong khoảng thời gian approved này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -846,7 +846,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo thá»i gian approved thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo thời gian approved thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -857,7 +857,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-by/{publishedBy}")
-    @Operation(summary = "Láº¥y version theo published by", description = "Láº¥y danh sÃ¡ch version theo ngÆ°á»i published")
+    @Operation(summary = "Lấy version theo published by", description = "Lấy danh sách version theo người published")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByPublishedBy(
             @PathVariable String contractId,
             @PathVariable String publishedBy) {
@@ -868,7 +868,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o Ä‘Æ°á»£c published bá»Ÿi ngÆ°á»i nÃ y.")
+                .description("Không có version nào được published bởi người này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -882,7 +882,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo published by thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo published by thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -893,7 +893,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/approved-by/{approvedBy}")
-    @Operation(summary = "Láº¥y version theo approved by", description = "Láº¥y danh sÃ¡ch version theo ngÆ°á»i approved")
+    @Operation(summary = "Lấy version theo approved by", description = "Lấy danh sách version theo người approved")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByApprovedBy(
             @PathVariable String contractId,
             @PathVariable String approvedBy) {
@@ -904,7 +904,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o Ä‘Æ°á»£c approved bá»Ÿi ngÆ°á»i nÃ y.")
+                .description("Không có version nào được approved bởi người này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -918,7 +918,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo approved by thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo approved by thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -929,7 +929,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/tags")
-    @Operation(summary = "Láº¥y version theo tags", description = "Láº¥y danh sÃ¡ch version theo tags")
+    @Operation(summary = "Lấy version theo tags", description = "Lấy danh sách version theo tags")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByTags(
             @PathVariable String contractId,
             @RequestParam String[] tags) {
@@ -940,7 +940,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o vá»›i tags nÃ y.")
+                .description("Không có version nào với tags này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -954,7 +954,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo tags thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo tags thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -965,7 +965,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-created")
-    @Operation(summary = "Láº¥y version theo change type sáº¯p xáº¿p theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch version theo change type sáº¯p xáº¿p theo thá»i gian táº¡o")
+    @Operation(summary = "Lấy version theo change type sắp xếp theo thời gian tạo", description = "Lấy danh sách version theo change type sắp xếp theo thời gian tạo")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByChangeTypeOrderByCreatedAt(
             @PathVariable String contractId,
             @PathVariable Version.ChangeType changeType) {
@@ -976,7 +976,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o vá»›i change type nÃ y.")
+                .description("Không có version nào với change type này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -990,7 +990,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo change type sáº¯p xáº¿p theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo change type sắp xếp theo thời gian tạo thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1001,7 +1001,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-version")
-    @Operation(summary = "Láº¥y version theo change type sáº¯p xáº¿p theo version number", description = "Láº¥y danh sÃ¡ch version theo change type sáº¯p xáº¿p theo version number")
+    @Operation(summary = "Lấy version theo change type sắp xếp theo version number", description = "Lấy danh sách version theo change type sắp xếp theo version number")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByChangeTypeOrderByVersionNumber(
             @PathVariable String contractId,
             @PathVariable Version.ChangeType changeType) {
@@ -1012,7 +1012,7 @@ public class VersionController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ version nÃ o vá»›i change type nÃ y.")
+                .description("Không có version nào với change type này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -1026,7 +1026,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo change type sáº¯p xáº¿p theo version number thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo change type sắp xếp theo version number thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1037,7 +1037,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/previous/{previousVersionId}/list")
-    @Operation(summary = "Láº¥y version theo previous version ID", description = "Láº¥y danh sÃ¡ch version theo previous version ID")
+    @Operation(summary = "Lấy version theo previous version ID", description = "Lấy danh sách version theo previous version ID")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByContractIdAndPreviousVersionId(
             @PathVariable String contractId,
             @PathVariable String previousVersionId) {
@@ -1048,7 +1048,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version nÃ o vá»›i previous version ID nÃ y.")
+            .description("Không có version nào với previous version ID này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1062,7 +1062,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo previous version ID thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo previous version ID thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1073,7 +1073,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/file-path/{filePath}")
-    @Operation(summary = "Láº¥y version theo file path", description = "Láº¥y danh sÃ¡ch version theo file path")
+    @Operation(summary = "Lấy version theo file path", description = "Lấy danh sách version theo file path")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByFilePath(
             @PathVariable String contractId,
             @PathVariable String filePath) {
@@ -1084,7 +1084,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version nÃ o vá»›i file path nÃ y.")
+            .description("Không có version nào với file path này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1098,7 +1098,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo file path thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo file path thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1109,7 +1109,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/checksum/{checksum}")
-    @Operation(summary = "Láº¥y version theo checksum", description = "Láº¥y danh sÃ¡ch version theo checksum")
+    @Operation(summary = "Lấy version theo checksum", description = "Lấy danh sách version theo checksum")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByChecksum(
             @PathVariable String contractId,
             @PathVariable String checksum) {
@@ -1120,7 +1120,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version nÃ o vá»›i checksum nÃ y.")
+            .description("Không có version nào với checksum này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1134,7 +1134,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo checksum thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo checksum thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1145,7 +1145,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/file-size/{fileSize}")
-    @Operation(summary = "Láº¥y version theo file size", description = "Láº¥y danh sÃ¡ch version theo file size")
+    @Operation(summary = "Lấy version theo file size", description = "Lấy danh sách version theo file size")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByFileSize(
             @PathVariable String contractId,
             @PathVariable Long fileSize) {
@@ -1156,7 +1156,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version nÃ o vá»›i file size nÃ y.")
+            .description("Không có version nào với file size này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1170,7 +1170,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo file size thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo file size thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1181,7 +1181,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/file-size-between")
-    @Operation(summary = "Láº¥y version theo file size trong khoáº£ng", description = "Láº¥y danh sÃ¡ch version theo file size trong khoáº£ng")
+    @Operation(summary = "Lấy version theo file size trong khoảng", description = "Lấy danh sách version theo file size trong khoảng")
     public ResponseEntity<RestResponse<List<Version>>> getVersionsByFileSizeBetween(
             @PathVariable String contractId,
             @RequestParam Long minSize,
@@ -1193,7 +1193,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version nÃ o vá»›i file size trong khoáº£ng nÃ y.")
+            .description("Không có version nào với file size trong khoảng này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1207,7 +1207,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version theo file size trong khoáº£ng thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version theo file size trong khoảng thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1218,7 +1218,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/rollback")
-    @Operation(summary = "Láº¥y version rollback", description = "Láº¥y danh sÃ¡ch version rollback")
+    @Operation(summary = "Lấy version rollback", description = "Lấy danh sách version rollback")
     public ResponseEntity<RestResponse<List<Version>>> getRollbackVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getRollbackVersionsByContractId(contractId);
         
@@ -1227,7 +1227,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version rollback nÃ o.")
+            .description("Không có version rollback nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1241,7 +1241,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version rollback thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version rollback thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1252,7 +1252,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/rollback-by-type")
-    @Operation(summary = "Láº¥y version rollback theo change type", description = "Láº¥y danh sÃ¡ch version rollback theo change type")
+    @Operation(summary = "Lấy version rollback theo change type", description = "Lấy danh sách version rollback theo change type")
     public ResponseEntity<RestResponse<List<Version>>> getRollbackVersionsByChangeType(@PathVariable String contractId) {
         List<Version> versions = versionService.getRollbackVersionsByContractIdAndChangeType(contractId);
         
@@ -1261,7 +1261,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version rollback nÃ o.")
+            .description("Không có version rollback nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1275,7 +1275,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version rollback theo change type thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version rollback theo change type thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1286,7 +1286,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/draft")
-    @Operation(summary = "Láº¥y version draft", description = "Láº¥y danh sÃ¡ch version draft")
+    @Operation(summary = "Lấy version draft", description = "Lấy danh sách version draft")
     public ResponseEntity<RestResponse<List<Version>>> getDraftVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getDraftVersionsByContractId(contractId);
         
@@ -1295,7 +1295,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version draft nÃ o.")
+            .description("Không có version draft nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1309,7 +1309,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version draft thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version draft thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1320,7 +1320,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/major")
-    @Operation(summary = "Láº¥y version major", description = "Láº¥y danh sÃ¡ch version major")
+    @Operation(summary = "Lấy version major", description = "Lấy danh sách version major")
     public ResponseEntity<RestResponse<List<Version>>> getMajorVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getMajorVersionsByContractId(contractId);
         
@@ -1329,7 +1329,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version major nÃ o.")
+            .description("Không có version major nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1343,7 +1343,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version major thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version major thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1354,7 +1354,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/minor")
-    @Operation(summary = "Láº¥y version minor", description = "Láº¥y danh sÃ¡ch version minor")
+    @Operation(summary = "Lấy version minor", description = "Lấy danh sách version minor")
     public ResponseEntity<RestResponse<List<Version>>> getMinorVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getMinorVersionsByContractId(contractId);
         
@@ -1363,7 +1363,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version minor nÃ o.")
+            .description("Không có version minor nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1377,7 +1377,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version minor thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version minor thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1388,7 +1388,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/patch")
-    @Operation(summary = "Láº¥y version patch", description = "Láº¥y danh sÃ¡ch version patch")
+    @Operation(summary = "Lấy version patch", description = "Lấy danh sách version patch")
     public ResponseEntity<RestResponse<List<Version>>> getPatchVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getPatchVersionsByContractId(contractId);
         
@@ -1397,7 +1397,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version patch nÃ o.")
+            .description("Không có version patch nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1411,7 +1411,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version patch thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version patch thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1422,7 +1422,7 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/hotfix")
-    @Operation(summary = "Láº¥y version hotfix", description = "Láº¥y danh sÃ¡ch version hotfix")
+    @Operation(summary = "Lấy version hotfix", description = "Lấy danh sách version hotfix")
     public ResponseEntity<RestResponse<List<Version>>> getHotfixVersions(@PathVariable String contractId) {
         List<Version> versions = versionService.getHotfixVersionsByContractId(contractId);
         
@@ -1431,7 +1431,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ version hotfix nÃ o.")
+            .description("Không có version hotfix nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1445,7 +1445,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch version hotfix thÃ nh cÃ´ng.")
+            .description("Lấy danh sách version hotfix thành công.")
             .data(versions)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1466,7 +1466,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Publish version thÃ nh cÃ´ng.")
+            .description("Publish version thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1487,7 +1487,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Approve version thÃ nh cÃ´ng.")
+            .description("Approve version thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1498,7 +1498,7 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/mark-current")
-    @Operation(summary = "ÄÃ¡nh dáº¥u version hiá»‡n táº¡i", description = "ÄÃ¡nh dáº¥u version lÃ  current")
+    @Operation(summary = "Đánh dấu version hiện tại", description = "Đánh dấu version là current")
     public ResponseEntity<RestResponse<Version>> markVersionAsCurrent(@PathVariable String id) {
         Version version = versionService.markVersionAsCurrent(id);
         
@@ -1506,7 +1506,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("ÄÃ¡nh dáº¥u version hiá»‡n táº¡i thÃ nh cÃ´ng.")
+            .description("Đánh dấu version hiện tại thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1517,7 +1517,7 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/unmark-current")
-    @Operation(summary = "Bá» Ä‘Ã¡nh dáº¥u version hiá»‡n táº¡i", description = "Bá» Ä‘Ã¡nh dáº¥u version lÃ  current")
+    @Operation(summary = "Bỏ đánh dấu version hiện tại", description = "Bỏ đánh dấu version là current")
     public ResponseEntity<RestResponse<Version>> unmarkVersionAsCurrent(@PathVariable String id) {
         Version version = versionService.unmarkVersionAsCurrent(id);
         
@@ -1525,7 +1525,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Bá» Ä‘Ã¡nh dáº¥u version hiá»‡n táº¡i thÃ nh cÃ´ng.")
+            .description("Bỏ đánh dấu version hiện tại thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1546,7 +1546,7 @@ public class VersionController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Rollback version thÃ nh cÃ´ng.")
+            .description("Rollback version thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1557,17 +1557,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/previous-version")
-    @Operation(summary = "Cáº­p nháº­t previous version ID", description = "Cáº­p nháº­t previous version ID")
+    @Operation(summary = "Cập nhật previous version ID", description = "Cập nhật previous version ID")
     public ResponseEntity<RestResponse<Version>> setPreviousVersionId(
             @PathVariable String id,
             @RequestParam String previousVersionId) {
         Version version = versionService.setPreviousVersionId(id, previousVersionId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t previous version ID thÃ nh cÃ´ng.")
+            .description("Cập nhật previous version ID thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1578,17 +1578,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/file-path")
-    @Operation(summary = "Cáº­p nháº­t file path", description = "Cáº­p nháº­t file path")
+    @Operation(summary = "Cập nhật file path", description = "Cập nhật file path")
     public ResponseEntity<RestResponse<Version>> setFilePath(
             @PathVariable String id,
             @RequestParam String filePath) {
         Version version = versionService.setFilePath(id, filePath);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t file path thÃ nh cÃ´ng.")
+            .description("Cập nhật file path thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1599,17 +1599,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/file-size")
-    @Operation(summary = "Cáº­p nháº­t file size", description = "Cáº­p nháº­t file size")
+    @Operation(summary = "Cập nhật file size", description = "Cập nhật file size")
     public ResponseEntity<RestResponse<Version>> setFileSize(
             @PathVariable String id,
             @RequestParam Long fileSize) {
         Version version = versionService.setFileSize(id, fileSize);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t file size thÃ nh cÃ´ng.")
+            .description("Cập nhật file size thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1620,17 +1620,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/checksum")
-    @Operation(summary = "Cáº­p nháº­t checksum", description = "Cáº­p nháº­t checksum")
+    @Operation(summary = "Cập nhật checksum", description = "Cập nhật checksum")
     public ResponseEntity<RestResponse<Version>> setChecksum(
             @PathVariable String id,
             @RequestParam String checksum) {
         Version version = versionService.setChecksum(id, checksum);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t checksum thÃ nh cÃ´ng.")
+            .description("Cập nhật checksum thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1641,17 +1641,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/approval-required")
-    @Operation(summary = "Cáº­p nháº­t approval required", description = "Cáº­p nháº­t tráº¡ng thÃ¡i cáº§n approval")
+    @Operation(summary = "Cập nhật approval required", description = "Cập nhật trạng thái cần approval")
     public ResponseEntity<RestResponse<Version>> setApprovalRequired(
             @PathVariable String id,
             @RequestParam Boolean approvalRequired) {
         Version version = versionService.setApprovalRequired(id, approvalRequired);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t approval required thÃ nh cÃ´ng.")
+            .description("Cập nhật approval required thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1662,17 +1662,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/tags")
-    @Operation(summary = "Cáº­p nháº­t tags", description = "Cáº­p nháº­t tags")
+    @Operation(summary = "Cập nhật tags", description = "Cập nhật tags")
     public ResponseEntity<RestResponse<Version>> setTags(
             @PathVariable String id,
             @RequestParam String[] tags) {
         Version version = versionService.setTags(id, tags);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t tags thÃ nh cÃ´ng.")
+            .description("Cập nhật tags thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1683,17 +1683,17 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/detailed-changes")
-    @Operation(summary = "Cáº­p nháº­t detailed changes", description = "Cáº­p nháº­t detailed changes")
+    @Operation(summary = "Cập nhật detailed changes", description = "Cập nhật detailed changes")
     public ResponseEntity<RestResponse<Version>> setDetailedChanges(
             @PathVariable String id,
             @RequestBody Map<String, Object> detailedChanges) {
         Version version = versionService.setDetailedChanges(id, detailedChanges);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Cáº­p nháº­t detailed changes thÃ nh cÃ´ng.")
+            .description("Cập nhật detailed changes thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1704,17 +1704,17 @@ public class VersionController {
     }
 
     @DeleteMapping("/versions/{id}")
-    @Operation(summary = "XÃ³a version", description = "Soft delete version")
+    @Operation(summary = "Xóa version", description = "Soft delete version")
     public ResponseEntity<RestResponse<Void>> deleteVersion(
             @PathVariable String id,
             @RequestParam String deletedBy) {
         versionService.deleteVersion(id, deletedBy);
         
-        RestResponse<Version> response = RestResponse.<Version>builder()
+        RestResponse<Void> response = RestResponse.<Void>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ³a version thÃ nh cÃ´ng.")
+            .description("Xóa version thành công.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1725,15 +1725,15 @@ public class VersionController {
     }
 
     @PutMapping("/versions/{id}/restore")
-    @Operation(summary = "KhÃ´i phá»¥c version", description = "KhÃ´i phá»¥c version Ä‘Ã£ xÃ³a")
+    @Operation(summary = "Khôi phục version", description = "Khôi phục version đã xóa")
     public ResponseEntity<RestResponse<Version>> restoreVersion(@PathVariable String id) {
         Version version = versionService.restoreVersion(id);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Version> response = RestResponse.<Version>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("KhÃ´i phá»¥c version thÃ nh cÃ´ng.")
+            .description("Khôi phục version thành công.")
             .data(version)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1744,15 +1744,15 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/count")
-    @Operation(summary = "Äáº¿m sá»‘ version", description = "Äáº¿m sá»‘ lÆ°á»£ng version")
+    @Operation(summary = "Đếm số version", description = "Đếm số lượng version")
     public ResponseEntity<RestResponse<Long>> countVersionsByContractId(@PathVariable String contractId) {
         long count = versionService.countVersionsByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ version thÃ nh cÃ´ng.")
+            .description("Đếm số version thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1763,17 +1763,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/count-by-change-type")
-    @Operation(summary = "Äáº¿m sá»‘ version theo change type", description = "Äáº¿m sá»‘ lÆ°á»£ng version theo change type")
+    @Operation(summary = "Đếm số version theo change type", description = "Đếm số lượng version theo change type")
     public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndChangeType(
             @PathVariable String contractId,
             @RequestParam Version.ChangeType changeType) {
         long count = versionService.countVersionsByContractIdAndChangeType(contractId, changeType);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ version theo change type thÃ nh cÃ´ng.")
+            .description("Đếm số version theo change type thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1784,17 +1784,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/count-by-published")
-    @Operation(summary = "Äáº¿m sá»‘ version theo published status", description = "Äáº¿m sá»‘ lÆ°á»£ng version theo published status")
+    @Operation(summary = "Đếm số version theo published status", description = "Đếm số lượng version theo published status")
     public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndIsPublished(
             @PathVariable String contractId,
             @RequestParam Boolean isPublished) {
         long count = versionService.countVersionsByContractIdAndIsPublished(contractId, isPublished);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ version theo published status thÃ nh cÃ´ng.")
+            .description("Đếm số version theo published status thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1805,17 +1805,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/count-by-current")
-    @Operation(summary = "Äáº¿m sá»‘ version theo current status", description = "Äáº¿m sá»‘ lÆ°á»£ng version theo current status")
+    @Operation(summary = "Đếm số version theo current status", description = "Đếm số lượng version theo current status")
     public ResponseEntity<RestResponse<Long>> countVersionsByContractIdAndIsCurrent(
             @PathVariable String contractId,
             @RequestParam Boolean isCurrent) {
         long count = versionService.countVersionsByContractIdAndIsCurrent(contractId, isCurrent);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ version theo current status thÃ nh cÃ´ng.")
+            .description("Đếm số version theo current status thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1826,17 +1826,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-version-number")
-    @Operation(summary = "Kiá»ƒm tra tá»“n táº¡i version number", description = "Kiá»ƒm tra version number Ä‘Ã£ tá»“n táº¡i chÆ°a")
+    @Operation(summary = "Kiểm tra tồn tại version number", description = "Kiểm tra version number đã tồn tại chưa")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByContractIdAndVersionNumber(
             @PathVariable String contractId,
             @RequestParam String versionNumber) {
         boolean exists = versionService.existsVersionByContractIdAndVersionNumber(contractId, versionNumber);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra tá»“n táº¡i version number thÃ nh cÃ´ng.")
+            .description("Kiểm tra tồn tại version number thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1847,15 +1847,15 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-current")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version current", description = "Kiá»ƒm tra contract cÃ³ version current khÃ´ng")
+    @Operation(summary = "Kiểm tra có version current", description = "Kiểm tra contract có version current không")
     public ResponseEntity<RestResponse<Boolean>> existsCurrentVersionByContractId(@PathVariable String contractId) {
         boolean exists = versionService.existsCurrentVersionByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version current thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version current thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1866,15 +1866,15 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-published")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version published", description = "Kiá»ƒm tra contract cÃ³ version published khÃ´ng")
+    @Operation(summary = "Kiểm tra có version published", description = "Kiểm tra contract có version published không")
     public ResponseEntity<RestResponse<Boolean>> existsPublishedVersionByContractId(@PathVariable String contractId) {
         boolean exists = versionService.existsPublishedVersionByContractId(contractId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version published thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version published thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1885,17 +1885,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-change-type")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo change type", description = "Kiá»ƒm tra contract cÃ³ version theo change type khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo change type", description = "Kiểm tra contract có version theo change type không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByChangeType(
             @PathVariable String contractId,
             @RequestParam Version.ChangeType changeType) {
         boolean exists = versionService.existsVersionByChangeType(contractId, changeType);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo change type thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo change type thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1906,17 +1906,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-tags")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo tags", description = "Kiá»ƒm tra contract cÃ³ version theo tags khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo tags", description = "Kiểm tra contract có version theo tags không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByTags(
             @PathVariable String contractId,
             @RequestParam String[] tags) {
         boolean exists = versionService.existsVersionByTags(contractId, tags);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo tags thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo tags thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1927,17 +1927,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-file-path")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo file path", description = "Kiá»ƒm tra contract cÃ³ version theo file path khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo file path", description = "Kiểm tra contract có version theo file path không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByFilePath(
             @PathVariable String contractId,
             @RequestParam String filePath) {
         boolean exists = versionService.existsVersionByFilePath(contractId, filePath);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo file path thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo file path thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1948,17 +1948,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-checksum")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo checksum", description = "Kiá»ƒm tra contract cÃ³ version theo checksum khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo checksum", description = "Kiểm tra contract có version theo checksum không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByChecksum(
             @PathVariable String contractId,
             @RequestParam String checksum) {
         boolean exists = versionService.existsVersionByChecksum(contractId, checksum);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo checksum thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo checksum thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1969,17 +1969,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-file-size")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo file size", description = "Kiá»ƒm tra contract cÃ³ version theo file size khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo file size", description = "Kiểm tra contract có version theo file size không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByFileSize(
             @PathVariable String contractId,
             @RequestParam Long fileSize) {
         boolean exists = versionService.existsVersionByFileSize(contractId, fileSize);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo file size thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo file size thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1990,17 +1990,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-previous-version")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo previous version", description = "Kiá»ƒm tra contract cÃ³ version theo previous version khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo previous version", description = "Kiểm tra contract có version theo previous version không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByPreviousVersionId(
             @PathVariable String contractId,
             @RequestParam String previousVersionId) {
         boolean exists = versionService.existsVersionByPreviousVersionId(contractId, previousVersionId);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo previous version thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo previous version thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -2011,17 +2011,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-published-by")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo published by", description = "Kiá»ƒm tra contract cÃ³ version theo published by khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo published by", description = "Kiểm tra contract có version theo published by không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByPublishedBy(
             @PathVariable String contractId,
             @RequestParam String publishedBy) {
         boolean exists = versionService.existsVersionByPublishedBy(contractId, publishedBy);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo published by thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo published by thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -2032,17 +2032,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-approved-by")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo approved by", description = "Kiá»ƒm tra contract cÃ³ version theo approved by khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo approved by", description = "Kiểm tra contract có version theo approved by không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByApprovedBy(
             @PathVariable String contractId,
             @RequestParam String approvedBy) {
         boolean exists = versionService.existsVersionByApprovedBy(contractId, approvedBy);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo approved by thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo approved by thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -2053,17 +2053,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-description")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo description", description = "Kiá»ƒm tra contract cÃ³ version theo description chá»©a tá»« khÃ³a khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo description", description = "Kiểm tra contract có version theo description chứa từ khóa không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByDescriptionContaining(
             @PathVariable String contractId,
             @RequestParam String keyword) {
         boolean exists = versionService.existsVersionByDescriptionContaining(contractId, keyword);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo description thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo description thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -2074,17 +2074,17 @@ public class VersionController {
     }
 
     @GetMapping("/contracts/{contractId}/versions/exists-by-changes-summary")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ version theo changes summary", description = "Kiá»ƒm tra contract cÃ³ version theo changes summary chá»©a tá»« khÃ³a khÃ´ng")
+    @Operation(summary = "Kiểm tra có version theo changes summary", description = "Kiểm tra contract có version theo changes summary chứa từ khóa không")
     public ResponseEntity<RestResponse<Boolean>> existsVersionByChangesSummaryContaining(
             @PathVariable String contractId,
             @RequestParam String keyword) {
         boolean exists = versionService.existsVersionByChangesSummaryContaining(contractId, keyword);
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ version theo changes summary thÃ nh cÃ´ng.")
+            .description("Kiểm tra có version theo changes summary thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -2094,4 +2094,3 @@ public class VersionController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
-

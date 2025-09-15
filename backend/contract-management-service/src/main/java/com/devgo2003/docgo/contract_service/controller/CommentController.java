@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/comments")
-@Tag(name = "API Quáº£n lÃ½ BÃ¬nh luáº­n", description = "CÃ¡c API Ä‘á»ƒ quáº£n lÃ½ bÃ¬nh luáº­n vÃ  cá»™ng tÃ¡c trong há»‡ thá»‘ng DocGO")
+@Tag(name = "API Quản lý Bình luận", description = "Các API để quản lý bình luận và cộng tác trong hệ thống DocGO")
 public class CommentController {
 
     private final CommentService commentService;
@@ -33,68 +33,8 @@ public class CommentController {
 
     @GetMapping
     @Operation(
-        summary = "Láº¥y danh sÃ¡ch táº¥t cáº£ bÃ¬nh luáº­n", 
-        description = """
-        ðŸ”¹ Äáº§u vÃ o
-        
-        ðŸ“„ pageNumber (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: Sá»‘ trang (máº·c Ä‘á»‹nh: 0)
-        
-        ðŸ“„ pageSize (tÃ¹y chá»n, query)
-        Loáº¡i: integer
-        MÃ´ táº£: KÃ­ch thÆ°á»›c trang (máº·c Ä‘á»‹nh: 10)
-        
-        ðŸ“„ sortBy (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: TrÆ°á»ng sáº¯p xáº¿p (máº·c Ä‘á»‹nh: createdAt)
-        
-        ðŸ“„ sortDirection (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: HÆ°á»›ng sáº¯p xáº¿p: ASC hoáº·c DESC (máº·c Ä‘á»‹nh: DESC)
-        
-        ðŸ“„ searchTerm (tÃ¹y chá»n, query)
-        Loáº¡i: string
-        MÃ´ táº£: Tá»« khÃ³a tÃ¬m kiáº¿m
-        
-        ðŸ“„ includeDeleted (tÃ¹y chá»n, query)
-        Loáº¡i: boolean
-        MÃ´ táº£: Bao gá»“m báº£n ghi Ä‘Ã£ xÃ³a (máº·c Ä‘á»‹nh: false)
-        
-        ðŸ”¹ Äáº§u ra
-        
-        ðŸ“ data
-        Loáº¡i: List<Comment>
-        MÃ´ táº£: Danh sÃ¡ch bÃ¬nh luáº­n
-        
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
-        
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 204: No Content)
-        
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
-        
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
-        
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
-        
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
-        
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
-        """
+        summary = "Lấy danh sách tất cả bình luận",
+        description = "Hỗ trợ query phân trang: pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted"
     )
     public ResponseEntity<RestResponse<List<Comment>>> getAllComments(
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -111,7 +51,7 @@ public class CommentController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ bÃ¬nh luáº­n nÃ o.")
+                .description("Không có bình luận nào.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -125,7 +65,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch bÃ¬nh luáº­n thÃ nh cÃ´ng.")
+            .description("Lấy danh sách bình luận thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -137,47 +77,47 @@ public class CommentController {
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Láº¥y chi tiáº¿t bÃ¬nh luáº­n", 
+        summary = "Lấy chi tiết bình luận", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        "Đầu vào
         
-        ðŸ”— id (báº¯t buá»™c, path)
-        Loáº¡i: string
-        MÃ´ táº£: ID cá»§a bÃ¬nh luáº­n cáº§n láº¥y
+        "- id (bắt buộc, path)
+        Loại: string
+        mô tả: ID của bình luận cần lấy
         
-        ðŸ”¹ Äáº§u ra
+        "Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Comment
-        MÃ´ táº£: ThÃ´ng tin chi tiáº¿t bÃ¬nh luáº­n
+        "data
+        Loại: Comment
+        mô tả: Thông tin chi tiết bình luận
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        "S apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 404: Not Found)
+        "statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (200: OK, 404: Not Found)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        "< shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        "- description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        ⏰ timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        "- requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        "path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Comment>> getComment(@PathVariable String id) {
@@ -188,7 +128,7 @@ public class CommentController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y bÃ¬nh luáº­n vá»›i ID: " + id)
+                .description("Không tìm thấy bình luận với ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -202,7 +142,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y chi tiáº¿t bÃ¬nh luáº­n thÃ nh cÃ´ng.")
+            .description("Lấy chi tiết bình luận thành công.")
             .data(comment.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -214,47 +154,47 @@ public class CommentController {
 
     @PostMapping
     @Operation(
-        summary = "Táº¡o bÃ¬nh luáº­n má»›i", 
+        summary = "Tạo bình luận mới", 
         description = """
-        ðŸ”¹ Äáº§u vÃ o
+        "Đầu vào
         
-        ðŸ“„ comment (báº¯t buá»™c, body)
-        Loáº¡i: CommentCreateRequest
-        MÃ´ táº£: ThÃ´ng tin bÃ¬nh luáº­n cáº§n táº¡o (contractId, authorId, authorName, authorEmail, content, commentType, parentCommentId)
+        "" comment (bắt buộc, body)
+        Loại: CommentCreateRequest
+        mô tả: Thông tin bình luận cần tạo (contractId, authorId, authorName, authorEmail, content, commentType, parentCommentId)
         
-        ðŸ”¹ Äáº§u ra
+        "Đầu ra
         
-        ðŸ“ data
-        Loáº¡i: Comment
-        MÃ´ táº£: ThÃ´ng tin bÃ¬nh luáº­n Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
+        "data
+        Loại: Comment
+        mô tả: Thông tin bình luận đã được tạo thành công
         
-        ðŸ“Š apiVersion
-        Loáº¡i: string
-        MÃ´ táº£: PhiÃªn báº£n API (v1)
+        "S apiVersion
+        Loại: string
+        mô tả: Phiên bản API (v1)
         
-        ðŸ”¢ statusCode
-        Loáº¡i: integer
-        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (201: Created)
+        "statusCode
+        Loại: integer
+        mô tả: mã trạng thái HTTP (201: Created)
         
-        ðŸ“‹ shortMessage
-        Loáº¡i: string
-        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
+        "< shortMessage
+        Loại: string
+        mô tả: Thông báo ngắn gọn về kết quả
         
-        ðŸ“– description
-        Loáº¡i: string
-        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
+        "- description
+        Loại: string
+        mô tả: mô tả chi tiết về kết quả xử lý
         
-        â° timestamp
-        Loáº¡i: string
-        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
+        ⏰ timestamp
+        Loại: string
+        mô tả: Thời điểm xử lý request (ISO-8601)
         
-        ðŸ”— requestId
-        Loáº¡i: string
-        MÃ´ táº£: ID duy nháº¥t cá»§a request
+        "- requestId
+        Loại: string
+        mô tả: ID duy nhất của request
         
-        ðŸ“ path
-        Loáº¡i: string
-        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
+        "path
+        Loại: string
+        mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<Comment>> createComment(@RequestBody CommentCreateRequest request) {
@@ -264,7 +204,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o bÃ¬nh luáº­n thÃ nh cÃ´ng.")
+            .description("Tạo bình luận thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -275,7 +215,7 @@ public class CommentController {
     }
 
     @PostMapping("/contracts/{contractId}/comments")
-    @Operation(summary = "Táº¡o comment má»›i", description = "Táº¡o comment má»›i cho contract")
+    @Operation(summary = "Tạo comment mới", description = "Tạo comment mới cho contract")
     public ResponseEntity<RestResponse<Comment>> createComment(
             @PathVariable String contractId,
             @RequestParam String authorId,
@@ -290,7 +230,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Táº¡o comment thÃ nh cÃ´ng.")
+            .description("Tạo comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -301,16 +241,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments")
-    @Operation(summary = "Láº¥y danh sÃ¡ch comment", description = "Láº¥y táº¥t cáº£ comment cá»§a contract")
+    @Operation(summary = "Lấy danh sách comment", description = "Lấy tất cả comment của contract")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByContractId(@PathVariable String contractId) {
         List<Comment> comments = commentService.getCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-            RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+            RestResponse<Comment> response = RestResponse.<Comment>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("KhÃ´ng cÃ³ comment nÃ o cho contract nÃ y.")
+                .description("Không có comment nào cho contract này.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -324,7 +264,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -335,7 +275,7 @@ public class CommentController {
     }
 
     @GetMapping("/comments/{id}")
-    @Operation(summary = "Láº¥y comment theo ID", description = "Láº¥y chi tiáº¿t comment")
+    @Operation(summary = "Lấy comment theo ID", description = "Lấy chi tiết comment")
     public ResponseEntity<RestResponse<Comment>> getCommentById(@PathVariable String id) {
         Optional<Comment> comment = commentService.getCommentById(id);
         
@@ -344,7 +284,7 @@ public class CommentController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("KhÃ´ng tÃ¬m tháº¥y comment.")
+                .description("Không tìm thấy comment.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -354,11 +294,11 @@ public class CommentController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y comment thÃ nh cÃ´ng.")
+            .description("Lấy comment thành công.")
             .data(comment.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -369,16 +309,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/unresolved")
-    @Operation(summary = "Láº¥y comment chÆ°a resolved", description = "Láº¥y danh sÃ¡ch comment chÆ°a Ä‘Æ°á»£c giáº£i quyáº¿t")
+    @Operation(summary = "Lấy comment chưa resolved", description = "Lấy danh sách comment chưa được giải quyết")
     public ResponseEntity<RestResponse<List<Comment>>> getUnresolvedComments(@PathVariable String contractId) {
         List<Comment> comments = commentService.getUnresolvedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o chÆ°a resolved.")
+            .description("Không có comment nào chưa resolved.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -388,11 +328,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment unresolved thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment unresolved thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -403,16 +343,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/resolved")
-    @Operation(summary = "Láº¥y comment Ä‘Ã£ resolved", description = "Láº¥y danh sÃ¡ch comment Ä‘Ã£ Ä‘Æ°á»£c giáº£i quyáº¿t")
+    @Operation(summary = "Lấy comment đã resolved", description = "Lấy danh sách comment đã được giải quyết")
     public ResponseEntity<RestResponse<List<Comment>>> getResolvedComments(@PathVariable String contractId) {
         List<Comment> comments = commentService.getResolvedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o Ä‘Ã£ resolved.")
+            .description("Không có comment nào đã resolved.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -422,11 +362,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment resolved thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment resolved thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -437,16 +377,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/pinned")
-    @Operation(summary = "Láº¥y comment Ä‘Ã£ pinned", description = "Láº¥y danh sÃ¡ch comment Ä‘Ã£ Ä‘Æ°á»£c ghim")
+    @Operation(summary = "Lấy comment đã pinned", description = "Lấy danh sách comment đã được ghim")
     public ResponseEntity<RestResponse<List<Comment>>> getPinnedComments(@PathVariable String contractId) {
         List<Comment> comments = commentService.getPinnedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o Ä‘Ã£ pinned.")
+            .description("Không có comment nào đã pinned.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -456,11 +396,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment pinned thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment pinned thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -471,16 +411,16 @@ public class CommentController {
     }
 
     @GetMapping("/comments/author/{authorId}")
-    @Operation(summary = "Láº¥y comment theo author ID", description = "Láº¥y danh sÃ¡ch comment cá»§a author")
+    @Operation(summary = "Lấy comment theo author ID", description = "Lấy danh sách comment của author")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByAuthorId(@PathVariable String authorId) {
         List<Comment> comments = commentService.getCommentsByAuthorId(authorId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o cá»§a author nÃ y.")
+            .description("Không có comment nào của author này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -490,11 +430,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment cá»§a author thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment của author thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -505,16 +445,16 @@ public class CommentController {
     }
 
     @GetMapping("/comments/parent/{parentCommentId}")
-    @Operation(summary = "Láº¥y comment theo parent comment ID", description = "Láº¥y danh sÃ¡ch comment con")
+    @Operation(summary = "Lấy comment theo parent comment ID", description = "Lấy danh sách comment con")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByParentCommentId(@PathVariable String parentCommentId) {
         List<Comment> comments = commentService.getCommentsByParentCommentId(parentCommentId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment con nÃ o.")
+            .description("Không có comment con nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -524,11 +464,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment con thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment con thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -539,18 +479,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/type/{commentType}")
-    @Operation(summary = "Láº¥y comment theo type", description = "Láº¥y danh sÃ¡ch comment theo loáº¡i")
+    @Operation(summary = "Lấy comment theo type", description = "Lấy danh sách comment theo loại")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByCommentType(
             @PathVariable String contractId,
             @PathVariable Comment.CommentType commentType) {
         List<Comment> comments = commentService.getCommentsByCommentType(contractId, commentType);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o vá»›i type nÃ y.")
+            .description("Không có comment nào với type này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -560,11 +500,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo type thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo type thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -575,18 +515,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/priority/{priority}")
-    @Operation(summary = "Láº¥y comment theo priority", description = "Láº¥y danh sÃ¡ch comment theo má»©c Ä‘á»™ Æ°u tiÃªn")
+    @Operation(summary = "Lấy comment theo priority", description = "Lấy danh sách comment theo mức độ ưu tiên")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByPriority(
             @PathVariable String contractId,
             @PathVariable Comment.CommentPriority priority) {
         List<Comment> comments = commentService.getCommentsByPriority(contractId, priority);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o vá»›i priority nÃ y.")
+            .description("Không có comment nào với priority này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -596,11 +536,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo priority thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo priority thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -611,16 +551,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/public")
-    @Operation(summary = "Láº¥y comment public", description = "Láº¥y danh sÃ¡ch comment public")
+    @Operation(summary = "Lấy comment public", description = "Lấy danh sách comment public")
     public ResponseEntity<RestResponse<List<Comment>>> getPublicComments(@PathVariable String contractId) {
         List<Comment> comments = commentService.getPublicCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment public nÃ o.")
+            .description("Không có comment public nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -630,11 +570,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment public thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment public thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -645,16 +585,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/private")
-    @Operation(summary = "Láº¥y comment private", description = "Láº¥y danh sÃ¡ch comment private")
+    @Operation(summary = "Lấy comment private", description = "Lấy danh sách comment private")
     public ResponseEntity<RestResponse<List<Comment>>> getPrivateComments(@PathVariable String contractId) {
         List<Comment> comments = commentService.getPrivateCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment private nÃ o.")
+            .description("Không có comment private nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -664,11 +604,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment private thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment private thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -679,18 +619,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/visibility/{visibility}")
-    @Operation(summary = "Láº¥y comment theo visibility", description = "Láº¥y danh sÃ¡ch comment theo visibility")
+    @Operation(summary = "Lấy comment theo visibility", description = "Lấy danh sách comment theo visibility")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByVisibility(
             @PathVariable String contractId,
             @PathVariable Comment.CommentVisibility visibility) {
         List<Comment> comments = commentService.getCommentsByVisibility(contractId, visibility);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o vá»›i visibility nÃ y.")
+            .description("Không có comment nào với visibility này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -700,11 +640,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo visibility thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo visibility thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -715,18 +655,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/mentioned/{userId}")
-    @Operation(summary = "Láº¥y comment Ä‘Ã£ mention user", description = "Láº¥y danh sÃ¡ch comment Ä‘Ã£ mention user")
+    @Operation(summary = "Lấy comment đã mention user", description = "Lấy danh sách comment đã mention user")
     public ResponseEntity<RestResponse<List<Comment>>> getMentionedComments(
             @PathVariable String contractId,
             @PathVariable String userId) {
         List<Comment> comments = commentService.getMentionedCommentsByContractId(contractId, userId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o mention user nÃ y.")
+            .description("Không có comment nào mention user này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -736,11 +676,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment Ä‘Ã£ mention user thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment đã mention user thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -751,18 +691,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/section/{sectionReference}")
-    @Operation(summary = "Láº¥y comment theo section", description = "Láº¥y danh sÃ¡ch comment theo section reference")
+    @Operation(summary = "Lấy comment theo section", description = "Lấy danh sách comment theo section reference")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsBySectionReference(
             @PathVariable String contractId,
             @PathVariable String sectionReference) {
         List<Comment> comments = commentService.getCommentsBySectionReference(contractId, sectionReference);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o cho section nÃ y.")
+            .description("Không có comment nào cho section này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -772,11 +712,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo section thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo section thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -787,18 +727,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/line/{lineNumber}")
-    @Operation(summary = "Láº¥y comment theo line number", description = "Láº¥y danh sÃ¡ch comment theo line number")
+    @Operation(summary = "Lấy comment theo line number", description = "Lấy danh sách comment theo line number")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByLineNumber(
             @PathVariable String contractId,
             @PathVariable Integer lineNumber) {
         List<Comment> comments = commentService.getCommentsByLineNumber(contractId, lineNumber);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o cho line nÃ y.")
+            .description("Không có comment nào cho line này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -808,11 +748,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo line number thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo line number thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -823,16 +763,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/order-by-created")
-    @Operation(summary = "Láº¥y comment sáº¯p xáº¿p theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo thá»i gian táº¡o")
+    @Operation(summary = "Lấy comment sắp xếp theo thời gian tạo", description = "Lấy danh sách comment sắp xếp theo thời gian tạo")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsOrderByCreatedAt(@PathVariable String contractId) {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByCreatedAt(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o.")
+            .description("Không có comment nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -842,11 +782,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment sắp xếp theo thời gian tạo thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -857,16 +797,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/order-by-reaction")
-    @Operation(summary = "Láº¥y comment sáº¯p xáº¿p theo reaction count", description = "Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo reaction count")
+    @Operation(summary = "Lấy comment sắp xếp theo reaction count", description = "Lấy danh sách comment sắp xếp theo reaction count")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsOrderByReactionCount(@PathVariable String contractId) {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByReactionCount(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o.")
+            .description("Không có comment nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -876,11 +816,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo reaction count thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment sắp xếp theo reaction count thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -891,16 +831,16 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/order-by-reply")
-    @Operation(summary = "Láº¥y comment sáº¯p xáº¿p theo reply count", description = "Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo reply count")
+    @Operation(summary = "Lấy comment sắp xếp theo reply count", description = "Lấy danh sách comment sắp xếp theo reply count")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsOrderByReplyCount(@PathVariable String contractId) {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByReplyCount(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o.")
+            .description("Không có comment nào.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -910,11 +850,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment sáº¯p xáº¿p theo reply count thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment sắp xếp theo reply count thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -925,7 +865,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/created-between")
-    @Operation(summary = "Láº¥y comment theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch comment trong khoáº£ng thá»i gian táº¡o")
+    @Operation(summary = "Lấy comment theo thời gian tạo", description = "Lấy danh sách comment trong khoảng thời gian tạo")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByCreatedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -933,11 +873,11 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByCreatedAtBetween(startDate, endDate);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o trong khoáº£ng thá»i gian nÃ y.")
+            .description("Không có comment nào trong khoảng thời gian này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -951,7 +891,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo thời gian tạo thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -962,7 +902,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/resolved-between")
-    @Operation(summary = "Láº¥y comment theo thá»i gian resolved", description = "Láº¥y danh sÃ¡ch comment trong khoáº£ng thá»i gian resolved")
+    @Operation(summary = "Lấy comment theo thời gian resolved", description = "Lấy danh sách comment trong khoảng thời gian resolved")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsByResolvedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -970,11 +910,11 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByResolvedAtBetween(startDate, endDate);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o trong khoáº£ng thá»i gian resolved nÃ y.")
+            .description("Không có comment nào trong khoảng thời gian resolved này.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -988,7 +928,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment theo thá»i gian resolved thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment theo thời gian resolved thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -999,18 +939,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/high-reaction")
-    @Operation(summary = "Láº¥y comment cÃ³ reaction cao", description = "Láº¥y danh sÃ¡ch comment cÃ³ reaction count cao")
+    @Operation(summary = "Lấy comment có reaction cao", description = "Lấy danh sách comment có reaction count cao")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsWithHighReactionCount(
             @PathVariable String contractId,
             @RequestParam Integer reactionCount) {
         List<Comment> comments = commentService.getCommentsWithHighReactionCount(reactionCount);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o cÃ³ reaction count cao.")
+            .description("Không có comment nào có reaction count cao.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1020,11 +960,11 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment cÃ³ reaction count cao thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment có reaction count cao thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1035,18 +975,18 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/with-replies")
-    @Operation(summary = "Láº¥y comment cÃ³ replies", description = "Láº¥y danh sÃ¡ch comment cÃ³ replies")
+    @Operation(summary = "Lấy comment có replies", description = "Lấy danh sách comment có replies")
     public ResponseEntity<RestResponse<List<Comment>>> getCommentsWithReplies(
             @PathVariable String contractId,
             @RequestParam Integer replyCount) {
         List<Comment> comments = commentService.getCommentsWithReplies(replyCount);
         
         if (comments.isEmpty()) {
-                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
-            .description("KhÃ´ng cÃ³ comment nÃ o cÃ³ replies.")
+            .description("Không có comment nào có replies.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1060,7 +1000,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Láº¥y danh sÃ¡ch comment cÃ³ replies thÃ nh cÃ´ng.")
+            .description("Lấy danh sách comment có replies thành công.")
             .data(comments)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1071,7 +1011,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/resolve")
-    @Operation(summary = "Resolve comment", description = "ÄÃ¡nh dáº¥u comment Ä‘Ã£ Ä‘Æ°á»£c giáº£i quyáº¿t")
+    @Operation(summary = "Resolve comment", description = "Đánh dấu comment đã được giải quyết")
     public ResponseEntity<RestResponse<Comment>> resolveComment(
             @PathVariable String id,
             @RequestParam String resolvedBy,
@@ -1082,7 +1022,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Resolve comment thÃ nh cÃ´ng.")
+            .description("Resolve comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1093,7 +1033,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/unresolve")
-    @Operation(summary = "Unresolve comment", description = "Bá» Ä‘Ã¡nh dáº¥u comment Ä‘Ã£ Ä‘Æ°á»£c giáº£i quyáº¿t")
+    @Operation(summary = "Unresolve comment", description = "Bỏ đánh dấu comment đã được giải quyết")
     public ResponseEntity<RestResponse<Comment>> unresolveComment(@PathVariable String id) {
         Comment comment = commentService.unresolveComment(id);
         
@@ -1101,7 +1041,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Unresolve comment thÃ nh cÃ´ng.")
+            .description("Unresolve comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1122,7 +1062,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Pin comment thÃ nh cÃ´ng.")
+            .description("Pin comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1133,7 +1073,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/unpin")
-    @Operation(summary = "Unpin comment", description = "Bá» ghim comment")
+    @Operation(summary = "Unpin comment", description = "Bỏ ghim comment")
     public ResponseEntity<RestResponse<Comment>> unpinComment(@PathVariable String id) {
         Comment comment = commentService.unpinComment(id);
         
@@ -1141,7 +1081,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Unpin comment thÃ nh cÃ´ng.")
+            .description("Unpin comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1152,7 +1092,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/increment-reaction")
-    @Operation(summary = "TÄƒng reaction count", description = "TÄƒng sá»‘ lÆ°á»£ng reaction")
+    @Operation(summary = "Tăng reaction count", description = "Tăng số lượng reaction")
     public ResponseEntity<RestResponse<Comment>> incrementReactionCount(@PathVariable String id) {
         Comment comment = commentService.incrementReactionCount(id);
         
@@ -1160,7 +1100,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("TÄƒng reaction count thÃ nh cÃ´ng.")
+            .description("Tăng reaction count thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1171,7 +1111,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/decrement-reaction")
-    @Operation(summary = "Giáº£m reaction count", description = "Giáº£m sá»‘ lÆ°á»£ng reaction")
+    @Operation(summary = "Giảm reaction count", description = "Giảm số lượng reaction")
     public ResponseEntity<RestResponse<Comment>> decrementReactionCount(@PathVariable String id) {
         Comment comment = commentService.decrementReactionCount(id);
         
@@ -1179,7 +1119,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Giáº£m reaction count thÃ nh cÃ´ng.")
+            .description("Giảm reaction count thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1190,7 +1130,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/increment-reply")
-    @Operation(summary = "TÄƒng reply count", description = "TÄƒng sá»‘ lÆ°á»£ng reply")
+    @Operation(summary = "Tăng reply count", description = "Tăng số lượng reply")
     public ResponseEntity<RestResponse<Comment>> incrementReplyCount(@PathVariable String id) {
         Comment comment = commentService.incrementReplyCount(id);
         
@@ -1198,7 +1138,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("TÄƒng reply count thÃ nh cÃ´ng.")
+            .description("Tăng reply count thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1209,7 +1149,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/decrement-reply")
-    @Operation(summary = "Giáº£m reply count", description = "Giáº£m sá»‘ lÆ°á»£ng reply")
+    @Operation(summary = "Giảm reply count", description = "Giảm số lượng reply")
     public ResponseEntity<RestResponse<Comment>> decrementReplyCount(@PathVariable String id) {
         Comment comment = commentService.decrementReplyCount(id);
         
@@ -1217,7 +1157,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Giáº£m reply count thÃ nh cÃ´ng.")
+            .description("Giảm reply count thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1228,7 +1168,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/hide")
-    @Operation(summary = "áº¨n comment", description = "áº¨n comment")
+    @Operation(summary = "Ẩn comment", description = "Ẩn comment")
     public ResponseEntity<RestResponse<Comment>> hideComment(@PathVariable String id) {
         Comment comment = commentService.hideComment(id);
         
@@ -1236,7 +1176,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("áº¨n comment thÃ nh cÃ´ng.")
+            .description("Ẩn comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1247,7 +1187,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/show")
-    @Operation(summary = "Hiá»‡n comment", description = "Hiá»‡n comment")
+    @Operation(summary = "Hiện comment", description = "Hiện comment")
     public ResponseEntity<RestResponse<Comment>> showComment(@PathVariable String id) {
         Comment comment = commentService.showComment(id);
         
@@ -1255,7 +1195,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Hiá»‡n comment thÃ nh cÃ´ng.")
+            .description("Hiện comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1266,17 +1206,17 @@ public class CommentController {
     }
 
     @DeleteMapping("/comments/{id}")
-    @Operation(summary = "XÃ³a comment", description = "Soft delete comment")
+    @Operation(summary = "Xóa comment", description = "Soft delete comment")
     public ResponseEntity<RestResponse<Void>> deleteComment(
             @PathVariable String id,
             @RequestParam String deletedBy) {
         commentService.deleteComment(id, deletedBy);
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<Void> response = RestResponse.<Void>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("XÃ³a comment thÃ nh cÃ´ng.")
+            .description("Xóa comment thành công.")
             .data(null)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1287,7 +1227,7 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}/restore")
-    @Operation(summary = "KhÃ´i phá»¥c comment", description = "KhÃ´i phá»¥c comment Ä‘Ã£ xÃ³a")
+    @Operation(summary = "Khôi phục comment", description = "Khôi phục comment đã xóa")
     public ResponseEntity<RestResponse<Comment>> restoreComment(@PathVariable String id) {
         Comment comment = commentService.restoreComment(id);
         
@@ -1295,7 +1235,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("KhÃ´i phá»¥c comment thÃ nh cÃ´ng.")
+            .description("Khôi phục comment thành công.")
             .data(comment)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1306,7 +1246,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/count")
-    @Operation(summary = "Äáº¿m sá»‘ comment", description = "Äáº¿m sá»‘ lÆ°á»£ng comment")
+    @Operation(summary = "Đếm số comment", description = "Đếm số lượng comment")
     public ResponseEntity<RestResponse<Long>> countCommentsByContractId(@PathVariable String contractId) {
         long count = commentService.countCommentsByContractId(contractId);
         
@@ -1314,7 +1254,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment thÃ nh cÃ´ng.")
+            .description("Đếm số comment thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1325,7 +1265,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/count-by-status")
-    @Operation(summary = "Äáº¿m sá»‘ comment theo status", description = "Äáº¿m sá»‘ lÆ°á»£ng comment theo status")
+    @Operation(summary = "Đếm số comment theo status", description = "Đếm số lượng comment theo status")
     public ResponseEntity<RestResponse<Long>> countCommentsByContractIdAndStatus(
             @PathVariable String contractId,
             @RequestParam Comment.CommentStatus status) {
@@ -1335,7 +1275,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment theo status thÃ nh cÃ´ng.")
+            .description("Đếm số comment theo status thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1346,7 +1286,7 @@ public class CommentController {
     }
 
     @GetMapping("/comments/author/{authorId}/count")
-    @Operation(summary = "Äáº¿m sá»‘ comment cá»§a author", description = "Äáº¿m sá»‘ lÆ°á»£ng comment cá»§a author")
+    @Operation(summary = "Đếm số comment của author", description = "Đếm số lượng comment của author")
     public ResponseEntity<RestResponse<Long>> countCommentsByAuthorId(@PathVariable String authorId) {
         long count = commentService.countCommentsByAuthorId(authorId);
         
@@ -1354,7 +1294,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment cá»§a author thÃ nh cÃ´ng.")
+            .description("Đếm số comment của author thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1365,7 +1305,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/count-unresolved")
-    @Operation(summary = "Äáº¿m sá»‘ comment unresolved", description = "Äáº¿m sá»‘ lÆ°á»£ng comment chÆ°a resolved")
+    @Operation(summary = "Đếm số comment unresolved", description = "Đếm số lượng comment chưa resolved")
     public ResponseEntity<RestResponse<Long>> countUnresolvedCommentsByContractId(@PathVariable String contractId) {
         long count = commentService.countUnresolvedCommentsByContractId(contractId);
         
@@ -1373,7 +1313,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment unresolved thÃ nh cÃ´ng.")
+            .description("Đếm số comment unresolved thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1384,7 +1324,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/count-resolved")
-    @Operation(summary = "Äáº¿m sá»‘ comment resolved", description = "Äáº¿m sá»‘ lÆ°á»£ng comment Ä‘Ã£ resolved")
+    @Operation(summary = "Đếm số comment resolved", description = "Đếm số lượng comment đã resolved")
     public ResponseEntity<RestResponse<Long>> countResolvedCommentsByContractId(@PathVariable String contractId) {
         long count = commentService.countResolvedCommentsByContractId(contractId);
         
@@ -1392,7 +1332,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment resolved thÃ nh cÃ´ng.")
+            .description("Đếm số comment resolved thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1403,7 +1343,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/count-pinned")
-    @Operation(summary = "Äáº¿m sá»‘ comment pinned", description = "Äáº¿m sá»‘ lÆ°á»£ng comment Ä‘Ã£ pinned")
+    @Operation(summary = "Đếm số comment pinned", description = "Đếm số lượng comment đã pinned")
     public ResponseEntity<RestResponse<Long>> countPinnedCommentsByContractId(@PathVariable String contractId) {
         long count = commentService.countPinnedCommentsByContractId(contractId);
         
@@ -1411,7 +1351,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Äáº¿m sá»‘ comment pinned thÃ nh cÃ´ng.")
+            .description("Đếm số comment pinned thành công.")
             .data(count)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1422,7 +1362,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/exists")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ comment", description = "Kiá»ƒm tra contract cÃ³ comment khÃ´ng")
+    @Operation(summary = "Kiểm tra có comment", description = "Kiểm tra contract có comment không")
     public ResponseEntity<RestResponse<Boolean>> existsCommentsByContractId(@PathVariable String contractId) {
         boolean exists = commentService.existsCommentsByContractId(contractId);
         
@@ -1430,7 +1370,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ comment thÃ nh cÃ´ng.")
+            .description("Kiểm tra có comment thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1441,7 +1381,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/exists-unresolved")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ comment unresolved", description = "Kiá»ƒm tra contract cÃ³ comment unresolved khÃ´ng")
+    @Operation(summary = "Kiểm tra có comment unresolved", description = "Kiểm tra contract có comment unresolved không")
     public ResponseEntity<RestResponse<Boolean>> existsUnresolvedCommentsByContractId(@PathVariable String contractId) {
         boolean exists = commentService.existsUnresolvedCommentsByContractId(contractId);
         
@@ -1449,7 +1389,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ comment unresolved thÃ nh cÃ´ng.")
+            .description("Kiểm tra có comment unresolved thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1460,7 +1400,7 @@ public class CommentController {
     }
 
     @GetMapping("/contracts/{contractId}/comments/exists-pinned")
-    @Operation(summary = "Kiá»ƒm tra cÃ³ comment pinned", description = "Kiá»ƒm tra contract cÃ³ comment pinned khÃ´ng")
+    @Operation(summary = "Kiểm tra có comment pinned", description = "Kiểm tra contract có comment pinned không")
     public ResponseEntity<RestResponse<Boolean>> existsPinnedCommentsByContractId(@PathVariable String contractId) {
         boolean exists = commentService.existsPinnedCommentsByContractId(contractId);
         
@@ -1468,7 +1408,7 @@ public class CommentController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiá»ƒm tra cÃ³ comment pinned thÃ nh cÃ´ng.")
+            .description("Kiểm tra có comment pinned thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -1478,4 +1418,3 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
-

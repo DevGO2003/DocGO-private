@@ -11,6 +11,11 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends MongoRepository<Comment, String> {
 
+    /**
+     * Tìm tất cả comment chưa bị xóa
+     */
+    List<Comment> findByIsDeletedFalse();
+
     List<Comment> findByContractIdAndIsDeletedFalse(String contractId);
     
     List<Comment> findByContractIdAndStatusAndIsDeletedFalse(String contractId, Comment.CommentStatus status);

@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuditService {
@@ -551,7 +552,12 @@ public class AuditService {
         auditLog.setContractId(request.getContractId());
         auditLog.setIpAddress(request.getIpAddress());
         auditLog.setUserAgent(request.getUserAgent());
-        auditLog.setAdditionalData(request.getAdditionalData());
+        // Convert additionalData string to map if needed
+        if (request.getAdditionalData() != null && !request.getAdditionalData().isEmpty()) {
+            Map<String, Object> additionalDataMap = new HashMap<>();
+            additionalDataMap.put("data", request.getAdditionalData());
+            auditLog.setAdditionalData(additionalDataMap);
+        }
         auditLog.initializeNewEntity();
         
         return auditLogRepository.save(auditLog);

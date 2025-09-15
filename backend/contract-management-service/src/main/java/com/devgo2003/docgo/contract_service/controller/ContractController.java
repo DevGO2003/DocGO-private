@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.contract_service.controller;
+﻿package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.contract_service.common.response.RequestInfo;
@@ -78,7 +78,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -169,7 +169,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -230,7 +230,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (201: Created).
+        Mô tả: ma trạng thái HTTP (201: Created).
         
         📋 shortMessage
         Loại: string
@@ -257,7 +257,7 @@ public class ContractController {
             content = @Content(
                 schema = @Schema(implementation = ContractCreateRequest.class),
                 examples = @ExampleObject(
-                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DRAFT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"systemId\": \"SYS-001\"\n}"
+                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DraFT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"systemId\": \"SYS-001\"\n}"
                 )
             )
         )
@@ -337,7 +337,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -397,7 +397,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -457,7 +457,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -517,7 +517,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -577,7 +577,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -656,7 +656,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -747,7 +747,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -829,7 +829,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -926,7 +926,7 @@ public class ContractController {
         
         🔢 statusCode
         Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK).
+        Mô tả: ma trạng thái HTTP (200: OK).
         
         📋 shortMessage
         Loại: string
@@ -966,3 +966,5 @@ public class ContractController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
+
+

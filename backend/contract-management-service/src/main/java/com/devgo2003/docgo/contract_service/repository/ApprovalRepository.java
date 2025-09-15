@@ -17,6 +17,11 @@ import java.util.Optional;
 public interface ApprovalRepository extends MongoRepository<Approval, String> {
 
     /**
+     * Tìm tất cả approval chưa bị xóa
+     */
+    List<Approval> findByIsDeletedFalse();
+
+    /**
      * Tìm tất cả approval theo contract ID
      */
     List<Approval> findByContractIdAndIsDeletedFalse(String contractId);

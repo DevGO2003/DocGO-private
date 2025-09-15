@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration;
 
 @SpringBootApplication(exclude = {
-    OAuth2ClientAutoConfiguration.class,
     DataSourceAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class
 })

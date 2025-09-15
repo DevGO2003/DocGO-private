@@ -11,6 +11,11 @@ import java.util.List;
 @Repository
 public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
 
+    /**
+     * Tìm tất cả audit log chưa bị xóa
+     */
+    List<AuditLog> findByIsDeletedFalse();
+
     List<AuditLog> findByContractIdAndIsDeletedFalse(String contractId);
     
     List<AuditLog> findByContractIdAndEventCategoryAndIsDeletedFalse(String contractId, AuditLog.EventCategory eventCategory);

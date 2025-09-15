@@ -96,9 +96,7 @@ public class SecurityConfig {
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Enable OAuth2 configuration - TEMPORARILY DISABLED
-        // TODO: Re-enable after adding ClientRegistrationRepository bean
-        /*
+        // Enable OAuth2 configuration if Google client is configured
         if (googleClientId != null && !googleClientId.trim().isEmpty()) {
             OAuth2LoginSuccessHandler successHandler = new OAuth2LoginSuccessHandler(userRepository, jwtUtil);
             http.oauth2Login(oauth2 -> oauth2
@@ -108,7 +106,6 @@ public class SecurityConfig {
                 })
             );
         }
-        */
 
         return http.build();
     }
