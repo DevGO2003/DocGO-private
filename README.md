@@ -52,17 +52,17 @@ git clone https://github.com/DevGO2003/DocGO.git
 cd DocGO
 
 # Chạy toàn bộ hệ thống
-cd autofiles
-docker-compose -f docker-compose.dev.yml up -d
+# cd autofiles (đã loại bỏ thư mục này)
+docker-compose -f docker-compose.local.yml up -d
 
 # Hoặc chạy từng service
-docker-compose -f docker-compose.dev.yml up mariadb redis
-docker-compose -f docker-compose.dev.yml up api-gateway-bff
-docker-compose -f docker-compose.dev.yml up authentication-identity-service
-docker-compose -f docker-compose.dev.yml up user-management-service
-docker-compose -f docker-compose.dev.yml up contract-management-service
-docker-compose -f docker-compose.dev.yml up ai-processing-service
-docker-compose -f docker-compose.dev.yml up file-storage-asset-service
+docker-compose -f docker-compose.local.yml up mariadb redis
+docker-compose -f docker-compose.local.yml up api-gateway-bff
+docker-compose -f docker-compose.local.yml up authentication-identity-service
+docker-compose -f docker-compose.local.yml up user-management-service
+docker-compose -f docker-compose.local.yml up contract-management-service
+docker-compose -f docker-compose.local.yml up ai-processing-service
+docker-compose -f docker-compose.local.yml up file-storage-asset-service
 ```
 
 ### 2. Chạy từng service riêng lẻ
@@ -129,11 +129,11 @@ Tất cả các microservices đều có API documentation tự động tại `/
 ### Test Auto-Redirect Feature
 ```bash
 # PowerShell
-cd autofiles
+# cd autofiles (đã loại bỏ thư mục này)
 ./test-auto-redirect.ps1
 
 # Batch
-cd autofiles
+# cd autofiles (đã loại bỏ thư mục này)
 ./test-auto-redirect.bat
 ```
 
@@ -179,7 +179,7 @@ mysql -u root -p docgo_contract_service < backend/contract-management-service/da
 
 ```
 DocGO/
-├── autofiles/                    # Scripts và cấu hình Docker
+# ├── autofiles/                    # (đã loại bỏ)
 ├── backend/                      # Backend microservices
 │   ├── api-gateway-bff/         # API Gateway (Next.js)
 │   ├── authentication-identity-service/  # Auth Service (Spring Boot)

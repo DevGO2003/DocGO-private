@@ -223,12 +223,15 @@ class ApiClient {
         console.error('Token refresh failed:', refreshError)
       }
       
-      // If refresh fails, clear all auth data and redirect
+      // If refresh fails, clear all auth data and conditionally redirect
       localStorage.removeItem('docgo_auth_v1')
       localStorage.removeItem('auth_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_data')
-      window.location.href = '/auth/login'
+      // Avoid forcing a full reload if we're already on the login page
+      if (window.location.pathname !== '/auth/login') {
+        window.location.href = '/auth/login'
+      }
     }
     return false
   }

@@ -190,8 +190,8 @@ docker run -d --name kafka \
   confluentinc/cp-kafka:7.4.0
 
 # Hoặc sử dụng docker-compose
-cd autofiles
-docker-compose -f docker-compose.dev.yml up kafka
+# cd autofiles (đã loại bỏ)
+docker-compose -f docker-compose.local.yml up kafka
 ```
 
 ### 6. Cập nhật database schema
@@ -214,7 +214,7 @@ API Documentation: http://localhost:8003/docs#/
 ### 1. Build Docker image
 ```bash
 # Sử dụng script có sẵn
-cd autofiles
+# cd autofiles (đã loại bỏ)
 ./build-contract-service.bat  # Windows
 ./build-contract-service.ps1  # PowerShell
 
@@ -225,8 +225,8 @@ docker build -t docgo-contract-service:latest .
 
 ### 2. Chạy với docker-compose (khuyến nghị)
 ```bash
-cd autofiles
-docker-compose -f docker-compose.dev.yml up contract-management-service
+# cd autofiles (đã loại bỏ)
+docker-compose -f docker-compose.local.yml up contract-management-service
 ```
 
 ### 3. Chạy standalone

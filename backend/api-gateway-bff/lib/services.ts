@@ -194,6 +194,17 @@ class ServiceManager {
     // Add request interceptor for logging
     axiosInstance.interceptors.request.use(
       (config) => {
+        // Propagate correlation and actor headers
+        const correlationId = (config.headers?.['X-Correlation-Id'] as string) || process.env.CORRELATION_ID || '';
+        const actor = (config.headers?.['X-Actor'] as string) || process.env.ACTOR || '';
+        config.headers = config.headers || {};
+        if (!config.headers['X-Correlation-Id']) {
+          config.headers['X-Correlation-Id'] = correlationId || cryptoRandomId();
+        }
+        if (!config.headers['X-Actor']) {
+          config.headers['X-Actor'] = actor || 'api-gateway';
+        }
+
         logger.info(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
           service: key,
           headers: config.headers
@@ -380,6 +391,16 @@ class ServiceManager {
       logger.error(`❌ Proxy request failed for ${serviceKey}:`, error.response?.data || error.message);
       throw error;
     }
+  }
+}
+
+// Simple random id fallback
+function cryptoRandomId(): string {
+  try {
+    const { randomUUID } = require('crypto');
+    return randomUUID();
+  } catch {
+    return Math.random().toString(36).slice(2);
   }
 }
 

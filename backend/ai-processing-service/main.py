@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from fastapi.openapi.utils import get_openapi
+from starlette.middleware.base import BaseHTTPMiddleware
 import routers
 import os
 import asyncio
@@ -22,6 +23,30 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_version="3.0.3"
 )
+
+# Actor/Correlation middleware per MDC 06
+class ActorCorrelationMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Correlation ID
+        correlation_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
+        # Actor detection with sensible defaults
+        actor = request.headers.get("X-Actor")
+        if not actor:
+            # Try to derive from gateway headers/user context if any in the future
+            actor = "system"
+
+        # Attach to request.state for downstream usage
+        request.state.correlation_id = correlation_id
+        request.state.actor = actor
+
+        response = await call_next(request)
+        # Propagate headers back for traceability
+        response.headers["X-Correlation-Id"] = correlation_id
+        response.headers["X-Actor"] = actor
+        return response
+
+# Register middleware early
+app.add_middleware(ActorCorrelationMiddleware)
 
 # Add CORS middleware
 app.add_middleware(

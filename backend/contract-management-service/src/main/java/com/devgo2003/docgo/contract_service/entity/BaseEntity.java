@@ -1,7 +1,9 @@
 package com.devgo2003.docgo.contract_service.entity;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ public abstract class BaseEntity {
     /**
      * Người tạo bản ghi
      */
+    @CreatedBy
     @Field("created_by")
     private String createdBy;
 
@@ -35,6 +38,7 @@ public abstract class BaseEntity {
     /**
      * Người cập nhật cuối
      */
+    @LastModifiedBy
     @Field("updated_by")
     private String updatedBy;
 

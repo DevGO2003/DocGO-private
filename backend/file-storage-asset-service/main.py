@@ -18,6 +18,21 @@ app = FastAPI(
 	openapi_version="3.0.3"
 )
 
+# Actor/Correlation middleware per MDC 06
+class ActorCorrelationMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        correlation_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
+        actor = request.headers.get("X-Actor") or "system"
+        request.state.correlation_id = correlation_id
+        request.state.actor = actor
+        response = await call_next(request)
+        response.headers["X-Correlation-Id"] = correlation_id
+        response.headers["X-Actor"] = actor
+        return response
+
+# Register middleware early
+app.add_middleware(ActorCorrelationMiddleware)
+
 # Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
 def custom_openapi():
 	if app.openapi_schema:

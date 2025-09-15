@@ -1,10 +1,8 @@
 package com.devgo2003.docgo.auth_service.security;
 
-import com.devgo2003.docgo.auth_service.entity.Role;
-import com.devgo2003.docgo.auth_service.entity.User;
+import com.devgo2003.docgo.auth_service.entity.UserMongo;
 import com.devgo2003.docgo.auth_service.entity.UserStatus;
-import com.devgo2003.docgo.auth_service.model.AuthResponse;
-import com.devgo2003.docgo.auth_service.repository.UserRepository;
+import com.devgo2003.docgo.auth_service.repository.UserMongoRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,10 +22,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2LoginSuccessHandler.class);
     
-    private final UserRepository userRepository;
+    private final UserMongoRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    public OAuth2LoginSuccessHandler(UserRepository userRepository, JwtUtil jwtUtil) {
+    public OAuth2LoginSuccessHandler(UserMongoRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
     }
@@ -70,7 +68,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             logger.debug("[{}] OAuth2 All attributes: {}", requestId, attributes);
 
             // Find or create user with error handling
-            User user = findOrCreateUser(username, email, requestId);
+            UserMongo user = findOrCreateUser(username, email, requestId);
             if (user == null) {
                 logger.error("[{}] Failed to find or create user: {}", requestId, username);
                 redirectToError(response, "user_creation_failed", requestId);
@@ -129,20 +127,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private User findOrCreateUser(String username, String email, String requestId) {
+    private UserMongo findOrCreateUser(String username, String email, String requestId) {
         try {
             return userRepository.findByUsername(username)
                     .orElseGet(() -> {
                         logger.info("[{}] Creating new OAuth2 user: {}", requestId, username);
                         try {
-                            User newUser = User.builder()
+                            UserMongo newUser = UserMongo.builder()
                                     .username(username)
                                     .email(email)
-                                    .passwordHash("") // OAuth2 users don't need password
-                                    .role(Role.EMPLOYEE)
+                                    .password("") // OAuth2 users don't need password
                                     .status(UserStatus.ACTIVE)
                                     .build();
-                            User savedUser = userRepository.save(newUser);
+                            UserMongo savedUser = userRepository.save(newUser);
                             logger.info("[{}] Successfully created new OAuth2 user: {}", requestId, username);
                             return savedUser;
                         } catch (Exception e) {
@@ -156,17 +153,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private String generateAccessToken(User user, String requestId) {
+    private String generateAccessToken(UserMongo user, String requestId) {
         try {
-            AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-                user.getUserId(), 
-                user.getUsername(), 
-                user.getEmail(), 
-                user.getRole().name()
-            );
             return jwtUtil.generateAccessToken(user.getUsername(), Map.of(
-                    "userId", user.getUserId(),
-                    "role", user.getRole().name()
+                    "userId", user.getId(),
+                    "role", "USER"
             ));
         } catch (Exception e) {
             logger.error("[{}] Error generating access token: {}", requestId, e.getMessage(), e);
@@ -174,7 +165,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
-    private String generateRefreshToken(User user, String requestId) {
+    private String generateRefreshToken(UserMongo user, String requestId) {
         try {
             return jwtUtil.generateRefreshToken(user.getUsername());
         } catch (Exception e) {
