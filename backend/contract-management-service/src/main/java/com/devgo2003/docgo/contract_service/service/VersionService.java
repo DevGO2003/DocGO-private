@@ -469,35 +469,35 @@ public class VersionService {
      * Đếm số version theo contract ID
      */
     public long countVersionsByContractId(String contractId) {
-        return versionRepository.countByContractId(contractId);
+        return versionRepository.countByContractIdAndIsDeletedFalse(contractId);
     }
 
     /**
      * Đếm số version theo contract ID và change type
      */
     public long countVersionsByContractIdAndChangeType(String contractId, Version.ChangeType changeType) {
-        return versionRepository.countByContractIdAndChangeType(contractId, changeType);
+        return versionRepository.countByContractIdAndChangeTypeAndIsDeletedFalse(contractId, changeType);
     }
 
     /**
      * Đếm số version theo contract ID và isPublished
      */
     public long countVersionsByContractIdAndIsPublished(String contractId, Boolean isPublished) {
-        return versionRepository.countByContractIdAndIsPublished(contractId, isPublished);
+        return versionRepository.countByContractIdAndIsPublishedAndIsDeletedFalse(contractId, isPublished);
     }
 
     /**
      * Đếm số version theo contract ID và isCurrent
      */
     public long countVersionsByContractIdAndIsCurrent(String contractId, Boolean isCurrent) {
-        return versionRepository.countByContractIdAndIsCurrent(contractId, isCurrent);
+        return versionRepository.countByContractIdAndIsCurrentAndIsDeletedFalse(contractId, isCurrent);
     }
 
     /**
      * Kiểm tra xem có version nào với version number cho trước không
      */
     public boolean existsVersionByContractIdAndVersionNumber(String contractId, String versionNumber) {
-        return versionRepository.existsByContractIdAndVersionNumber(contractId, versionNumber);
+        return versionRepository.existsByContractIdAndVersionNumberAndIsDeletedFalse(contractId, versionNumber);
     }
 
     /**
@@ -601,18 +601,16 @@ public class VersionService {
         Contract contract = contractRepository.findById(request.getContractId())
                 .orElseThrow(() -> new RuntimeException("Contract not found"));
         
-        Version version = new Version(contract, request.getVersionNumber(), request.getVersionName(), 
-                                    request.getChangeDescription(), request.getChangeType(), request.getCreatedBy());
+        Version version = new Version(
+                contract,
+                request.getVersionNumber(),
+                request.getVersionName(),
+                request.getChangeType(),
+                request.getChangeSummary()
+        );
         version.setContractId(request.getContractId());
-        version.setChangeSummary(request.getChangeSummary());
-        version.setChangeDetails(request.getChangeDetails());
+        version.setDescription(request.getChangeDescription());
         version.setPreviousVersionId(request.getPreviousVersionId());
-        version.setChangeReason(request.getChangeReason());
-        version.setChangeImpact(request.getChangeImpact());
-        version.setChangeApproval(request.getChangeApproval());
-        version.setChangeReviewer(request.getChangeReviewer());
-        version.setChangeDate(request.getChangeDate());
-        version.setAdditionalData(request.getAdditionalData());
         version.initializeNewEntity();
         
         return versionRepository.save(version);

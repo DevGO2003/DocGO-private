@@ -1,4 +1,4 @@
-﻿package com.devgo2003.docgo.contract_service.controller;
+package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Comment;
 import com.devgo2003.docgo.contract_service.service.CommentService;
@@ -246,7 +246,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-            RestResponse<Comment> response = RestResponse.<Comment>builder()
+            RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
@@ -314,7 +314,7 @@ public class CommentController {
         List<Comment> comments = commentService.getUnresolvedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -328,7 +328,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -348,7 +348,7 @@ public class CommentController {
         List<Comment> comments = commentService.getResolvedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -362,7 +362,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -382,7 +382,7 @@ public class CommentController {
         List<Comment> comments = commentService.getPinnedCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -396,7 +396,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -416,7 +416,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByAuthorId(authorId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -430,7 +430,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -450,7 +450,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByParentCommentId(parentCommentId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -464,7 +464,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -486,7 +486,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByCommentType(contractId, commentType);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -500,7 +500,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -522,7 +522,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByPriority(contractId, priority);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -536,7 +536,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -556,7 +556,7 @@ public class CommentController {
         List<Comment> comments = commentService.getPublicCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -570,7 +570,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -590,7 +590,7 @@ public class CommentController {
         List<Comment> comments = commentService.getPrivateCommentsByContractId(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -604,7 +604,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -626,7 +626,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByVisibility(contractId, visibility);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -640,7 +640,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -662,7 +662,7 @@ public class CommentController {
         List<Comment> comments = commentService.getMentionedCommentsByContractId(contractId, userId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -676,7 +676,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -698,7 +698,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsBySectionReference(contractId, sectionReference);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -712,7 +712,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -734,7 +734,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByLineNumber(contractId, lineNumber);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -748,7 +748,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -768,7 +768,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByCreatedAt(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -782,7 +782,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -802,7 +802,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByReactionCount(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -816,7 +816,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -836,7 +836,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByContractIdOrderByReplyCount(contractId);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -850,7 +850,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -873,7 +873,7 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByCreatedAtBetween(startDate, endDate);
         
         if (comments.isEmpty()) {
-                    RestResponse<Comment> response = RestResponse.<Comment>builder()
+                    RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -960,7 +960,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")

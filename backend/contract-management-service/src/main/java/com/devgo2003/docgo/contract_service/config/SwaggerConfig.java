@@ -29,10 +29,10 @@ public class SwaggerConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8003")
+                                .url("http://localhost:8002")
                                 .description("Local Development Server"),
                         new Server()
-                                .url("http://localhost:8003/api/v1/contract-management-service")
+                                .url("http://localhost:8002/api/v1/contract-management-service")
                                 .description("API Base URL")
                 ));
     }

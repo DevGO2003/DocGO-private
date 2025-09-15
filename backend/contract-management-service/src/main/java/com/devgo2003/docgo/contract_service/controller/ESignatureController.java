@@ -1,4 +1,5 @@
-﻿package com.devgo2003.docgo.contract_service.controller;
+package com.devgo2003.docgo.contract_service.controller;
+// encoding: utf-8
 
 import com.devgo2003.docgo.contract_service.entity.ESignature;
 import com.devgo2003.docgo.contract_service.service.ESignatureService;
@@ -553,7 +554,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getUnconsentedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -567,7 +568,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -587,7 +588,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getComplianceVerifiedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -601,7 +602,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -621,7 +622,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getComplianceUnverifiedSignaturesByContractId(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -635,7 +636,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -655,7 +656,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerId(signerId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -669,7 +670,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -689,7 +690,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerEmail(signerEmail);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -703,7 +704,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -723,7 +724,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignatureType(signatureType);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -737,7 +738,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -757,7 +758,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByVerificationMethod(verificationMethod);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -771,7 +772,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -791,7 +792,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignatureOrder(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -805,7 +806,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -825,7 +826,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignedAt(contractId);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -839,7 +840,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -862,7 +863,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getESignaturesBySignedAtBetween(startDate, endDate);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -876,7 +877,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -896,7 +897,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getExpiredSignatures(LocalDateTime.now());
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -910,7 +911,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -932,7 +933,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getExpiringSignatures(dueDate);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -946,7 +947,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -968,7 +969,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getSignaturesWithHighVerificationAttempts(maxAttempts);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -982,7 +983,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1004,7 +1005,7 @@ public class ESignatureController {
         List<ESignature> eSignatures = eSignatureService.getSignaturesWithReminders(reminderCount);
         
         if (eSignatures.isEmpty()) {
-                    RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(204)
             .shortMessage("No Content")
@@ -1018,7 +1019,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1584,7 +1585,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countRequiredSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countRequiredSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1603,7 +1604,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countOptionalSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countOptionalSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1622,7 +1623,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countConsentedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countConsentedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1641,7 +1642,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countUnconsentedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countUnconsentedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1660,7 +1661,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countComplianceVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1679,7 +1680,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Long>> countComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countComplianceUnverifiedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1698,7 +1699,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsESignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsESignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1717,7 +1718,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsPendingSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsPendingSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1736,7 +1737,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsSignedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsSignedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1755,7 +1756,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsDeclinedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsDeclinedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1774,7 +1775,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsExpiredSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsExpiredSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1793,7 +1794,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsVerifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1812,7 +1813,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsRequiredSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsRequiredSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1831,7 +1832,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsOptionalSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsOptionalSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1850,7 +1851,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsConsentedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsConsentedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1869,7 +1870,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsUnconsentedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsUnconsentedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1888,7 +1889,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsComplianceVerifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsComplianceVerifiedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
@@ -1907,7 +1908,7 @@ public class ESignatureController {
     public ResponseEntity<RestResponse<Boolean>> existsComplianceUnverifiedSignaturesByContractId(@PathVariable String contractId) {
         boolean exists = eSignatureService.existsComplianceUnverifiedSignaturesByContractId(contractId);
         
-                RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")

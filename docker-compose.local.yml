@@ -65,7 +65,7 @@ services:
       - AI_SERVICE_URL=http://ai-processing-service:8000
       - FILE_SERVICE_URL=http://file-storage-service:8000
     volumes:
-      - backend/api-gateway-bff:/app
+      - ./backend/api-gateway-bff:/app
       - /app/node_modules
       - npm_cache:/root/.npm
     command: >
@@ -73,6 +73,29 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    networks:
+      - docgo_network_local
+
+  # Frontend Web (Next.js) - Development server on port 3000
+  web-nextjs:
+    image: node:18-alpine
+    container_name: docgo-local-web-nextjs
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - frontend/web_nextjs/env/.env.local
+    environment:
+      - NODE_ENV=development
+      # Adjust backend URLs if the web app calls internal services directly
+      - NEXT_PUBLIC_API_GATEWAY_URL=http://localhost:8000
+    volumes:
+      - ./frontend/web_nextjs:/app
+      - /app/node_modules
+      - npm_cache:/root/.npm
+    command: >
+      sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000"
     networks:
       - docgo_network_local
 
@@ -96,7 +119,7 @@ services:
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=
     volumes:
-      - backend/authentication-identity-service:/app
+      - ./backend/authentication-identity-service:/app
       - maven_cache:/root/.m2
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
@@ -125,10 +148,10 @@ services:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
       - SPRING_REDIS_PASSWORD=
-      - AI_SERVICE_URL=http://ai-processing-service:8003
-      - FILE_SERVICE_URL=http://file-storage-service:8004
+      - AI_SERVICE_URL=http://ai-processing-service:8000
+      - FILE_SERVICE_URL=http://file-storage-service:8000
     volumes:
-      - backend/contract-management-service:/app
+      - ./backend/contract-management-service:/app
       - maven_cache:/root/.m2
     command: >
       sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
@@ -155,7 +178,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
     volumes:
-      - backend/ai-processing-service:/app
+      - ./backend/ai-processing-service:/app
       - ai_processing_results_local:/app/results
       - pip_cache:/root/.cache/pip
     command: >
@@ -183,7 +206,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
     volumes:
-      - backend/file-storage-asset-service:/app
+      - ./backend/file-storage-asset-service:/app
       - file_storage_uploads_local:/app/uploads
       - file_storage_temp_local:/app/temp
       - pip_cache:/root/.cache/pip
@@ -217,6 +240,3 @@ volumes:
 networks:
   docgo_network_local:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.23.0.0/16

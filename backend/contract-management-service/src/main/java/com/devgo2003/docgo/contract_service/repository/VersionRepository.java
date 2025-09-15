@@ -14,6 +14,10 @@ import java.util.Optional;
  */
 @Repository
 public interface VersionRepository extends MongoRepository<Version, String> {
+    /**
+     * Lấy tất cả version chưa bị xóa mềm
+     */
+    List<Version> findByIsDeletedFalse();
 
     /**
      * Tìm tất cả version theo contract ID

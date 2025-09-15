@@ -27,6 +27,9 @@ public class ESignatureCreateRequest {
     
     @NotBlank(message = "Email người ký không được để trống")
     private String signerEmail;
+
+    @NotBlank(message = "Vai trò người ký không được để trống")
+    private String signerRole;
     
     @NotNull(message = "Loại chữ ký không được để trống")
     private ESignature.SignatureType signatureType;

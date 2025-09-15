@@ -1,4 +1,4 @@
-﻿package com.devgo2003.docgo.contract_service.controller;
+package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Approval;
 import com.devgo2003.docgo.contract_service.service.ApprovalService;
@@ -766,11 +766,11 @@ public class ApprovalController {
 
     @GetMapping("/contracts/{contractId}/approvals/due-date")
     @Operation(summary = "Lấy approval theo due date", description = "Lấy danh sách approval trong khoảng due date")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDaterange(
+    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDateRange(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
             @RequestParam LocalDateTime endDate) {
-        List<Approval> approvals = approvalService.getApprovalsByDueDaterange(contractId, startDate, endDate);
+        List<Approval> approvals = approvalService.getApprovalsByDueDateRange(contractId, startDate, endDate);
         
         if (approvals.isEmpty()) {
                     RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()

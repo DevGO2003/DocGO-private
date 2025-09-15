@@ -37,8 +37,8 @@ RUN chown spring:spring app.jar
 # Switch to non-root user
 USER spring
 
-# Expose port 8003 (theo quy tắc port mapping)
-EXPOSE 8003
+# Expose internal runtime port (matches docker-compose command override)
+EXPOSE 8000
 
 # Command khởi chạy service
 CMD ["java", "-jar", "app.jar"]

@@ -437,10 +437,17 @@ public class ESignatureService {
         Contract contract = contractRepository.findById(request.getContractId())
                 .orElseThrow(() -> new RuntimeException("Contract not found"));
         
-        ESignature eSignature = new ESignature(contract, request.getSignerId(), request.getSignerName(), 
-                                              request.getSignerEmail(), request.getSignatureType().toString(), request.getSignatureData());
+        ESignature eSignature = new ESignature(
+                contract,
+                request.getSignerId(),
+                request.getSignerName(),
+                request.getSignerEmail(),
+                request.getSignerRole(),
+                request.getSignatureType()
+        );
         eSignature.setContractId(request.getContractId());
         eSignature.setSignatureImage(request.getSignatureImage());
+        eSignature.setSignatureData(request.getSignatureData());
         eSignature.setCertificateData(request.getCertificateData());
         eSignature.setCertificateIssuer(request.getCertificateIssuer());
         eSignature.setSignedAt(request.getSignedAt());

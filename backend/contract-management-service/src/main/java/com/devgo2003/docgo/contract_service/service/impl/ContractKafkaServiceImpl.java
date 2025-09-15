@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = false)
 public class ContractKafkaServiceImpl implements IContractKafkaService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractKafkaServiceImpl.class);

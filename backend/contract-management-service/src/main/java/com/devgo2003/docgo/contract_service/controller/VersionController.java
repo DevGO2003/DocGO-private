@@ -1,4 +1,4 @@
-﻿package com.devgo2003.docgo.contract_service.controller;
+package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Version;
 import com.devgo2003.docgo.contract_service.service.VersionService;

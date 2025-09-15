@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = false)
 public class ContractKafkaService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractKafkaService.class);
