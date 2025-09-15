@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.contract_service.controller;
+﻿package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.AuditLog;
 import com.devgo2003.docgo.contract_service.service.AuditService;
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/audit-logs")
-@Tag(name = "API Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
+@Tag(name = "API Quáº£n lÃ½ Audit Log", description = "CÃ¡c API Ä‘á»ƒ quáº£n lÃ½ nháº­t kÃ½ kiá»ƒm toÃ¡n trong há»‡ thá»‘ng DocGO")
 public class AuditController {
 
     private final AuditService auditService;
@@ -33,67 +33,67 @@ public class AuditController {
 
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách tất cả audit log", 
+        summary = "Láº¥y danh sÃ¡ch táº¥t cáº£ audit log", 
         description = """
-        🔹 Đầu vào
+        ðŸ”¹ Äáº§u vÃ o
         
-        📄 pageNumber (tùy chọn, query)
-        Loại: integer
-        Mô tả: Số trang (mặc định: 0)
+        ðŸ“„ pageNumber (tÃ¹y chá»n, query)
+        Loáº¡i: integer
+        MÃ´ táº£: Sá»‘ trang (máº·c Ä‘á»‹nh: 0)
         
-        📄 pageSize (tùy chọn, query)
-        Loại: integer
-        Mô tả: Kích thước trang (mặc định: 10)
+        ðŸ“„ pageSize (tÃ¹y chá»n, query)
+        Loáº¡i: integer
+        MÃ´ táº£: KÃ­ch thÆ°á»›c trang (máº·c Ä‘á»‹nh: 10)
         
-        📄 sortBy (tùy chọn, query)
-        Loại: string
-        Mô tả: Trường sắp xếp (mặc định: timestamp)
+        ðŸ“„ sortBy (tÃ¹y chá»n, query)
+        Loáº¡i: string
+        MÃ´ táº£: TrÆ°á»ng sáº¯p xáº¿p (máº·c Ä‘á»‹nh: timestamp)
         
-        📄 sortDirection (tùy chọn, query)
-        Loại: string
-        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        ðŸ“„ sortDirection (tÃ¹y chá»n, query)
+        Loáº¡i: string
+        MÃ´ táº£: HÆ°á»›ng sáº¯p xáº¿p: ASC hoáº·c DESC (máº·c Ä‘á»‹nh: DESC)
         
-        📄 searchTerm (tùy chọn, query)
-        Loại: string
-        Mô tả: Từ khóa tìm kiếm
+        ðŸ“„ searchTerm (tÃ¹y chá»n, query)
+        Loáº¡i: string
+        MÃ´ táº£: Tá»« khÃ³a tÃ¬m kiáº¿m
         
-        📄 includeDeleted (tùy chọn, query)
-        Loại: boolean
-        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        ðŸ“„ includeDeleted (tÃ¹y chá»n, query)
+        Loáº¡i: boolean
+        MÃ´ táº£: Bao gá»“m báº£n ghi Ä‘Ã£ xÃ³a (máº·c Ä‘á»‹nh: false)
         
-        🔹 Đầu ra
+        ðŸ”¹ Äáº§u ra
         
-        📝 data
-        Loại: List<AuditLog>
-        Mô tả: Danh sách audit log
+        ðŸ“ data
+        Loáº¡i: List<AuditLog>
+        MÃ´ táº£: Danh sÃ¡ch audit log
         
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
+        ðŸ“Š apiVersion
+        Loáº¡i: string
+        MÃ´ táº£: PhiÃªn báº£n API (v1)
         
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        ðŸ”¢ statusCode
+        Loáº¡i: integer
+        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 204: No Content)
         
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
+        ðŸ“‹ shortMessage
+        Loáº¡i: string
+        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
         
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
+        ðŸ“– description
+        Loáº¡i: string
+        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
         
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
+        â° timestamp
+        Loáº¡i: string
+        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
         
-        🔗 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
+        ðŸ”— requestId
+        Loáº¡i: string
+        MÃ´ táº£: ID duy nháº¥t cá»§a request
         
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
+        ðŸ“ path
+        Loáº¡i: string
+        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
         """
     )
     public ResponseEntity<RestResponse<List<AuditLog>>> getAllAuditLogs(
@@ -111,7 +111,7 @@ public class AuditController {
                 .apiVersion("v1")
                 .statusCode(204)
                 .shortMessage("No Content")
-                .description("Không có audit log nào.")
+                .description("KhÃ´ng cÃ³ audit log nÃ o.")
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -125,7 +125,7 @@ public class AuditController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Lấy danh sách audit log thành công.")
+            .description("Láº¥y danh sÃ¡ch audit log thÃ nh cÃ´ng.")
             .data(auditLogs)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -137,47 +137,47 @@ public class AuditController {
 
     @GetMapping("/{id}")
     @Operation(
-        summary = "Lấy chi tiết audit log", 
+        summary = "Láº¥y chi tiáº¿t audit log", 
         description = """
-        🔹 Đầu vào
+        ðŸ”¹ Äáº§u vÃ o
         
-        🔗 id (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của audit log cần lấy
+        ðŸ”— id (báº¯t buá»™c, path)
+        Loáº¡i: string
+        MÃ´ táº£: ID cá»§a audit log cáº§n láº¥y
         
-        🔹 Đầu ra
+        ðŸ”¹ Äáº§u ra
         
-        📝 data
-        Loại: AuditLog
-        Mô tả: Thông tin chi tiết audit log
+        ðŸ“ data
+        Loáº¡i: AuditLog
+        MÃ´ táº£: ThÃ´ng tin chi tiáº¿t audit log
         
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
+        ðŸ“Š apiVersion
+        Loáº¡i: string
+        MÃ´ táº£: PhiÃªn báº£n API (v1)
         
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        ðŸ”¢ statusCode
+        Loáº¡i: integer
+        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (200: OK, 404: Not Found)
         
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
+        ðŸ“‹ shortMessage
+        Loáº¡i: string
+        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
         
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
+        ðŸ“– description
+        Loáº¡i: string
+        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
         
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
+        â° timestamp
+        Loáº¡i: string
+        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
         
-        🔗 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
+        ðŸ”— requestId
+        Loáº¡i: string
+        MÃ´ táº£: ID duy nháº¥t cá»§a request
         
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
+        ðŸ“ path
+        Loáº¡i: string
+        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
         """
     )
     public ResponseEntity<RestResponse<AuditLog>> getAuditLog(@PathVariable String id) {
@@ -188,7 +188,7 @@ public class AuditController {
                 .apiVersion("v1")
                 .statusCode(404)
                 .shortMessage("Not Found")
-                .description("Không tìm thấy audit log với ID: " + id)
+                .description("KhÃ´ng tÃ¬m tháº¥y audit log vá»›i ID: " + id)
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
@@ -202,7 +202,7 @@ public class AuditController {
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Lấy chi tiết audit log thành công.")
+            .description("Láº¥y chi tiáº¿t audit log thÃ nh cÃ´ng.")
             .data(auditLog.get())
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -214,47 +214,47 @@ public class AuditController {
 
     @PostMapping
     @Operation(
-        summary = "Tạo audit log mới", 
+        summary = "Táº¡o audit log má»›i", 
         description = """
-        🔹 Đầu vào
+        ðŸ”¹ Äáº§u vÃ o
         
-        📄 auditLog (bắt buộc, body)
-        Loại: AuditLogCreateRequest
-        Mô tả: Thông tin audit log cần tạo (eventType, eventCategory, action, description, userId, userName, contractId)
+        ðŸ“„ auditLog (báº¯t buá»™c, body)
+        Loáº¡i: AuditLogCreateRequest
+        MÃ´ táº£: ThÃ´ng tin audit log cáº§n táº¡o (eventType, eventCategory, action, description, userId, userName, contractId)
         
-        🔹 Đầu ra
+        ðŸ”¹ Äáº§u ra
         
-        📝 data
-        Loại: AuditLog
-        Mô tả: Thông tin audit log đã được tạo thành công
+        ðŸ“ data
+        Loáº¡i: AuditLog
+        MÃ´ táº£: ThÃ´ng tin audit log Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
         
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
+        ðŸ“Š apiVersion
+        Loáº¡i: string
+        MÃ´ táº£: PhiÃªn báº£n API (v1)
         
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (201: Created)
+        ðŸ”¢ statusCode
+        Loáº¡i: integer
+        MÃ´ táº£: MÃ£ tráº¡ng thÃ¡i HTTP (201: Created)
         
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
+        ðŸ“‹ shortMessage
+        Loáº¡i: string
+        MÃ´ táº£: ThÃ´ng bÃ¡o ngáº¯n gá»n vá» káº¿t quáº£
         
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
+        ðŸ“– description
+        Loáº¡i: string
+        MÃ´ táº£: MÃ´ táº£ chi tiáº¿t vá» káº¿t quáº£ xá»­ lÃ½
         
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
+        â° timestamp
+        Loáº¡i: string
+        MÃ´ táº£: Thá»i Ä‘iá»ƒm xá»­ lÃ½ request (ISO-8601)
         
-        🔗 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
+        ðŸ”— requestId
+        Loáº¡i: string
+        MÃ´ táº£: ID duy nháº¥t cá»§a request
         
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
+        ðŸ“ path
+        Loáº¡i: string
+        MÃ´ táº£: ÄÆ°á»ng dáº«n API Ä‘Æ°á»£c gá»i
         """
     )
     public ResponseEntity<RestResponse<AuditLog>> createAuditLog(@RequestBody AuditLogCreateRequest request) {
@@ -264,7 +264,7 @@ public class AuditController {
             .apiVersion("v1")
             .statusCode(201)
             .shortMessage("Created")
-            .description("Tạo audit log thành công.")
+            .description("Táº¡o audit log thÃ nh cÃ´ng.")
             .data(auditLog)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
@@ -275,7 +275,7 @@ public class AuditController {
     }
 
     @PostMapping("/audit-logs")
-    @Operation(summary = "Tạo audit log mới", description = "Tạo audit log mới")
+    @Operation(summary = "Táº¡o audit log má»›i", description = "Táº¡o audit log má»›i")
     public ResponseEntity<RestResponse<AuditLog>> createAuditLog(
             @RequestParam String eventType,
             @RequestParam AuditLog.EventCategory eventCategory,
@@ -286,11 +286,22 @@ public class AuditController {
         
         AuditLog auditLog = auditService.createAuditLog(eventType, eventCategory, action, description, userId, userName);
         
-        return ResponseBuilder.success(auditLog, "Tạo audit log thành công");
+        RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Táº¡o audit log thÃ nh cÃ´ng.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/contracts/{contractId}/audit-logs")
-    @Operation(summary = "Tạo audit log cho contract", description = "Tạo audit log mới cho contract")
+    @Operation(summary = "Táº¡o audit log cho contract", description = "Táº¡o audit log má»›i cho contract")
     public ResponseEntity<RestResponse<AuditLog>> createAuditLogForContract(
             @PathVariable String contractId,
             @RequestParam String eventType,
@@ -302,133 +313,364 @@ public class AuditController {
         
         AuditLog auditLog = auditService.createAuditLogForContract(contractId, eventType, eventCategory, action, description, userId, userName);
         
-        return ResponseBuilder.success(auditLog, "Tạo audit log cho contract thành công");
+        RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Táº¡o audit log cho contract thÃ nh cÃ´ng.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs")
-    @Operation(summary = "Lấy danh sách audit log", description = "Lấy tất cả audit log của contract")
+    @Operation(summary = "Láº¥y danh sÃ¡ch audit log", description = "Láº¥y táº¥t cáº£ audit log cá»§a contract")
     public ResponseEntity<RestResponse<List<AuditLog>>> getAuditLogsByContractId(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getAuditLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log nào cho contract này");
+            RestResponse<List<AuditLog>> response = RestResponse.<List<AuditLog>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("KhÃ´ng cÃ³ audit log nÃ o cho contract nÃ y.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log thành công");
+        RestResponse<List<AuditLog>> response = RestResponse.<List<AuditLog>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/audit-logs/{id}")
-    @Operation(summary = "Lấy audit log theo ID", description = "Lấy chi tiết audit log")
+    @Operation(summary = "Láº¥y audit log theo ID", description = "Láº¥y chi tiáº¿t audit log")
     public ResponseEntity<RestResponse<AuditLog>> getAuditLogById(@PathVariable String id) {
         Optional<AuditLog> auditLog = auditService.getAuditLogById(id);
         
         if (auditLog.isEmpty()) {
-            return ResponseBuilder.notFound("Không tìm thấy audit log");
+            RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("KhÃ´ng tÃ¬m tháº¥y audit log.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLog.get(), "Lấy audit log thành công");
+        RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y audit log thÃ nh cÃ´ng.")
+            .data(auditLog.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/category/{eventCategory}")
-    @Operation(summary = "Lấy audit log theo event category", description = "Lấy danh sách audit log theo event category")
+    @Operation(summary = "Láº¥y audit log theo event category", description = "Láº¥y danh sÃ¡ch audit log theo event category")
     public ResponseEntity<RestResponse<List<AuditLog>>> getAuditLogsByEventCategory(
             @PathVariable String contractId,
             @PathVariable AuditLog.EventCategory eventCategory) {
         List<AuditLog> auditLogs = auditService.getAuditLogsByEventCategory(contractId, eventCategory);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log nào với event category này");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log nÃ o vá»›i event category nÃ y.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log theo event category thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log theo event category thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/audit-logs/user/{userId}")
-    @Operation(summary = "Lấy audit log theo user ID", description = "Lấy danh sách audit log của user")
+    @Operation(summary = "Láº¥y audit log theo user ID", description = "Láº¥y danh sÃ¡ch audit log cá»§a user")
     public ResponseEntity<RestResponse<List<AuditLog>>> getAuditLogsByUserId(@PathVariable String userId) {
         List<AuditLog> auditLogs = auditService.getAuditLogsByUserId(userId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log nào của user này");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log nÃ o cá»§a user nÃ y.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log của user thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log cá»§a user thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/successful")
-    @Operation(summary = "Lấy audit log successful", description = "Lấy danh sách audit log thành công")
+    @Operation(summary = "Láº¥y audit log successful", description = "Láº¥y danh sÃ¡ch audit log thÃ nh cÃ´ng")
     public ResponseEntity<RestResponse<List<AuditLog>>> getSuccessfulLogs(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getSuccessfulLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log successful nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log successful nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log successful thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log successful thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/failed")
-    @Operation(summary = "Lấy audit log failed", description = "Lấy danh sách audit log thất bại")
+    @Operation(summary = "Láº¥y audit log failed", description = "Láº¥y danh sÃ¡ch audit log tháº¥t báº¡i")
     public ResponseEntity<RestResponse<List<AuditLog>>> getFailedLogs(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getFailedLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log failed nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log failed nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log failed thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log failed thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/high-severity")
-    @Operation(summary = "Lấy audit log high severity", description = "Lấy danh sách audit log mức độ cao")
+    @Operation(summary = "Láº¥y audit log high severity", description = "Láº¥y danh sÃ¡ch audit log má»©c Ä‘á»™ cao")
     public ResponseEntity<RestResponse<List<AuditLog>>> getHighSeverityLogs(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getHighSeverityLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log high severity nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log high severity nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log high severity thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log high severity thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/sensitive")
-    @Operation(summary = "Lấy audit log sensitive", description = "Lấy danh sách audit log nhạy cảm")
+    @Operation(summary = "Láº¥y audit log sensitive", description = "Láº¥y danh sÃ¡ch audit log nháº¡y cáº£m")
     public ResponseEntity<RestResponse<List<AuditLog>>> getSensitiveLogs(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getSensitiveLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log sensitive nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log sensitive nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log sensitive thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log sensitive thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/compliance-required")
-    @Operation(summary = "Lấy audit log compliance required", description = "Lấy danh sách audit log cần compliance")
+    @Operation(summary = "Láº¥y audit log compliance required", description = "Láº¥y danh sÃ¡ch audit log cáº§n compliance")
     public ResponseEntity<RestResponse<List<AuditLog>>> getComplianceRequiredLogs(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getComplianceRequiredLogsByContractId(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log compliance required nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log compliance required nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log compliance required thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log compliance required thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/order-by-created")
-    @Operation(summary = "Lấy audit log sắp xếp theo thời gian tạo", description = "Lấy danh sách audit log sắp xếp theo thời gian tạo")
+    @Operation(summary = "Láº¥y audit log sáº¯p xáº¿p theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch audit log sáº¯p xáº¿p theo thá»i gian táº¡o")
     public ResponseEntity<RestResponse<List<AuditLog>>> getAuditLogsOrderByCreatedAt(@PathVariable String contractId) {
         List<AuditLog> auditLogs = auditService.getAuditLogsByContractIdOrderByCreatedAt(contractId);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log nào");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log nÃ o.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log sắp xếp theo thời gian tạo thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log sáº¯p xáº¿p theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/created-between")
-    @Operation(summary = "Lấy audit log theo thời gian tạo", description = "Lấy danh sách audit log trong khoảng thời gian tạo")
+    @Operation(summary = "Láº¥y audit log theo thá»i gian táº¡o", description = "Láº¥y danh sÃ¡ch audit log trong khoáº£ng thá»i gian táº¡o")
     public ResponseEntity<RestResponse<List<AuditLog>>> getAuditLogsByCreatedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -436,98 +678,231 @@ public class AuditController {
         List<AuditLog> auditLogs = auditService.getAuditLogsByContractIdAndCreatedAtBetween(contractId, startDate, endDate);
         
         if (auditLogs.isEmpty()) {
-            return ResponseBuilder.noContent("Không có audit log nào trong khoảng thời gian này");
+                    RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(204)
+            .shortMessage("No Content")
+            .description("KhÃ´ng cÃ³ audit log nÃ o trong khoáº£ng thá»i gian nÃ y.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(auditLogs, "Lấy danh sách audit log theo thời gian tạo thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Láº¥y danh sÃ¡ch audit log theo thá»i gian táº¡o thÃ nh cÃ´ng.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/mark-success")
-    @Operation(summary = "Đánh dấu thành công", description = "Đánh dấu audit log thành công")
+    @Operation(summary = "ÄÃ¡nh dáº¥u thÃ nh cÃ´ng", description = "ÄÃ¡nh dáº¥u audit log thÃ nh cÃ´ng")
     public ResponseEntity<RestResponse<AuditLog>> markAsSuccess(@PathVariable String id) {
         AuditLog auditLog = auditService.markAsSuccess(id);
         
-        return ResponseBuilder.success(auditLog, "Đánh dấu audit log thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("ÄÃ¡nh dáº¥u audit log thÃ nh cÃ´ng.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/mark-failure")
-    @Operation(summary = "Đánh dấu thất bại", description = "Đánh dấu audit log thất bại")
+    @Operation(summary = "ÄÃ¡nh dáº¥u tháº¥t báº¡i", description = "ÄÃ¡nh dáº¥u audit log tháº¥t báº¡i")
     public ResponseEntity<RestResponse<AuditLog>> markAsFailure(
             @PathVariable String id,
             @RequestParam String errorCode,
             @RequestParam String errorMessage) {
         AuditLog auditLog = auditService.markAsFailure(id, errorCode, errorMessage);
         
-        return ResponseBuilder.success(auditLog, "Đánh dấu audit log thất bại");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("ÄÃ¡nh dáº¥u audit log tháº¥t báº¡i.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/mark-sensitive")
-    @Operation(summary = "Đánh dấu sensitive", description = "Đánh dấu audit log là nhạy cảm")
+    @Operation(summary = "ÄÃ¡nh dáº¥u sensitive", description = "ÄÃ¡nh dáº¥u audit log lÃ  nháº¡y cáº£m")
     public ResponseEntity<RestResponse<AuditLog>> markAsSensitive(@PathVariable String id) {
         AuditLog auditLog = auditService.markAsSensitive(id);
         
-        return ResponseBuilder.success(auditLog, "Đánh dấu audit log sensitive");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("ÄÃ¡nh dáº¥u audit log sensitive.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/compliance-requirement")
-    @Operation(summary = "Cập nhật compliance requirement", description = "Cập nhật yêu cầu compliance")
+    @Operation(summary = "Cáº­p nháº­t compliance requirement", description = "Cáº­p nháº­t yÃªu cáº§u compliance")
     public ResponseEntity<RestResponse<AuditLog>> setComplianceRequirement(
             @PathVariable String id,
             @RequestParam String complianceStandard) {
         AuditLog auditLog = auditService.setComplianceRequirement(id, complianceStandard);
         
-        return ResponseBuilder.success(auditLog, "Cập nhật compliance requirement thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cáº­p nháº­t compliance requirement thÃ nh cÃ´ng.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/mark-exported")
-    @Operation(summary = "Đánh dấu đã exported", description = "Đánh dấu audit log đã được exported")
+    @Operation(summary = "ÄÃ¡nh dáº¥u Ä‘Ã£ exported", description = "ÄÃ¡nh dáº¥u audit log Ä‘Ã£ Ä‘Æ°á»£c exported")
     public ResponseEntity<RestResponse<AuditLog>> markAsExported(
             @PathVariable String id,
             @RequestParam String exportedBy) {
         AuditLog auditLog = auditService.markAsExported(id, exportedBy);
         
-        return ResponseBuilder.success(auditLog, "Đánh dấu audit log đã exported");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("ÄÃ¡nh dáº¥u audit log Ä‘Ã£ exported.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/audit-logs/{id}")
-    @Operation(summary = "Xóa audit log", description = "Soft delete audit log")
+    @Operation(summary = "XÃ³a audit log", description = "Soft delete audit log")
     public ResponseEntity<RestResponse<Void>> deleteAuditLog(
             @PathVariable String id,
             @RequestParam String deletedBy) {
         auditService.deleteAuditLog(id, deletedBy);
         
-        return ResponseBuilder.success(null, "Xóa audit log thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("XÃ³a audit log thÃ nh cÃ´ng.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/audit-logs/{id}/restore")
-    @Operation(summary = "Khôi phục audit log", description = "Khôi phục audit log đã xóa")
+    @Operation(summary = "KhÃ´i phá»¥c audit log", description = "KhÃ´i phá»¥c audit log Ä‘Ã£ xÃ³a")
     public ResponseEntity<RestResponse<AuditLog>> restoreAuditLog(@PathVariable String id) {
         AuditLog auditLog = auditService.restoreAuditLog(id);
         
-        return ResponseBuilder.success(auditLog, "Khôi phục audit log thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("KhÃ´i phá»¥c audit log thÃ nh cÃ´ng.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/count")
-    @Operation(summary = "Đếm số audit log", description = "Đếm số lượng audit log")
+    @Operation(summary = "Äáº¿m sá»‘ audit log", description = "Äáº¿m sá»‘ lÆ°á»£ng audit log")
     public ResponseEntity<RestResponse<Long>> countAuditLogsByContractId(@PathVariable String contractId) {
         long count = auditService.countAuditLogsByContractId(contractId);
         
-        return ResponseBuilder.success(count, "Đếm số audit log thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Äáº¿m sá»‘ audit log thÃ nh cÃ´ng.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/audit-logs/user/{userId}/count")
-    @Operation(summary = "Đếm số audit log của user", description = "Đếm số lượng audit log của user")
+    @Operation(summary = "Äáº¿m sá»‘ audit log cá»§a user", description = "Äáº¿m sá»‘ lÆ°á»£ng audit log cá»§a user")
     public ResponseEntity<RestResponse<Long>> countAuditLogsByUserId(@PathVariable String userId) {
         long count = auditService.countAuditLogsByUserId(userId);
         
-        return ResponseBuilder.success(count, "Đếm số audit log của user thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Äáº¿m sá»‘ audit log cá»§a user thÃ nh cÃ´ng.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/audit-logs/exists")
-    @Operation(summary = "Kiểm tra có audit log", description = "Kiểm tra contract có audit log không")
+    @Operation(summary = "Kiá»ƒm tra cÃ³ audit log", description = "Kiá»ƒm tra contract cÃ³ audit log khÃ´ng")
     public ResponseEntity<RestResponse<Boolean>> existsAuditLogsByContractId(@PathVariable String contractId) {
         boolean exists = auditService.existsAuditLogsByContractId(contractId);
         
-        return ResponseBuilder.success(exists, "Kiểm tra có audit log thành công");
+                RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Kiá»ƒm tra cÃ³ audit log thÃ nh cÃ´ng.")
+            .data(exists)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
+

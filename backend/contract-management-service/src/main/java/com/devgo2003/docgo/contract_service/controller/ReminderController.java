@@ -4,7 +4,6 @@ import com.devgo2003.docgo.contract_service.entity.Reminder;
 import com.devgo2003.docgo.contract_service.service.ReminderService;
 import com.devgo2003.docgo.contract_service.dto.ReminderCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
-import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -285,7 +284,18 @@ public class ReminderController {
         
         Reminder reminder = reminderService.createReminder(contractId, title, description, reminderType, scheduledAt);
         
-        return ResponseBuilder.success(reminder, "Tạo reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders")
@@ -294,10 +304,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào cho contract này");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào cho contract này.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/reminders/{id}")
@@ -306,10 +338,32 @@ public class ReminderController {
         Optional<Reminder> reminder = reminderService.getReminderById(id);
         
         if (reminder.isEmpty()) {
-            return ResponseBuilder.notFound("Không tìm thấy reminder");
+            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy reminder.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminder.get(), "Lấy reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy reminder thành công.")
+            .data(reminder.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders/pending")
@@ -318,10 +372,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getPendingRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào đang pending");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào đang pending.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder pending thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder pending thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders/completed")
@@ -330,10 +406,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getCompletedRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào đã hoàn thành");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào đã hoàn thành.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder completed thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder completed thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders/escalated")
@@ -342,10 +440,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getEscalatedRemindersByContractId(contractId);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào đã escalated");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào đã escalated.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder escalated thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder escalated thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/reminders/due")
@@ -354,10 +474,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getDueReminders(currentTime);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào đến hạn");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào đến hạn.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder đến hạn thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder đến hạn thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/reminders/overdue")
@@ -366,10 +508,32 @@ public class ReminderController {
         List<Reminder> reminders = reminderService.getOverdueReminders(currentTime);
         
         if (reminders.isEmpty()) {
-            return ResponseBuilder.noContent("Không có reminder nào quá hạn");
+            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có reminder nào quá hạn.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(reminders, "Lấy danh sách reminder quá hạn thành công");
+        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách reminder quá hạn thành công.")
+            .data(reminders)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/reminders/{id}/send")
@@ -377,7 +541,18 @@ public class ReminderController {
     public ResponseEntity<RestResponse<Reminder>> sendReminder(@PathVariable String id) {
         Reminder reminder = reminderService.sendReminder(id);
         
-        return ResponseBuilder.success(reminder, "Gửi reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Gửi reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/reminders/{id}/complete")
@@ -388,7 +563,18 @@ public class ReminderController {
             @RequestParam String completionNotes) {
         Reminder reminder = reminderService.completeReminder(id, completedBy, completionNotes);
         
-        return ResponseBuilder.success(reminder, "Hoàn thành reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Hoàn thành reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/reminders/{id}/cancel")
@@ -399,7 +585,18 @@ public class ReminderController {
             @RequestParam String cancellationReason) {
         Reminder reminder = reminderService.cancelReminder(id, cancelledBy, cancellationReason);
         
-        return ResponseBuilder.success(reminder, "Hủy reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Hủy reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/reminders/{id}/escalate")
@@ -409,7 +606,18 @@ public class ReminderController {
             @RequestParam String escalatedTo) {
         Reminder reminder = reminderService.escalateReminder(id, escalatedTo);
         
-        return ResponseBuilder.success(reminder, "Escalate reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Escalate reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/reminders/{id}")
@@ -419,7 +627,18 @@ public class ReminderController {
             @RequestParam String deletedBy) {
         reminderService.deleteReminder(id, deletedBy);
         
-        return ResponseBuilder.success(null, "Xóa reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Xóa reminder thành công.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/reminders/{id}/restore")
@@ -427,7 +646,18 @@ public class ReminderController {
     public ResponseEntity<RestResponse<Reminder>> restoreReminder(@PathVariable String id) {
         Reminder reminder = reminderService.restoreReminder(id);
         
-        return ResponseBuilder.success(reminder, "Khôi phục reminder thành công");
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Khôi phục reminder thành công.")
+            .data(reminder)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders/count")
@@ -435,7 +665,18 @@ public class ReminderController {
     public ResponseEntity<RestResponse<Long>> countRemindersByContractId(@PathVariable String contractId) {
         long count = reminderService.countRemindersByContractId(contractId);
         
-        return ResponseBuilder.success(count, "Đếm số reminder thành công");
+        RestResponse<Long> response = RestResponse.<Long>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đếm số reminder thành công.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reminders/exists")
@@ -443,6 +684,17 @@ public class ReminderController {
     public ResponseEntity<RestResponse<Boolean>> existsRemindersByContractId(@PathVariable String contractId) {
         boolean exists = reminderService.existsRemindersByContractId(contractId);
         
-        return ResponseBuilder.success(exists, "Kiểm tra có reminder thành công");
+        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Kiểm tra có reminder thành công.")
+            .data(exists)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
