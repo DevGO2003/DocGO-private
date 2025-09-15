@@ -219,9 +219,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setAccessToken(accessToken)
       setTokenData(newTokenData)
-      setUser(user)
-      
-      return true
+      // Prefer server user; if missing, fetch profile before considering success
+      if (user) {
+        setUser(user)
+        return true
+      }
+
+      try {
+        const me = await authAPI.getProfile()
+        const current = me.data?.data as unknown as User
+        if (current) {
+          setUser(current)
+          return true
+        }
+      } catch (e) {
+        // fall through to failure handling below
+        console.warn('Login succeeded but fetching profile failed:', e)
+      }
+
+      // If we cannot obtain user info, treat as failed to prevent redirect loop
+      setAccessToken(null)
+      setTokenData(null)
+      setUser(null)
+      clearStorage()
+      return false
     } catch (error) {
       console.error('Login error:', error)
       return false

@@ -736,7 +736,7 @@ async def test_gemini_api_key_api(request: Request):
                 "envFiles": {
                     "dotenvLoaded": True,
                     "envLocalExists": os.path.exists(".env.local"),
-                    "envExampleExists": os.path.exists("env_exmaple.txt")
+                    "envExampleExists": os.path.exists("env/.env.example")
                 }
             }
         }
