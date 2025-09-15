@@ -228,8 +228,10 @@ class ApiClient {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_data')
-      // Avoid forcing a full reload if we're already on the login page
-      if (window.location.pathname !== '/auth/login') {
+      // Avoid forcing a full reload if we're already on any auth page
+      const path = window.location.pathname || ''
+      const isOnAuthPages = path === '/auth/login' || path.startsWith('/auth')
+      if (!isOnAuthPages) {
         window.location.href = '/auth/login'
       }
     }

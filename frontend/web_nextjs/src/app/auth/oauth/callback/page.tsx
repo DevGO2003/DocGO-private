@@ -81,6 +81,24 @@ export default function OAuthCallbackPage() {
               
               // Update auth context
               setAuthData(userData)
+
+              // If opened as a popup, notify opener and close without reloading parent
+              try {
+                const opener = window.opener
+                if (opener && !opener.closed) {
+                  const targetOrigin = window.location.origin
+                  opener.postMessage({
+                    type: 'oauth_success',
+                    token,
+                    refreshToken: refreshToken || null,
+                    username
+                  }, targetOrigin)
+                  window.close()
+                  return
+                }
+              } catch (e) {
+                // ignore if cross-origin or no opener
+              }
               
               setStatus('success')
               setMessage(`Đăng nhập Google thành công! Chào mừng ${username}`)
@@ -113,6 +131,18 @@ export default function OAuthCallbackPage() {
               details: `Thiếu: ${missingParams.join(', ')}`
             })
             setMessage('Thông tin đăng nhập không đầy đủ.')
+
+            // Inform opener about error if in popup
+            try {
+              const opener = window.opener
+              if (opener && !opener.closed) {
+                const targetOrigin = window.location.origin
+                opener.postMessage({
+                  type: 'oauth_error',
+                  message: 'Thông tin đăng nhập không đầy đủ.',
+                }, targetOrigin)
+              }
+            } catch {}
           }
         } else {
           setStatus('error')
@@ -122,6 +152,18 @@ export default function OAuthCallbackPage() {
             details: 'URL không chứa thông tin OAuth callback'
           })
           setMessage('URL callback không hợp lệ.')
+
+          // Inform opener if exists
+          try {
+            const opener = window.opener
+            if (opener && !opener.closed) {
+              const targetOrigin = window.location.origin
+              opener.postMessage({
+                type: 'oauth_error',
+                message: 'URL callback không hợp lệ.',
+              }, targetOrigin)
+            }
+          } catch {}
         }
       } catch (error) {
         console.error('OAuth callback error:', error)
@@ -132,6 +174,18 @@ export default function OAuthCallbackPage() {
           details: error instanceof Error ? error.message : 'Unknown error'
         })
         setMessage('Có lỗi xảy ra trong quá trình đăng nhập.')
+
+        // Inform opener on unknown error as well
+        try {
+          const opener = window.opener
+          if (opener && !opener.closed) {
+            const targetOrigin = window.location.origin
+            opener.postMessage({
+              type: 'oauth_error',
+              message: 'Có lỗi xảy ra trong quá trình đăng nhập.',
+            }, targetOrigin)
+          }
+        } catch {}
       }
     }
 

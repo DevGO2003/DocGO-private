@@ -37,6 +37,33 @@ export default function LoginPage() {
     clearErrors
   } = useForm<LoginFormData>()
 
+  // Listen for OAuth popup messages to avoid full page reload
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const allowedOrigin = process.env.NEXT_PUBLIC_APP_ORIGIN || window.location.origin
+        if (event.origin !== allowedOrigin) return
+        if (!event.data || typeof event.data !== 'object') return
+
+        if (event.data.type === 'oauth_success') {
+          // Tokens may already be stored by the popup; just route to dashboard
+          setOauthLoading(false)
+          router.push('/dashboard')
+        } else if (event.data.type === 'oauth_error') {
+          setOauthLoading(false)
+          setOauthError(event.data.message || 'Đăng nhập Google thất bại')
+        }
+      } catch (e) {
+        // ignore malformed messages
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [router])
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setLoginError(null)
@@ -120,12 +147,12 @@ export default function LoginPage() {
           // Listen for the new window to close or receive message
           const checkClosed = setInterval(() => {
             if (newWindow.closed) {
-              clearInterval(checkClosed);
-              setOauthLoading(false);
-              // Refresh the page or check login status
-              window.location.reload();
+              clearInterval(checkClosed)
+              setOauthLoading(false)
+              // Do not hard-reload; if postMessage was received we already navigated.
+              // Optionally soft refresh data here if needed.
             }
-          }, 1000);
+          }, 1000)
           
           // Timeout after 5 minutes to prevent infinite loading
           setTimeout(() => {

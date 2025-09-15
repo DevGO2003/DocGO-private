@@ -10,12 +10,28 @@ const store = new Map<string, { count: number; resetAt: number }>()
 
 // Public routes that don't require authentication
 const publicRoutes = [
+  // Legacy/public BFF auth endpoints
   '/api/auth/login',
   '/api/auth/refresh',
+  // OpenAPI & health
   '/api/health',
   '/api/docs',
   '/api/swagger.json'
 ]
+
+function isPublicAuthPath(pathname: string): boolean {
+  // Allow direct proxy calls to authentication service auth endpoints (login/register/refresh, oauth)
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/login')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/register')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/refresh')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/forgot-password')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/reset-password')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/oauth2')) return true
+  if (pathname.startsWith('/api/v1/authentication-identity-service/oauth2')) return true
+  // Public health endpoint of auth service
+  if (pathname.startsWith('/api/v1/authentication-identity-service/auth/health')) return true
+  return false
+}
 
 // Admin routes that require admin role
 const adminRoutes = [
@@ -114,8 +130,8 @@ async function handleCORS(req: NextRequest): Promise<NextResponse | null> {
 async function handleAuthentication(req: NextRequest): Promise<NextResponse | null> {
   const pathname = req.nextUrl.pathname
   
-  // Skip authentication for public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Skip authentication for public routes or public auth paths
+  if (publicRoutes.some(route => pathname.startsWith(route)) || isPublicAuthPath(pathname)) {
     return null
   }
   

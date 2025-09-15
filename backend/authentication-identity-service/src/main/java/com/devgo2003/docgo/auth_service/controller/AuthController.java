@@ -10,6 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import com.devgo2003.docgo.auth_service.dto.LoginRequest;
+import com.devgo2003.docgo.auth_service.dto.RegisterRequest;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -26,10 +31,10 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập", description = "Đăng nhập bằng username và password, trả về accessToken và refreshToken")
-    public ResponseEntity<RestResponse<AuthResponse>> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<RestResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         String requestId = UUID.randomUUID().toString();
-        String username = body.getOrDefault("username", "");
-        String password = body.getOrDefault("password", "");
+        String username = request.getUsername();
+        String password = request.getPassword();
 
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             return ResponseEntity.badRequest().body(RestResponse.<AuthResponse>builder()
@@ -72,11 +77,11 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Đăng ký", description = "Tạo tài khoản mới")
-    public ResponseEntity<RestResponse<AuthResponse>> register(@RequestBody Map<String, String> body) {
+    public ResponseEntity<RestResponse<AuthResponse>> register(@RequestBody RegisterRequest request) {
         String requestId = UUID.randomUUID().toString();
-        String username = body.getOrDefault("username", "");
-        String email = body.getOrDefault("email", "");
-        String password = body.getOrDefault("password", "");
+        String username = request.getUsername();
+        String email = request.getEmail();
+        String password = request.getPassword();
 
         if (username.isBlank() || email.isBlank() || password.isBlank()) {
             return ResponseEntity.badRequest().body(RestResponse.<AuthResponse>builder()
