@@ -168,10 +168,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // General File Management Service (FastAPI) - Port 8018
-    this.addService('general-file-management', {
-      name: 'general-file-management-service',
-      url: selectUrl(process.env.GENERAL_FILE_MANAGEMENT_SERVICE_URL, 'http://general-file-management-service:8018', 'http://localhost:8018'),
+    // File Storage Asset Service (FastAPI) - Port 8012
+    this.addService('file-storage-asset', {
+      name: 'file-storage-asset-service',
+      url: selectUrl(process.env.FILE_STORAGE_ASSET_SERVICE_URL, 'http://file-storage-asset-service:8012', 'http://localhost:8012'),
       healthCheck: '/health',
       timeout: 10000
     });

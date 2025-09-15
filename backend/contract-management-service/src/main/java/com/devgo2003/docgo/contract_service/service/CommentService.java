@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.Comment;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.CommentCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.CommentRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,5 +275,32 @@ public class CommentService {
 
     public boolean existsPinnedCommentsByContractId(String contractId) {
         return commentRepository.existsPinnedCommentsByContractId(contractId);
+    }
+
+    /**
+     * Tạo comment mới từ CommentCreateRequest
+     */
+    public Comment createComment(CommentCreateRequest request) {
+        Contract contract = contractRepository.findById(request.getContractId())
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+        
+        Comment comment = new Comment(contract, request.getAuthorId(), request.getAuthorName(), 
+                                    request.getAuthorEmail(), request.getContent(), request.getCommentType());
+        comment.setContractId(request.getContractId());
+        comment.setParentCommentId(request.getParentCommentId());
+        comment.setMentions(request.getMentions());
+        comment.setAttachments(request.getAttachments());
+        comment.setIsPrivate(request.getIsPrivate());
+        comment.setIsPinned(request.getIsPinned());
+        comment.initializeNewEntity();
+        
+        return commentRepository.save(comment);
+    }
+
+    /**
+     * Lấy tất cả comment
+     */
+    public List<Comment> getAllComments() {
+        return commentRepository.findByIsDeletedFalse();
     }
 }

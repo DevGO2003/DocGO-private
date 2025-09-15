@@ -115,7 +115,7 @@ async def on_shutdown():
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
     """
-    Validation error handler - trả về RestResponse format cho lỗi validation
+    Validation error handler - trả về HTTP 200 với statusCode 400 trong RestResponse format
     """
     from schemas.response import ErrorResponse
     
@@ -124,8 +124,8 @@ async def validation_exception_handler(request, exc):
         error_details.append(f"{'.'.join(str(loc) for loc in error['loc'])}: {error['msg']}")
     
     error_response = ErrorResponse(
-        statusCode=422,
-        shortMessage="Validation Error",
+        statusCode=400,
+        shortMessage="Bad Request",
         description="Dữ liệu đầu vào không hợp lệ",
         error="; ".join(error_details),
         path=str(request.url),
@@ -134,19 +134,32 @@ async def validation_exception_handler(request, exc):
     )
     
     return JSONResponse(
-        status_code=422,
+        status_code=200,  # Luôn trả về HTTP 200
         content=error_response.model_dump(mode='json')
     )
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     """
-    Custom HTTP exception handler - trả về RestResponse format
+    Custom HTTP exception handler - trả về HTTP 200 với statusCode tương ứng trong RestResponse format
     """
     from schemas.response import ErrorResponse
     
+    # Map HTTP status codes to statusCode trong RestResponse
+    status_code_mapping = {
+        400: 400,  # Bad Request
+        401: 401,  # Unauthorized
+        403: 403,  # Forbidden
+        404: 404,  # Not Found
+        409: 409,  # Conflict
+        422: 422,  # Unprocessable Entity
+        500: 500   # Internal Server Error
+    }
+    
+    mapped_status_code = status_code_mapping.get(exc.status_code, 500)
+    
     error_response = ErrorResponse(
-        statusCode=exc.status_code,
+        statusCode=mapped_status_code,
         shortMessage="Error",
         description=f"HTTP {exc.status_code}: {exc.detail}",
         error=exc.detail,
@@ -156,14 +169,14 @@ async def http_exception_handler(request, exc):
     )
     
     return JSONResponse(
-        status_code=exc.status_code,
+        status_code=200,  # Luôn trả về HTTP 200
         content=error_response.model_dump(mode='json')
     )
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     """
-    General exception handler - trả về RestResponse format
+    General exception handler - trả về HTTP 200 với statusCode 500 trong RestResponse format
     """
     from schemas.response import ErrorResponse
     
@@ -178,7 +191,7 @@ async def general_exception_handler(request, exc):
     )
     
     return JSONResponse(
-        status_code=500,
+        status_code=200,  # Luôn trả về HTTP 200
         content=error_response.model_dump(mode='json')
     )
 

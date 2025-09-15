@@ -2,25 +2,277 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Comment;
 import com.devgo2003.docgo.contract_service.service.CommentService;
+import com.devgo2003.docgo.contract_service.dto.CommentCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service")
-@Tag(name = "Comment Management", description = "API quản lý bình luận và cộng tác trên hợp đồng")
+@RequestMapping("/api/v1/contract-management-service/comments")
+@Tag(name = "API Quản lý Bình luận", description = "Các API để quản lý bình luận và cộng tác trong hệ thống DocGO")
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
+    private final HttpServletRequest request;
+
+    public CommentController(CommentService commentService, HttpServletRequest request) {
+        this.commentService = commentService;
+        this.request = request;
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Lấy danh sách tất cả bình luận", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<Comment>
+        Mô tả: Danh sách bình luận
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<Comment>>> getAllComments(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        List<Comment> comments = commentService.getAllComments();
+        
+        if (comments.isEmpty()) {
+            RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có bình luận nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách bình luận thành công.")
+            .data(comments)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Lấy chi tiết bình luận", 
+        description = """
+        🔹 Đầu vào
+        
+        🔗 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của bình luận cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Comment
+        Mô tả: Thông tin chi tiết bình luận
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Comment>> getComment(@PathVariable String id) {
+        Optional<Comment> comment = commentService.getCommentById(id);
+        
+        if (comment.isEmpty()) {
+            RestResponse<Comment> response = RestResponse.<Comment>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy bình luận với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy chi tiết bình luận thành công.")
+            .data(comment.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "Tạo bình luận mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 comment (bắt buộc, body)
+        Loại: CommentCreateRequest
+        Mô tả: Thông tin bình luận cần tạo (contractId, authorId, authorName, authorEmail, content, commentType, parentCommentId)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Comment
+        Mô tả: Thông tin bình luận đã được tạo thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Comment>> createComment(@RequestBody CommentCreateRequest request) {
+        Comment comment = commentService.createComment(request);
+        
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo bình luận thành công.")
+            .data(comment)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(this.request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/contracts/{contractId}/comments")
     @Operation(summary = "Tạo comment mới", description = "Tạo comment mới cho contract")

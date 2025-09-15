@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.AuditLog;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.AuditLogCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.AuditLogRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -538,5 +539,28 @@ public class AuditService {
 
     public boolean existsUnexportedLogsByContractId(String contractId) {
         return auditLogRepository.existsUnexportedLogsByContractId(contractId);
+    }
+
+    /**
+     * Tạo audit log mới từ AuditLogCreateRequest
+     */
+    public AuditLog createAuditLog(AuditLogCreateRequest request) {
+        AuditLog auditLog = new AuditLog(request.getEventType(), request.getEventCategory(), 
+                                       request.getAction(), request.getDescription(), 
+                                       request.getUserId(), request.getUserName());
+        auditLog.setContractId(request.getContractId());
+        auditLog.setIpAddress(request.getIpAddress());
+        auditLog.setUserAgent(request.getUserAgent());
+        auditLog.setAdditionalData(request.getAdditionalData());
+        auditLog.initializeNewEntity();
+        
+        return auditLogRepository.save(auditLog);
+    }
+
+    /**
+     * Lấy tất cả audit log
+     */
+    public List<AuditLog> getAllAuditLogs() {
+        return auditLogRepository.findByIsDeletedFalse();
     }
 }

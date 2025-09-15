@@ -72,49 +72,49 @@ async def extract_api(
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    📄 file (bắt buộc, body)
+    📁 file (bắt buộc, multipart/form-data)
     Loại: UploadFile (DOCX hoặc PDF)
-    Mô tả: Tệp hợp đồng cần trích xuất toàn bộ nội dung văn bản.
+    Mô tả: Tệp hợp đồng cần trích xuất toàn bộ nội dung văn bản
     
     🔑 gemini_api_key (tùy chọn, header)
     Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📝 data
+    📄 data
     Loại: string
-    Mô tả: Chuỗi văn bản chứa toàn bộ nội dung được trích xuất từ file (không qua AI xử lý).
+    Mô tả: Chuỗi văn bản chứa toàn bộ nội dung được trích xuất từ file (không qua AI xử lý)
     
     📊 apiVersion
     Loại: string
-    Mô tả: Phiên bản API (v1).
+    Mô tả: Phiên bản API (v1)
     
     🔢 statusCode
     Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server).
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
     
     📋 shortMessage
     Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả.
+    Mô tả: Thông báo ngắn gọn về kết quả
     
     📖 description
     Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý.
+    Mô tả: Mô tả chi tiết về kết quả xử lý
     
     🕒 timestamp
     Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu.
+    Mô tả: Thời gian xử lý yêu cầu
     
     🆔 requestId
     Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu.
+    Mô tả: Định danh duy nhất của yêu cầu
     
     🛣️ path
     Loại: string
-    Mô tả: Đường dẫn API được gọi.
+    Mô tả: Đường dẫn API được gọi
     """
     # Extract API logic
     temp_path = os.path.join(RESULTS_DIR, file.filename)
@@ -169,25 +169,53 @@ async def classify_api(
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    📄 file (tùy chọn, body)
+    📁 file (tùy chọn, multipart/form-data)
     Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
-    Mô tả: Tệp cần phân loại. Cung cấp file HOẶC text.
+    Mô tả: Tệp cần phân loại. Cung cấp file HOẶC text
     
-    📝 text (tùy chọn, body)
+    📝 text (tùy chọn, application/json)
     Loại: string
-    Mô tả: Nội dung văn bản dạng chuỗi cần phân loại. Cung cấp file HOẶC text.
+    Mô tả: Nội dung văn bản dạng chuỗi cần phân loại. Cung cấp file HOẶC text
     
     🔑 gemini_api_key (tùy chọn, header)
     Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📝 data
+    📄 data
     Loại: object
-    Mô tả: JSON kết quả phân loại gồm: documentType, isContract, confidence, reasons, contractSubtype (nếu có).
+    Mô tả: JSON kết quả phân loại gồm: documentType, isContract, confidence, reasons, contractSubtype (nếu có)
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1)
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả xử lý
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi
     """
     # Chuẩn hóa nội dung đầu vào như summarize
     content = None
@@ -344,53 +372,53 @@ async def summarize_api(
     gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    📄 file (tùy chọn, body)
+    📁 file (tùy chọn, multipart/form-data)
     Loại: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
-    Mô tả: Tệp văn bản cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai.
+    Mô tả: Tệp văn bản cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai
     
-    📝 text (tùy chọn, body)
+    📝 text (tùy chọn, application/json)
     Loại: string
-    Mô tả: Nội dung văn bản dạng chuỗi cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai.
+    Mô tả: Nội dung văn bản dạng chuỗi cần tóm tắt. Chỉ cần cung cấp file HOẶC text, không cần cả hai
     
     🔑 gemini_api_key (tùy chọn, header)
     Loại: string
-    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường.
+    Mô tả: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📝 data
+    📄 data
     Loại: object hoặc string
-    Mô tả: Nếu AI trả về JSON hợp lệ, data sẽ là object chứa các trường tóm tắt hợp đồng (title, parties, object, effective_date, ...). Nếu không parse được JSON, data sẽ là chuỗi text.
+    Mô tả: Nếu AI trả về JSON hợp lệ, data sẽ là object chứa các trường tóm tắt hợp đồng (title, parties, object, effective_date, ...). Nếu không parse được JSON, data sẽ là chuỗi text
     
     📊 apiVersion
     Loại: string
-    Mô tả: Phiên bản API (v1).
+    Mô tả: Phiên bản API (v1)
     
     🔢 statusCode
     Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server).
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
     
     📋 shortMessage
     Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả.
+    Mô tả: Thông báo ngắn gọn về kết quả
     
     📖 description
     Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý.
+    Mô tả: Mô tả chi tiết về kết quả xử lý
     
     🕒 timestamp
     Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu.
+    Mô tả: Thời gian xử lý yêu cầu
     
     🆔 requestId
     Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu.
+    Mô tả: Định danh duy nhất của yêu cầu
     
     🛣️ path
     Loại: string
-    Mô tả: Đường dẫn API được gọi.
+    Mô tả: Đường dẫn API được gọi
     """
     # Summarize API logic
     content = None
@@ -636,43 +664,43 @@ async def summarize_api(
 @router.get("/test/get-geminiapikey", summary="Kiểm tra GEMINI_API_KEY mà hệ thống đọc được", tags=["Test"])
 async def test_gemini_api_key_api(request: Request):
     """
-    🔹 Đầu vào
+    ## 🔹 Đầu vào
     
-    Không có tham số đầu vào.
+    Không có tham số đầu vào
     
-    🔹 Đầu ra
+    ## 🔹 Đầu ra
     
-    📝 data
+    📄 data
     Loại: object
-    Mô tả: Thông tin về GEMINI_API_KEY và trạng thái hệ thống.
+    Mô tả: Thông tin về GEMINI_API_KEY và trạng thái hệ thống
     
     📊 apiVersion
     Loại: string
-    Mô tả: Phiên bản API (v1).
+    Mô tả: Phiên bản API (v1)
     
     🔢 statusCode
     Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 500: lỗi server).
+    Mô tả: Mã trạng thái HTTP (200: thành công, 500: lỗi server)
     
     📋 shortMessage
     Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả.
+    Mô tả: Thông báo ngắn gọn về kết quả
     
     📖 description
     Loại: string
-    Mô tả: Mô tả chi tiết về kết quả kiểm tra.
+    Mô tả: Mô tả chi tiết về kết quả kiểm tra
     
     🕒 timestamp
     Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu.
+    Mô tả: Thời gian xử lý yêu cầu
     
     🆔 requestId
     Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu.
+    Mô tả: Định danh duy nhất của yêu cầu
     
     🛣️ path
     Loại: string
-    Mô tả: Đường dẫn API được gọi.
+    Mô tả: Đường dẫn API được gọi
     """
     try:
         # Lấy GEMINI_API_KEY từ biến môi trường
@@ -736,7 +764,7 @@ async def test_gemini_api_key_api(request: Request):
             path=str(request.url)
         )
 
-@router.post("/process-url", summary="Xử lý file từ URL với AI")
+@router.post("/process-url", summary="Xử lý file từ URL với AI", tags=["AI Processing Service"])
 async def process_file_from_url(
     request: Request,
     file_url: str = Query(..., description="URL của file cần xử lý"),
@@ -745,7 +773,57 @@ async def process_file_from_url(
     file_id: str = Query(None, description="ID của file (tùy chọn)")
 ):
     """
-    Xử lý file từ URL: tải về, extract text, classify và summary
+    ## 🔹 Đầu vào
+    
+    🌐 file_url (bắt buộc, query)
+    Loại: string
+    Mô tả: URL của file cần xử lý (PDF, DOCX, TXT, etc.)
+    
+    📄 filename (bắt buộc, query)
+    Loại: string
+    Mô tả: Tên file để xử lý
+    
+    📋 content_type (tùy chọn, query)
+    Loại: string
+    Mô tả: Loại file (mặc định: application/pdf)
+    
+    🆔 file_id (tùy chọn, query)
+    Loại: string
+    Mô tả: ID của file (tùy chọn, nếu không có sẽ tự tạo)
+    
+    ## 🔹 Đầu ra
+    
+    📄 data
+    Loại: object
+    Mô tả: Kết quả xử lý file bao gồm extracted_text, classification, summary
+    
+    📊 apiVersion
+    Loại: string
+    Mô tả: Phiên bản API (v1)
+    
+    🔢 statusCode
+    Loại: integer
+    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 500: lỗi server)
+    
+    📋 shortMessage
+    Loại: string
+    Mô tả: Thông báo ngắn gọn về kết quả
+    
+    📖 description
+    Loại: string
+    Mô tả: Mô tả chi tiết về kết quả xử lý
+    
+    🕒 timestamp
+    Loại: string (ISO-8601)
+    Mô tả: Thời gian xử lý yêu cầu
+    
+    🆔 requestId
+    Loại: string (UUID)
+    Mô tả: Định danh duy nhất của yêu cầu
+    
+    🛣️ path
+    Loại: string
+    Mô tả: Đường dẫn API được gọi
     """
     try:
         # Download file from URL

@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.Approval;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.ApprovalCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.ApprovalRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,32 @@ public class ApprovalService {
         approval.initializeNewEntity();
         
         return approvalRepository.save(approval);
+    }
+
+    /**
+     * Tạo approval mới từ ApprovalCreateRequest
+     */
+    public Approval createApproval(ApprovalCreateRequest request) {
+        Contract contract = contractRepository.findById(request.getContractId())
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+        
+        Approval approval = new Approval(contract, request.getApproverId(), request.getApproverName(), 
+                                       request.getApproverEmail(), request.getApproverRole(), request.getPriority());
+        approval.setContractId(request.getContractId());
+        approval.setDueDate(request.getDueDate());
+        approval.setApprovalOrder(request.getApprovalOrder());
+        approval.setIsRequired(request.getIsRequired());
+        approval.setComments(request.getComments());
+        approval.initializeNewEntity();
+        
+        return approvalRepository.save(approval);
+    }
+
+    /**
+     * Lấy tất cả approval
+     */
+    public List<Approval> getAllApprovals() {
+        return approvalRepository.findByIsDeletedFalse();
     }
 
     /**

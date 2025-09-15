@@ -2,26 +2,278 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.ESignature;
 import com.devgo2003.docgo.contract_service.service.ESignatureService;
+import com.devgo2003.docgo.contract_service.dto.ESignatureCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service")
-@Tag(name = "E-Signature Management", description = "API quản lý chữ ký điện tử cho hợp đồng")
+@RequestMapping("/api/v1/contract-management-service/esignatures")
+@Tag(name = "API Quản lý Chữ ký điện tử", description = "Các API để quản lý chữ ký điện tử trong hệ thống DocGO")
 public class ESignatureController {
 
-    @Autowired
-    private ESignatureService eSignatureService;
+    private final ESignatureService eSignatureService;
+    private final HttpServletRequest request;
+
+    public ESignatureController(ESignatureService eSignatureService, HttpServletRequest request) {
+        this.eSignatureService = eSignatureService;
+        this.request = request;
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Lấy danh sách tất cả chữ ký điện tử", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<ESignature>
+        Mô tả: Danh sách chữ ký điện tử
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<ESignature>>> getAllESignatures(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        List<ESignature> eSignatures = eSignatureService.getAllESignatures();
+        
+        if (eSignatures.isEmpty()) {
+            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có chữ ký điện tử nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách chữ ký điện tử thành công.")
+            .data(eSignatures)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Lấy chi tiết chữ ký điện tử", 
+        description = """
+        🔹 Đầu vào
+        
+        🔗 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của chữ ký điện tử cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: ESignature
+        Mô tả: Thông tin chi tiết chữ ký điện tử
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<ESignature>> getESignature(@PathVariable String id) {
+        Optional<ESignature> eSignature = eSignatureService.getESignatureById(id);
+        
+        if (eSignature.isEmpty()) {
+            RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy chữ ký điện tử với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy chi tiết chữ ký điện tử thành công.")
+            .data(eSignature.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "Tạo chữ ký điện tử mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 eSignature (bắt buộc, body)
+        Loại: ESignatureCreateRequest
+        Mô tả: Thông tin chữ ký điện tử cần tạo (contractId, signerId, signerName, signerEmail, signatureType, signatureData)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: ESignature
+        Mô tả: Thông tin chữ ký điện tử đã được tạo thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<ESignature>> createESignature(@RequestBody ESignatureCreateRequest request) {
+        ESignature eSignature = eSignatureService.createESignature(request);
+        
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo chữ ký điện tử thành công.")
+            .data(eSignature)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(this.request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/contracts/{contractId}/esignature")
     @Operation(summary = "Tạo e-signature mới", description = "Tạo e-signature mới cho contract")

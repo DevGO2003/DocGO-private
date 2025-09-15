@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.Version;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.VersionCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.VersionRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -591,5 +592,36 @@ public class VersionService {
     public boolean existsVersionByChangesSummaryContaining(String contractId, String keyword) {
         List<Version> versions = versionRepository.findByContractIdAndChangesSummaryContainingIgnoreCase(contractId, keyword);
         return !versions.isEmpty();
+    }
+
+    /**
+     * Tạo version mới từ VersionCreateRequest
+     */
+    public Version createVersion(VersionCreateRequest request) {
+        Contract contract = contractRepository.findById(request.getContractId())
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+        
+        Version version = new Version(contract, request.getVersionNumber(), request.getVersionName(), 
+                                    request.getChangeDescription(), request.getChangeType(), request.getCreatedBy());
+        version.setContractId(request.getContractId());
+        version.setChangeSummary(request.getChangeSummary());
+        version.setChangeDetails(request.getChangeDetails());
+        version.setPreviousVersionId(request.getPreviousVersionId());
+        version.setChangeReason(request.getChangeReason());
+        version.setChangeImpact(request.getChangeImpact());
+        version.setChangeApproval(request.getChangeApproval());
+        version.setChangeReviewer(request.getChangeReviewer());
+        version.setChangeDate(request.getChangeDate());
+        version.setAdditionalData(request.getAdditionalData());
+        version.initializeNewEntity();
+        
+        return versionRepository.save(version);
+    }
+
+    /**
+     * Lấy tất cả version
+     */
+    public List<Version> getAllVersions() {
+        return versionRepository.findByIsDeletedFalse();
     }
 }

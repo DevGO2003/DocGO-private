@@ -28,7 +28,7 @@ interface HealthResponse {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    return res.status(405).json({
+    return res.status(200).json({
       apiVersion: 'v1',
       statusCode: 405,
       shortMessage: 'Method Not Allowed',

@@ -61,13 +61,28 @@ class ApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
+        // Kiểm tra nếu backend trả về HTTP 200 nhưng có statusCode khác trong body
+        if (response.data && response.data.statusCode && response.data.statusCode !== 200) {
+          // Tạo error object để trigger error handler
+          const error = {
+            response: {
+              status: 200, // HTTP status luôn là 200
+              data: response.data
+            }
+          }
+          this.handleApiError(error)
+          return Promise.reject(error)
+        }
         return response
       },
       async (error) => {
         const originalRequest = error.config
         
-        // Handle 401 errors with token refresh
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Handle 401 errors with token refresh (kiểm tra cả HTTP status và statusCode trong body)
+        const isUnauthorized = error.response?.status === 401 || 
+                              (error.response?.data?.statusCode === 401)
+        
+        if (isUnauthorized && !originalRequest._retry) {
           originalRequest._retry = true
           
           try {
@@ -122,8 +137,13 @@ class ApiClient {
     // Handle backend RestResponse format
     let message = 'Đã xảy ra lỗi'
     let shortMessage = 'Error'
+    let statusCode = status || 500
     
     if (responseData) {
+      // Backend trả về HTTP 200 với statusCode trong body
+      if (responseData.statusCode) {
+        statusCode = responseData.statusCode
+      }
       message = responseData.description || responseData.message || message
       shortMessage = responseData.shortMessage || shortMessage
     }
@@ -136,7 +156,8 @@ class ApiClient {
       message = `Lỗi validation: ${validationErrors}`
     }
 
-    switch (status) {
+    // Sử dụng statusCode từ response body thay vì HTTP status
+    switch (statusCode) {
       case 400:
         toast.error(message)
         break

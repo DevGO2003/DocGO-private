@@ -2,26 +2,278 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Version;
 import com.devgo2003.docgo.contract_service.service.VersionService;
+import com.devgo2003.docgo.contract_service.dto.VersionCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service")
-@Tag(name = "Version Management", description = "API quản lý phiên bản và lịch sử thay đổi hợp đồng")
+@RequestMapping("/api/v1/contract-management-service/versions")
+@Tag(name = "API Quản lý Phiên bản", description = "Các API để quản lý phiên bản hợp đồng trong hệ thống DocGO")
 public class VersionController {
 
-    @Autowired
-    private VersionService versionService;
+    private final VersionService versionService;
+    private final HttpServletRequest request;
+
+    public VersionController(VersionService versionService, HttpServletRequest request) {
+        this.versionService = versionService;
+        this.request = request;
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Lấy danh sách tất cả phiên bản", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<Version>
+        Mô tả: Danh sách phiên bản
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<Version>>> getAllVersions(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        List<Version> versions = versionService.getAllVersions();
+        
+        if (versions.isEmpty()) {
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có phiên bản nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách phiên bản thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Lấy chi tiết phiên bản", 
+        description = """
+        🔹 Đầu vào
+        
+        🔗 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của phiên bản cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Version
+        Mô tả: Thông tin chi tiết phiên bản
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Version>> getVersion(@PathVariable String id) {
+        Optional<Version> version = versionService.getVersionById(id);
+        
+        if (version.isEmpty()) {
+            RestResponse<Version> response = RestResponse.<Version>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy phiên bản với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy chi tiết phiên bản thành công.")
+            .data(version.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "Tạo phiên bản mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 version (bắt buộc, body)
+        Loại: VersionCreateRequest
+        Mô tả: Thông tin phiên bản cần tạo (contractId, versionNumber, changeDescription, changeType, createdBy)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Version
+        Mô tả: Thông tin phiên bản đã được tạo thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Version>> createVersion(@RequestBody VersionCreateRequest request) {
+        Version version = versionService.createVersion(request);
+        
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo phiên bản thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(this.request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/contracts/{contractId}/versions")
     @Operation(summary = "Tạo version mới", description = "Tạo version mới cho contract")

@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.ESignature;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.ESignatureCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.ESignatureRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -427,5 +428,34 @@ public class ESignatureService {
 
     public boolean existsComplianceUnverifiedSignaturesByContractId(String contractId) {
         return eSignatureRepository.existsComplianceUnverifiedSignaturesByContractId(contractId);
+    }
+
+    /**
+     * Tạo e-signature mới từ ESignatureCreateRequest
+     */
+    public ESignature createESignature(ESignatureCreateRequest request) {
+        Contract contract = contractRepository.findById(request.getContractId())
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+        
+        ESignature eSignature = new ESignature(contract, request.getSignerId(), request.getSignerName(), 
+                                              request.getSignerEmail(), request.getSignatureType(), request.getSignatureData());
+        eSignature.setContractId(request.getContractId());
+        eSignature.setSignatureImage(request.getSignatureImage());
+        eSignature.setCertificateData(request.getCertificateData());
+        eSignature.setCertificateIssuer(request.getCertificateIssuer());
+        eSignature.setSignedAt(request.getSignedAt());
+        eSignature.setIpAddress(request.getIpAddress());
+        eSignature.setUserAgent(request.getUserAgent());
+        eSignature.setAdditionalData(request.getAdditionalData());
+        eSignature.initializeNewEntity();
+        
+        return eSignatureRepository.save(eSignature);
+    }
+
+    /**
+     * Lấy tất cả e-signature
+     */
+    public List<ESignature> getAllESignatures() {
+        return eSignatureRepository.findByIsDeletedFalse();
     }
 }

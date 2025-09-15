@@ -2,25 +2,277 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.Approval;
 import com.devgo2003.docgo.contract_service.service.ApprovalService;
+import com.devgo2003.docgo.contract_service.dto.ApprovalCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service")
-@Tag(name = "Approval Management", description = "API quản lý quy trình phê duyệt hợp đồng")
+@RequestMapping("/api/v1/contract-management-service/approvals")
+@Tag(name = "API Quản lý Phê duyệt", description = "Các API để quản lý quy trình phê duyệt hợp đồng trong hệ thống DocGO")
 public class ApprovalController {
 
-    @Autowired
-    private ApprovalService approvalService;
+    private final ApprovalService approvalService;
+    private final HttpServletRequest request;
+
+    public ApprovalController(ApprovalService approvalService, HttpServletRequest request) {
+        this.approvalService = approvalService;
+        this.request = request;
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Lấy danh sách tất cả phê duyệt", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: PaginatedResponse<Approval>
+        Mô tả: Danh sách phê duyệt có phân trang
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<Approval>>> getAllApprovals(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        List<Approval> approvals = approvalService.getAllApprovals();
+        
+        if (approvals.isEmpty()) {
+            RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có phê duyệt nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách phê duyệt thành công.")
+            .data(approvals)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Lấy chi tiết phê duyệt", 
+        description = """
+        🔹 Đầu vào
+        
+        🔗 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của phê duyệt cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Approval
+        Mô tả: Thông tin chi tiết phê duyệt
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Approval>> getApproval(@PathVariable String id) {
+        Optional<Approval> approval = approvalService.getApprovalById(id);
+        
+        if (approval.isEmpty()) {
+            RestResponse<Approval> response = RestResponse.<Approval>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy phê duyệt với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<Approval> response = RestResponse.<Approval>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy chi tiết phê duyệt thành công.")
+            .data(approval.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "Tạo phê duyệt mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 approval (bắt buộc, body)
+        Loại: ApprovalCreateRequest
+        Mô tả: Thông tin phê duyệt cần tạo (contractId, approverId, approverName, approverEmail, approverRole, priority, dueDate, approvalOrder, isRequired)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Approval
+        Mô tả: Thông tin phê duyệt đã được tạo thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Approval>> createApproval(@RequestBody ApprovalCreateRequest request) {
+        Approval approval = approvalService.createApproval(request);
+        
+        RestResponse<Approval> response = RestResponse.<Approval>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo phê duyệt thành công.")
+            .data(approval)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(this.request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/contracts/{contractId}/approve")
     @Operation(summary = "Phê duyệt hợp đồng", description = "Tạo approval mới cho contract")

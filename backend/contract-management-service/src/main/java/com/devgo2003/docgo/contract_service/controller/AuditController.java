@@ -2,25 +2,277 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.entity.AuditLog;
 import com.devgo2003.docgo.contract_service.service.AuditService;
+import com.devgo2003.docgo.contract_service.dto.AuditLogCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/contract-management-service")
-@Tag(name = "Audit Management", description = "API quản lý audit log cho hợp đồng")
+@RequestMapping("/api/v1/contract-management-service/audit-logs")
+@Tag(name = "API Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
 public class AuditController {
 
-    @Autowired
-    private AuditService auditService;
+    private final AuditService auditService;
+    private final HttpServletRequest request;
+
+    public AuditController(AuditService auditService, HttpServletRequest request) {
+        this.auditService = auditService;
+        this.request = request;
+    }
+
+    @GetMapping
+    @Operation(
+        summary = "Lấy danh sách tất cả audit log", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 pageNumber (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 pageSize (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: timestamp)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        📄 searchTerm (tùy chọn, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm
+        
+        📄 includeDeleted (tùy chọn, query)
+        Loại: boolean
+        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<AuditLog>
+        Mô tả: Danh sách audit log
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<AuditLog>>> getAllAuditLogs(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "timestamp") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+        
+        List<AuditLog> auditLogs = auditService.getAllAuditLogs();
+        
+        if (auditLogs.isEmpty()) {
+            RestResponse<List<AuditLog>> response = RestResponse.<List<AuditLog>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có audit log nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<List<AuditLog>> response = RestResponse.<List<AuditLog>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách audit log thành công.")
+            .data(auditLogs)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+        summary = "Lấy chi tiết audit log", 
+        description = """
+        🔹 Đầu vào
+        
+        🔗 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của audit log cần lấy
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuditLog
+        Mô tả: Thông tin chi tiết audit log
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<AuditLog>> getAuditLog(@PathVariable String id) {
+        Optional<AuditLog> auditLog = auditService.getAuditLogById(id);
+        
+        if (auditLog.isEmpty()) {
+            RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy audit log với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
+        RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy chi tiết audit log thành công.")
+            .data(auditLog.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "Tạo audit log mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 auditLog (bắt buộc, body)
+        Loại: AuditLogCreateRequest
+        Mô tả: Thông tin audit log cần tạo (eventType, eventCategory, action, description, userId, userName, contractId)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: AuditLog
+        Mô tả: Thông tin audit log đã được tạo thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        ⏰ timestamp
+        Loại: string
+        Mô tả: Thời điểm xử lý request (ISO-8601)
+        
+        🔗 requestId
+        Loại: string
+        Mô tả: ID duy nhất của request
+        
+        📍 path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<AuditLog>> createAuditLog(@RequestBody AuditLogCreateRequest request) {
+        AuditLog auditLog = auditService.createAuditLog(request);
+        
+        RestResponse<AuditLog> response = RestResponse.<AuditLog>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo audit log thành công.")
+            .data(auditLog)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(this.request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/audit-logs")
     @Operation(summary = "Tạo audit log mới", description = "Tạo audit log mới")

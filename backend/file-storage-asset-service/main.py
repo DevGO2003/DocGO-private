@@ -93,7 +93,7 @@ class RestResponseMiddleware(BaseHTTPMiddleware):
 					)
 				
 				return JSONResponse(
-					status_code=response.status_code,
+					status_code=200,  # Luôn trả về HTTP 200
 					content=error_response.model_dump(mode='json')
 				)
 			
@@ -111,7 +111,7 @@ class RestResponseMiddleware(BaseHTTPMiddleware):
 			)
 			
 			return JSONResponse(
-				status_code=500,
+				status_code=200,  # Luôn trả về HTTP 200
 				content=error_response.model_dump(mode='json')
 			)
 
@@ -191,7 +191,7 @@ async def health_check():
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
 	"""
-	Custom HTTP exception handler - trả về RestResponse format
+	Custom HTTP exception handler - trả về HTTP 200 với statusCode tương ứng trong RestResponse format
 	"""
 	from schemas.response import ErrorResponse
 	
@@ -218,14 +218,14 @@ async def http_exception_handler(request, exc):
 	)
 	
 	return JSONResponse(
-		status_code=exc.status_code,
+		status_code=200,  # Luôn trả về HTTP 200
 		content=error_response.model_dump(mode='json')
 	)
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
 	"""
-	General exception handler - trả về RestResponse format
+	General exception handler - trả về HTTP 200 với statusCode 500 trong RestResponse format
 	"""
 	from schemas.response import ErrorResponse
 	
@@ -238,13 +238,13 @@ async def general_exception_handler(request, exc):
 	)
 	
 	return JSONResponse(
-		status_code=500,
+		status_code=200,  # Luôn trả về HTTP 200
 		content=error_response.model_dump(mode='json')
 	)
 
 
 if __name__ == "__main__":
 	import uvicorn
-	uvicorn.run(app, host="127.0.0.1", port=8018)
+	uvicorn.run(app, host="127.0.0.1", port=8012)
 
 

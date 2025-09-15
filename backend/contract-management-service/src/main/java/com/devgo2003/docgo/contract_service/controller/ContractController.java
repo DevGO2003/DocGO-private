@@ -3,7 +3,6 @@ package com.devgo2003.docgo.contract_service.controller;
 import com.devgo2003.docgo.contract_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.contract_service.common.response.RequestInfo;
 import com.devgo2003.docgo.contract_service.common.response.ResultInfo;
-import com.devgo2003.docgo.contract_service.common.response.SortInfo;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
 import com.devgo2003.docgo.contract_service.entity.Contract;
 import com.devgo2003.docgo.contract_service.entity.ContractAttachment;
@@ -11,7 +10,6 @@ import com.devgo2003.docgo.contract_service.entity.ContractEvent;
 import com.devgo2003.docgo.contract_service.dto.ContractWithSummaryDto;
 import com.devgo2003.docgo.contract_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.contract_service.dto.ContractResponseDto;
-import com.devgo2003.docgo.contract_service.dto.ContractDetailResponseDto;
 import com.devgo2003.docgo.contract_service.dto.ContractCreateRequest;
 import com.devgo2003.docgo.contract_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +19,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.devgo2003.docgo.contract_service.common.exception.NoContentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,125 +26,19 @@ import org.springframework.web.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 
 @RestController
 @RequestMapping("/api/v1/contract-management-service/contracts")
-@Tag(name = "API Quản lý Hợp đồng", description = "Các API để tạo, đọc, cập nhật và xóa hợp đồng")
+@Tag(name = "API Quản lý Hợp đồng", description = "Các API để tạo, đọc, cập nhật và xóa hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
     private final IContractService contractService;
     private final HttpServletRequest request;
 
-    @Autowired
     public ContractController(IContractService contractService, HttpServletRequest request) {
         this.contractService = contractService;
         this.request = request;
-    }
-
-    @Operation(
-        summary = "Tạo hợp đồng mới", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 contract (bắt buộc, body)
-        Loại: Contract
-        Mô tả: Thông tin hợp đồng cần tạo (contractNumber, title, status, partiesJson, startDate, endDate, systemId).
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: Contract
-        Mô tả: Thông tin hợp đồng đã được tạo thành công.
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1).
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (201: Created).
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả.
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý.
-        
-        🕒 timestamp
-        Loại: ZonedDateTime
-        Mô tả: Thời gian xử lý yêu cầu.
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu.
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi.
-        """,
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                schema = @Schema(implementation = Contract.class),
-                examples = @ExampleObject(
-                    value = "{\n  \"contractNumber\": \"string\",\n  \"title\": \"string\",\n  \"status\": \"DRAFT\",\n  \"partiesJson\": \"string\",\n  \"startDate\": \"2025-08-17\",\n  \"endDate\": \"2025-08-17\",\n  \"systemId\": \"string\"\n}"
-                )
-            )
-        )
-    )
-    @PostMapping
-    public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
-        if (request.getContractNumber() == null) {
-            throw new com.devgo2003.docgo.contract_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
-        }
-        
-        // Convert DTO to Entity
-        Contract contract = new Contract();
-        contract.setContractNumber(request.getContractNumber());
-        contract.setTitle(request.getTitle());
-        contract.setStatus(Contract.ContractStatus.valueOf(request.getStatus()));
-        contract.setPartiesJson(request.getPartiesJson());
-        contract.setStartDate(request.getStartDate());
-        contract.setEndDate(request.getEndDate());
-        contract.setSystemId(request.getSystemId());
-        contract.setSummary(request.getSummary());
-        contract.setContractType(request.getContractType());
-        contract.setRiskLevel(request.getRiskLevel());
-        contract.setKeyTerms(request.getKeyTerms());
-        contract.setFavorableClauses(request.getFavorableClauses());
-        contract.setUnfavorableClauses(request.getUnfavorableClauses());
-        contract.setPaymentCurrency(request.getPaymentCurrency());
-        contract.setContractObject(request.getContractObject());
-        contract.setEffectiveDate(request.getEffectiveDate());
-        contract.setContractTerm(request.getContractTerm());
-        contract.setTotalValue(request.getTotalValue());
-        contract.setPaymentSchedule(request.getPaymentSchedule());
-        contract.setCurrency(request.getCurrency());
-        contract.setPaymentMethod(request.getPaymentMethod());
-        contract.setReminders(request.getReminders());
-        contract.setTerminationConditions(request.getTerminationConditions());
-        contract.setRiskAssessment(request.getRiskAssessment());
-        contract.setComplianceStatus(request.getComplianceStatus());
-        contract.setLegalReviewRequired(request.getLegalReviewRequired());
-        contract.setReviewDeadline(request.getReviewDeadline());
-        
-        Contract created = contractService.createContract(contract);
-        RestResponse<Contract> response = RestResponse.<Contract>builder()
-                .apiVersion("v1")
-                .statusCode(HttpStatus.CREATED.value())
-                .shortMessage("Success")
-                .description("Hợp đồng đã được tạo thành công.")
-                .data(created)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(this.request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(
@@ -317,6 +207,109 @@ public class ContractController {
                 .build();
         
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(
+        summary = "Tạo hợp đồng mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 contract (bắt buộc, body)
+        Loại: ContractCreateRequest
+        Mô tả: Thông tin hợp đồng cần tạo (contractNumber, title, status, partiesJson, startDate, endDate, systemId).
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Contract
+        Mô tả: Thông tin hợp đồng đã được tạo thành công.
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1).
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created).
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả.
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý.
+        
+        🕒 timestamp
+        Loại: ZonedDateTime
+        Mô tả: Thời gian xử lý yêu cầu.
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu.
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi.
+        """,
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                schema = @Schema(implementation = ContractCreateRequest.class),
+                examples = @ExampleObject(
+                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DRAFT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"systemId\": \"SYS-001\"\n}"
+                )
+            )
+        )
+    )
+    @PostMapping
+    public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
+        if (request.getContractNumber() == null) {
+            throw new com.devgo2003.docgo.contract_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
+        }
+        
+        // Convert DTO to Entity
+        Contract contract = new Contract();
+        contract.setContractNumber(request.getContractNumber());
+        contract.setTitle(request.getTitle());
+        contract.setStatus(Contract.ContractStatus.valueOf(request.getStatus()));
+        contract.setPartiesJson(request.getPartiesJson());
+        contract.setStartDate(request.getStartDate());
+        contract.setEndDate(request.getEndDate());
+        contract.setSystemId(request.getSystemId());
+        contract.setSummary(request.getSummary());
+        contract.setContractType(request.getContractType());
+        contract.setRiskLevel(request.getRiskLevel());
+        contract.setKeyTerms(request.getKeyTerms());
+        contract.setFavorableClauses(request.getFavorableClauses());
+        contract.setUnfavorableClauses(request.getUnfavorableClauses());
+        contract.setPaymentCurrency(request.getPaymentCurrency());
+        contract.setContractObject(request.getContractObject());
+        contract.setEffectiveDate(request.getEffectiveDate());
+        contract.setContractTerm(request.getContractTerm());
+        contract.setTotalValue(request.getTotalValue());
+        contract.setPaymentSchedule(request.getPaymentSchedule());
+        contract.setCurrency(request.getCurrency());
+        contract.setPaymentMethod(request.getPaymentMethod());
+        contract.setReminders(request.getReminders());
+        contract.setTerminationConditions(request.getTerminationConditions());
+        contract.setRiskAssessment(request.getRiskAssessment());
+        contract.setComplianceStatus(request.getComplianceStatus());
+        contract.setLegalReviewRequired(request.getLegalReviewRequired());
+        contract.setReviewDeadline(request.getReviewDeadline());
+        
+        Contract created = contractService.createContract(contract);
+        RestResponse<Contract> response = RestResponse.<Contract>builder()
+                .apiVersion("v1")
+                .statusCode(HttpStatus.CREATED.value())
+                .shortMessage("Success")
+                .description("Hợp đồng đã được tạo thành công.")
+                .data(created)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(this.request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(

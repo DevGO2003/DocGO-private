@@ -2,6 +2,7 @@ package com.devgo2003.docgo.contract_service.service;
 
 import com.devgo2003.docgo.contract_service.entity.Reminder;
 import com.devgo2003.docgo.contract_service.entity.Contract;
+import com.devgo2003.docgo.contract_service.dto.ReminderCreateRequest;
 import com.devgo2003.docgo.contract_service.repository.ReminderRepository;
 import com.devgo2003.docgo.contract_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -454,5 +455,34 @@ public class ReminderService {
 
     public boolean existsNonRecurringRemindersByContractId(String contractId) {
         return reminderRepository.existsNonRecurringRemindersByContractId(contractId);
+    }
+
+    /**
+     * Tạo reminder mới từ ReminderCreateRequest
+     */
+    public Reminder createReminder(ReminderCreateRequest request) {
+        Contract contract = contractRepository.findById(request.getContractId())
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+        
+        Reminder reminder = new Reminder(contract, request.getTitle(), request.getDescription(), 
+                                       request.getReminderType(), request.getReminderDate());
+        reminder.setContractId(request.getContractId());
+        reminder.setIsRecurring(request.getIsRecurring());
+        reminder.setRecurringPattern(request.getRecurringPattern());
+        reminder.setRecipientEmail(request.getRecipientEmail());
+        reminder.setRecipientPhone(request.getRecipientPhone());
+        reminder.setNotificationMethod(request.getNotificationMethod());
+        reminder.setPriority(request.getPriority());
+        reminder.setAdditionalData(request.getAdditionalData());
+        reminder.initializeNewEntity();
+        
+        return reminderRepository.save(reminder);
+    }
+
+    /**
+     * Lấy tất cả reminder
+     */
+    public List<Reminder> getAllReminders() {
+        return reminderRepository.findByIsDeletedFalse();
     }
 }

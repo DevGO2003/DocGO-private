@@ -11,7 +11,7 @@ const nextConfig = {
     AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8001',
     CONTRACT_SERVICE_URL: process.env.CONTRACT_SERVICE_URL || 'http://contract-management-service:8002',
     AI_SERVICE_URL: process.env.AI_SERVICE_URL || 'http://ai-processing-service:8003',
-    FILE_SERVICE_URL: process.env.FILE_SERVICE_URL || 'http://file-storage-asset-service:8018',
+    FILE_SERVICE_URL: process.env.FILE_SERVICE_URL || 'http://file-storage-asset-service:8012',
   },
   async rewrites() {
     return [
@@ -29,7 +29,7 @@ const nextConfig = {
       },
       {
         source: '/api/files/:path*',
-        destination: `${process.env.FILE_SERVICE_URL || 'http://file-storage-asset-service:8018'}/api/v1/file-storage-asset-service/:path*`,
+        destination: `${process.env.FILE_SERVICE_URL || 'http://file-storage-asset-service:8012'}/api/v1/file-storage-asset-service/:path*`,
       },
       {
         source: '/api/v1/:path*',
