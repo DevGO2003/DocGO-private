@@ -2,7 +2,6 @@ package com.devgo2003.docgo.contract_service.controller;
 
 import com.devgo2003.docgo.contract_service.service.ReportService;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
-import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -136,7 +135,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateOverallReport() {
         Map<String, Object> report = reportService.generateOverallReport();
         
-        return ResponseBuilder.success(report, "Tạo báo cáo tổng hợp thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo tổng hợp thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/overview")
@@ -144,7 +154,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateContractOverviewReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateContractOverviewReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo tổng quan contract thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo tổng quan contract thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/approval")
@@ -152,7 +173,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateApprovalReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateApprovalReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo approval thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo approval thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/version")
@@ -160,7 +192,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateVersionReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateVersionReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo version thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo version thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/comment")
@@ -168,7 +211,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateCommentReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateCommentReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo comment thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo comment thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/esignature")
@@ -176,7 +230,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateESignatureReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateESignatureReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo e-signature thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo e-signature thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/reminder")
@@ -184,7 +249,18 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateReminderReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateReminderReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo reminder thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo reminder thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/reports/audit-log")
@@ -192,6 +268,17 @@ public class ReportController {
     public ResponseEntity<RestResponse<Map<String, Object>>> generateAuditLogReport(@PathVariable String contractId) {
         Map<String, Object> report = reportService.generateAuditLogReport(contractId);
         
-        return ResponseBuilder.success(report, "Tạo báo cáo audit log thành công");
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Tạo báo cáo audit log thành công.")
+            .data(report)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

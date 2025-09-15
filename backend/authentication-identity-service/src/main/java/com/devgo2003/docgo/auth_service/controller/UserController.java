@@ -27,7 +27,62 @@ public class UserController {
     private final UserService userService;
     
     @GetMapping
-    @Operation(summary = "Lấy danh sách người dùng", description = "Lấy danh sách người dùng với phân trang và sắp xếp")
+    @Operation(
+        summary = "Lấy danh sách người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Page<UserMongo>
+        Mô tả: Danh sách người dùng với phân trang
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<Page<UserMongo>>> getAllUsers(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int size,
@@ -47,7 +102,50 @@ public class UserController {
     }
     
     @GetMapping("/{id}")
-    @Operation(summary = "Lấy thông tin người dùng", description = "Lấy thông tin chi tiết người dùng theo ID")
+    @Operation(
+        summary = "Lấy thông tin người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần lấy thông tin
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin chi tiết người dùng
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> getUserById(
             @Parameter(description = "ID người dùng") @PathVariable String id) {
         
@@ -64,7 +162,50 @@ public class UserController {
     }
     
     @GetMapping("/username/{username}")
-    @Operation(summary = "Lấy người dùng theo username", description = "Lấy thông tin người dùng theo username")
+    @Operation(
+        summary = "Lấy người dùng theo username", 
+        description = """
+        🔹 Đầu vào
+        
+        👤 username (bắt buộc, path)
+        Loại: string
+        Mô tả: Username của người dùng cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> getUserByUsername(
             @Parameter(description = "Username") @PathVariable String username) {
         
@@ -81,7 +222,50 @@ public class UserController {
     }
     
     @GetMapping("/email/{email}")
-    @Operation(summary = "Lấy người dùng theo email", description = "Lấy thông tin người dùng theo email")
+    @Operation(
+        summary = "Lấy người dùng theo email", 
+        description = """
+        🔹 Đầu vào
+        
+        📧 email (bắt buộc, path)
+        Loại: string
+        Mô tả: Email của người dùng cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> getUserByEmail(
             @Parameter(description = "Email") @PathVariable String email) {
         
@@ -98,7 +282,50 @@ public class UserController {
     }
     
     @GetMapping("/search")
-    @Operation(summary = "Tìm kiếm người dùng", description = "Tìm kiếm người dùng theo từ khóa")
+    @Operation(
+        summary = "Tìm kiếm người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🔍 q (bắt buộc, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm (username, email, tên)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách người dùng tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<UserMongo>>> searchUsers(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam String q) {
         
@@ -115,7 +342,50 @@ public class UserController {
     }
     
     @GetMapping("/status/{status}")
-    @Operation(summary = "Lấy người dùng theo trạng thái", description = "Lấy danh sách người dùng theo trạng thái")
+    @Operation(
+        summary = "Lấy người dùng theo trạng thái", 
+        description = """
+        🔹 Đầu vào
+        
+        📊 status (bắt buộc, path)
+        Loại: UserStatus
+        Mô tả: Trạng thái người dùng (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách người dùng theo trạng thái
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<UserMongo>>> getUsersByStatus(
             @Parameter(description = "Trạng thái người dùng") @PathVariable UserStatus status) {
         
@@ -132,7 +402,50 @@ public class UserController {
     }
     
     @PostMapping
-    @Operation(summary = "Tạo người dùng mới", description = "Tạo người dùng mới trong hệ thống")
+    @Operation(
+        summary = "Tạo người dùng mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📝 user (bắt buộc, body)
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng mới cần tạo
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng đã được tạo
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created, 400: Bad Request, 409: Conflict)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> createUser(
             @Parameter(description = "Thông tin người dùng") @Valid @RequestBody UserMongo user) {
         
@@ -149,7 +462,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}")
-    @Operation(summary = "Cập nhật người dùng", description = "Cập nhật thông tin người dùng")
+    @Operation(
+        summary = "Cập nhật người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần cập nhật
+        
+        📝 userDetails (bắt buộc, body)
+        Loại: UserMongo
+        Mô tả: Thông tin cập nhật cho người dùng
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng đã được cập nhật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 400: Bad Request, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> updateUser(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody UserMongo userDetails) {
@@ -167,7 +527,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}/status")
-    @Operation(summary = "Cập nhật trạng thái người dùng", description = "Cập nhật trạng thái người dùng")
+    @Operation(
+        summary = "Cập nhật trạng thái người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần cập nhật trạng thái
+        
+        📊 status (bắt buộc, query)
+        Loại: UserStatus
+        Mô tả: Trạng thái mới (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với trạng thái đã cập nhật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> updateUserStatus(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Trạng thái mới") @RequestParam UserStatus status) {
@@ -185,7 +592,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}/roles")
-    @Operation(summary = "Gán vai trò cho người dùng", description = "Gán vai trò cho người dùng")
+    @Operation(
+        summary = "Gán vai trò cho người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần gán vai trò
+        
+        👥 roleIds (bắt buộc, body)
+        Loại: Set<String>
+        Mô tả: Danh sách ID các vai trò cần gán
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với vai trò đã được gán
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> assignRoles(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Danh sách ID vai trò") @RequestBody Set<String> roleIds) {
@@ -203,7 +657,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}/permissions")
-    @Operation(summary = "Gán quyền cho người dùng", description = "Gán quyền cho người dùng")
+    @Operation(
+        summary = "Gán quyền cho người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần gán quyền
+        
+        🔐 permissionIds (bắt buộc, body)
+        Loại: Set<String>
+        Mô tả: Danh sách ID các quyền cần gán
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với quyền đã được gán
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> assignPermissions(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Danh sách ID quyền") @RequestBody Set<String> permissionIds) {
@@ -221,7 +722,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}/password")
-    @Operation(summary = "Đổi mật khẩu", description = "Đổi mật khẩu cho người dùng")
+    @Operation(
+        summary = "Đổi mật khẩu", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần đổi mật khẩu
+        
+        🔑 newPassword (bắt buộc, query)
+        Loại: string
+        Mô tả: Mật khẩu mới
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với mật khẩu đã được cập nhật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> updatePassword(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Mật khẩu mới") @RequestParam String newPassword) {
@@ -239,7 +787,54 @@ public class UserController {
     }
     
     @PutMapping("/{id}/two-factor/enable")
-    @Operation(summary = "Bật xác thực hai yếu tố", description = "Bật xác thực hai yếu tố cho người dùng")
+    @Operation(
+        summary = "Bật xác thực hai yếu tố", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần bật 2FA
+        
+        🔐 secret (bắt buộc, query)
+        Loại: string
+        Mô tả: Mã bí mật để thiết lập 2FA
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với 2FA đã được bật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> enableTwoFactor(
             @Parameter(description = "ID người dùng") @PathVariable String id,
             @Parameter(description = "Mã bí mật") @RequestParam String secret) {
@@ -257,7 +852,50 @@ public class UserController {
     }
     
     @PutMapping("/{id}/two-factor/disable")
-    @Operation(summary = "Tắt xác thực hai yếu tố", description = "Tắt xác thực hai yếu tố cho người dùng")
+    @Operation(
+        summary = "Tắt xác thực hai yếu tố", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần tắt 2FA
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: UserMongo
+        Mô tả: Thông tin người dùng với 2FA đã được tắt
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<UserMongo>> disableTwoFactor(
             @Parameter(description = "ID người dùng") @PathVariable String id) {
         
@@ -274,7 +912,50 @@ public class UserController {
     }
     
     @DeleteMapping("/{id}")
-    @Operation(summary = "Xóa người dùng", description = "Xóa người dùng khỏi hệ thống")
+    @Operation(
+        summary = "Xóa người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần xóa
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về khi xóa thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<Void>> deleteUser(
             @Parameter(description = "ID người dùng") @PathVariable String id) {
         
@@ -291,7 +972,48 @@ public class UserController {
     }
     
     @GetMapping("/locked")
-    @Operation(summary = "Lấy danh sách tài khoản bị khóa", description = "Lấy danh sách tài khoản bị khóa do đăng nhập sai nhiều lần")
+    @Operation(
+        summary = "Lấy danh sách tài khoản bị khóa", 
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserMongo>
+        Mô tả: Danh sách tài khoản bị khóa do đăng nhập sai nhiều lần
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<UserMongo>>> getLockedUsers() {
         
         log.info("Getting locked users");

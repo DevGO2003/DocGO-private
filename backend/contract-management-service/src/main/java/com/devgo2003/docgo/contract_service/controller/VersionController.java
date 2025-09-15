@@ -4,7 +4,6 @@ import com.devgo2003.docgo.contract_service.entity.Version;
 import com.devgo2003.docgo.contract_service.service.VersionService;
 import com.devgo2003.docgo.contract_service.dto.VersionCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
-import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -286,7 +285,18 @@ public class VersionController {
         
         Version version = versionService.createVersion(contractId, versionNumber, versionName, changeType, changesSummary);
         
-        return ResponseBuilder.success(version, "Tạo version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Tạo version thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions")
@@ -295,10 +305,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByContractId(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào cho contract này");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào cho contract này.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/versions/{id}")
@@ -307,10 +339,32 @@ public class VersionController {
         Optional<Version> version = versionService.getVersionById(id);
         
         if (version.isEmpty()) {
-            return ResponseBuilder.notFound("Không tìm thấy version");
+            RestResponse<Version> response = RestResponse.<Version>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không tìm thấy version với ID: " + id)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(version.get(), "Lấy version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy version thành công.")
+            .data(version.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/current")
@@ -319,10 +373,32 @@ public class VersionController {
         Optional<Version> version = versionService.getCurrentVersionByContractId(contractId);
         
         if (version.isEmpty()) {
-            return ResponseBuilder.notFound("Không có version hiện tại");
+            RestResponse<Version> response = RestResponse.<Version>builder()
+                .apiVersion("v1")
+                .statusCode(404)
+                .shortMessage("Not Found")
+                .description("Không có version hiện tại cho contract: " + contractId)
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(version.get(), "Lấy version hiện tại thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy version hiện tại thành công.")
+            .data(version.get())
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/published")
@@ -331,10 +407,32 @@ public class VersionController {
         List<Version> versions = versionService.getPublishedVersionsByContractId(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào đã published");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào đã published.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version published thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version published thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/unpublished")
@@ -343,10 +441,32 @@ public class VersionController {
         List<Version> versions = versionService.getUnpublishedVersionsByContractId(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào chưa published");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào chưa published.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version unpublished thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version unpublished thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}")
@@ -357,10 +477,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByChangeType(contractId, changeType);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào với change type này");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào với change type này.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo change type thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo change type thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/current-list")
@@ -369,10 +511,32 @@ public class VersionController {
         List<Version> versions = versionService.getCurrentVersionsByContractId(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào đang là current");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào đang là current.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version current thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version current thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-list")
@@ -384,7 +548,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào đã published");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version published thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version published thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/approval-required")
@@ -431,10 +606,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByContractIdOrderByVersionNumber(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version sắp xếp theo version number thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version sắp xếp theo version number thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/order-by-created")
@@ -443,10 +640,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByContractIdOrderByCreatedAt(contractId);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version sắp xếp theo thời gian tạo thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version sắp xếp theo thời gian tạo thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/created-between")
@@ -461,7 +680,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào trong khoảng thời gian này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo thời gian tạo thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo thời gian tạo thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-between")
@@ -476,7 +706,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào trong khoảng thời gian published này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo thời gian published thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo thời gian published thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/approved-between")
@@ -491,7 +732,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào trong khoảng thời gian approved này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo thời gian approved thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo thời gian approved thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/published-by/{publishedBy}")
@@ -505,7 +757,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào được published bởi người này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo published by thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo published by thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/approved-by/{approvedBy}")
@@ -519,7 +782,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào được approved bởi người này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo approved by thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo approved by thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/tags")
@@ -533,7 +807,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào với tags này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo tags thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo tags thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-created")
@@ -544,10 +829,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByContractIdAndChangeTypeOrderByCreatedAt(contractId, changeType);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào với change type này");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào với change type này.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo change type sắp xếp theo thời gian tạo thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo change type sắp xếp theo thời gian tạo thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-version")
@@ -558,10 +865,32 @@ public class VersionController {
         List<Version> versions = versionService.getVersionsByContractIdAndChangeTypeOrderByVersionNumber(contractId, changeType);
         
         if (versions.isEmpty()) {
-            return ResponseBuilder.noContent("Không có version nào với change type này");
+            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+                .apiVersion("v1")
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("Không có version nào với change type này.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo change type sắp xếp theo version number thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo change type sắp xếp theo version number thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/previous/{previousVersionId}/list")
@@ -575,7 +904,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào với previous version ID này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo previous version ID thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo previous version ID thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/file-path/{filePath}")
@@ -589,7 +929,18 @@ public class VersionController {
             return ResponseBuilder.noContent("Không có version nào với file path này");
         }
         
-        return ResponseBuilder.success(versions, "Lấy danh sách version theo file path thành công");
+        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Lấy danh sách version theo file path thành công.")
+            .data(versions)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contracts/{contractId}/versions/checksum/{checksum}")
@@ -726,7 +1077,18 @@ public class VersionController {
             @RequestParam String publishedBy) {
         Version version = versionService.publishVersion(id, publishedBy);
         
-        return ResponseBuilder.success(version, "Publish version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Publish version thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/approve")
@@ -736,7 +1098,18 @@ public class VersionController {
             @RequestParam String approvedBy) {
         Version version = versionService.approveVersion(id, approvedBy);
         
-        return ResponseBuilder.success(version, "Approve version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Approve version thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/mark-current")
@@ -744,7 +1117,18 @@ public class VersionController {
     public ResponseEntity<RestResponse<Version>> markVersionAsCurrent(@PathVariable String id) {
         Version version = versionService.markVersionAsCurrent(id);
         
-        return ResponseBuilder.success(version, "Đánh dấu version hiện tại thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đánh dấu version hiện tại thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/unmark-current")
@@ -752,7 +1136,18 @@ public class VersionController {
     public ResponseEntity<RestResponse<Version>> unmarkVersionAsCurrent(@PathVariable String id) {
         Version version = versionService.unmarkVersionAsCurrent(id);
         
-        return ResponseBuilder.success(version, "Bỏ đánh dấu version hiện tại thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Bỏ đánh dấu version hiện tại thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/rollback")
@@ -762,7 +1157,18 @@ public class VersionController {
             @RequestParam String rollbackReason) {
         Version version = versionService.rollbackVersion(id, rollbackReason);
         
-        return ResponseBuilder.success(version, "Rollback version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Rollback version thành công.")
+            .data(version)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/previous-version")
@@ -842,7 +1248,18 @@ public class VersionController {
             @RequestParam String deletedBy) {
         versionService.deleteVersion(id, deletedBy);
         
-        return ResponseBuilder.success(null, "Xóa version thành công");
+        RestResponse<Version> response = RestResponse.<Version>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Xóa version thành công.")
+            .data(null)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/versions/{id}/restore")

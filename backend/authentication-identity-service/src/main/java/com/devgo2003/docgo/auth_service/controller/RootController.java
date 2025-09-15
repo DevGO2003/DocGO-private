@@ -14,7 +14,45 @@ public class RootController {
 
     @Operation(
         summary = "Root endpoint", 
-        description = "Tự động redirect sang /docs để hiển thị API documentation"
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        🔄 Redirect
+        Loại: HTTP Redirect (302)
+        Mô tả: Tự động chuyển hướng sang /docs để hiển thị API documentation
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (302: Found - Redirect)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
     )
     @GetMapping("/")
     public void redirectToDocs(HttpServletResponse response) throws IOException {

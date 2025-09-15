@@ -26,7 +26,62 @@ public class RoleController {
     private final RoleService roleService;
     
     @GetMapping
-    @Operation(summary = "Lấy danh sách vai trò", description = "Lấy danh sách vai trò với phân trang và sắp xếp")
+    @Operation(
+        summary = "Lấy danh sách vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        📄 sortBy (tùy chọn, query)
+        Loại: string
+        Mô tả: Trường sắp xếp (mặc định: createdAt)
+        
+        📄 sortDirection (tùy chọn, query)
+        Loại: string
+        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Page<RoleMongo>
+        Mô tả: Danh sách vai trò với phân trang
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<Page<RoleMongo>>> getAllRoles(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int size,
@@ -46,7 +101,50 @@ public class RoleController {
     }
     
     @GetMapping("/{id}")
-    @Operation(summary = "Lấy thông tin vai trò", description = "Lấy thông tin chi tiết vai trò theo ID")
+    @Operation(
+        summary = "Lấy thông tin vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần lấy thông tin
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin chi tiết vai trò
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> getRoleById(
             @Parameter(description = "ID vai trò") @PathVariable String id) {
         
@@ -63,7 +161,50 @@ public class RoleController {
     }
     
     @GetMapping("/name/{name}")
-    @Operation(summary = "Lấy vai trò theo tên", description = "Lấy thông tin vai trò theo tên")
+    @Operation(
+        summary = "Lấy vai trò theo tên", 
+        description = """
+        🔹 Đầu vào
+        
+        📝 name (bắt buộc, path)
+        Loại: string
+        Mô tả: Tên vai trò cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> getRoleByName(
             @Parameter(description = "Tên vai trò") @PathVariable String name) {
         
@@ -80,7 +221,48 @@ public class RoleController {
     }
     
     @GetMapping("/active")
-    @Operation(summary = "Lấy danh sách vai trò hoạt động", description = "Lấy danh sách vai trò đang hoạt động")
+    @Operation(
+        summary = "Lấy danh sách vai trò hoạt động", 
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò đang hoạt động
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getActiveRoles() {
         
         log.info("Getting active roles");
@@ -96,7 +278,48 @@ public class RoleController {
     }
     
     @GetMapping("/system")
-    @Operation(summary = "Lấy danh sách vai trò hệ thống", description = "Lấy danh sách vai trò hệ thống")
+    @Operation(
+        summary = "Lấy danh sách vai trò hệ thống", 
+        description = """
+        🔹 Đầu vào
+        
+        Không có tham số đầu vào
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò hệ thống
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getSystemRoles() {
         
         log.info("Getting system roles");
@@ -112,7 +335,50 @@ public class RoleController {
     }
     
     @GetMapping("/parent/{parentRoleId}")
-    @Operation(summary = "Lấy vai trò con", description = "Lấy danh sách vai trò con của vai trò cha")
+    @Operation(
+        summary = "Lấy vai trò con", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 parentRoleId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cha
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò con
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByParent(
             @Parameter(description = "ID vai trò cha") @PathVariable String parentRoleId) {
         
@@ -129,7 +395,50 @@ public class RoleController {
     }
     
     @GetMapping("/level/{level}")
-    @Operation(summary = "Lấy vai trò theo cấp độ", description = "Lấy danh sách vai trò theo cấp độ")
+    @Operation(
+        summary = "Lấy vai trò theo cấp độ", 
+        description = """
+        🔹 Đầu vào
+        
+        📊 level (bắt buộc, path)
+        Loại: integer
+        Mô tả: Cấp độ vai trò
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò theo cấp độ
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByLevel(
             @Parameter(description = "Cấp độ vai trò") @PathVariable Integer level) {
         
@@ -146,7 +455,50 @@ public class RoleController {
     }
     
     @GetMapping("/search")
-    @Operation(summary = "Tìm kiếm vai trò", description = "Tìm kiếm vai trò theo từ khóa")
+    @Operation(
+        summary = "Tìm kiếm vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🔍 q (bắt buộc, query)
+        Loại: string
+        Mô tả: Từ khóa tìm kiếm (tên, mô tả vai trò)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò tìm được
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> searchRoles(
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam String q) {
         
@@ -163,7 +515,50 @@ public class RoleController {
     }
     
     @GetMapping("/permission/{permissionId}")
-    @Operation(summary = "Lấy vai trò theo quyền", description = "Lấy danh sách vai trò có quyền cụ thể")
+    @Operation(
+        summary = "Lấy vai trò theo quyền", 
+        description = """
+        🔹 Đầu vào
+        
+        🔐 permissionId (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của quyền cần tìm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Danh sách vai trò có quyền này
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 204: No Content)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getRolesByPermission(
             @Parameter(description = "ID quyền") @PathVariable String permissionId) {
         
@@ -180,7 +575,50 @@ public class RoleController {
     }
     
     @PostMapping
-    @Operation(summary = "Tạo vai trò mới", description = "Tạo vai trò mới trong hệ thống")
+    @Operation(
+        summary = "Tạo vai trò mới", 
+        description = """
+        🔹 Đầu vào
+        
+        📝 role (bắt buộc, body)
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò mới cần tạo
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò đã được tạo
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (201: Created, 400: Bad Request, 409: Conflict)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> createRole(
             @Parameter(description = "Thông tin vai trò") @Valid @RequestBody RoleMongo role) {
         
@@ -197,7 +635,54 @@ public class RoleController {
     }
     
     @PutMapping("/{id}")
-    @Operation(summary = "Cập nhật vai trò", description = "Cập nhật thông tin vai trò")
+    @Operation(
+        summary = "Cập nhật vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần cập nhật
+        
+        📝 roleDetails (bắt buộc, body)
+        Loại: RoleMongo
+        Mô tả: Thông tin cập nhật cho vai trò
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò đã được cập nhật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 400: Bad Request, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> updateRole(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody RoleMongo roleDetails) {
@@ -215,7 +700,54 @@ public class RoleController {
     }
     
     @PutMapping("/{id}/permissions")
-    @Operation(summary = "Gán quyền cho vai trò", description = "Gán quyền cho vai trò")
+    @Operation(
+        summary = "Gán quyền cho vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần gán quyền
+        
+        🔐 permissionIds (bắt buộc, body)
+        Loại: Set<String>
+        Mô tả: Danh sách ID các quyền cần gán
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò với quyền đã được gán
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> assignPermissions(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "Danh sách ID quyền") @RequestBody Set<String> permissionIds) {
@@ -233,7 +765,54 @@ public class RoleController {
     }
     
     @PutMapping("/{id}/permissions/add")
-    @Operation(summary = "Thêm quyền cho vai trò", description = "Thêm quyền cho vai trò")
+    @Operation(
+        summary = "Thêm quyền cho vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần thêm quyền
+        
+        🔐 permissionId (bắt buộc, query)
+        Loại: string
+        Mô tả: ID của quyền cần thêm
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò với quyền đã được thêm
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> addPermission(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "ID quyền") @RequestParam String permissionId) {
@@ -251,7 +830,54 @@ public class RoleController {
     }
     
     @PutMapping("/{id}/permissions/remove")
-    @Operation(summary = "Xóa quyền khỏi vai trò", description = "Xóa quyền khỏi vai trò")
+    @Operation(
+        summary = "Xóa quyền khỏi vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần xóa quyền
+        
+        🔐 permissionId (bắt buộc, query)
+        Loại: string
+        Mô tả: ID của quyền cần xóa
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò với quyền đã được xóa
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> removePermission(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "ID quyền") @RequestParam String permissionId) {
@@ -269,7 +895,54 @@ public class RoleController {
     }
     
     @PutMapping("/{id}/status")
-    @Operation(summary = "Cập nhật trạng thái vai trò", description = "Cập nhật trạng thái vai trò")
+    @Operation(
+        summary = "Cập nhật trạng thái vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần cập nhật trạng thái
+        
+        📊 isActive (bắt buộc, query)
+        Loại: boolean
+        Mô tả: Trạng thái mới (true: hoạt động, false: không hoạt động)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: RoleMongo
+        Mô tả: Thông tin vai trò với trạng thái đã cập nhật
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<RoleMongo>> updateRoleStatus(
             @Parameter(description = "ID vai trò") @PathVariable String id,
             @Parameter(description = "Trạng thái mới") @RequestParam Boolean isActive) {
@@ -287,7 +960,50 @@ public class RoleController {
     }
     
     @GetMapping("/{id}/hierarchy")
-    @Operation(summary = "Lấy cây phân cấp vai trò", description = "Lấy cây phân cấp vai trò")
+    @Operation(
+        summary = "Lấy cây phân cấp vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò gốc để lấy cây phân cấp
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<RoleMongo>
+        Mô tả: Cây phân cấp vai trò từ vai trò gốc
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<List<RoleMongo>>> getRoleHierarchy(
             @Parameter(description = "ID vai trò") @PathVariable String id) {
         
@@ -304,7 +1020,50 @@ public class RoleController {
     }
     
     @DeleteMapping("/{id}")
-    @Operation(summary = "Xóa vai trò", description = "Xóa vai trò khỏi hệ thống")
+    @Operation(
+        summary = "Xóa vai trò", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của vai trò cần xóa
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về khi xóa thành công
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
     public ResponseEntity<RestResponse<Void>> deleteRole(
             @Parameter(description = "ID vai trò") @PathVariable String id) {
         
