@@ -34,20 +34,124 @@ public class ESignatureController {
 
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách chữ ký điện tử",
-        description = "Hỗ trợ query phân trang: pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted"
+        summary = "Lấy danh sách e-signature (hợp nhất)",
+        description = "Hỗ trợ lọc: contractId, signerId, signerEmail, status(PENDING|SIGNED|DECLINED|EXPIRED|VERIFIED), type, verificationMethod, required(true/false). Khoảng thời gian: signedFrom/signedTo. Sắp xếp: sortBy(signedAt|createdAt). Tổng hợp: aggregate=count|exists."
     )
-    public ResponseEntity<RestResponse<List<ESignature>>> getAllESignatures(
+    public ResponseEntity<RestResponse<?>> getAllESignatures(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        
-        List<ESignature> eSignatures = eSignatureService.getAllESignatures();
-        
-        if (eSignatures.isEmpty()) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) String signerId,
+            @RequestParam(required = false) String signerEmail,
+            @RequestParam(required = false) ESignature.SignatureStatus status,
+            @RequestParam(required = false) ESignature.SignatureType type,
+            @RequestParam(required = false) ESignature.VerificationMethod verificationMethod,
+            @RequestParam(required = false) Boolean required,
+            @RequestParam(required = false) String signedFrom,
+            @RequestParam(required = false) String signedTo,
+            @RequestParam(required = false) Integer minVerificationAttempts,
+            @RequestParam(required = false) Integer minReminderCount,
+            @RequestParam(required = false) String aggregate) {
+
+        // Aggregate (count|exists)
+        if (aggregate != null && !aggregate.isBlank()) {
+            String agg = aggregate.toLowerCase();
+            if ("count".equals(agg)) {
+                long count;
+                if (contractId != null && status != null) {
+                    count = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status);
+                } else if (contractId != null) {
+                    count = eSignatureService.countESignaturesByContractId(contractId);
+                } else if (signerId != null) {
+                    count = eSignatureService.countESignaturesBySignerId(signerId);
+                } else {
+                    List<ESignature> all = eSignatureService.getAllESignatures();
+                    count = all == null ? 0 : all.size();
+                }
+                RestResponse<Long> response = RestResponse.<Long>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đếm e-signature thành công.")
+                        .data(count)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            if ("exists".equals(agg)) {
+                boolean exists = false;
+                if (contractId != null && status != null) {
+                    exists = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status) > 0;
+                } else if (contractId != null) {
+                    exists = eSignatureService.existsESignaturesByContractId(contractId);
+                } else if (signerId != null) {
+                    exists = eSignatureService.getESignaturesBySignerId(signerId).size() > 0;
+                }
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Kiểm tra tồn tại e-signature thành công.")
+                        .data(exists)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // List mode
+        List<ESignature> eSignatures;
+        if (signerId != null) {
+            eSignatures = eSignatureService.getESignaturesBySignerId(signerId);
+        } else if (signerEmail != null) {
+            eSignatures = eSignatureService.getESignaturesBySignerEmail(signerEmail);
+        } else if (type != null) {
+            eSignatures = eSignatureService.getESignaturesBySignatureType(type);
+        } else if (verificationMethod != null) {
+            eSignatures = eSignatureService.getESignaturesByVerificationMethod(verificationMethod);
+        } else if (contractId != null && status == ESignature.SignatureStatus.PENDING) {
+            eSignatures = eSignatureService.getPendingSignaturesByContractId(contractId);
+        } else if (contractId != null && status == ESignature.SignatureStatus.SIGNED) {
+            eSignatures = eSignatureService.getSignedSignaturesByContractId(contractId);
+        } else if (contractId != null && status == ESignature.SignatureStatus.DECLINED) {
+            eSignatures = eSignatureService.getDeclinedSignaturesByContractId(contractId);
+        } else if (contractId != null && Boolean.TRUE.equals(required)) {
+            eSignatures = eSignatureService.getRequiredSignaturesByContractId(contractId);
+        } else if (contractId != null && Boolean.FALSE.equals(required)) {
+            eSignatures = eSignatureService.getOptionalSignaturesByContractId(contractId);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("signatureOrder")) {
+            eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignatureOrder(contractId);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("signedAt")) {
+            eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignedAt(contractId);
+        } else if (contractId != null && signedFrom != null && signedTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(signedFrom);
+                LocalDateTime to = LocalDateTime.parse(signedTo);
+                eSignatures = eSignatureService.getESignaturesBySignedAtBetween(from, to);
+            } catch (Exception e) {
+                eSignatures = eSignatureService.getAllESignatures();
+            }
+        } else if (contractId != null && status == ESignature.SignatureStatus.EXPIRED) {
+            eSignatures = eSignatureService.getExpiredSignatures(LocalDateTime.now());
+        } else if (minVerificationAttempts != null) {
+            eSignatures = eSignatureService.getSignaturesWithHighVerificationAttempts(minVerificationAttempts);
+        } else if (minReminderCount != null) {
+            eSignatures = eSignatureService.getSignaturesWithReminders(minReminderCount);
+        } else if (contractId != null) {
+            eSignatures = eSignatureService.getESignaturesByContractId(contractId);
+        } else {
+            eSignatures = eSignatureService.getAllESignatures();
+        }
+
+        if (eSignatures == null || eSignatures.isEmpty()) {
             RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
                 .apiVersion("v1")
                 .statusCode(204)
@@ -58,21 +162,19 @@ public class ESignatureController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
-            
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        
+
         RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Lấy danh sách chữ ký điện tử thành công.")
+            .description("Lấy danh sách e-signature thành công.")
             .data(eSignatures)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -215,67 +317,11 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/contracts/{contractId}/esignature")
-    @Operation(summary = "Tạo e-signature mới", description = "Tạo e-signature mới cho contract")
-    public ResponseEntity<RestResponse<ESignature>> createESignature(
-            @PathVariable String contractId,
-            @RequestParam String signerId,
-            @RequestParam String signerName,
-            @RequestParam String signerEmail,
-            @RequestParam String signerRole,
-            @RequestParam ESignature.SignatureType signatureType) {
-        
-        ESignature eSignature = eSignatureService.createESignature(contractId, signerId, signerName, signerEmail, signerRole, signatureType);
-        
-        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
-            .apiVersion("v1")
-            .statusCode(201)
-            .shortMessage("Created")
-            .description("Tạo e-signature thành công.")
-            .data(eSignature)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested create endpoint. Use POST /esignatures with body
 
-    @GetMapping("/contracts/{contractId}/esignatures")
-    @Operation(summary = "Lấy danh sách e-signature", description = "Lấy tất cả e-signature của contract")
-    public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesByContractId(@PathVariable String contractId) {
-        List<ESignature> eSignatures = eSignatureService.getESignaturesByContractId(contractId);
-        
-        if (eSignatures.isEmpty()) {
-            RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có e-signature nào cho contract này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách e-signature thành công.")
-            .data(eSignatures)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested list endpoint. Use GET /esignatures?contractId=...
 
-    @GetMapping("/esignatures/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Lấy e-signature theo ID", description = "Lấy chi tiết e-signature")
     public ResponseEntity<RestResponse<ESignature>> getESignatureById(@PathVariable String id) {
         Optional<ESignature> eSignature = eSignatureService.getESignatureById(id);
@@ -310,7 +356,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/pending")
-    @Operation(summary = "Lấy e-signature đang pending", description = "Lấy danh sách e-signature đang chờ ký")
+    @Operation(summary = "(Deprecated) Lấy e-signature pending", description = "Dùng GET /esignatures?contractId=...&status=PENDING", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getPendingSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getPendingSignaturesByContractId(contractId);
         
@@ -344,7 +390,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/signed")
-    @Operation(summary = "Lấy e-signature đã signed", description = "Lấy danh sách e-signature đã ký")
+    @Operation(summary = "(Deprecated) Lấy e-signature signed", description = "Dùng GET /esignatures?contractId=...&status=SIGNED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getSignedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getSignedSignaturesByContractId(contractId);
         
@@ -378,7 +424,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/declined")
-    @Operation(summary = "Lấy e-signature đã declined", description = "Lấy danh sách e-signature đã từ chối")
+    @Operation(summary = "(Deprecated) Lấy e-signature declined", description = "Dùng GET /esignatures?contractId=...&status=DECLINED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getDeclinedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getDeclinedSignaturesByContractId(contractId);
         
@@ -413,7 +459,7 @@ public class ESignatureController {
 
 
     @GetMapping("/contracts/{contractId}/esignatures/verified")
-    @Operation(summary = "Lấy e-signature đã verified", description = "Lấy danh sách e-signature đã xác thực")
+    @Operation(summary = "(Deprecated) Lấy e-signature verified", description = "Dùng GET /esignatures?contractId=...&status=VERIFIED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getVerifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getVerifiedSignaturesByContractId(contractId);
         
@@ -447,7 +493,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/required")
-    @Operation(summary = "Lấy e-signature bắt buộc", description = "Lấy danh sách e-signature bắt buộc")
+    @Operation(summary = "(Deprecated) Lấy e-signature required", description = "Dùng GET /esignatures?contractId=...&required=true", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getRequiredSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getRequiredSignaturesByContractId(contractId);
         
@@ -481,7 +527,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/optional")
-    @Operation(summary = "Lấy e-signature tùy chọn", description = "Lấy danh sách e-signature tùy chọn")
+    @Operation(summary = "(Deprecated) Lấy e-signature optional", description = "Dùng GET /esignatures?contractId=...&required=false", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getOptionalSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getOptionalSignaturesByContractId(contractId);
         
@@ -515,7 +561,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/consented")
-    @Operation(summary = "Lấy e-signature đã consent", description = "Lấy danh sách e-signature đã đồng ý")
+    @Operation(summary = "(Deprecated) Lấy e-signature consented", description = "Dùng GET /esignatures?contractId=...&status=CONSENTED (nếu có)", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getConsentedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getConsentedSignaturesByContractId(contractId);
         
@@ -549,7 +595,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/unconsented")
-    @Operation(summary = "Lấy e-signature chưa consent", description = "Lấy danh sách e-signature chưa đồng ý")
+    @Operation(summary = "(Deprecated) Lấy e-signature unconsented", description = "Dùng GET /esignatures?contractId=...&status=UNCONSENTED (nếu có)", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getUnconsentedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getUnconsentedSignaturesByContractId(contractId);
         
@@ -583,7 +629,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/compliance-verified")
-    @Operation(summary = "Lấy e-signature đã compliance verified", description = "Lấy danh sách e-signature đã xác thực compliance")
+    @Operation(summary = "(Deprecated) Lấy e-signature compliance verified", description = "Dùng GET /esignatures?contractId=...&status=VERIFIED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getComplianceVerifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getComplianceVerifiedSignaturesByContractId(contractId);
         
@@ -617,7 +663,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/compliance-unverified")
-    @Operation(summary = "Lấy e-signature chưa compliance verified", description = "Lấy danh sách e-signature chưa xác thực compliance")
+    @Operation(summary = "(Deprecated) Lấy e-signature compliance unverified", description = "Dùng GET /esignatures?contractId=...&status!=VERIFIED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getComplianceUnverifiedSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getComplianceUnverifiedSignaturesByContractId(contractId);
         
@@ -650,144 +696,16 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/esignatures/signer/{signerId}")
-    @Operation(summary = "Lấy e-signature theo signer ID", description = "Lấy danh sách e-signature của signer")
-    public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignerId(@PathVariable String signerId) {
-        List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerId(signerId);
-        
-        if (eSignatures.isEmpty()) {
-                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có e-signature nào của signer này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách e-signature của signer thành công.")
-            .data(eSignatures)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated signerId path. Use GET /esignatures?signerId=...
 
-    @GetMapping("/esignatures/signer/email/{signerEmail}")
-    @Operation(summary = "Lấy e-signature theo signer email", description = "Lấy danh sách e-signature của signer email")
-    public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignerEmail(@PathVariable String signerEmail) {
-        List<ESignature> eSignatures = eSignatureService.getESignaturesBySignerEmail(signerEmail);
-        
-        if (eSignatures.isEmpty()) {
-                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có e-signature nào của signer email này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách e-signature của signer email thành công.")
-            .data(eSignatures)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated signerEmail path. Use GET /esignatures?signerEmail=...
 
-    @GetMapping("/esignatures/type/{signatureType}")
-    @Operation(summary = "Lấy e-signature theo signature type", description = "Lấy danh sách e-signature theo loại chữ ký")
-    public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignatureType(@PathVariable ESignature.SignatureType signatureType) {
-        List<ESignature> eSignatures = eSignatureService.getESignaturesBySignatureType(signatureType);
-        
-        if (eSignatures.isEmpty()) {
-                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có e-signature nào với signature type này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách e-signature theo signature type thành công.")
-            .data(eSignatures)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated signatureType path. Use GET /esignatures?type=...
 
-    @GetMapping("/esignatures/verification-method/{verificationMethod}")
-    @Operation(summary = "Lấy e-signature theo verification method", description = "Lấy danh sách e-signature theo phương thức xác thực")
-    public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesByVerificationMethod(@PathVariable ESignature.VerificationMethod verificationMethod) {
-        List<ESignature> eSignatures = eSignatureService.getESignaturesByVerificationMethod(verificationMethod);
-        
-        if (eSignatures.isEmpty()) {
-                    RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có e-signature nào với verification method này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<ESignature>> response = RestResponse.<List<ESignature>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách e-signature theo verification method thành công.")
-            .data(eSignatures)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated verificationMethod path. Use GET /esignatures?verificationMethod=...
 
     @GetMapping("/contracts/{contractId}/esignatures/order-by-signature-order")
-    @Operation(summary = "Lấy e-signature sắp xếp theo signature order", description = "Lấy danh sách e-signature sắp xếp theo thứ tự ký")
+    @Operation(summary = "(Deprecated) Lấy e-signature order-by signature order", description = "Dùng GET /esignatures?contractId=...&sortBy=signatureOrder", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesOrderBySignatureOrder(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignatureOrder(contractId);
         
@@ -821,7 +739,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/order-by-signed-at")
-    @Operation(summary = "Lấy e-signature sắp xếp theo thời gian ký", description = "Lấy danh sách e-signature sắp xếp theo thời gian ký")
+    @Operation(summary = "(Deprecated) Lấy e-signature order-by signedAt", description = "Dùng GET /esignatures?contractId=...&sortBy=signedAt", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesOrderBySignedAt(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getESignaturesByContractIdOrderBySignedAt(contractId);
         
@@ -855,7 +773,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/signed-between")
-    @Operation(summary = "Lấy e-signature theo thời gian ký", description = "Lấy danh sách e-signature trong khoảng thời gian ký")
+    @Operation(summary = "(Deprecated) Lấy e-signature theo thời gian ký", description = "Dùng GET /esignatures?contractId=...&signedFrom=...&signedTo=...", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getESignaturesBySignedAtBetween(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -892,7 +810,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/expired")
-    @Operation(summary = "Lấy e-signature đã expired", description = "Lấy danh sách e-signature đã hết hạn")
+    @Operation(summary = "(Deprecated) Lấy e-signature expired", description = "Dùng GET /esignatures?contractId=...&status=EXPIRED", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getExpiredSignatures(@PathVariable String contractId) {
         List<ESignature> eSignatures = eSignatureService.getExpiredSignatures(LocalDateTime.now());
         
@@ -926,7 +844,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/expiring")
-    @Operation(summary = "Lấy e-signature sắp expired", description = "Lấy danh sách e-signature sắp hết hạn")
+    @Operation(summary = "(Deprecated) Lấy e-signature expiring", description = "Dùng GET /esignatures?contractId=...&expiresTo=...", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getExpiringSignatures(
             @PathVariable String contractId,
             @RequestParam LocalDateTime dueDate) {
@@ -962,7 +880,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/high-verification-attempts")
-    @Operation(summary = "Lấy e-signature có verification attempts cao", description = "Lấy danh sách e-signature có verification attempts cao")
+    @Operation(summary = "(Deprecated) Lấy e-signature có verification attempts cao", description = "Dùng GET /esignatures?minVerificationAttempts=...", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getSignaturesWithHighVerificationAttempts(
             @PathVariable String contractId,
             @RequestParam Integer maxAttempts) {
@@ -998,7 +916,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/with-reminders")
-    @Operation(summary = "Lấy e-signature có reminders", description = "Lấy danh sách e-signature có reminders")
+    @Operation(summary = "(Deprecated) Lấy e-signature có reminders", description = "Dùng GET /esignatures?minReminderCount=...", deprecated = true)
     public ResponseEntity<RestResponse<List<ESignature>>> getSignaturesWithReminders(
             @PathVariable String contractId,
             @RequestParam Integer reminderCount) {
@@ -1033,7 +951,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/sign")
+    @PutMapping("/{id}/sign")
     @Operation(summary = "Ký e-signature", description = "Ký e-signature")
     public ResponseEntity<RestResponse<ESignature>> signESignature(
             @PathVariable String id,
@@ -1058,7 +976,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/decline")
+    @PutMapping("/{id}/decline")
     @Operation(summary = "Từ chối e-signature", description = "Từ chối e-signature")
     public ResponseEntity<RestResponse<ESignature>> declineESignature(
             @PathVariable String id,
@@ -1079,7 +997,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/verify")
+    @PutMapping("/{id}/verify")
     @Operation(summary = "Xác thực e-signature", description = "Xác thực e-signature")
     public ResponseEntity<RestResponse<ESignature>> verifyESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.verifyESignature(id);
@@ -1098,7 +1016,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/fail-verification")
+    @PutMapping("/{id}/fail-verification")
     @Operation(summary = "Xác thực e-signature thất bại", description = "Xác thực e-signature thất bại")
     public ResponseEntity<RestResponse<ESignature>> failVerificationESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.failVerificationESignature(id);
@@ -1117,7 +1035,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/expire")
+    @PutMapping("/{id}/expire")
     @Operation(summary = "Đánh dấu e-signature hết hạn", description = "Đánh dấu e-signature đã hết hạn")
     public ResponseEntity<RestResponse<ESignature>> expireESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.expireESignature(id);
@@ -1136,7 +1054,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/cancel")
+    @PutMapping("/{id}/cancel")
     @Operation(summary = "Hủy e-signature", description = "Hủy e-signature")
     public ResponseEntity<RestResponse<ESignature>> cancelESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.cancelESignature(id);
@@ -1155,7 +1073,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/increment-reminder")
+    @PutMapping("/{id}/increment-reminder")
     @Operation(summary = "Tăng reminder count", description = "Tăng số lần nhắc nhở")
     public ResponseEntity<RestResponse<ESignature>> incrementReminderCount(@PathVariable String id) {
         ESignature eSignature = eSignatureService.incrementReminderCount(id);
@@ -1174,7 +1092,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/give-consent")
+    @PutMapping("/{id}/give-consent")
     @Operation(summary = "Đồng ý e-signature", description = "Đồng ý e-signature")
     public ResponseEntity<RestResponse<ESignature>> giveLegalConsent(@PathVariable String id) {
         ESignature eSignature = eSignatureService.giveLegalConsent(id);
@@ -1193,7 +1111,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/verify-compliance")
+    @PutMapping("/{id}/verify-compliance")
     @Operation(summary = "Xác thực compliance", description = "Xác thực compliance")
     public ResponseEntity<RestResponse<ESignature>> verifyCompliance(
             @PathVariable String id,
@@ -1214,7 +1132,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/signature-order")
+    @PutMapping("/{id}/signature-order")
     @Operation(summary = "Cập nhật signature order", description = "Cập nhật thứ tự ký")
     public ResponseEntity<RestResponse<ESignature>> setSignatureOrder(
             @PathVariable String id,
@@ -1235,7 +1153,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/required")
+    @PutMapping("/{id}/required")
     @Operation(summary = "Cập nhật isRequired", description = "Cập nhật trạng thái bắt buộc")
     public ResponseEntity<RestResponse<ESignature>> setIsRequired(
             @PathVariable String id,
@@ -1256,7 +1174,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/expires-at")
+    @PutMapping("/{id}/expires-at")
     @Operation(summary = "Cập nhật expires at", description = "Cập nhật thời gian hết hạn")
     public ResponseEntity<RestResponse<ESignature>> setExpiresAt(
             @PathVariable String id,
@@ -1277,7 +1195,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/verification-method")
+    @PutMapping("/{id}/verification-method")
     @Operation(summary = "Cập nhật verification method", description = "Cập nhật phương thức xác thực")
     public ResponseEntity<RestResponse<ESignature>> setVerificationMethod(
             @PathVariable String id,
@@ -1298,7 +1216,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/verification-code")
+    @PutMapping("/{id}/verification-code")
     @Operation(summary = "Cập nhật verification code", description = "Cập nhật mã xác thực")
     public ResponseEntity<RestResponse<ESignature>> setVerificationCode(
             @PathVariable String id,
@@ -1319,7 +1237,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/certificate-data")
+    @PutMapping("/{id}/certificate-data")
     @Operation(summary = "Cập nhật certificate data", description = "Cập nhật dữ liệu chứng chỉ")
     public ResponseEntity<RestResponse<ESignature>> setCertificateData(
             @PathVariable String id,
@@ -1344,7 +1262,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/location-info")
+    @PutMapping("/{id}/location-info")
     @Operation(summary = "Cập nhật location info", description = "Cập nhật thông tin vị trí")
     public ResponseEntity<RestResponse<ESignature>> setLocationInfo(
             @PathVariable String id,
@@ -1365,7 +1283,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/audit-trail")
+    @PutMapping("/{id}/audit-trail")
     @Operation(summary = "Cập nhật audit trail", description = "Cập nhật audit trail")
     public ResponseEntity<RestResponse<ESignature>> setAuditTrail(
             @PathVariable String id,
@@ -1386,7 +1304,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/esignatures/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Xóa e-signature", description = "Soft delete e-signature")
     public ResponseEntity<RestResponse<Void>> deleteESignature(
             @PathVariable String id,
@@ -1407,7 +1325,7 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/esignatures/{id}/restore")
+    @PutMapping("/{id}/restore")
     @Operation(summary = "Khôi phục e-signature", description = "Khôi phục e-signature đã xóa")
     public ResponseEntity<RestResponse<ESignature>> restoreESignature(@PathVariable String id) {
         ESignature eSignature = eSignatureService.restoreESignature(id);
@@ -1426,8 +1344,217 @@ public class ESignatureController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/count")
+    @Operation(summary = "Đếm e-signature (rút gọn)", description = "Thay thế các đường dẫn count-* bằng query aggregate=count")
+    public ResponseEntity<RestResponse<Long>> countESignatures(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) ESignature.SignatureStatus status,
+            @RequestParam(required = false) String signerId) {
+        long count;
+        if (contractId != null && status != null) {
+            count = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status);
+        } else if (contractId != null) {
+            count = eSignatureService.countESignaturesByContractId(contractId);
+        } else if (signerId != null) {
+            count = eSignatureService.countESignaturesBySignerId(signerId);
+        } else {
+            List<ESignature> all = eSignatureService.getAllESignatures();
+            count = all == null ? 0 : all.size();
+        }
+        RestResponse<Long> response = RestResponse.<Long>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đếm e-signature thành công.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/exists")
+    @Operation(summary = "Kiểm tra tồn tại e-signature (rút gọn)", description = "Thay thế các đường dẫn exists-* bằng query aggregate=exists")
+    public ResponseEntity<RestResponse<Boolean>> existsESignatures(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) ESignature.SignatureStatus status,
+            @RequestParam(required = false) String signerId) {
+        boolean exists = false;
+        if (contractId != null && status != null) {
+            exists = eSignatureService.countESignaturesByContractIdAndStatus(contractId, status) > 0;
+        } else if (contractId != null) {
+            exists = eSignatureService.existsESignaturesByContractId(contractId);
+        } else if (signerId != null) {
+            exists = eSignatureService.getESignaturesBySignerId(signerId).size() > 0;
+        }
+        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Kiểm tra tồn tại e-signature thành công.")
+            .data(exists)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Cập nhật trạng thái e-signature (rút gọn)", description = "Thay thế các URL dài sign/decline/verify/expire/cancel")
+    public ResponseEntity<RestResponse<ESignature>> updateESignatureStatus(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, Object> body) {
+        String status = body == null ? null : (String) body.getOrDefault("status", null);
+        ESignature updated;
+        if (status == null) {
+            RestResponse<ESignature> bad = RestResponse.<ESignature>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Thiếu trường 'status'.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(bad, HttpStatus.OK);
+        }
+        switch (status.toUpperCase()) {
+            case "SIGNED" -> {
+                String signatureData = (String) body.getOrDefault("signatureData", "");
+                String signatureImage = (String) body.getOrDefault("signatureImage", "");
+                String ipAddress = (String) body.getOrDefault("ipAddress", "");
+                String useragent = (String) body.getOrDefault("useragent", "");
+                @SuppressWarnings("unchecked") Map<String,Object> deviceInfo = (Map<String,Object>) body.getOrDefault("deviceInfo", java.util.Map.of());
+                updated = eSignatureService.signESignature(id, signatureData, signatureImage, ipAddress, useragent, deviceInfo);
+            }
+            case "DECLINED" -> {
+                String declineReason = (String) body.getOrDefault("declineReason", "");
+                updated = eSignatureService.declineESignature(id, declineReason);
+            }
+            case "VERIFIED" -> updated = eSignatureService.verifyESignature(id);
+            case "EXPIRED" -> updated = eSignatureService.expireESignature(id);
+            case "CANCELED" -> updated = eSignatureService.cancelESignature(id);
+            default -> {
+                RestResponse<ESignature> bad = RestResponse.<ESignature>builder()
+                    .apiVersion("v1")
+                    .statusCode(400)
+                    .shortMessage("Bad Request")
+                    .description("Giá trị 'status' không hợp lệ.")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+                return new ResponseEntity<>(bad, HttpStatus.OK);
+            }
+        }
+
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật trạng thái e-signature thành công.")
+            .data(updated)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Cập nhật từng phần e-signature (rút gọn)", description = "Hỗ trợ: required, expiresAt, verificationMethod, verificationCode, certificateData, locationInfo, signatureOrder, incrementReminder, giveConsent, auditTrail")
+    public ResponseEntity<RestResponse<ESignature>> patchESignature(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> body) {
+        ESignature updated = null;
+
+        if (body.containsKey("required")) {
+            Object v = body.get("required");
+            if (v instanceof Boolean b) updated = eSignatureService.setIsRequired(id, b);
+        }
+        if (body.containsKey("expiresAt")) {
+            Object v = body.get("expiresAt");
+            if (v instanceof String s) {
+                try { updated = eSignatureService.setExpiresAt(id, LocalDateTime.parse(s)); } catch (Exception ignored) {}
+            }
+        }
+        if (body.containsKey("verificationMethod")) {
+            Object v = body.get("verificationMethod");
+            if (v instanceof String s) {
+                try { updated = eSignatureService.setVerificationMethod(id, ESignature.VerificationMethod.valueOf(s.toUpperCase())); } catch (Exception ignored) {}
+            }
+        }
+        if (body.containsKey("verificationCode")) {
+            Object v = body.get("verificationCode");
+            if (v instanceof String s) updated = eSignatureService.setVerificationCode(id, s);
+        }
+        if (body.containsKey("certificateData")) {
+            Object v = body.get("certificateData");
+            if (v instanceof String s) {
+                String issuer = (String) body.getOrDefault("certificateIssuer", "");
+                String serial = (String) body.getOrDefault("certificateSerial", "");
+                String validFrom = (String) body.getOrDefault("validFrom", null);
+                String validTo = (String) body.getOrDefault("validTo", null);
+                LocalDateTime vf = validFrom == null ? null : LocalDateTime.parse(validFrom);
+                LocalDateTime vt = validTo == null ? null : LocalDateTime.parse(validTo);
+                updated = eSignatureService.setCertificateData(id, s, issuer, serial, vf, vt);
+            }
+        }
+        if (body.containsKey("locationInfo")) {
+            Object v = body.get("locationInfo");
+            if (v instanceof Map<?,?> m) {
+                @SuppressWarnings("unchecked") Map<String,Object> cast = (Map<String,Object>) m;
+                updated = eSignatureService.setLocationInfo(id, cast);
+            }
+        }
+        if (body.containsKey("signatureOrder")) {
+            Object v = body.get("signatureOrder");
+            if (v instanceof Number n) updated = eSignatureService.setSignatureOrder(id, n.intValue());
+        }
+        if (Boolean.TRUE.equals(body.get("incrementReminder"))) {
+            updated = eSignatureService.incrementReminderCount(id);
+        }
+        if (Boolean.TRUE.equals(body.get("giveConsent"))) {
+            updated = eSignatureService.giveLegalConsent(id);
+        }
+        if (body.containsKey("auditTrail")) {
+            Object v = body.get("auditTrail");
+            if (v instanceof String s) updated = eSignatureService.setAuditTrail(id, s);
+        }
+
+        if (updated == null) {
+            RestResponse<ESignature> bad = RestResponse.<ESignature>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Không có trường hợp lệ để cập nhật.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(bad, HttpStatus.OK);
+        }
+
+        RestResponse<ESignature> response = RestResponse.<ESignature>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật e-signature thành công.")
+            .data(updated)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/contracts/{contractId}/esignatures/count")
-    @Operation(summary = "Đếm số e-signature", description = "Đếm số lượng e-signature")
+    @Operation(summary = "(Deprecated) Đếm e-signature", description = "Dùng GET /esignatures?contractId=...&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countESignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countESignaturesByContractId(contractId);
         
@@ -1446,7 +1573,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-by-status")
-    @Operation(summary = "Đếm số e-signature theo status", description = "Đếm số lượng e-signature theo status")
+    @Operation(summary = "(Deprecated) Đếm e-signature theo status", description = "Dùng GET /esignatures?contractId=...&status=...&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countESignaturesByContractIdAndStatus(
             @PathVariable String contractId,
             @RequestParam ESignature.SignatureStatus status) {
@@ -1467,7 +1594,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/esignatures/signer/{signerId}/count")
-    @Operation(summary = "Đếm số e-signature của signer", description = "Đếm số lượng e-signature của signer")
+    @Operation(summary = "(Deprecated) Đếm e-signature của signer", description = "Dùng GET /esignatures?signerId=...&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countESignaturesBySignerId(@PathVariable String signerId) {
         long count = eSignatureService.countESignaturesBySignerId(signerId);
         
@@ -1486,7 +1613,7 @@ public class ESignatureController {
     }
 
     @GetMapping("/contracts/{contractId}/esignatures/count-pending")
-    @Operation(summary = "Đếm số e-signature pending", description = "Đếm số lượng e-signature đang pending")
+    @Operation(summary = "(Deprecated) Đếm e-signature pending", description = "Dùng GET /esignatures?contractId=...&status=PENDING&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countPendingSignaturesByContractId(@PathVariable String contractId) {
         long count = eSignatureService.countPendingSignaturesByContractId(contractId);
         

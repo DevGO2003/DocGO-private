@@ -32,80 +32,124 @@ public class ReminderController {
 
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách tất cả nhắc nhở", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 pageNumber (tùy chọn, query)
-        Loại: integer
-        Mô tả: Số trang (mặc định: 0)
-        
-        📄 pageSize (tùy chọn, query)
-        Loại: integer
-        Mô tả: Kích thước trang (mặc định: 10)
-        
-        📄 sortBy (tùy chọn, query)
-        Loại: string
-        Mô tả: Trường sắp xếp (mặc định: createdAt)
-        
-        📄 sortDirection (tùy chọn, query)
-        Loại: string
-        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
-        
-        📄 searchTerm (tùy chọn, query)
-        Loại: string
-        Mô tả: Từ khóa tìm kiếm
-        
-        📄 includeDeleted (tùy chọn, query)
-        Loại: boolean
-        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: List<Reminder>
-        Mô tả: Danh sách nhắc nhở
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: ma trạng thái HTTP (200: OK, 204: No Content)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        🔗 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
-        
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
+        summary = "Lấy danh sách nhắc nhở (hợp nhất)",
+        description = "Hỗ trợ lọc qua query: contractId, status (PENDING|SENT|COMPLETED|CANCELLED|FAILED|ESCALATED), type, priority, scheduledFrom, scheduledTo, dueFrom, dueTo; aggregate=count|exists. Phân trang/sắp xếp: pageNumber, pageSize, sortBy(createdAt|scheduledAt), sortDirection."
     )
-    public ResponseEntity<RestResponse<List<Reminder>>> getAllReminders(
+    public ResponseEntity<RestResponse<?>> getAllReminders(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        
-        List<Reminder> reminders = reminderService.getAllReminders();
-        
-        if (reminders.isEmpty()) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Reminder.ReminderStatus status,
+            @RequestParam(required = false) Reminder.ReminderType type,
+            @RequestParam(required = false) Reminder.ReminderPriority priority,
+            @RequestParam(required = false) String scheduledFrom,
+            @RequestParam(required = false) String scheduledTo,
+            @RequestParam(required = false) String dueFrom,
+            @RequestParam(required = false) String dueTo,
+            @RequestParam(required = false) Integer minSentCount,
+            @RequestParam(required = false) Integer minEscalationLevel,
+            @RequestParam(required = false) String aggregate) {
+
+        // Aggregate mode (count | exists)
+        if (aggregate != null && !aggregate.isBlank()) {
+            String agg = aggregate.toLowerCase();
+            if ("count".equals(agg)) {
+                long count;
+                if (contractId != null && status != null) {
+                    count = reminderService.countRemindersByContractIdAndStatus(contractId, status);
+                } else if (contractId != null) {
+                    count = reminderService.countRemindersByContractId(contractId);
+                } else {
+                    List<Reminder> all = reminderService.getAllReminders();
+                    count = all == null ? 0 : all.size();
+                }
+                RestResponse<Long> response = RestResponse.<Long>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đếm số nhắc nhở thành công.")
+                        .data(count)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            if ("exists".equals(agg)) {
+                boolean exists = false;
+                if (contractId != null && status != null) {
+                    // No direct exists-by-status; degrade to count>0
+                    exists = reminderService.countRemindersByContractIdAndStatus(contractId, status) > 0;
+                } else if (contractId != null) {
+                    exists = reminderService.existsRemindersByContractId(contractId);
+                }
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Kiểm tra tồn tại nhắc nhở thành công.")
+                        .data(exists)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // List mode
+        List<Reminder> reminders;
+        if (contractId != null && status == Reminder.ReminderStatus.PENDING) {
+            reminders = reminderService.getPendingRemindersByContractId(contractId);
+        } else if (contractId != null && status == Reminder.ReminderStatus.SENT) {
+            reminders = reminderService.getSentRemindersByContractId(contractId);
+        } else if (contractId != null && status == Reminder.ReminderStatus.COMPLETED) {
+            reminders = reminderService.getCompletedRemindersByContractId(contractId);
+        } else if (contractId != null && status == Reminder.ReminderStatus.CANCELLED) {
+            reminders = reminderService.getCancelledRemindersByContractId(contractId);
+        } else if (contractId != null && status == Reminder.ReminderStatus.FAILED) {
+            reminders = reminderService.getFailedRemindersByContractId(contractId);
+        } else if (contractId != null && status == Reminder.ReminderStatus.ESCALATED) {
+            reminders = reminderService.getEscalatedRemindersByContractId(contractId);
+        } else if (contractId != null && type != null) {
+            reminders = reminderService.getRemindersByReminderType(contractId, type);
+        } else if (contractId != null && priority != null) {
+            reminders = reminderService.getRemindersByPriority(contractId, priority);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("scheduledAt")) {
+            reminders = reminderService.getRemindersByContractIdOrderByScheduledAt(contractId);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("createdAt")) {
+            reminders = reminderService.getRemindersByContractIdOrderByCreatedAt(contractId);
+        } else if (scheduledFrom != null && scheduledTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(scheduledFrom);
+                LocalDateTime to = LocalDateTime.parse(scheduledTo);
+                reminders = reminderService.getRemindersByScheduledAtBetween(from, to);
+            } catch (Exception e) {
+                reminders = reminderService.getAllReminders();
+            }
+        } else if (dueFrom != null && dueTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(dueFrom);
+                LocalDateTime to = LocalDateTime.parse(dueTo);
+                reminders = reminderService.getRemindersByDueDateBetween(from, to);
+            } catch (Exception e) {
+                reminders = reminderService.getAllReminders();
+            }
+        } else if (minSentCount != null) {
+            reminders = reminderService.getRemindersWithHighSentCount(minSentCount);
+        } else if (minEscalationLevel != null) {
+            reminders = reminderService.getRemindersWithHighEscalationLevel(minEscalationLevel);
+        } else if (contractId != null) {
+            reminders = reminderService.getRemindersByContractId(contractId);
+        } else {
+            reminders = reminderService.getAllReminders();
+        }
+
+        if (reminders == null || reminders.isEmpty()) {
             RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
                 .apiVersion("v1")
                 .statusCode(204)
@@ -116,10 +160,9 @@ public class ReminderController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
-            
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        
+
         RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
             .apiVersion("v1")
             .statusCode(200)
@@ -130,7 +173,6 @@ public class ReminderController {
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -273,66 +315,11 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/contracts/{contractId}/reminders")
-    @Operation(summary = "Tạo reminder mới", description = "Tạo reminder mới cho contract")
-    public ResponseEntity<RestResponse<Reminder>> createReminder(
-            @PathVariable String contractId,
-            @RequestParam String title,
-            @RequestParam String description,
-            @RequestParam Reminder.ReminderType reminderType,
-            @RequestParam LocalDateTime scheduledAt) {
-        
-        Reminder reminder = reminderService.createReminder(contractId, title, description, reminderType, scheduledAt);
-        
-        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
-            .apiVersion("v1")
-            .statusCode(201)
-            .shortMessage("Created")
-            .description("Tạo reminder thành công.")
-            .data(reminder)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested create endpoint removed. Use POST /reminders with body instead.
 
-    @GetMapping("/contracts/{contractId}/reminders")
-    @Operation(summary = "Lấy danh sách reminder", description = "Lấy tất cả reminder của contract")
-    public ResponseEntity<RestResponse<List<Reminder>>> getRemindersByContractId(@PathVariable String contractId) {
-        List<Reminder> reminders = reminderService.getRemindersByContractId(contractId);
-        
-        if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có reminder nào cho contract này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách reminder thành công.")
-            .data(reminders)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested list endpoint removed. Use GET /reminders?contractId=...
 
-    @GetMapping("/reminders/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Lấy reminder theo ID", description = "Lấy chi tiết reminder")
     public ResponseEntity<RestResponse<Reminder>> getReminderById(@PathVariable String id) {
         Optional<Reminder> reminder = reminderService.getReminderById(id);
@@ -366,109 +353,13 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/reminders/pending")
-    @Operation(summary = "Lấy reminder pending", description = "Lấy danh sách reminder đang pending")
-    public ResponseEntity<RestResponse<List<Reminder>>> getPendingReminders(@PathVariable String contractId) {
-        List<Reminder> reminders = reminderService.getPendingRemindersByContractId(contractId);
-        
-        if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có reminder nào đang pending.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách reminder pending thành công.")
-            .data(reminders)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested pending endpoint removed. Use GET /reminders?contractId=...&status=PENDING
 
-    @GetMapping("/contracts/{contractId}/reminders/completed")
-    @Operation(summary = "Lấy reminder completed", description = "Lấy danh sách reminder đã hoàn thành")
-    public ResponseEntity<RestResponse<List<Reminder>>> getCompletedReminders(@PathVariable String contractId) {
-        List<Reminder> reminders = reminderService.getCompletedRemindersByContractId(contractId);
-        
-        if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có reminder nào đã hoàn thành.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách reminder completed thành công.")
-            .data(reminders)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested completed endpoint removed. Use GET /reminders?contractId=...&status=COMPLETED
 
-    @GetMapping("/contracts/{contractId}/reminders/escalated")
-    @Operation(summary = "Lấy reminder escalated", description = "Lấy danh sách reminder đã escalated")
-    public ResponseEntity<RestResponse<List<Reminder>>> getEscalatedReminders(@PathVariable String contractId) {
-        List<Reminder> reminders = reminderService.getEscalatedRemindersByContractId(contractId);
-        
-        if (reminders.isEmpty()) {
-            RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có reminder nào đã escalated.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Reminder>> response = RestResponse.<List<Reminder>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách reminder escalated thành công.")
-            .data(reminders)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested escalated endpoint removed. Use GET /reminders?contractId=...&status=ESCALATED
 
-    @GetMapping("/reminders/due")
+    @GetMapping("/due")
     @Operation(summary = "Lấy reminder đến hạn", description = "Lấy danh sách reminder đến hạn")
     public ResponseEntity<RestResponse<List<Reminder>>> getDueReminders(@RequestParam LocalDateTime currentTime) {
         List<Reminder> reminders = reminderService.getDueReminders(currentTime);
@@ -502,7 +393,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/reminders/overdue")
+    @GetMapping("/overdue")
     @Operation(summary = "Lấy reminder quá hạn", description = "Lấy danh sách reminder quá hạn")
     public ResponseEntity<RestResponse<List<Reminder>>> getOverdueReminders(@RequestParam LocalDateTime currentTime) {
         List<Reminder> reminders = reminderService.getOverdueReminders(currentTime);
@@ -536,7 +427,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/reminders/{id}/send")
+    @PutMapping("/{id}/send")
     @Operation(summary = "Gửi reminder", description = "Gửi reminder")
     public ResponseEntity<RestResponse<Reminder>> sendReminder(@PathVariable String id) {
         Reminder reminder = reminderService.sendReminder(id);
@@ -555,7 +446,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/reminders/{id}/complete")
+    @PutMapping("/{id}/complete")
     @Operation(summary = "Hoàn thành reminder", description = "Đánh dấu reminder hoàn thành")
     public ResponseEntity<RestResponse<Reminder>> completeReminder(
             @PathVariable String id,
@@ -577,7 +468,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/reminders/{id}/cancel")
+    @PutMapping("/{id}/cancel")
     @Operation(summary = "Hủy reminder", description = "Hủy reminder")
     public ResponseEntity<RestResponse<Reminder>> cancelReminder(
             @PathVariable String id,
@@ -599,7 +490,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/reminders/{id}/escalate")
+    @PutMapping("/{id}/escalate")
     @Operation(summary = "Escalate reminder", description = "Escalate reminder")
     public ResponseEntity<RestResponse<Reminder>> escalateReminder(
             @PathVariable String id,
@@ -620,7 +511,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/reminders/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Xóa reminder", description = "Soft delete reminder")
     public ResponseEntity<RestResponse<Void>> deleteReminder(
             @PathVariable String id,
@@ -641,7 +532,7 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/reminders/{id}/restore")
+    @PutMapping("/{id}/restore")
     @Operation(summary = "Khôi phục reminder", description = "Khôi phục reminder đã xóa")
     public ResponseEntity<RestResponse<Reminder>> restoreReminder(@PathVariable String id) {
         Reminder reminder = reminderService.restoreReminder(id);
@@ -660,11 +551,74 @@ public class ReminderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/reminders/count")
-    @Operation(summary = "Đếm số reminder", description = "Đếm số lượng reminder")
-    public ResponseEntity<RestResponse<Long>> countRemindersByContractId(@PathVariable String contractId) {
-        long count = reminderService.countRemindersByContractId(contractId);
-        
+    @PatchMapping("/{id}")
+    @Operation(summary = "Cập nhật từng phần reminder (rút gọn)", description = "Hỗ trợ: send, complete, cancel, escalate")
+    public ResponseEntity<RestResponse<Reminder>> patchReminder(
+            @PathVariable String id,
+            @RequestBody java.util.Map<String, Object> body) {
+        Reminder updated = null;
+
+        if (Boolean.TRUE.equals(body.get("send"))) {
+            updated = reminderService.sendReminder(id);
+        }
+        if (Boolean.TRUE.equals(body.get("complete"))) {
+            String completedBy = (String) body.getOrDefault("completedBy", "");
+            String completionNotes = (String) body.getOrDefault("completionNotes", "");
+            updated = reminderService.completeReminder(id, completedBy, completionNotes);
+        }
+        if (Boolean.TRUE.equals(body.get("cancel"))) {
+            String cancelledBy = (String) body.getOrDefault("cancelledBy", "");
+            String cancellationReason = (String) body.getOrDefault("cancellationReason", "");
+            updated = reminderService.cancelReminder(id, cancelledBy, cancellationReason);
+        }
+        if (body.containsKey("escalatedTo")) {
+            Object v = body.get("escalatedTo");
+            if (v instanceof String s) {
+                updated = reminderService.escalateReminder(id, s);
+            }
+        }
+
+        if (updated == null) {
+            RestResponse<Reminder> bad = RestResponse.<Reminder>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Không có trường hợp lệ để cập nhật.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(bad, HttpStatus.OK);
+        }
+
+        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật reminder thành công.")
+            .data(updated)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/count")
+    @Operation(summary = "Đếm reminder (rút gọn)", description = "Thay thế các đường dẫn count-* bằng query aggregate=count")
+    public ResponseEntity<RestResponse<Long>> countReminders(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Reminder.ReminderStatus status) {
+        long count;
+        if (contractId != null && status != null) {
+            count = reminderService.countRemindersByContractIdAndStatus(contractId, status);
+        } else if (contractId != null) {
+            count = reminderService.countRemindersByContractId(contractId);
+        } else {
+            List<Reminder> all = reminderService.getAllReminders();
+            count = all == null ? 0 : all.size();
+        }
         RestResponse<Long> response = RestResponse.<Long>builder()
             .apiVersion("v1")
             .statusCode(200)
@@ -675,26 +629,30 @@ public class ReminderController {
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/reminders/exists")
-    @Operation(summary = "Kiểm tra có reminder", description = "Kiểm tra contract có reminder không")
-    public ResponseEntity<RestResponse<Boolean>> existsRemindersByContractId(@PathVariable String contractId) {
-        boolean exists = reminderService.existsRemindersByContractId(contractId);
-        
+    @GetMapping("/exists")
+    @Operation(summary = "Kiểm tra tồn tại reminder (rút gọn)", description = "Thay thế các đường dẫn exists-* bằng query aggregate=exists")
+    public ResponseEntity<RestResponse<Boolean>> existsReminders(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Reminder.ReminderStatus status) {
+        boolean exists = false;
+        if (contractId != null && status != null) {
+            exists = reminderService.countRemindersByContractIdAndStatus(contractId, status) > 0;
+        } else if (contractId != null) {
+            exists = reminderService.existsRemindersByContractId(contractId);
+        }
         RestResponse<Boolean> response = RestResponse.<Boolean>builder()
             .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
-            .description("Kiểm tra có reminder thành công.")
+            .description("Kiểm tra tồn tại reminder thành công.")
             .data(exists)
             .timestamp(ZonedDateTime.now())
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -4,7 +4,6 @@ import com.devgo2003.docgo.contract_service.entity.Comment;
 import com.devgo2003.docgo.contract_service.service.CommentService;
 import com.devgo2003.docgo.contract_service.dto.CommentCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
-import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,20 +32,138 @@ public class CommentController {
 
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách tất cả bình luận",
-        description = "Hỗ trợ query phân trang: pageNumber, pageSize, sortBy, sortDirection, searchTerm, includeDeleted"
+        summary = "Lấy danh sách bình luận (hợp nhất)",
+        description = "Hỗ trợ lọc qua query: contractId, authorId, status (RESOLVED|UNRESOLVED), visibility (PUBLIC|PRIVATE|PINNED), createdFrom, createdTo, resolvedFrom, resolvedTo, minReactionCount, minReplyCount; aggregate=count|exists. Các tham số phân trang/sắp xếp giữ nguyên: pageNumber, pageSize, sortBy, sortDirection."
     )
-    public ResponseEntity<RestResponse<List<Comment>>> getAllComments(
+    public ResponseEntity<RestResponse<?>> getAllComments(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) String authorId,
+            @RequestParam(required = false) Comment.CommentStatus status,
+            @RequestParam(required = false) Comment.CommentVisibility visibility,
+            @RequestParam(required = false) Comment.CommentType type,
+            @RequestParam(required = false) Comment.CommentPriority priority,
+            @RequestParam(required = false) Boolean pinned,
+            @RequestParam(required = false) Boolean unresolved,
+            @RequestParam(required = false) String createdFrom,
+            @RequestParam(required = false) String createdTo,
+            @RequestParam(required = false) String resolvedFrom,
+            @RequestParam(required = false) String resolvedTo,
+            @RequestParam(required = false) Integer minReactionCount,
+            @RequestParam(required = false) Integer minReplyCount,
+            @RequestParam(required = false) String aggregate) {
         
-        List<Comment> comments = commentService.getAllComments();
+        // Aggregate mode (count | exists)
+        if (aggregate != null && !aggregate.isBlank()) {
+            String agg = aggregate.toLowerCase();
+            if ("count".equals(agg)) {
+                long count;
+                if (contractId != null && status != null) {
+                    count = commentService.countCommentsByContractIdAndStatus(contractId, status);
+                } else if (contractId != null && Boolean.TRUE.equals(unresolved)) {
+                    count = commentService.countUnresolvedCommentsByContractId(contractId);
+                } else if (contractId != null && status == Comment.CommentStatus.RESOLVED) {
+                    count = commentService.countResolvedCommentsByContractId(contractId);
+                } else if (contractId != null) {
+                    count = commentService.countCommentsByContractId(contractId);
+                } else if (authorId != null) {
+                    count = commentService.countCommentsByAuthorId(authorId);
+                } else {
+                    // Fallback: count tất cả (không có API riêng) => dùng size danh sách
+                    List<Comment> all = commentService.getAllComments();
+                    count = all == null ? 0 : all.size();
+                }
+                RestResponse<Long> response = RestResponse.<Long>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đếm số bình luận thành công.")
+                        .data(count)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            if ("exists".equals(agg)) {
+                boolean exists = false;
+                if (contractId != null && Boolean.TRUE.equals(unresolved)) {
+                    exists = commentService.existsUnresolvedCommentsByContractId(contractId);
+                } else if (contractId != null && Boolean.TRUE.equals(pinned)) {
+                    exists = commentService.existsPinnedCommentsByContractId(contractId);
+                } else if (contractId != null) {
+                    exists = commentService.existsCommentsByContractId(contractId);
+                }
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Kiểm tra tồn tại bình luận thành công.")
+                        .data(exists)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // List mode
+        List<Comment> comments;
+        if (authorId != null) {
+            comments = commentService.getCommentsByAuthorId(authorId);
+        } else if (contractId != null && Boolean.TRUE.equals(unresolved)) {
+            comments = commentService.getUnresolvedCommentsByContractId(contractId);
+        } else if (contractId != null && status == Comment.CommentStatus.RESOLVED) {
+            comments = commentService.getResolvedCommentsByContractId(contractId);
+        } else if (contractId != null && Boolean.TRUE.equals(pinned)) {
+            comments = commentService.getPinnedCommentsByContractId(contractId);
+        } else if (contractId != null && visibility == Comment.CommentVisibility.PUBLIC) {
+            comments = commentService.getPublicCommentsByContractId(contractId);
+        } else if (contractId != null && visibility == Comment.CommentVisibility.PRIVATE) {
+            comments = commentService.getPrivateCommentsByContractId(contractId);
+        } else if (contractId != null && type != null) {
+            comments = commentService.getCommentsByCommentType(contractId, type);
+        } else if (contractId != null && priority != null) {
+            comments = commentService.getCommentsByPriority(contractId, priority);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("reactionCount")) {
+            comments = commentService.getCommentsByContractIdOrderByReactionCount(contractId);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("replyCount")) {
+            comments = commentService.getCommentsByContractIdOrderByReplyCount(contractId);
+        } else if (contractId != null && sortBy != null && sortBy.equalsIgnoreCase("createdAt")) {
+            comments = commentService.getCommentsByContractIdOrderByCreatedAt(contractId);
+        } else if (createdFrom != null && createdTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(createdFrom);
+                LocalDateTime to = LocalDateTime.parse(createdTo);
+                comments = commentService.getCommentsByCreatedAtBetween(from, to);
+            } catch (Exception e) {
+                comments = commentService.getAllComments();
+            }
+        } else if (resolvedFrom != null && resolvedTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(resolvedFrom);
+                LocalDateTime to = LocalDateTime.parse(resolvedTo);
+                comments = commentService.getCommentsByResolvedAtBetween(from, to);
+            } catch (Exception e) {
+                comments = commentService.getAllComments();
+            }
+        } else if (minReactionCount != null) {
+            comments = commentService.getCommentsWithHighReactionCount(minReactionCount);
+        } else if (minReplyCount != null) {
+            comments = commentService.getCommentsWithReplies(minReplyCount);
+        } else if (contractId != null) {
+            comments = commentService.getCommentsByContractId(contractId);
+        } else {
+            comments = commentService.getAllComments();
+        }
         
-        if (comments.isEmpty()) {
+        if (comments == null || comments.isEmpty()) {
             RestResponse<List<Comment>> response = RestResponse.<List<Comment>>builder()
                 .apiVersion("v1")
                 .statusCode(204)
@@ -57,7 +174,6 @@ public class CommentController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
-            
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         
@@ -71,86 +187,10 @@ public class CommentController {
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    @Operation(
-        summary = "Lấy chi tiết bình luận", 
-        description = """
-        "Đầu vào
-        
-        "- id (bắt buộc, path)
-        Loại: string
-        mô tả: ID của bình luận cần lấy
-        
-        "Đầu ra
-        
-        "data
-        Loại: Comment
-        mô tả: Thông tin chi tiết bình luận
-        
-        "S apiVersion
-        Loại: string
-        mô tả: Phiên bản API (v1)
-        
-        "statusCode
-        Loại: integer
-        mô tả: mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        "< shortMessage
-        Loại: string
-        mô tả: Thông báo ngắn gọn về kết quả
-        
-        "- description
-        Loại: string
-        mô tả: mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        "- requestId
-        Loại: string
-        mô tả: ID duy nhất của request
-        
-        "path
-        Loại: string
-        mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<Comment>> getComment(@PathVariable String id) {
-        Optional<Comment> comment = commentService.getCommentById(id);
-        
-        if (comment.isEmpty()) {
-            RestResponse<Comment> response = RestResponse.<Comment>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description("Không tìm thấy bình luận với ID: " + id)
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<Comment> response = RestResponse.<Comment>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy chi tiết bình luận thành công.")
-            .data(comment.get())
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed duplicate getComment mapping to avoid ambiguous mapping with getCommentById
 
     @PostMapping
     @Operation(
@@ -274,7 +314,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/comments/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Lấy comment theo ID", description = "Lấy chi tiết comment")
     public ResponseEntity<RestResponse<Comment>> getCommentById(@PathVariable String id) {
         Optional<Comment> comment = commentService.getCommentById(id);
@@ -1010,7 +1050,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/resolve")
+    @PutMapping("/{id}/resolve")
     @Operation(summary = "Resolve comment", description = "Đánh dấu comment đã được giải quyết")
     public ResponseEntity<RestResponse<Comment>> resolveComment(
             @PathVariable String id,
@@ -1032,7 +1072,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/unresolve")
+    @PutMapping("/{id}/unresolve")
     @Operation(summary = "Unresolve comment", description = "Bỏ đánh dấu comment đã được giải quyết")
     public ResponseEntity<RestResponse<Comment>> unresolveComment(@PathVariable String id) {
         Comment comment = commentService.unresolveComment(id);
@@ -1051,7 +1091,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/pin")
+    @PutMapping("/{id}/pin")
     @Operation(summary = "Pin comment", description = "Ghim comment")
     public ResponseEntity<RestResponse<Comment>> pinComment(
             @PathVariable String id,
@@ -1072,7 +1112,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/unpin")
+    @PutMapping("/{id}/unpin")
     @Operation(summary = "Unpin comment", description = "Bỏ ghim comment")
     public ResponseEntity<RestResponse<Comment>> unpinComment(@PathVariable String id) {
         Comment comment = commentService.unpinComment(id);
@@ -1091,7 +1131,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/increment-reaction")
+    @PutMapping("/{id}/increment-reaction")
     @Operation(summary = "Tăng reaction count", description = "Tăng số lượng reaction")
     public ResponseEntity<RestResponse<Comment>> incrementReactionCount(@PathVariable String id) {
         Comment comment = commentService.incrementReactionCount(id);
@@ -1110,7 +1150,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/decrement-reaction")
+    @PutMapping("/{id}/decrement-reaction")
     @Operation(summary = "Giảm reaction count", description = "Giảm số lượng reaction")
     public ResponseEntity<RestResponse<Comment>> decrementReactionCount(@PathVariable String id) {
         Comment comment = commentService.decrementReactionCount(id);
@@ -1129,7 +1169,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/increment-reply")
+    @PutMapping("/{id}/increment-reply")
     @Operation(summary = "Tăng reply count", description = "Tăng số lượng reply")
     public ResponseEntity<RestResponse<Comment>> incrementReplyCount(@PathVariable String id) {
         Comment comment = commentService.incrementReplyCount(id);
@@ -1148,7 +1188,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/decrement-reply")
+    @PutMapping("/{id}/decrement-reply")
     @Operation(summary = "Giảm reply count", description = "Giảm số lượng reply")
     public ResponseEntity<RestResponse<Comment>> decrementReplyCount(@PathVariable String id) {
         Comment comment = commentService.decrementReplyCount(id);
@@ -1167,7 +1207,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/hide")
+    @PutMapping("/{id}/hide")
     @Operation(summary = "Ẩn comment", description = "Ẩn comment")
     public ResponseEntity<RestResponse<Comment>> hideComment(@PathVariable String id) {
         Comment comment = commentService.hideComment(id);
@@ -1186,7 +1226,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/show")
+    @PutMapping("/{id}/show")
     @Operation(summary = "Hiện comment", description = "Hiện comment")
     public ResponseEntity<RestResponse<Comment>> showComment(@PathVariable String id) {
         Comment comment = commentService.showComment(id);
@@ -1205,7 +1245,137 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/comments/{id}")
+    @PatchMapping("/{id}")
+    @Operation(summary = "Cập nhật từng phần comment (rút gọn)", description = "Hỗ trợ: resolved/unresolved, pinned/unpinned, hide/show, + counters")
+    public ResponseEntity<RestResponse<Comment>> patchComment(
+            @PathVariable String id,
+            @RequestBody java.util.Map<String, Object> body) {
+        Comment updated = null;
+
+        if (Boolean.TRUE.equals(body.get("resolve"))) {
+            String resolvedBy = (String) body.getOrDefault("resolvedBy", "");
+            String resolutionNote = (String) body.getOrDefault("resolutionNote", "");
+            updated = commentService.resolveComment(id, resolvedBy, resolutionNote);
+        }
+        if (Boolean.TRUE.equals(body.get("unresolve"))) {
+            updated = commentService.unresolveComment(id);
+        }
+        if (Boolean.TRUE.equals(body.get("pin"))) {
+            String pinnedBy = (String) body.getOrDefault("pinnedBy", "");
+            updated = commentService.pinComment(id, pinnedBy);
+        }
+        if (Boolean.TRUE.equals(body.get("unpin"))) {
+            updated = commentService.unpinComment(id);
+        }
+        if (Boolean.TRUE.equals(body.get("hide"))) {
+            updated = commentService.hideComment(id);
+        }
+        if (Boolean.TRUE.equals(body.get("show"))) {
+            updated = commentService.showComment(id);
+        }
+        if (Boolean.TRUE.equals(body.get("incrementReaction"))) {
+            updated = commentService.incrementReactionCount(id);
+        }
+        if (Boolean.TRUE.equals(body.get("decrementReaction"))) {
+            updated = commentService.decrementReactionCount(id);
+        }
+        if (Boolean.TRUE.equals(body.get("incrementReply"))) {
+            updated = commentService.incrementReplyCount(id);
+        }
+        if (Boolean.TRUE.equals(body.get("decrementReply"))) {
+            updated = commentService.decrementReplyCount(id);
+        }
+
+        if (updated == null) {
+            RestResponse<Comment> bad = RestResponse.<Comment>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Không có trường hợp lệ để cập nhật.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(bad, HttpStatus.OK);
+        }
+
+        RestResponse<Comment> response = RestResponse.<Comment>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật comment thành công.")
+            .data(updated)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/count")
+    @Operation(summary = "Đếm comment (rút gọn)", description = "Thay thế các đường dẫn count-* bằng query aggregate=count")
+    public ResponseEntity<RestResponse<Long>> countComments(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Comment.CommentStatus status,
+            @RequestParam(required = false) Boolean unresolved,
+            @RequestParam(required = false) String authorId) {
+        long count;
+        if (contractId != null && status != null) {
+            count = commentService.countCommentsByContractIdAndStatus(contractId, status);
+        } else if (contractId != null && Boolean.TRUE.equals(unresolved)) {
+            count = commentService.countUnresolvedCommentsByContractId(contractId);
+        } else if (contractId != null) {
+            count = commentService.countCommentsByContractId(contractId);
+        } else if (authorId != null) {
+            count = commentService.countCommentsByAuthorId(authorId);
+        } else {
+            List<Comment> all = commentService.getAllComments();
+            count = all == null ? 0 : all.size();
+        }
+
+        RestResponse<Long> response = RestResponse.<Long>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đếm số comment thành công.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/exists")
+    @Operation(summary = "Kiểm tra tồn tại comment (rút gọn)", description = "Thay thế các đường dẫn exists-* bằng query aggregate=exists")
+    public ResponseEntity<RestResponse<Boolean>> existsComments(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Boolean unresolved,
+            @RequestParam(required = false) Boolean pinned) {
+        boolean exists = false;
+        if (contractId != null && Boolean.TRUE.equals(unresolved)) {
+            exists = commentService.existsUnresolvedCommentsByContractId(contractId);
+        } else if (contractId != null && Boolean.TRUE.equals(pinned)) {
+            exists = commentService.existsPinnedCommentsByContractId(contractId);
+        } else if (contractId != null) {
+            exists = commentService.existsCommentsByContractId(contractId);
+        }
+
+        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Kiểm tra tồn tại comment thành công.")
+            .data(exists)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
     @Operation(summary = "Xóa comment", description = "Soft delete comment")
     public ResponseEntity<RestResponse<Void>> deleteComment(
             @PathVariable String id,
@@ -1226,7 +1396,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/comments/{id}/restore")
+    @PutMapping("/{id}/restore")
     @Operation(summary = "Khôi phục comment", description = "Khôi phục comment đã xóa")
     public ResponseEntity<RestResponse<Comment>> restoreComment(@PathVariable String id) {
         Comment comment = commentService.restoreComment(id);

@@ -1,61 +1,11 @@
-# VCS & IDE
+# VCS
 .git/
 .github/
 .gitlab/
-.idea/
-.vscode/
-**/*.iml
-.DS_Store
-Thumbs.db
 
-# Node/JS
-**/node_modules/
-**/.next/
-**/out/
-**/dist/
-**/build/
-
-# Python
-**/venv/
-**/.venv/
-**/__pycache__/
-**/*.pyc
-**/*.pyo
-**/.pytest_cache/
-
-# Java/Maven/Gradle
-**/target/
-**/.mvn/
-**/.gradle/
-
-# Caches, logs, temp
-**/.cache/
-**/logs/
-**/*.log
-**/tmp/
-**/temp/
-**/coverage/
-**/.nyc_output/
-
-# Large/binary assets and datasets
-document/**/*.pdf
-document/**/*.doc
-document/**/*.docx
-document/**/*.xls
-document/**/*.xlsx
-document/**/*.ppt
-document/**/*.pptx
+# Project-specific items not in .gitignore
 document/**/*.drawio
-**/*.zip
-**/*.rar
-**/*.7z
-
-# Project-specific data dirs
-**/uploads/
 **/documents/
-**/contract_uploads/
-**/results/
-backend/api-gateway-bff/logs/
 
 # KHÔNG ignore file .env* để Cursor AI có thể track
 # (Git vẫn ignore chúng qua .gitignore)
@@ -64,10 +14,3 @@ backend/api-gateway-bff/logs/
 !**/.env.local
 !**/.env.*.local
 !**/.env.example
-
-# Ngăn chặn file MD tự động tạo (trừ README và How to run)
-**/*.md
-!README.md
-!**/README.md
-!**/How to run this microservice.md
-!prompt/**/*.md

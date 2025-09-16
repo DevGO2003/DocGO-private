@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
+import { contractAPI } from '@/lib/api'
 
 type ContractItem = {
   id: number
@@ -22,7 +23,16 @@ type ContractItem = {
   expiryDate: string
 }
 
-const STATUS = ['ALL','DRAFT','PENDING_REVIEW','APPROVED','ACTIVE','EXPIRED','TERMINATED','ARCHIVED'] as const
+const STATUS_OPTIONS = [
+  { label: 'Tất cả trạng thái', value: 'ALL' },
+  { label: 'Nháp', value: 'DRAFT' },
+  { label: 'Chờ duyệt', value: 'PENDING_REVIEW' },
+  { label: 'Đã duyệt', value: 'APPROVED' },
+  { label: 'Đang hiệu lực', value: 'ACTIVE' },
+  { label: 'Hết hạn', value: 'EXPIRED' },
+  { label: 'Đã chấm dứt', value: 'TERMINATED' },
+  { label: 'Đã lưu trữ', value: 'ARCHIVED' },
+] as const
 const TYPES = ['ALL','Dịch vụ','Mua bán','Hợp tác','Lao động','Bảo mật','Khác'] as const
 const TAGS = ['ưu_tiên','gấp','gia_hạn','cao_giá','đối_tác_mới','rủi_ro']
 
@@ -41,6 +51,7 @@ export default function ContractsPage() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedItems, setSelectedItems] = useState<number[]>([])
+  const abortRef = useRef<AbortController | null>(null)
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams()
@@ -58,17 +69,62 @@ export default function ContractsPage() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/mock/contracts?${queryString}`)
-      const json = await res.json()
-      setItems(json?.data?.content || [])
-      setTotalPages(json?.data?.totalPages || 1)
+      // Abort previous in-flight request
+      if (abortRef.current) {
+        try { abortRef.current.abort() } catch {}
+      }
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      const params: any = {
+        pageNumber: page,
+        pageSize,
+        includeDeleted: false,
+      }
+      const trimmed = search.trim()
+      if (trimmed.length >= 2) params.searchTerm = trimmed
+      if (sortBy) params.sortBy = sortBy
+      if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
+
+      const res = await contractAPI.getContracts(params, { signal: controller.signal })
+      const payload: any = res.data?.data || {}
+      const content = Array.isArray(payload.content) ? payload.content : []
+
+      const mapped: ContractItem[] = content.map((c: any) => ({
+        id: c.id,
+        title: c.title || c.contractNumber || `Contract ${c.id}`,
+        description: c.object || c.description || '',
+        status: c.status || 'DRAFT',
+        contractType: c.contractType || 'Other',
+        tags: c.tags || [],
+        createdAt: c.createdAt || '',
+        updatedAt: c.updatedAt || '',
+        creatorId: 0,
+        parties: (c.parties || []).map((p: any) => ({ name: p.name || '', role: p.role || '' })),
+        totalValue: Number(c.paymentDetails?.totalValue || 0),
+        currency: c.paymentDetails?.currency || 'VND',
+        effectiveDate: c.effectiveDate || '',
+        expiryDate: c.expiryDate || '',
+      }))
+
+      setItems(mapped)
+      const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
+      setTotalPages(Number(totalPagesFromApi) || 1)
+    } catch (e) {
+      setItems([])
+      setTotalPages(1)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchData()
+    const t = setTimeout(() => {
+      fetchData()
+    }, 400)
+    return () => {
+      clearTimeout(t)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryString])
 
@@ -142,8 +198,8 @@ export default function ContractsPage() {
                 onChange={(e) => { setStatus(e.target.value); setPage(0) }}
                 className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                {STATUS.map(s => (
-                  <option key={s} value={s}>{s === 'ALL' ? 'Tất cả trạng thái' : s}</option>
+                {STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
@@ -287,7 +343,7 @@ export default function ContractsPage() {
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
                   </div>
-                  <Link href={`/dashboard/contracts/${c.id}`} className="block">
+                  <Link href={`/contracts/${c.id}`} className="block">
                     <div className="flex justify-between items-start gap-4 ml-6">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{c.status}</span>
@@ -343,7 +399,7 @@ export default function ContractsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <Link href={`/dashboard/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                            <Link href={`/contracts/${c.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
                               {c.title}
                             </Link>
                             <p className="text-sm text-gray-500 line-clamp-1">{c.description || 'Không có mô tả'}</p>
@@ -362,7 +418,7 @@ export default function ContractsPage() {
                         <td className="px-6 py-4 text-sm text-gray-900">{c.effectiveDate}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <Link href={`/dashboard/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+                            <Link href={`/contracts/${c.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
                               Xem
                             </Link>
                             <button className="text-gray-400 hover:text-gray-600 text-sm">

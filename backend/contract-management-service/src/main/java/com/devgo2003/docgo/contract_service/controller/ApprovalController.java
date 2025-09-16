@@ -4,7 +4,6 @@ import com.devgo2003.docgo.contract_service.entity.Approval;
 import com.devgo2003.docgo.contract_service.service.ApprovalService;
 import com.devgo2003.docgo.contract_service.dto.ApprovalCreateRequest;
 import com.devgo2003.docgo.contract_service.common.response.RestResponse;
-import com.devgo2003.docgo.contract_service.common.util.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,75 +32,126 @@ public class ApprovalController {
 
     @GetMapping
     @Operation(
-        summary = "Lấy danh sách tất cả phê duyệt", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 pageNumber (tùy chọn, query)
-        Loại: integer
-        Mô tả: Số[object Object]n        Loại: integer
-        Mô tả: Kích thước trang (mặc định: 10)
-        
-        📄 sortBy (tùy chọn, query)
-        Loại: string
-        Mô tả: Trường sắp xếp (mặc định: createdAt)
-        
-        📄 sortDirection (tùy chọn, query)
-        Loại: string
-        Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
-        
-        📄 searchTerm (tùy chọn, query)
-        Loại: string
-        Mô tả: Từ khóa tìm kiếm
-        
-        📄 includeDeleted (tùy chọn, query)
-        Loại: boolean
-        Mô tả: Bao gồm bản ghi đã xóa (mặc định: false)
-        
-        🔹 Đầu ra
-        
-        📦 data
-        Loại: PaginatedResponse<Approval>
-        Mô tả: Danh sách phê duyệt có phân trang
-        
-        🧾 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔧 statusCode
-        Loại: integer
-        Mô tả: ma[object Object] shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📝 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        🆔 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
-        
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
+        summary = "Lấy danh sách phê duyệt (hợp nhất)",
+        description = "Lọc: contractId, approverId, approverEmail, approverRole, status(PENDING|APPROVED|REJECTED|EXPIRED), priority, order, dueFrom/To. Sắp xếp: sortBy(createdAt|dueDate|order). Tổng hợp: aggregate=count|exists."
     )
-    public ResponseEntity<RestResponse<List<Approval>>> getAllApprovals(
+    public ResponseEntity<RestResponse<?>> getAllApprovals(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @RequestParam(required = false) String searchTerm,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
-        
-        List<Approval> approvals = approvalService.getAllApprovals();
-        
-        if (approvals.isEmpty()) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) String approverId,
+            @RequestParam(required = false) String approverEmail,
+            @RequestParam(required = false) String approverRole,
+            @RequestParam(required = false) Approval.ApprovalStatus status,
+            @RequestParam(required = false) Approval.ApprovalPriority priority,
+            @RequestParam(required = false) Integer order,
+            @RequestParam(required = false) String dueFrom,
+            @RequestParam(required = false) String dueTo,
+            @RequestParam(required = false) String aggregate) {
+
+        // Aggregate (count|exists)
+        if (aggregate != null && !aggregate.isBlank()) {
+            String agg = aggregate.toLowerCase();
+            if ("count".equals(agg)) {
+                long count;
+                if (contractId != null && status != null) {
+                    count = approvalService.countApprovalsByContractIdAndStatus(contractId, status);
+                } else if (approverId != null && status != null) {
+                    count = approvalService.countApprovalsByApproverIdAndStatus(approverId, status);
+                } else if (contractId != null) {
+                    // no direct count-all; degrade to size
+                    List<Approval> list = approvalService.getApprovalsByContractId(contractId);
+                    count = list == null ? 0 : list.size();
+                } else {
+                    List<Approval> all = approvalService.getAllApprovals();
+                    count = all == null ? 0 : all.size();
+                }
+                RestResponse<Long> response = RestResponse.<Long>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đếm số phê duyệt thành công.")
+                        .data(count)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+            if ("exists".equals(agg)) {
+                boolean exists = false;
+                if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+                    exists = approvalService.hasPendingApprovals(contractId);
+                } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
+                    exists = approvalService.hasApprovedApprovals(contractId);
+                } else if (contractId != null && status == Approval.ApprovalStatus.REJECTED) {
+                    exists = approvalService.hasRejectedApprovals(contractId);
+                } else if (contractId != null && status == Approval.ApprovalStatus.EXPIRED) {
+                    exists = approvalService.hasExpiredApprovals(contractId);
+                } else if (contractId != null && approverRole != null) {
+                    exists = approvalService.hasApprovalsByRole(contractId, approverRole);
+                } else if (contractId != null) {
+                    exists = !approvalService.getApprovalsByContractId(contractId).isEmpty();
+                }
+                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Kiểm tra tồn tại phê duyệt thành công.")
+                        .data(exists)
+                        .timestamp(ZonedDateTime.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path(request.getRequestURI())
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // List mode
+        List<Approval> approvals;
+        if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+            approvals = approvalService.getPendingApprovalsByContractId(contractId);
+        } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
+            approvals = approvalService.getApprovedApprovalsByContractId(contractId);
+        } else if (contractId != null && status == Approval.ApprovalStatus.REJECTED) {
+            approvals = approvalService.getRejectedApprovalsByContractId(contractId);
+        } else if (approverId != null) {
+            approvals = approvalService.getApprovalsByApproverId(approverId);
+        } else if (approverEmail != null) {
+            approvals = approvalService.getApprovalsByApproverEmail(approverEmail);
+        } else if (approverRole != null && status != null) {
+            // Fallback: lấy theo role rồi lọc theo status
+            List<Approval> byRole = approvalService.getApprovalsByApproverRole(approverRole);
+            approvals = byRole == null ? List.of() : byRole.stream()
+                    .filter(a -> a.getStatus() == status)
+                    .toList();
+        } else if (approverRole != null) {
+            approvals = approvalService.getApprovalsByApproverRole(approverRole);
+        } else if (priority != null) {
+            approvals = approvalService.getApprovalsByPriority(priority);
+        } else if (contractId != null && order != null) {
+            approvals = approvalService.getApprovalsByOrder(contractId, order);
+        } else if (dueFrom != null && dueTo != null) {
+            try {
+                LocalDateTime from = LocalDateTime.parse(dueFrom);
+                LocalDateTime to = LocalDateTime.parse(dueTo);
+                approvals = approvalService.getApprovalsByDueDateRange(contractId, from, to);
+            } catch (Exception e) {
+                approvals = approvalService.getAllApprovals();
+            }
+        } else if (contractId != null && sortBy.equalsIgnoreCase("order")) {
+            approvals = approvalService.getApprovalsByOrder(contractId, 0); // fallback usage
+        } else if (contractId != null) {
+            approvals = approvalService.getApprovalsByContractId(contractId);
+        } else {
+            approvals = approvalService.getAllApprovals();
+        }
+
+        if (approvals == null || approvals.isEmpty()) {
             RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
                 .apiVersion("v1")
                 .statusCode(204)
@@ -112,10 +162,9 @@ public class ApprovalController {
                 .requestId(UUID.randomUUID().toString())
                 .path(request.getRequestURI())
                 .build();
-            
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        
+
         RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
             .apiVersion("v1")
             .statusCode(200)
@@ -126,82 +175,10 @@ public class ApprovalController {
             .requestId(UUID.randomUUID().toString())
             .path(request.getRequestURI())
             .build();
-        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    @Operation(
-        summary = "Lấy chi tiết phê duyệt", 
-        description = """
-        🔹 Đầu vào
-        
-        🆔 id (bắt buộc, path)
-        Loại: string
-        Mô tả: ID của phê duyệt cần lấy
-        
-        🔹 Đầu ra
-        
-        📦 data
-        Loại: Approval
-        Mô tả: Thông tin chi tiết phê duyệt
-        
-        🧾 apiVersion
-        Loại: string
-        [object Object]n        Mô tả: ma trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📨 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📝 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        ⏰ timestamp
-        Loại: string
-        Mô tả: Thời điểm xử lý request (ISO-8601)
-        
-        🆔 requestId
-        Loại: string
-        Mô tả: ID duy nhất của request
-        
-        📍 path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
-    )
-    public ResponseEntity<RestResponse<Approval>> getApproval(@PathVariable String id) {
-        Optional<Approval> approval = approvalService.getApprovalById(id);
-        
-        if (approval.isEmpty()) {
-            RestResponse<Approval> response = RestResponse.<Approval>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description("Không tìm thấy phê duyệt với ID: " + id)
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<Approval> response = RestResponse.<Approval>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy chi tiết phê duyệt thành công.")
-            .data(approval.get())
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed duplicate getApproval mapping to avoid ambiguous mapping with getApprovalById
 
     @PostMapping
     @Operation(
@@ -261,68 +238,11 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/contracts/{contractId}/approve")
-    @Operation(summary = "Phê duyệt hợp đồng", description = "Tạo approval mới cho contract")
-    public ResponseEntity<RestResponse<Approval>> createApproval(
-            @PathVariable String contractId,
-            @RequestParam String approverId,
-            @RequestParam String approverName,
-            @RequestParam String approverEmail,
-            @RequestParam String approverRole,
-            @RequestParam Approval.ApprovalPriority priority) {
-        
-        Approval approval = approvalService.createApproval(contractId, approverId, approverName, 
-                                                         approverEmail, approverRole, priority);
-        
-        RestResponse<Approval> response = RestResponse.<Approval>builder()
-            .apiVersion("v1")
-            .statusCode(201)
-            .shortMessage("Created")
-            .description("Tạo approval thành công.")
-            .data(approval)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested create endpoint. Use POST /approvals with body instead.
 
-    @GetMapping("/contracts/{contractId}/approvals")
-    @Operation(summary = "Lấy danh sách approval theo contract ID", description = "Lấy tất cả approval của contract")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByContractId(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-            RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có approval nào cho contract này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested list endpoint. Use GET /approvals?contractId=...
 
-    @GetMapping("/approvals/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Lấy approval theo ID", description = "Lấy chi tiết approval")
     public ResponseEntity<RestResponse<Approval>> getApprovalById(@PathVariable String id) {
         Optional<Approval> approval = approvalService.getApprovalById(id);
@@ -356,345 +276,25 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/approvals/pending")
-    @Operation(summary = "Lấy approval đang pending", description = "Lấy danh sách approval đang chờ phê duyệt")
-    public ResponseEntity<RestResponse<List<Approval>>> getPendingApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getPendingApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào đang pending.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval pending thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested pending endpoint. Use GET /approvals?contractId=...&status=PENDING
 
-    @GetMapping("/contracts/{contractId}/approvals/approved")
-    @Operation(summary = "Lấy approval đã approved", description = "Lấy danh sách approval đã được phê duyệt")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovedApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getApprovedApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào đã được phê duyệt.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval approved thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested approved endpoint. Use GET /approvals?contractId=...&status=APPROVED
 
-    @GetMapping("/contracts/{contractId}/approvals/rejected")
-    @Operation(summary = "Lấy approval đã rejected", description = "Lấy danh sách approval đã bị từ chối")
-    public ResponseEntity<RestResponse<List<Approval>>> getRejectedApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getRejectedApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào bị từ chối.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval rejected thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated nested rejected endpoint. Use GET /approvals?contractId=...&status=REJECTED
 
-    @GetMapping("/approvals/approver/{approverId}")
-    @Operation(summary = "Lấy approval theo approver ID", description = "Lấy danh sách approval của approver")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverId(@PathVariable String approverId) {
-        List<Approval> approvals = approvalService.getApprovalsByApproverId(approverId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào của approver này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval của approver thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated approverId path. Use GET /approvals?approverId=...
 
-    @GetMapping("/approvals/approver/email/{approverEmail}")
-    @Operation(summary = "Lấy approval theo approver email", description = "Lấy danh sách approval của approver email")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverEmail(@PathVariable String approverEmail) {
-        List<Approval> approvals = approvalService.getApprovalsByApproverEmail(approverEmail);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào của approver email này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval của approver email thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated approverEmail path. Use GET /approvals?approverEmail=...
 
-    @GetMapping("/approvals/approver/role/{approverRole}")
-    @Operation(summary = "Lấy approval theo approver role", description = "Lấy danh sách approval của approver role")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByApproverRole(@PathVariable String approverRole) {
-        List<Approval> approvals = approvalService.getApprovalsByApproverRole(approverRole);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào của approver role này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval của approver role thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated approverRole path. Use GET /approvals?approverRole=...
 
-    @GetMapping("/approvals/expiring")
-    @Operation(summary = "Lấy approval sắp hết hạn", description = "Lấy danh sách approval sắp hết hạn")
-    public ResponseEntity<RestResponse<List<Approval>>> getExpiringApprovals(@RequestParam LocalDateTime dueDate) {
-        List<Approval> approvals = approvalService.getExpiringApprovals(dueDate);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào sắp hết hạn.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval sắp hết hạn thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated expiring list. Use GET /approvals with query.
 
-    @GetMapping("/approvals/expired")
-    @Operation(summary = "Lấy approval đã hết hạn", description = "Lấy danh sách approval đã hết hạn")
-    public ResponseEntity<RestResponse<List<Approval>>> getExpiredApprovals(@RequestParam LocalDateTime currentTime) {
-        List<Approval> approvals = approvalService.getExpiredApprovals(currentTime);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào đã hết hạn.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval đã hết hạn thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated expired list. Use GET /approvals with query.
 
-    @GetMapping("/approvals/priority/{priority}")
-    @Operation(summary = "Lấy approval theo priority", description = "Lấy danh sách approval theo mức độ ưu tiên")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByPriority(@PathVariable Approval.ApprovalPriority priority) {
-        List<Approval> approvals = approvalService.getApprovalsByPriority(priority);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào với priority này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval theo priority thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated priority path. Use GET /approvals?priority=...
 
-    @GetMapping("/contracts/{contractId}/approvals/order/{approvalOrder}")
-    @Operation(summary = "Lấy approval theo thứ tự", description = "Lấy danh sách approval theo thứ tự phê duyệt")
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByOrder(@PathVariable String contractId, @PathVariable Integer approvalOrder) {
-        List<Approval> approvals = approvalService.getApprovalsByOrder(contractId, approvalOrder);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào với thứ tự này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval theo thứ tự thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Removed deprecated order path. Use GET /approvals?contractId=...&order=...
 
     @GetMapping("/contracts/{contractId}/approvals/required")
     @Operation(summary = "Lấy approval bắt buộc", description = "Lấy danh sách approval bắt buộc")
@@ -765,7 +365,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/due-date")
-    @Operation(summary = "Lấy approval theo due date", description = "Lấy danh sách approval trong khoảng due date")
+    @Operation(summary = "(Deprecated) Lấy approval theo due date", description = "Dùng GET /approvals?contractId=...&dueFrom=...&dueTo=...", deprecated = true)
     public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDateRange(
             @PathVariable String contractId,
             @RequestParam LocalDateTime startDate,
@@ -802,7 +402,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/upcoming-due")
-    @Operation(summary = "Lấy approval sắp đến hạn", description = "Lấy danh sách approval sắp đến hạn")
+    @Operation(summary = "(Deprecated) Lấy approval sắp đến hạn", description = "Dùng GET /approvals?contractId=...&dueTo=...", deprecated = true)
     public ResponseEntity<RestResponse<List<Approval>>> getUpcomingDueApprovals(
             @PathVariable String contractId,
             @RequestParam LocalDateTime dueDate) {
@@ -838,7 +438,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/notified")
-    @Operation(summary = "Lấy approval đã được notify", description = "Lấy danh sách approval đã được thông báo")
+    @Operation(summary = "(Deprecated) Lấy approval đã được notify", description = "Dùng GET /approvals?contractId=...&notified=true", deprecated = true)
     public ResponseEntity<RestResponse<List<Approval>>> getNotifiedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getNotifiedApprovals(contractId);
         
@@ -872,7 +472,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/unnotified")
-    @Operation(summary = "Lấy approval chưa được notify", description = "Lấy danh sách approval chưa được thông báo")
+    @Operation(summary = "(Deprecated) Lấy approval chưa được notify", description = "Dùng GET /approvals?contractId=...&notified=false", deprecated = true)
     public ResponseEntity<RestResponse<List<Approval>>> getUnnotifiedApprovals(@PathVariable String contractId) {
         List<Approval> approvals = approvalService.getUnnotifiedApprovals(contractId);
         
@@ -905,7 +505,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/approve")
+    @PutMapping("/{id}/approve")
     @Operation(summary = "Phê duyệt approval", description = "Phê duyệt approval với comments")
     public ResponseEntity<RestResponse<Approval>> approveApproval(
             @PathVariable String id,
@@ -926,7 +526,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/reject")
+    @PutMapping("/{id}/reject")
     @Operation(summary = "Từ chối approval", description = "Từ chối approval với lý do")
     public ResponseEntity<RestResponse<Approval>> rejectApproval(
             @PathVariable String id,
@@ -947,7 +547,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/cancel")
+    @PutMapping("/{id}/cancel")
     @Operation(summary = "Hủy approval", description = "Hủy approval")
     public ResponseEntity<RestResponse<Approval>> cancelApproval(@PathVariable String id) {
         Approval approval = approvalService.cancelApproval(id);
@@ -966,7 +566,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/expire")
+    @PutMapping("/{id}/expire")
     @Operation(summary = "Đánh dấu approval hết hạn", description = "Đánh dấu approval đã hết hạn")
     public ResponseEntity<RestResponse<Approval>> markApprovalAsExpired(@PathVariable String id) {
         Approval approval = approvalService.markApprovalAsExpired(id);
@@ -985,7 +585,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/increment-reminder")
+    @PutMapping("/{id}/increment-reminder")
     @Operation(summary = "Tăng reminder count", description = "Tăng số lần nhắc nhở")
     public ResponseEntity<RestResponse<Approval>> incrementReminderCount(@PathVariable String id) {
         Approval approval = approvalService.incrementReminderCount(id);
@@ -1004,7 +604,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/notify")
+    @PutMapping("/{id}/notify")
     @Operation(summary = "Đánh dấu đã notify", description = "Đánh dấu approval đã được thông báo")
     public ResponseEntity<RestResponse<Approval>> setNotificationTime(@PathVariable String id) {
         Approval approval = approvalService.setNotificationTime(id);
@@ -1023,7 +623,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/due-date")
+    @PutMapping("/{id}/due-date")
     @Operation(summary = "Cập nhật due date", description = "Cập nhật ngày hết hạn")
     public ResponseEntity<RestResponse<Approval>> setDueDate(
             @PathVariable String id,
@@ -1044,7 +644,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/priority")
+    @PutMapping("/{id}/priority")
     @Operation(summary = "Cập nhật priority", description = "Cập nhật mức độ ưu tiên")
     public ResponseEntity<RestResponse<Approval>> setPriority(
             @PathVariable String id,
@@ -1065,7 +665,140 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/order")
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Cập nhật trạng thái phê duyệt (rút gọn)", description = "Thay thế các URL dài approve/reject/cancel/expire")
+    public ResponseEntity<RestResponse<Approval>> updateApprovalStatus(
+            @PathVariable String id,
+            @RequestBody(required = false) java.util.Map<String, Object> body) {
+        Approval approval;
+        String status = body == null ? null : (String) body.getOrDefault("status", null);
+        String comment = body == null ? null : (String) body.getOrDefault("comment", null);
+
+        if (status == null) {
+            RestResponse<Approval> response = RestResponse.<Approval>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Thiếu trường 'status'.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        switch (status.toUpperCase()) {
+            case "APPROVED" -> approval = approvalService.approveApproval(id, comment == null ? "" : comment);
+            case "REJECTED" -> approval = approvalService.rejectApproval(id, comment == null ? "" : comment);
+            case "CANCELED" -> approval = approvalService.cancelApproval(id);
+            case "EXPIRED" -> approval = approvalService.markApprovalAsExpired(id);
+            default -> {
+                RestResponse<Approval> response = RestResponse.<Approval>builder()
+                    .apiVersion("v1")
+                    .statusCode(400)
+                    .shortMessage("Bad Request")
+                    .description("Giá trị 'status' không hợp lệ.")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        RestResponse<Approval> response = RestResponse.<Approval>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật trạng thái approval thành công.")
+            .data(approval)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Cập nhật từng phần phê duyệt (rút gọn)", description = "Hỗ trợ cập nhật dueDate, priority, order, isRequired, incrementReminder, notify")
+    public ResponseEntity<RestResponse<Approval>> patchApproval(
+            @PathVariable String id,
+            @RequestBody java.util.Map<String, Object> body) {
+        Approval updated = null;
+
+        if (body.containsKey("dueDate")) {
+            Object v = body.get("dueDate");
+            if (v instanceof String s) {
+                try {
+                    LocalDateTime dt = LocalDateTime.parse(s);
+                    updated = approvalService.setDueDate(id, dt);
+                } catch (Exception ignored) { /* fallback below */ }
+            }
+        }
+
+        if (body.containsKey("priority")) {
+            Object v = body.get("priority");
+            if (v instanceof String s) {
+                try {
+                    Approval.ApprovalPriority p = Approval.ApprovalPriority.valueOf(s.toUpperCase());
+                    updated = approvalService.setPriority(id, p);
+                } catch (Exception ignored) { /* fallback below */ }
+            }
+        }
+
+        if (body.containsKey("order")) {
+            Object v = body.get("order");
+            if (v instanceof Number n) {
+                updated = approvalService.setApprovalOrder(id, n.intValue());
+            }
+        }
+
+        if (body.containsKey("isRequired")) {
+            Object v = body.get("isRequired");
+            if (v instanceof Boolean b) {
+                updated = approvalService.setIsRequired(id, b);
+            }
+        }
+
+        if (body.containsKey("incrementReminder") && Boolean.TRUE.equals(body.get("incrementReminder"))) {
+            updated = approvalService.incrementReminderCount(id);
+        }
+
+        if (body.containsKey("notify") && Boolean.TRUE.equals(body.get("notify"))) {
+            updated = approvalService.setNotificationTime(id);
+        }
+
+        if (updated == null) {
+            RestResponse<Approval> response = RestResponse.<Approval>builder()
+                .apiVersion("v1")
+                .statusCode(400)
+                .shortMessage("Bad Request")
+                .description("Không có trường hợp lệ để cập nhật.")
+                .data(null)
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        RestResponse<Approval> response = RestResponse.<Approval>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Cập nhật approval thành công.")
+            .data(updated)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/order")
     @Operation(summary = "Cập nhật approval order", description = "Cập nhật thứ tự phê duyệt")
     public ResponseEntity<RestResponse<Approval>> setApprovalOrder(
             @PathVariable String id,
@@ -1086,7 +819,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/required")
+    @PutMapping("/{id}/required")
     @Operation(summary = "Cập nhật isRequired", description = "Cập nhật trạng thái bắt buộc")
     public ResponseEntity<RestResponse<Approval>> setIsRequired(
             @PathVariable String id,
@@ -1107,7 +840,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/approvals/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Xóa approval", description = "Soft delete approval")
     public ResponseEntity<RestResponse<Void>> deleteApproval(
             @PathVariable String id,
@@ -1128,7 +861,7 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/approvals/{id}/restore")
+    @PutMapping("/{id}/restore")
     @Operation(summary = "Khôi phục approval", description = "Khôi phục approval đã xóa")
     public ResponseEntity<RestResponse<Approval>> restoreApproval(@PathVariable String id) {
         Approval approval = approvalService.restoreApproval(id);
@@ -1148,7 +881,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/count")
-    @Operation(summary = "Đếm số approval", description = "Đếm số lượng approval theo status")
+    @Operation(summary = "(Deprecated) Đếm số approval", description = "Dùng GET /approvals?contractId=...&status=...&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countApprovalsByContractIdAndStatus(
             @PathVariable String contractId,
             @RequestParam Approval.ApprovalStatus status) {
@@ -1169,7 +902,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/approvals/approver/{approverId}/count")
-    @Operation(summary = "Đếm số approval của approver", description = "Đếm số lượng approval của approver theo status")
+    @Operation(summary = "(Deprecated) Đếm số approval của approver", description = "Dùng GET /approvals?approverId=...&status=...&aggregate=count", deprecated = true)
     public ResponseEntity<RestResponse<Long>> countApprovalsByApproverIdAndStatus(
             @PathVariable String approverId,
             @RequestParam Approval.ApprovalStatus status) {
@@ -1190,7 +923,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-pending")
-    @Operation(summary = "Kiểm tra có approval pending", description = "Kiểm tra contract có approval đang pending không")
+    @Operation(summary = "(Deprecated) Kiểm tra có approval pending", description = "Dùng GET /approvals?contractId=...&status=PENDING&aggregate=exists", deprecated = true)
     public ResponseEntity<RestResponse<Boolean>> hasPendingApprovals(@PathVariable String contractId) {
         boolean hasPending = approvalService.hasPendingApprovals(contractId);
         
@@ -1209,7 +942,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-approved")
-    @Operation(summary = "Kiểm tra có approval approved", description = "Kiểm tra contract có approval đã approved không")
+    @Operation(summary = "(Deprecated) Kiểm tra có approval approved", description = "Dùng GET /approvals?contractId=...&status=APPROVED&aggregate=exists", deprecated = true)
     public ResponseEntity<RestResponse<Boolean>> hasApprovedApprovals(@PathVariable String contractId) {
         boolean hasApproved = approvalService.hasApprovedApprovals(contractId);
         
@@ -1228,7 +961,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-rejected")
-    @Operation(summary = "Kiểm tra có approval rejected", description = "Kiểm tra contract có approval đã rejected không")
+    @Operation(summary = "(Deprecated) Kiểm tra có approval rejected", description = "Dùng GET /approvals?contractId=...&status=REJECTED&aggregate=exists", deprecated = true)
     public ResponseEntity<RestResponse<Boolean>> hasRejectedApprovals(@PathVariable String contractId) {
         boolean hasRejected = approvalService.hasRejectedApprovals(contractId);
         
@@ -1247,7 +980,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/contracts/{contractId}/approvals/has-expired")
-    @Operation(summary = "Kiểm tra có approval expired", description = "Kiểm tra contract có approval đã hết hạn không")
+    @Operation(summary = "(Deprecated) Kiểm tra có approval expired", description = "Dùng GET /approvals?contractId=...&status=EXPIRED&aggregate=exists", deprecated = true)
     public ResponseEntity<RestResponse<Boolean>> hasExpiredApprovals(@PathVariable String contractId) {
         boolean hasExpired = approvalService.hasExpiredApprovals(contractId);
         

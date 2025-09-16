@@ -84,12 +84,17 @@ services:
       - frontend/web_nextjs/env/.env.local
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=1
+      - WATCHPACK_POLLING=true
+      - WATCHPACK_POLLING_INTERVAL=1000
+      - NEXT_WEBPACK_USEPOLLING=1
+      - BROWSER=none
     volumes:
       - ./frontend/web_nextjs:/app
       - /app/node_modules
       - npm_cache:/root/.npm
     command: >
-      sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000"
+      sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000 -H 0.0.0.0"
     networks:
       - docgo_network_local
 

@@ -1,0 +1,320 @@
+---
+alwaysApply: true
+---
+
+# DocGO – Chuẩn hóa API (v1)
+
+Mục tiêu: Đồng bộ URL, payload, response format, và tài liệu cho các microservice DocGO, đặc biệt chuẩn hóa và rút gọn các endpoint của `contract-management-service` mà vẫn giữ tính tương thích ngược trong giai đoạn chuyển đổi.
+
+## 1) Quy tắc URL
+- Base path: `/api/v1/{service-name}/...`
+- `{service-name}` dùng kebab-case đúng tên service: `ai-processing-service`, `contract-management-service`, ...
+- Tài nguyên: số nhiều, kebab-case: `contracts`, `approvals`, `versions`, `esignatures`, `comments`, `reminders`, `reports`, `audit-logs`.
+- CRUD chuẩn REST:
+  - `POST /{resources}`
+  - `GET /{resources}`
+  - `GET /{resources}/{id}`
+  - `PUT /{resources}/{id}`
+  - `PATCH /{resources}/{id}` (cập nhật một phần/trạng thái)
+  - `DELETE /{resources}/{id}`
+- Sub-resource chỉ dùng khi là quan hệ chặt/bản chất hành động trên bản ghi: `PUT /contracts/{id}/restore`.
+- Ưu tiên QUERY thay vì lồng path sâu: thay `GET /contracts/{id}/versions/...` bằng `GET /versions?contractId={id}&...`.
+- Đếm/kiểm tra tồn tại:
+  - `GET /{resources}/count?{filters}`
+  - `GET /{resources}/exists?{filters}`
+
+Tham số phân trang/sắp xếp/lọc:
+- `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
+
+## 2) Handler naming
+- Java (Spring): động từ rõ ràng hiện tại đơn: `getAllContracts`, `getContract`, `createContract`, `updateContract`, `softDeleteContract`, `restoreContract`...
+- Python (FastAPI): snake_case tương đương: `extract_api`, `summarize_api`...
+- Path variable: dùng `{id}` cho định danh chính; các tham số còn lại đưa về query.
+
+## 3) Payload & Content-Type
+- CRUD: `application/json` (DTO/entity tương ứng)
+- Upload file: `multipart/form-data` với trường `file`
+- Phân trang/lọc: dùng query theo mục 1
+
+## 4) Response Envelope (bắt buộc)
+Tất cả API trả về dạng:
+```
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success | Not Found | Bad Request | Conflict | No Content | Internal Server Error",
+  "description": "Mô tả ngắn gọn kết quả",
+  "data": <object|null>,
+  "timestamp": <ISO-8601>,
+  "requestId": <uuid>,
+  "path": "/api/v1/..."
+}
+```
+- HTTP status: 201 Created (tạo mới), 200 OK (mọi trường hợp khác). KHÔNG dùng HTTP 204. Trường hợp không dữ liệu: `statusCode: 204` trong body.
+
+## 5) Cấu trúc API chuẩn cho contract-management-service
+Base: `/api/v1/contract-management-service`
+
+### Contracts
+- `GET /contracts`
+- `GET /contracts/{id}`
+- `POST /contracts`
+- `PUT /contracts/{id}`
+- `PATCH /contracts/{id}` (cập nhật một phần nếu cần)
+- `DELETE /contracts/{id}`
+- `PUT /contracts/{id}/restore`
+- `GET /contracts/count`
+- `GET /contracts/exists`
+
+Gợi ý chuyển đổi: các endpoint `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments` →
+- `GET /events?contractId={id}`
+- `GET /attachments?contractId={id}`
+
+### Approvals
+- `GET /approvals` (lọc: `contractId`, `approverId`, `status`, `dueFrom`, `dueTo`, `priority`, `required`, ...)
+- `GET /approvals/{id}`
+- `POST /approvals` (body: `contractId`, `action` nếu cần khởi tạo hành động)
+- `PATCH /approvals/{id}` (các trường: `status`, `dueDate`, `priority`, `order`, `isRequired`, tăng `reminderCount`)
+- `DELETE /approvals/{id}`
+- `PUT /approvals/{id}/restore`
+- `GET /approvals/count?{filters}`
+- `GET /approvals/exists?{filters}`
+
+Gộp đường dài: `PUT /approvals/{id}/approve|reject|cancel|expire` → `PUT /approvals/{id}/status` hoặc `PATCH /approvals/{id}` với `{ "status": "..." }`.
+
+### Versions
+- `GET /versions` (lọc: `contractId`, `current`, `published`, `changeType`, `createdFrom`, `createdTo`, `tags`, ...; sắp xếp `version|createdAt`)
+- `GET /versions/{id}`
+- `POST /versions` (body gồm `contractId` và metadata phiên bản)
+- `PUT /versions/{id}`
+- `PATCH /versions/{id}` (các trường: `previousVersion`, `approvalRequired`, `detailedChanges`, ...)
+- `DELETE /versions/{id}`
+- `PUT /versions/{id}/restore`
+- `GET /versions/count?{filters}`
+- `GET /versions/exists?{filters}`
+
+Gộp đường dài: thay mọi biến thể `GET /contracts/{contractId}/versions/...` bằng query `GET /versions?contractId={id}&...`.
+
+### E-Signatures
+- `GET /esignatures` (lọc: `contractId`, `signerId|signerEmail`, `status`, `verificationMethod`, `required`, `signedFrom`, `signedTo`, ...)
+- `GET /esignatures/{id}`
+- `POST /esignatures`
+- `PATCH /esignatures/{id}` (các trường: `status`, `verificationMethod`, `verificationCode`, `certificateData`, `locationInfo`, `signatureOrder`, `reminderCount`)
+- `DELETE /esignatures/{id}`
+- `PUT /esignatures/{id}/restore`
+- `GET /esignatures/count?{filters}`
+- `GET /esignatures/exists?{filters}`
+
+### Comments
+- `GET /comments` (lọc: `contractId`, `authorId`, `status`, `visibility`, `createdFrom`, `createdTo`, `minReactionCount`, ...)
+- `GET /comments/{id}`
+- `POST /comments`
+- `PUT /comments/{id}`
+- `PATCH /comments/{id}` (các trường: `resolved`, `pinned`, `visibility`)
+- `DELETE /comments/{id}`
+- `PUT /comments/{id}/restore`
+- `GET /comments/count?{filters}`
+- `GET /comments/exists?{filters}`
+
+### Reminders
+- `GET /reminders` (lọc: `contractId`, `dueFrom`, `dueTo`, `status`, ...)
+- `GET /reminders/{id}`
+- `POST /reminders`
+- `PUT /reminders/{id}`
+- `PATCH /reminders/{id}`
+- `DELETE /reminders/{id}`
+- `PUT /reminders/{id}/restore`
+- `GET /reminders/count?{filters}`
+- `GET /reminders/exists?{filters}`
+
+### Reports
+- `GET /reports` (lọc: `type`, `contractId`, `from`, `to`, ...)
+
+### Audit logs
+- `GET /audit-logs` (lọc theo `resource`, `actor`, thời gian, `correlationId`)
+
+## 6) Tài liệu API
+- Spring (SpringDoc): dùng `@Tag`, `@Operation(summary, description)`; mô tả Input/Output theo format emoji (đã chuẩn hóa); response là `RestResponse<T>`.
+- Luôn nêu rõ: URL đầy đủ, headers (JWT...), params path/query, body (schema + ví dụ), response mẫu thành công/lỗi.
+
+## 7) Trật tự trong Controller
+1. `@GetMapping` (danh sách)
+2. `@GetMapping("/{id}")` (chi tiết)
+3. `@PostMapping` (tạo)
+4. `@PutMapping("/{id}")` (cập nhật toàn phần)
+5. `@DeleteMapping("/{id}")` (xóa)
+6. Các API khác theo thứ tự logic (ví dụ: `restore`, `count`, `exists`)
+
+## 8) Tương thích ngược & Deprecated
+- Giai đoạn chuyển đổi: giữ nguyên các URL dài hiện tại, bổ sung URL rút gọn chạy song song (alias) và đánh dấu `@Operation(deprecated = true)` ở URL cũ.
+- Lộ trình: thông báo client, theo dõi logs truy cập, gỡ dần endpoint cũ sau 2–3 phiên bản nhỏ.
+
+## 9) Ví dụ chuyển đổi (Approvals)
+- Cũ: `PUT /api/v1/contract-management-service/approvals/approvals/{id}/approve`
+- Mới: `PUT /api/v1/contract-management-service/approvals/{id}/status` body:
+```json
+{ "status": "APPROVED", "comment": "Looks good" }
+```
+
+## 10) Bảo mật & Versioning
+- Luôn có tiền tố `/api/v1/...`; thay đổi breaking → phát hành `/api/v2/...` song song.
+- Ghi rõ header bảo mật trong tài liệu endpoint.
+
+# DocGO – Chuẩn hóa API (v1)
+
+Mục tiêu: Đồng bộ URL, payload, response format, và tài liệu cho các microservice DocGO, đặc biệt chuẩn hóa và rút gọn các endpoint của `contract-management-service` mà vẫn giữ tính tương thích ngược trong giai đoạn chuyển đổi.
+
+## 1) Quy tắc URL
+- Base path: `/api/v1/{service-name}/...`
+- `{service-name}` dùng kebab-case đúng tên service: `ai-processing-service`, `contract-management-service`, ...
+- Tài nguyên: số nhiều, kebab-case: `contracts`, `approvals`, `versions`, `esignatures`, `comments`, `reminders`, `reports`, `audit-logs`.
+- CRUD chuẩn REST:
+  - `POST /{resources}`
+  - `GET /{resources}`
+  - `GET /{resources}/{id}`
+  - `PUT /{resources}/{id}`
+  - `PATCH /{resources}/{id}` (cập nhật một phần/trạng thái)
+  - `DELETE /{resources}/{id}`
+- Sub-resource chỉ dùng khi là quan hệ chặt/bản chất hành động trên bản ghi: `PUT /contracts/{id}/restore`.
+- Ưu tiên QUERY thay vì lồng path sâu: thay `GET /contracts/{id}/versions/...` bằng `GET /versions?contractId={id}&...`.
+- Đếm/kiểm tra tồn tại:
+  - `GET /{resources}/count?{filters}`
+  - `GET /{resources}/exists?{filters}`
+
+Tham số phân trang/sắp xếp/lọc:
+- `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `includeDeleted`
+
+## 2) Handler naming
+- Java (Spring): động từ rõ ràng hiện tại đơn: `getAllContracts`, `getContract`, `createContract`, `updateContract`, `softDeleteContract`, `restoreContract`...
+- Python (FastAPI): snake_case tương đương: `extract_api`, `summarize_api`...
+- Path variable: dùng `{id}` cho định danh chính; các tham số còn lại đưa về query.
+
+## 3) Payload & Content-Type
+- CRUD: `application/json` (DTO/entity tương ứng)
+- Upload file: `multipart/form-data` với trường `file`
+- Phân trang/lọc: dùng query theo mục 1
+
+## 4) Response Envelope (bắt buộc)
+Tất cả API trả về dạng:
+```
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success | Not Found | Bad Request | Conflict | No Content | Internal Server Error",
+  "description": "Mô tả ngắn gọn kết quả",
+  "data": <object|null>,
+  "timestamp": <ISO-8601>,
+  "requestId": <uuid>,
+  "path": "/api/v1/..."
+}
+```
+- HTTP status: 201 Created (tạo mới), 200 OK (mọi trường hợp khác). KHÔNG dùng HTTP 204. Trường hợp không dữ liệu: `statusCode: 204` trong body.
+
+## 5) Cấu trúc API chuẩn cho contract-management-service
+Base: `/api/v1/contract-management-service`
+
+### Contracts
+- `GET /contracts`
+- `GET /contracts/{id}`
+- `POST /contracts`
+- `PUT /contracts/{id}`
+- `PATCH /contracts/{id}` (cập nhật một phần nếu cần)
+- `DELETE /contracts/{id}`
+- `PUT /contracts/{id}/restore`
+- `GET /contracts/count`
+- `GET /contracts/exists`
+
+Gợi ý chuyển đổi: các endpoint `GET /contracts/{id}/events`, `GET /contracts/{id}/attachments` →
+- `GET /events?contractId={id}`
+- `GET /attachments?contractId={id}`
+
+### Approvals
+- `GET /approvals` (lọc: `contractId`, `approverId`, `status`, `dueFrom`, `dueTo`, `priority`, `required`, ...)
+- `GET /approvals/{id}`
+- `POST /approvals` (body: `contractId`, `action` nếu cần khởi tạo hành động)
+- `PATCH /approvals/{id}` (các trường: `status`, `dueDate`, `priority`, `order`, `isRequired`, tăng `reminderCount`)
+- `DELETE /approvals/{id}`
+- `PUT /approvals/{id}/restore`
+- `GET /approvals/count?{filters}`
+- `GET /approvals/exists?{filters}`
+
+Gộp đường dài: `PUT /approvals/{id}/approve|reject|cancel|expire` → `PUT /approvals/{id}/status` hoặc `PATCH /approvals/{id}` với `{ "status": "..." }`.
+
+### Versions
+- `GET /versions` (lọc: `contractId`, `current`, `published`, `changeType`, `createdFrom`, `createdTo`, `tags`, ...; sắp xếp `version|createdAt`)
+- `GET /versions/{id}`
+- `POST /versions` (body gồm `contractId` và metadata phiên bản)
+- `PUT /versions/{id}`
+- `PATCH /versions/{id}` (các trường: `previousVersion`, `approvalRequired`, `detailedChanges`, ...)
+- `DELETE /versions/{id}`
+- `PUT /versions/{id}/restore`
+- `GET /versions/count?{filters}`
+- `GET /versions/exists?{filters}`
+
+Gộp đường dài: thay mọi biến thể `GET /contracts/{contractId}/versions/...` bằng query `GET /versions?contractId={id}&...`.
+
+### E-Signatures
+- `GET /esignatures` (lọc: `contractId`, `signerId|signerEmail`, `status`, `verificationMethod`, `required`, `signedFrom`, `signedTo`, ...)
+- `GET /esignatures/{id}`
+- `POST /esignatures`
+- `PATCH /esignatures/{id}` (các trường: `status`, `verificationMethod`, `verificationCode`, `certificateData`, `locationInfo`, `signatureOrder`, `reminderCount`)
+- `DELETE /esignatures/{id}`
+- `PUT /esignatures/{id}/restore`
+- `GET /esignatures/count?{filters}`
+- `GET /esignatures/exists?{filters}`
+
+### Comments
+- `GET /comments` (lọc: `contractId`, `authorId`, `status`, `visibility`, `createdFrom`, `createdTo`, `minReactionCount`, ...)
+- `GET /comments/{id}`
+- `POST /comments`
+- `PUT /comments/{id}`
+- `PATCH /comments/{id}` (các trường: `resolved`, `pinned`, `visibility`)
+- `DELETE /comments/{id}`
+- `PUT /comments/{id}/restore`
+- `GET /comments/count?{filters}`
+- `GET /comments/exists?{filters}`
+
+### Reminders
+- `GET /reminders` (lọc: `contractId`, `dueFrom`, `dueTo`, `status`, ...)
+- `GET /reminders/{id}`
+- `POST /reminders`
+- `PUT /reminders/{id}`
+- `PATCH /reminders/{id}`
+- `DELETE /reminders/{id}`
+- `PUT /reminders/{id}/restore`
+- `GET /reminders/count?{filters}`
+- `GET /reminders/exists?{filters}`
+
+### Reports
+- `GET /reports` (lọc: `type`, `contractId`, `from`, `to`, ...)
+
+### Audit logs
+- `GET /audit-logs` (lọc theo `resource`, `actor`, thời gian, `correlationId`)
+
+## 6) Tài liệu API
+- Spring (SpringDoc): dùng `@Tag`, `@Operation(summary, description)`; mô tả Input/Output theo format emoji (đã chuẩn hóa); response là `RestResponse<T>`.
+- Luôn nêu rõ: URL đầy đủ, headers (JWT...), params path/query, body (schema + ví dụ), response mẫu thành công/lỗi.
+
+## 7) Trật tự trong Controller
+1. `@GetMapping` (danh sách)
+2. `@GetMapping("/{id}")` (chi tiết)
+3. `@PostMapping` (tạo)
+4. `@PutMapping("/{id}")` (cập nhật toàn phần)
+5. `@DeleteMapping("/{id}")` (xóa)
+6. Các API khác theo thứ tự logic (ví dụ: `restore`, `count`, `exists`)
+
+## 8) Tương thích ngược & Deprecated
+- Giai đoạn chuyển đổi: giữ nguyên các URL dài hiện tại, bổ sung URL rút gọn chạy song song (alias) và đánh dấu `@Operation(deprecated = true)` ở URL cũ.
+- Lộ trình: thông báo client, theo dõi logs truy cập, gỡ dần endpoint cũ sau 2–3 phiên bản nhỏ.
+
+## 9) Ví dụ chuyển đổi (Approvals)
+- Cũ: `PUT /api/v1/contract-management-service/approvals/approvals/{id}/approve`
+- Mới: `PUT /api/v1/contract-management-service/approvals/{id}/status` body:
+```json
+{ "status": "APPROVED", "comment": "Looks good" }
+```
+
+## 10) Bảo mật & Versioning
+- Luôn có tiền tố `/api/v1/...`; thay đổi breaking → phát hành `/api/v2/...` song song.
+- Ghi rõ header bảo mật trong tài liệu endpoint.
+

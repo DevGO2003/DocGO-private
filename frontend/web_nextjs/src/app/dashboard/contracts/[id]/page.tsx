@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams } from 'next/navigation'
+import { contractAPI } from '@/lib/api'
 
 export default function ContractDetailPage() {
   const params = useParams() as { id: string }
@@ -15,38 +16,39 @@ export default function ContractDetailPage() {
       setLoading(true)
       try {
         setError('')
-        const res = await fetch(`/api/mock/contracts/${encodeURIComponent(String(params.id))}`)
-        const json = await res.json().catch(() => null)
-        if (!res.ok) {
-          // Fallback: thử lấy từ danh sách lớn rồi tìm theo id
-          const fallbackRes = await fetch(`/api/mock/contracts?pageNumber=0&pageSize=200`)
-          const fallbackJson = await fallbackRes.json().catch(() => null)
-          const list = fallbackJson?.data?.content || []
-          const found = list.find((c: any) => String(c.id) === String(params.id))
-          if (found) {
-            setData({
-              ...found,
-              content: 'Nội dung chưa có chi tiết (fallback từ danh sách).',
-              paymentDetails: {
-                totalValue: found.totalValue,
-                currency: found.currency,
-                schedule: 'N/A',
-                paymentMethod: 'N/A',
-              },
-              keyClauses: [],
-              unfavorableClauses: [],
-              reminders: [],
-              riskAssessment: { riskLevel: 'LOW', riskFactors: [], mitigationMeasures: [] },
-              complianceStatus: { status: 'COMPLIANT', issues: [], recommendations: [] },
-            })
-            setError('')
-          } else {
-            setError(json?.description || 'Không tải được chi tiết hợp đồng')
-            setData(null)
-          }
-        } else {
-          setData(json?.data)
+        const res = await contractAPI.getContract(String(params.id))
+        const c: any = res.data?.data
+        const mapped = {
+          id: c.id,
+          title: c.title || c.contractNumber || `Contract ${c.id}`,
+          description: c.object || c.description || '',
+          status: c.status || 'DRAFT',
+          contractType: c.contractType || 'Other',
+          tags: c.tags || [],
+          parties: (c.parties || []).map((p: any) => ({
+            name: p.name || '',
+            role: p.role || '',
+            representative: p.representative,
+            taxCode: p.taxCode,
+            contact: p.contact,
+            address: p.address,
+          })),
+          effectiveDate: c.effectiveDate || '',
+          expiryDate: c.expiryDate || '',
+          paymentDetails: {
+            totalValue: Number(c.paymentDetails?.totalValue || 0),
+            currency: c.paymentDetails?.currency || 'VND',
+            schedule: c.paymentDetails?.schedule || '',
+            paymentMethod: c.paymentDetails?.paymentMethod || '',
+          },
+          keyClauses: c.keyClauses || [],
+          unfavorableClauses: c.unfavorableClauses || [],
+          reminders: c.reminders || [],
+          riskAssessment: c.riskAssessment || { riskLevel: 'LOW', riskFactors: [], mitigationMeasures: [] },
+          complianceStatus: c.complianceStatus || { status: 'COMPLIANT', issues: [], recommendations: [] },
+          content: c.content || c.object || '',
         }
+        setData(mapped)
       } catch (e: any) {
         setError('Lỗi kết nối máy chủ')
         setData(null)
