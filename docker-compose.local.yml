@@ -134,11 +134,12 @@ services:
       - backend/contract-management-service/env/.env.local
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - MAVEN_OPTS=-Xmx2g -XX:+UseG1GC -XX:+UseStringDeduplication
     volumes:
       - ./backend/contract-management-service:/app
       - maven_cache:/root/.m2
     command: >
-      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
+      sh -c "chmod +x ./mvnw && ./mvnw --no-transfer-progress -T 1C -o -DskipTests clean spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8000'"
     depends_on:
       redis:
         condition: service_healthy
