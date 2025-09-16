@@ -20,8 +20,12 @@ const nextConfig = {
         destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/api/v1/authentication-identity-service/auth/:path*`,
       },
       {
-        source: '/api/oauth2/:path*',
-        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/api/v1/authentication-identity-service/auth/oauth2/:path*`,
+        source: '/oauth2/:path*',
+        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/oauth2/:path*`,
+      },
+      {
+        source: '/login/oauth2/:path*',
+        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/login/oauth2/:path*`,
       },
       {
         source: '/api/contracts/:path*',

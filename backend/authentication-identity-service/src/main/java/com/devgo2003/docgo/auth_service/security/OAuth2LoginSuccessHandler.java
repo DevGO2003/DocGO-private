@@ -177,7 +177,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String buildRedirectUrl(String accessToken, String refreshToken, String username, String requestId) {
         try {
             String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000");
-            return frontendUrl + "/auth/oauth/callback" +
+            return frontendUrl + "/auth/oauth2/callback" +
                     "?token=" + java.net.URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
                     "&refreshToken=" + java.net.URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
                     "&success=true" +

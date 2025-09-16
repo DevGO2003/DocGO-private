@@ -62,8 +62,6 @@ public class SecurityConfig {
                 "/api/v1/authentication-identity-service/auth/logout",
                 "/api/v1/authentication-identity-service/auth/health",
                 "/api/v1/authentication-identity-service/auth/oauth2/test",
-                "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
-                "/api/v1/authentication-identity-service/auth/oauth2/callback/google",
                 "/api/v1/authentication-identity-service/oauth2/**",
                 "/oauth2/**",
                 "/login/oauth2/**"
@@ -80,8 +78,6 @@ public class SecurityConfig {
                 "/api/v1/authentication-identity-service/auth/logout",
                 "/api/v1/authentication-identity-service/auth/health",
                 "/api/v1/authentication-identity-service/auth/oauth2/test",
-                "/api/v1/authentication-identity-service/auth/oauth2/authorization/google",
-                "/api/v1/authentication-identity-service/auth/oauth2/callback/google",
                 "/api/v1/authentication-identity-service/oauth2/**"
             };
         }

@@ -14,11 +14,13 @@ const publicRoutes = [
   '/api/auth/login',
   '/api/auth/refresh',
   // OAuth2 endpoints
-  '/api/oauth2',
+  '/oauth2',
+  '/login/oauth2',
   // OpenAPI & health
   '/api/health',
   '/api/docs',
-  '/api/swagger.json'
+  '/api/swagger.json',
+  '/api/oauth2/test'
 ]
 
 function isPublicAuthPath(pathname: string): boolean {

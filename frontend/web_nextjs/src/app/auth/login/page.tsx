@@ -123,54 +123,12 @@ export default function LoginPage() {
         return
       }
       
-      // Get Google OAuth URL from backend
+      // Direct redirect to Google OAuth2 authorization endpoint (Spring Security standard)
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-      const apiUrl = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/authorization/google`
+      const googleOAuthUrl = `${baseUrl}/oauth2/authorization/google`
       
-      try {
-        // Call API to get Google OAuth URL
-        const response = await fetch(apiUrl)
-        const data = await response.json()
-        
-        if (data.statusCode === 200 && data.data) {
-          const googleOAuthUrl = data.data
-          
-          // Open Google OAuth in new tab
-          const newWindow = window.open(googleOAuthUrl, 'google-oauth', 'width=500,height=600,scrollbars=yes,resizable=yes');
-          
-          if (!newWindow) {
-            setOauthError('Không thể mở cửa sổ đăng nhập Google. Vui lòng cho phép popup.')
-            setOauthLoading(false)
-            return
-          }
-          
-          // Listen for the new window to close or receive message
-          const checkClosed = setInterval(() => {
-            if (newWindow.closed) {
-              clearInterval(checkClosed)
-              setOauthLoading(false)
-              // Do not hard-reload; if postMessage was received we already navigated.
-              // Optionally soft refresh data here if needed.
-            }
-          }, 1000)
-          
-          // Timeout after 5 minutes to prevent infinite loading
-          setTimeout(() => {
-            clearInterval(checkClosed);
-            setOauthLoading(false);
-            setOauthError('Đăng nhập Google timeout. Vui lòng thử lại.');
-          }, 5 * 60 * 1000);
-          
-        } else {
-          setOauthError('Không thể lấy Google OAuth URL: ' + (data.description || 'Unknown error'))
-          setOauthLoading(false)
-        }
-        
-      } catch (error) {
-        console.error('OAuth setup error:', error)
-        setOauthError('Không thể kết nối đến server OAuth')
-        setOauthLoading(false)
-      }
+      // Redirect current page to Google OAuth
+      window.location.href = googleOAuthUrl;
     } catch (error: any) {
       console.error('OAuth setup error:', error)
       
@@ -191,7 +149,7 @@ export default function LoginPage() {
       const checkOauth = async () => {
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-          const url = `${baseUrl}/api/v1/authentication-identity-service/auth/oauth2/test`
+          const url = `${baseUrl}/api/oauth2/test`
           const res = await fetch(url, {
             method: 'GET',
             headers: {
