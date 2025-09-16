@@ -32,10 +32,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // Authentication Identity Service (Spring Boot) - Port 8001
+    // Authentication Identity Service (Spring Boot) - Port 8000
     this.addService('authentication', {
       name: 'authentication-identity-service',
-      url: selectUrl(process.env.AUTH_SERVICE_URL, 'http://docgo-local-authentication-identity-service:8000', 'http://localhost:8001'),
+      url: selectUrl(process.env.AUTH_SERVICE_URL, 'http://authentication-identity-service:8000', 'http://localhost:8001'),
       healthCheck: '/api/v1/authentication-identity-service/auth/health',
       timeout: 10000
     });
@@ -48,10 +48,10 @@ class ServiceManager {
       timeout: 10000
     });
 
-    // Contract Management Service (Spring Boot) - Port 8002
+    // Contract Management Service (Spring Boot) - Port 8000
     this.addService('contract-management', {
       name: 'contract-management-service',
-      url: selectUrl(process.env.CONTRACT_SERVICE_URL, 'http://docgo-local-contract-management-service:8000', 'http://localhost:8002'),
+      url: selectUrl(process.env.CONTRACT_SERVICE_URL, 'http://contract-management-service:8000', 'http://localhost:8002'),
       healthCheck: '/actuator/health',
       timeout: 10000
     });

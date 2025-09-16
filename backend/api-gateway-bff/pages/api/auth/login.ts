@@ -45,18 +45,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('[Auth Login] Error:', error)
     
     if (error.name === 'ValidationError') {
-      return res.status(200).json(createErrorResponse(error, req as any))
+      const requestId = generateRequestId()
+      return res.status(200).json({
+        apiVersion: 'v1',
+        statusCode: 400,
+        shortMessage: 'Bad Request',
+        description: error.message || 'Validation failed',
+        data: null,
+        timestamp: new Date().toISOString(),
+        requestId: requestId,
+        path: req.url || '/api/auth/login'
+      })
     }
 
     // Handle service errors
     const requestId = generateRequestId()
-    const errorResponse = createErrorResponse(
-      new Error(error.message || 'Login failed'),
-      req as any,
-      500
-    )
-
-    return res.status(200).json(errorResponse)
+    return res.status(200).json({
+      apiVersion: 'v1',
+      statusCode: 500,
+      shortMessage: 'Internal Server Error',
+      description: error.message || 'Login failed',
+      data: null,
+      timestamp: new Date().toISOString(),
+      requestId: requestId,
+      path: req.url || '/api/auth/login'
+    })
   }
 }
 
