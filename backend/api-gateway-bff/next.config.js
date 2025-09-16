@@ -20,6 +20,10 @@ const nextConfig = {
         destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/api/v1/authentication-identity-service/auth/:path*`,
       },
       {
+        source: '/api/oauth2/:path*',
+        destination: `${process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8000'}/api/v1/authentication-identity-service/auth/oauth2/:path*`,
+      },
+      {
         source: '/api/contracts/:path*',
         destination: `${process.env.CONTRACT_SERVICE_URL || 'http://contract-management-service:8000'}/api/v1/contract-management-service/contracts/:path*`,
       },

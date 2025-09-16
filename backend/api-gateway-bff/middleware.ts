@@ -13,6 +13,8 @@ const publicRoutes = [
   // Legacy/public BFF auth endpoints
   '/api/auth/login',
   '/api/auth/refresh',
+  // OAuth2 endpoints
+  '/api/oauth2',
   // OpenAPI & health
   '/api/health',
   '/api/docs',
