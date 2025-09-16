@@ -180,6 +180,72 @@ public class ApprovalController {
 
     // Removed duplicate getApproval mapping to avoid ambiguous mapping with getApprovalById
 
+    @GetMapping("/count")
+    @Operation(summary = "Đếm phê duyệt (rút gọn)", description = "Thay thế các đường dẫn count-* bằng query aggregate=count")
+    public ResponseEntity<RestResponse<Long>> countApprovals(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Approval.ApprovalStatus status,
+            @RequestParam(required = false) String approverId) {
+        long count;
+        if (contractId != null && status != null) {
+            count = approvalService.countApprovalsByContractIdAndStatus(contractId, status);
+        } else if (approverId != null && status != null) {
+            count = approvalService.countApprovalsByApproverIdAndStatus(approverId, status);
+        } else if (contractId != null) {
+            List<Approval> list = approvalService.getApprovalsByContractId(contractId);
+            count = list == null ? 0 : list.size();
+        } else {
+            List<Approval> all = approvalService.getAllApprovals();
+            count = all == null ? 0 : all.size();
+        }
+
+        RestResponse<Long> response = RestResponse.<Long>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đếm số phê duyệt thành công.")
+            .data(count)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/exists")
+    @Operation(summary = "Kiểm tra tồn tại phê duyệt (rút gọn)", description = "Thay thế các đường dẫn exists-/has-* bằng query aggregate=exists")
+    public ResponseEntity<RestResponse<Boolean>> existsApprovals(
+            @RequestParam(required = false) String contractId,
+            @RequestParam(required = false) Approval.ApprovalStatus status,
+            @RequestParam(required = false) String approverRole) {
+        boolean exists = false;
+        if (contractId != null && status == Approval.ApprovalStatus.PENDING) {
+            exists = approvalService.hasPendingApprovals(contractId);
+        } else if (contractId != null && status == Approval.ApprovalStatus.APPROVED) {
+            exists = approvalService.hasApprovedApprovals(contractId);
+        } else if (contractId != null && status == Approval.ApprovalStatus.REJECTED) {
+            exists = approvalService.hasRejectedApprovals(contractId);
+        } else if (contractId != null && status == Approval.ApprovalStatus.EXPIRED) {
+            exists = approvalService.hasExpiredApprovals(contractId);
+        } else if (contractId != null && approverRole != null) {
+            exists = approvalService.hasApprovalsByRole(contractId, approverRole);
+        } else if (contractId != null) {
+            exists = !approvalService.getApprovalsByContractId(contractId).isEmpty();
+        }
+
+        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Kiểm tra tồn tại phê duyệt thành công.")
+            .data(exists)
+            .timestamp(ZonedDateTime.now())
+            .requestId(UUID.randomUUID().toString())
+            .path(request.getRequestURI())
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PostMapping
     @Operation(
         summary = "Tạo phê duyệt mới", 
