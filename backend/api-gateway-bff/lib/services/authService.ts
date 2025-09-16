@@ -63,7 +63,7 @@ class AuthService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.AUTH_SERVICE_URL || 'http://authentication-identity-service:8001';
+    this.baseURL = process.env.AUTHENTICATION_SERVICE_URL || 'http://authentication-identity-service:8001';
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,
