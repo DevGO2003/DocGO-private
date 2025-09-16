@@ -61,17 +61,21 @@ class ApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
-        // Kiểm tra nếu backend trả về HTTP 200 nhưng có statusCode khác trong body
-        if (response.data && response.data.statusCode && response.data.statusCode !== 200) {
-          // Tạo error object để trigger error handler
-          const error = {
-            response: {
-              status: 200, // HTTP status luôn là 200
-              data: response.data
+        // Chuẩn RestResponse: coi 200/201/204 trong body là thành công
+        if (response.data && typeof response.data.statusCode === 'number') {
+          const sc = response.data.statusCode
+          const isSuccessCode = sc === 200 || sc === 201 || sc === 204
+          if (!isSuccessCode) {
+            // Tạo error object để trigger error handler
+            const error = {
+              response: {
+                status: response.status,
+                data: response.data
+              }
             }
+            this.handleApiError(error)
+            return Promise.reject(error)
           }
-          this.handleApiError(error)
-          return Promise.reject(error)
         }
         return response
       },
@@ -417,10 +421,10 @@ export class FileStorageAPI {
 
 // Authentication API - Updated to use API Gateway proxy
 export class AuthAPI {
-  private basePath = '/api/v1/authentication-identity-service'
+  private basePath = '/api/auth'
 
   async login(credentials: { username: string; password: string }) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/login`, credentials)
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/login`, credentials)
   }
 
   async register(userData: {
@@ -431,28 +435,28 @@ export class AuthAPI {
     lastName: string
     role?: string
   }) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/register`, userData)
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/register`, userData)
   }
 
   async refreshToken(refreshToken: string) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/refresh`, { refreshToken })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/refresh`, { refreshToken })
   }
 
   async logout(refreshToken?: string) {
     const body = refreshToken ? { refreshToken } : {}
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/logout`, body)
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/logout`, body)
   }
 
   async forgotPassword(email: string) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/forgot-password`, { email })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/forgot-password`, { email })
   }
 
   async resetPassword(token: string, newPassword: string) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/auth/reset-password`, { token, newPassword })
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/reset-password`, { token, newPassword })
   }
 
   async getProfile() {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/auth/me`)
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/me`)
   }
 
   async updateProfile(data: {
@@ -464,16 +468,16 @@ export class AuthAPI {
     position?: string
     avatar?: string
   }) {
-    return apiClient.put<ApiResponse<any>>(`${this.basePath}/auth/profile`, data)
+    return apiClient.put<ApiResponse<any>>(`${this.basePath}/profile`, data)
   }
 
   async changePassword(data: { oldPassword: string; newPassword: string }) {
-    return apiClient.put<ApiResponse<any>>(`${this.basePath}/auth/change-password`, data)
+    return apiClient.put<ApiResponse<any>>(`${this.basePath}/change-password`, data)
   }
 
   // OAuth endpoints
   async getOAuthStatus() {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/auth/oauth2/test`)
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/oauth2/test`)
   }
 
   async initiateOAuth(provider: string) {

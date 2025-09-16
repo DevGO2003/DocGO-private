@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { authAPI } from '@/lib/api'
 import { User, AuthResponse, LoginCredentials, RegisterData } from '@/types'
@@ -22,6 +23,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -87,6 +89,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('user_data')
     setUser(null)
     toast.success('Đã đăng xuất')
+    try {
+      router.replace('/auth/login')
+    } catch {}
   }
 
   const refreshToken = async () => {
@@ -138,13 +143,19 @@ export function useAuth() {
 // Hook to check if user is authenticated
 export function useRequireAuth() {
   const { user, loading } = useAuth()
+  const router = useRouter()
   
   useEffect(() => {
     if (!loading && !user) {
-      // Redirect to login page if not authenticated
-      window.location.href = '/login'
+      // Redirect to login page if not authenticated (soft navigation)
+      try {
+        router.replace('/auth/login')
+      } catch {
+        // fallback (only if router is unavailable)
+        window.location.href = '/auth/login'
+      }
     }
-  }, [user, loading])
+  }, [user, loading, router])
 
   return { user, loading }
 }
@@ -152,13 +163,18 @@ export function useRequireAuth() {
 // Hook to check if user has specific role
 export function useRequireRole(requiredRole: string) {
   const { user, loading } = useAuth()
+  const router = useRouter()
   
   useEffect(() => {
     if (!loading && (!user || user.role !== requiredRole)) {
-      // Redirect to unauthorized page if user doesn't have required role
-      window.location.href = '/unauthorized'
+      // Redirect to unauthorized page (soft navigation)
+      try {
+        router.replace('/unauthorized')
+      } catch {
+        window.location.href = '/unauthorized'
+      }
     }
-  }, [user, loading, requiredRole])
+  }, [user, loading, requiredRole, router])
 
   return { user, loading }
 }

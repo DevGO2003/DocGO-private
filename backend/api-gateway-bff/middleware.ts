@@ -55,23 +55,26 @@ export async function middleware(req: NextRequest) {
     const rateLimitResult = await handleRateLimit(req)
     if (rateLimitResult) return rateLimitResult
     
-    // 2. CORS handling
-    const corsResult = await handleCORS(req)
-    if (corsResult) return corsResult
+    // Execute middleware chain
+    const handlers = [
+      handleCORS,
+      handleAuthentication,
+      handleAuthorization,
+      handleServiceHealth
+    ];
+
+    let response: NextResponse | null = null;
+
+    for (const handler of handlers) {
+      const result = await handler(req);
+      if (result instanceof NextResponse) {
+        // If a handler returns a response, stop the chain
+        return result;
+      }
+    }
     
-    // 3. Authentication check
-    const authResult = await handleAuthentication(req)
-    if (authResult) return authResult
-    
-    // 4. Authorization check
-    const authzResult = await handleAuthorization(req)
-    if (authzResult) return authzResult
-    
-    // 5. Service health check
-    const healthResult = await handleServiceHealth(req)
-    if (healthResult) return healthResult
-    
-    return NextResponse.next()
+    // If no handler returned a response, proceed
+    return NextResponse.next();
     
   } catch (error) {
     console.error('[Middleware] Error:', error)
