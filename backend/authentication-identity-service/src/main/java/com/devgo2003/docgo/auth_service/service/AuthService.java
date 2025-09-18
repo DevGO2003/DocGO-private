@@ -23,11 +23,13 @@ public class AuthService {
     private final UserMongoRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final long accessTokenTtlSeconds;
 
     public AuthService(UserMongoRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.accessTokenTtlSeconds = 900L; // 15 minutes - should be injected from config
     }
 
     public AuthResponse register(String username, String email, String password) {
@@ -60,7 +62,7 @@ public class AuthService {
             "tokenVersion", "1"
         ));
         String refreshToken = jwtUtil.generateRefreshToken(savedUser.getUsername());
-        return new AuthResponse(true, "User registered successfully", accessToken, userInfo, refreshToken);
+        return new AuthResponse(true, "User registered successfully", accessToken, refreshToken, userInfo, accessTokenTtlSeconds, "Bearer");
     }
 
     public AuthResponse login(String username, String password) {
@@ -79,7 +81,7 @@ public class AuthService {
                             "tokenVersion", "1"
                         ));
                         String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
-                        return new AuthResponse(true, "Login successful", accessToken, userInfo, refreshToken);
+                        return new AuthResponse(true, "Login successful", accessToken, refreshToken, userInfo, accessTokenTtlSeconds, "Bearer");
                     } else {
                         // Increment failed login attempts
                         user.setLoginAttempts(user.getLoginAttempts() != null ? user.getLoginAttempts() + 1 : 1);
@@ -103,7 +105,7 @@ public class AuthService {
                             "roles", user.getRoleIds(),
                             "tokenVersion", "1"
                         ));
-                        return new AuthResponse(true, "Token refreshed successfully", newAccessToken, userInfo, refreshToken);
+                        return new AuthResponse(true, "Token refreshed successfully", newAccessToken, refreshToken, userInfo, accessTokenTtlSeconds, "Bearer");
                     })
                     .orElse(new AuthResponse(false, "User not found", null, null, null));
         } catch (Exception e) {

@@ -11,10 +11,10 @@ public class JwtConfig {
     @Value("${security.jwt.base64-secret}")
     private String base64Secret;
 
-    @Value("${security.jwt.access-ttl-seconds:3600}")
+    @Value("${security.jwt.access-ttl-seconds:900}")
     private long accessTokenTtlSeconds;
 
-    @Value("${security.jwt.refresh-ttl-seconds:1209600}")
+    @Value("${security.jwt.refresh-ttl-seconds:3600}")
     private long refreshTokenTtlSeconds;
 
     @Bean

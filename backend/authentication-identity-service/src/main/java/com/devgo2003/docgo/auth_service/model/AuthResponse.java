@@ -25,7 +25,7 @@ public class AuthResponse {
         this.accessToken = token; // Set both for compatibility
         this.user = user;
         this.refreshToken = refreshToken;
-        this.expiresIn = 3600L; // Default 1 hour
+        this.expiresIn = 900L; // 15 minutes (access token TTL)
         this.tokenType = "Bearer";
     }
 

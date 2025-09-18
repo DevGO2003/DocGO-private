@@ -33,12 +33,12 @@ Khi người dùng cần làm việc với database, command này sẽ:
 
 | Operation | Mô tả | ✅ Ưu điểm | ⚠️ Nhược điểm | 🎯 Độ khó | ⏱️ Thời gian | 💰 Chi phí |
 |-----------|-------|------------|---------------|-----------|-------------|-----------|
-| **Query Data** | Tìm kiếm dữ liệu | ✅ Nhanh chóng<br>✅ Không thay đổi data | ⚠️ Có thể chậm với data lớn | 🟢 Dễ | 🟢 < 1 phút | 🟢 Thấp |
-| **Update Records** | Cập nhật dữ liệu | ✅ Sửa lỗi data<br>✅ Đồng bộ thông tin | ⚠️ Có thể mất data<br>⚠️ Cần backup trước | 🟡 Trung bình | 🟡 5-15 phút | 🟡 Trung bình |
-| **Insert Records** | Thêm dữ liệu mới | ✅ Bổ sung data<br>✅ Không ảnh hưởng existing | ⚠️ Có thể duplicate<br>⚠️ Cần validate | 🟡 Trung bình | 🟡 10-30 phút | 🟡 Trung bình |
-| **Delete Records** | Xóa dữ liệu | ✅ Dọn dẹp data<br>✅ Giảm storage | ⚠️ Mất data vĩnh viễn<br>⚠️ Cần backup trước | 🔴 Khó | 🔴 30 phút - 2h | 🔴 Cao |
-| **Backup Data** | Sao lưu dữ liệu | ✅ An toàn data<br>✅ Có thể restore | ⚠️ Tốn storage<br>⚠️ Có thể chậm | 🟡 Trung bình | 🟡 15-60 phút | 🟡 Trung bình |
-| **Restore Data** | Khôi phục dữ liệu | ✅ Khôi phục data<br>✅ Giải quyết lỗi | ⚠️ Có thể ghi đè data mới<br>⚠️ Cần kiểm tra kỹ | 🔴 Khó | 🔴 1-4 giờ | 🔴 Cao |
+| **Query Data** | Tìm kiếm dữ liệu | ✅ Nhanh chóng, ✅ Không thay đổi data | ⚠️ Có thể chậm với data lớn | 🟢 Dễ | 🟢 < 1 phút | 🟢 Thấp |
+| **Update Records** | Cập nhật dữ liệu | ✅ Sửa lỗi data, ✅ Đồng bộ thông tin | ⚠️ Có thể mất data, ⚠️ Cần backup trước | 🟡 Trung bình | 🟡 5-15 phút | 🟡 Trung bình |
+| **Insert Records** | Thêm dữ liệu mới | ✅ Bổ sung data, ✅ Không ảnh hưởng existing | ⚠️ Có thể duplicate, ⚠️ Cần validate | 🟡 Trung bình | 🟡 10-30 phút | 🟡 Trung bình |
+| **Delete Records** | Xóa dữ liệu | ✅ Dọn dẹp data, ✅ Giảm storage | ⚠️ Mất data vĩnh viễn, ⚠️ Cần backup trước | 🔴 Khó | 🔴 30 phút - 2h | 🔴 Cao |
+| **Backup Data** | Sao lưu dữ liệu | ✅ An toàn data, ✅ Có thể restore | ⚠️ Tốn storage, ⚠️ Có thể chậm | 🟡 Trung bình | 🟡 15-60 phút | 🟡 Trung bình |
+| **Restore Data** | Khôi phục dữ liệu | ✅ Khôi phục data, ✅ Giải quyết lỗi | ⚠️ Có thể ghi đè data mới, ⚠️ Cần kiểm tra kỹ | 🔴 Khó | 🔴 1-4 giờ | 🔴 Cao |
 
 ### 4. 📈 Báo cáo kết quả
 - **Tổng hợp dữ liệu** với số liệu cụ thể từ MCP

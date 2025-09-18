@@ -207,7 +207,7 @@ class ApiClient {
                 ...parsed.tokenData,
                 accessToken: refreshData.accessToken,
                 refreshToken: refreshData.refreshToken || refreshToken,
-                expiresAt: Date.now() + (refreshData.expiresIn * 1000),
+                expiresAt: Date.now() + ((refreshData.expiresIn || 900) * 1000), // Default 15 minutes if not provided
                 tokenType: refreshData.tokenType || 'Bearer'
               }
               localStorage.setItem('docgo_auth_v1', JSON.stringify(parsed))
@@ -278,8 +278,11 @@ export class ContractAPI {
     sortDirection?: 'ASC' | 'DESC'
     searchTerm?: string
     includeDeleted?: boolean
-  }) {
-    return apiClient.get<PaginatedResponse<any>>(`${this.basePath}/contracts`, { params })
+  }, options?: { signal?: AbortSignal }) {
+    return apiClient.get<PaginatedResponse<any>>(`${this.basePath}/contracts`, { 
+      params,
+      signal: options?.signal
+    })
   }
 
   async getContract(id: string) {

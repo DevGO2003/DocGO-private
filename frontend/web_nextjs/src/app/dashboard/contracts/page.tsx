@@ -40,6 +40,7 @@ export default function ContractsPage() {
   const [items, setItems] = useState<ContractItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const [status, setStatus] = useState<string>('ALL')
   const [type, setType] = useState<string>('ALL')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -57,14 +58,14 @@ export default function ContractsPage() {
     const params = new URLSearchParams()
     params.set('pageNumber', String(page))
     params.set('pageSize', String(pageSize))
-    if (search.trim()) params.set('searchTerm', search.trim())
+    if (debouncedSearch.trim()) params.set('searchTerm', debouncedSearch.trim())
     if (status !== 'ALL') params.set('status', status)
     if (type !== 'ALL') params.set('type', type)
     if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
     params.set('sortBy', sortBy)
     params.set('sortDirection', sortDirection)
     return params.toString()
-  }, [page, pageSize, search, status, type, selectedTags, sortBy, sortDirection])
+  }, [page, pageSize, debouncedSearch, status, type, selectedTags, sortBy, sortDirection])
 
   const fetchData = async () => {
     setLoading(true)
@@ -81,7 +82,7 @@ export default function ContractsPage() {
         pageSize,
         includeDeleted: false,
       }
-      const trimmed = search.trim()
+      const trimmed = debouncedSearch.trim()
       if (trimmed.length >= 2) params.searchTerm = trimmed
       if (sortBy) params.sortBy = sortBy
       if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
@@ -118,10 +119,20 @@ export default function ContractsPage() {
     }
   }
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [search])
+
+  // Fetch data when queryString changes (including debounced search)
   useEffect(() => {
     const t = setTimeout(() => {
       fetchData()
-    }, 400)
+    }, 100)
     return () => {
       clearTimeout(t)
     }
