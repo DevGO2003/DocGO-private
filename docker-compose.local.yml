@@ -203,6 +203,27 @@ services:
     networks:
       - docgo_network_local
 
+  # MongoDB MCP Server - Port 8005
+  mongodb-mcp-server:
+    image: node:22-alpine
+    container_name: docgo-local-mongodb-mcp-server
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8005:3000"
+    environment:
+      - MDB_MCP_CONNECTION_STRING=mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - MDB_MCP_READ_ONLY=false
+      - MDB_MCP_TRANSPORT=stdio
+      - MDB_MCP_LOGGERS=mcp,stderr
+    volumes:
+      - ./mcp-server:/app
+      - npm_cache:/root/.npm
+    command: >
+      sh -c "npm install -g mongodb-mcp-server@latest && mongodb-mcp-server"
+    networks:
+      - docgo_network_local
+
 volumes:
   # Data volumes
   redis_data_local:

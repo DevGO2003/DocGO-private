@@ -38,8 +38,8 @@ export const useTokenMonitor = () => {
     const tokenInfo = TokenManager.getTokenInfo()
     
     if (tokenInfo.timeUntilExpiry && tokenInfo.timeUntilExpiry > 0) {
-      // Schedule refresh 5 minutes before expiration
-      const refreshTime = Math.max(0, tokenInfo.timeUntilExpiry - 5 * 60 * 1000)
+      // Schedule refresh 15 minutes before expiration (increased from 5 minutes)
+      const refreshTime = Math.max(0, tokenInfo.timeUntilExpiry - 15 * 60 * 1000)
       
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current)
@@ -63,10 +63,10 @@ export const useTokenMonitor = () => {
       // Schedule refresh
       scheduleRefresh()
 
-      // Set up periodic monitoring (every 30 seconds)
+      // Set up periodic monitoring (every 2 minutes to reduce conflicts)
       monitorIntervalRef.current = setInterval(() => {
         checkAndRefreshToken()
-      }, 30 * 1000)
+      }, 2 * 60 * 1000)
     }
 
     return () => {

@@ -136,7 +136,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private String tags;
 
     public enum ContractStatus {
-        DRAFT, PENDING, PENDING_APPROVAL, ACTIVE, EXPIRED, ARCHIVED
+        DRAFT, PENDING, PENDING_APPROVAL, APPROVED, ACTIVE, COMPLETED, EXPIRED, ARCHIVED
     }
 
     public enum ProcessingStatus {

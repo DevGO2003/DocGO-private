@@ -107,15 +107,15 @@ export class TokenManager {
     return this.validateToken().isExpired
   }
 
-  // Check if token needs refresh (expires within 5 minutes)
+  // Check if token needs refresh (expires within 15 minutes)
   static needsRefresh(): boolean {
     const validation = this.validateToken()
     if (!validation.isValid || validation.isExpired) {
       return true
     }
 
-    // Refresh if expires within 5 minutes
-    return validation.timeUntilExpiry ? validation.timeUntilExpiry < 5 * 60 * 1000 : false
+    // Refresh if expires within 15 minutes (increased from 5 minutes)
+    return validation.timeUntilExpiry ? validation.timeUntilExpiry < 15 * 60 * 1000 : false
   }
 
   // Update access token

@@ -183,11 +183,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If there is a token in storage, try to fetch current user
     if (accessToken && !user && !isTokenExpired()) {
       fetchCurrentUser()
-    } else if (isTokenExpired()) {
-      // Token expired, try to refresh
+    } else if (isTokenExpired() && tokenData?.refreshToken) {
+      // Token expired, try to refresh only if we have refresh token
+      console.log('Token expired, attempting refresh...')
       refreshToken()
     }
-  }, [accessToken, user, fetchCurrentUser, isTokenExpired])
+  }, [accessToken, user, fetchCurrentUser, isTokenExpired, tokenData?.refreshToken])
 
   const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
     setLoading(true)
@@ -364,8 +365,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false
     } catch (error) {
       console.error('Token refresh error:', error)
-      // If refresh fails, logout user
-      logout()
+      // Only logout if it's a critical error, not network issues
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any
+        if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+          // Invalid refresh token, logout user
+          logout()
+        } else {
+          // Network or other errors, don't logout immediately
+          console.warn('Token refresh failed due to network error, will retry later')
+        }
+      } else {
+        // Unknown error, don't logout immediately
+        console.warn('Token refresh failed with unknown error, will retry later')
+      }
       return false
     }
   }, [tokenData, logout])

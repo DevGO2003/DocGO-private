@@ -105,20 +105,24 @@ public class ContractController {
     public ResponseEntity<RestResponse<PaginatedResponse<ContractResponseDto>>> getAllContracts(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) List<String> sortBy,
-            @RequestParam(required = false) List<String> sortDirection,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
         
+        // Convert single sortBy to List for service compatibility
+        List<String> sortByList = sortBy != null ? List.of(sortBy) : null;
+        List<String> sortDirectionList = sortDirection != null ? List.of(sortDirection) : null;
+        
         org.springframework.data.domain.Page<ContractResponseDto> contractsPage = 
-                contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortBy, sortDirection, includeDeleted);
+                contractService.getAllContractsWithNewFormat(pageNumber, pageSize, sortByList, sortDirectionList, includeDeleted);
         
         PaginatedResponse<ContractResponseDto> paginatedResponse = PaginatedResponse.<ContractResponseDto>builder()
                 .request(RequestInfo.builder()
                         .page(contractsPage.getNumber())
                         .size(contractsPage.getSize())
                         .searchTerm(null)
-                        .sortBy(sortBy)
-                        .sortDirection(sortDirection)
+                        .sortBy(sortByList)
+                        .sortDirection(sortDirectionList)
                         .build())
                 .result(ResultInfo.builder()
                         .page(contractsPage.getNumber())

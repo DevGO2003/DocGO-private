@@ -91,14 +91,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
 // Layout variants
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth()
+  const { user, loading, isAuthenticated } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/auth/login')
+    // Only redirect if not loading and definitely not authenticated
+    // Use isAuthenticated instead of just checking user to avoid premature redirects
+    if (!loading && !isAuthenticated) {
+      // Add a small delay to prevent rapid redirects during token refresh
+      const timeoutId = setTimeout(() => {
+        router.replace('/auth/login')
+      }, 1000)
+      
+      return () => clearTimeout(timeoutId)
     }
-  }, [loading, user, router])
+  }, [loading, isAuthenticated, router])
 
   if (loading) {
     return (
