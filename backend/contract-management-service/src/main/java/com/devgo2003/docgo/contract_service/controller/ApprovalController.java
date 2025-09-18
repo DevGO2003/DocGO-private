@@ -200,18 +200,18 @@ public class ApprovalController {
         }
 
         RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
+                .apiVersion("v1")
             .statusCode(200)
             .shortMessage("Success")
             .description("Đếm số phê duyệt thành công.")
             .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
+                .timestamp(ZonedDateTime.now())
+                .requestId(UUID.randomUUID().toString())
+                .path(request.getRequestURI())
+                .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        
     @GetMapping("/exists")
     @Operation(summary = "Kiểm tra tồn tại phê duyệt (rút gọn)", description = "Thay thế các đường dẫn exists-/has-* bằng query aggregate=exists")
     public ResponseEntity<RestResponse<Boolean>> existsApprovals(
