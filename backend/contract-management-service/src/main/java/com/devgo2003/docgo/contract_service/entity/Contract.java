@@ -5,7 +5,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
@@ -41,10 +41,10 @@ public class Contract extends BaseEntity implements Persistable<String> {
 
     @Field("start_date")
     @NotNull(message = "Ngày bắt đầu không được để trống")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Field("end_date")
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Field("system_id")
     @Size(max = 100, message = "System ID không được vượt quá 100 ký tự")
@@ -131,7 +131,7 @@ public class Contract extends BaseEntity implements Persistable<String> {
     private Boolean legalReviewRequired = false;
 
     @Field("review_deadline")
-    private LocalDate reviewDeadline;
+    private LocalDateTime reviewDeadline;
     
     private String tags;
 
