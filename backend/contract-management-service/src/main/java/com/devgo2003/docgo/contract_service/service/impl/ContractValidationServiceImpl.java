@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -127,6 +128,19 @@ public class ContractValidationServiceImpl implements IContractValidationService
             throw new InvalidInputException("Start date cannot be in the past");
         }
     }
+
+    /**
+     * Validate dates (overload for LocalDateTime)
+     */
+    private void validateDates(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null) {
+            throw new InvalidInputException("Start date cannot be null");
+        }
+        
+        LocalDate start = startDate.toLocalDate();
+        LocalDate end = endDate != null ? endDate.toLocalDate() : null;
+        validateDates(start, end);
+    }
     
     /**
      * Validate contract value and currency
@@ -169,7 +183,7 @@ public class ContractValidationServiceImpl implements IContractValidationService
             if (contractDto.getReviewDeadline() == null) {
                 throw new InvalidInputException("Review deadline is required when legal review is required");
             }
-            if (contractDto.getReviewDeadline().isBefore(LocalDate.now())) {
+            if (contractDto.getReviewDeadline().toLocalDate().isBefore(LocalDate.now())) {
                 throw new InvalidInputException("Review deadline cannot be in the past");
             }
         }
@@ -273,7 +287,7 @@ public class ContractValidationServiceImpl implements IContractValidationService
             throw new InvalidInputException("Cannot delete active contracts. Please archive them first.");
         }
         
-        if (contract.getEndDate() != null && contract.getEndDate().isAfter(LocalDate.now())) {
+        if (contract.getEndDate() != null && contract.getEndDate().toLocalDate().isAfter(LocalDate.now())) {
             throw new InvalidInputException("Cannot delete contracts that are still in effect");
         }
     }

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class ContractCreateRequest {
@@ -27,9 +27,9 @@ public class ContractCreateRequest {
     private String partiesJson;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Size(max = 100, message = "System ID không được vượt quá 100 ký tự")
     private String systemId;
@@ -90,5 +90,5 @@ public class ContractCreateRequest {
 
     private Boolean legalReviewRequired = false;
 
-    private LocalDate reviewDeadline;
+    private LocalDateTime reviewDeadline;
 }

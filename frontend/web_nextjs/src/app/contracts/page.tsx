@@ -320,6 +320,27 @@ export default function ContractsPage() {
           )}
         </div>
 
+        {/* Top Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="px-3 py-2 text-sm text-gray-600">Trang {page + 1} / {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
+        )}
+
         {/* Content */}
         <div>
           {loading ? (

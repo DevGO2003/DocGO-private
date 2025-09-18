@@ -20,8 +20,8 @@ public class ContractWithSummaryDto {
     private String title;
     private String status;
     private String partiesJson;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String systemId;
     private String summary;
     private String contractType;

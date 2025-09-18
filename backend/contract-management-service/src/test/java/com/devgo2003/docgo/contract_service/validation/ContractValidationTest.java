@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,7 +42,7 @@ public class ContractValidationTest {
         request.setContractNumber("TEST-001");
         request.setTitle("Test Contract Valid");
         request.setStatus("DRAFT");
-        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setStartDate(LocalDateTime.now().plusDays(1));
 
         // When
         Set<ConstraintViolation<ContractCreateRequest>> violations = validator.validate(request);
@@ -57,7 +58,7 @@ public class ContractValidationTest {
         request.setContractNumber("test-001"); // Lowercase not allowed
         request.setTitle("Test Contract");
         request.setStatus("DRAFT");
-        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setStartDate(LocalDateTime.now().plusDays(1));
 
         // When
         Set<ConstraintViolation<ContractCreateRequest>> violations = validator.validate(request);
@@ -76,7 +77,7 @@ public class ContractValidationTest {
         request.setContractNumber("TEST-001");
         request.setTitle("Test Contract");
         request.setStatus("INVALID_STATUS"); // Invalid status
-        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setStartDate(LocalDateTime.now().plusDays(1));
 
         // When
         Set<ConstraintViolation<ContractCreateRequest>> violations = validator.validate(request);
@@ -95,7 +96,7 @@ public class ContractValidationTest {
         request.setContractNumber("TEST-001");
         request.setTitle("Test Contract");
         request.setStatus("DRAFT");
-        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setStartDate(LocalDateTime.now().plusDays(1));
         request.setCurrency("USD"); // Valid
         request.setPaymentCurrency("INVALID"); // Invalid
 
@@ -116,7 +117,7 @@ public class ContractValidationTest {
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
-        contract.setStartDate(LocalDate.now().plusDays(1));
+        contract.setStartDate(LocalDateTime.now().plusDays(1));
 
         // When
         ContractValidationResult result = validationService.validateForCreation(contract);
@@ -133,8 +134,8 @@ public class ContractValidationTest {
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
-        contract.setStartDate(LocalDate.now().plusDays(10));
-        contract.setEndDate(LocalDate.now().plusDays(5)); // End before start
+        contract.setStartDate(LocalDateTime.now().plusDays(10));
+        contract.setEndDate(LocalDateTime.now().plusDays(5)); // End before start
 
         // When
         ContractValidationResult result = validationService.validateForCreation(contract);
@@ -154,7 +155,7 @@ public class ContractValidationTest {
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
-        contract.setStartDate(LocalDate.now().minusDays(1)); // Past date
+        contract.setStartDate(LocalDateTime.now().minusDays(1)); // Past date
 
         // When
         ContractValidationResult result = validationService.validateForCreation(contract);
@@ -174,7 +175,7 @@ public class ContractValidationTest {
         contract.setContractNumber("TEST-001");
         contract.setTitle("Test Contract");
         contract.setStatus(Contract.ContractStatus.DRAFT);
-        contract.setStartDate(LocalDate.now().plusDays(1));
+        contract.setStartDate(LocalDateTime.now().plusDays(1));
         contract.setTotalValue("2000000"); // High value
         contract.setRiskLevel("LOW"); // Low risk
 

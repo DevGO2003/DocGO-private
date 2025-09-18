@@ -86,8 +86,8 @@ public class ManualTestDataGenerator {
         contract1.setTitle("Hợp đồng cung cấp dịch vụ IT cho Công ty ABC");
         contract1.setStatus(Contract.ContractStatus.ACTIVE);
         contract1.setPartiesJson("[{\"role\":\"CLIENT\",\"name\":\"Công ty ABC\",\"address\":\"123 Đường ABC, Quận 1, TP.HCM\"},{\"role\":\"PROVIDER\",\"name\":\"Công ty IT Solutions\",\"address\":\"456 Đường XYZ, Quận 3, TP.HCM\"}]");
-        contract1.setStartDate(today.minusDays(30));
-        contract1.setEndDate(today.plusDays(335));
+        contract1.setStartDate(today.minusDays(30).atStartOfDay());
+        contract1.setEndDate(today.plusDays(335).atStartOfDay());
         contract1.setSystemId("SYS-IT-001");
         contract1.setSummary("Hợp đồng cung cấp dịch vụ IT bao gồm phát triển phần mềm, bảo trì hệ thống và hỗ trợ kỹ thuật");
         contract1.setContractType("Dịch vụ IT");
@@ -121,8 +121,8 @@ public class ManualTestDataGenerator {
         contract2.setTitle("Hợp đồng thuê văn phòng tại Tòa nhà Landmark");
         contract2.setStatus(Contract.ContractStatus.PENDING_APPROVAL);
         contract2.setPartiesJson("[{\"role\":\"TENANT\",\"name\":\"Công ty Startup XYZ\",\"address\":\"789 Đường Startup, Quận 2, TP.HCM\"},{\"role\":\"LANDLORD\",\"name\":\"Công ty BDS Landmark\",\"address\":\"Tòa nhà Landmark, Quận 1, TP.HCM\"}]");
-        contract2.setStartDate(today.plusDays(15));
-        contract2.setEndDate(today.plusDays(380));
+        contract2.setStartDate(today.plusDays(15).atStartOfDay());
+        contract2.setEndDate(today.plusDays(380).atStartOfDay());
         contract2.setSystemId("SYS-RE-002");
         contract2.setSummary("Hợp đồng thuê văn phòng 200m2 tại tầng 15 Tòa nhà Landmark với đầy đủ tiện ích");
         contract2.setContractType("Thuê văn phòng");
@@ -156,8 +156,8 @@ public class ManualTestDataGenerator {
         contract3.setTitle("Hợp đồng cung cấp nguyên vật liệu xây dựng");
         contract3.setStatus(Contract.ContractStatus.DRAFT);
         contract3.setPartiesJson("[{\"role\":\"BUYER\",\"name\":\"Công ty Xây dựng DEF\",\"address\":\"321 Đường Construction, Quận 7, TP.HCM\"},{\"role\":\"SUPPLIER\",\"name\":\"Công ty Vật liệu GHI\",\"address\":\"654 Đường Materials, Quận 8, TP.HCM\"}]");
-        contract3.setStartDate(today.plusDays(30));
-        contract3.setEndDate(today.plusDays(425));
+        contract3.setStartDate(today.plusDays(30).atStartOfDay());
+        contract3.setEndDate(today.plusDays(425).atStartOfDay());
         contract3.setSystemId("SYS-CON-003");
         contract3.setSummary("Hợp đồng cung cấp xi măng, thép, gạch và các vật liệu xây dựng khác cho dự án chung cư cao cấp");
         contract3.setContractType("Cung cấp vật liệu");
@@ -191,8 +191,8 @@ public class ManualTestDataGenerator {
         contract4.setTitle("Hợp đồng dịch vụ vận chuyển hàng hóa");
         contract4.setStatus(Contract.ContractStatus.ACTIVE);
         contract4.setPartiesJson("[{\"role\":\"SHIPPER\",\"name\":\"Công ty Logistics JKL\",\"address\":\"987 Đường Logistics, Quận 9, TP.HCM\"},{\"role\":\"CUSTOMER\",\"name\":\"Công ty Thương mại MNO\",\"address\":\"147 Đường Trade, Quận 10, TP.HCM\"}]");
-        contract4.setStartDate(today.minusDays(60));
-        contract4.setEndDate(today.plusDays(305));
+        contract4.setStartDate(today.minusDays(60).atStartOfDay());
+        contract4.setEndDate(today.plusDays(305).atStartOfDay());
         contract4.setSystemId("SYS-LOG-004");
         contract4.setSummary("Hợp đồng cung cấp dịch vụ vận chuyển hàng hóa từ TP.HCM đến các tỉnh miền Tây và miền Đông");
         contract4.setContractType("Dịch vụ vận chuyển");
@@ -226,8 +226,8 @@ public class ManualTestDataGenerator {
         contract5.setTitle("Hợp đồng bảo hiểm nhân thọ cho nhân viên");
         contract5.setStatus(Contract.ContractStatus.PENDING);
         contract5.setPartiesJson("[{\"role\":\"INSURER\",\"name\":\"Công ty Bảo hiểm PQR\",\"address\":\"258 Đường Insurance, Quận 1, TP.HCM\"},{\"role\":\"EMPLOYER\",\"name\":\"Công ty Công nghệ STU\",\"address\":\"369 Đường Tech, Quận 3, TP.HCM\"}]");
-        contract5.setStartDate(today.plusDays(45));
-        contract5.setEndDate(today.plusDays(440));
+        contract5.setStartDate(today.plusDays(45).atStartOfDay());
+        contract5.setEndDate(today.plusDays(440).atStartOfDay());
         contract5.setSystemId("SYS-INS-005");
         contract5.setSummary("Hợp đồng bảo hiểm nhân thọ nhóm cho 150 nhân viên công ty công nghệ với các gói bảo hiểm đa dạng");
         contract5.setContractType("Bảo hiểm nhân thọ");

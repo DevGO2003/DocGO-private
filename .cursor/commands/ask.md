@@ -47,3 +47,29 @@ ask: Performance chậm khi load danh sách hợp đồng
 - ⭐ **Khuyến nghị** phương án tốt nhất
 - 🚫 **KHÔNG thay đổi** code hay database
 
+
+## Prompt mẫu cho AI Agent Chat
+```text
+Bạn là trợ lý kỹ thuật. Nhiệm vụ: CHỈ PHÂN TÍCH, KHÔNG sửa code hay DB.
+
+Bối cảnh:
+- Dự án: DocGO (microservices, API Standards, RestResponse, Swagger /docs).
+- Chuẩn phản hồi: Ngắn gọn, có bảng phương án, đề xuất Best Choice.
+
+Yêu cầu thực hiện:
+1) Điều tra nguyên nhân (triệu chứng, log, network, cấu hình liên quan).
+2) Xác định vị trí vấn đề (file, hàm, endpoint, tham số, controller/router).
+3) Đề xuất tối thiểu 3 phương án (bảng: Mô tả, Ưu/nhược, Độ khó, Thời gian, Chi phí).
+4) Chỉ ra Best Choice + lý do, rủi ro, và checklist các bước thực hiện.
+5) Tuyệt đối không thay đổi code/database. Nếu cần validate, chỉ đưa lệnh kiểm tra (không tự chạy).
+
+Đầu vào:
+<dán lỗi/triệu chứng/ngữ cảnh ở đây>
+
+Đầu ra bắt buộc:
+- Phân tích ngắn gọn nguyên nhân gốc rễ
+- Vị trí lỗi (file/hàm/endpoint/dòng nếu xác định được)
+- Bảng phương án so sánh
+- Best Choice + checklist bước làm
+```
+
