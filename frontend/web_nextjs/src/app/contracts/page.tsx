@@ -40,6 +40,7 @@ export default function ContractsPage() {
   const [items, setItems] = useState<ContractItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState<string>('')
+  const [useMock, setUseMock] = useState<boolean>(false)
   const [status, setStatus] = useState<string>('ALL')
   const [type, setType] = useState<string>('ALL')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -86,8 +87,15 @@ export default function ContractsPage() {
       if (sortBy) params.sortBy = sortBy
       if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
 
-      const res = await contractAPI.getContracts(params)
-      const payload: any = res.data?.data || {}
+      let payload: any = {}
+      if (useMock) {
+        const resp = await fetch(`/api/mock/contracts?${queryString}`, { signal: controller.signal })
+        const json = await resp.json()
+        payload = json?.data || {}
+      } else {
+        const res = await contractAPI.getContracts(params)
+        payload = res.data?.data || {}
+      }
       const content = Array.isArray(payload.content) ? payload.content : []
 
       const mapped: ContractItem[] = content.map((c: any) => ({
@@ -117,6 +125,19 @@ export default function ContractsPage() {
       setLoading(false)
     }
   }
+
+  // Init mock toggle from localStorage
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem('docgo_use_mock_contracts')
+      if (v === '1') setUseMock(true)
+    } catch {}
+  }, [])
+
+  // Persist toggle
+  useEffect(() => {
+    try { localStorage.setItem('docgo_use_mock_contracts', useMock ? '1' : '0') } catch {}
+  }, [useMock])
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -161,7 +182,14 @@ export default function ContractsPage() {
               </h1>
               <p className="text-gray-600">Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => { setUseMock(v => !v); setPage(0); fetchData() }}
+                className={`px-3 py-2 rounded-lg border text-sm ${useMock ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                title={useMock ? 'Đang dùng dữ liệu giả (mock)' : 'Chuyển sang dùng dữ liệu giả (mock)'}
+              >
+                {useMock ? 'Mock: BẬT' : 'Mock: TẮT'}
+              </button>
               <Link href="/dashboard/create-contract" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">
                 + Tạo hợp đồng
               </Link>
@@ -319,27 +347,6 @@ export default function ContractsPage() {
             </div>
           )}
         </div>
-
-        {/* Top Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-4 flex justify-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(0, p - 1))}
-              disabled={page === 0}
-              className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
-            >
-              Trước
-            </button>
-            <span className="px-3 py-2 text-sm text-gray-600">Trang {page + 1} / {totalPages}</span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-              disabled={page >= totalPages - 1}
-              className="px-3 py-2 text-sm rounded-md border bg-white text-gray-700 disabled:opacity-50"
-            >
-              Sau
-            </button>
-          </div>
-        )}
 
         {/* Content */}
         <div>

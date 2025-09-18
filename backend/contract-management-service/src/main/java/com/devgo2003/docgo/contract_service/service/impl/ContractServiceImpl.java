@@ -1241,7 +1241,7 @@ public class ContractServiceImpl implements IContractService {
                 contract.setStatus(Contract.ContractStatus.DRAFT);
                 // Provide minimal required fields
                 if (contract.getStartDate() == null) {
-                    contract.setStartDate(java.time.LocalDate.now());
+                    contract.setStartDate(java.time.LocalDateTime.now());
                 }
                 // Let Mongo initialize version
                 contract.setVersion(null);
