@@ -89,9 +89,12 @@ services:
       - WATCHPACK_POLLING_INTERVAL=1000
       - NEXT_WEBPACK_USEPOLLING=1
       - BROWSER=none
+      - FAST_REFRESH=true
+      - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - ./frontend/web_nextjs:/app
       - /app/node_modules
+      - /app/.next
       - npm_cache:/root/.npm
     command: >
       sh -c "npm install --cache /root/.npm && npm run dev -- -p 3000 -H 0.0.0.0"

@@ -309,6 +309,22 @@ export class ContractAPI {
   async getContractAttachments(id: string) {
     return apiClient.get<any[]>(`${this.basePath}/contracts/${id}/attachments`)
   }
+
+  async approveContract(id: string) {
+    return apiClient.put<any>(`${this.basePath}/contracts/${id}/approve`)
+  }
+
+  async createVersion(id: string, data: any) {
+    return apiClient.post<any>(`${this.basePath}/contracts/${id}/versions`, data)
+  }
+
+  async requestESignature(id: string, data: any) {
+    return apiClient.post<any>(`${this.basePath}/contracts/${id}/esignature`, data)
+  }
+
+  async addComment(id: string, data: any) {
+    return apiClient.post<any>(`${this.basePath}/contracts/${id}/comments`, data)
+  }
 }
 
 // User Management API - Sử dụng API Gateway

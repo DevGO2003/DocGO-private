@@ -338,66 +338,11 @@ public class VersionController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/contracts/{contractId}/versions")
-    @Operation(summary = "Tạo version mới", description = "Tạo version mới cho contract")
-    public ResponseEntity<RestResponse<Version>> createVersion(
-            @PathVariable String contractId,
-            @RequestParam String versionNumber,
-            @RequestParam String versionName,
-            @RequestParam Version.ChangeType changeType,
-            @RequestParam String changesSummary) {
-        
-        Version version = versionService.createVersion(contractId, versionNumber, versionName, changeType, changesSummary);
-        
-        RestResponse<Version> response = RestResponse.<Version>builder()
-            .apiVersion("v1")
-            .statusCode(201)
-            .shortMessage("Created")
-            .description("Tạo version thành công.")
-            .data(version)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested create route removed: dùng POST /versions với body
 
     // Removed deprecated nested version list. Use GET /versions?contractId=...
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Lấy version theo ID", description = "Lấy chi tiết version")
-    public ResponseEntity<RestResponse<Version>> getVersionById(@PathVariable String id) {
-        Optional<Version> version = versionService.getVersionById(id);
-        
-        if (version.isEmpty()) {
-            RestResponse<Version> response = RestResponse.<Version>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description("Không tìm thấy version với ID: " + id)
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<Version> response = RestResponse.<Version>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy version thành công.")
-            .data(version.get())
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Duplicate method removed: getVersionById - already exists as getVersion above
 
     // Removed deprecated nested current version. Use GET /versions?contractId=...&isCurrent=true
     @Operation(summary = "(Deprecated) Lấy version hiện tại", description = "Dùng GET /versions?contractId=...&isCurrent=true", deprecated = true)
@@ -519,224 +464,17 @@ public class VersionController {
 
     // Removed deprecated order-by-created endpoint. Use GET /versions?contractId=...&sortBy=createdAt
 
-    @GetMapping("/contracts/{contractId}/versions/created-between")
-    @Operation(summary = "(Deprecated) Theo thời gian tạo", description = "Dùng GET /versions?contractId=...&createdFrom=...&createdTo=...", deprecated = true)
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByCreatedAtBetween(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate) {
-        List<Version> versions = versionService.getVersionsByCreatedAtBetween(startDate, endDate);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào trong khoảng thời gian này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo thời gian tạo thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?createdFrom=...&createdTo=...
 
-    @GetMapping("/contracts/{contractId}/versions/published-between")
-    @Operation(summary = "Lấy version theo thời gian published", description = "Lấy danh sách version trong khoảng thời gian published")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByPublishedAtBetween(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate) {
-        List<Version> versions = versionService.getVersionsByPublishedAtBetween(startDate, endDate);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào trong khoảng thời gian published này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo thời gian published thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?publishedFrom=...&publishedTo=...
 
-    @GetMapping("/contracts/{contractId}/versions/approved-between")
-    @Operation(summary = "Lấy version theo thời gian approved", description = "Lấy danh sách version trong khoảng thời gian approved")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByApprovedAtBetween(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate) {
-        List<Version> versions = versionService.getVersionsByApprovedAtBetween(startDate, endDate);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào trong khoảng thời gian approved này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo thời gian approved thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?approvedFrom=...&approvedTo=...
 
-    @GetMapping("/contracts/{contractId}/versions/published-by/{publishedBy}")
-    @Operation(summary = "Lấy version theo published by", description = "Lấy danh sách version theo người published")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByPublishedBy(
-            @PathVariable String contractId,
-            @PathVariable String publishedBy) {
-        List<Version> versions = versionService.getVersionsByPublishedBy(publishedBy);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào được published bởi người này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo published by thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?publishedBy=...
 
-    @GetMapping("/contracts/{contractId}/versions/approved-by/{approvedBy}")
-    @Operation(summary = "Lấy version theo approved by", description = "Lấy danh sách version theo người approved")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByApprovedBy(
-            @PathVariable String contractId,
-            @PathVariable String approvedBy) {
-        List<Version> versions = versionService.getVersionsByApprovedBy(approvedBy);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào được approved bởi người này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo approved by thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?approvedBy=...
 
-    @GetMapping("/contracts/{contractId}/versions/tags")
-    @Operation(summary = "Lấy version theo tags", description = "Lấy danh sách version theo tags")
-    public ResponseEntity<RestResponse<List<Version>>> getVersionsByTags(
-            @PathVariable String contractId,
-            @RequestParam String[] tags) {
-        List<Version> versions = versionService.getVersionsByContractIdAndTags(contractId, tags);
-        
-        if (versions.isEmpty()) {
-            RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-                .apiVersion("v1")
-                .statusCode(204)
-                .shortMessage("No Content")
-                .description("Không có version nào với tags này.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Version>> response = RestResponse.<List<Version>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách version theo tags thành công.")
-            .data(versions)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /versions?tags=...
 
     @GetMapping("/contracts/{contractId}/versions/change-type/{changeType}/order-by-created")
     @Operation(summary = "Lấy version theo change type sắp xếp theo thời gian tạo", description = "Lấy danh sách version theo change type sắp xếp theo thời gian tạo")

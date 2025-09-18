@@ -362,214 +362,17 @@ public class ApprovalController {
 
     // Removed deprecated order path. Use GET /approvals?contractId=...&order=...
 
-    @GetMapping("/contracts/{contractId}/approvals/required")
-    @Operation(summary = "Lấy approval bắt buộc", description = "Lấy danh sách approval bắt buộc")
-    public ResponseEntity<RestResponse<List<Approval>>> getRequiredApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getRequiredApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval bắt buộc nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval bắt buộc thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&isRequired=true
 
-    @GetMapping("/contracts/{contractId}/approvals/optional")
-    @Operation(summary = "Lấy approval tùy chọn", description = "Lấy danh sách approval tùy chọn")
-    public ResponseEntity<RestResponse<List<Approval>>> getOptionalApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getOptionalApprovalsByContractId(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval tùy chọn nào.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval tùy chọn thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&isRequired=false
 
-    @GetMapping("/contracts/{contractId}/approvals/due-date")
-    @Operation(summary = "(Deprecated) Lấy approval theo due date", description = "Dùng GET /approvals?contractId=...&dueFrom=...&dueTo=...", deprecated = true)
-    public ResponseEntity<RestResponse<List<Approval>>> getApprovalsByDueDateRange(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate) {
-        List<Approval> approvals = approvalService.getApprovalsByDueDateRange(contractId, startDate, endDate);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào trong khoảng thời gian này.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval theo due date thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&dueFrom=...&dueTo=...
 
-    @GetMapping("/contracts/{contractId}/approvals/upcoming-due")
-    @Operation(summary = "(Deprecated) Lấy approval sắp đến hạn", description = "Dùng GET /approvals?contractId=...&dueTo=...", deprecated = true)
-    public ResponseEntity<RestResponse<List<Approval>>> getUpcomingDueApprovals(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime dueDate) {
-        List<Approval> approvals = approvalService.getUpcomingDueApprovals(contractId, dueDate);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào sắp đến hạn.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval sắp đến hạn thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&dueTo=...
 
-    @GetMapping("/contracts/{contractId}/approvals/notified")
-    @Operation(summary = "(Deprecated) Lấy approval đã được notify", description = "Dùng GET /approvals?contractId=...&notified=true", deprecated = true)
-    public ResponseEntity<RestResponse<List<Approval>>> getNotifiedApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getNotifiedApprovals(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào đã được thông báo.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval đã được notify thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&notified=true
 
-    @GetMapping("/contracts/{contractId}/approvals/unnotified")
-    @Operation(summary = "(Deprecated) Lấy approval chưa được notify", description = "Dùng GET /approvals?contractId=...&notified=false", deprecated = true)
-    public ResponseEntity<RestResponse<List<Approval>>> getUnnotifiedApprovals(@PathVariable String contractId) {
-        List<Approval> approvals = approvalService.getUnnotifiedApprovals(contractId);
-        
-        if (approvals.isEmpty()) {
-                    RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(204)
-            .shortMessage("No Content")
-            .description("Không có approval nào chưa được thông báo.")
-            .data(null)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<List<Approval>> response = RestResponse.<List<Approval>>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy danh sách approval chưa được notify thành công.")
-            .data(approvals)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested route removed: dùng GET /approvals?contractId=...&notified=false
 
     @PutMapping("/{id}/approve")
     @Operation(summary = "Phê duyệt approval", description = "Phê duyệt approval với comments")
@@ -946,208 +749,25 @@ public class ApprovalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contracts/{contractId}/approvals/count")
-    @Operation(summary = "(Deprecated) Đếm số approval", description = "Dùng GET /approvals?contractId=...&status=...&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countApprovalsByContractIdAndStatus(
-            @PathVariable String contractId,
-            @RequestParam Approval.ApprovalStatus status) {
-        long count = approvalService.countApprovalsByContractIdAndStatus(contractId, status);
-        
-        RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số approval thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested count route removed: dùng GET /approvals?contractId=...&status=...&aggregate=count
 
-    @GetMapping("/approvals/approver/{approverId}/count")
-    @Operation(summary = "(Deprecated) Đếm số approval của approver", description = "Dùng GET /approvals?approverId=...&status=...&aggregate=count", deprecated = true)
-    public ResponseEntity<RestResponse<Long>> countApprovalsByApproverIdAndStatus(
-            @PathVariable String approverId,
-            @RequestParam Approval.ApprovalStatus status) {
-        long count = approvalService.countApprovalsByApproverIdAndStatus(approverId, status);
-        
-        RestResponse<Long> response = RestResponse.<Long>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đếm số approval của approver thành công.")
-            .data(count)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested count route removed: dùng GET /approvals?approverId=...&status=...&aggregate=count
 
-    @GetMapping("/contracts/{contractId}/approvals/has-pending")
-    @Operation(summary = "(Deprecated) Kiểm tra có approval pending", description = "Dùng GET /approvals?contractId=...&status=PENDING&aggregate=exists", deprecated = true)
-    public ResponseEntity<RestResponse<Boolean>> hasPendingApprovals(@PathVariable String contractId) {
-        boolean hasPending = approvalService.hasPendingApprovals(contractId);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval pending thành công.")
-            .data(hasPending)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=PENDING&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/approvals/has-approved")
-    @Operation(summary = "(Deprecated) Kiểm tra có approval approved", description = "Dùng GET /approvals?contractId=...&status=APPROVED&aggregate=exists", deprecated = true)
-    public ResponseEntity<RestResponse<Boolean>> hasApprovedApprovals(@PathVariable String contractId) {
-        boolean hasApproved = approvalService.hasApprovedApprovals(contractId);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval approved thành công.")
-            .data(hasApproved)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=APPROVED&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/approvals/has-rejected")
-    @Operation(summary = "(Deprecated) Kiểm tra có approval rejected", description = "Dùng GET /approvals?contractId=...&status=REJECTED&aggregate=exists", deprecated = true)
-    public ResponseEntity<RestResponse<Boolean>> hasRejectedApprovals(@PathVariable String contractId) {
-        boolean hasRejected = approvalService.hasRejectedApprovals(contractId);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval rejected thành công.")
-            .data(hasRejected)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=REJECTED&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/approvals/has-expired")
-    @Operation(summary = "(Deprecated) Kiểm tra có approval expired", description = "Dùng GET /approvals?contractId=...&status=EXPIRED&aggregate=exists", deprecated = true)
-    public ResponseEntity<RestResponse<Boolean>> hasExpiredApprovals(@PathVariable String contractId) {
-        boolean hasExpired = approvalService.hasExpiredApprovals(contractId);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval expired thành công.")
-            .data(hasExpired)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=EXPIRED&aggregate=exists
 
-    @GetMapping("/contracts/{contractId}/approvals/has-expiring")
-    @Operation(summary = "Kiểm tra có approval expiring", description = "Kiểm tra contract có approval sắp hết hạn không")
-    public ResponseEntity<RestResponse<Boolean>> hasExpiringApprovals(
-            @PathVariable String contractId,
-            @RequestParam LocalDateTime dueDate) {
-        boolean hasExpiring = approvalService.hasExpiringApprovals(contractId, dueDate);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval expiring thành công.")
-            .data(hasExpiring)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&status=EXPIRING&aggregate=exists hoặc dueTo
 
-    @GetMapping("/contracts/{contractId}/approvals/needs-reminder")
-    @Operation(summary = "Kiểm tra cần reminder", description = "Kiểm tra contract có approval cần nhắc nhở không")
-    public ResponseEntity<RestResponse<Boolean>> hasApprovalsNeedingReminder(
-            @PathVariable String contractId,
-            @RequestParam Integer reminderCount) {
-        boolean needsReminder = approvalService.hasApprovalsNeedingReminder(contractId, reminderCount);
-        
-                RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra cần reminder thành công.")
-            .data(needsReminder)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?contractId=...&aggregate=exists&minReminderCount=...
 
-    @GetMapping("/contracts/{contractId}/approvals/by-role/{approverRole}")
-    @Operation(summary = "Kiểm tra có approval theo role", description = "Kiểm tra contract có approval theo role không")
-    public ResponseEntity<RestResponse<Boolean>> hasApprovalsByRole(
-            @PathVariable String contractId,
-            @PathVariable String approverRole) {
-        boolean hasByRole = approvalService.hasApprovalsByRole(contractId, approverRole);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval theo role thành công.")
-            .data(hasByRole)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?aggregate=exists&contractId=...&approverRole=...
 
-    @GetMapping("/contracts/{contractId}/approvals/by-role-status")
-    @Operation(summary = "Kiểm tra có approval theo role và status", description = "Kiểm tra contract có approval theo role và status không")
-    public ResponseEntity<RestResponse<Boolean>> hasApprovalsByRoleAndStatus(
-            @PathVariable String contractId,
-            @RequestParam String approverRole,
-            @RequestParam Approval.ApprovalStatus status) {
-        boolean hasByRoleAndStatus = approvalService.hasApprovalsByRoleAndStatus(contractId, approverRole, status);
-        
-        RestResponse<Boolean> response = RestResponse.<Boolean>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Kiểm tra approval theo role và status thành công.")
-            .data(hasByRoleAndStatus)
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Deprecated nested exists route removed: dùng GET /approvals?aggregate=exists&contractId=...&approverRole=...&status=...
 }
 
 

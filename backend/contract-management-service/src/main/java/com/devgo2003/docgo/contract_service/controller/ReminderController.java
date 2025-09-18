@@ -319,39 +319,7 @@ public class ReminderController {
 
     // Deprecated nested list endpoint removed. Use GET /reminders?contractId=...
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Lấy reminder theo ID", description = "Lấy chi tiết reminder")
-    public ResponseEntity<RestResponse<Reminder>> getReminderById(@PathVariable String id) {
-        Optional<Reminder> reminder = reminderService.getReminderById(id);
-        
-        if (reminder.isEmpty()) {
-            RestResponse<Reminder> response = RestResponse.<Reminder>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description("Không tìm thấy reminder.")
-                .data(null)
-                .timestamp(ZonedDateTime.now())
-                .requestId(UUID.randomUUID().toString())
-                .path(request.getRequestURI())
-                .build();
-            
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        
-        RestResponse<Reminder> response = RestResponse.<Reminder>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Lấy reminder thành công.")
-            .data(reminder.get())
-            .timestamp(ZonedDateTime.now())
-            .requestId(UUID.randomUUID().toString())
-            .path(request.getRequestURI())
-            .build();
-        
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+    // Duplicate method removed: getReminderById - already exists as getReminder above
 
     // Deprecated nested pending endpoint removed. Use GET /reminders?contractId=...&status=PENDING
 
