@@ -35,7 +35,7 @@ class ContractControllerTest {
         request.setContractNumber("TEST-001");
         request.setTitle("Test Contract");
         request.setStatus("DRAFT");
-        request.setStartDate(java.time.LocalDate.now());
+        request.setStartDate(java.time.LocalDate.now().atStartOfDay());
         
         ResponseEntity<RestResponse> response = restTemplate.postForEntity(
             "/api/v1/contract-management-service/contracts",
