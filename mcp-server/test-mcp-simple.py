@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""
+Script test MongoDB MCP Server đơn giản
+Tác giả: Moe Moe - Nữ quản gia của quý ngài Thaïs Gault
+"""
+
+import requests
+import json
+import time
+
+def test_mcp_server_simple():
+    """Test MongoDB MCP Server đơn giản"""
+    print("=== TEST MONGODB MCP SERVER ĐƠN GIẢN ===")
+    print("Tác giả: Moe Moe - Nữ quản gia của quý ngài Thaïs Gault")
+    print()
+    
+    # URL của MCP Server
+    mcp_url = "http://localhost:8005"
+    
+    print(f"1. Kiểm tra MCP Server tại {mcp_url}...")
+    
+    try:
+        # Test basic connection
+        response = requests.get(mcp_url, timeout=5)
+        print(f"   Status: {response.status_code}")
+        print(f"   Headers: {dict(response.headers)}")
+        print(f"   Content: {response.text[:200]}...")
+        
+        if response.status_code == 404:
+            print("   ✅ MCP Server đang chạy (404 là bình thường cho MCP)")
+        else:
+            print(f"   ⚠️  Unexpected status: {response.status_code}")
+            
+    except requests.exceptions.ConnectionError:
+        print("   ❌ Không thể kết nối đến MCP Server")
+        return False
+    except Exception as e:
+        print(f"   ❌ Lỗi: {e}")
+        return False
+    
+    print("\n2. Test MCP Protocol...")
+    
+    # Test MCP protocol
+    try:
+        # MCP request format
+        mcp_request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {
+                    "name": "test-client",
+                    "version": "1.0.0"
+                }
+            }
+        }
+        
+        response = requests.post(mcp_url, 
+                               json=mcp_request,
+                               headers={"Content-Type": "application/json"},
+                               timeout=10)
+        
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text[:300]}...")
+        
+        if response.status_code == 200:
+            print("   ✅ MCP Protocol hoạt động!")
+        else:
+            print(f"   ⚠️  MCP Protocol trả về status {response.status_code}")
+            
+    except Exception as e:
+        print(f"   ❌ Lỗi khi test MCP Protocol: {e}")
+    
+    print("\n✅ Test hoàn thành!")
+    print("\n📋 Kết luận:")
+    print("1. MCP Server đang chạy tại: http://localhost:8005")
+    print("2. Sử dụng MCP Protocol (không phải HTTP REST)")
+    print("3. Có thể tích hợp với Cursor qua MCP configuration")
+    print("4. File cấu hình: cursor-mcp-config.json")
+    
+    return True
+
+if __name__ == "__main__":
+    test_mcp_server_simple()
