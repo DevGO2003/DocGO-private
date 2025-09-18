@@ -44,7 +44,7 @@ public class TestDataGenerator implements CommandLineRunner {
 
     private List<Contract> createTestContracts() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
         
         Contract contract1 = Contract.createNew();
         contract1.setContractNumber("CTR-2024-001");
