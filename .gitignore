@@ -118,19 +118,19 @@ dist/
 .next/
 out/
 
-# Service specific
+# Service specific - only ignore data/upload directories, not source code
 results/
 uploads/
-assets/
-storage/
 temp_files/
 cache/
-contracts/
 attachments/
 user_uploads/
 profile_images/
 approval_docs/
 temp_users/
+# Allow assets/ and storage/ for source code
+# assets/
+# storage/
 
 # Python service lib/ directories (ignore only in Python services)
 backend/*/lib/
@@ -147,8 +147,8 @@ coverage/
 .pytest_cache/
 htmlcov/
 
-# Package managers
-package-lock.json
+# Package managers - only ignore lock files in root, allow in services
+# package-lock.json - Commented out to allow tracking in services
 yarn.lock
 Pipfile.lock
 
