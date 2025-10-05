@@ -5,11 +5,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '@/lib/services';
 import logger from '@/lib/logger';
 import { withApiHandler } from '@/lib/http/withApiHandler';
+import { Buffer } from 'buffer';
 
 export const config = {
   api: {
-    // Disable bodyParser so multipart/form-data streams are forwarded intact
-    bodyParser: false
+    // Enable bodyParser for JSON requests, disable only for multipart
+    bodyParser: {
+      sizeLimit: '10mb',
+    }
   }
 };
 
@@ -105,7 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Prepare headers
     const headers: Record<string, string> = {
       'User-Agent': 'API-Gateway/1.0.0',
-      'Content-Type': (req.headers['content-type'] as string) || 'application/json'
+      'Content-Type': 'application/json; charset=utf-8'
     };
 
     // Forward critical headers
@@ -144,46 +147,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     });
 
-    // Decide how to forward body (multipart vs json)
-    const isMultipart = (headers['Content-Type'] || '').includes('multipart/form-data');
-
-    // Ensure proper body handling
+    // Simple body handling for JSON requests
     let requestData = req.body;
     
-    // Debug logging for request body processing (can be removed in production)
+    // Debug logging for request body processing
     logger.debug('🔍 [DEBUG] Request body processing:', {
-      originalBody: req.body,
       bodyType: typeof req.body,
       bodyStringified: JSON.stringify(req.body),
-      isMultipart: isMultipart,
       contentType: headers['Content-Type']
     });
     
-    // For non-multipart requests, ensure proper JSON serialization
-    if (!isMultipart && req.body) {
-      if (typeof req.body === 'object') {
-        // Object needs to be stringified
-        requestData = JSON.stringify(req.body);
-        // Update Content-Length header to match serialized data
-        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
-      } else if (typeof req.body === 'string') {
-        // Already a string, use as-is
-        requestData = req.body;
-        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
-      }
-      
-      logger.debug('🔍 [DEBUG] After body processing:', {
-        requestData: requestData,
-        requestDataType: typeof requestData,
-        contentLength: headers['Content-Length']
-      });
+    // Ensure proper JSON serialization
+    if (req.body && typeof req.body === 'object') {
+      requestData = JSON.stringify(req.body);
+      headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
     }
 
     // Make request to microservice
     const response = await service.request({
       method: method as any,
       url: endpoint,
-      data: isMultipart ? (req as any) : requestData,
+      data: requestData,
       headers,
       params: sanitizedParams,
       maxBodyLength: Infinity,

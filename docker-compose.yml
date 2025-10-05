@@ -86,13 +86,13 @@ services:
       dockerfile: Dockerfile
     
     ports:
-      - "${USER_MANAGEMENT_PORT:-8001}:8000"
+      - "${USER_MANAGEMENT_PORT:-8001}:8001"
     env_file:
       - .env
       - ./backend/user-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8000
+      - SERVER_PORT=8001
       - MONGODB_DATABASE=${MONGODB_USER_DATABASE}
       - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-user-management
       - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-user-management
