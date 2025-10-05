@@ -14,6 +14,7 @@ import { CONTRACT_TAGS, getTagDisplayName } from '@/constants/contractTags'
 import ContractControlPanel from '@/components/contracts/ContractControlPanel'
 import CustomTable from '@/components/contracts/CustomTable'
 import TableSettings, { TableColumn } from '@/components/contracts/TableSettings'
+import TokenRefreshHelper from '@/utils/token-refresh-helper'
 
 type ContractItem = {
   id: string
@@ -126,7 +127,6 @@ export default function ContractsPage() {
       console.log('[Contracts] Request params:', params)
 
       // Ensure valid token before making request
-      const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
       const tokenValid = await TokenRefreshHelper.ensureValidToken()
       
       if (!tokenValid) {
@@ -266,7 +266,6 @@ export default function ContractsPage() {
       console.log('[Contracts] Refresh params:', params)
 
       // Ensure valid token before making request
-      const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
       const tokenValid = await TokenRefreshHelper.ensureValidToken()
       
       if (!tokenValid) {
