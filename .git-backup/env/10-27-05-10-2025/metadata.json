@@ -1,0 +1,78 @@
+﻿[
+    {
+        "BackupName": "root_.env",
+        "OriginalPath": ".env"
+    },
+    {
+        "BackupName": "root_.env.example",
+        "OriginalPath": ".env.example"
+    },
+    {
+        "BackupName": "root_.env.template",
+        "OriginalPath": ".env.template"
+    },
+    {
+        "BackupName": "cursor_mcp.json",
+        "OriginalPath": ".cursor/mcp.json"
+    },
+    {
+        "BackupName": "cursor_tools_discord_env_.env",
+        "OriginalPath": ".cursor/tools/discord/env/.env"
+    },
+    {
+        "BackupName": "cursor_tools_github_env_.env",
+        "OriginalPath": ".cursor/tools/github/env/.env"
+    },
+    {
+        "BackupName": "backend_api-gateway_.env",
+        "OriginalPath": "backend/api-gateway/.env"
+    },
+    {
+        "BackupName": "backend_api-gateway_.env.example",
+        "OriginalPath": "backend/api-gateway/.env.example"
+    },
+    {
+        "BackupName": "backend_api-gateway_.env.template",
+        "OriginalPath": "backend/api-gateway/.env.template"
+    },
+    {
+        "BackupName": "backend_automation-service_.env",
+        "OriginalPath": "backend/automation-service/.env"
+    },
+    {
+        "BackupName": "backend_automation-service_.env.example",
+        "OriginalPath": "backend/automation-service/.env.example"
+    },
+    {
+        "BackupName": "backend_automation-service_.env.template",
+        "OriginalPath": "backend/automation-service/.env.template"
+    },
+    {
+        "BackupName": "backend_document-management-service_.env",
+        "OriginalPath": "backend/document-management-service/.env"
+    },
+    {
+        "BackupName": "backend_document-management-service_.env.example",
+        "OriginalPath": "backend/document-management-service/.env.example"
+    },
+    {
+        "BackupName": "backend_document-management-service_.env.template",
+        "OriginalPath": "backend/document-management-service/.env.template"
+    },
+    {
+        "BackupName": "backend_user-management-service_.env",
+        "OriginalPath": "backend/user-management-service/.env"
+    },
+    {
+        "BackupName": "backend_user-management-service_.env.example",
+        "OriginalPath": "backend/user-management-service/.env.example"
+    },
+    {
+        "BackupName": "backend_user-management-service_.env.template",
+        "OriginalPath": "backend/user-management-service/.env.template"
+    },
+    {
+        "BackupName": "frontend_web-app_env_.env",
+        "OriginalPath": "frontend/web-app/env/.env"
+    }
+]
