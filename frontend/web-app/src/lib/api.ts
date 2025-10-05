@@ -49,6 +49,34 @@ export class ContractAPI {
     return apiClient.get<any>(`${this.basePath}/contracts/${id}`, { params })
   }
 
+  // API refresh với cache busting và timestamp
+  async refreshContracts(params?: {
+    pageNumber?: number
+    pageSize?: number
+    sortBy?: string
+    sortDirection?: 'ASC' | 'DESC'
+    searchTerm?: string
+    includeDeleted?: boolean
+    view?: string
+  }, options?: { signal?: AbortSignal }) {
+    // Thêm timestamp để bust cache
+    const refreshParams = {
+      ...params,
+      _refresh: Date.now(),
+      _cache: 'no-cache'
+    }
+    
+    return apiClient.get<PaginatedResponse<any>>(`${this.basePath}/contracts`, { 
+      params: refreshParams,
+      signal: options?.signal,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
+  }
+
   async createContract(data: any, view?: string) {
     const params = view ? { view } : {}
     return apiClient.post<any>(`${this.basePath}/contracts`, data, { params })
@@ -271,7 +299,7 @@ export class FileStorageAPI {
 
 // Tag Management API - Sử dụng API Gateway với pattern mới
 export class TagAPI {
-  private basePath = '/api/v1/document-management-service/v1'
+  private basePath = '/api/v1/document-management-service'
 
   async getPopularTags(view?: string) {
     const params = view ? { view } : {}

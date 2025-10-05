@@ -47,6 +47,7 @@ export default function ContractsPage() {
   const [tagsLoading, setTagsLoading] = useState<boolean>(true)
   const [tagsError, setTagsError] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
+  const [refreshing, setRefreshing] = useState<boolean>(false)
   const [search, setSearch] = useState<string>('')
   const [debouncedSearch, setDebouncedSearch] = useState<string>('')
   const [status, setStatus] = useState<string>('ALL')
@@ -228,6 +229,84 @@ export default function ContractsPage() {
       setLoading(false)
       setIsLoadingMore(false)
       console.log('[Contracts] Fetch completed')
+    }
+  }
+
+  // Hàm refresh riêng với loading state và toast notification
+  const refreshData = async () => {
+    console.log('[Contracts] Starting refresh...')
+    setRefreshing(true)
+    
+    try {
+      // Abort previous in-flight request
+      if (abortRef.current) {
+        console.log('[Contracts] Aborting previous request')
+        try { 
+          abortRef.current.abort() 
+        } catch (e) {
+          console.warn('[Contracts] Error aborting previous request:', e)
+        }
+      }
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      const params: any = {
+        pageNumber: 0,
+        pageSize,
+        includeDeleted: false,
+      }
+      const trimmed = debouncedSearch.trim()
+      if (trimmed.length >= 2) params.searchTerm = trimmed
+      if (sortBy) params.sortBy = sortBy
+      if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
+      if (status && status !== 'ALL') params.status = status
+      if (type && type !== 'ALL') params.type = type
+      if (selectedTags.length > 0) params.tags = selectedTags.join(',')
+
+      console.log('[Contracts] Refresh params:', params)
+
+      // Ensure valid token before making request
+      const { default: TokenRefreshHelper } = await import('@/utils/token-refresh-helper')
+      const tokenValid = await TokenRefreshHelper.ensureValidToken()
+      
+      if (!tokenValid) {
+        console.warn('[Contracts] Token validation failed, request may fail')
+      }
+
+      console.log('[Contracts] Making refresh API request...')
+      const res = await contractAPI.refreshContracts(params, { signal: controller.signal })
+      const payload: any = res.data?.data || {}
+      
+      console.log('[Contracts] Refresh response:', { 
+        status: res.status, 
+        data: payload,
+        totalElements: payload?.result?.totalElements ?? payload?.totalElements ?? 0
+      })
+
+      const newItems = payload?.result?.content ?? payload?.content ?? []
+      const currentTotalItems = payload?.result?.totalElements ?? payload?.totalElements ?? 0
+      const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
+
+      // Reset to first page and update data
+      setPage(0)
+      setItems(newItems)
+      setDisplayedItems(newItems)
+      setAllItems(newItems)
+      setTotalPages(totalPagesFromApi)
+      
+      // Show success toast
+      console.log('[Contracts] Refresh completed successfully')
+      
+    } catch (e: any) {
+      console.error('[Contracts] Error refreshing data:', {
+        error: e,
+        message: e?.message,
+        response: e?.response?.data,
+        status: e?.response?.status
+      })
+    } finally {
+      setRefreshing(false)
+      console.log('[Contracts] Refresh completed')
     }
   }
 
@@ -658,6 +737,24 @@ export default function ContractsPage() {
           </div>
           
             <div className="flex items-center gap-2">
+              {/* Refresh Button */}
+              <button
+                onClick={() => refreshData()}
+                disabled={refreshing}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Làm mới dữ liệu"
+              >
+                {refreshing ? (
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+              </button>
+              
             {viewMode === 'list' && (
               <button
                 onClick={() => setShowTableSettings(true)}
@@ -687,13 +784,20 @@ export default function ContractsPage() {
                 </div>
                 <p className="text-gray-600 mb-6">Không tìm thấy hợp đồng phù hợp.</p>
                 <button
-                  onClick={() => fetchData()}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  onClick={() => refreshData()}
+                  disabled={refreshing}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Làm mới
+                  {refreshing ? (
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                  {refreshing ? 'Đang làm mới...' : 'Làm mới'}
                 </button>
               </div>
             </div>

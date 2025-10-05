@@ -1329,4 +1329,58 @@ async def get_batch_jobs_api(
             requestId=str(uuid.uuid4())
         )
 
+@router.get("/health", summary="Health check", tags=["🏥 APIs Kiểm tra Hệ thống"])
+async def health_check():
+    """
+    ## 📖 Mô tả
+    API kiểm tra sức khỏe của Automation Service - health check endpoint.
+    Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
+    
+    ## 🔹 Đầu vào
+    
+    Không có tham số đầu vào.
+    
+    ## 🔹 Đầu ra
+    
+    📄 **data** (object)
+    - **Mô tả**: Thông tin chi tiết về trạng thái service
+    - **Bao gồm**:
+      - `status`: Trạng thái service ("healthy")
+      - `service`: Tên service ("Automation Service")
+      - `version`: Phiên bản service ("2.0.0")
+      - `ai_model`: Mô hình AI được sử dụng ("Gemini 2.0 Flash")
+      - `supported_formats`: Các định dạng file được hỗ trợ
+      - `timestamp`: Thời gian kiểm tra
+    
+    📊 **apiVersion** (string)
+    - **Mô tả**: Phiên bản API hiện tại
+    - **Giá trị**: "v1"
+    
+    🔢 **statusCode** (integer)
+    - **Mô tả**: Mã trạng thái HTTP (200: OK)
+    - **Giá trị**: 200 (thành công)
+    
+    📋 **shortMessage** (string)
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    - **Giá trị**: "Success"
+    
+    📖 **description** (string)
+    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
+    - **Ví dụ**: "Service đang hoạt động bình thường"
+    """
+    return RestResponse(
+        statusCode=200,
+        shortMessage="Success",
+        description="Service đang hoạt động bình thường",
+        data={
+            "status": "healthy",
+            "service": "Automation Service",
+            "version": "2.0.0",
+            "ai_model": "Gemini 2.0 Flash",
+            "supported_formats": ["docx", "pdf", "txt"],
+            "timestamp": datetime.now().isoformat()
+        },
+        path="/api/v1/automation-service/v1/health"
+    )
+
 

@@ -64,7 +64,7 @@ export const config: GatewayConfig = {
     'user-management': {
       name: 'user-management-service',
       url: process.env.USER_MANAGEMENT_SERVICE_URL || 
-           buildServiceUrl('user-management-service', 8000, 8001),
+           buildServiceUrl('user-management-service', 8001, 8001),
       port: 8001,
       healthCheck: '/api/v1/user-management-service/v1/health',
       timeout: 15000
@@ -73,9 +73,9 @@ export const config: GatewayConfig = {
     'document-management': {
       name: 'document-management-service',
       url: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 
-           buildServiceUrl('document-management-service', 8000, 8002),
+           buildServiceUrl('document-management-service', 8002, 8002),
       port: 8002,
-      healthCheck: '/actuator/health',
+      healthCheck: '/api/v1/document-management-service/v1/health',
       timeout: 10000
     },
     
@@ -84,7 +84,7 @@ export const config: GatewayConfig = {
       url: process.env.AUTOMATION_SERVICE_URL || 
            buildServiceUrl('automation-service', 8000, 8003),
       port: 8003,
-      healthCheck: '/health',
+      healthCheck: '/api/v1/automation-service/v1/health',
       timeout: 15000
     }
   },

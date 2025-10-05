@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
-@Tag(name = "🏥 APIs Gốc", description = "Health check và root endpoints")
+@RequestMapping("/api/v1/document-management-service/v1")
+@Tag(name = "🏥 APIs Kiểm tra Hệ thống", description = "APIs kiểm tra và cấu hình hệ thống - Health check, cấu hình S3, kiểm tra kết nối")
 public class HealthController {
 
     @GetMapping("/health")
@@ -21,37 +22,54 @@ public class HealthController {
         summary = "Health check",
         description = """
         ## 📖 Mô tả
-        Kiểm tra tình trạng hoạt động của Document Management Service. Trả về theo chuẩn RestResponse.
-
+        API kiểm tra sức khỏe của Document Management Service - health check endpoint.
+        Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
+        
         ## 🔹 Đầu vào
-
-        (Không có tham số)
-
+        
+        Không có tham số đầu vào.
+        
         ## 🔹 Đầu ra
-
-        📝 data
-        Loại: object
-        Mô tả: status, service, version, timestamp
-
-        📊 apiVersion | 🔢 statusCode(200) | 📋 shortMessage | 📖 description | 🕒 timestamp | 🆔 requestId | 🛣️ path
+        
+        📄 **data** (object)
+        - **Mô tả**: Thông tin chi tiết về trạng thái service
+        - **Bao gồm**:
+          - `status`: Trạng thái service ("UP")
+          - `service`: Tên service ("Document Management Service")
+          - `version`: Phiên bản service ("1.0.0")
+          - `timestamp`: Thời gian kiểm tra
+        
+        📊 **apiVersion** (string)
+        - **Mô tả**: Phiên bản API hiện tại
+        - **Giá trị**: "v1"
+        
+        🔢 **statusCode** (integer)
+        - **Mô tả**: Mã trạng thái HTTP (200: OK)
+        - **Giá trị**: 200 (thành công)
+        
+        📋 **shortMessage** (string)
+        - **Mô tả**: Thông báo ngắn gọn về kết quả
+        - **Giá trị**: "Success"
+        
+        📖 **description** (string)
+        - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
+        - **Ví dụ**: "Service đang hoạt động bình thường"
         """
     )
-    public ResponseEntity<RestResponse<Map<String, Object>>> health() {
-        String requestId = UUID.randomUUID().toString();
-        return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Service đang hoạt động bình thường")
-                .data(Map.of(
-                    "status", "healthy",
-                    "service", "Document Management Service",
-                    "version", "1.0.0",
-                    "timestamp", ZonedDateTime.now().toString()
-                ))
-                .timestamp(ZonedDateTime.now())
-                .requestId(requestId)
-                .path("/health")
-                .build());
+    public ResponseEntity<RestResponse<Map<String, Object>>> healthCheck() {
+        Map<String, Object> healthData = new HashMap<>();
+        healthData.put("status", "UP");
+        healthData.put("service", "Document Management Service");
+        healthData.put("version", "1.0.0");
+        healthData.put("timestamp", LocalDateTime.now().toString());
+        
+        RestResponse<Map<String, Object>> response = RestResponse.<Map<String, Object>>builder()
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Service đang hoạt động bình thường")
+            .data(healthData)
+            .build();
+            
+        return ResponseEntity.ok(response);
     }
 }

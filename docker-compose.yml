@@ -113,13 +113,13 @@ services:
       dockerfile: Dockerfile
     
     ports:
-      - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8000"
+      - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8002"
     env_file:
       - .env
       - ./backend/document-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8000
+      - SERVER_PORT=8002
       - MONGODB_DATABASE=${MONGODB_DOCUMENT_DATABASE}
       - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-document-management
       - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-document-management
@@ -147,7 +147,7 @@ services:
       - ./backend/automation-service/.env
     environment:
       - ENVIRONMENT=docker
-      - PORT=8000
+      - PORT=8003
       - MONGODB_DATABASE=${MONGODB_AUTOMATION_DATABASE}
       - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-automation
       - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-automation
