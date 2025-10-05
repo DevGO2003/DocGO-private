@@ -4,26 +4,31 @@ import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.model.AuthResponse;
 import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import com.devgo2003.docgo.backend.user_service.security.JwtUtil;
+import com.devgo2003.docgo.backend.user_service.security.TokenBlacklist;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import io.jsonwebtoken.Claims;
 
+@Slf4j
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklist tokenBlacklist;
     private final long accessTokenTtlSeconds;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil, TokenBlacklist tokenBlacklist) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklist = tokenBlacklist;
         this.accessTokenTtlSeconds = jwtUtil.getAccessTokenTtlSeconds();
     }
 
@@ -111,11 +116,18 @@ public class AuthService {
             // Validate token before logout
             jwtUtil.parseClaims(token);
             
-            // TODO: Add token to blacklist when blacklist service is available
-            // jwtUtil.addToBlacklist(token);
+            // Add token to blacklist để vô hiệu hóa token
+            boolean addedToBlacklist = tokenBlacklist.addToBlacklist(token);
             
-            return true;
+            if (addedToBlacklist) {
+                log.info("[AuthService] Token successfully added to blacklist during logout");
+                return true;
+            } else {
+                log.warn("[AuthService] Failed to add token to blacklist during logout");
+                return false;
+            }
         } catch (Exception e) {
+            log.error("[AuthService] Error during logout: {}", e.getMessage());
             return false;
         }
     }

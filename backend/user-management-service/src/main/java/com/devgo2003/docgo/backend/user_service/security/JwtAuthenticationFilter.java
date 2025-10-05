@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -21,13 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final TokenBlacklist blacklistService;
-    private final UserRepository userRepository;
+    private final TokenBlacklist tokenBlacklist;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, TokenBlacklist blacklistService, UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, TokenBlacklist tokenBlacklist) {
         this.jwtUtil = jwtUtil;
-        this.blacklistService = blacklistService;
-        this.userRepository = userRepository;
+        this.tokenBlacklist = tokenBlacklist;
     }
 
     @Override
@@ -40,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             log.debug("[JWT Filter] Found Bearer token, length: {}", token.length());
             
-            if (blacklistService.isBlacklisted(token)) {
+            if (tokenBlacklist.isBlacklisted(token)) {
                 log.debug("[JWT Filter] Token is blacklisted, skipping authentication");
                 filterChain.doFilter(request, response);
                 return;
@@ -50,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("[JWT Filter] Parsing JWT token...");
                 Claims claims = jwtUtil.parseClaims(token);
                 String username = claims.getSubject();
-                Integer tokenVersion = claims.get("tokenVersion", Integer.class);
+                String tokenVersion = claims.get("tokenVersion", String.class);
                 
                 log.debug("[JWT Filter] Parsed claims - username: {}, tokenVersion: {}", username, tokenVersion);
                 
