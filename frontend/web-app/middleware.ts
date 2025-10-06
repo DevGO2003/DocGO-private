@@ -24,6 +24,7 @@ const publicRoutes = [
 const protectedRoutes = [
   '/dashboard',
   '/contracts',
+  '/documents',
   '/analytics',
   '/profile',
   '/settings',

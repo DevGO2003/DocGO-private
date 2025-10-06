@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { automationAPI } from '@/lib/apis/automation-api'
 import { ArrowUpTrayIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import UploadSuccessControls from '@/components/upload/UploadSuccessControls'
 
 export default function UploadDocumentPage() {
   const router = useRouter()
@@ -19,6 +20,12 @@ export default function UploadDocumentPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadResult, setUploadResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [uploadedFileInfo, setUploadedFileInfo] = useState<{
+    fileId: string
+    fileName: string
+    fileType?: string
+    fileSize?: string
+  } | null>(null)
 
   // File validation
   const validateFile = (file: File): boolean => {
@@ -143,14 +150,29 @@ export default function UploadDocumentPage() {
       const bodyStatus = response.data?.statusCode
       if ((bodyStatus === 200 || bodyStatus === 201 || bodyStatus === 204) || (response.status >= 200 && response.status < 300)) {
         setUploadResult(response.data?.data ?? null)
+        
+        // Lưu thông tin file để hiển thị controls
+        const uploadedData = response.data?.data as any
+        if (uploadedData) {
+          // Tạo file ID tạm thời nếu không có từ API
+          const fileId = uploadedData.id || `temp_${Date.now()}`
+          setUploadedFileInfo({
+            fileId: fileId,
+            fileName: selectedFile.name,
+            fileType: selectedFile.type,
+            fileSize: formatFileSize(selectedFile.size)
+          })
+        }
+        
         toast.success('Upload file thành công!')
         
-        // Reset form after 3 seconds
+        // Reset form sau 10 giây (để user có thời gian sử dụng controls)
         setTimeout(() => {
           setSelectedFile(null)
           setUploadResult(null)
           setUploadProgress(0)
-        }, 3000)
+          setUploadedFileInfo(null)
+        }, 10000)
       } else {
         throw new Error(response.data?.shortMessage || 'Có lỗi xảy ra khi upload file')
       }
@@ -169,6 +191,7 @@ export default function UploadDocumentPage() {
     setError(null)
     setUploadResult(null)
     setUploadProgress(0)
+    setUploadedFileInfo(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -347,21 +370,20 @@ export default function UploadDocumentPage() {
                 </div>
               )}
 
-              {/* Result */}
-              {uploadResult && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <div className="flex items-center">
-                    <div className="w-7 h-7 bg-green-500 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-green-800">Upload thành công!</p>
-                      <p className="text-green-700">File ID: {uploadResult.id}</p>
-                    </div>
-                  </div>
-                </div>
+              {/* Upload Success Controls */}
+              {uploadedFileInfo && (
+                <UploadSuccessControls
+                  fileId={uploadedFileInfo.fileId}
+                  fileName={uploadedFileInfo.fileName}
+                  fileType={uploadedFileInfo.fileType}
+                  fileSize={uploadedFileInfo.fileSize}
+                  onUploadMore={() => {
+                    setUploadedFileInfo(null)
+                    setSelectedFile(null)
+                    setUploadResult(null)
+                    setUploadProgress(0)
+                  }}
+                />
               )}
 
               {/* Compact Instructions */}
