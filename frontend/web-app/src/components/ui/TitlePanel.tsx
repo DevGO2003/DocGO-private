@@ -4,7 +4,7 @@ import React from 'react'
 
 export interface TitlePanelProps {
   title: React.ReactNode
-  description: React.ReactNode
+  description?: React.ReactNode
   icon?: string
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'info'
   actionButton?: React.ReactNode
@@ -66,9 +66,11 @@ export default function TitlePanel({
             <span className="align-middle mr-2">{displayIcon}</span>
             <span className="align-middle">{title}</span>
           </h1>
-          <p className={`text-sm leading-relaxed ${styles.description}`}>
-            {description}
-          </p>
+          {description ? (
+            <p className={`text-sm leading-relaxed ${styles.description}`}>
+              {description}
+            </p>
+          ) : null}
         </div>
         {actionButton && (
           <div className="ml-4 flex-shrink-0">

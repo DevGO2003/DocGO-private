@@ -46,7 +46,7 @@ export class ContractAPI {
 
   async getContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any>(`${this.basePath}/contracts/${id}`, { params })
+    return apiClient.get<any>(`${this.basePath}/documents/${id}`, { params })
   }
 
   // API refresh với cache busting và timestamp
@@ -84,47 +84,47 @@ export class ContractAPI {
 
   async updateContract(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/contracts/${id}`, data, { params })
+    return apiClient.put<any>(`${this.basePath}/documents/${id}`, data, { params })
   }
 
   async deleteContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.delete<any>(`${this.basePath}/contracts/${id}`, { params })
+    return apiClient.delete<any>(`${this.basePath}/documents/${id}`, { params })
   }
 
   async restoreContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/contracts/${id}/restore`, undefined, { params })
+    return apiClient.put<any>(`${this.basePath}/documents/${id}/restore`, undefined, { params })
   }
 
   async getContractEvents(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/contracts/${id}/events`, { params })
+    return apiClient.get<any[]>(`${this.basePath}/documents/${id}/events`, { params })
   }
 
   async getContractAttachments(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/contracts/${id}/attachments`, { params })
+    return apiClient.get<any[]>(`${this.basePath}/documents/${id}/attachments`, { params })
   }
 
   async approveContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/contracts/${id}/approve`, undefined, { params })
+    return apiClient.put<any>(`${this.basePath}/documents/${id}/approve`, undefined, { params })
   }
 
   async createVersion(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/contracts/${id}/versions`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/documents/${id}/versions`, data, { params })
   }
 
   async requestESignature(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/contracts/${id}/esignature`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/documents/${id}/esignature`, data, { params })
   }
 
   async addComment(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/contracts/${id}/comments`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/documents/${id}/comments`, data, { params })
   }
 }
 
@@ -213,7 +213,7 @@ export class AutomationAPI {
 
   async summarizeText(text: string, apiKey?: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/contracts/summarize`, { text }, {
+    return apiClient.post<any>(`${this.basePath}/documents/summarize`, { text }, {
       headers: {
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
       },
@@ -226,7 +226,7 @@ export class AutomationAPI {
     formData.append('file', file)
     
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/contracts/summarize`, formData, {
+    return apiClient.post<any>(`${this.basePath}/documents/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -276,6 +276,29 @@ export class FileStorageAPI {
           onProgress(progress)
         }
       }
+    })
+  }
+
+  async getAllFiles(view: string = 'table', page: number = 0, size: number = 10) {
+    // GET /api/v1/automation-service/v1/files
+    return apiClient.get<any>(`${this.basePath}`, {
+      params: {
+        view,
+        page_number: page,
+        page_size: size
+      }
+    })
+  }
+
+  async getFileDetails(fileId: string) {
+    // GET /api/v1/automation-service/v1/files/{fileId}
+    return apiClient.get<any>(`${this.basePath}/${fileId}`)
+  }
+
+  async downloadFile(fileId: string) {
+    // GET /api/v1/automation-service/v1/files/{fileId}/download
+    return apiClient.get(`${this.basePath}/${fileId}/download`, {
+      responseType: 'blob'
     })
   }
 
@@ -414,3 +437,4 @@ export const authAPI = new AuthAPI()
 // Export default client for custom requests
 export { apiClient }
 export default apiClient
+

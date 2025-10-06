@@ -341,6 +341,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           hasTokenData: !!newTokenData,
           rememberMe: rememberMe
         })
+        // Ensure cookies are set on frontend origin for middleware (HttpOnly)
+        try {
+          await fetch('/api/auth/set-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              accessToken,
+              refreshToken,
+              expiresIn,
+              rememberMe,
+              userJson: user ? JSON.stringify(user) : undefined
+            })
+          })
+        } catch (e) {
+          console.warn('[Auth] Failed to call set-cookie route:', e)
+        }
       } catch (error) {
         console.error('[Auth] Error storing tokens:', error)
       }

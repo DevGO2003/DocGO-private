@@ -69,7 +69,7 @@ export default function CustomTable({
       case 'title':
         return (
           <div>
-            <Link href={`/contracts/${item.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+            <Link href={`/documents/${item.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
               {item.title}
             </Link>
             <p className="text-sm text-gray-500 line-clamp-1">{item.description || 'Không có mô tả'}</p>
@@ -138,7 +138,7 @@ export default function CustomTable({
       case 'actions':
         return (
           <div className="flex items-center gap-2">
-            <Link href={`/contracts/${item.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
+            <Link href={`/documents/${item.id}`} className="text-indigo-600 hover:text-indigo-900 text-sm">
               Xem
             </Link>
             <button className="text-gray-400 hover:text-gray-600 text-sm">

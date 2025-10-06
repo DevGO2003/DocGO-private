@@ -46,21 +46,21 @@ const PAGE_ERRORS: Record<string, PageError[]> = {
     }
   ],
   
-  '/contracts': [
+  '/documents': [
     {
-      page: 'Hợp đồng (/contracts)',
+      page: 'Hợp đồng (/documents)',
       feature: 'Chỉnh sửa hàng loạt',
       status: 'warning',
       description: 'Chức năng chỉnh sửa hàng loạt hợp đồng chưa được triển khai'
     },
     {
-      page: 'Hợp đồng (/contracts)',
+      page: 'Hợp đồng (/documents)',
       feature: 'Xóa hàng loạt',
       status: 'warning',
       description: 'Chức năng xóa hàng loạt hợp đồng chưa được triển khai'
     },
     {
-      page: 'Hợp đồng (/contracts)',
+      page: 'Hợp đồng (/documents)',
       feature: 'Gửi duyệt hàng loạt',
       status: 'warning',
       description: 'Chức năng gửi duyệt hàng loạt hợp đồng chưa được triển khai'
@@ -270,4 +270,5 @@ export function hasPageErrors(pagePath: string): boolean {
 export function getPageErrorCount(pagePath: string): number {
   return (PAGE_ERRORS[pagePath] || []).length
 }
+
 

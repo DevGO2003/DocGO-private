@@ -217,9 +217,21 @@ class ApiClient {
             if (refreshData.refreshToken) {
               localStorage.setItem('refresh_token', refreshData.refreshToken)
             }
-            document.cookie = `auth_token=${refreshData.accessToken}; Max-Age=${(refreshData.expiresIn || 900)}; Path=/`
-            if (refreshData.refreshToken) {
-              document.cookie = `refresh_token=${refreshData.refreshToken}; Max-Age=${7 * 24 * 60 * 60}; Path=/`
+            // Also set HttpOnly cookies on frontend origin for middleware
+            try {
+              await fetch('/api/auth/set-cookie', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  accessToken: refreshData.accessToken,
+                  refreshToken: refreshData.refreshToken || refreshToken,
+                  expiresIn: refreshData.expiresIn || 900,
+                  rememberMe: false
+                })
+              })
+            } catch (e) {
+              console.warn('[API] Failed to call set-cookie route after refresh:', e)
             }
             return true
           }

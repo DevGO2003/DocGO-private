@@ -291,8 +291,7 @@ export const ROUTES = {
     RESET_PASSWORD: '/auth/reset-password',
   },
   DASHBOARD: '/dashboard',
-  CONTRACTS: '/contracts',
-  IMPORT_DOCUMENT: '/import-document',
+  CONTRACTS: '/documents',
   USERS: '/users',
   AI_PROCESSING: '/ai-processing',
   DOCUMENTS: '/documents',
@@ -324,3 +323,4 @@ export const SUCCESS_MESSAGES = {
   LOGOUT: 'Đăng xuất thành công',
   REGISTER: 'Đăng ký thành công',
 } as const
+

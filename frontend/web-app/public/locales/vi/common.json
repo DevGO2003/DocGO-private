@@ -5,6 +5,7 @@
     },
     "navigation": {
       "dashboard": "Bảng điều khiển",
+      "createDocument": "Tạo tài liệu",
       "upload": "Tải lên",
       "contracts": "Hợp đồng",
       "importDocument": "Nhập tài liệu",

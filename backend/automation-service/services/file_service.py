@@ -363,6 +363,34 @@ class FileStorageService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Lỗi lấy danh sách files: {str(e)}")
     
+    async def get_files_by_name(self, filename: str) -> List[Dict[str, Any]]:
+        """Get files by filename for version conflict checking"""
+        try:
+            # For now, we'll return mock data
+            # In real implementation, you would query from database
+            # This is a simplified version for demonstration
+            
+            # Mock data - in real implementation, query database
+            mock_files = [
+                {
+                    "id": "file-1",
+                    "filename": filename,
+                    "size": 1024000,
+                    "last_modified": "2024-01-15T10:30:00Z",
+                    "created_at": "2024-01-15T10:30:00Z",
+                    "version": "1.0"
+                }
+            ]
+            
+            # Filter by filename (case-insensitive)
+            matching_files = [f for f in mock_files if f["filename"].lower() == filename.lower()]
+            
+            return matching_files
+            
+        except Exception as e:
+            # Return empty list on error
+            return []
+    
     def get_file_details(self, file_id: str) -> Dict[str, Any]:
         """Get file details"""
         try:

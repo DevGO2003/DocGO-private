@@ -47,6 +47,24 @@ export interface BatchProcessResult {
   completedAt?: string
 }
 
+export interface VersionConflictCheck {
+  hasConflict: boolean
+  existingFile?: {
+    id: string
+    filename: string
+    size: number
+    lastModified: string
+    version: string
+  }
+  currentFile: {
+    filename: string
+    size: number
+    lastModified?: string
+  }
+  conflictType: 'size' | 'timestamp' | 'both' | 'none'
+  message: string
+}
+
 // File Management Interfaces
 export interface FileUploadResult {
   id: string
@@ -103,7 +121,7 @@ export class AutomationAPI {
   }
 
   async summarizeText(text: string, apiKey?: string) {
-    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/contracts/summarize`, 
+    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/documents/summarize`, 
       { text }, 
       {
         headers: {
@@ -118,7 +136,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/contracts/summarize`, formData, {
+    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/documents/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -131,7 +149,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<ProcessResult>>(`${this.basePath}/contracts/process`, formData, {
+    return apiClient.post<ApiResponse<ProcessResult>>(`${this.basePath}/documents/process`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -143,7 +161,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<ValidationResult>>(`${this.basePath}/contracts/validate`, formData, {
+    return apiClient.post<ApiResponse<ValidationResult>>(`${this.basePath}/documents/validate`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -196,6 +214,16 @@ export class AutomationAPI {
 
   async deleteFile(id: string) {
     return apiClient.delete<ApiResponse<any>>(`${this.basePath}/files/${id}`)
+  }
+
+  async checkFileVersion(filename: string, fileSize: number, lastModified?: string) {
+    return apiClient.get<ApiResponse<VersionConflictCheck>>(`${this.basePath}/files/check-version`, {
+      params: {
+        filename,
+        file_size: fileSize,
+        last_modified: lastModified
+      }
+    })
   }
 
   async deleteMultipleFiles(ids: string[]) {
@@ -328,5 +356,6 @@ export const automationAPI = new AutomationAPI()
 
 // Export file API instance for backward compatibility
 export const fileAPI = automationAPI
+
 
 

@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-lg font-semibold mb-4">Sản phẩm</h4>
             <ul className="space-y-2">
               <li>
-                <NavigationLink href="/contracts" className="text-gray-300 hover:text-white transition-colors">
+                <NavigationLink href="/documents" className="text-gray-300 hover:text-white transition-colors">
                   Quản lý hợp đồng
                 </NavigationLink>
               </li>
@@ -131,3 +131,4 @@ export const Footer: React.FC = () => {
     </footer>
   )
 }
+

@@ -28,6 +28,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed)
+  const COLLAPSE_STORAGE_KEY = 'sidebar_collapsed'
+
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(COLLAPSE_STORAGE_KEY) : null
+      if (saved != null) {
+        setIsCollapsed(saved === 'true')
+      }
+    } catch {}
+  }, [])
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen)
@@ -36,6 +46,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   const handleSidebarCollapse = (collapsed: boolean) => {
     setIsCollapsed(collapsed)
     onSidebarToggle?.(collapsed)
+    try {
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, String(collapsed))
+    } catch {}
   }
 
   return (
@@ -59,7 +72,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
               ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}
             `}
           >
-            <Sidebar />
+            <Sidebar 
+              collapsed={isCollapsed}
+              onCollapseToggle={() => handleSidebarCollapse(!isCollapsed)}
+            />
           </div>
         </>
       )}
@@ -88,6 +104,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         {/* Footer */}
         {showFooter && <Footer />}
       </div>
+
+      {/* Desktop collapse toggle handle */}
+      {showSidebar && (
+        <button
+          type="button"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+          onClick={() => handleSidebarCollapse(!isCollapsed)}
+          className={`hidden lg:flex items-center justify-center fixed top-24 z-50 h-8 w-8 rounded-full border bg-white shadow-sm hover:shadow-md transition-all ${isCollapsed ? 'left-4' : 'left-64 -ml-4'}`}
+        >
+          <span className="text-sm font-semibold">{isCollapsed ? '>' : '<'}</span>
+        </button>
+      )}
     </div>
   )
 }

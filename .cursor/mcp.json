@@ -35,6 +35,10 @@
       "args": [
         "@browsermcp/mcp@latest"
       ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest", "--channel", "stable", "--viewport", "1280x720"]
     }
   }
 }

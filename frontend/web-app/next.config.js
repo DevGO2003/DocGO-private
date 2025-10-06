@@ -21,8 +21,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: '/documents', destination: '/documents/files', permanent: false },
+      { source: '/documents/:id', destination: '/documents/:id', permanent: false },
       { source: '/dashboard/hop-dong', destination: '/dashboard/contracts', permanent: false },
-      { source: '/dashboard/tao-hop-dong', destination: '/dashboard/import-document', permanent: false },
+      { source: '/dashboard/tao-hop-dong', destination: '/dashboard/upload-document', permanent: false },
       { source: '/dashboard/chu-ky-dien-tu', destination: '/dashboard/e-signature', permanent: false },
       { source: '/dashboard/binh-luan-cong-tac', destination: '/dashboard/collaboration-comments', permanent: false },
       { source: '/dashboard/phien-ban-hop-dong', destination: '/dashboard/contract-versions', permanent: false },

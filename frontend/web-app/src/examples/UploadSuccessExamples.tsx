@@ -1,5 +1,6 @@
 import React from 'react';
 import UploadSuccessManager from '../components/UploadSuccessManager';
+import UploadSuccessNotification from '../components/UploadSuccessNotification';
 import { useUploadSuccess } from '../hooks/useUploadSuccess';
 
 // Example 1: Sử dụng với UploadSuccessManager (Recommended)
