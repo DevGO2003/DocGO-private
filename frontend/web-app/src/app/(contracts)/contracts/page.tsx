@@ -394,8 +394,8 @@ export default function ContractsPage() {
 
   // Control Panel Handlers
   const handleCreateContract = () => {
-    // Navigate to create contract page
-    window.location.href = '/import-document'
+    // Navigate to create document page
+    window.location.href = '/create-document'
   }
 
   const handleEditSelected = () => {

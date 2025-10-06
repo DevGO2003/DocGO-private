@@ -26,8 +26,7 @@ file_service = FileStorageService()
 async def upload_file(
     file: UploadFile = File(..., description="File cần upload lên hệ thống"),
     folder: Optional[str] = Query(None, description="Thư mục con tùy chọn trong bucket"),
-    user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)"),
-    view: Optional[str] = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
+    user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)")
 ):
     """
     ## 📖 Mô tả
@@ -245,8 +244,7 @@ async def get_all_files(
 
 @router.get("/{file_id}", summary="Chi tiết file", response_model=RestResponse[dict])
 async def get_file_details(
-    file_id: str,
-    view: Optional[str] = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
+    file_id: str
 ):
     """
     Lấy thông tin chi tiết file

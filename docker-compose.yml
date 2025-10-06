@@ -141,7 +141,7 @@ services:
       dockerfile: Dockerfile
     
     ports:
-      - "${AUTOMATION_PORT:-8003}:8000"
+      - "${AUTOMATION_PORT:-8003}:8003"
     env_file:
       - .env
       - ./backend/automation-service/.env

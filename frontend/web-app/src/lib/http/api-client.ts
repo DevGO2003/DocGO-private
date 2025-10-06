@@ -252,6 +252,10 @@ class ApiClient {
     return this.client.post(url, data, config)
   }
 
+  async postWithProgress<T>(url: string, data?: any, config?: AxiosRequestConfig & { onUploadProgress?: (progressEvent: any) => void }): Promise<AxiosResponse<LocalApiResponse<T>>> {
+    return this.client.post(url, data, config)
+  }
+
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<LocalApiResponse<T>>> {
     return this.client.put(url, data, config)
   }

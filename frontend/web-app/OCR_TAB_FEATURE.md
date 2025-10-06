@@ -1,7 +1,7 @@
 # OCR Tab Feature - Tạo hợp đồng nhanh
 
 ## 🎯 Tổng quan
-Đã thêm tab OCR Upload vào trang tạo hợp đồng (`/dashboard/create-contract`) để người dùng có thể sử dụng OCR để trích xuất thông tin từ file hoặc văn bản.
+Đã thêm tab OCR Upload vào trang tạo tài liệu (`/dashboard/create-document`) để người dùng có thể sử dụng OCR để trích xuất thông tin từ file hoặc văn bản.
 
 ## ✨ Tính năng mới
 
@@ -31,7 +31,7 @@
 
 ### Files đã tạo/sửa đổi:
 1. `src/components/OCRUpload.tsx` - Component OCR upload riêng biệt
-2. `src/app/dashboard/create-contract/page.tsx` - Thêm tab system và tích hợp OCR
+2. `src/app/dashboard/create-document/page.tsx` - Thêm tab system và tích hợp OCR
 
 ### API Endpoints:
 - `/api/v1/automation-service/v1/document/extract` - Trích xuất văn bản từ file
@@ -54,7 +54,7 @@
 
 ## 🚀 Cách sử dụng
 
-1. Truy cập `/dashboard/create-contract`
+1. Truy cập `/dashboard/create-document`
 2. Tab "OCR Upload" sẽ được chọn mặc định
 3. Chọn phương thức:
    - **Upload File**: Kéo thả hoặc click chọn file

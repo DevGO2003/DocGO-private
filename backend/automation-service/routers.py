@@ -74,8 +74,7 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 async def extract_api(
     request: Request,
     file: UploadFile = File(..., description="File tài liệu cần trích xuất (docx, pdf)"),
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
-    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
     ## 📖 Mô tả
@@ -231,8 +230,7 @@ async def extract_api(
 @router.post("/document/classify", summary="Phân loại tài liệu", tags=["🤖 APIs Xử lý AI"])
 async def classify_api(
     request: Request,
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
-    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
     ## 📖 Mô tả

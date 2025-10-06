@@ -240,3 +240,4 @@ import UploadSuccessDemo from './components/UploadSuccessDemo';
 - TypeScript support đầy đủ
 - Có thể customize theo nhu cầu
 - Performance optimized với React.memo (có thể thêm)
+

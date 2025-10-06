@@ -256,7 +256,7 @@ export class FileStorageAPI {
   // Chuyển upload/lưu trữ file sang automation-service
   private basePath = '/api/v1/automation-service/v1/files'
 
-  async uploadFile(file: File, metadata?: any, view?: string) {
+  async uploadFile(file: File, metadata?: any, view?: string, onProgress?: (progress: number) => void) {
     const formData = new FormData()
     formData.append('file', file)
     if (metadata) {
@@ -265,11 +265,17 @@ export class FileStorageAPI {
     
     const params = view ? { view } : {}
     // POST /api/v1/automation-service/v1/files
-    return apiClient.post<any>(`${this.basePath}`, formData, {
+    return apiClient.postWithProgress<any>(`${this.basePath}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      params
+      params,
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          onProgress(progress)
+        }
+      }
     })
   }
 

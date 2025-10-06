@@ -13,8 +13,7 @@ router = APIRouter(prefix="/api/v1/automation-service/v1")
 async def contract_summarize_api(
     file: UploadFile = File(None, description="File hợp đồng cần tóm tắt (pdf, docx, txt, html)"),
     text: str = Form(None, description="Nội dung hợp đồng dạng văn bản"),
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)"),
-    view: str = Query(None, description="Loại view để trả về dữ liệu (ví dụ: summary, detail, full)")
+    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
 ):
     """
     ## 📖 Mô tả

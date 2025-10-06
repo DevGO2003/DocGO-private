@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Page Title */}
         <TitlePanel
           title="THỐNG KÊ"
@@ -72,28 +72,28 @@ export default function DashboardPage() {
               className="hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer bg-gradient-to-br from-white to-gray-50"
               onClick={() => router.push(s.href)}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-1 pt-3 px-3">
                 <CardTitle className="text-base text-gray-700">{t(s.titleKey)}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{s.value}</div>
-                <p className="text-sm text-primary-600 mt-2">{t('common.clickToViewDetails')}</p>
+              <CardContent className="pt-1 px-3 pb-3">
+                <div className="text-2xl font-bold text-gray-900">{s.value}</div>
+                <p className="text-xs text-primary-600 mt-1">{t('common.clickToViewDetails')}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Hàng biểu đồ: cột (2/3) + tròn (1/3) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Biểu đồ cột: Hợp đồng tải lên theo tháng */}
           <div className="lg:col-span-2">
             <Card className="overflow-hidden">
-              <CardHeader>
-                <CardTitle>Hợp đồng tải lên theo tháng</CardTitle>
-                <CardDescription>Nhấp vào cột để xem chi tiết</CardDescription>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-lg">Hợp đồng tải lên theo tháng</CardTitle>
+                <CardDescription className="text-xs">Nhấp vào cột để xem chi tiết</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-8 gap-2 items-end h-56">
+              <CardContent className="pt-0 px-4 pb-4">
+                <div className="grid grid-cols-8 gap-2 items-end h-32 sm:h-36 md:h-40">
                   {/* Trục Y */}
                   <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2">
                     {[28, 21, 14, 7, 0].map((t) => (
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   {/* Cột */}
-                  <div className="col-span-7 grid grid-cols-6 gap-4 h-full">
+                  <div className="col-span-7 grid grid-cols-6 gap-2 h-full">
                     {uploadsByMonth.map((val, idx) => (
                       <div key={idx} className="flex flex-col items-center justify-end">
                         <div
@@ -123,22 +123,22 @@ export default function DashboardPage() {
           {/* Biểu đồ tròn: Phân bố trạng thái */}
           <div className="lg:col-span-1">
             <Card className="overflow-hidden h-full">
-              <CardHeader>
-                <CardTitle>Phân bố trạng thái</CardTitle>
-                <CardDescription>Nhấp vào phần để xem chi tiết</CardDescription>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-lg">Phân bố trạng thái</CardTitle>
+                <CardDescription className="text-xs">Nhấp vào phần để xem chi tiết</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-8">
+              <CardContent className="pt-0 px-4 pb-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
                   {/* Pie chart */}
                   <div
-                    className="w-40 h-40 rounded-full shadow-sm"
+                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full shadow-sm"
                     style={{
                       backgroundImage: `conic-gradient(${pieColors[0]} 0 ${pieData[0]}%, ${pieColors[1]} ${pieData[0]}% ${pieData[0] + pieData[1]}%, ${pieColors[2]} ${pieData[0] + pieData[1]}% 100%)`,
                     }}
                     title={`Đã duyệt ${pieData[0]}% | Chờ duyệt ${pieData[1]}% | Từ chối ${pieData[2]}%`}
                   />
                   {/* Legend */}
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-1 text-xs">
                     <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[0] }} /> Đã duyệt {pieData[0]}%</div>
                     <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[1] }} /> Chờ duyệt {pieData[1]}%</div>
                     <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: pieColors[2] }} /> Từ chối {pieData[2]}%</div>
@@ -152,11 +152,11 @@ export default function DashboardPage() {
         {/* Biểu đồ cột: Lý do từ chối phổ biến (full width) */}
         <div>
           <Card className="overflow-hidden">
-            <CardHeader>
-              <CardTitle>Lý do từ chối phổ biến</CardTitle>
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-lg">Lý do từ chối phổ biến</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-8 gap-2 items-end h-64">
+            <CardContent className="pt-0 px-4 pb-4">
+              <div className="grid grid-cols-8 gap-2 items-end h-36 sm:h-40 md:h-48">
                 {/* Trục Y */}
                 <div className="flex flex-col justify-between h-full text-xs text-gray-500 pr-2">
                   {[8, 6, 4, 2, 0].map((t) => (
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 {/* Cột */}
-                <div className="col-span-7 grid grid-cols-5 gap-4 h-full">
+                <div className="col-span-7 grid grid-cols-5 gap-2 h-full">
                   {rejectReasons.map((r, idx) => (
                     <div key={r.label} className="flex flex-col items-center justify-end">
                       <div
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mt-3">Giá trị vượt thẩm quyền — count: 2</p>
+              <p className="text-xs text-gray-600 mt-2">Giá trị vượt thẩm quyền — count: 2</p>
             </CardContent>
           </Card>
         </div>

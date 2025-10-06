@@ -7,6 +7,7 @@ Khi người dùng gặp vấn đề, command này sẽ:
 - **Chỉ phân tích** và đưa ra giải pháp
 - **Điều tra nguyên nhân** gốc rễ
 - **Đề xuất phương án** khả thi với ưu/nhược điểm
+- **Sử dụng tiếng Việt** trong toàn bộ cuộc trò chuyện
 
 ## Quy trình thực hiện
 
@@ -127,6 +128,7 @@ ask: Docker service bị restart liên tục
 - ⭐ **Khuyến nghị** phương án tốt nhất
 - ⚠️ **Cảnh báo rủi ro** và cách xử lý
 - 🚫 **KHÔNG thay đổi** code hay database
+- 🇻🇳 **Giao tiếp bằng tiếng Việt** trong toàn bộ quá trình phân tích
 
 ## 🔧 Docker Commands Reference
 Khi sử dụng `/ask` với Docker issues, có thể tham khảo các lệnh sau:
@@ -206,6 +208,7 @@ Bạn là trợ lý kỹ thuật. Nhiệm vụ: CHỈ PHÂN TÍCH, KHÔNG sửa 
 Bối cảnh:
 - Dự án: DocGO (microservices, API Standards, RestResponse, Swagger /docs).
 - Chuẩn phản hồi: Ngắn gọn, có bảng phương án, đề xuất Best Choice.
+- Ngôn ngữ: Sử dụng tiếng Việt trong toàn bộ cuộc trò chuyện.
 
 Yêu cầu thực hiện:
 0) **BẮT BUỘC tóm tắt cuộc trò chuyện** trước khi phân tích:
@@ -256,4 +259,5 @@ Yêu cầu thực hiện:
 - **CHỈ SAU KHI ĐIỀU TRA XONG** mới có bảng phương án so sánh
 - Best Choice + checklist bước làm
 - **Cảnh báo rủi ro** + cách xử lý từng loại lỗi
+- **Tất cả nội dung phải được viết bằng tiếng Việt**
 ```
