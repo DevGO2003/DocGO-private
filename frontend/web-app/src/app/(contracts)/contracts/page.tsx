@@ -622,8 +622,8 @@ export default function ContractsPage() {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+          )}
+        </div>
 
           {/* Tags */}
           <div className="mt-4">
@@ -704,7 +704,7 @@ export default function ContractsPage() {
               )
             })}
               </div>
-            )}
+              )}
           </div>
         </div>
 
@@ -968,8 +968,7 @@ export default function ContractsPage() {
                 </div>
               )}
         </div>
-
-
+          )}
         {/* Table Settings Modal */}
         <TableSettings
           columns={tableColumns}
@@ -979,6 +978,7 @@ export default function ContractsPage() {
           isOpen={showTableSettings}
           onClose={() => setShowTableSettings(false)}
         />
+      </div>
       </div>
     </DashboardLayout>
   )
