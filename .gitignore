@@ -255,13 +255,6 @@ site/
 .cursor/tools/**/env/.env
 
 # Note: Cursor will still track these via .cursorignore (!**/.env)
-document/**/*.pdf
-document/**/*.doc
-document/**/*.docx
-document/**/*.xls
-document/**/*.xlsx
-document/**/*.ppt
-document/**/*.pptx
 **/document_uploads/.git-backup/
 
 ###############################################################################

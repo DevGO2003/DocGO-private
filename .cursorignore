@@ -14,7 +14,7 @@
 **/__pycache__/
 **/build/
 **/dist/
-**/documents/
+# removed documents folder ignore (no longer used)
 **/logs/
 **/node_modules/
 **/target/
