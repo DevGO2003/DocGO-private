@@ -329,7 +329,7 @@ async def delete_file(
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/files/{file_id}"
+            path=f"/api/v1/automation-service/v1/files/{file_id}"
         )
     except HTTPException as e:
         return RestResponse(
@@ -340,7 +340,7 @@ async def delete_file(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/files/{file_id}"
+            path=f"/api/v1/automation-service/v1/files/{file_id}"
         )
 
 
