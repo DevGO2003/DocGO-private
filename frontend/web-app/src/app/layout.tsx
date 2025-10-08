@@ -2,14 +2,15 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import '@/styles/animations.css'
-import { Toaster } from 'react-hot-toast'
+// import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { LoadingProvider } from '@/components/LoadingProvider'
-import { PageTransition } from '@/components/PageTransition'
+// import { PageTransition } from '@/components/PageTransition'
 import { I18nProvider } from '@/components/I18nProvider'
-import StickyFixGlobal from '@/components/StickyFixGlobal'
-import GlobalErrorSummary from '@/components/GlobalErrorSummary'
-import GlobalDragDrop from '@/components/GlobalDragDrop'
+// import StickyFixGlobal from '@/components/StickyFixGlobal'
+// import GlobalErrorSummary from '@/components/GlobalErrorSummary'
+// import GlobalDragDrop from '@/components/GlobalDragDrop'
+// import { AutoLoginIndicator } from '@/components/AutoLoginIndicator'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -87,37 +88,11 @@ export default function RootLayout({
         <I18nProvider>
           <LoadingProvider>
             <AuthProvider>
-              <GlobalDragDrop>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </GlobalDragDrop>
-              <Toaster 
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    iconTheme: {
-                      primary: '#10b981',
-                      secondary: '#fff',
-                    },
-                  },
-                  error: {
-                    duration: 5000,
-                    iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#fff',
-                    },
-                  },
-                }}
-              />
-              <GlobalErrorSummary />
-              <StickyFixGlobal />
+              {children}
+              {/* Temporarily disabled to resolve undefined component during RSC */}
+              {/* <GlobalErrorSummary /> */}
+              {/* <StickyFixGlobal /> */}
+              {/* <AutoLoginIndicator /> */}
             </AuthProvider>
           </LoadingProvider>
         </I18nProvider>
