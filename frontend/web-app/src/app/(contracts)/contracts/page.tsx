@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { TitlePanel } from '@/components/ui'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
-import { contractAPI } from '@/lib/api'
+import { contractAPI, fileStorageAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 import { tagAPI } from '@/lib/api'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -866,6 +866,60 @@ export default function ContractsPage() {
                       )}
                     </div>
                   </Link>
+                  {/* Action buttons at bottom of card */}
+                  <div className="mt-4 ml-6 flex flex-wrap gap-2">
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        try {
+                          const res = await fileStorageAPI.getFile(c.id)
+                          const file = (res.data as any)?.data
+                          if (file?.file_url) window.open(file.file_url, '_blank')
+                        } catch (err) { console.error('Open file error', err) }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                      title="Mở file đính kèm"
+                    >
+                      <span>📂 Mở</span>
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        try {
+                          const res = await fileStorageAPI.getFile(c.id)
+                          const file = (res.data as any)?.data
+                          if (file?.file_url) window.open(file.file_url, '_blank')
+                        } catch (err) { console.error('Preview file error', err) }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                      title="Xem nhanh file"
+                    >
+                      <span>👁️ Preview</span>
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        try {
+                          const metaResp = await fileStorageAPI.getFile(c.id)
+                          const meta = (metaResp.data as any)?.data
+                          const resp = await fetch(`/api/v1/automation-service/v1/files/${c.id}/download`)
+                          const blob = await resp.blob()
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = meta?.filename || `file-${c.id}`
+                          document.body.appendChild(a)
+                          a.click()
+                          a.remove()
+                          window.URL.revokeObjectURL(url)
+                        } catch (err) { console.error('Download file error', err) }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                      title="Tải file"
+                    >
+                      <span>⬇️ Download</span>
+                    </button>
+                  </div>
                 </div>
               ))}
               </div>
@@ -914,9 +968,7 @@ export default function ContractsPage() {
                 </div>
               )}
         </div>
-          )}
 
-        </div>
 
         {/* Table Settings Modal */}
         <TableSettings

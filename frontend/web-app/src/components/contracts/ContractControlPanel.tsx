@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { fileStorageAPI } from '@/lib/api'
 
 interface ContractControlPanelProps {
   selectedItems: string[]
@@ -23,6 +24,42 @@ export default function ContractControlPanel({
   onClearSelection
 }: ContractControlPanelProps) {
   const hasSelection = selectedItems.length > 0
+  async function handleOpenFile() {
+    if (!hasSelection) return
+    const id = selectedItems[0]
+    try {
+      const res = await fileStorageAPI.getFile(id)
+      const file = (res.data as any)?.data
+      if (file?.file_url) window.open(file.file_url, '_blank')
+    } catch (e) { console.error('Open file error', e) }
+  }
+  async function handlePreviewFile() {
+    if (!hasSelection) return
+    const id = selectedItems[0]
+    try {
+      const res = await fileStorageAPI.getFile(id)
+      const file = (res.data as any)?.data
+      if (file?.file_url) window.open(file.file_url, '_blank')
+    } catch (e) { console.error('Preview file error', e) }
+  }
+  async function handleDownloadFile() {
+    if (!hasSelection) return
+    const id = selectedItems[0]
+    try {
+      const resp = await fileStorageAPI.getFile(id)
+      const meta = (resp.data as any)?.data
+      const dl = await fetch(`/api/v1/automation-service/v1/files/${id}/download`)
+      const blob = await dl.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = meta?.filename || `file-${id}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (e) { console.error('Download file error', e) }
+  }
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-white/90 via-indigo-50/50 to-purple-50/50 backdrop-blur-xl rounded-3xl border border-white/20 p-6 shadow-xl shadow-indigo-100/50">
@@ -153,6 +190,51 @@ export default function ContractControlPanel({
                   </div>
                 </button>
                 
+                <button
+                  onClick={handleOpenFile}
+                  className="group relative overflow-hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 shadow transition-all duration-200 hover:scale-[1.02] text-sm font-semibold"
+                  title="Mở file đính kèm đầu tiên"
+                >
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="p-1 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors duration-200">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l4-4 4 4m-8-8l4 4 4-4" />
+                      </svg>
+                    </div>
+                    <span>📂 Mở file (1)</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handlePreviewFile}
+                  className="group relative overflow-hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 shadow transition-all duration-200 hover:scale-[1.02] text-sm font-semibold"
+                  title="Xem nhanh file"
+                >
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="p-1 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors duration-200">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553 2.276A2 2 0 0121 14.09V19a2 2 0 01-2 2h-3m-1-11V5a2 2 0 012-2h3a2 2 0 012 2v5m-8 11H7a2 2 0 01-2-2v-5.09a2 2 0 011.447-1.814L11 10m0 0V5a2 2 0 012-2h0" />
+                      </svg>
+                    </div>
+                    <span>👁️ Preview</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleDownloadFile}
+                  className="group relative overflow-hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 shadow transition-all duration-200 hover:scale-[1.02] text-sm font-semibold"
+                  title="Tải file đính kèm"
+                >
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="p-1 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors duration-200">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                      </svg>
+                    </div>
+                    <span>⬇️ Download</span>
+                  </div>
+                </button>
+
                 <button
                   onClick={onDeleteSelected}
                   className="group relative overflow-hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow transition-all duration-200 hover:scale-[1.02] text-sm font-semibold"

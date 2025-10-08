@@ -43,6 +43,7 @@ const navigationGroups = [
     titleKey: 'category.documents',
     items: [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
+      { nameKey: 'navigation.contracts', href: '/contracts', icon: DocumentTextIcon },
       { nameKey: 'navigation.documents', href: '/documents', icon: DocumentTextIcon },
       { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
       { nameKey: 'navigation.uploadDocument', href: '/upload-document', icon: ArrowUpTrayIcon },
@@ -107,13 +108,42 @@ export default function Sidebar({ collapsed = false, onCollapseToggle }: Sidebar
       const savedOrder = JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || '[]') as string[]
       const savedPins = JSON.parse(localStorage.getItem(PIN_STORAGE_KEY) || '[]') as string[]
       const savedLabels = JSON.parse(localStorage.getItem(LABELS_STORAGE_KEY) || '{}') as Record<string, string>
-      const mergedOrder = Array.from(new Set([...(savedOrder || []), ...defaultOrder]))
+      let mergedOrder = Array.from(new Set([...(savedOrder || []), ...defaultOrder]))
+
+      // Đưa Hợp đồng ngay sau Bảng điều khiển nếu có trong menu
+      const dashboardKey = 'navigation.dashboard'
+      const contractsKey = 'navigation.contracts'
+      if (mergedOrder.includes(contractsKey)) {
+        mergedOrder = mergedOrder.filter(k => k !== contractsKey)
+        const dashIdx = Math.max(0, mergedOrder.indexOf(dashboardKey))
+        mergedOrder.splice(dashIdx + 1, 0, contractsKey)
+      }
+
       setMenuOrder(mergedOrder)
-      setPinnedKeys((savedPins || []).filter((k) => defaultOrder.includes(k)))
+
+      // Ghim Hợp đồng mặc định (vẫn tôn trọng pins đã lưu)
+      const nextPins = new Set((savedPins || []).filter((k) => defaultOrder.includes(k)))
+      nextPins.add(contractsKey)
+      const pinsArr = Array.from(nextPins)
+      setPinnedKeys(pinsArr)
+      localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinsArr))
+
       setLabelOverrides(savedLabels || {})
     } catch {
-      setMenuOrder(defaultOrder)
-      setPinnedKeys([])
+      // Fallback mặc định
+      const fallbackOrder = [...defaultOrder]
+      const dashboardKey = 'navigation.dashboard'
+      const contractsKey = 'navigation.contracts'
+      if (fallbackOrder.includes(contractsKey)) {
+        const filtered = fallbackOrder.filter(k => k !== contractsKey)
+        const dashIdx = Math.max(0, filtered.indexOf(dashboardKey))
+        filtered.splice(dashIdx + 1, 0, contractsKey)
+        setMenuOrder(filtered)
+      } else {
+        setMenuOrder(defaultOrder)
+      }
+      setPinnedKeys(['navigation.contracts'])
+      localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(['navigation.contracts']))
       setLabelOverrides({})
     }
   }, [])
