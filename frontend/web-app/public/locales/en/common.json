@@ -5,6 +5,7 @@
     },
     "navigation": {
     "dashboard": "Dashboard",
+    "createDocument": "Create Document",
     "upload": "Upload",
     "contracts": "Contracts",
     "importDocument": "Import Document",

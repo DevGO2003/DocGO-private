@@ -344,3 +344,191 @@ async def delete_file(
         )
 
 
+@router.get("/check-version", summary="Kiểm tra version conflict", response_model=RestResponse[dict])
+async def check_file_version(
+    filename: str = Query(..., description="Tên file cần kiểm tra version"),
+    file_size: int = Query(..., description="Kích thước file (bytes)"),
+    last_modified: Optional[str] = Query(None, description="Thời gian sửa đổi cuối cùng (ISO format)")
+):
+    """
+    ## 📖 Mô tả
+    API kiểm tra version conflict khi upload file. So sánh file hiện tại với file đã tồn tại
+    để phát hiện xung đột version và đưa ra cảnh báo cho người dùng.
+    
+    ## 🔹 Đầu vào
+    
+    📄 **filename** (bắt buộc, query)
+    - **Loại**: string
+    - **Mô tả**: Tên file cần kiểm tra version conflict
+    - **Ví dụ**: "contract_2024.pdf", "report.docx"
+    
+    📊 **file_size** (bắt buộc, query)
+    - **Loại**: integer
+    - **Mô tả**: Kích thước file hiện tại (bytes)
+    - **Ví dụ**: 1024000, 2048000
+    
+    🕒 **last_modified** (tùy chọn, query)
+    - **Loại**: string (ISO format)
+    - **Mô tả**: Thời gian sửa đổi cuối cùng của file hiện tại
+    - **Ví dụ**: "2024-01-15T10:30:00Z"
+    
+    ## 🔹 Đầu ra
+    
+    📝 **data**
+    - **Loại**: object
+    - **Mô tả**: Thông tin version conflict check
+    - **Cấu trúc**:
+      ```json
+      {
+        "hasConflict": boolean,
+        "existingFile": {
+          "id": string,
+          "filename": string,
+          "size": integer,
+          "lastModified": string,
+          "version": string
+        },
+        "currentFile": {
+          "filename": string,
+          "size": integer,
+          "lastModified": string
+        },
+        "conflictType": "size" | "timestamp" | "none",
+        "message": string
+      }
+      ```
+    
+    📊 **apiVersion**
+    - **Loại**: string
+    - **Mô tả**: Phiên bản API (v1)
+    
+    🔢 **statusCode**
+    - **Loại**: integer
+    - **Mô tả**: Mã trạng thái HTTP (200: OK)
+    
+    📋 **shortMessage**
+    - **Loại**: string
+    - **Mô tả**: Thông báo ngắn gọn về kết quả
+    
+    📖 **description**
+    - **Loại**: string
+    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
+    
+    🕒 **timestamp**
+    - **Loại**: string (ISO-8601)
+    - **Mô tả**: Thời gian xử lý yêu cầu
+    
+    🆔 **requestId**
+    - **Loại**: string (UUID)
+    - **Mô tả**: Định danh duy nhất của yêu cầu
+    
+    🛣️ **path**
+    - **Loại**: string
+    - **Mô tả**: Đường dẫn API được gọi
+    """
+    try:
+        # Kiểm tra file có tồn tại không
+        existing_files = await file_service.get_files_by_name(filename)
+        
+        if not existing_files:
+            # Không có file nào trùng tên
+            return RestResponse[dict](
+                apiVersion="v1",
+                statusCode=200,
+                shortMessage="Success",
+                description="Không có file trùng tên, có thể upload an toàn",
+                data={
+                    "hasConflict": False,
+                    "existingFile": None,
+                    "currentFile": {
+                        "filename": filename,
+                        "size": file_size,
+                        "lastModified": last_modified
+                    },
+                    "conflictType": "none",
+                    "message": "File mới, không có xung đột version"
+                },
+                timestamp=datetime.now().isoformat(),
+                requestId=str(uuid.uuid4()),
+                path="/api/v1/automation-service/v1/files/check-version"
+            )
+        
+        # Lấy file mới nhất (theo thời gian tạo)
+        latest_file = max(existing_files, key=lambda x: x.get('created_at', ''))
+        
+        # So sánh kích thước file
+        size_conflict = latest_file.get('size', 0) != file_size
+        
+        # So sánh thời gian sửa đổi (nếu có)
+        timestamp_conflict = False
+        if last_modified and latest_file.get('last_modified'):
+            try:
+                from datetime import datetime
+                current_time = datetime.fromisoformat(last_modified.replace('Z', '+00:00'))
+                existing_time = datetime.fromisoformat(latest_file['last_modified'].replace('Z', '+00:00'))
+                timestamp_conflict = current_time < existing_time
+            except:
+                timestamp_conflict = False
+        
+        # Xác định loại xung đột
+        conflict_type = "none"
+        if size_conflict and timestamp_conflict:
+            conflict_type = "both"
+        elif size_conflict:
+            conflict_type = "size"
+        elif timestamp_conflict:
+            conflict_type = "timestamp"
+        
+        has_conflict = conflict_type != "none"
+        
+        # Tạo thông báo
+        if has_conflict:
+            if conflict_type == "size":
+                message = f"File '{filename}' đã tồn tại với kích thước khác ({latest_file.get('size', 0)} bytes vs {file_size} bytes)"
+            elif conflict_type == "timestamp":
+                message = f"File '{filename}' đã tồn tại với thời gian sửa đổi mới hơn"
+            else:
+                message = f"File '{filename}' đã tồn tại với cả kích thước và thời gian sửa đổi khác"
+        else:
+            message = f"File '{filename}' đã tồn tại nhưng không có xung đột version"
+        
+        return RestResponse[dict](
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Đã kiểm tra version conflict thành công",
+            data={
+                "hasConflict": has_conflict,
+                "existingFile": {
+                    "id": latest_file.get('id', ''),
+                    "filename": latest_file.get('filename', ''),
+                    "size": latest_file.get('size', 0),
+                    "lastModified": latest_file.get('last_modified', ''),
+                    "version": latest_file.get('version', '1.0')
+                },
+                "currentFile": {
+                    "filename": filename,
+                    "size": file_size,
+                    "lastModified": last_modified
+                },
+                "conflictType": conflict_type,
+                "message": message
+            },
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path="/api/v1/automation-service/v1/files/check-version"
+        )
+        
+    except Exception as e:
+        return RestResponse[dict](
+            apiVersion="v1",
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi kiểm tra version conflict: {str(e)}",
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path="/api/v1/automation-service/v1/files/check-version"
+        )
+
+

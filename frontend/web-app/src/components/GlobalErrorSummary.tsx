@@ -18,7 +18,7 @@ function calculateGlobalErrors(): GlobalErrorSummary {
     '/': 1, // warning
     '/auth/login': 1, // critical
     '/dashboard': 1, // critical
-    '/contracts': 3, // 3 warnings
+    '/documents': 3, // 3 warnings
     '/analytics': 1, // critical
     '/settings': 1, // critical
     '/user-management': 3, // 3 criticals
@@ -161,4 +161,5 @@ export default function GlobalErrorSummary() {
     </div>
   )
 }
+
 

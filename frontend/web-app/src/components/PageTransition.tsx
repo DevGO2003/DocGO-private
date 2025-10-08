@@ -10,8 +10,7 @@ function isInternalMenuNavigation(fromPath: string, toPath: string): boolean {
   const menuRoutes = [
     '/dashboard',
     '/analytics', 
-    '/contracts',
-    '/import-document',
+    '/documents',
     '/e-signature',
     '/collaboration-comments',
     '/contract-versions',

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TitlePanel } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
+import { CardSkeleton, StatsSkeleton } from '@/components/ui/LoadingSkeleton'
 
 // Hook dữ liệu đơn giản: dùng mock bây giờ, dễ chuyển sang API thật sau
 function useDashboardData() {
@@ -60,10 +61,24 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* Page Title */}
         <TitlePanel
-          title="THỐNG KÊ"
-          description="Tổng quan hoạt động và số liệu chính"
+          title={
+            <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+              📊THỐNG KÊ Tổng quan hoạt động và số liệu chính
+            </span>
+          }
           variant="primary"
         />
+        {loading ? (
+          <div>
+            <StatsSkeleton cards={4} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2"><CardSkeleton className="h-48" /></div>
+              <div><CardSkeleton className="h-48" /></div>
+            </div>
+            <CardSkeleton className="h-56" />
+          </div>
+        ) : (
+        <div>
         {/* 4 Ô thống kê trên cùng */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statusStats.map((s, idx) => (
@@ -183,6 +198,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+        </div>
+        )}
       </div>
     </DashboardLayout>
   )

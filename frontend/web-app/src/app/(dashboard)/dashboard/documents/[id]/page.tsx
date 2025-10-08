@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams } from 'next/navigation'
-import { contractAPI } from '@/lib/api'
+import { documentAPI } from '@/lib/apis/document-api'
 
 export default function ContractDetailPage() {
   const params = useParams() as { id: string }
@@ -16,7 +16,7 @@ export default function ContractDetailPage() {
       setLoading(true)
       try {
         setError('')
-        const res = await contractAPI.getContract(String(params.id))
+        const res = await documentAPI.getDocumentById(String(params.id))
         const c: any = res.data?.data
         const mapped = {
           id: c.id,
@@ -50,7 +50,7 @@ export default function ContractDetailPage() {
         }
         setData(mapped)
       } catch (e: any) {
-        setError('Lỗi kết nối máy chủ')
+        setError('Lá»—i káº¿t ná»‘i mÃ¡y chá»§')
         setData(null)
       } finally {
         setLoading(false)
@@ -80,7 +80,7 @@ export default function ContractDetailPage() {
   if (!data) {
     return (
       <DashboardLayout>
-        <div className="p-6">Không tìm thấy hợp đồng.</div>
+        <div className="p-6">KhÃ´ng tÃ¬m tháº¥y há»£p Ä‘á»“ng.</div>
       </DashboardLayout>
     )
   }
@@ -93,7 +93,7 @@ export default function ContractDetailPage() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">{data.title}</h1>
-              <p className="text-gray-600">Mã: HD-{data.id} · Loại: {data.contractType}</p>
+              <p className="text-gray-600">MÃ£: HD-{data.id} Â· Loáº¡i: {data.contractType}</p>
             </div>
             <div className="flex gap-2">
               <span className={`px-3 py-1 text-sm rounded-full border ${badgeClass(data.status)}`}>{data.status}</span>
@@ -108,29 +108,29 @@ export default function ContractDetailPage() {
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Hành động:</span>
+              <span>HÃ nh Ä‘á»™ng:</span>
             </div>
             <div className="flex flex-wrap gap-2">
               <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
-                📝 Chỉnh sửa
+                ðŸ“ Chá»‰nh sá»­a
               </button>
               <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-sm">
-                📤 Gửi duyệt
+                ðŸ“¤ Gá»­i duyá»‡t
               </button>
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow-sm">
-                📋 Tạo phiên bản
+                ðŸ“‹ Táº¡o phiÃªn báº£n
               </button>
               <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium shadow-sm">
-                ✍️ Gửi ký
+                âœï¸ Gá»­i kÃ½
               </button>
               <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium shadow-sm">
-                📄 Tải PDF
+                ðŸ“„ Táº£i PDF
               </button>
               <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium shadow-sm">
-                💬 Bình luận
+                ðŸ’¬ BÃ¬nh luáº­n
               </button>
               <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium shadow-sm">
-                🗑️ Xóa
+                ðŸ—‘ï¸ XÃ³a
               </button>
             </div>
           </div>
@@ -141,19 +141,19 @@ export default function ContractDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Parties */}
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Các bên tham gia</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">CÃ¡c bÃªn tham gia</h3>
               <div className="divide-y">
                 {data.parties?.map((p: any, idx: number) => (
                   <div key={idx} className="py-3 flex items-start justify-between gap-4">
                     <div>
                       <div className="font-medium text-gray-900">{p.name}</div>
-                      <div className="text-sm text-gray-600">Vai trò: {p.role}</div>
-                      {p.representative && <div className="text-sm text-gray-600">Đại diện: {p.representative}</div>}
-                      {p.address && <div className="text-sm text-gray-600">Địa chỉ: {p.address}</div>}
+                      <div className="text-sm text-gray-600">Vai trÃ²: {p.role}</div>
+                      {p.representative && <div className="text-sm text-gray-600">Äáº¡i diá»‡n: {p.representative}</div>}
+                      {p.address && <div className="text-sm text-gray-600">Äá»‹a chá»‰: {p.address}</div>}
                     </div>
                     <div className="text-right text-sm text-gray-600">
                       {p.taxCode && <div>MST: {p.taxCode}</div>}
-                      {p.contact && <div>Liên hệ: {p.contact}</div>}
+                      {p.contact && <div>LiÃªn há»‡: {p.contact}</div>}
                     </div>
                   </div>
                 ))}
@@ -162,14 +162,14 @@ export default function ContractDetailPage() {
 
             {/* Content */}
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Nội dung hợp đồng</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Ná»™i dung há»£p Ä‘á»“ng</h3>
               <pre className="whitespace-pre-wrap text-sm text-gray-700">{data.content}</pre>
             </div>
 
             {/* Clauses */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Điều khoản chính</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Äiá»u khoáº£n chÃ­nh</h3>
                 <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
                   {data.keyClauses?.map((c: any, i: number) => (
                     <li key={i}><span className="font-medium">{c.name}:</span> {c.description}</li>
@@ -177,7 +177,7 @@ export default function ContractDetailPage() {
                 </ul>
               </div>
               <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Điều khoản bất lợi</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Äiá»u khoáº£n báº¥t lá»£i</h3>
                 <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
                   {data.unfavorableClauses?.map((c: any, i: number) => (
                     <li key={i}><span className="font-medium">{c.clauseName}:</span> {c.description}</li>
@@ -191,32 +191,32 @@ export default function ContractDetailPage() {
           <div className="space-y-6">
             {/* Timing & Payment */}
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Thời hạn & Thanh toán</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Thá»i háº¡n & Thanh toÃ¡n</h3>
               <div className="text-sm text-gray-700 space-y-2">
-                <div className="flex justify-between"><span>Hiệu lực</span><span>{data.effectiveDate}</span></div>
-                <div className="flex justify-between"><span>Hết hạn</span><span>{data.expiryDate}</span></div>
-                <div className="flex justify-between"><span>Tổng giá trị</span><span>{data.paymentDetails?.totalValue?.toLocaleString('vi-VN')} {data.paymentDetails?.currency}</span></div>
-                <div className="flex justify-between"><span>Lịch thanh toán</span><span>{data.paymentDetails?.schedule}</span></div>
+                <div className="flex justify-between"><span>Hiá»‡u lá»±c</span><span>{data.effectiveDate}</span></div>
+                <div className="flex justify-between"><span>Háº¿t háº¡n</span><span>{data.expiryDate}</span></div>
+                <div className="flex justify-between"><span>Tá»•ng giÃ¡ trá»‹</span><span>{data.paymentDetails?.totalValue?.toLocaleString('vi-VN')} {data.paymentDetails?.currency}</span></div>
+                <div className="flex justify-between"><span>Lá»‹ch thanh toÃ¡n</span><span>{data.paymentDetails?.schedule}</span></div>
               </div>
             </div>
 
             {/* Risk & Compliance */}
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Rủi ro & Tuân thủ</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Rá»§i ro & TuÃ¢n thá»§</h3>
               <div className="text-sm text-gray-700 space-y-2">
-                <div><span className="font-medium">Mức rủi ro:</span> {data.riskAssessment?.riskLevel}</div>
-                <div><span className="font-medium">Yếu tố rủi ro:</span> {(data.riskAssessment?.riskFactors||[]).join(', ')}</div>
-                <div><span className="font-medium">Biện pháp:</span> {(data.riskAssessment?.mitigationMeasures||[]).join(', ')}</div>
-                <div><span className="font-medium">Tuân thủ:</span> {data.complianceStatus?.status}</div>
+                <div><span className="font-medium">Má»©c rá»§i ro:</span> {data.riskAssessment?.riskLevel}</div>
+                <div><span className="font-medium">Yáº¿u tá»‘ rá»§i ro:</span> {(data.riskAssessment?.riskFactors||[]).join(', ')}</div>
+                <div><span className="font-medium">Biá»‡n phÃ¡p:</span> {(data.riskAssessment?.mitigationMeasures||[]).join(', ')}</div>
+                <div><span className="font-medium">TuÃ¢n thá»§:</span> {data.complianceStatus?.status}</div>
               </div>
             </div>
 
             {/* Reminders */}
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-3">Nhắc nhở</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Nháº¯c nhá»Ÿ</h3>
               <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
                 {data.reminders?.map((r: any, i: number) => (
-                  <li key={i}><span className="font-medium">{r.type}</span> — {r.date}: {r.content}</li>
+                  <li key={i}><span className="font-medium">{r.type}</span> â€” {r.date}: {r.content}</li>
                 ))}
               </ul>
             </div>
@@ -247,5 +247,3 @@ function badgeClass(status: string) {
       return 'bg-gray-50 text-gray-700 border-gray-200'
   }
 }
-
-

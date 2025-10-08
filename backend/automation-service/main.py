@@ -55,7 +55,11 @@ app.add_middleware(ActorCorrelationMiddleware)
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    # Explicit origins are required when allow_credentials=True
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

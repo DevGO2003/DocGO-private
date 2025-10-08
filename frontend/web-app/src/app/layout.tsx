@@ -9,6 +9,7 @@ import { PageTransition } from '@/components/PageTransition'
 import { I18nProvider } from '@/components/I18nProvider'
 import StickyFixGlobal from '@/components/StickyFixGlobal'
 import GlobalErrorSummary from '@/components/GlobalErrorSummary'
+import GlobalDragDrop from '@/components/GlobalDragDrop'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -86,9 +87,11 @@ export default function RootLayout({
         <I18nProvider>
           <LoadingProvider>
             <AuthProvider>
-              <PageTransition>
-                {children}
-              </PageTransition>
+              <GlobalDragDrop>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </GlobalDragDrop>
               <Toaster 
                 position="top-right"
                 toastOptions={{

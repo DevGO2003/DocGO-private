@@ -175,8 +175,7 @@ export const ROUTES = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   DASHBOARD: '/dashboard',
-  CONTRACTS: '/contracts',
-  IMPORT_DOCUMENT: '/import-document',
+  CONTRACTS: '/documents',
   USERS: '/users',
   AI_PROCESSING: '/ai-processing',
   REPORTS: '/reports',
@@ -209,3 +208,4 @@ export const SUCCESS_MESSAGES = {
   SENT: 'Gửi thành công.',
   RESTORED: 'Khôi phục thành công.',
 } as const
+

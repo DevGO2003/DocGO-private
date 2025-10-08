@@ -88,7 +88,7 @@ export class DocumentAPI {
   }
 
   async getContractById(id: string) {
-    return apiClient.get<ApiResponse<Contract>>(`${this.basePath}/contracts/${id}`)
+    return apiClient.get<ApiResponse<Contract>>(`${this.basePath}/documents/${id}`)
   }
 
   async createContract(contractData: ContractCreateData) {
@@ -96,15 +96,15 @@ export class DocumentAPI {
   }
 
   async updateContract(id: string, contractData: ContractUpdateData) {
-    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/contracts/${id}`, contractData)
+    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/documents/${id}`, contractData)
   }
 
   async deleteContract(id: string) {
-    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/contracts/${id}`)
+    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/documents/${id}`)
   }
 
   async restoreContract(id: string) {
-    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/contracts/${id}/restore`)
+    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/documents/${id}/restore`)
   }
 
   // Documents
@@ -155,13 +155,13 @@ export class DocumentAPI {
 
   // Attachments
   async getContractAttachments(contractId: string) {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/contracts/${contractId}/attachments`)
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/documents/${contractId}/attachments`)
   }
 
   async uploadContractAttachment(contractId: string, file: File) {
     const formData = new FormData()
     formData.append('file', file)
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/contracts/${contractId}/attachments`, formData, {
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/documents/${contractId}/attachments`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -194,5 +194,6 @@ export class DocumentAPI {
 
 // Export instance
 export const documentAPI = new DocumentAPI()
+
 
 
