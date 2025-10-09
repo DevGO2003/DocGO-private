@@ -68,6 +68,7 @@ export default function DocumentsPage() {
   const [hasMoreData, setHasMoreData] = useState<boolean>(true)
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
   const abortRef = useRef<AbortController | null>(null)
+  const [activeTab, setActiveTab] = useState<'all' | 'contract'>('all')
 
   // Table columns configuration
   const [tableColumns, setTableColumns] = useState<TableColumn[]>([
@@ -543,6 +544,20 @@ export default function DocumentsPage() {
           onClearSelection={clearSelection}
         />
 
+        {/* Tabs: All files / Contract files */}
+        <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-2 shadow-sm">
+          <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`px-4 py-2 text-sm ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            >Tất cả file</button>
+            <button
+              onClick={() => setActiveTab('contract')}
+              className={`px-4 py-2 text-sm border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            >File hợp đồng</button>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -818,7 +833,7 @@ export default function DocumentsPage() {
               </div>
               
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {items.map(c => (
+              {(activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)).map(c => (
                 <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
                   <div className="absolute top-4 left-4">
                     <input

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { contractAPI } from '@/lib/api'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
+import { DocumentDetailTabs } from '@/components/DocumentDetail/DocumentDetailTabs'
 
 export default function DocumentDetailPage() {
   const params = useParams() as { id: string }
@@ -140,92 +141,8 @@ export default function DocumentDetailPage() {
           </div>
         </div>
 
-        {/* Meta */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Parties */}
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Các bên tham gia</h3>
-              <div className="divide-y">
-                {data.parties?.map((p: any, idx: number) => (
-                  <div key={idx} className="py-3 flex items-start justify-between gap-4">
-                    <div>
-                      <div className="font-medium text-gray-900">{p.name}</div>
-                      <div className="text-sm text-gray-600">Vai trò: {p.role}</div>
-                      {p.representative && <div className="text-sm text-gray-600">Đại diện: {p.representative}</div>}
-                      {p.address && <div className="text-sm text-gray-600">Địa chỉ: {p.address}</div>}
-                    </div>
-                    <div className="text-right text-sm text-gray-600">
-                      {p.taxCode && <div>MST: {p.taxCode}</div>}
-                      {p.contact && <div>Liên hệ: {p.contact}</div>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Nội dung tài liệu</h3>
-              <pre className="whitespace-pre-wrap text-sm text-gray-700">{data.content}</pre>
-            </div>
-
-            {/* Clauses */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Điều khoản chính</h3>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  {data.keyClauses?.map((c: any, i: number) => (
-                    <li key={i}><span className="font-medium">{c.name}:</span> {c.description}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Điều khoản bất lợi</h3>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  {data.unfavorableClauses?.map((c: any, i: number) => (
-                    <li key={i}><span className="font-medium">{c.clauseName}:</span> {c.description}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Timing & Payment */}
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Thời hạn & Thanh toán</h3>
-              <div className="text-sm text-gray-700 space-y-2">
-                <div className="flex justify-between"><span>Hiệu lực</span><span>{data.effectiveDate}</span></div>
-                <div className="flex justify-between"><span>Hết hạn</span><span>{data.expiryDate}</span></div>
-                <div className="flex justify-between"><span>Tổng giá trị</span><span>{data.paymentDetails?.totalValue?.toLocaleString('vi-VN')} {data.paymentDetails?.currency}</span></div>
-                <div className="flex justify-between"><span>Lịch thanh toán</span><span>{data.paymentDetails?.schedule}</span></div>
-              </div>
-            </div>
-
-            {/* Risk & Compliance */}
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">Rủi ro & Tuân thủ</h3>
-              <div className="text-sm text-gray-700 space-y-2">
-                <div><span className="font-medium">Mức rủi ro:</span> {data.riskAssessment?.riskLevel}</div>
-                <div><span className="font-medium">Yếu tố rủi ro:</span> {(data.riskAssessment?.riskFactors||[]).join(', ')}</div>
-                <div><span className="font-medium">Biện pháp:</span> {(data.riskAssessment?.mitigationMeasures||[]).join(', ')}</div>
-                <div><span className="font-medium">Tuân thủ:</span> {data.complianceStatus?.status}</div>
-              </div>
-            </div>
-
-            {/* Reminders */}
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-5 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-3">Nhắc nhở</h3>
-              <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                {data.reminders?.map((r: any, i: number) => (
-                  <li key={i}><span className="font-medium">{r.type}</span> — {r.date}: {r.content}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        {/* Document Detail Tabs */}
+        <DocumentDetailTabs documentData={data} />
       </div>
     </DashboardLayout>
   )
