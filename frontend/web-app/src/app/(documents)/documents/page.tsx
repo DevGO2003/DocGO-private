@@ -343,8 +343,52 @@ export default function DocumentsPage() {
         {/* Page Header */}
         <HeaderPanel
           title="QUẢN LÝ TÀI LIỆU"
-          description="Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh"
-          variant="primary"
+          breadcrumbs={[{ label: 'Documents', href: '/documents' }, { label: 'Danh sách', current: true }]}
+          density="condensed"
+          wrapControls
+          right={
+            <div className="flex items-center gap-2">
+              {/* Tabs */}
+              <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+                <button onClick={() => setActiveTab('all')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Tất cả file">
+                  <span className="md:hidden">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                  </span>
+                  <span className="hidden md:inline">Tất cả file</span>
+                </button>
+                <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
+                  <span className="md:hidden">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+                  </span>
+                  <span className="hidden md:inline">File hợp đồng</span>
+                </button>
+              </div>
+
+              {/* Filters (compact) */}
+              <div className="min-w-[240px] md:min-w-[420px]">
+                <DocumentsFilters
+                  search={search}
+                  onSearchChange={(v) => setSearch(v)}
+                  status={status}
+                  onStatusChange={(v) => { setStatus(v); setPage(0) }}
+                  type={type}
+                  onTypeChange={(v) => { setType(v); setPage(0) }}
+                  availableTags={availableTags}
+                  tagsLoading={tagsLoading}
+                  tagsError={tagsError}
+                  selectedTags={selectedTags}
+                  onToggleTag={toggleTag}
+                  onRetryTags={handleRetryTags}
+                  sortBy={sortBy}
+                  onSortByChange={setSortBy}
+                  sortDirection={sortDirection}
+                  onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                  showAdvanced={showAdvanced}
+                  onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                />
+              </div>
+            </div>
+          }
         />
 
         {/* Control Panel */}
@@ -358,103 +402,12 @@ export default function DocumentsPage() {
           onClearSelection={clearSelection}
         />
 
-        {/* Tabs: All files / Contract files */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-2 shadow-sm">
-          <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`px-4 py-2 text-sm ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-            >Tất cả file</button>
-            <button
-              onClick={() => setActiveTab('contract')}
-              className={`px-4 py-2 text-sm border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-            >File hợp đồng</button>
-          </div>
-        </div>
+        {/* Tabs moved into HeaderPanel */}
 
-        {/* Filters */}
-        <DocumentsFilters
-          search={search}
-          onSearchChange={(v) => setSearch(v)}
-          status={status}
-          onStatusChange={(v) => { setStatus(v); setPage(0) }}
-          type={type}
-          onTypeChange={(v) => { setType(v); setPage(0) }}
-          availableTags={availableTags}
-          tagsLoading={tagsLoading}
-          tagsError={tagsError}
-          selectedTags={selectedTags}
-          onToggleTag={toggleTag}
-          onRetryTags={handleRetryTags}
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-          showAdvanced={showAdvanced}
-          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-        />
+        {/* Filters moved into HeaderPanel */}
 
-        {/* Content Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-400 hover:text-gray-600'}`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-            <span className="text-sm text-gray-600">
-              {displayedItems.length} tài liệu
-              {selectedItems.length > 0 && ` · ${selectedItems.length} đã chọn`}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* Refresh Button */}
-            <button
-              onClick={() => refreshData()}
-              disabled={refreshing}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Làm mới dữ liệu"
-            >
-              {refreshing ? (
-                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              )}
-            </button>
-            
-            {viewMode === 'list' && (
-              <button
-                onClick={() => setShowTableSettings(true)}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                title="Cài đặt bảng"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
+        {/* Content Header removed (now inside HeaderPanel) */}
+        
         {/* Content */}
         <div>
           {loading ? (

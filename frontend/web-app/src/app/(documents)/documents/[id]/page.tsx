@@ -12,7 +12,7 @@ const DocumentDetailTabs = dynamic(() => import('@/components/DocumentDetail/Doc
   loading: () => <SkeletonDetails />
 })
 import { useDocumentQuery } from '../_hooks/useDocumentQuery'
-import DocumentHeader from '../_components/DocumentHeader'
+import { HeaderPanel } from '@/components/ui'
 
 export default function DocumentDetailPage() {
 	const params = useParams() as { id: string }
@@ -47,18 +47,25 @@ export default function DocumentDetailPage() {
 	}
 
 	return (
-		<DashboardLayout>
-			<div className="space-y-6">
-        <DocumentHeader
-					title={data.title}
-          subtitle={`Mã: HD-${data.id} · Loại: ${translateContractType(data.contractType, t)}`}
-          statusBadge={<span className={`px-3 py-1 text-sm rounded-full border ${badgeClass(data.status)}`}>{translateContractStatus(data.status, t)}</span>}
-          typeBadge={<span className="px-3 py-1 text-sm rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(data.contractType, t)}</span>}
-				/>
+    <DashboardLayout>
+      <div className="space-y-4">
+        <HeaderPanel
+          title={data.title}
+          breadcrumbs={[{ label: 'Docs', href: '/documents' }, { label: `HD-${data.id}`, current: true }]}
+          density="compact"
+          right={
+            <div className="inline-flex items-center gap-2">
+              <span className={`px-2 py-0.5 text-xs rounded-full border ${badgeClass(data.status)}`}>{translateContractStatus(data.status, t)}</span>
+              <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(data.contractType, t)}</span>
+            </div>
+          }
+        />
 
-				<DocumentDetailTabs documentData={data as any} contractSummary={contractSummary} />
-			</div>
-		</DashboardLayout>
+        <div className="mt-2">
+          <DocumentDetailTabs documentData={data as any} contractSummary={contractSummary} />
+        </div>
+      </div>
+    </DashboardLayout>
 	)
 }
 

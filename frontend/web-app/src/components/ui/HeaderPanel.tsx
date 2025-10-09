@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 
 export interface HeaderPanelProps {
   title: React.ReactNode
@@ -11,6 +12,15 @@ export interface HeaderPanelProps {
   className?: string
   maxHeights?: { desktop?: number; tablet?: number; mobile?: number }
   compact?: boolean
+  // Density: control global typography and spacing scale
+  density?: 'compact' | 'condensed' | 'cozy'
+  // New props
+  breadcrumbs?: { label: string; href?: string; current?: boolean }[]
+  right?: React.ReactNode
+  children?: React.ReactNode
+  maxHeight?: number
+  // Wrap controls: allow children to wrap with tight gaps
+  wrapControls?: boolean
 }
 
 const variantStyles = {
@@ -53,19 +63,48 @@ export default function HeaderPanel({
   title,
   description,
   icon,
-  variant = 'primary',
+  variant,
   actionButton,
   className = '',
   maxHeights,
-  compact = false
+  compact = false,
+  density = 'compact',
+  breadcrumbs,
+  right,
+  children,
+  maxHeight,
+  wrapControls = false
 }: HeaderPanelProps) {
-  const styles = variantStyles[variant]
-  const displayIcon = icon || defaultIcons[variant]
+  const styles = variant ? variantStyles[variant] : {
+    container: 'bg-white border-gray-200',
+    title: 'text-gray-900',
+    description: 'text-gray-600'
+  }
+  const displayIcon = icon || (variant ? defaultIcons[variant] : '')
 
   // Defaults per requirement: desktop 300, tablet 240, mobile 200
-  const mhDesktop = maxHeights?.desktop ?? 300
-  const mhTablet = maxHeights?.tablet ?? 240
-  const mhMobile = maxHeights?.mobile ?? 200
+  const base = maxHeight ?? undefined
+  const mhDesktop = base ?? (maxHeights?.desktop ?? 300)
+  const mhTablet = base ? Math.max(220, Math.min(base, 280)) : (maxHeights?.tablet ?? 240)
+  const mhMobile = base ? Math.max(180, Math.min(base, 220)) : (maxHeights?.mobile ?? 200)
+
+  // Density scales
+  const isCompact = density === 'compact'
+  const isCondensed = density === 'condensed'
+  const isCozy = density === 'cozy'
+
+  const paddingClass = isCompact || isCondensed ? 'p-2 sm:p-3 md:p-4 lg:p-5' : 'p-4 sm:p-5 md:p-6 lg:p-6'
+  const titleClass = isCompact
+    ? 'text-xs sm:text-sm'
+    : isCondensed
+      ? 'text-sm sm:text-base'
+      : 'text-2xl'
+  const descClass = isCompact ? 'text-[10px] sm:text-[11px]' : isCondensed ? 'text-xs' : 'text-sm'
+  const breadcrumbsText = isCompact ? 'text-[9px] sm:text-[10px]' : isCondensed ? 'text-xs' : 'text-sm'
+  const childrenScaleClass = isCompact || isCondensed
+    ? '[&_input]:text-[10px] [&_select]:text-[10px] [&_button]:text-[10px]'
+    : ''
+  const childrenWrapClass = wrapControls ? 'flex flex-wrap gap-x-2 gap-y-2 items-center' : ''
 
   return (
     <div
@@ -76,25 +115,53 @@ export default function HeaderPanel({
         overflow: 'hidden'
       }}
     >
-      <div className="p-4 sm:p-5 md:p-6 lg:p-6">
-        <div className="flex items-center justify-between">
+      <div className={`${paddingClass}`}>
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className={`font-bold tracking-tight ${compact ? 'text-xl' : 'text-2xl'} mb-1 ${styles.title}`}>
-              <span className="align-middle mr-2">{displayIcon}</span>
+            {/* Breadcrumbs */}
+            {Array.isArray(breadcrumbs) && breadcrumbs.length > 0 && (
+              <nav aria-label="Breadcrumb" className={`mb-1 ${breadcrumbsText} text-gray-500`}>
+                <ol className="flex items-center gap-2 flex-wrap">
+                  {breadcrumbs.map((bc, idx) => (
+                    <li key={idx} className="inline-flex items-center gap-2">
+                      {bc.href && !bc.current ? (
+                        <Link href={bc.href} className="hover:text-gray-700 underline-offset-2 hover:underline">
+                          {bc.label}
+                        </Link>
+                      ) : (
+                        <span aria-current={bc.current ? 'page' : undefined} className={bc.current ? 'text-gray-700 font-medium' : ''}>{bc.label}</span>
+                      )}
+                      {idx < breadcrumbs.length - 1 && <span>›</span>}
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+
+            <h1 className={`font-semibold tracking-tight ${titleClass} mb-1 ${styles.title}`}>
+              {displayIcon && <span className="align-middle mr-2">{displayIcon}</span>}
               <span className="align-middle truncate block">{title}</span>
             </h1>
             {description ? (
-              <p className={`text-sm leading-relaxed line-clamp-2 ${styles.description}`}>
+              <div className={`${descClass} leading-relaxed ${styles.description}`}>
                 {description}
-              </p>
+              </div>
             ) : null}
           </div>
-          {actionButton && (
-            <div className="ml-4 flex-shrink-0">
-              {actionButton}
-            </div>
-          )}
+
+          <div className="ml-4 flex-shrink-0 flex items-center gap-2">
+            {right}
+            {actionButton}
+          </div>
         </div>
+
+        {/* Children slot for page controls */}
+        {children ? (
+          <div className={`${'mt-2'} ${childrenScaleClass} ${childrenWrapClass}`}>
+            {/* When wrapControls enabled, we still render children directly; parent container manages wrapping */}
+            {children}
+          </div>
+        ) : null}
       </div>
 
       <style jsx>{`
