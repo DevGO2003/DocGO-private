@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import dynamic from 'next/dynamic'
 
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false })
@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
-        <TitlePanel
+        <HeaderPanel
           title="THỐNG KÊ"
           description="Tổng quan hoạt động và số liệu chính"
           variant="primary"

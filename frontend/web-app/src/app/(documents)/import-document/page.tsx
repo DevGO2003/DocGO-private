@@ -2,25 +2,32 @@
 
 import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
-import ContractSummaryRender from '@/components/ContractSummaryRender'
+import { HeaderPanel } from '@/components/ui'
 import EditableArrayTable from '@/components/EditableArrayTable'
 import ProgressBar from '@/components/ProgressBar'
-import { DocumentTextIcon, DocumentMagnifyingGlassIcon, ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { useRouter } from 'next/navigation'
+import { DocumentTextIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { automationAPI, fileStorageAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 export default function CreateContractPage() {
   // Tab state
   const [activeTab, setActiveTab] = useState<'file' | 'summary'>('file')
-  const router = useRouter()
   
   // File Tab states
   const [selectedRegularFile, setSelectedRegularFile] = useState<File | null>(null)
   const [fileUploading, setFileUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
+  
+  // OCR states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const [extractedText, setExtractedText] = useState('')
+  const [isOcrModalOpen, setIsOcrModalOpen] = useState(false)
+  const [ocrDragActive, setOcrDragActive] = useState(false)
+  const [apiKey, setApiKey] = useState('')
+  const ocrFileInputRef = useRef<HTMLInputElement>(null)
+  const regularFileInputRef = useRef<HTMLInputElement>(null)
   
   // UI state
   const [submitting, setSubmitting] = useState(false)
@@ -35,6 +42,28 @@ export default function CreateContractPage() {
   const [summaryJsonError, setSummaryJsonError] = useState<string>('')
   const [summarySubmitting, setSummarySubmitting] = useState<boolean>(false)
   const [classifyResult, setClassifyResult] = useState<any | null>(null)
+
+  // Form field states (added to satisfy references)
+  const [title, setTitle] = useState('')
+  const [creatorId, setCreatorId] = useState('')
+  const [contractType, setContractType] = useState('')
+  const [tags, setTags] = useState('')
+  const [object, setObject] = useState('')
+  const [effectiveDate, setEffectiveDate] = useState('')
+  const [term, setTerm] = useState('')
+  const [terminationConditions, setTerminationConditions] = useState('')
+  const [content, setContent] = useState('')
+  const [paymentTotalValue, setPaymentTotalValue] = useState('')
+  const [paymentCurrency, setPaymentCurrency] = useState('VND')
+  const [paymentSchedule, setPaymentSchedule] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('Chuyển khoản')
+  const [parties, setParties] = useState('')
+  const [keyClauses, setKeyClauses] = useState('')
+  const [favorableClauses, setFavorableClauses] = useState('')
+  const [unfavorableClauses, setUnfavorableClauses] = useState('')
+  const [reminders, setReminders] = useState('')
+  const [riskAssessment, setRiskAssessment] = useState('')
+  const [complianceStatus, setComplianceStatus] = useState('')
 
   const handleSummaryValidate = (value: string) => {
     if (!value.trim()) {
@@ -51,8 +80,8 @@ export default function CreateContractPage() {
     }
   }
 
-  const handleSummarySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSummarySubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault?.()
     if (!summaryJsonText.trim()) {
       toast.error('Vui lòng nhập JSON tóm tắt')
       return
@@ -74,9 +103,9 @@ export default function CreateContractPage() {
     }
   }
   
-  // File input refs
-  const ocrFileInputRef = useRef<HTMLInputElement>(null)
-  const regularFileInputRef = useRef<HTMLInputElement>(null)
+  // File input refs (remove duplicate declarations here)
+  // const ocrFileInputRef = useRef<HTMLInputElement>(null)
+  // const regularFileInputRef = useRef<HTMLInputElement>(null)
 
   // OCR Tab handlers
   const handleOcrFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -329,8 +358,8 @@ export default function CreateContractPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault?.()
     setMessage(null)
     setResponseData(null)
 
@@ -477,7 +506,7 @@ export default function CreateContractPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Page Title */}
-          <TitlePanel
+          <HeaderPanel
             title="NHẬP TÀI LIỆU"
             description="Tải lên và xử lý tài liệu hợp đồng hoặc tạo hợp đồng mới"
             variant="primary"
@@ -738,6 +767,7 @@ export default function CreateContractPage() {
               )}
 
             {/* Thông tin cơ bản */}
+            <form onSubmit={handleSubmit}>
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
                 <div className="flex items-center justify-between">
@@ -1352,6 +1382,7 @@ export default function CreateContractPage() {
                       </div>
                     )}
                   </form>
+                  
                 </div>
               )}
 
@@ -1597,8 +1628,7 @@ export default function CreateContractPage() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setSummaryData(null)
-                        }
+                        onClick={() => setSummaryData(null)}
                         className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 text-sm"
                       >
                         Làm trống dữ liệu

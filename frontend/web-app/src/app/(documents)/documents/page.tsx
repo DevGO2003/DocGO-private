@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
 import { contractAPI, fileStorageAPI } from '@/lib/api'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
@@ -94,7 +94,7 @@ export default function DocumentsPage() {
     if (isLoadMore) {
       setIsLoadingMore(true)
     } else {
-    setLoading(true)
+      setLoading(true)
       setPage(0) // Reset to first page when not loading more
     }
     
@@ -184,7 +184,7 @@ export default function DocumentsPage() {
         setAllItems(newItems)
       } else {
         // Replace all items
-      setItems(mapped)
+        setItems(mapped)
         setDisplayedItems(mapped)
         setAllItems(mapped)
       }
@@ -221,10 +221,10 @@ export default function DocumentsPage() {
         }
       })
       if (!isLoadMore) {
-      setItems([])
+        setItems([])
         setDisplayedItems([])
         setAllItems([])
-      setTotalPages(1)
+        setTotalPages(1)
       }
     } finally {
       setLoading(false)
@@ -329,9 +329,9 @@ export default function DocumentsPage() {
           setAvailableTags([])
           console.warn('[Documents] No tags returned from API')
         } else {
-        setAvailableTags(tagsFromApi)
+          setAvailableTags(tagsFromApi)
           setTagsError(false)
-        console.log('[Documents] Loaded tags from API:', tagsFromApi)
+          console.log('[Documents] Loaded tags from API:', tagsFromApi)
         }
       } catch (error) {
         console.error('[Documents] Error loading tags:', error)
@@ -527,7 +527,7 @@ export default function DocumentsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <TitlePanel
+        <HeaderPanel
           title="QUẢN LÝ TÀI LIỆU"
           description="Tìm kiếm, lọc trạng thái/loại và gắn thẻ nhanh"
           variant="primary"
@@ -637,8 +637,8 @@ export default function DocumentsPage() {
                   </button>
                 </div>
               </div>
-          )}
-        </div>
+            )}
+          </div>
 
           {/* Tags */}
           <div className="mt-4">
@@ -701,25 +701,25 @@ export default function DocumentsPage() {
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
-            {availableTags.map((t: string) => {
-              const active = selectedTags.includes(t)
-              return (
-                <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
+                {availableTags.map((t: string) => {
+                  const active = selectedTags.includes(t)
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => toggleTag(t)}
                       className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${
                         active 
                           ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-indigo-200 shadow-md' 
                           : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
                       }`}
-                >
-                  <TagIcon className="h-4 w-4" />
-                  {t}
-                </button>
-              )
-            })}
+                    >
+                      <TagIcon className="h-4 w-4" />
+                      {t}
+                    </button>
+                  )
+                })}
               </div>
-              )}
+            )}
           </div>
         </div>
 
@@ -750,25 +750,25 @@ export default function DocumentsPage() {
             </span>
           </div>
           
-            <div className="flex items-center gap-2">
-              {/* Refresh Button */}
-              <button
-                onClick={() => refreshData()}
-                disabled={refreshing}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Làm mới dữ liệu"
-              >
-                {refreshing ? (
-                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                )}
-              </button>
-              
+          <div className="flex items-center gap-2">
+            {/* Refresh Button */}
+            <button
+              onClick={() => refreshData()}
+              disabled={refreshing}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Làm mới dữ liệu"
+            >
+              {refreshing ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              )}
+            </button>
+            
             {viewMode === 'list' && (
               <button
                 onClick={() => setShowTableSettings(true)}
@@ -780,7 +780,7 @@ export default function DocumentsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
-          )}
+            )}
           </div>
         </div>
 
@@ -832,111 +832,111 @@ export default function DocumentsPage() {
                 </div>
               </div>
               
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {(activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)).map(c => (
-                <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
-                  <div className="absolute top-4 left-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(c.id)}
-                      onChange={() => toggleSelectItem(c.id)}
-                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    />
-                  </div>
-                  <Link href={`/documents/${c.id}`} className="block">
-                    <div className="flex justify-between items-start gap-4 ml-6">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
-                        {c.contractNumber && (
-                          <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
-                        )}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {(activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)).map(c => (
+                  <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
+                    <div className="absolute top-4 left-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(c.id)}
+                        onChange={() => toggleSelectItem(c.id)}
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                    </div>
+                    <Link href={`/documents/${c.id}`} className="block">
+                      <div className="flex justify-between items-start gap-4 ml-6">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
+                          {c.contractNumber && (
+                            <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {c.reminders && c.reminders.length > 0 && (
+                            <span title="Có nhắc nhở" className="text-amber-600">🔔</span>
+                          )}
+                          {c.riskLevel && (
+                            <span className={`text-xs px-2 py-1 rounded-full border ${
+                              c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                              c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                              'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}>{c.riskLevel}</span>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {c.reminders && c.reminders.length > 0 && (
-                          <span title="Có nhắc nhở" className="text-amber-600">🔔</span>
-                        )}
-                        {c.riskLevel && (
-                          <span className={`text-xs px-2 py-1 rounded-full border ${
-                            c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                            c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                            'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          }`}>{c.riskLevel}</span>
-                        )}
-                        <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
+                      <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 ml-6">
+                        <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
+                        {c.tags?.slice(0,3).map(tag => (
+                          <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
+                        ))}
                       </div>
+                      <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
+                        <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
+                        <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
+                        <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
+                        {c.parties && c.parties.length > 0 ? (
+                          <div className="flex justify-between"><span>Đối tác</span><span className="truncate max-w-[60%]">{c.parties.map(p => p.name).filter(Boolean).slice(0,2).join(' · ')}</span></div>
+                        ) : null}
+                      </div>
+                    </Link>
+                    {/* Action buttons at bottom of card */}
+                    <div className="mt-4 ml-6 flex flex-wrap gap-2">
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          try {
+                            const res = await fileStorageAPI.getFile(c.id)
+                            const file = (res.data as any)?.data
+                            if (file?.file_url) window.open(file.file_url, '_blank')
+                          } catch (err) { console.error('Open file error', err) }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                        title="Mở file đính kèm"
+                      >
+                        <span>📂 Mở</span>
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          try {
+                            const res = await fileStorageAPI.getFile(c.id)
+                            const file = (res.data as any)?.data
+                            if (file?.file_url) window.open(file.file_url, '_blank')
+                          } catch (err) { console.error('Preview file error', err) }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                        title="Xem nhanh file"
+                      >
+                        <span>👁️ Preview</span>
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          try {
+                            const metaResp = await fileStorageAPI.getFile(c.id)
+                            const meta = (metaResp.data as any)?.data
+                            const resp = await fetch(`/api/v1/automation-service/v1/files/${c.id}/download`)
+                            const blob = await resp.blob()
+                            const url = window.URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = meta?.filename || `file-${c.id}`
+                            document.body.appendChild(a)
+                            a.click()
+                            a.remove()
+                            window.URL.revokeObjectURL(url)
+                          } catch (err) { console.error('Download file error', err) }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
+                        title="Tải file"
+                      >
+                        <span>⬇️ Download</span>
+                      </button>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
-                    <div className="mt-3 flex flex-wrap gap-2 ml-6">
-                      <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
-                      {c.tags?.slice(0,3).map(tag => (
-                        <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
-                      ))}
-                    </div>
-                    <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
-                      <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
-                      <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
-                      <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
-                      {c.parties && c.parties.length > 0 && (
-                        <div className="flex justify-between"><span>Đối tác</span><span className="truncate max-w-[60%]">{c.parties.map(p => p.name).filter(Boolean).slice(0,2).join(' · ')}</span></div>
-                      )}
-                    </div>
-                  </Link>
-                  {/* Action buttons at bottom of card */}
-                  <div className="mt-4 ml-6 flex flex-wrap gap-2">
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault()
-                        try {
-                          const res = await fileStorageAPI.getFile(c.id)
-                          const file = (res.data as any)?.data
-                          if (file?.file_url) window.open(file.file_url, '_blank')
-                        } catch (err) { console.error('Open file error', err) }
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                      title="Mở file đính kèm"
-                    >
-                      <span>📂 Mở</span>
-                    </button>
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault()
-                        try {
-                          const res = await fileStorageAPI.getFile(c.id)
-                          const file = (res.data as any)?.data
-                          if (file?.file_url) window.open(file.file_url, '_blank')
-                        } catch (err) { console.error('Preview file error', err) }
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                      title="Xem nhanh file"
-                    >
-                      <span>👁️ Preview</span>
-                    </button>
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault()
-                        try {
-                          const metaResp = await fileStorageAPI.getFile(c.id)
-                          const meta = (metaResp.data as any)?.data
-                          const resp = await fetch(`/api/v1/automation-service/v1/files/${c.id}/download`)
-                          const blob = await resp.blob()
-                          const url = window.URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = meta?.filename || `file-${c.id}`
-                          document.body.appendChild(a)
-                          a.click()
-                          a.remove()
-                          window.URL.revokeObjectURL(url)
-                        } catch (err) { console.error('Download file error', err) }
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                      title="Tải file"
-                    >
-                      <span>⬇️ Download</span>
-                    </button>
                   </div>
-                </div>
-              ))}
+                ))}
               </div>
             </div>
           ) : (
@@ -982,8 +982,10 @@ export default function DocumentsPage() {
                   </button>
                 </div>
               )}
-        </div>
+            </div>
           )}
+        </div>
+        
         {/* Table Settings Modal */}
         <TableSettings
           columns={tableColumns}
@@ -993,7 +995,6 @@ export default function DocumentsPage() {
           isOpen={showTableSettings}
           onClose={() => setShowTableSettings(false)}
         />
-      </div>
       </div>
     </DashboardLayout>
   )

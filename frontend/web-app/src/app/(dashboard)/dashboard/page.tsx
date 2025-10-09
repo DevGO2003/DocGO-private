@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
 import { CardSkeleton, StatsSkeleton } from '@/components/ui/LoadingSkeleton'
@@ -60,7 +60,7 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Page Title */}
-        <TitlePanel
+        <HeaderPanel
           title={
             <span className="whitespace-nowrap overflow-hidden text-ellipsis">
               📊THỐNG KÊ Tổng quan hoạt động và số liệu chính

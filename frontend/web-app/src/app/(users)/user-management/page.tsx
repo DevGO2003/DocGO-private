@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { useTranslation } from '@/hooks/useTranslation'
 import { UserGroupIcon } from '@heroicons/react/24/outline'
 
@@ -131,7 +131,7 @@ export default function UserManagementPage() {
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
         {/* Page Title */}
-        <TitlePanel
+        <HeaderPanel
           title="QUẢN LÝ NGƯỜI DÙNG"
           description="Quản lý tài khoản, phân quyền và cài đặt hệ thống"
           variant="primary"

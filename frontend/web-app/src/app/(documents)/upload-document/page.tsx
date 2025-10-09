@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { DocumentTextIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import { automationAPI } from '@/lib/api'
@@ -140,7 +140,7 @@ export default function UploadDocumentPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
-        <TitlePanel 
+        <HeaderPanel 
           title="Upload file OCR hợp đồng"
           description="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
         />

@@ -1,3 +1,12 @@
+## HeaderPanel (thay cho TitlePanel)
+
+- Đã thay `TitlePanel` bằng `HeaderPanel` thống nhất cho tất cả trang.
+- Thuộc tính mặc định max-height theo breakpoint:
+  - Desktop (≥1280px): 300px
+  - Tablet (768–1279px): 240px
+  - Mobile (<768px): 200px
+- Có thể điều chỉnh qua props `maxHeights={{ desktop, tablet, mobile }}` và `compact` để giảm kích thước chữ.
+
 # DocGO Web Frontend
 
 Nền tảng quản lý tài liệu và hợp đồng thông minh, được xây dựng với Next.js 14 và TypeScript.

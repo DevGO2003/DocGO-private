@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -133,7 +133,7 @@ export default function CreateDocumentPage() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
-        <TitlePanel 
+        <HeaderPanel 
           title="Tạo tài liệu mới"
           description="Nhập thông tin chi tiết để khởi tạo tài liệu trong hệ thống"
         />

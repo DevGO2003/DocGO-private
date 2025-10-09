@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { ProfileForm, ProfileAvatar, ProfileSettings, ProfileStats } from '@/components/profile'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { TitlePanel } from '@/components/ui'
+import { HeaderPanel } from '@/components/ui'
 import { UserIcon, CogIcon, ChartBarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { DashboardLayout } from '@/components/layout'
 
@@ -16,7 +16,7 @@ export default function ProfilePage() {
     <DashboardLayout>
       <div className="max-w-6xl">
         {/* Page Title */}
-        <TitlePanel
+        <HeaderPanel
           title="THÔNG TIN CÁ NHÂN"
           description="Quản lý thông tin tài khoản và cài đặt cá nhân"
           variant="primary"
