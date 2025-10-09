@@ -5,8 +5,8 @@ import { DashboardLayout } from '@/components/layout'
 
 interface ESignatureRequest {
   id: string
-  contractId: string
-  contractTitle: string
+  documentId: string
+  documentTitle: string
   signerEmail: string
   signerName: string
   status: 'PENDING' | 'SIGNED' | 'EXPIRED'
@@ -73,7 +73,7 @@ export default function ESignaturePage() {
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 text-gray-600">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium">Hợp đồng</th>
+                  <th className="px-4 py-3 text-left font-medium">Tài liệu</th>
                   <th className="px-4 py-3 text-left font-medium">Người ký</th>
                   <th className="px-4 py-3 text-left font-medium">Trạng thái</th>
                   <th className="px-4 py-3 text-left font-medium">Ngày yêu cầu</th>
@@ -86,8 +86,8 @@ export default function ESignaturePage() {
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div>
-                        <div className="font-medium text-gray-900">{request.contractTitle}</div>
-                        <div className="text-xs text-gray-500">ID: {request.contractId}</div>
+                        <div className="font-medium text-gray-900">{request.documentTitle}</div>
+                        <div className="text-xs text-gray-500">ID: {request.documentId}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3">

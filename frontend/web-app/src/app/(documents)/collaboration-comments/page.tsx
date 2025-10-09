@@ -5,8 +5,8 @@ import { DashboardLayout } from '@/components/layout'
 
 interface Comment {
   id: string
-  contractId: string
-  contractTitle: string
+  documentId: string
+  documentTitle: string
   author: string
   authorEmail: string
   content: string
@@ -40,7 +40,7 @@ export default function CollaborationCommentsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 opacity-50" />
           <div className="relative px-6 py-6">
             <h1 className="text-2xl font-bold text-gray-900">Bình luận cộng tác</h1>
-            <p className="mt-1 text-gray-600">Quản lý và theo dõi các bình luận trên hợp đồng</p>
+            <p className="mt-1 text-gray-600">Quản lý và theo dõi các bình luận trên tài liệu</p>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500" />
         </div>
@@ -87,7 +87,7 @@ export default function CollaborationCommentsPage() {
                   </div>
                   
                   <div className="mb-3">
-                    <div className="text-sm text-gray-600 mb-1">Hợp đồng: {comment.contractTitle}</div>
+                    <div className="text-sm text-gray-600 mb-1">Tài liệu: {comment.documentTitle}</div>
                     <div className="text-gray-800">{comment.content}</div>
                   </div>
                   

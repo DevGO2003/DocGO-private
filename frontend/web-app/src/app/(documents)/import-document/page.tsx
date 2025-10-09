@@ -420,7 +420,7 @@ export default function CreateContractPage() {
       if (complianceStatus.trim()) payload.complianceStatus = JSON.parse(complianceStatus)
 
       // For now, use mock API - easy to replace with real backend
-      const res = await fetch('/api/mock/contracts', {
+      const res = await fetch('/api/mock/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

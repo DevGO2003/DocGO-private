@@ -3,10 +3,10 @@
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 
-interface ContractVersion {
+interface DocumentVersion {
   id: string
-  contractId: string
-  contractTitle: string
+  documentId: string
+  documentTitle: string
   version: number
   changes: string
   author: string
@@ -15,8 +15,8 @@ interface ContractVersion {
   fileUrl?: string
 }
 
-export default function ContractVersionsPage() {
-  const [versions, setVersions] = useState<ContractVersion[]>([])
+export default function DocumentVersionsPage() {
+  const [versions, setVersions] = useState<DocumentVersion[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<'ALL' | 'DRAFT' | 'ACTIVE' | 'ARCHIVED'>('ALL')
@@ -39,8 +39,8 @@ export default function ContractVersionsPage() {
         <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-50 via-violet-50 to-indigo-50 opacity-50" />
           <div className="relative px-6 py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Phiên bản hợp đồng</h1>
-            <p className="mt-1 text-gray-600">Quản lý và theo dõi các phiên bản của hợp đồng</p>
+            <h1 className="text-2xl font-bold text-gray-900">Phiên bản tài liệu</h1>
+            <p className="mt-1 text-gray-600">Quản lý và theo dõi các phiên bản của tài liệu</p>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500" />
         </div>
@@ -73,7 +73,7 @@ export default function ContractVersionsPage() {
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50 text-gray-600">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium">Hợp đồng</th>
+                  <th className="px-4 py-3 text-left font-medium">Tài liệu</th>
                   <th className="px-4 py-3 text-left font-medium">Phiên bản</th>
                   <th className="px-4 py-3 text-left font-medium">Thay đổi</th>
                   <th className="px-4 py-3 text-left font-medium">Tác giả</th>
@@ -87,8 +87,8 @@ export default function ContractVersionsPage() {
                   <tr key={version.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div>
-                        <div className="font-medium text-gray-900">{version.contractTitle}</div>
-                        <div className="text-xs text-gray-500">ID: {version.contractId}</div>
+                        <div className="font-medium text-gray-900">{version.documentTitle}</div>
+                        <div className="text-xs text-gray-500">ID: {version.documentId}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3">

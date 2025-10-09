@@ -206,7 +206,7 @@ export default function TestAPIPage() {
                       <li>• GET /api/health - Health check</li>
                       <li>• POST /api/v1/user-management-service/v1/auth/login - Login</li>
                       <li>• POST /api/v1/user-management-service/v1/auth/register - Register</li>
-                      <li>• GET /api/v1/document-management-service/v1/contracts - Get contracts</li>
+                      <li>• GET /api/v1/document-management-service/v1/documents - Get documents</li>
                     </ul>
                   </div>
                 </div>

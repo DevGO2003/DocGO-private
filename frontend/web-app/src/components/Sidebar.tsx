@@ -43,7 +43,6 @@ const navigationGroups = [
     titleKey: 'category.documents',
     items: [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
-      { nameKey: 'navigation.contracts', href: '/contracts', icon: DocumentTextIcon },
       { nameKey: 'navigation.documents', href: '/documents', icon: DocumentTextIcon },
       { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
       { nameKey: 'navigation.uploadDocument', href: '/upload-document', icon: ArrowUpTrayIcon },
@@ -55,7 +54,7 @@ const navigationGroups = [
     items: [
       { nameKey: 'navigation.eSignature', href: '/e-signature', icon: PencilSquareIcon },
       { nameKey: 'navigation.collaboration', href: '/collaboration-comments', icon: ChatBubbleLeftRightIcon },
-      { nameKey: 'navigation.versions', href: '/contract-versions', icon: ClockIcon },
+      { nameKey: 'navigation.versions', href: '/document-versions', icon: ClockIcon },
       { nameKey: 'navigation.approval', href: '/approval-workflow', icon: CheckCircleIcon },
       { nameKey: 'navigation.permissions', href: '/role-based-permissions', icon: ShieldCheckIcon },
       { nameKey: 'navigation.reports', href: '/reports', icon: DocumentChartBarIcon },
@@ -110,20 +109,20 @@ export default function Sidebar({ collapsed = false, onCollapseToggle }: Sidebar
       const savedLabels = JSON.parse(localStorage.getItem(LABELS_STORAGE_KEY) || '{}') as Record<string, string>
       let mergedOrder = Array.from(new Set([...(savedOrder || []), ...defaultOrder]))
 
-      // Đưa Hợp đồng ngay sau Bảng điều khiển nếu có trong menu
+      // Đưa Tài liệu ngay sau Bảng điều khiển nếu có trong menu
       const dashboardKey = 'navigation.dashboard'
-      const contractsKey = 'navigation.contracts'
-      if (mergedOrder.includes(contractsKey)) {
-        mergedOrder = mergedOrder.filter(k => k !== contractsKey)
+      const documentsKey = 'navigation.documents'
+      if (mergedOrder.includes(documentsKey)) {
+        mergedOrder = mergedOrder.filter(k => k !== documentsKey)
         const dashIdx = Math.max(0, mergedOrder.indexOf(dashboardKey))
-        mergedOrder.splice(dashIdx + 1, 0, contractsKey)
+        mergedOrder.splice(dashIdx + 1, 0, documentsKey)
       }
 
       setMenuOrder(mergedOrder)
 
-      // Ghim Hợp đồng mặc định (vẫn tôn trọng pins đã lưu)
+      // Ghim Tài liệu mặc định (vẫn tôn trọng pins đã lưu)
       const nextPins = new Set((savedPins || []).filter((k) => defaultOrder.includes(k)))
-      nextPins.add(contractsKey)
+      nextPins.add(documentsKey)
       const pinsArr = Array.from(nextPins)
       setPinnedKeys(pinsArr)
       localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinsArr))
@@ -133,17 +132,17 @@ export default function Sidebar({ collapsed = false, onCollapseToggle }: Sidebar
       // Fallback mặc định
       const fallbackOrder = [...defaultOrder]
       const dashboardKey = 'navigation.dashboard'
-      const contractsKey = 'navigation.contracts'
-      if (fallbackOrder.includes(contractsKey)) {
-        const filtered = fallbackOrder.filter(k => k !== contractsKey)
+      const documentsKey = 'navigation.documents'
+      if (fallbackOrder.includes(documentsKey)) {
+        const filtered = fallbackOrder.filter(k => k !== documentsKey)
         const dashIdx = Math.max(0, filtered.indexOf(dashboardKey))
-        filtered.splice(dashIdx + 1, 0, contractsKey)
+        filtered.splice(dashIdx + 1, 0, documentsKey)
         setMenuOrder(filtered)
       } else {
         setMenuOrder(defaultOrder)
       }
-      setPinnedKeys(['navigation.contracts'])
-      localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(['navigation.contracts']))
+      setPinnedKeys(['navigation.documents'])
+      localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(['navigation.documents']))
       setLabelOverrides({})
     }
   }, [])

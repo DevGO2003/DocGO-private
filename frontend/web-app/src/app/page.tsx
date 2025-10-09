@@ -24,7 +24,12 @@ export default function HomePage() {
   // Redirect to dashboard if user is authenticated
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.replace('/dashboard')
+      // Add a small delay to prevent redirect loop
+      const timer = setTimeout(() => {
+        router.replace('/dashboard')
+      }, 100)
+      
+      return () => clearTimeout(timer)
     }
   }, [isAuthenticated, loading, router])
 

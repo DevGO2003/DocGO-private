@@ -12,6 +12,7 @@ export const navigationTranslations = {
   'navigation.uploadDocument': 'Upload',
   'navigation.analytics': 'Phân tích',
   'navigation.documents': 'Tài liệu',
+  'navigation.contracts': 'Hợp đồng',
   'navigation.importDocument': 'Import',
   'navigation.eSignature': 'Ký số',
   'navigation.collaboration': 'Cộng tác',
@@ -36,3 +37,5 @@ export const navigationTranslations = {
 export const getNavigationTranslation = (key: string): string => {
   return navigationTranslations[key as keyof typeof navigationTranslations] || key
 }
+
+

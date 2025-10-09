@@ -27,6 +27,15 @@ class ApiClient {
       },
       withCredentials: true,
     })
+    
+    // Add request interceptor to handle mock API calls
+    this.client.interceptors.request.use((config) => {
+      // If the request is for mock API, use localhost:3000
+      if (config.url?.includes('/api/mock/')) {
+        config.baseURL = 'http://localhost:3000'
+      }
+      return config
+    })
 
     this.setupInterceptors()
   }

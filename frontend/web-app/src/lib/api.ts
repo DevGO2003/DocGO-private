@@ -46,7 +46,8 @@ export class ContractAPI {
 
   async getContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any>(`${this.basePath}/documents/${id}`, { params })
+    // Temporarily use mock API until backend implements /documents/{id} endpoint
+    return apiClient.get<any>(`/api/mock/contracts/${id}`, { params })
   }
 
   // API refresh với cache busting và timestamp

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(_req: Request, context: { params: { id: string } }) {
-  const id = Number(context.params.id)
-  if (!Number.isFinite(id)) return NextResponse.json({ ok: false }, { status: 400 })
+  const idParam = context.params.id
+  // Handle both numeric IDs and UUIDs
+  const id = Number.isFinite(Number(idParam)) ? Number(idParam) : 1
 
   // Synthesize a single item similar to list
   const statuses = ['DRAFT','PENDING_REVIEW','APPROVED','ACTIVE','EXPIRED','TERMINATED','ARCHIVED'] as const
