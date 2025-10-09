@@ -30,6 +30,12 @@ const mainTabs = [
     name: 'Hợp đồng',
     icon: DocumentIcon,
     description: 'Quản lý hợp đồng và thông tin doanh nghiệp'
+  },
+  {
+    id: 'comments',
+    name: 'Bình luận',
+    icon: ChatBubbleLeftRightIcon,
+    description: 'Thảo luận và hoạt động'
   }
 ]
 
@@ -107,6 +113,16 @@ const documentDetailSubTabs = [
   }
 ]
 
+// Tab con cho Bình luận (tối thiểu 1 tab để tương thích layout)
+const commentsSubTabs = [
+  {
+    id: 'comments-list',
+    name: 'Bình luận',
+    icon: ChatBubbleLeftRightIcon,
+    description: 'Danh sách bình luận'
+  }
+]
+
 export function DocumentDetailTabs({ documentData, onTabChange }: DocumentDetailTabsProps & { contractSummary?: any }) {
   const [activeMainTab, setActiveMainTab] = useState('contracts')
   const [activeSubTab, setActiveSubTab] = useState('basic-info')
@@ -118,6 +134,8 @@ export function DocumentDetailTabs({ documentData, onTabChange }: DocumentDetail
       setActiveSubTab('basic-info')
     } else if (tabId === 'overview') {
       setActiveSubTab('details')
+    } else if (tabId === 'comments') {
+      setActiveSubTab('comments-list')
     }
     onTabChange?.(`${tabId}-${activeSubTab}`)
   }
@@ -128,7 +146,9 @@ export function DocumentDetailTabs({ documentData, onTabChange }: DocumentDetail
   }
 
   const getCurrentSubTabs = () => {
-    return activeMainTab === 'contracts' ? contractSubTabs : documentDetailSubTabs
+    if (activeMainTab === 'contracts') return contractSubTabs
+    if (activeMainTab === 'overview') return documentDetailSubTabs
+    return commentsSubTabs
   }
 
   const renderSubTabContent = () => {
@@ -172,6 +192,15 @@ export function DocumentDetailTabs({ documentData, onTabChange }: DocumentDetail
           return <PermissionsTab documentData={documentData} />
         default:
           return null
+      }
+    }
+
+    // Bình luận (Comments)
+    if (activeMainTab === 'comments') {
+      switch (activeSubTab) {
+        case 'comments-list':
+        default:
+          return <CommentsMainTab />
       }
     }
     
@@ -255,6 +284,104 @@ export function DocumentDetailTabs({ documentData, onTabChange }: DocumentDetail
     </div>
   )
 }
+
+function CommentsMainTab() {
+  const [commentInput, setCommentInput] = React.useState('')
+  const [sort, setSort] = React.useState<'newest' | 'oldest'>('newest')
+  const [comments, setComments] = React.useState<Array<{ user: string; timeISO: string; content: string }>>([
+    { user: 'Admin', timeISO: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), content: 'Vui lòng kiểm tra điều khoản thanh toán.' },
+    { user: 'Legal', timeISO: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), content: 'Đã rà soát, đề xuất chỉnh sửa mục 7.' }
+  ])
+
+  const addComment = () => {
+    if (!commentInput.trim()) return
+    const nowISO = new Date().toISOString()
+    setComments([{ user: 'Bạn', timeISO: nowISO, content: commentInput.trim() }, ...comments])
+    setCommentInput('')
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault()
+      addComment()
+    }
+  }
+
+  const sorted = [...comments].sort((a, b) =>
+    sort === 'newest' ? b.timeISO.localeCompare(a.timeISO) : a.timeISO.localeCompare(b.timeISO)
+  )
+
+  return (
+    <div className="p-6 space-y-4">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-600">{sorted.length} bình luận</div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">Sắp xếp</label>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as 'newest' | 'oldest')}
+            className="px-2 py-1 border rounded text-sm"
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+          </select>
+          <button className="px-2 py-1 text-sm border rounded hover:bg-gray-50" onClick={() => setCommentInput('')}>Xóa ô nhập</button>
+        </div>
+      </div>
+
+      {/* Composer */}
+      <div className="bg-white rounded-lg border p-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Thêm bình luận</label>
+        <textarea
+          value={commentInput}
+          onChange={(e) => setCommentInput(e.target.value)}
+          onKeyDown={onKeyDown}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 min-h-[100px]"
+          placeholder="Nhập bình luận... (Ctrl/Cmd + Enter để gửi)"
+        />
+        <div className="mt-2 flex items-center justify-between">
+          <div className="text-xs text-gray-500">Hỗ trợ markdown tối giản (in đậm, xuống dòng)</div>
+          <div className="space-x-2">
+            <button className="px-3 py-1 border rounded text-sm" onClick={() => setCommentInput(commentInput + '\n')}>Xuống dòng</button>
+            <button onClick={addComment} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm">Gửi</button>
+          </div>
+        </div>
+      </div>
+
+      {/* List */}
+      {sorted.length === 0 ? (
+        <div className="text-sm text-gray-500">Chưa có bình luận nào.</div>
+      ) : (
+        <div className="space-y-3">
+          {sorted.map((c, i) => (
+            <div key={i} className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  {c.user.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-sm font-medium text-gray-900">{c.user}</span>
+                    <span className="text-xs text-gray-500">{new Date(c.timeISO).toLocaleString('vi-VN')}</span>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{c.content}</p>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+                    <button className="hover:text-gray-700">Thích</button>
+                    <button className="hover:text-gray-700">Trả lời</button>
+                    <button className="hover:text-gray-700">Sao chép</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// (Removed duplicate old CommentsMainTab)
 
 // Tab Components
 function BasicInfoTab({ documentData }: { documentData: any }) {
@@ -479,12 +606,12 @@ function WorkflowTab({ documentData }: { documentData: any }) {
       {
         task: 'Phê duyệt tài liệu',
         assignee: 'Legal Team',
-        status: 'in-progress'
+        status: 'in-progress' as const
       },
       {
         task: 'Ký số điện tử',
         assignee: 'Admin',
-        status: 'pending'
+        status: 'pending' as const
       }
     ]
   }
@@ -493,28 +620,47 @@ function WorkflowTab({ documentData }: { documentData: any }) {
 }
 
 function NotesTab({ documentData }: { documentData: any }) {
+  const [noteInput, setNoteInput] = React.useState('')
+  const [notes, setNotes] = React.useState<Array<{ content: string; at: string }>>(
+    (documentData?.authorNotes as Array<string>)?.map((n: string) => ({ content: n, at: new Date().toISOString() })) || []
+  )
+
+  const addNote = () => {
+    if (!noteInput.trim()) return
+    const newNote = { content: noteInput.trim(), at: new Date().toISOString() }
+    setNotes([newNote, ...notes])
+    setNoteInput('')
+  }
+
   return (
     <div className="space-y-6">
       <div>
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Bình luận</h4>
-        <div className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                A
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-sm font-medium text-gray-900">Admin</span>
-                  <span className="text-xs text-gray-500">2 giờ trước</span>
-                </div>
-                <p className="text-sm text-gray-700">Cần xem xét lại điều khoản thanh toán trước khi ký.</p>
-              </div>
-            </div>
-          </div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">Ghi chú của tác giả</h4>
+        <textarea
+          placeholder="Nhập ghi chú nội bộ cho tài liệu..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 min-h-[120px]"
+          value={noteInput}
+          onChange={(e) => setNoteInput(e.target.value)}
+        />
+        <div className="mt-2 text-right">
+          <button onClick={addNote} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm">Thêm ghi chú</button>
         </div>
       </div>
-      
+
+      {!!notes.length && (
+        <div>
+          <h5 className="text-sm font-medium text-gray-900 mb-2">Danh sách ghi chú</h5>
+          <div className="space-y-2">
+            {notes.map((n, i) => (
+              <div key={i} className="p-3 bg-gray-50 rounded">
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">{n.content}</div>
+                <div className="text-xs text-gray-400 mt-1">{new Date(n.at).toLocaleString('vi-VN')}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <h4 className="text-lg font-medium text-gray-900 mb-4">Lịch sử hoạt động</h4>
         <div className="space-y-3">
@@ -695,88 +841,71 @@ function MetadataTab({ documentData }: { documentData: any }) {
   return (
     <div className="space-y-6">
       <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Technical Metadata</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">File Size:</span>
-              <span className="font-medium">2.5 MB</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">File Type:</span>
-              <span className="font-medium">PDF</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Pages:</span>
-              <span className="font-medium">15</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Created:</span>
-              <span className="font-medium">2024-01-10 14:30:25</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Modified:</span>
-              <span className="font-medium">2024-01-15 09:15:42</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Version:</span>
-              <span className="font-medium">1.2</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Checksum:</span>
-              <span className="font-medium text-xs">a1b2c3d4...</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">OCR Status:</span>
-              <span className="font-medium text-green-600">Completed</span>
-            </div>
-          </div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">🗃 File System Metadata</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          {renderKV('dateModified', documentData?.dateModified)}
+          {renderKV('dateAdded', documentData?.dateAdded)}
+          {renderKV('mediaFilename', documentData?.mediaFilename)}
+          {renderKV('originalFilename', documentData?.originalFilename)}
+          {renderKV('originalMD5', documentData?.originalMD5)}
+          {renderKV('originalFileSize', documentData?.originalFileSize)}
+          {renderKV('originalMimeType', documentData?.originalMimeType)}
+          {renderKV('archiveMD5', documentData?.archiveMD5)}
+          {renderKV('archiveFileSize', documentData?.archiveFileSize)}
         </div>
       </div>
       
       <div>
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Custom Fields</h4>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Number</label>
-              <input 
-                type="text" 
-                placeholder="Enter invoice number..." 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-              <input 
-                type="text" 
-                placeholder="0.00" 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date Paid</label>
-              <input 
-                type="date" 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">Select priority...</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          </div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">📄 Original Document Metadata</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          {renderKV('dcFormat', documentData?.dcFormat)}
+          {renderKV('dcTitle', documentData?.dcTitle)}
+          {renderKV('dcCreator', documentData?.dcCreator)}
+          {renderKV('dcDescription', documentData?.dcDescription)}
+          {renderKV('dcSubject', documentData?.dcSubject)}
+          {renderKV('xmpCreateDate', documentData?.xmpCreateDate)}
+          {renderKV('xmpCreatorTool', documentData?.xmpCreatorTool)}
+          {renderKV('xmpModifyDate', documentData?.xmpModifyDate)}
+          {renderKV('xmpMetadataDate', documentData?.xmpMetadataDate)}
+          {renderKV('pdfKeywords', documentData?.pdfKeywords)}
+          {renderKV('pdfProducer', documentData?.pdfProducer)}
+          {renderKV('xmpDocumentID', documentData?.xmpDocumentID)}
+          {renderKV('xmpInstanceID', documentData?.xmpInstanceID)}
+          {renderKV('pdfaExtensionSchemas', documentData?.pdfaExtensionSchemas)}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">🗂 Archived Document Metadata</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          {renderKV('archivedPdfProducer', documentData?.archivedPdfProducer)}
+          {renderKV('archivedMetadataDate', documentData?.archivedMetadataDate)}
+          {renderKV('archivedModifyDate', documentData?.archivedModifyDate)}
+          {renderKV('archivedCreateDate', documentData?.archivedCreateDate)}
+          {renderKV('archivedCreatorTool', documentData?.archivedCreatorTool)}
+          {renderKV('archivedDocumentID', documentData?.archivedDocumentID)}
+          {renderKV('archivedDcFormat', documentData?.archivedDcFormat)}
+          {renderKV('archivedDcTitle', documentData?.archivedDcTitle)}
+          {renderKV('archivedDcCreator', documentData?.archivedDcCreator)}
         </div>
       </div>
     </div>
   )
+}
+
+function renderKV(label: string, value: any) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-gray-600">{label}</span>
+      <span className="font-medium text-gray-900 truncate max-w-[60%] text-right">{displayValue(value)}</span>
+    </div>
+  )
+}
+
+function displayValue(value: any) {
+  if (value === null || value === undefined || value === '') return '—'
+  if (Array.isArray(value)) return value.length ? value.join(', ') : '—'
+  return String(value)
 }
 
 function HistoryTab({ documentData }: { documentData: any }) {
