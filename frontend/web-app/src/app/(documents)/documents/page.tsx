@@ -1,20 +1,19 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel } from '@/components/ui'
-import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
-import { contractAPI, fileStorageAPI } from '@/lib/api'
-import { InlineLoading } from '@/components/ui/LoadingSpinner'
-import { tagAPI } from '@/lib/api'
-import { useTranslation } from '@/hooks/useTranslation'
-import { translateContractType, translateContractStatus, translateContractTag, getContractTypes, getContractStatuses } from '@/utils/tagTranslations'
-import { CONTRACT_TAGS, getTagDisplayName } from '@/constants/contractTags'
 import ContractControlPanel from '@/components/contracts/ContractControlPanel'
 import CustomTable from '@/components/contracts/CustomTable'
 import TableSettings, { TableColumn } from '@/components/contracts/TableSettings'
-import { TokenRefreshHelper } from '@/utils/token-refresh-helper'
+import { useTranslation } from '@/hooks/useTranslation'
+import { translateContractStatus, translateContractType, translateContractTag } from '@/utils/tagTranslations'
+import DocumentsFilters from './_components/DocumentsFilters'
+import DocumentsTable from './_components/DocumentsTable'
+import { InlineLoading } from '@/components/ui/LoadingSpinner'
+import { tagAPI } from '@/lib/api'
+import { useDocumentsQuery } from './_hooks/useDocumentsQuery'
+import { DEFAULT_PAGE_SIZE } from './_constants'
 
 type ContractItem = {
   id: string
@@ -36,12 +35,29 @@ type ContractItem = {
   reminders?: any[]
 }
 
-// STATUS_OPTIONS will be generated dynamically using getContractStatuses
-const TYPES = ['ALL','SERVICE_AGREEMENT','PURCHASE_AGREEMENT','PARTNERSHIP_AGREEMENT','EMPLOYMENT_CONTRACT','CONFIDENTIALITY_AGREEMENT','OTHER'] as const
-// Sử dụng CONTRACT_TAGS từ constants thay vì hardcode array
-const TAGS = CONTRACT_TAGS
+// local-only view model to match existing CustomTable props
 
 export default function DocumentsPage() {
+  function getBadgeClass(status: string) {
+    switch (status) {
+      case 'DRAFT':
+        return 'bg-gray-50 text-gray-700 border-gray-200'
+      case 'PENDING_REVIEW':
+        return 'bg-amber-50 text-amber-700 border-amber-200'
+      case 'APPROVED':
+        return 'bg-blue-50 text-blue-700 border-blue-200'
+      case 'ACTIVE':
+        return 'bg-green-50 text-green-700 border-green-200'
+      case 'EXPIRED':
+        return 'bg-rose-50 text-rose-700 border-rose-200'
+      case 'TERMINATED':
+        return 'bg-red-50 text-red-700 border-red-200'
+      case 'ARCHIVED':
+        return 'bg-slate-50 text-slate-700 border-slate-200'
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200'
+    }
+  }
   const { t } = useTranslation()
   const [items, setItems] = useState<ContractItem[]>([])
   const [availableTags, setAvailableTags] = useState<string[]>([])
@@ -55,7 +71,7 @@ export default function DocumentsPage() {
   const [type, setType] = useState<string>('ALL')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [page, setPage] = useState<number>(0)
-  const [pageSize, setPageSize] = useState<number>(9)
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [sortBy, setSortBy] = useState<string>('createdAt')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -88,227 +104,10 @@ export default function DocumentsPage() {
 
   // Removed manual queryString builder; fetchData composes params directly
 
-  const fetchData = async (isLoadMore = false) => {
-    console.log('[Documents] Starting fetchData...', { isLoadMore })
-    
-    if (isLoadMore) {
-      setIsLoadingMore(true)
-    } else {
-      setLoading(true)
-      setPage(0) // Reset to first page when not loading more
-    }
-    
-    try {
-      // Abort previous in-flight request
-      if (abortRef.current) {
-        console.log('[Documents] Aborting previous request')
-        try { 
-          abortRef.current.abort() 
-        } catch (e) {
-          console.warn('[Documents] Error aborting previous request:', e)
-        }
-      }
-      const controller = new AbortController()
-      abortRef.current = controller
-
-      const currentPage = isLoadMore ? Math.floor(displayedItems.length / pageSize) : 0
-      const params: any = {
-        pageNumber: currentPage,
-        pageSize,
-        includeDeleted: false,
-      }
-      const trimmed = debouncedSearch.trim()
-      if (trimmed.length >= 2) params.searchTerm = trimmed
-      if (sortBy) params.sortBy = sortBy
-      if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
-      if (status && status !== 'ALL') params.status = status
-      if (type && type !== 'ALL') params.type = type
-      if (selectedTags.length > 0) params.tags = selectedTags.join(',')
-
-      console.log('[Documents] Request params:', params)
-
-      // Ensure valid token before making request
-      const tokenValid = await TokenRefreshHelper.ensureValidToken()
-      
-      if (!tokenValid) {
-        console.warn('[Documents] Token validation failed, request may fail')
-      }
-
-      console.log('[Documents] Making API request...')
-      const res = await contractAPI.getContracts(params, { signal: controller.signal })
-      const payload: any = res.data?.data || {}
-      const content = Array.isArray(payload.content) ? payload.content : []
-
-      const computeExpiryDate = (effectiveDate: string, term: string | undefined): string => {
-        if (!effectiveDate || !term) return ''
-        // Try to parse term as number of months (e.g., "12", "12M", "12 months")
-        const match = String(term).match(/(\d{1,3})\s*(m|mo|mon|month|months)?/i)
-        if (match) {
-          const months = parseInt(match[1], 10)
-          if (!isNaN(months)) {
-            const d = new Date(effectiveDate)
-            if (!isNaN(d.getTime())) {
-              d.setMonth(d.getMonth() + months)
-              return d.toISOString().slice(0, 10)
-            }
-          }
-        }
-        return ''
-      }
-
-      const mapped: ContractItem[] = content.map((c: any) => ({
-        id: String(c.id),
-        title: c.title || c.contractNumber || `Contract ${c.id}`,
-        description: c.object || c.description || '',
-        status: c.status || 'DRAFT',
-        contractType: c.contractType || 'Other',
-        tags: c.tags || [],
-        contractNumber: c.contractNumber,
-        createdAt: c.createdAt || '',
-        updatedAt: c.updatedAt || '',
-        creatorId: 0,
-        parties: (c.parties || []).map((p: any) => ({ name: p.name || '', role: p.role || '' })),
-        totalValue: Number(c.paymentDetails?.totalValue || 0),
-        currency: c.paymentDetails?.currency || 'VND',
-        effectiveDate: c.effectiveDate || '',
-        expiryDate: c.expiryDate || computeExpiryDate(c.effectiveDate, c.term),
-        riskLevel: c.riskAssessment?.riskLevel,
-        reminders: Array.isArray(c.reminders) ? c.reminders : [],
-      }))
-
-      if (isLoadMore) {
-        // Append new items to existing ones
-        const newItems = [...displayedItems, ...mapped]
-        setDisplayedItems(newItems)
-        setItems(newItems)
-        setAllItems(newItems)
-      } else {
-        // Replace all items
-        setItems(mapped)
-        setDisplayedItems(mapped)
-        setAllItems(mapped)
-      }
-
-      const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
-      setTotalPages(Number(totalPagesFromApi) || 1)
-      
-      // Check if there's more data to load
-      const currentTotalItems = isLoadMore ? displayedItems.length + mapped.length : mapped.length
-      setHasMoreData(currentTotalItems < (payload?.result?.totalElements ?? payload?.totalElements ?? 0))
-      
-      console.log('[Documents] Successfully fetched data:', {
-        itemsCount: mapped.length,
-        totalItems: currentTotalItems,
-        totalPages: totalPagesFromApi,
-        hasMoreData: currentTotalItems < (payload?.result?.totalElements ?? payload?.totalElements ?? 0),
-        response: res.data
-      })
-    } catch (e: any) {
-      console.error('[Documents] Error fetching data:', {
-        error: e,
-        message: e?.message,
-        response: e?.response?.data,
-        status: e?.response?.status,
-        params: {
-          page,
-          pageSize,
-          status,
-          type,
-          selectedTags,
-          sortBy,
-          sortDirection,
-          search: debouncedSearch
-        }
-      })
-      if (!isLoadMore) {
-        setItems([])
-        setDisplayedItems([])
-        setAllItems([])
-        setTotalPages(1)
-      }
-    } finally {
-      setLoading(false)
-      setIsLoadingMore(false)
-      console.log('[Documents] Fetch completed')
-    }
-  }
+  // switched to hook-based fetching
 
   // Hàm refresh riêng với loading state và toast notification
-  const refreshData = async () => {
-    console.log('[Documents] Starting refresh...')
-    setRefreshing(true)
-    
-    try {
-      // Abort previous in-flight request
-      if (abortRef.current) {
-        console.log('[Documents] Aborting previous request')
-        try { 
-          abortRef.current.abort() 
-        } catch (e) {
-          console.warn('[Documents] Error aborting previous request:', e)
-        }
-      }
-      const controller = new AbortController()
-      abortRef.current = controller
-
-      const params: any = {
-        pageNumber: 0,
-        pageSize,
-        includeDeleted: false,
-      }
-      const trimmed = debouncedSearch.trim()
-      if (trimmed.length >= 2) params.searchTerm = trimmed
-      if (sortBy) params.sortBy = sortBy
-      if (sortDirection) params.sortDirection = sortDirection.toUpperCase()
-      if (status && status !== 'ALL') params.status = status
-      if (type && type !== 'ALL') params.type = type
-      if (selectedTags.length > 0) params.tags = selectedTags.join(',')
-
-      console.log('[Documents] Refresh params:', params)
-
-      // Ensure valid token before making request
-      const tokenValid = await TokenRefreshHelper.ensureValidToken()
-      
-      if (!tokenValid) {
-        console.warn('[Documents] Token validation failed, request may fail')
-      }
-
-      console.log('[Documents] Making refresh API request...')
-      const res = await contractAPI.refreshContracts(params, { signal: controller.signal })
-      const payload: any = res.data?.data || {}
-      
-      console.log('[Documents] Refresh response:', { 
-        status: res.status, 
-        data: payload,
-        totalElements: payload?.result?.totalElements ?? payload?.totalElements ?? 0
-      })
-
-      const newItems = payload?.result?.content ?? payload?.content ?? []
-      const currentTotalItems = payload?.result?.totalElements ?? payload?.totalElements ?? 0
-      const totalPagesFromApi = payload?.result?.totalPages ?? payload?.totalPages ?? 1
-
-      // Reset to first page and update data
-      setPage(0)
-      setItems(newItems)
-      setDisplayedItems(newItems)
-      setAllItems(newItems)
-      setTotalPages(totalPagesFromApi)
-      
-      // Show success toast
-      console.log('[Documents] Refresh completed successfully')
-      
-    } catch (e: any) {
-      console.error('[Documents] Error refreshing data:', {
-        error: e,
-        message: e?.message,
-        response: e?.response?.data,
-        status: e?.response?.status
-      })
-    } finally {
-      setRefreshing(false)
-      console.log('[Documents] Refresh completed')
-    }
-  }
+  const refreshData = async () => { setRefreshing(true); try { refetch(); } finally { setRefreshing(false) } }
 
   // Load available tags once
   useEffect(() => {
@@ -344,24 +143,43 @@ export default function DocumentsPage() {
     loadTags()
   }, [])
 
-  // Unified data fetching with debounce for all filters
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      console.log('[Documents] Fetching data with params:', {
-        page,
+  // hook binding to params
+  const { data: queryData, loading: queryLoading, error: queryError, params: q, setParams, refetch } = useDocumentsQuery({
         pageSize,
+    sortBy,
+    sortDirection: sortDirection.toUpperCase() as 'ASC' | 'DESC',
+    searchTerm: debouncedSearch,
         status,
         type,
-        selectedTags,
-        sortBy,
-        sortDirection,
-        search: debouncedSearch
-      })
-      fetchData()
-    }, 300) // Reduced debounce time for better UX
-    
-    return () => clearTimeout(handler)
-  }, [page, pageSize, status, type, selectedTags, sortBy, sortDirection, debouncedSearch])
+    tags: selectedTags,
+  })
+  useEffect(() => {
+    setLoading(queryLoading)
+    const mapped = (queryData?.content || []).map(c => ({
+      id: String(c.id),
+      title: c.title,
+      description: c.description,
+      status: c.status,
+      contractType: c.contractType,
+      tags: c.tags || [],
+      contractNumber: c.contractNumber,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+      creatorId: 0,
+      parties: c.parties,
+      totalValue: c.totalValue,
+      currency: c.currency,
+      effectiveDate: c.effectiveDate,
+      expiryDate: c.expiryDate,
+      riskLevel: c.riskLevel,
+      reminders: [],
+    }))
+    setItems(mapped)
+    setDisplayedItems(mapped)
+    setAllItems(mapped)
+    setTotalPages(queryData?.totalPages || 1)
+    setHasMoreData(mapped.length < (queryData?.totalElements || 0))
+  }, [queryLoading, queryData])
 
   // Separate effect for search input to update debouncedSearch
   useEffect(() => {
@@ -484,11 +302,7 @@ export default function DocumentsPage() {
     setHasMoreData(true)
   }
 
-  const handleShowMore = () => {
-    if (hasMoreData && !isLoadingMore) {
-      fetchData(true)
-    }
-  }
+  const handleShowMore = () => {}
 
   // Retry loading tags
   const handleRetryTags = () => {
@@ -536,7 +350,7 @@ export default function DocumentsPage() {
         {/* Control Panel */}
         <ContractControlPanel
           selectedItems={selectedItems}
-          onRefresh={fetchData}
+          onRefresh={() => refetch()}
           onCreateContract={handleCreateContract}
           onEditSelected={handleEditSelected}
           onDeleteSelected={handleDeleteSelected}
@@ -559,169 +373,26 @@ export default function DocumentsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Tìm theo tiêu đề hoặc mô tả"
-                  className="w-full rounded-lg border-gray-300 pl-10 pr-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
-            </div>
-
-            {/* Status */}
-            <div>
-              <select
-                value={status}
-                onChange={(e) => { setStatus(e.target.value); setPage(0) }}
-                className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              >
-                {getContractStatuses(t).map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Type */}
-            <div>
-              <select
-                value={type}
-                onChange={(e) => { setType(e.target.value); setPage(0) }}
-                className="w-full rounded-lg border-gray-300 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              >
-                {getContractTypes(t).map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Advanced Options */}
-          <div className="mt-4 flex items-center justify-between">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              <span>{showAdvanced ? 'Ẩn' : 'Hiện'} tùy chọn nâng cao</span>
-              <span className={`transform transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>▼</span>
-            </button>
-            
-            {showAdvanced && (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Sắp xếp theo:</label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-lg border-gray-300 py-1 px-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    <option value="createdAt">Ngày tạo</option>
-                    <option value="title">Tên tài liệu</option>
-                    <option value="status">Trạng thái</option>
-                    <option value="totalValue">Giá trị</option>
-                    <option value="effectiveDate">Ngày hiệu lực</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Thứ tự:</label>
-                  <button
-                    onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
-                  >
-                    {sortDirection === 'asc' ? '↑ Tăng dần' : '↓ Giảm dần'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Tags */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <h4 className="text-sm font-semibold text-gray-700">Thẻ phân loại</h4>
-              {tagsLoading && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Đang tải...
-                </div>
-              )}
-            </div>
-            
-            {tagsError ? (
-              <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-medium text-red-800">Không thể tải danh sách thẻ</p>
-                    <p className="text-xs text-red-600">Vui lòng thử lại sau hoặc liên hệ quản trị viên</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleRetryTags}
-                  disabled={tagsLoading}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {tagsLoading ? (
-                    <>
-                      <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Đang thử...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Thử lại
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : availableTags.length === 0 && !tagsLoading ? (
-              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-yellow-800">Chưa có thẻ nào</p>
-                  <p className="text-xs text-yellow-600">Hãy tạo thẻ mới để phân loại tài liệu</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((t: string) => {
-                  const active = selectedTags.includes(t)
-                  return (
-                    <button
-                      key={t}
-                      onClick={() => toggleTag(t)}
-                      className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${
-                        active 
-                          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-indigo-200 shadow-md' 
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
-                      }`}
-                    >
-                      <TagIcon className="h-4 w-4" />
-                      {t}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+        <DocumentsFilters
+          search={search}
+          onSearchChange={(v) => setSearch(v)}
+          status={status}
+          onStatusChange={(v) => { setStatus(v); setPage(0) }}
+          type={type}
+          onTypeChange={(v) => { setType(v); setPage(0) }}
+          availableTags={availableTags}
+          tagsLoading={tagsLoading}
+          tagsError={tagsError}
+          selectedTags={selectedTags}
+          onToggleTag={toggleTag}
+          onRetryTags={handleRetryTags}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDirection={sortDirection}
+          onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+        />
 
         {/* Content Header */}
         <div className="flex items-center justify-between">
@@ -816,129 +487,16 @@ export default function DocumentsPage() {
               </div>
             </div>
           ) : viewMode === 'grid' ? (
-            <div>
-              {/* Grid Header with Select All */}
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.length === items.length && items.length > 0}
-                    onChange={selectedItems.length === items.length ? clearSelection : selectAll}
-                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-600">
-                    {selectedItems.length === items.length && items.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {(activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)).map(c => (
-                  <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
-                    <div className="absolute top-4 left-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(c.id)}
-                        onChange={() => toggleSelectItem(c.id)}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                      />
-                    </div>
-                    <Link href={`/documents/${c.id}`} className="block">
-                      <div className="flex justify-between items-start gap-4 ml-6">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
-                          {c.contractNumber && (
-                            <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {c.reminders && c.reminders.length > 0 && (
-                            <span title="Có nhắc nhở" className="text-amber-600">🔔</span>
-                          )}
-                          {c.riskLevel && (
-                            <span className={`text-xs px-2 py-1 rounded-full border ${
-                              c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                              c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            }`}>{c.riskLevel}</span>
-                          )}
-                          <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
-                        </div>
-                      </div>
-                      <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
-                      <div className="mt-3 flex flex-wrap gap-2 ml-6">
-                        <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
-                        {c.tags?.slice(0,3).map(tag => (
-                          <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
-                        ))}
-                      </div>
-                      <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
-                        <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
-                        <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
-                        <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
-                        {c.parties && c.parties.length > 0 ? (
-                          <div className="flex justify-between"><span>Đối tác</span><span className="truncate max-w-[60%]">{c.parties.map(p => p.name).filter(Boolean).slice(0,2).join(' · ')}</span></div>
-                        ) : null}
-                      </div>
-                    </Link>
-                    {/* Action buttons at bottom of card */}
-                    <div className="mt-4 ml-6 flex flex-wrap gap-2">
-                      <button
-                        onClick={async (e) => {
-                          e.preventDefault()
-                          try {
-                            const res = await fileStorageAPI.getFile(c.id)
-                            const file = (res.data as any)?.data
-                            if (file?.file_url) window.open(file.file_url, '_blank')
-                          } catch (err) { console.error('Open file error', err) }
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                        title="Mở file đính kèm"
-                      >
-                        <span>📂 Mở</span>
-                      </button>
-                      <button
-                        onClick={async (e) => {
-                          e.preventDefault()
-                          try {
-                            const res = await fileStorageAPI.getFile(c.id)
-                            const file = (res.data as any)?.data
-                            if (file?.file_url) window.open(file.file_url, '_blank')
-                          } catch (err) { console.error('Preview file error', err) }
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                        title="Xem nhanh file"
-                      >
-                        <span>👁️ Preview</span>
-                      </button>
-                      <button
-                        onClick={async (e) => {
-                          e.preventDefault()
-                          try {
-                            const metaResp = await fileStorageAPI.getFile(c.id)
-                            const meta = (metaResp.data as any)?.data
-                            const resp = await fetch(`/api/v1/automation-service/v1/files/${c.id}/download`)
-                            const blob = await resp.blob()
-                            const url = window.URL.createObjectURL(blob)
-                            const a = document.createElement('a')
-                            a.href = url
-                            a.download = meta?.filename || `file-${c.id}`
-                            document.body.appendChild(a)
-                            a.click()
-                            a.remove()
-                            window.URL.revokeObjectURL(url)
-                          } catch (err) { console.error('Download file error', err) }
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-700 border hover:bg-gray-50 text-xs"
-                        title="Tải file"
-                      >
-                        <span>⬇️ Download</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DocumentsTable
+              items={activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)}
+              selectedItems={selectedItems}
+              onToggleSelect={toggleSelectItem}
+              onSelectAll={selectAll}
+              onClearSelection={clearSelection}
+              viewMode={viewMode}
+              badgeClass={getBadgeClass}
+              t={t}
+            />
           ) : (
             <div>
               <CustomTable
@@ -951,7 +509,7 @@ export default function DocumentsPage() {
                 translateContractStatus={translateContractStatus}
                 translateContractType={translateContractType}
                 translateContractTag={translateContractTag}
-                badgeClass={badgeClass}
+                badgeClass={getBadgeClass}
                 t={t}
               />
               
@@ -998,25 +556,4 @@ export default function DocumentsPage() {
       </div>
     </DashboardLayout>
   )
-}
-
-function badgeClass(status: string) {
-  switch (status) {
-    case 'DRAFT':
-      return 'bg-gray-50 text-gray-700 border-gray-200'
-    case 'PENDING_REVIEW':
-      return 'bg-amber-50 text-amber-700 border-amber-200'
-    case 'APPROVED':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
-    case 'ACTIVE':
-      return 'bg-green-50 text-green-700 border-green-200'
-    case 'EXPIRED':
-      return 'bg-rose-50 text-rose-700 border-rose-200'
-    case 'TERMINATED':
-      return 'bg-red-50 text-red-700 border-red-200'
-    case 'ARCHIVED':
-      return 'bg-slate-50 text-slate-700 border-slate-200'
-    default:
-      return 'bg-gray-50 text-gray-700 border-gray-200'
-  }
 }
