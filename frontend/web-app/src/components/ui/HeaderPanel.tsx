@@ -41,8 +41,8 @@ function HeaderPanel({
         overflow: 'hidden'
       }}
     >
-      <div className="p-[10px]">
-        <div className="flex items-start gap-[10px]">
+      <div className="p-[5px]">
+        <div className="flex items-start justify-between gap-[5px]">
           {/* Left section - natural width */}
           <div className="shrink-0">
             {/* Breadcrumbs */}
@@ -72,7 +72,7 @@ function HeaderPanel({
             )}
 
             {/* Title */}
-            <h1 className="inline-block w-auto text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+            <h1 className="inline-block w-auto text-xl font-bold text-gray-900 mb-1">{title}</h1>
             
             {/* Subtitle */}
             {subtitle && (
@@ -81,7 +81,7 @@ function HeaderPanel({
 
             {/* Children content */}
             {children && (
-              <div className="mt-4">
+              <div className="mt-2">
                 {children}
               </div>
             )}
