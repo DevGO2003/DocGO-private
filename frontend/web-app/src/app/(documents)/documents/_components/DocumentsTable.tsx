@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
+import { DocumentTextIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import type { Document } from '../_types'
 import { translateContractStatus, translateContractType, translateContractTag } from '@/utils/tagTranslations'
 
@@ -17,6 +18,25 @@ type Props = {
 }
 
 export default function DocumentsTable({ items, selectedItems, onToggleSelect, onSelectAll, onClearSelection, viewMode, badgeClass, t }: Props) {
+  const [previewDoc, setPreviewDoc] = useState<string | null>(null)
+  const [previewPos, setPreviewPos] = useState<{x: number, y: number} | null>(null)
+
+  const handlePreviewEnter = (e: React.MouseEvent, doc: Document) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPreviewPos({ x: rect.left + rect.width/2, y: rect.top - 10 })
+    setPreviewDoc(doc.id)
+  }
+
+  const handlePreviewLeave = () => {
+    setPreviewDoc(null)
+    setPreviewPos(null)
+  }
+
+  const handleDownload = (doc: Document) => {
+    console.log('Downloading file:', doc.title)
+    // Demo download logic - API chưa sẵn sàng
+  }
+
   if (viewMode === 'grid') {
     return (
       <div>
@@ -34,9 +54,9 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid gap-4" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'}}>
           {items.map(c => (
-            <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative">
+            <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative" style={{aspectRatio: '3/4'}}>
               <div className="absolute top-4 left-4">
                 <input
                   type="checkbox"
@@ -45,41 +65,89 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
                   className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                 />
               </div>
-              <Link href={`/documents/${c.id}`} className="block">
-                <div className="flex justify-between items-start gap-4 ml-6">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition">{c.title}</h3>
-                    {c.contractNumber && (
-                      <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
-                    )}
+              <div className="flex flex-col h-full">
+                <div className="flex-1">
+                  <div className="flex justify-between items-start gap-2 ml-6">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition text-sm">{c.title}</h3>
+                      {c.contractNumber && (
+                        <div className="mt-1 text-xs text-gray-500">Mã HĐ: {c.contractNumber}</div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {c.riskLevel && (
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full border ${
+                          c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                          c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>{c.riskLevel}</span>
+                      )}
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {c.riskLevel && (
-                      <span className={`text-xs px-2 py-1 rounded-full border ${
-                        c.riskLevel === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                        c.riskLevel === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>{c.riskLevel}</span>
-                    )}
-                    <span className={`text-xs px-2 py-1 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
+                  <p className="mt-2 text-xs text-gray-600 line-clamp-2 ml-6">{c.description || 'Không có mô tả'}</p>
+                  <div className="mt-2 flex flex-wrap gap-1 ml-6">
+                    <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
+                    {c.tags?.slice(0,2).map(tag => (
+                      <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 space-y-1 ml-6">
+                    <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
+                    <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
+                    <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
                   </div>
                 </div>
-                <p className="mt-2 text-sm text-gray-600 line-clamp-3 ml-6">{c.description || 'Không có mô tả'}</p>
-                <div className="mt-3 flex flex-wrap gap-2 ml-6">
-                  <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
-                  {c.tags?.slice(0,3).map(tag => (
-                    <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
-                  ))}
+
+                {/* Action Buttons */}
+                <div className="mt-3 flex justify-center gap-1 border-t border-gray-100 pt-2">
+                  <button 
+                    onClick={() => window.location.href = `/documents/${c.id}`}
+                    className="flex items-center gap-0.5 px-1.5 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs transition-colors"
+                  >
+                    <DocumentTextIcon className="w-2.5 h-2.5" />
+                    Mở
+                  </button>
+                  
+                  <button 
+                    onMouseEnter={(e) => handlePreviewEnter(e, c)}
+                    onMouseLeave={handlePreviewLeave}
+                    className="flex items-center gap-0.5 px-1.5 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-xs transition-colors"
+                  >
+                    <EyeIcon className="w-2.5 h-2.5" />
+                    Xem
+                  </button>
+                  
+                  <button 
+                    onClick={() => handleDownload(c)}
+                    className="flex items-center gap-0.5 px-1.5 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs transition-colors"
+                  >
+                    <ArrowDownTrayIcon className="w-2.5 h-2.5" />
+                    Tải
+                  </button>
                 </div>
-                <div className="mt-4 text-sm text-gray-500 space-y-1 ml-6">
-                  <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
-                  <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
-                  <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
-                </div>
-              </Link>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* Preview Popup */}
+        {previewDoc && previewPos && (
+          <div 
+            className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 max-w-sm"
+            style={{
+              left: `${previewPos.x}px`,
+              top: `${previewPos.y}px`,
+              transform: 'translateX(-50%) translateY(-100%)'
+            }}
+          >
+            <div className="text-sm">
+              <div className="font-medium mb-2">Xem trước (Demo)</div>
+              <p className="text-gray-600">Nội dung file sẽ được hiển thị ở đây...</p>
+              <p className="text-xs text-gray-500 mt-2">API chưa sẵn sàng</p>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
