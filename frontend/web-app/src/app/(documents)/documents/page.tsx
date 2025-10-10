@@ -288,6 +288,7 @@ export default function DocumentsPage() {
                 onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
                 showAdvanced={showAdvanced}
                 onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                onRefresh={refreshData}
               />
             </div>
           }
