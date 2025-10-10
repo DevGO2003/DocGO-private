@@ -2,8 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { HeaderPanel } from '@/components/ui'
-import ContractControlPanel from '@/components/contracts/ContractControlPanel'
+import { HeaderPanel, PrimaryContent } from '@/components/ui'
 import CustomTable from '@/components/contracts/CustomTable'
 import TableSettings, { TableColumn } from '@/components/contracts/TableSettings'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -211,83 +210,6 @@ export default function DocumentsPage() {
     setSelectedItems([])
   }
 
-  // Control Panel Handlers
-  const handleCreateContract = () => {
-    // Navigate to create document page
-    window.location.href = '/create-document'
-  }
-
-  const handleEditSelected = () => {
-    if (selectedItems.length === 0) return
-    
-    if (selectedItems.length === 1) {
-      // Edit single contract
-      window.location.href = `/documents/${selectedItems[0]}/edit`
-    } else {
-      // Bulk edit - show modal or navigate to bulk edit page
-      alert(`Chức năng chỉnh sửa hàng loạt cho ${selectedItems.length} tài liệu đang được phát triển`)
-    }
-  }
-
-  const handleDeleteSelected = async () => {
-    if (selectedItems.length === 0) return
-    
-    const confirmed = confirm(`Bạn có chắc chắn muốn xóa ${selectedItems.length} tài liệu đã chọn?`)
-    if (confirmed) {
-      try {
-        setLoading(true)
-        
-        // Gọi API bulk delete
-        const response = await fetch('/api/documents/bulk', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ids: selectedItems
-          })
-        })
-        
-        if (!response.ok) {
-          throw new Error('Không thể xóa tài liệu')
-        }
-        
-        const result = await response.json()
-        
-        if (result.statusCode === 200) {
-          // Hiển thị kết quả
-          if (result.data.failedCount > 0) {
-            alert(`Xóa thành công ${result.data.successCount} tài liệu. ${result.data.failedCount} tài liệu không thể xóa.`)
-          } else {
-            alert(`Đã xóa thành công ${result.data.successCount} tài liệu.`)
-          }
-          
-          // Refresh danh sách
-          setPage(0)
-          setSelectedItems([])
-          // Trigger refresh data
-          window.location.reload()
-        } else {
-          throw new Error(result.description || 'Có lỗi xảy ra khi xóa tài liệu')
-        }
-      } catch (e: any) {
-        console.error('Error deleting documents:', e)
-        alert(`Lỗi khi xóa tài liệu: ${e?.message || 'Không rõ lỗi'}`)
-      } finally {
-        setLoading(false)
-      }
-    }
-  }
-
-  const handleSendForApproval = () => {
-    if (selectedItems.length === 0) return
-    
-    const confirmed = confirm(`Gửi ${selectedItems.length} tài liệu để duyệt?`)
-    if (confirmed) {
-      // TODO: Implement send for approval
-      alert(`Chức năng gửi duyệt hàng loạt cho ${selectedItems.length} tài liệu đang được phát triển`)
-    }
-  }
 
   // Table Settings Handlers
   const handleTableColumnsChange = (newColumns: TableColumn[]) => {
@@ -342,74 +264,50 @@ export default function DocumentsPage() {
       <div className="space-y-6">
         {/* Page Header */}
         <HeaderPanel
-          title="QUẢN LÝ TÀI LIỆU"
+          title="Quản lý tài liệu"
           breadcrumbs={[{ label: 'Documents', href: '/documents' }, { label: 'Danh sách', current: true }]}
-          density="condensed"
-          wrapControls
-          right={
-            <div className="flex items-center gap-2">
-              {/* Tabs */}
-              <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-                <button onClick={() => setActiveTab('all')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Tất cả file">
-                  <span className="md:hidden">
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                  </span>
-                  <span className="hidden md:inline">Tất cả file</span>
-                </button>
-                <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
-                  <span className="md:hidden">
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
-                  </span>
-                  <span className="hidden md:inline">File hợp đồng</span>
-                </button>
-              </div>
+        >
+          {/* Tabs */}
+          <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+            <button onClick={() => setActiveTab('all')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Tất cả file">
+              <span className="md:hidden">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+              </span>
+              <span className="hidden md:inline">Tất cả file</span>
+            </button>
+            <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
+              <span className="md:hidden">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+              </span>
+              <span className="hidden md:inline">File hợp đồng</span>
+            </button>
+          </div>
+        </HeaderPanel>
 
-              {/* Filters (compact) */}
-              <div className="min-w-[240px] md:min-w-[420px]">
-                <DocumentsFilters
-                  search={search}
-                  onSearchChange={(v) => setSearch(v)}
-                  status={status}
-                  onStatusChange={(v) => { setStatus(v); setPage(0) }}
-                  type={type}
-                  onTypeChange={(v) => { setType(v); setPage(0) }}
-                  availableTags={availableTags}
-                  tagsLoading={tagsLoading}
-                  tagsError={tagsError}
-                  selectedTags={selectedTags}
-                  onToggleTag={toggleTag}
-                  onRetryTags={handleRetryTags}
-                  sortBy={sortBy}
-                  onSortByChange={setSortBy}
-                  sortDirection={sortDirection}
-                  onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                  showAdvanced={showAdvanced}
-                  onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-                />
-              </div>
-            </div>
-          }
+        {/* Search and Filter Bar */}
+        <DocumentsFilters
+          search={search}
+          onSearchChange={(v) => setSearch(v)}
+          status={status}
+          onStatusChange={(v) => { setStatus(v); setPage(0) }}
+          type={type}
+          onTypeChange={(v) => { setType(v); setPage(0) }}
+          availableTags={availableTags}
+          tagsLoading={tagsLoading}
+          tagsError={tagsError}
+          selectedTags={selectedTags}
+          onToggleTag={toggleTag}
+          onRetryTags={handleRetryTags}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDirection={sortDirection}
+          onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
         />
 
-        {/* Control Panel */}
-        <ContractControlPanel
-          selectedItems={selectedItems}
-          onRefresh={() => refetch()}
-          onCreateContract={handleCreateContract}
-          onEditSelected={handleEditSelected}
-          onDeleteSelected={handleDeleteSelected}
-          onSendForApproval={handleSendForApproval}
-          onClearSelection={clearSelection}
-        />
-
-        {/* Tabs moved into HeaderPanel */}
-
-        {/* Filters moved into HeaderPanel */}
-
-        {/* Content Header removed (now inside HeaderPanel) */}
-        
         {/* Content */}
-        <div>
+        <PrimaryContent>
           {loading ? (
             <InlineLoading text="Đang tải tài liệu..." size="lg" />
           ) : items.length === 0 ? (
@@ -495,7 +393,7 @@ export default function DocumentsPage() {
               )}
             </div>
           )}
-        </div>
+        </PrimaryContent>
         
         {/* Table Settings Modal */}
         <TableSettings
