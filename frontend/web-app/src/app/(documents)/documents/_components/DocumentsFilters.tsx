@@ -38,11 +38,11 @@ export default function DocumentsFilters(props: Props) {
   } = props
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+    <div className="bg-white/80 backdrop-blur rounded-lg p-4 shadow-sm w-full">
       {/* Search and Filter Bar - Flex Layout */}
-      <div className="flex items-center gap-4">
-        {/* Search Input - Takes up more space (40-50% of the bar) */}
-        <div className="flex-1 min-w-0 max-w-[50%]">
+      <div className="flex items-center gap-4 w-full">
+        {/* Search Input - Takes maximum space */}
+        <div className="flex-1 min-w-[200px]">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
@@ -55,7 +55,7 @@ export default function DocumentsFilters(props: Props) {
         </div>
 
         {/* Document Type Dropdown */}
-        <div className="min-w-[140px] max-w-[20%]">
+        <div className="min-w-[140px]">
           <select
             value={type}
             onChange={(e) => onTypeChange(e.target.value)}
@@ -69,7 +69,7 @@ export default function DocumentsFilters(props: Props) {
         </div>
 
         {/* Status Dropdown */}
-        <div className="min-w-[120px] max-w-[20%]">
+        <div className="min-w-[120px]">
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
@@ -108,7 +108,7 @@ export default function DocumentsFilters(props: Props) {
 
       {/* Advanced Options - Hidden by default, shown when toggled */}
       {showAdvanced && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-600">Sắp xếp:</label>

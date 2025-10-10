@@ -127,9 +127,9 @@ export default function DocumentsPage() {
           setAvailableTags([])
           console.warn('[Documents] No tags returned from API')
         } else {
-          setAvailableTags(tagsFromApi)
+        setAvailableTags(tagsFromApi)
           setTagsError(false)
-          console.log('[Documents] Loaded tags from API:', tagsFromApi)
+        console.log('[Documents] Loaded tags from API:', tagsFromApi)
         }
       } catch (error) {
         console.error('[Documents] Error loading tags:', error)
@@ -266,45 +266,50 @@ export default function DocumentsPage() {
         <HeaderPanel
           title="Quản lý tài liệu"
           breadcrumbs={[{ label: 'Documents', href: '/documents' }, { label: 'Danh sách', current: true }]}
+          right={
+            <div className="flex-1 max-w-4xl">
+              <DocumentsFilters
+                search={search}
+                onSearchChange={(v) => setSearch(v)}
+                status={status}
+                onStatusChange={(v) => { setStatus(v); setPage(0) }}
+                type={type}
+                onTypeChange={(v) => { setType(v); setPage(0) }}
+                availableTags={availableTags}
+                tagsLoading={tagsLoading}
+                tagsError={tagsError}
+                selectedTags={selectedTags}
+                onToggleTag={toggleTag}
+                onRetryTags={handleRetryTags}
+                sortBy={sortBy}
+                onSortByChange={setSortBy}
+                sortDirection={sortDirection}
+                onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                showAdvanced={showAdvanced}
+                onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+              />
+            </div>
+          }
         >
-          {/* Tabs */}
-          <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-            <button onClick={() => setActiveTab('all')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Tất cả file">
-              <span className="md:hidden">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-              </span>
-              <span className="hidden md:inline">Tất cả file</span>
-            </button>
-            <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
-              <span className="md:hidden">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
-              </span>
-              <span className="hidden md:inline">File hợp đồng</span>
-            </button>
+          {/* Tabs with space between */}
+          <div className="flex justify-between items-center">
+            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+              <button onClick={() => setActiveTab('all')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Tất cả file">
+                <span className="md:hidden">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                </span>
+                <span className="hidden md:inline">Tất cả file</span>
+              </button>
+              <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
+                <span className="md:hidden">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+                </span>
+                <span className="hidden md:inline">File hợp đồng</span>
+              </button>
+            </div>
+            <div className="flex-1"></div>
           </div>
         </HeaderPanel>
-
-        {/* Search and Filter Bar */}
-        <DocumentsFilters
-          search={search}
-          onSearchChange={(v) => setSearch(v)}
-          status={status}
-          onStatusChange={(v) => { setStatus(v); setPage(0) }}
-          type={type}
-          onTypeChange={(v) => { setType(v); setPage(0) }}
-          availableTags={availableTags}
-          tagsLoading={tagsLoading}
-          tagsError={tagsError}
-          selectedTags={selectedTags}
-          onToggleTag={toggleTag}
-          onRetryTags={handleRetryTags}
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-          showAdvanced={showAdvanced}
-          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-        />
 
         {/* Content */}
         <PrimaryContent>
@@ -391,7 +396,7 @@ export default function DocumentsPage() {
                   </button>
                 </div>
               )}
-            </div>
+        </div>
           )}
         </PrimaryContent>
         
