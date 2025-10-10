@@ -129,9 +129,18 @@ export default function DocumentsFilters(props: Props) {
         open={openTags}
         title="Phân loại"
         availableItems={availableTags}
-        include={[]}
+        include={selectedTags}
         exclude={[]}
-        onChange={() => {}}
+        onChange={(inc) => {
+          // update selectedTags via provided handler
+          // ensure unique set
+          const next = Array.from(new Set(inc))
+          next.forEach(()=>{})
+          // Diff to toggle: remove ones not in inc
+          // Fallback: just replace by clearing then adding
+          selectedTags.forEach(tag => { if (!next.includes(tag)) onToggleTag(tag) })
+          next.forEach(tag => { if (!selectedTags.includes(tag)) onToggleTag(tag) })
+        }}
         onClose={()=>setOpenTags(false)}
         anchorEl={typeof document !== 'undefined' ? document.querySelector('[data-anchor-id="tags"]') as HTMLElement : null}
       />
@@ -139,9 +148,12 @@ export default function DocumentsFilters(props: Props) {
         open={openTypes}
         title="Loại file"
         availableItems={getContractTypes(t).map(x=>x.label)}
-        include={[]}
+        include={type && type !== 'ALL' ? [type] : []}
         exclude={[]}
-        onChange={() => {}}
+        onChange={(inc) => {
+          const picked = Array.isArray(inc) && inc.length > 0 ? inc[0] : 'ALL'
+          onTypeChange(picked)
+        }}
         onClose={()=>setOpenTypes(false)}
         anchorEl={typeof document !== 'undefined' ? document.querySelector('[data-anchor-id="types"]') as HTMLElement : null}
       />
