@@ -288,6 +288,8 @@ export default function DocumentsPage() {
                 onToggleSortDirection={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
                 showAdvanced={showAdvanced}
                 onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
                 onRefresh={refreshData}
               />
             </div>
@@ -312,33 +314,7 @@ export default function DocumentsPage() {
             <div className="flex-1"></div>
         </div>
 
-          {/* View Mode Toggle - align start */}
-          <div className="flex justify-start mt-2">
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 transition-colors ${
-                  viewMode === 'grid' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-                title="Xem dạng card"
-              >
-                <Squares2X2Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 transition-colors border-l border-gray-300 ${
-                  viewMode === 'list' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-                title="Xem dạng bảng"
-              >
-                <ListBulletIcon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          {/* View Mode toggle moved into DocumentsFilters Row 2 */}
         </HeaderPanel>
 
         {/* Content */}
