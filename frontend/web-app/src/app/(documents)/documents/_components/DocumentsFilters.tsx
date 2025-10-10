@@ -58,28 +58,28 @@ export default function DocumentsFilters(props: Props) {
       {/* Row 1: Search + Sort + Refresh (controls cluster to the right) */}
       <div className="flex items-center gap-[10px] w-full">
         <div className="flex-1 min-w-[200px]">
-          <div className="relative">
+            <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
+              <input
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Tìm theo tiêu đề hoặc mô tả.."
               className="w-full rounded-lg border border-gray-300 pl-10 pr-3 h-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
+              />
+            </div>
           </div>
-        </div>
         <div className="ml-auto flex items-center gap-[10px]">
-        <select
-            value={sortBy}
-            onChange={(e) => onSortByChange(e.target.value)}
+                <select
+                  value={sortBy}
+                  onChange={(e) => onSortByChange(e.target.value)}
             className="h-10 px-2 pr-6 min-w-[140px] rounded-lg border border-indigo-300 text-sm text-indigo-700 bg-white hover:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="createdAt">Ngày tạo</option>
-            <option value="title">Tên</option>
-            <option value="status">Trạng thái</option>
-            <option value="totalValue">Giá trị</option>
-            <option value="effectiveDate">Hiệu lực</option>
-          </select>
+                >
+                  <option value="createdAt">Ngày tạo</option>
+                  <option value="title">Tên</option>
+                  <option value="status">Trạng thái</option>
+                  <option value="totalValue">Giá trị</option>
+                  <option value="effectiveDate">Hiệu lực</option>
+                </select>
         <select
             value={sortDirection}
             onChange={() => onToggleSortDirection()}
@@ -112,15 +112,15 @@ export default function DocumentsFilters(props: Props) {
             </div>
             </div>
           </>
-        )}
-      </div>
+          )}
+        </div>
 
       {/* Row 3: Actions */}
       <div className="mt-[10px] flex items-center gap-[10px] justify-end">
         <button onClick={()=>setOpenAdd(true)} className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><PlusIcon className="w-4 h-4"/>Thêm</button>
         <button className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><PencilSquareIcon className="w-4 h-4"/>Sửa</button>
         <button className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-rose-300 text-sm text-rose-700 hover:bg-rose-50"><TrashIcon className="w-4 h-4"/>Xóa</button>
-      </div>
+              </div>
 
       {/* Advanced content removed to avoid duplicate triggers; row 2 handles toggling label only */}
 

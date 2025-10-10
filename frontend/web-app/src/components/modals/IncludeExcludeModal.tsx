@@ -79,7 +79,7 @@ export default function IncludeExcludeModal({ open, title, availableItems, inclu
       </div>
       <div className="px-3 py-2">
         <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Tìm kiếm..." className="w-full h-8 px-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs" />
-        <div className="mt-2 overflow-auto" style={{ maxHeight: height - 150 }}>
+        <div className="mt-2 overflow-auto pr-2" style={{ maxHeight: height - 150 }}>
           {filtered.length === 0 ? (
             <div className="text-sm text-gray-500 py-6 text-center">Không có mục phù hợp</div>
           ) : (
@@ -87,7 +87,7 @@ export default function IncludeExcludeModal({ open, title, availableItems, inclu
               {filtered.map(item => {
                 const checked = tab==='include' ? include.includes(item) : exclude.includes(item)
                 return (
-                  <li key={item} className="flex items-center justify-between py-2">
+                  <li key={item} className="flex items-center justify-between py-2 pr-1">
                     <span className="text-sm text-gray-700">{item}</span>
                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                       <input type="checkbox" checked={checked} onChange={() => toggle(item)} className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
