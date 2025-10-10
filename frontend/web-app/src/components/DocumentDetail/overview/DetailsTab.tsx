@@ -186,28 +186,7 @@ export function DetailsTab({ documentData }: DetailsTabProps) {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6">
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Thống kê nhanh</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-indigo-600">7</div>
-            <div className="text-sm text-gray-600">Điều khoản</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">2</div>
-            <div className="text-sm text-gray-600">Bên tham gia</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600">4</div>
-            <div className="text-sm text-gray-600">Nhãn</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">3</div>
-            <div className="text-sm text-gray-600">Nhắc nhở</div>
-          </div>
-        </div>
-      </div>
+      
     </div>
   )
 }

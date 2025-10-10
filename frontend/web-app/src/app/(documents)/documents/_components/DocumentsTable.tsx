@@ -70,19 +70,21 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
         </div>
 
         <div className="grid gap-4" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'}}>
-          {items.map(c => (
-            <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative" style={{aspectRatio: '3/4'}}>
-              <div className="absolute top-4 left-4">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.includes(c.id)}
-                  onChange={() => onToggleSelect(c.id)}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-              </div>
+          {items.map(c => {
+            const isSelected = selectedItems.includes(c.id)
+            return (
+              <div key={c.id} className="group bg-white rounded-2xl border border-gray-200 p-[10px] shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative" style={{aspectRatio: '5/6'}}>
+                <div className={`absolute top-2 left-2 z-30 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onToggleSelect(c.id)}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                </div>
               <div className="flex flex-col h-full">
-                <div className="flex-1">
-                  <div className="flex justify-between items-start gap-2 ml-6">
+                <div className="flex-1 overflow-y-auto pr-1 pb-12 no-scrollbar">
+                  <div className="flex justify-between items-start gap-2">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition text-sm">{c.title}</h3>
                       {c.contractNumber && (
@@ -100,8 +102,8 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
                       <span className={`text-xs px-1.5 py-0.5 rounded-full border ${badgeClass(c.status)}`}>{translateContractStatus(c.status, t)}</span>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-gray-600 line-clamp-2 ml-6">{c.description || 'Không có mô tả'}</p>
-                  <div className="mt-2 flex flex-wrap gap-1 ml-6">
+                  <p className="mt-2 text-xs text-gray-600 line-clamp-2">{c.description || 'Không có mô tả'}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
                     <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(c.contractType, t)}</span>
                     {c.tags?.slice(0,2).map(tag => (
                       <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
@@ -116,43 +118,46 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 text-xs text-gray-500 space-y-1 ml-6">
+                  <div className="mt-2 text-xs text-gray-500 space-y-1">
                     <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
                     <div className="flex justify-between"><span>Hết hạn</span><span>{c.expiryDate}</span></div>
                     <div className="flex justify-between"><span>Giá trị</span><span>{c.totalValue.toLocaleString('vi-VN')} {c.currency}</span></div>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="mt-3 flex justify-center gap-1 border-t border-gray-100 pt-2">
-                  <button 
-                    onClick={() => window.location.href = `/documents/${c.id}`}
-                    className="flex items-center gap-0.5 px-1.5 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs transition-colors"
-                  >
-                    <DocumentTextIcon className="w-2.5 h-2.5" />
-                    Mở
-                  </button>
-                  
-                  <button 
-                    onMouseEnter={(e) => handlePreviewEnter(e, c)}
-                    onMouseLeave={handlePreviewLeave}
-                    className="flex items-center gap-0.5 px-1.5 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-xs transition-colors"
-                  >
-                    <EyeIcon className="w-2.5 h-2.5" />
-                    Xem
-                  </button>
-                  
-                  <button 
-                    onClick={() => handleDownload(c)}
-                    className="flex items-center gap-0.5 px-1.5 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs transition-colors"
-                  >
-                    <ArrowDownTrayIcon className="w-2.5 h-2.5" />
-                    Tải
-                  </button>
+                {/* Action Buttons - Fixed at bottom */}
+                <div className="absolute inset-x-0 bottom-0 z-20">
+                  <div className="flex rounded-none border-t border-gray-200 overflow-hidden divide-x divide-gray-200 bg-transparent">
+                    <button 
+                      onClick={() => window.location.href = `/documents/${c.id}`}
+                      className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
+                      title="Mở tệp"
+                    >
+                      <DocumentTextIcon className="w-5 h-5" />
+                    </button>
+                    
+                    <button 
+                      onMouseEnter={(e) => handlePreviewEnter(e, c)}
+                      onMouseLeave={handlePreviewLeave}
+                      className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
+                      title="Xem thử"
+                    >
+                      <EyeIcon className="w-5 h-5" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => handleDownload(c)}
+                      className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
+                      title="Tải về"
+                    >
+                      <ArrowDownTrayIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Preview Popup */}
@@ -195,6 +200,11 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
             </div>
           </div>
         )}
+        {/* Hide scrollbar (keep scroll functionality) */}
+        <style jsx>{`
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+        `}</style>
       </div>
     )
   }
