@@ -1,7 +1,7 @@
-import { API_ENDPOINTS } from '../_constants'
+import { API_ENDPOINTS } from '../_constants/index'
 import type { Document, Paginated, RestResponse } from '../_types'
 import { mapApiDocumentToUi, mapPaginated } from './mappers'
-import { mockDocument, mockDocumentsPage } from './mocks'
+import { mockDocument, mockDocumentsPage, createTestDocuments } from './mocks'
 
 async function unwrap<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null)
@@ -24,9 +24,18 @@ export async function fetchDocuments(params: Record<string, any>): Promise<Pagin
     const data = await unwrap<any>(res)
     return mapPaginated<Document>(data, mapApiDocumentToUi)
   } catch (e) {
-    const pageNumber = Number(params?.pageNumber ?? 0)
-    const pageSize = Number(params?.pageSize ?? 9)
-    return mockDocumentsPage(pageNumber, pageSize)
+    // Sử dụng test documents với tags đa dạng để test tính năng
+    const testDocs = createTestDocuments()
+    const mockDocs = mockDocumentsPage(Number(params?.pageNumber ?? 0), Number(params?.pageSize ?? 9))
+    
+    // Kết hợp test documents với mock documents
+    const combinedContent = [...testDocs, ...mockDocs.content]
+    
+    return {
+      content: combinedContent,
+      totalElements: combinedContent.length,
+      totalPages: 1
+    }
   }
 }
 

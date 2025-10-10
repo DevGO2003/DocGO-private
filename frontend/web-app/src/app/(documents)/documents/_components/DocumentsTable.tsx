@@ -20,6 +20,8 @@ type Props = {
 export default function DocumentsTable({ items, selectedItems, onToggleSelect, onSelectAll, onClearSelection, viewMode, badgeClass, t }: Props) {
   const [previewDoc, setPreviewDoc] = useState<string | null>(null)
   const [previewPos, setPreviewPos] = useState<{x: number, y: number} | null>(null)
+  const [previewTags, setPreviewTags] = useState<{docId: string, tags: string[]} | null>(null)
+  const [tagsPos, setTagsPos] = useState<{x: number, y: number} | null>(null)
 
   const handlePreviewEnter = (e: React.MouseEvent, doc: Document) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -30,6 +32,19 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
   const handlePreviewLeave = () => {
     setPreviewDoc(null)
     setPreviewPos(null)
+  }
+
+  const handleTagsEnter = (e: React.MouseEvent, doc: Document) => {
+    if (doc.tags && doc.tags.length > 2) {
+      const rect = e.currentTarget.getBoundingClientRect()
+      setTagsPos({ x: rect.left + rect.width/2, y: rect.top - 10 })
+      setPreviewTags({ docId: doc.id, tags: doc.tags })
+    }
+  }
+
+  const handleTagsLeave = () => {
+    setPreviewTags(null)
+    setTagsPos(null)
   }
 
   const handleDownload = (doc: Document) => {
@@ -91,6 +106,15 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
                     {c.tags?.slice(0,2).map(tag => (
                       <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-700 border border-gray-200">#{translateContractTag(tag, t)}</span>
                     ))}
+                    {c.tags && c.tags.length > 2 && (
+                      <span 
+                        onMouseEnter={(e) => handleTagsEnter(e, c)}
+                        onMouseLeave={handleTagsLeave}
+                        className="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-300 cursor-pointer hover:bg-gray-200 transition-colors"
+                      >
+                        +{c.tags.length - 2}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-2 text-xs text-gray-500 space-y-1 ml-6">
                     <div className="flex justify-between"><span>Hiệu lực</span><span>{c.effectiveDate}</span></div>
@@ -148,6 +172,29 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
             </div>
           </div>
         )}
+
+        {/* Tags Preview Popup */}
+        {previewTags && tagsPos && (
+          <div 
+            className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-xs"
+            style={{
+              left: `${tagsPos.x}px`,
+              top: `${tagsPos.y}px`,
+              transform: 'translateX(-50%) translateY(-100%)'
+            }}
+          >
+            <div className="text-sm">
+              <div className="font-medium mb-2 text-gray-900">Tất cả tags</div>
+              <div className="flex flex-wrap gap-1">
+                {previewTags.tags.map(tag => (
+                  <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">
+                    #{translateContractTag(tag, t)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -155,5 +202,4 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
   // list mode delegates to existing CustomTable via parent for now
   return null
 }
-
 

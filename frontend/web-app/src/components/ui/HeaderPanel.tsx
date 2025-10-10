@@ -1,114 +1,41 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 
-export interface HeaderPanelProps {
-  title: React.ReactNode
-  description?: React.ReactNode
-  icon?: string
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'info'
-  actionButton?: React.ReactNode
-  className?: string
-  maxHeights?: { desktop?: number; tablet?: number; mobile?: number }
-  compact?: boolean
-  // Density: control global typography and spacing scale
-  density?: 'compact' | 'condensed' | 'cozy'
-  // New props
-  breadcrumbs?: { label: string; href?: string; current?: boolean }[]
-  right?: React.ReactNode
+interface HeaderPanelProps {
+  title: string
+  subtitle?: string
+  breadcrumbs?: Array<{
+    label: string
+    href?: string
+    current?: boolean
+  }>
   children?: React.ReactNode
-  maxHeight?: number
-  // Wrap controls: allow children to wrap with tight gaps
-  wrapControls?: boolean
+  right?: React.ReactNode
+  className?: string
+  maxHeightDesktop?: number
+  maxHeightTablet?: number
+  maxHeightMobile?: number
 }
 
-const variantStyles = {
-  primary: {
-    container: 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100',
-    title: 'text-blue-900',
-    description: 'text-blue-700'
-  },
-  secondary: {
-    container: 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-100',
-    title: 'text-gray-900',
-    description: 'text-gray-700'
-  },
-  success: {
-    container: 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-100',
-    title: 'text-green-900',
-    description: 'text-green-700'
-  },
-  warning: {
-    container: 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-100',
-    title: 'text-orange-900',
-    description: 'text-orange-700'
-  },
-  info: {
-    container: 'bg-gradient-to-r from-purple-50 to-violet-50 border-purple-100',
-    title: 'text-purple-900',
-    description: 'text-purple-700'
-  }
-}
-
-const defaultIcons = {
-  primary: '📊',
-  secondary: '📄',
-  success: '✅',
-  warning: '⚠️',
-  info: 'ℹ️'
-}
-
-export default function HeaderPanel({
+function HeaderPanel({
   title,
-  description,
-  icon,
-  variant,
-  actionButton,
-  className = '',
-  maxHeights,
-  compact = false,
-  density = 'compact',
+  subtitle,
   breadcrumbs,
-  right,
   children,
-  maxHeight,
-  wrapControls = false
+  right,
+  className = '',
+  maxHeightDesktop = 300,
+  maxHeightTablet = 240,
+  maxHeightMobile = 200
 }: HeaderPanelProps) {
-  const styles = variant ? variantStyles[variant] : {
-    container: 'bg-white border-gray-200',
-    title: 'text-gray-900',
-    description: 'text-gray-600'
-  }
-  const displayIcon = icon || (variant ? defaultIcons[variant] : '')
-
-  // Defaults per requirement: desktop 300, tablet 240, mobile 200
-  const base = maxHeight ?? undefined
-  const mhDesktop = base ?? (maxHeights?.desktop ?? 300)
-  const mhTablet = base ? Math.max(220, Math.min(base, 280)) : (maxHeights?.tablet ?? 240)
-  const mhMobile = base ? Math.max(180, Math.min(base, 220)) : (maxHeights?.mobile ?? 200)
-
-  // Density scales
-  const isCompact = density === 'compact'
-  const isCondensed = density === 'condensed'
-  const isCozy = density === 'cozy'
-
-  const paddingClass = isCompact || isCondensed ? 'p-2 sm:p-3 md:p-4 lg:p-5' : 'p-4 sm:p-5 md:p-6 lg:p-6'
-  const titleClass = isCompact
-    ? 'text-xs sm:text-sm'
-    : isCondensed
-      ? 'text-sm sm:text-base'
-      : 'text-2xl'
-  const descClass = isCompact ? 'text-[10px] sm:text-[11px]' : isCondensed ? 'text-xs' : 'text-sm'
-  const breadcrumbsText = isCompact ? 'text-[9px] sm:text-[10px]' : isCondensed ? 'text-xs' : 'text-sm'
-  const childrenScaleClass = isCompact || isCondensed
-    ? '[&_input]:text-[10px] [&_select]:text-[10px] [&_button]:text-[10px]'
-    : ''
-  const childrenWrapClass = wrapControls ? 'flex flex-wrap gap-x-2 gap-y-2 items-center' : ''
+  const mhDesktop = maxHeightDesktop
+  const mhTablet = maxHeightTablet
+  const mhMobile = maxHeightMobile
 
   return (
     <div
-      className={`sticky top-0 z-40 backdrop-blur-sm bg-white rounded-2xl border border-gray-200 shadow-lg ${className}`}
+      className={`bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}
       style={{
         maxHeight: '300px',
         overflow: 'hidden'
@@ -119,50 +46,58 @@ export default function HeaderPanel({
           {/* Left section - 1fr */}
           <div className="lg:col-span-1 min-w-0">
             {/* Breadcrumbs */}
-            {Array.isArray(breadcrumbs) && breadcrumbs.length > 0 && (
-              <nav aria-label="Breadcrumb" className="mb-1.5 text-sm text-gray-500">
-                <ol className="flex items-center gap-2 flex-wrap">
-                  {breadcrumbs.map((bc, idx) => (
-                    <li key={idx} className="inline-flex items-center gap-2">
-                      {bc.href && !bc.current ? (
-                        <Link href={bc.href} className="hover:text-gray-700 underline-offset-2 hover:underline">
-                          {bc.label}
-                        </Link>
-                      ) : (
-                        <span aria-current={bc.current ? 'page' : undefined} className={bc.current ? 'text-gray-700 font-medium' : ''}>{bc.label}</span>
+            {breadcrumbs && breadcrumbs.length > 0 && (
+              <nav className="flex mb-3" aria-label="Breadcrumb">
+                <ol className="flex items-center space-x-2 text-sm">
+                  {breadcrumbs.map((breadcrumb, index) => (
+                    <li key={index} className="flex items-center">
+                      {index > 0 && (
+                        <svg className="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
                       )}
-                      {idx < breadcrumbs.length - 1 && <span>›</span>}
+                      {breadcrumb.current ? (
+                        <span className="text-gray-500 font-medium">{breadcrumb.label}</span>
+                      ) : breadcrumb.href ? (
+                        <a href={breadcrumb.href} className="text-indigo-600 hover:text-indigo-700 font-medium">
+                          {breadcrumb.label}
+                        </a>
+                      ) : (
+                        <span className="text-gray-900 font-medium">{breadcrumb.label}</span>
+                      )}
                     </li>
                   ))}
                 </ol>
               </nav>
             )}
 
-            <h1 className="text-xl font-bold text-gray-900 mb-2">
-              {displayIcon && <span className="align-middle mr-2">{displayIcon}</span>}
-              <span className="align-middle truncate block">{title}</span>
-            </h1>
-            {description ? (
-              <div className="text-sm text-gray-600 leading-relaxed mb-3">
-                {description}
-              </div>
-            ) : null}
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
             
-            {/* Tabs section */}
+            {/* Subtitle */}
+            {subtitle && (
+              <p className="text-gray-600 text-sm mb-4">{subtitle}</p>
+            )}
+
+            {/* Children content */}
             {children && (
-              <div className="flex gap-2.5 flex-wrap">
+              <div className="mt-4">
                 {children}
               </div>
             )}
           </div>
 
           {/* Right section - 2fr */}
-          <div className="lg:col-span-2 flex items-center justify-end gap-2.5 min-w-0 flex-wrap">
-            {right}
-            {actionButton}
-          </div>
+          {right && (
+            <div className="lg:col-span-2 min-w-0">
+              <div className="flex justify-end">
+                <div className="w-full max-w-none">
+                  {right}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-
       </div>
 
       <style jsx>{`
@@ -178,19 +113,27 @@ export default function HeaderPanel({
           }
         }
         
-        /* Sticky scroll effect */
-        div[class*='sticky'] {
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+        /* Responsive max-height */
+        @media (min-width: 1280px) {
+          div[class*='rounded-2xl'] {
+            max-height: ${mhDesktop}px !important;
+          }
         }
         
-        /* Enhanced shadow on scroll */
-        div[class*='sticky']:hover {
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        @media (min-width: 768px) and (max-width: 1279px) {
+          div[class*='rounded-2xl'] {
+            max-height: ${mhTablet}px !important;
+          }
+        }
+        
+        @media (max-width: 767px) {
+          div[class*='rounded-2xl'] {
+            max-height: ${mhMobile}px !important;
+          }
         }
       `}</style>
     </div>
   )
 }
 
-
+export default HeaderPanel
