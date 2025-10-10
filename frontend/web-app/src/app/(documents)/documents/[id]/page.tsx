@@ -273,6 +273,29 @@ export default function DocumentDetailPage() {
           ]}
           right={
             <div className="w-full">
+              <div className="flex flex-wrap gap-2 items-center justify-end mb-3">
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
+                  📝 Chỉnh sửa
+                </button>
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-sm">
+                  📤 Gửi duyệt
+                </button>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow-sm">
+                  📋 Tạo phiên bản
+                </button>
+                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium shadow-sm">
+                  ✍️ Gửi ký
+                </button>
+                <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium shadow-sm">
+                  📄 Tải PDF
+                </button>
+                <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium shadow-sm">
+                  💬 Bình luận
+                </button>
+                <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium shadow-sm">
+                  🗑️ Xóa
+                </button>
+              </div>
               <MainTabsNav
                 activeMainTab={activeMainTab}
                 onChange={(tabId) => {
