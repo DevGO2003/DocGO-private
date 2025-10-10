@@ -277,42 +277,45 @@ export default function DocumentDetailPage() {
                 <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
                   📝 Chỉnh sửa
                 </button>
-                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-green-600 text-green-700 hover:bg-green-50 transition text-sm font-medium">
                   📤 Gửi duyệt
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-blue-600 text-blue-700 hover:bg-blue-50 transition text-sm font-medium">
                   📋 Tạo phiên bản
                 </button>
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-purple-600 text-purple-700 hover:bg-purple-50 transition text-sm font-medium">
                   ✍️ Gửi ký
                 </button>
-                <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-gray-500 text-gray-700 hover:bg-gray-50 transition text-sm font-medium">
                   📄 Tải PDF
                 </button>
-                <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-amber-600 text-amber-700 hover:bg-amber-50 transition text-sm font-medium">
                   💬 Bình luận
                 </button>
-                <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium shadow-sm">
+                <button className="px-4 py-2 rounded-lg border border-red-600 text-red-700 hover:bg-red-50 transition text-sm font-medium">
                   🗑️ Xóa
                 </button>
               </div>
-              <MainTabsNav
-                activeMainTab={activeMainTab}
-                onChange={(tabId) => {
-                  setActiveMainTab(tabId)
-                  if (tabId === 'contracts') setActiveSubTab('basic-info')
-                  else if (tabId === 'overview') setActiveSubTab('details')
-                  else if (tabId === 'comments') setActiveSubTab('comments-list')
-                }}
-              />
-              <SubTabsNav
-                activeMainTab={activeMainTab}
-                activeSubTab={activeSubTab}
-                onChange={(tabId) => setActiveSubTab(tabId)}
-              />
             </div>
           }
-        />
+        >
+          <div className="mt-2">
+            <MainTabsNav
+              activeMainTab={activeMainTab}
+              onChange={(tabId) => {
+                setActiveMainTab(tabId)
+                if (tabId === 'contracts') setActiveSubTab('basic-info')
+                else if (tabId === 'overview') setActiveSubTab('details')
+                else if (tabId === 'comments') setActiveSubTab('comments-list')
+              }}
+            />
+            <SubTabsNav
+              activeMainTab={activeMainTab}
+              activeSubTab={activeSubTab}
+              onChange={(tabId) => setActiveSubTab(tabId)}
+            />
+          </div>
+        </HeaderPanel>
 
         <DocumentDetailTabs
           documentData={data}

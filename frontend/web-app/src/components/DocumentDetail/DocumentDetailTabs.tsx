@@ -137,36 +137,30 @@ export function getSubTabsFor(mainTabId: string) {
 
 export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string; onChange: (tabId: string) => void }) {
   return (
-    <div className="border-b border-gray-200 bg-gray-50">
-      <nav className="flex space-x-8 px-6" aria-label="Main Tabs">
-        {mainTabs.map((tab) => {
+    <div className="bg-gray-50 px-6">
+      <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+        {mainTabs.map((tab, index) => {
           const Icon = tab.icon
           const isActive = activeMainTab === tab.id
           return (
             <button
               key={tab.id}
               onClick={() => onChange(tab.id)}
-              className={`
-                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                  ${isActive 
-                    ? 'border-indigo-500 text-indigo-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
+              className={`${
+                isActive
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } ${index > 0 ? 'border-l border-gray-200' : ''} px-3 py-2 text-sm font-medium flex items-center`}
               aria-current={isActive ? 'page' : undefined}
+              title={tab.name}
             >
-              <Icon 
-                className={`
-                    -ml-0.5 mr-2 h-5 w-5 transition-colors
-                    ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}
-                  `} 
-              />
-              <span className="hidden sm:block">{tab.name}</span>
-              <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
+              <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+              <span className="hidden md:inline">{tab.name}</span>
+              <span className="md:hidden">{tab.name.split(' ')[0]}</span>
             </button>
           )
         })}
-      </nav>
+      </div>
     </div>
   )
 }
@@ -174,36 +168,30 @@ export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string
 export function SubTabsNav({ activeMainTab, activeSubTab, onChange }: { activeMainTab: string; activeSubTab: string; onChange: (tabId: string) => void }) {
   const subTabs = getSubTabsFor(activeMainTab)
   return (
-    <div className="border-b border-gray-200">
-      <nav className="flex space-x-6 px-6" aria-label="Sub Tabs">
-        {subTabs.map((tab) => {
+    <div className="px-6 mt-2">
+      <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+        {subTabs.map((tab, index) => {
           const Icon = tab.icon
           const isActive = activeSubTab === tab.id
           return (
             <button
               key={tab.id}
               onClick={() => onChange(tab.id)}
-              className={`
-                  group inline-flex items-center py-3 px-1 border-b-2 font-medium text-sm transition-colors
-                  ${isActive 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
+              className={`${
+                isActive
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } ${index > 0 ? 'border-l border-gray-200' : ''} px-3 py-2 text-sm font-medium flex items-center`}
               aria-current={isActive ? 'page' : undefined}
+              title={tab.name}
             >
-              <Icon 
-                className={`
-                    -ml-0.5 mr-2 h-4 w-4 transition-colors
-                    ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}
-                  `} 
-              />
-              <span className="hidden sm:block">{tab.name}</span>
-              <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
+              <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+              <span className="hidden md:inline">{tab.name}</span>
+              <span className="md:hidden">{tab.name.split(' ')[0]}</span>
             </button>
           )
         })}
-      </nav>
+      </div>
     </div>
   )
 }
