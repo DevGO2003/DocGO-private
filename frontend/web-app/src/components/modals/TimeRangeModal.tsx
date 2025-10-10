@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type DateTime = string | undefined // ISO string compatible with input[type=datetime-local]
 
@@ -15,10 +16,12 @@ type TimeRangeModalProps = {
   value?: TimeRange
   onChange?: (next: TimeRange) => void
   onClose: () => void
+  anchorEl?: HTMLElement | null
 }
 
-export default function TimeRangeModal({ open, title = 'Thời gian', value, onChange, onClose }: TimeRangeModalProps) {
+export default function TimeRangeModal({ open, title = 'Thời gian', value, onChange, onClose, anchorEl }: TimeRangeModalProps) {
   const [local, setLocal] = useState<TimeRange>({ from: value?.from, to: value?.to })
+  const panelRef = useRef<HTMLDivElement | null>(null)
 
   const setField = (key: keyof TimeRange, v?: string) => {
     const next = { ...local, [key]: v }
@@ -26,17 +29,37 @@ export default function TimeRangeModal({ open, title = 'Thời gian', value, onC
     onChange?.(next)
   }
 
-  if (!open) return null
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (panelRef.current && !panelRef.current.contains(t) && anchorEl && !anchorEl.contains(t)) onClose()
+    }
+    if (open) {
+      document.addEventListener('keydown', onKey)
+      document.addEventListener('mousedown', onClick)
+    }
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
+    }
+  }, [open, onClose, anchorEl])
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl border border-gray-200 shadow-lg w-full max-w-md">
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        <div className="p-4 space-y-3">
+  if (!open || typeof window === 'undefined' || !anchorEl) return null
+
+  const width = 300
+  const height = 500
+  const rect = anchorEl.getBoundingClientRect()
+  const top = Math.min(window.scrollY + rect.bottom + 6, window.scrollY + window.innerHeight - height - 8)
+  const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - width - 8)
+
+  return createPortal(
+    <div ref={panelRef} className="fixed z-[100] bg-white rounded-xl border border-gray-200 shadow-lg" style={{ top, left, width, height }}>
+      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+      </div>
+      <div className="p-3 space-y-3">
           <div>
             <label className="block text-sm text-gray-700 mb-1">Từ</label>
             <input
@@ -58,12 +81,12 @@ export default function TimeRangeModal({ open, title = 'Thời gian', value, onC
           {local.from && local.to && new Date(local.from) > new Date(local.to) && (
             <div className="text-xs text-rose-600">Thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc.</div>
           )}
-        </div>
-        <div className="px-4 pb-4 flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Đóng</button>
-        </div>
       </div>
-    </div>
+      <div className="px-3 pb-3 flex justify-end gap-2">
+        <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50">Đóng</button>
+      </div>
+    </div>,
+    document.body
   )
 }
 

@@ -98,9 +98,9 @@ export default function DocumentsFilters(props: Props) {
         {showAdvanced && (
           <>
             <div className="ml-auto flex items-center gap-[10px]">
-              <button onClick={()=>setOpenTags(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><TagIcon className="w-4 h-4"/>Phân loại</button>
-              <button onClick={()=>setOpenTypes(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><FunnelIcon className="w-4 h-4"/>Loại file</button>
-              <button onClick={()=>setOpenTime(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><CalendarIcon className="w-4 h-4"/>Thời gian</button>
+          <button onClick={(e)=>{ setOpenTags(true); (e.currentTarget as HTMLElement).dataset.anchor='tags'; }} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50" data-anchor-id="tags"><TagIcon className="w-4 h-4"/>Phân loại</button>
+          <button onClick={(e)=>{ setOpenTypes(true); (e.currentTarget as HTMLElement).dataset.anchor='types'; }} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50" data-anchor-id="types"><FunnelIcon className="w-4 h-4"/>Loại file</button>
+          <button onClick={(e)=>{ setOpenTime(true); (e.currentTarget as HTMLElement).dataset.anchor='time'; }} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50" data-anchor-id="time"><CalendarIcon className="w-4 h-4"/>Thời gian</button>
               <button onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-indigo-300 text-sm text-indigo-700 hover:bg-indigo-50"><ArrowUturnLeftIcon className="w-4 h-4"/>Đặt lại</button>
               <div className="flex rounded-lg border border-gray-300 overflow-hidden">
               <button onClick={() => onViewModeChange?.('grid')} className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Xem dạng card">
@@ -133,6 +133,7 @@ export default function DocumentsFilters(props: Props) {
         exclude={[]}
         onChange={() => {}}
         onClose={()=>setOpenTags(false)}
+        anchorEl={typeof document !== 'undefined' ? document.querySelector('[data-anchor-id="tags"]') as HTMLElement : null}
       />
       <IncludeExcludeModal
         open={openTypes}
@@ -142,6 +143,7 @@ export default function DocumentsFilters(props: Props) {
         exclude={[]}
         onChange={() => {}}
         onClose={()=>setOpenTypes(false)}
+        anchorEl={typeof document !== 'undefined' ? document.querySelector('[data-anchor-id="types"]') as HTMLElement : null}
       />
       <TimeRangeModal
         open={openTime}
@@ -149,6 +151,7 @@ export default function DocumentsFilters(props: Props) {
         value={{}}
         onChange={() => {}}
         onClose={()=>setOpenTime(false)}
+        anchorEl={typeof document !== 'undefined' ? document.querySelector('[data-anchor-id="time"]') as HTMLElement : null}
       />
       <AddFileChoiceModal
         open={openAdd}
