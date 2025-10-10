@@ -41,18 +41,18 @@ function HeaderPanel({
         overflow: 'hidden'
       }}
     >
-      <div className="p-[5px]">
-        <div className="flex items-start justify-between gap-[5px]">
+      <div className="px-4 py-[5px]">
+        <div className="flex items-start justify-between gap-4">
           {/* Left section - natural width */}
           <div className="shrink-0">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
-              <nav className="flex mb-3" aria-label="Breadcrumb">
-                <ol className="flex items-center space-x-2 text-sm">
+              <nav className="flex mb-1" aria-label="Breadcrumb">
+                <ol className="flex items-center space-x-1 text-sm">
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={index} className="flex items-center">
                       {index > 0 && (
-                        <svg className="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-gray-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
                       )}
@@ -76,12 +76,12 @@ function HeaderPanel({
             
             {/* Subtitle */}
             {subtitle && (
-              <p className="text-gray-600 text-sm mb-4">{subtitle}</p>
+              <p className="text-gray-600 text-sm mb-2">{subtitle}</p>
             )}
 
             {/* Children content */}
             {children && (
-              <div className="mt-2">
+              <div className="mt-1">
                 {children}
               </div>
             )}
