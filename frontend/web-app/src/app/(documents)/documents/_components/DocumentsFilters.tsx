@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
-import { MagnifyingGlassIcon, TagIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TagIcon, Squares2X2Icon, ListBulletIcon, ArrowPathIcon, FunnelIcon, CalendarIcon } from '@heroicons/react/24/outline'
+import IncludeExcludeModal from '@/components/modals/IncludeExcludeModal'
+import TimeRangeModal from '@/components/modals/TimeRangeModal'
 import { getContractStatuses, getContractTypes } from '@/utils/tagTranslations'
 import { useTranslation } from '@/hooks/useTranslation'
 
@@ -42,10 +44,40 @@ export default function DocumentsFilters(props: Props) {
     onRefresh, onOpenTags, onOpenType, onOpenDate,
   } = props
 
+  const [openTags, setOpenTags] = React.useState(false)
+  const [openTypes, setOpenTypes] = React.useState(false)
+  const [openTime, setOpenTime] = React.useState(false)
+
   return (
     <div className="bg-white/80 backdrop-blur rounded-lg p-4 shadow-sm w-full">
-      {/* Search and Filter Bar - Flex Layout */}
-      <div className="flex items-center gap-4 w-full">
+      {/* Top bar: sort + refresh */}
+      <div className="flex items-center justify-between gap-4 w-full">
+        <div className="flex items-center gap-2">
+          <select
+            value={sortBy}
+            onChange={(e) => onSortByChange(e.target.value)}
+            className="h-9 px-2 rounded-lg border border-gray-300 text-sm"
+          >
+            <option value="createdAt">Ngày tạo</option>
+            <option value="title">Tên</option>
+            <option value="status">Trạng thái</option>
+            <option value="totalValue">Giá trị</option>
+            <option value="effectiveDate">Hiệu lực</option>
+          </select>
+          <select
+            value={sortDirection}
+            onChange={() => onToggleSortDirection()}
+            className="h-9 px-2 rounded-lg border border-gray-300 text-sm"
+          >
+            <option value="asc">Tăng dần</option>
+            <option value="desc">Giảm dần</option>
+          </select>
+        </div>
+        <button onClick={props.onRefresh} className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><ArrowPathIcon className="w-4 h-4"/>Làm mới</button>
+      </div>
+
+      {/* Search + Advanced triggers */}
+      <div className="flex items-center gap-2 w-full mt-3">
         {/* Search Input - Takes maximum space */}
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
@@ -54,114 +86,36 @@ export default function DocumentsFilters(props: Props) {
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Tìm theo tiêu đề hoặc mô tả.."
-              className="w-full rounded-lg border-gray-300 pl-10 pr-3 h-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full rounded-lg border border-gray-300 pl-10 pr-3 h-10 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
         </div>
-
-        {/* Document Type Dropdown */}
-        <div className="min-w-[140px]">
-          <select
-            value={type}
-            onChange={(e) => onTypeChange(e.target.value)}
-            className="w-full rounded-lg border-gray-300 h-10 px-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="ALL">— Loại tài liệu —</option>
-            {getContractTypes(t).map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Status Dropdown */}
-        <div className="min-w-[120px]">
-          <select
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full rounded-lg border-gray-300 h-10 px-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="ALL">— Trạng thái —</option>
-            {getContractStatuses(t).map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Reset Button */}
-        <button
-          onClick={() => {
-            onSearchChange('')
-            onStatusChange('ALL')
-            onTypeChange('ALL')
-          }}
-          className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-        >
-          Reset
-        </button>
-
-        {/* Apply Button */}
-        {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={onRefresh || (() => console.log('refresh'))}
-            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-          >
-            Làm mới
-          </button>
-          <button
-            onClick={onOpenTags || (() => console.log('open tags filter'))}
-            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-          >
-            Tags
-          </button>
-          <button
-            onClick={onOpenType || (() => console.log('open type filter include/exclude'))}
-            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-            title="Bao gồm / Loại trừ"
-          >
-            Loại file
-          </button>
-          <button
-            onClick={onOpenDate || (() => console.log('open date filter'))}
-            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
-          >
-            Ngày
-          </button>
+          <button onClick={()=>setOpenTags(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><TagIcon className="w-4 h-4"/>Tags</button>
+          <button onClick={()=>setOpenTypes(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><FunnelIcon className="w-4 h-4"/>Loại file</button>
+          <button onClick={()=>setOpenTime(true)} className="inline-flex items-center gap-1 px-3 h-10 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><CalendarIcon className="w-4 h-4"/>Thời gian</button>
         </div>
       </div>
 
       {/* Advanced Options - Hidden by default, shown when toggled */}
       {showAdvanced && (
         <div className="mt-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Sắp xếp:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => onSortByChange(e.target.value)}
-                className="rounded-lg border-gray-300 h-8 px-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="createdAt">Ngày tạo</option>
-                <option value="title">Tên</option>
-                <option value="status">Trạng thái</option>
-                <option value="totalValue">Giá trị</option>
-                <option value="effectiveDate">Hiệu lực</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Thứ tự:</label>
-              <button
-                onClick={onToggleSortDirection}
-                className="flex items-center gap-1 px-3 h-8 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
-              >
-                {sortDirection === 'asc' ? '↑ Tăng dần' : '↓ Giảm dần'}
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button onClick={()=>setOpenTags(true)} className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><TagIcon className="w-4 h-4"/>Tags</button>
+            <button onClick={()=>setOpenTypes(true)} className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><FunnelIcon className="w-4 h-4"/>Loại file</button>
+            <button onClick={()=>setOpenTime(true)} className="inline-flex items-center gap-1 px-3 h-9 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"><CalendarIcon className="w-4 h-4"/>Thời gian</button>
+            <button onClick={onToggleAdvanced} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium ml-auto">Ẩn tùy chọn nâng cao</button>
+          </div>
+          <div className="mt-3">
             <button
-              onClick={onToggleAdvanced}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              onClick={() => {
+                onSearchChange('')
+                onStatusChange('ALL')
+                onTypeChange('ALL')
+              }}
+              className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
             >
-              Ẩn tùy chọn nâng cao
+              Reset
             </button>
           </div>
         </div>
@@ -178,6 +132,33 @@ export default function DocumentsFilters(props: Props) {
           </button>
         </div>
       )}
+
+      {/* Modals */}
+      <IncludeExcludeModal
+        open={openTags}
+        title="Tags"
+        availableItems={availableTags}
+        include={[]}
+        exclude={[]}
+        onChange={() => {}}
+        onClose={()=>setOpenTags(false)}
+      />
+      <IncludeExcludeModal
+        open={openTypes}
+        title="Loại file"
+        availableItems={getContractTypes(t).map(x=>x.label)}
+        include={[]}
+        exclude={[]}
+        onChange={() => {}}
+        onClose={()=>setOpenTypes(false)}
+      />
+      <TimeRangeModal
+        open={openTime}
+        title="Thời gian"
+        value={{}}
+        onChange={() => {}}
+        onClose={()=>setOpenTime(false)}
+      />
     </div>
   )
 }
