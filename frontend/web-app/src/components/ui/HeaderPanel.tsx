@@ -108,19 +108,19 @@ export default function HeaderPanel({
 
   return (
     <div
-      className={`rounded-2xl border shadow-sm ring-1 ring-black/[0.03] ${styles.container} ${className}`}
+      className={`sticky top-0 z-40 backdrop-blur-sm bg-white rounded-2xl border border-gray-200 shadow-lg ${className}`}
       style={{
-        // Mobile first
-        maxHeight: mhMobile,
+        maxHeight: '300px',
         overflow: 'hidden'
       }}
     >
-      <div className={`${paddingClass}`}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
+      <div className="p-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+          {/* Left section - 1fr */}
+          <div className="lg:col-span-1 min-w-0">
             {/* Breadcrumbs */}
             {Array.isArray(breadcrumbs) && breadcrumbs.length > 0 && (
-              <nav aria-label="Breadcrumb" className={`mb-1 ${breadcrumbsText} text-gray-500`}>
+              <nav aria-label="Breadcrumb" className="mb-1.5 text-sm text-gray-500">
                 <ol className="flex items-center gap-2 flex-wrap">
                   {breadcrumbs.map((bc, idx) => (
                     <li key={idx} className="inline-flex items-center gap-2">
@@ -138,18 +138,19 @@ export default function HeaderPanel({
               </nav>
             )}
 
-            <h1 className={`font-semibold tracking-tight ${titleClass} mb-1 ${styles.title}`}>
+            <h1 className="text-xl font-bold text-gray-900 mb-2">
               {displayIcon && <span className="align-middle mr-2">{displayIcon}</span>}
               <span className="align-middle truncate block">{title}</span>
             </h1>
             {description ? (
-              <div className={`${descClass} leading-relaxed ${styles.description}`}>
+              <div className="text-sm text-gray-600 leading-relaxed">
                 {description}
               </div>
             ) : null}
           </div>
 
-          <div className="ml-4 flex-shrink-0 flex items-center gap-2">
+          {/* Right section - 2fr */}
+          <div className="lg:col-span-2 flex items-center justify-end gap-2.5 min-w-0 flex-wrap">
             {right}
             {actionButton}
           </div>
@@ -157,7 +158,7 @@ export default function HeaderPanel({
 
         {/* Children slot for page controls */}
         {children ? (
-          <div className={`${'mt-2'} ${childrenScaleClass} ${childrenWrapClass}`}>
+          <div className={`mt-2 ${childrenScaleClass} ${childrenWrapClass}`}>
             {/* When wrapControls enabled, we still render children directly; parent container manages wrapping */}
             {children}
           </div>
@@ -165,11 +166,16 @@ export default function HeaderPanel({
       </div>
 
       <style jsx>{`
-        @media (min-width: 768px) {
-          div[class*='rounded-2xl'] { max-height: ${mhTablet}px; }
-        }
-        @media (min-width: 1280px) {
-          div[class*='rounded-2xl'] { max-height: ${mhDesktop}px; }
+        @media (max-width: 900px) {
+          div[class*='rounded-2xl'] { 
+            max-height: none; 
+          }
+          div[class*='grid'] {
+            grid-template-columns: 1fr !important;
+          }
+          div[class*='justify-end'] {
+            justify-content: flex-start !important;
+          }
         }
       `}</style>
     </div>

@@ -12,7 +12,9 @@ import {
   MagnifyingGlassIcon, 
   BellIcon, 
   UserCircleIcon,
-  Bars3Icon
+  Bars3Icon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon
 } from '@heroicons/react/24/outline'
 import { APP_CONFIG } from '@/lib/constants'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
@@ -23,6 +25,8 @@ interface HeaderProps {
   showSearch?: boolean
   showNotifications?: boolean
   showUserMenu?: boolean
+  isZoomed?: boolean
+  onZoomToggle?: () => void
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,6 +34,8 @@ export const Header: React.FC<HeaderProps> = ({
   showSearch = true,
   showNotifications = true,
   showUserMenu = true,
+  isZoomed = false,
+  onZoomToggle,
 }) => {
   const { user, logout } = useAuth()
   const { t } = useTranslation()
@@ -73,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and Menu Toggle */}
           <div className="flex items-center">
-            {onMenuToggle && (
+            {onMenuToggle && !isZoomed && (
               <button
                 onClick={onMenuToggle}
                 className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
@@ -87,9 +93,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">D</span>
                 </div>
-              </div>
-              <div className="ml-3">
-                <h1 className="text-xl font-bold text-gray-900">{APP_CONFIG.NAME}</h1>
               </div>
             </NavigationLink>
           </div>
@@ -112,6 +115,22 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right side - Actions and User Menu */}
           <div className="flex items-center space-x-4">
+            {/* Zoom Toggle Button */}
+            {onZoomToggle && (
+              <button
+                onClick={onZoomToggle}
+                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+                title={isZoomed ? 'Thu nhỏ' : 'Phóng to'}
+                aria-label={isZoomed ? 'Thu nhỏ' : 'Phóng to'}
+              >
+                {isZoomed ? (
+                  <ArrowsPointingInIcon className="h-6 w-6" />
+                ) : (
+                  <ArrowsPointingOutIcon className="h-6 w-6" />
+                )}
+              </button>
+            )}
+
             {/* Search for mobile */}
             {showSearch && (
               <button className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">

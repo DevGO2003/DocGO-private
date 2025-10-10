@@ -28,13 +28,20 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed)
+  const [isZoomed, setIsZoomed] = useState(false)
   const COLLAPSE_STORAGE_KEY = 'sidebar_collapsed'
+  const ZOOM_STORAGE_KEY = 'header_zoomed'
 
   useEffect(() => {
     try {
       const saved = typeof window !== 'undefined' ? localStorage.getItem(COLLAPSE_STORAGE_KEY) : null
       if (saved != null) {
         setIsCollapsed(saved === 'true')
+      }
+      
+      const zoomSaved = typeof window !== 'undefined' ? localStorage.getItem(ZOOM_STORAGE_KEY) : null
+      if (zoomSaved != null) {
+        setIsZoomed(zoomSaved === 'true')
       }
     } catch {}
   }, [])
@@ -48,6 +55,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     onSidebarToggle?.(collapsed)
     try {
       localStorage.setItem(COLLAPSE_STORAGE_KEY, String(collapsed))
+    } catch {}
+  }
+
+  const handleZoomToggle = () => {
+    const newZoomed = !isZoomed
+    setIsZoomed(newZoomed)
+    try {
+      localStorage.setItem(ZOOM_STORAGE_KEY, String(newZoomed))
     } catch {}
   }
 
@@ -89,6 +104,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             showSearch={true}
             showNotifications={true}
             showUserMenu={true}
+            isZoomed={isZoomed}
+            onZoomToggle={handleZoomToggle}
           />
         )}
 

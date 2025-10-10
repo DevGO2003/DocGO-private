@@ -3,6 +3,7 @@ export { Button, buttonVariants } from './Button'
 export { Input } from './Input'
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card'
 export { default as HeaderPanel } from './HeaderPanel'
+export { default as PrimaryContent } from './PrimaryContent'
 
 // Re-export types
 export type { ButtonProps } from './Button'
