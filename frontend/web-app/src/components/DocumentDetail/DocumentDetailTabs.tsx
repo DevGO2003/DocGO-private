@@ -137,7 +137,7 @@ export function getSubTabsFor(mainTabId: string) {
 
 export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string; onChange: (tabId: string) => void }) {
   return (
-    <div className="bg-gray-50 px-6">
+    <div>
       <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
         {mainTabs.map((tab, index) => {
           const Icon = tab.icon
@@ -146,17 +146,14 @@ export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string
             <button
               key={tab.id}
               onClick={() => onChange(tab.id)}
-              className={`${
-                isActive
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              } ${index > 0 ? 'border-l border-gray-200' : ''} px-3 py-2 text-sm font-medium flex items-center`}
+              className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} ${index > 0 ? 'border-l border-gray-200' : ''}`}
               aria-current={isActive ? 'page' : undefined}
               title={tab.name}
             >
-              <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+              <span className="md:hidden">
+                <Icon className="w-3.5 h-3.5" />
+              </span>
               <span className="hidden md:inline">{tab.name}</span>
-              <span className="md:hidden">{tab.name.split(' ')[0]}</span>
             </button>
           )
         })}
@@ -168,7 +165,7 @@ export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string
 export function SubTabsNav({ activeMainTab, activeSubTab, onChange }: { activeMainTab: string; activeSubTab: string; onChange: (tabId: string) => void }) {
   const subTabs = getSubTabsFor(activeMainTab)
   return (
-    <div className="px-6 mt-2">
+    <div className="mt-2">
       <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
         {subTabs.map((tab, index) => {
           const Icon = tab.icon
@@ -177,17 +174,14 @@ export function SubTabsNav({ activeMainTab, activeSubTab, onChange }: { activeMa
             <button
               key={tab.id}
               onClick={() => onChange(tab.id)}
-              className={`${
-                isActive
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              } ${index > 0 ? 'border-l border-gray-200' : ''} px-3 py-2 text-sm font-medium flex items-center`}
+              className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} ${index > 0 ? 'border-l border-gray-200' : ''}`}
               aria-current={isActive ? 'page' : undefined}
               title={tab.name}
             >
-              <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+              <span className="md:hidden">
+                <Icon className="w-3.5 h-3.5" />
+              </span>
               <span className="hidden md:inline">{tab.name}</span>
-              <span className="md:hidden">{tab.name.split(' ')[0]}</span>
             </button>
           )
         })}

@@ -266,7 +266,7 @@ export default function DocumentsPage() {
         {/* Page Header */}
         <HeaderPanel
           title="Quản lý tài liệu"
-          breadcrumbs={[{ label: 'Documents', href: '/documents' }, { label: 'Danh sách', current: true }]}
+          breadcrumbs={[{ label: 'Tài liệu', href: '/documents' }, { label: 'Danh sách', current: true }]}
           right={
             <div className="w-full">
               <DocumentsFilters

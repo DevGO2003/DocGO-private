@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
 import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
 import { HeaderPanel } from '@/components/ui'
+import { PencilSquareIcon, ArrowUpTrayIcon, DocumentDuplicateIcon, PencilIcon, DocumentArrowDownIcon, ChatBubbleLeftRightIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 export default function DocumentDetailPage() {
   const params = useParams() as { id: string }
@@ -269,31 +270,39 @@ export default function DocumentDetailPage() {
           subtitle={`Mã: HD-${data.id} · Loại: ${translateContractType(data.contractType, t)} · Trạng thái: ${translateContractStatus(data.status, t)}`}
           breadcrumbs={[
             { label: 'Tài liệu', href: '/documents' },
+            { label: 'Danh sách', href: '/documents' },
             { label: 'Chi tiết', current: true },
           ]}
           right={
             <div className="w-full">
-              <div className="flex flex-wrap gap-2 items-center justify-end mb-3">
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
-                  📝 Chỉnh sửa
+              <div className="flex flex-wrap gap-[5px] items-center justify-end mb-[5px]">
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <PencilSquareIcon className="w-3 h-3" />
+                  Chỉnh sửa
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-green-600 text-green-700 hover:bg-green-50 transition text-sm font-medium">
-                  📤 Gửi duyệt
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <ArrowUpTrayIcon className="w-3 h-3" />
+                  Gửi duyệt
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-blue-600 text-blue-700 hover:bg-blue-50 transition text-sm font-medium">
-                  📋 Tạo phiên bản
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <DocumentDuplicateIcon className="w-3 h-3" />
+                  Tạo phiên bản
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-purple-600 text-purple-700 hover:bg-purple-50 transition text-sm font-medium">
-                  ✍️ Gửi ký
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <PencilIcon className="w-3 h-3" />
+                  Gửi ký
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-gray-500 text-gray-700 hover:bg-gray-50 transition text-sm font-medium">
-                  📄 Tải PDF
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <DocumentArrowDownIcon className="w-3 h-3" />
+                  Tải PDF
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-amber-600 text-amber-700 hover:bg-amber-50 transition text-sm font-medium">
-                  💬 Bình luận
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">
+                  <ChatBubbleLeftRightIcon className="w-3 h-3" />
+                  Bình luận
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-red-600 text-red-700 hover:bg-red-50 transition text-sm font-medium">
-                  🗑️ Xóa
+                <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-rose-300 text-xs text-rose-700 hover:bg-rose-50">
+                  <TrashIcon className="w-3 h-3" />
+                  Xóa
                 </button>
               </div>
             </div>
