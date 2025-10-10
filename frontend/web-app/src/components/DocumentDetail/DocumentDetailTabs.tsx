@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { DocumentTextIcon, InformationCircleIcon, BuildingOfficeIcon, TagIcon, CpuChipIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, Cog6ToothIcon, DocumentIcon, FolderIcon, ClockIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
 
 // Import all components
@@ -24,7 +24,7 @@ interface DocumentDetailTabsProps {
 }
 
 // Tab chính (Main Tabs)
-const mainTabs = [
+export const mainTabs = [
   {
     id: 'overview',
     name: 'Tổng quan',
@@ -46,7 +46,7 @@ const mainTabs = [
 ]
 
 // Tab con cho Contracts
-const contractSubTabs = [
+export const contractSubTabs = [
   {
     id: 'basic-info',
     name: 'Thông tin cơ bản',
@@ -80,7 +80,7 @@ const contractSubTabs = [
 ]
 
 // Tab con cho Document Details
-const documentDetailSubTabs = [
+export const documentDetailSubTabs = [
   {
     id: 'details',
     name: 'Chi tiết',
@@ -120,7 +120,7 @@ const documentDetailSubTabs = [
 ]
 
 // Tab con cho Bình luận (tối thiểu 1 tab để tương thích layout)
-const commentsSubTabs = [
+export const commentsSubTabs = [
   {
     id: 'comments-list',
     name: 'Bình luận',
@@ -129,36 +129,88 @@ const commentsSubTabs = [
   }
 ]
 
-export function DocumentDetailTabs({ documentData, onTabChange, contractSummary }: DocumentDetailTabsProps) {
-  const [activeMainTab, setActiveMainTab] = useState('contracts')
-  const [activeSubTab, setActiveSubTab] = useState('basic-info')
+export function getSubTabsFor(mainTabId: string) {
+  if (mainTabId === 'contracts') return contractSubTabs
+  if (mainTabId === 'overview') return documentDetailSubTabs
+  return commentsSubTabs
+}
 
-  const handleMainTabClick = (tabId: string) => {
-    setActiveMainTab(tabId)
-    // Reset sub tab when switching main tab
-    if (tabId === 'contracts') {
-      setActiveSubTab('basic-info')
-    } else if (tabId === 'overview') {
-      setActiveSubTab('details')
-    } else if (tabId === 'comments') {
-      setActiveSubTab('comments-list')
-    }
-    onTabChange?.(`${tabId}-${activeSubTab}`)
-  }
+export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string; onChange: (tabId: string) => void }) {
+  return (
+    <div className="border-b border-gray-200 bg-gray-50">
+      <nav className="flex space-x-8 px-6" aria-label="Main Tabs">
+        {mainTabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeMainTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              className={`
+                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${isActive 
+                    ? 'border-indigo-500 text-indigo-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon 
+                className={`
+                    -ml-0.5 mr-2 h-5 w-5 transition-colors
+                    ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}
+                  `} 
+              />
+              <span className="hidden sm:block">{tab.name}</span>
+              <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
+            </button>
+          )
+        })}
+      </nav>
+    </div>
+  )
+}
 
-  const handleSubTabClick = (tabId: string) => {
-    setActiveSubTab(tabId)
-    onTabChange?.(`${activeMainTab}-${tabId}`)
-  }
+export function SubTabsNav({ activeMainTab, activeSubTab, onChange }: { activeMainTab: string; activeSubTab: string; onChange: (tabId: string) => void }) {
+  const subTabs = getSubTabsFor(activeMainTab)
+  return (
+    <div className="border-b border-gray-200">
+      <nav className="flex space-x-6 px-6" aria-label="Sub Tabs">
+        {subTabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeSubTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              className={`
+                  group inline-flex items-center py-3 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${isActive 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon 
+                className={`
+                    -ml-0.5 mr-2 h-4 w-4 transition-colors
+                    ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}
+                  `} 
+              />
+              <span className="hidden sm:block">{tab.name}</span>
+              <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
+            </button>
+          )
+        })}
+      </nav>
+    </div>
+  )
+}
 
-  const getCurrentSubTabs = () => {
-    if (activeMainTab === 'contracts') return contractSubTabs
-    if (activeMainTab === 'overview') return documentDetailSubTabs
-    return commentsSubTabs
-  }
-
+export function DocumentDetailTabs({ documentData, onTabChange, contractSummary, activeMainTab = 'contracts', activeSubTab = 'basic-info' }: DocumentDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
   const renderSubTabContent = () => {
-    const subTabs = getCurrentSubTabs()
+    const subTabs = getSubTabsFor(activeMainTab)
     const currentSubTab = subTabs.find(tab => tab.id === activeSubTab)
     
     if (!currentSubTab) return null
@@ -215,75 +267,6 @@ export function DocumentDetailTabs({ documentData, onTabChange, contractSummary 
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      {/* Main Tab Navigation */}
-      <div className="border-b border-gray-200 bg-gray-50">
-        <nav className="flex space-x-8 px-6" aria-label="Main Tabs">
-          {mainTabs.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeMainTab === tab.id
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleMainTabClick(tab.id)}
-                className={`
-                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                  ${isActive 
-                    ? 'border-indigo-500 text-indigo-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon 
-                  className={`
-                    -ml-0.5 mr-2 h-5 w-5 transition-colors
-                    ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}
-                  `} 
-                />
-                <span className="hidden sm:block">{tab.name}</span>
-                <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
-              </button>
-            )
-          })}
-        </nav>
-      </div>
-
-      {/* Sub Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-6 px-6" aria-label="Sub Tabs">
-          {getCurrentSubTabs().map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeSubTab === tab.id
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleSubTabClick(tab.id)}
-                className={`
-                  group inline-flex items-center py-3 px-1 border-b-2 font-medium text-sm transition-colors
-                  ${isActive 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon 
-                  className={`
-                    -ml-0.5 mr-2 h-4 w-4 transition-colors
-                    ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}
-                  `} 
-                />
-                <span className="hidden sm:block">{tab.name}</span>
-                <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
-              </button>
-            )
-          })}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
       <div className="p-6">
         {renderSubTabContent()}
       </div>

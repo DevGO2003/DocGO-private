@@ -6,7 +6,8 @@ import { useParams } from 'next/navigation'
 import { contractAPI } from '@/lib/api'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
-import { DocumentDetailTabs } from '@/components/DocumentDetail/DocumentDetailTabs'
+import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
+import { HeaderPanel } from '@/components/ui'
 
 export default function DocumentDetailPage() {
   const params = useParams() as { id: string }
@@ -15,6 +16,8 @@ export default function DocumentDetailPage() {
   const [contractSummary, setContractSummary] = useState<any>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>('')
+  const [activeMainTab, setActiveMainTab] = useState<string>('contracts')
+  const [activeSubTab, setActiveSubTab] = useState<string>('basic-info')
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -261,56 +264,39 @@ export default function DocumentDetailPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Fancy Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 shadow-sm">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">{data.title}</h1>
-              <p className="text-gray-600">Mã: HD-{data.id} · Loại: {translateContractType(data.contractType, t)}</p>
+        <HeaderPanel
+          title={data.title}
+          subtitle={`Mã: HD-${data.id} · Loại: ${translateContractType(data.contractType, t)} · Trạng thái: ${translateContractStatus(data.status, t)}`}
+          breadcrumbs={[
+            { label: 'Tài liệu', href: '/documents' },
+            { label: 'Chi tiết', current: true },
+          ]}
+          right={
+            <div className="w-full">
+              <MainTabsNav
+                activeMainTab={activeMainTab}
+                onChange={(tabId) => {
+                  setActiveMainTab(tabId)
+                  if (tabId === 'contracts') setActiveSubTab('basic-info')
+                  else if (tabId === 'overview') setActiveSubTab('details')
+                  else if (tabId === 'comments') setActiveSubTab('comments-list')
+                }}
+              />
+              <SubTabsNav
+                activeMainTab={activeMainTab}
+                activeSubTab={activeSubTab}
+                onChange={(tabId) => setActiveSubTab(tabId)}
+              />
             </div>
-            <div className="flex gap-2">
-              <span className={`px-3 py-1 text-sm rounded-full border ${badgeClass(data.status)}`}>{translateContractStatus(data.status, t)}</span>
-              <span className="px-3 py-1 text-sm rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(data.contractType, t)}</span>
-            </div>
-          </div>
-          <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
-        </div>
+          }
+        />
 
-        {/* Action Bar */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Hành động:</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm">
-                📝 Chỉnh sửa
-              </button>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-sm">
-                📤 Gửi duyệt
-              </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow-sm">
-                📋 Tạo phiên bản
-              </button>
-              <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium shadow-sm">
-                ✍️ Gửi ký
-              </button>
-              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium shadow-sm">
-                📄 Tải PDF
-              </button>
-              <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium shadow-sm">
-                💬 Bình luận
-              </button>
-              <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium shadow-sm">
-                🗑️ Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Document Detail Tabs */}
-        <DocumentDetailTabs documentData={data} contractSummary={contractSummary} />
+        <DocumentDetailTabs
+          documentData={data}
+          contractSummary={contractSummary}
+          activeMainTab={activeMainTab}
+          activeSubTab={activeSubTab}
+        />
       </div>
     </DashboardLayout>
   )
