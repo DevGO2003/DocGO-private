@@ -52,7 +52,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   }
 
   return (
-    <div className={`min-h-screen bg-gray-50 flex ${showSidebar ? (isCollapsed ? 'lg:pl-16' : 'lg:pl-64') : ''}`}>
+    <div className={`h-screen overflow-hidden bg-gray-50 flex ${showSidebar ? (isCollapsed ? 'lg:pl-16' : 'lg:pl-64') : ''}`}>
       {/* Sidebar */}
       {showSidebar && (
         <>
@@ -92,7 +92,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           />
         )}
 
-        {/* Page Content */}
+        {/* Page Content - internal scroll only */}
         <main className="flex-1 overflow-auto" suppressHydrationWarning>
           <div className="mx-auto px-2 py-6">
             <PageTransition>

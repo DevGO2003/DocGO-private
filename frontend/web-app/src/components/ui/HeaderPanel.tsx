@@ -35,7 +35,7 @@ function HeaderPanel({
 
   return (
     <div
-      className={`bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}
+      className={`sticky top-0 z-50 bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}
       style={{
         maxHeight: '300px',
         overflow: 'hidden'
