@@ -268,7 +268,7 @@ export default function DocumentsPage() {
           title="Quản lý tài liệu"
           breadcrumbs={[{ label: 'Documents', href: '/documents' }, { label: 'Danh sách', current: true }]}
           right={
-            <div className="flex-1 max-w-4xl">
+            <div className="w-full">
               <DocumentsFilters
                 search={search}
                 onSearchChange={(v) => setSearch(v)}
@@ -311,8 +311,8 @@ export default function DocumentsPage() {
             <div className="flex-1"></div>
         </div>
 
-          {/* View Mode Toggle - Below tabs */}
-          <div className="flex justify-end mt-3">
+          {/* View Mode Toggle - align start */}
+          <div className="flex justify-start mt-2">
             <div className="flex rounded-lg border border-gray-300 overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}

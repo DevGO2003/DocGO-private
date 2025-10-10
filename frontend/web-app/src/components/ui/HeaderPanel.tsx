@@ -41,10 +41,10 @@ function HeaderPanel({
         overflow: 'hidden'
       }}
     >
-      <div className="p-5">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Left section - 1fr */}
-          <div className="lg:col-span-1 min-w-0">
+      <div className="p-[10px]">
+        <div className="flex items-start gap-[10px]">
+          {/* Left section - natural width */}
+          <div className="shrink-0">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
               <nav className="flex mb-3" aria-label="Breadcrumb">
@@ -72,7 +72,7 @@ function HeaderPanel({
             )}
 
             {/* Title */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+            <h1 className="inline-block w-auto text-2xl font-bold text-gray-900 mb-2">{title}</h1>
             
             {/* Subtitle */}
             {subtitle && (
@@ -87,14 +87,10 @@ function HeaderPanel({
             )}
           </div>
 
-          {/* Right section - 2fr */}
+          {/* Right section - takes remaining space */}
           {right && (
-            <div className="lg:col-span-2 min-w-0">
-              <div className="flex justify-end">
-                <div className="w-full max-w-none">
-                  {right}
-                </div>
-              </div>
+            <div className="flex-1 min-w-0">
+              {right}
             </div>
           )}
         </div>

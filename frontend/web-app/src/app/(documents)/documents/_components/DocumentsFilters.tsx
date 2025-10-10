@@ -24,6 +24,10 @@ type Props = {
   onToggleSortDirection: () => void
   showAdvanced: boolean
   onToggleAdvanced: () => void
+  onRefresh?: () => void
+  onOpenTags?: () => void
+  onOpenType?: () => void
+  onOpenDate?: () => void
 }
 
 export default function DocumentsFilters(props: Props) {
@@ -35,6 +39,7 @@ export default function DocumentsFilters(props: Props) {
     availableTags, tagsLoading, tagsError, selectedTags, onToggleTag, onRetryTags,
     sortBy, onSortByChange, sortDirection, onToggleSortDirection,
     showAdvanced, onToggleAdvanced,
+    onRefresh, onOpenTags, onOpenType, onOpenDate,
   } = props
 
   return (
@@ -95,15 +100,34 @@ export default function DocumentsFilters(props: Props) {
         </button>
 
         {/* Apply Button */}
-        <button
-          onClick={() => {
-            // Apply logic is handled by the parent component through state changes
-            console.log('Apply filters')
-          }}
-          className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
-        >
-          Áp dụng
-        </button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRefresh || (() => console.log('refresh'))}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+          >
+            Làm mới
+          </button>
+          <button
+            onClick={onOpenTags || (() => console.log('open tags filter'))}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+          >
+            Tags
+          </button>
+          <button
+            onClick={onOpenType || (() => console.log('open type filter include/exclude'))}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+            title="Bao gồm / Loại trừ"
+          >
+            Loại file
+          </button>
+          <button
+            onClick={onOpenDate || (() => console.log('open date filter'))}
+            className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+          >
+            Ngày
+          </button>
+        </div>
       </div>
 
       {/* Advanced Options - Hidden by default, shown when toggled */}
