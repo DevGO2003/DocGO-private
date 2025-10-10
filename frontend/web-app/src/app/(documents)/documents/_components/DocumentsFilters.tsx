@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { MagnifyingGlassIcon, TagIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TagIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline'
 import { getContractStatuses, getContractTypes } from '@/utils/tagTranslations'
 import { useTranslation } from '@/hooks/useTranslation'
 

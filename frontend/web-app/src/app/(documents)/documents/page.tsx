@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline'
 import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent } from '@/components/ui'
 import CustomTable from '@/components/contracts/CustomTable'
@@ -299,15 +300,43 @@ export default function DocumentsPage() {
                   <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                 </span>
                 <span className="hidden md:inline">Tất cả file</span>
-              </button>
+            </button>
               <button onClick={() => setActiveTab('contract')} className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs border-l border-gray-200 ${activeTab === 'contract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="File hợp đồng">
                 <span className="md:hidden">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
                 </span>
                 <span className="hidden md:inline">File hợp đồng</span>
-              </button>
+                  </button>
             </div>
             <div className="flex-1"></div>
+        </div>
+
+          {/* View Mode Toggle - Below tabs */}
+          <div className="flex justify-end mt-3">
+            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 transition-colors ${
+                  viewMode === 'grid' 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                title="Xem dạng card"
+              >
+                <Squares2X2Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 transition-colors border-l border-gray-300 ${
+                  viewMode === 'list' 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                title="Xem dạng bảng"
+              >
+                <ListBulletIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </HeaderPanel>
 
