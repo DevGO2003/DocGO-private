@@ -82,9 +82,6 @@ export default function TimeRangeModal({ open, title = 'Thời gian', value, onC
             <div className="text-xs text-rose-600">Thời điểm bắt đầu phải nhỏ hơn hoặc bằng thời điểm kết thúc.</div>
           )}
       </div>
-      <div className="px-3 pb-3 flex justify-end gap-2">
-        <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50">Đóng</button>
-      </div>
     </div>,
     document.body
   )

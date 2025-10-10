@@ -72,9 +72,9 @@ export default function IncludeExcludeModal({ open, title, availableItems, inclu
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
       </div>
       <div className="px-3 pt-2">
-        <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-          <button onClick={() => setTab('include')} className={`px-3 py-1.5 text-xs ${tab==='include'?'bg-indigo-600 text-white':'bg-white text-gray-700 hover:bg-gray-50'}`}>Bao gồm</button>
-          <button onClick={() => setTab('exclude')} className={`px-3 py-1.5 text-xs border-l border-gray-200 ${tab==='exclude'?'bg-indigo-600 text-white':'bg-white text-gray-700 hover:bg-gray-50'}`}>Loại bỏ</button>
+        <div className="grid grid-cols-2 w-full rounded-lg border border-gray-200 overflow-hidden">
+          <button onClick={() => setTab('include')} className={`w-full py-2 text-sm text-center ${tab==='include'?'bg-indigo-600 text-white':'bg-white text-indigo-700 hover:bg-indigo-50'}`}>Bao gồm</button>
+          <button onClick={() => setTab('exclude')} className={`w-full py-2 text-sm text-center border-l border-gray-200 ${tab==='exclude'?'bg-indigo-600 text-white':'bg-white text-indigo-700 hover:bg-indigo-50'}`}>Loại trừ</button>
         </div>
       </div>
       <div className="px-3 py-2">
@@ -99,9 +99,7 @@ export default function IncludeExcludeModal({ open, title, availableItems, inclu
           )}
         </div>
       </div>
-      <div className="px-3 pb-3 flex justify-end gap-2">
-        <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50">Đóng</button>
-      </div>
+      {/* No footer close button; header X handles close */}
     </div>,
     document.body
   )
