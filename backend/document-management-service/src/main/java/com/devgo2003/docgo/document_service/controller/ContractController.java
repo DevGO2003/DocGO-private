@@ -221,6 +221,23 @@ public class ContractController {
             @PathVariable String id,
             @RequestParam(required = false) String view) {
         ContractResponseDto contract = contractService.getContractWithNewFormat(id);
+        
+        // Check if contract not found
+        if (contract == null) {
+            RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
+                    .apiVersion("v1")
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .shortMessage("Not Found")
+                    .description("Không tìm thấy hợp đồng với ID: " + id)
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path(request.getRequestURI())
+                    .build();
+            
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        
         RestResponse<ContractResponseDto> response = RestResponse.<ContractResponseDto>builder()
                 .apiVersion("v1")
                 .statusCode(HttpStatus.OK.value())

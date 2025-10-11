@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { useParams } from 'next/navigation'
-import { contractAPI } from '@/lib/api'
+import { useParams, useRouter } from 'next/navigation'
+import { fetchDocument } from '../_services/documentsApi'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
 import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
@@ -12,6 +12,7 @@ import { PencilSquareIcon, ArrowUpTrayIcon, DocumentDuplicateIcon, PencilIcon, D
 
 export default function DocumentDetailPage() {
   const params = useParams() as { id: string }
+  const router = useRouter()
   const { t } = useTranslation()
   const [data, setData] = useState<any>(null)
   const [contractSummary, setContractSummary] = useState<any>(null)
@@ -25,207 +26,98 @@ export default function DocumentDetailPage() {
       setLoading(true)
       try {
         setError('')
-        // Mock data for id=1 with diverse and rich content
-        if (params.id === '1') {
-          const mockData = {
-            id: '1',
-            title: 'Hợp đồng cung cấp dịch vụ IT - Công ty ABC',
-            description: 'Hợp đồng cung cấp dịch vụ IT bao gồm phát triển phần mềm, bảo trì hệ thống và hỗ trợ kỹ thuật 24/7',
-            status: 'PENDING_REVIEW',
-            contractType: 'SERVICE_AGREEMENT',
-            tags: ['IT', 'Dịch vụ', 'Phần mềm', 'Bảo trì', 'Cloud', 'Security', 'AI', 'Digital Transformation'],
-            parties: [
-              { 
-                name: 'Công ty TNHH Công nghệ ABC', 
-                role: 'Khách hàng', 
-                representative: 'Nguyễn Văn Anh', 
-                taxCode: '0123456789', 
-                contact: '0901234567', 
-                address: '123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh',
-                businessLicense: 'BL-2024-001'
-              },
-              { 
-                name: 'Công ty TNHH DocGO Solutions', 
-                role: 'Nhà cung cấp', 
-                representative: 'Trần Thị Bình', 
-                taxCode: '9876543210', 
-                contact: '0987654321', 
-                address: '456 Đường Nguyễn Huệ, Quận 3, TP. Hồ Chí Minh',
-                businessLicense: 'BL-2024-002'
-              },
-            ],
-            effectiveDate: '2024-02-01',
-            expiryDate: '2025-01-31',
-            paymentDetails: {
-              totalValue: 2500000000,
-              currency: 'VND',
-              schedule: 'Thanh toán 30% khi ký hợp đồng, 40% khi hoàn thành 50% tiến độ, 20% khi nghiệm thu, 10% sau bảo hành 3 tháng',
-              paymentMethod: 'Chuyển khoản ngân hàng'
-            },
-            keyClauses: [
-              { name: 'Phạm vi công việc', description: 'Phát triển hệ thống quản lý tài liệu số với AI và machine learning', importance: 'High', risk: 'LOW' },
-              { name: 'Thời gian thực hiện', description: '8 tháng kể từ ngày ký hợp đồng', importance: 'High', risk: 'MEDIUM' },
-              { name: 'Bảo hành', description: '18 tháng bảo hành toàn diện và hỗ trợ kỹ thuật 24/7', importance: 'High', risk: 'LOW' },
-              { name: 'Bảo mật dữ liệu', description: 'Tuân thủ ISO 27001 và GDPR trong xử lý dữ liệu', importance: 'High', risk: 'LOW' },
-              { name: 'Quyền sở hữu trí tuệ', description: 'Khách hàng sở hữu source code và bản quyền phần mềm', importance: 'Medium', risk: 'LOW' },
-            ],
-            favorableClauses: [
-              { clauseName: 'Bảo hành mở rộng', description: 'Bảo hành 18 tháng thay vì 12 tháng thông thường', benefitTo: 'Khách hàng' },
-              { clauseName: 'Hỗ trợ 24/7', description: 'Hỗ trợ kỹ thuật 24/7 trong suốt thời gian bảo hành', benefitTo: 'Khách hàng' },
-              { clauseName: 'Training miễn phí', description: 'Đào tạo sử dụng hệ thống cho 10 nhân viên', benefitTo: 'Khách hàng' },
-            ],
-            unfavorableClauses: [
-              { clauseName: 'Phạt chậm tiến độ', description: 'Phạt 0.5% giá trị hợp đồng mỗi tuần chậm tiến độ', riskTo: 'Nhà cung cấp' },
-              { clauseName: 'Thay đổi yêu cầu', description: 'Phí 10% cho mỗi thay đổi yêu cầu lớn', riskTo: 'Khách hàng' },
-            ],
-            reminders: [
-              { type: 'Phê duyệt pháp lý', date: '2024-01-25', content: 'Cần phê duyệt từ phòng pháp lý và tuân thủ quy định về bảo mật' },
-              { type: 'Ký số điện tử', date: '2024-01-30', content: 'Hoàn tất ký số điện tử từ tất cả các bên tham gia' },
-              { type: 'Khởi động dự án', date: '2024-02-05', content: 'Meeting kick-off và bàn giao tài liệu kỹ thuật' },
-              { type: 'Báo cáo tiến độ', date: '2024-03-01', content: 'Báo cáo tiến độ tháng đầu tiên' },
-              { type: 'Nghiệm thu giai đoạn 1', date: '2024-06-01', content: 'Nghiệm thu và thanh toán 40% giá trị hợp đồng' },
-            ],
-            riskAssessment: {
-              riskLevel: 'MEDIUM',
-              riskFactors: [
-                'Phụ thuộc vào bên thứ ba cho infrastructure',
-                'Thay đổi yêu cầu trong quá trình phát triển',
-                'Rủi ro bảo mật dữ liệu khách hàng',
-                'Thiếu nhân lực có kinh nghiệm AI/ML'
-              ],
-              mitigationMeasures: [
-                'Hợp đồng rõ ràng về SLA và penalties',
-                'Giao tiếp thường xuyên và báo cáo định kỳ',
-                'Implement security framework ISO 27001',
-                'Đào tạo và tuyển dụng thêm chuyên gia AI'
-              ]
-            },
-            complianceStatus: {
-              status: 'REVIEW_REQUIRED',
-              issues: [
-                'Chưa có chữ ký số từ tất cả các bên',
-                'Cần bổ sung điều khoản GDPR compliance',
-                'Thiếu thông tin về disaster recovery plan'
-              ],
-              recommendations: [
-                'Hoàn tất ký số điện tử trước ngày 30/01',
-                'Thêm điều khoản xử lý dữ liệu cá nhân theo GDPR',
-                'Bổ sung kế hoạch backup và disaster recovery'
-              ]
-            },
-            content: `
-              ĐIỀU 1: ĐỐI TƯỢNG HỢP ĐỒNG
-              Bên A đồng ý thuê và Bên B đồng ý cung cấp dịch vụ phát triển hệ thống quản lý tài liệu theo các yêu cầu kỹ thuật đã được thống nhất trong Phụ lục A.
-
-              ĐIỀU 2: THỜI GIAN THỰC HIỆN
-              Thời gian thực hiện hợp đồng là 06 (sáu) tháng kể từ ngày hợp đồng có hiệu lực.
-
-              ĐIỀU 3: GIÁ TRỊ HỢP ĐỒNG VÀ PHƯƠNG THỨC THANH TOÁN
-              Tổng giá trị hợp đồng là 500.000.000 VNĐ (Năm trăm triệu đồng Việt Nam).
-              Thanh toán được thực hiện theo 3 đợt:
-              - Đợt 1: 30% sau khi ký hợp đồng.
-              - Đợt 2: 40% sau khi hoàn thành 50% công việc.
-              - Đợt 3: 30% sau khi nghiệm thu toàn bộ hệ thống.
-
-              ĐIỀU 4: QUYỀN VÀ NGHĨA VỤ CỦA CÁC BÊN
-              Bên A có quyền kiểm tra, giám sát tiến độ và chất lượng dịch vụ. Bên B có nghĩa vụ cung cấp dịch vụ đúng tiến độ, đảm bảo chất lượng và bảo mật thông tin.
-
-              ĐIỀU 5: BẢO HÀNH VÀ BẢO TRÌ
-              Bên B cam kết bảo hành hệ thống trong 12 tháng sau khi nghiệm thu.
-
-              ĐIỀU 6: CHẤM DỨT HỢP ĐỒNG
-              Hợp đồng có thể chấm dứt trước thời hạn nếu một trong hai bên vi phạm nghiêm trọng các điều khoản hoặc theo thỏa thuận của hai bên.
-
-              ĐIỀU 7: GIẢI QUYẾT TRANH CHẤP
-              Mọi tranh chấp phát sinh từ hoặc liên quan đến hợp đồng sẽ được giải quyết thông qua thương lượng. Nếu không đạt được thỏa thuận, tranh chấp sẽ được đưa ra Tòa án có thẩm quyền giải quyết.
-            `,
-            authorNotes: [
-              { user: 'Admin', time: '2024-07-20 10:00', content: 'Cần theo dõi chặt chẽ tiến độ của Bên B.' },
-              { user: 'Admin', time: '2024-07-21 14:30', content: 'Đã gửi yêu cầu chỉnh sửa điều khoản bảo hành.' }
-            ],
-            fileSystemMetadata: {
-              dateModified: '2024-07-22T10:00:00Z',
-              dateAdded: '2024-07-19T08:30:00Z',
-              mediaFilename: 'hop_dong_it_abc.pdf',
-              originalFilename: 'hop_dong_it_abc_v1.docx',
-              originalMD5: 'abcdef1234567890',
-              originalFileSize: 1024000,
-              originalMimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              archiveMD5: 'fedcba0987654321',
-              archiveFileSize: 512000
-            },
-            originalDocumentMetadata: {
-              dcFormat: 'application/pdf',
-              dcTitle: 'Hợp đồng cung cấp dịch vụ IT',
-              dcCreator: 'Nguyễn Văn A',
-              dcDescription: 'Hợp đồng dịch vụ phát triển phần mềm',
-              dcSubject: 'IT, Phần mềm, Dịch vụ',
-              xmpCreateDate: '2024-01-10T09:00:00Z',
-              xmpCreatorTool: 'Microsoft Word',
-              xmpModifyDate: '2024-01-15T10:30:00Z',
-              xmpMetadataDate: '2024-01-15T10:30:00Z',
-              pdfKeywords: 'hợp đồng, IT, dịch vụ',
-              pdfProducer: 'Microsoft Print to PDF',
-              xmpDocumentID: 'uuid:1234-5678-90ab-cdef',
-              xmpInstanceID: 'uuid:fedc-ba98-7654-3210',
-              pdfaExtensionSchemas: ['PDF/A-1b']
-            },
-            archivedDocumentMetadata: {
-              archivedPdfProducer: 'Paperless-ngx Archiver',
-              archivedMetadataDate: '2024-07-22T11:00:00Z',
-              archivedModifyDate: '2024-07-22T11:00:00Z',
-              archivedCreateDate: '2024-07-22T11:00:00Z',
-              archivedCreatorTool: 'Paperless-ngx',
-              archivedDocumentID: 'uuid:archived-1234-5678',
-              archivedDcFormat: 'application/pdf',
-              archivedDcTitle: 'Hợp đồng cung cấp dịch vụ IT (Archived)',
-              archivedDcCreator: 'DocGO System'
-            }
-          }
-          setData(mockData)
-        } else {
-          const res = await contractAPI.getContract(String(params.id))
-          const c: any = res.data?.data
-          const mapped = {
-            id: c.id,
-            title: c.title || c.contractNumber || `Contract ${c.id}`,
-            description: c.object || c.description || '',
-            status: c.status || 'DRAFT',
-            contractType: c.contractType || 'Other',
-            tags: c.tags || [],
-            parties: (c.parties || []).map((p: any) => ({
-              name: p.name || '',
-              role: p.role || '',
-              representative: p.representative,
-              taxCode: p.taxCode,
-              contact: p.contact,
-              address: p.address,
-            })),
-            effectiveDate: c.effectiveDate || '',
-            expiryDate: c.expiryDate || '',
-            paymentDetails: {
-              totalValue: Number(c.paymentDetails?.totalValue || 0),
-              currency: c.paymentDetails?.currency || 'VND',
-              schedule: c.paymentDetails?.schedule || '',
-              paymentMethod: c.paymentDetails?.paymentMethod || '',
-            },
-            keyClauses: c.keyClauses || [],
-            unfavorableClauses: c.unfavorableClauses || [],
-            reminders: c.reminders || [],
-            riskAssessment: c.riskAssessment || { riskLevel: 'LOW', riskFactors: [], mitigationMeasures: [] },
-            complianceStatus: c.complianceStatus || { status: 'COMPLIANT', issues: [], recommendations: [] },
-            content: c.content || c.object || '',
-          }
-          setData(mapped)
+        
+        // Fetch document from backend API
+        console.log('Fetching document with ID:', params.id)
+        const document = await fetchDocument(params.id)
+        console.log('Document result:', document)
+        
+        if (!document) {
+          // Document not found, redirect to 404
+          console.log('Document not found, redirecting to /not-found')
+          router.replace('/not-found')
+          return
         }
-
-        // Fetch contract summary mock data
-        const summaryRes = await fetch('/mock/contract-summary.json')
-        const summaryData = await summaryRes.json()
-        setContractSummary(summaryData.contract_summary)
+        
+        // Map document data to UI format
+        const mappedData = {
+          id: document.id,
+          title: document.title,
+          description: document.description,
+          status: document.status,
+          contractType: document.contractType,
+          tags: document.tags,
+          parties: document.parties,
+          effectiveDate: document.effectiveDate,
+          expiryDate: document.expiryDate,
+          paymentDetails: {
+            totalValue: document.totalValue,
+            currency: document.currency,
+            schedule: '',
+            paymentMethod: '',
+          },
+          keyClauses: [],
+          unfavorableClauses: [],
+          reminders: [],
+          riskAssessment: { riskLevel: document.riskLevel || 'LOW', riskFactors: [], mitigationMeasures: [] },
+          complianceStatus: { status: 'COMPLIANT', issues: [], recommendations: [] },
+          content: document.description || '',
+          authorNotes: [],
+          fileSystemMetadata: {
+            dateModified: document.updatedAt,
+            dateAdded: document.createdAt,
+            mediaFilename: `${document.title}.pdf`,
+            originalFilename: `${document.title}.docx`,
+            originalMD5: '',
+            originalFileSize: 0,
+            originalMimeType: 'application/pdf',
+            archiveMD5: '',
+            archiveFileSize: 0
+          },
+          originalDocumentMetadata: {
+            dcFormat: 'application/pdf',
+            dcTitle: document.title,
+            dcCreator: 'System',
+            dcDescription: document.description,
+            dcSubject: (document.tags || []).join(', '),
+            xmpCreateDate: document.createdAt,
+            xmpCreatorTool: 'DocGO System',
+            xmpModifyDate: document.updatedAt,
+            xmpMetadataDate: document.updatedAt,
+            pdfKeywords: (document.tags || []).join(', '),
+            pdfProducer: 'DocGO System',
+            xmpDocumentID: `uuid:${document.id}`,
+            xmpInstanceID: `uuid:${document.id}`,
+            pdfaExtensionSchemas: ['PDF/A-1b']
+          },
+          archivedDocumentMetadata: {
+            archivedPdfProducer: 'DocGO Archiver',
+            archivedMetadataDate: document.updatedAt,
+            archivedModifyDate: document.updatedAt,
+            archivedCreateDate: document.createdAt,
+            archivedCreatorTool: 'DocGO System',
+            archivedDocumentID: `uuid:archived-${document.id}`,
+            archivedDcFormat: 'application/pdf',
+            archivedDcTitle: `${document.title} (Archived)`,
+            archivedDcCreator: 'DocGO System'
+          }
+        }
+        
+        setData(mappedData)
+        
+        // TODO: Fetch ContractSummary from backend API if available
+        // For now, set null to indicate no summary available
+        setContractSummary(null)
 
       } catch (e: any) {
-        console.error('Error fetching contract detail:', e)
+        console.error('Error fetching document detail:', e)
+        
+        // Check if it's a 404 error
+        if (e.message && e.message.includes('404')) {
+          router.replace('/not-found')
+          return
+        }
+        
         setError(`Lỗi kết nối máy chủ: ${e.message || 'Unknown error'}`)
         setData(null)
         setContractSummary(null)
@@ -234,7 +126,7 @@ export default function DocumentDetailPage() {
       }
     }
     fetchDetail()
-  }, [params.id])
+  }, [params.id, router])
 
   if (loading) {
     return (

@@ -1,7 +1,6 @@
 import { API_ENDPOINTS } from '../_constants/index'
 import type { Document, Paginated, RestResponse } from '../_types'
 import { mapApiDocumentToUi, mapPaginated } from './mappers'
-import { mockDocument, mockDocumentsPage, createTestDocuments } from './mocks'
 
 async function unwrap<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null)
@@ -15,39 +14,42 @@ async function unwrap<T>(res: Response): Promise<T> {
 }
 
 export async function fetchDocuments(params: Record<string, any>): Promise<Paginated<Document>> {
-  try {
-    const url = new URL(API_ENDPOINTS.list, typeof window === 'undefined' ? 'http://localhost' : window.location.origin)
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v))
-    })
-    const res = await fetch(url.toString(), { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
-    const data = await unwrap<any>(res)
-    return mapPaginated<Document>(data, mapApiDocumentToUi)
-  } catch (e) {
-    // Sử dụng test documents với tags đa dạng để test tính năng
-    const testDocs = createTestDocuments()
-    const mockDocs = mockDocumentsPage(Number(params?.pageNumber ?? 0), Number(params?.pageSize ?? 9))
-    
-    // Kết hợp test documents với mock documents
-    const combinedContent = [...testDocs, ...mockDocs.content]
-    
-    return {
-      content: combinedContent,
-      totalElements: combinedContent.length,
-      totalPages: 1
-    }
-  }
+  const url = new URL(API_ENDPOINTS.list, typeof window === 'undefined' ? 'http://localhost' : window.location.origin)
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v))
+  })
+  const res = await fetch(url.toString(), { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
+  const data = await unwrap<any>(res)
+  return mapPaginated<Document>(data, mapApiDocumentToUi)
 }
 
 export async function fetchDocument(id: string): Promise<Document | null> {
   try {
-    const url = API_ENDPOINTS.detail(id)
+    const url = `http://localhost:8002${API_ENDPOINTS.detail(id)}`
+    console.log('Fetching document with URL:', url)
     const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
+    
+    console.log('Response status:', res.status)
+    
+    // Check if response is 404
+    if (res.status === 404) {
+      console.log('Document not found, returning null')
+      return null
+    }
+    
     const data = await unwrap<any>(res)
+    console.log('Unwrapped data:', data)
     if (!data) return null
     return mapApiDocumentToUi(data)
-  } catch (e) {
-    return mockDocument(id)
+  } catch (error: any) {
+    console.error('Error in fetchDocument:', error)
+    // Check if error message contains 404
+    if (error.message && error.message.includes('404')) {
+      console.log('404 error detected, returning null')
+      return null
+    }
+    // Re-throw other errors
+    throw error
   }
 }
 
