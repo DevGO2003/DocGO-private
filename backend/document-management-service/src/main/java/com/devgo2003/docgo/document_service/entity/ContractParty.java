@@ -1,44 +1,46 @@
 package com.devgo2003.docgo.document_service.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "contract_parties")
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/**
+ * Embedded entity cho thông tin các bên trong ContractSummary
+ */
 @Getter
 @Setter
-public class ContractParty extends BaseEntity {
+public class ContractParty {
 
-    @Id
-    private String id;
+    @Field("role")
+    @NotBlank(message = "Vai trò không được để trống")
+    @Size(max = 200, message = "Vai trò không được vượt quá 200 ký tự")
+    private String role;
 
-    @Field("contract_id")
-    private String contractId;
+    @Field("name")
+    @NotBlank(message = "Tên công ty không được để trống")
+    @Size(max = 200, message = "Tên công ty không được vượt quá 200 ký tự")
+    private String name;
 
-    @Field("party_name")
-    private String partyName;
-
-    @Field("party_type")
-    private String partyType;
-
-    @Field("contact_person")
-    private String contactPerson;
-
-    @Field("email")
-    private String email;
-
-    @Field("phone")
-    private String phone;
-
-    @Field("address")
-    private String address;
+    @Field("representative")
+    @Size(max = 200, message = "Người đại diện không được vượt quá 200 ký tự")
+    private String representative;
 
     @Field("tax_code")
+    @Size(max = 20, message = "Mã số thuế không được vượt quá 20 ký tự")
     private String taxCode;
-    @Override
-    public boolean isNew() {
-        return this.id == null;
-    }
+
+    @Field("contact")
+    @Size(max = 200, message = "Thông tin liên hệ không được vượt quá 200 ký tự")
+    private String contact;
+
+    @Field("address")
+    @Size(max = 500, message = "Địa chỉ không được vượt quá 500 ký tự")
+    private String address;
+
+    @Field("business_license")
+    @Size(max = 50, message = "Giấy phép kinh doanh không được vượt quá 50 ký tự")
+    private String businessLicense;
 }

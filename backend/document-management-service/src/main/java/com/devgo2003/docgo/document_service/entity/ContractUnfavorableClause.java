@@ -1,42 +1,30 @@
 package com.devgo2003.docgo.document_service.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "contract_unfavorable_clauses")
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/**
+ * Embedded entity cho điều khoản bất lợi trong ContractSummary
+ */
 @Getter
 @Setter
-public class ContractUnfavorableClause extends BaseEntity {
-
-    @Id
-    private String id;
-
-    @Field("contract_id")
-    private String contractId;
+public class ContractUnfavorableClause {
 
     @Field("clause_name")
+    @NotBlank(message = "Tên điều khoản bất lợi không được để trống")
+    @Size(max = 200, message = "Tên điều khoản bất lợi không được vượt quá 200 ký tự")
     private String clauseName;
 
-    @Field("clause_description")
-    private String clauseDescription;
+    @Field("description")
+    @NotBlank(message = "Mô tả điều khoản bất lợi không được để trống")
+    @Size(max = 1000, message = "Mô tả điều khoản bất lợi không được vượt quá 1000 ký tự")
+    private String description;
 
-    @Field("clause_source")
-    private String clauseSource;
-
-    @Field("risk_level")
-    private String riskLevel;
-
-    @Field("mitigation_suggestions")
-    private String mitigationSuggestions;
-
-    @Field("impact_assessment")
-    private String impactAssessment;
-    
-    @Override
-    public boolean isNew() {
-        return this.id == null;
-    }
+    @Field("risk_to")
+    @Size(max = 100, message = "Rủi ro cho không được vượt quá 100 ký tự")
+    private String riskTo;
 }

@@ -1,28 +1,23 @@
 package com.devgo2003.docgo.document_service.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
-@Document(collection = "contract_compliance_statuses")
+/**
+ * Embedded entity cho trạng thái tuân thủ trong ContractSummary
+ */
 @Getter
 @Setter
-public class ContractComplianceStatus extends BaseEntity {
-
-    @Id
-    @MongoId
-    private String id;
-
-    @Field("contract_id")
-    @NotBlank(message = "Contract ID không được để trống")
-    private String contractId;
+public class ContractComplianceStatus {
 
     @Field("status")
+    @NotBlank(message = "Trạng thái tuân thủ không được để trống")
+    @Pattern(regexp = "^(COMPLIANT|NON_COMPLIANT|PENDING_REVIEW|UNDER_REVIEW)$", message = "Trạng thái tuân thủ không hợp lệ")
     private String status;
 
     @Field("issues")
@@ -30,9 +25,4 @@ public class ContractComplianceStatus extends BaseEntity {
 
     @Field("recommendations")
     private List<String> recommendations;
-
-    @Override
-    public boolean isNew() {
-        return this.id == null;
-    }
 }

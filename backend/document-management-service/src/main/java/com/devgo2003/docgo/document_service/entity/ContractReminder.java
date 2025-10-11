@@ -1,42 +1,30 @@
 package com.devgo2003.docgo.document_service.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "contract_reminders")
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/**
+ * Embedded entity cho nhắc nhở trong ContractSummary
+ */
 @Getter
 @Setter
-public class ContractReminder extends BaseEntity {
+public class ContractReminder {
 
-    @Id
-    @MongoId
-    private String id;
-
-    @Field("contract_id")
-    @NotBlank(message = "Contract ID không được để trống")
-    private String contractId;
-
-    @Field("reminder_type")
+    @Field("type")
     @NotBlank(message = "Loại nhắc nhở không được để trống")
-    private String reminderType;
+    @Size(max = 100, message = "Loại nhắc nhở không được vượt quá 100 ký tự")
+    private String type;
 
-    @Field("reminder_date")
-    @NotBlank(message = "Ngày nhắc nhở không được để trống")
-    private String reminderDate; // Storing as String to match event data
+    @Field("date")
+    @Size(max = 50, message = "Ngày nhắc nhở không được vượt quá 50 ký tự")
+    private String date;
 
     @Field("content")
-    @NotBlank(message = "Nội dung không được để trống")
+    @NotBlank(message = "Nội dung nhắc nhở không được để trống")
+    @Size(max = 500, message = "Nội dung nhắc nhở không được vượt quá 500 ký tự")
     private String content;
-
-    @Override
-    public boolean isNew() {
-        return this.id == null;
-    }
 }
-
