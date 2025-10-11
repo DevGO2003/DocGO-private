@@ -16,22 +16,11 @@ const nextConfig = {
     DOCUMENT_SERVICE_URL: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL,
     AUTOMATION_SERVICE_URL: process.env.AUTOMATION_SERVICE_URL,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/users/:path*',
-        destination: `${process.env.USER_SERVICE_URL || 'http://user-management-service:8001'}/api/v1/user-management-service/users/:path*`,
-      },
-      {
-        source: '/api/v1/document-management-service/v1/:path*',
-        destination: `${process.env.DOCUMENT_SERVICE_URL || 'http://document-management-service:8002'}/api/v1/document-management-service/v1/:path*`,
-      },
-      {
-        source: '/api/v1/automation-service/v1/:path*',
-        destination: `${process.env.AUTOMATION_SERVICE_URL || 'http://automation-service:8003'}/api/v1/automation-service/v1/:path*`,
-      }
-    ]
-  },
+  // Rewrites are disabled - API routes handle all proxying
+  // async rewrites() {
+  //   console.log('🔧 Next.js rewrites loaded!');
+  //   return []
+  // },
   // CORS headers are handled centrally in middleware; avoid duplicating here
 }
 

@@ -5,7 +5,9 @@ import com.devgo2003.docgo.document_service.entity.Contract;
 import com.devgo2003.docgo.document_service.dto.ReminderCreateRequest;
 import com.devgo2003.docgo.document_service.repository.ReminderRepository;
 import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.document_service.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -485,5 +487,16 @@ public class ReminderService {
      */
     public List<Reminder> getAllReminders() {
         return reminderRepository.findAll();
+    }
+
+    /**
+     * Lấy tất cả reminder với pagination và filtering
+     */
+    public Page<Reminder> getAllReminders(int pageNumber, int pageSize, String sortBy, String sortDirection, boolean includeDeleted) {
+        // Get all reminders
+        List<Reminder> allReminders = reminderRepository.findAll();
+        
+        // Convert to Page using PageUtil
+        return PageUtil.createPageFromList(allReminders, pageNumber, pageSize, sortBy, sortDirection);
     }
 }

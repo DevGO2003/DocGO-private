@@ -154,7 +154,9 @@ public class AiEventProcessingServiceImpl implements IAiEventProcessingService {
         contractSummary.setContractId(contractId);
         contractSummary.setSummaryText(objectMapper.writeValueAsString(summary));
         contractSummary.setKeyPoints(objectMapper.writeValueAsString(summary.getTag()));
-        contractSummary.setRiskAssessment(objectMapper.writeValueAsString(summary.getTag()));
+        // Note: riskAssessment field expects ContractRiskAssessment object, not String
+        // For now, we'll set it to null and use keyPoints field instead
+        // contractSummary.setRiskAssessment(objectMapper.writeValueAsString(summary.getTag()));
         contractSummary.setRecommendations(objectMapper.writeValueAsString(summary.getTag()));
         
         summaryRepository.save(contractSummary);

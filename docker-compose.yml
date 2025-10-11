@@ -78,29 +78,29 @@ services:
   # MICROSERVICES
   # ==========================================
 
-  # User Management Service (Spring Boot)
-  user-management-service:
-    container_name: user-management-service
-    build:
-      context: ./backend/user-management-service
-      dockerfile: Dockerfile
-    
-    ports:
-      - "${USER_MANAGEMENT_PORT:-8001}:8001"
-    env_file:
-      - .env
-      - ./backend/user-management-service/.env
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - ENVIRONMENT=docker
-    depends_on:
-      - kafka
-      - redis
-    networks:
-      - docgo-network
-    volumes:
-      - ./logs/user-management:/app/logs
-    restart: unless-stopped
+  # User Management Service (Spring Boot) - TEMPORARILY DISABLED DUE TO COMPILATION ERRORS
+  # user-management-service:
+  #   container_name: user-management-service
+  #   build:
+  #     context: ./backend/user-management-service
+  #     dockerfile: Dockerfile
+  #   
+  #   ports:
+  #     - "${USER_MANAGEMENT_PORT:-8001}:8001"
+  #   env_file:
+  #     - .env
+  #     - ./backend/user-management-service/.env
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - ENVIRONMENT=docker
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #   networks:
+  #     - docgo-network
+  #   volumes:
+  #     - ./logs/user-management:/app/logs
+  #   restart: unless-stopped
 
   # Document Management Service (Spring Boot)
   document-management-service:
@@ -170,7 +170,7 @@ services:
     depends_on:
       - kafka
       - redis
-      - user-management-service
+      # - user-management-service  # TEMPORARILY DISABLED
       - document-management-service
       - automation-service
     networks:

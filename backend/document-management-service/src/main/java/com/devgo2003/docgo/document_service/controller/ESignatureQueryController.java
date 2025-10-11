@@ -4,6 +4,7 @@ import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.entity.ESignature;
 import com.devgo2003.docgo.document_service.service.ESignatureService;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -136,15 +137,8 @@ public class ESignatureQueryController {
                 .build());
         }
         
-        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponse.<ESignature>builder()
-            .content(eSignatures.getContent())
-            .pageNumber(eSignatures.getNumber())
-            .pageSize(eSignatures.getSize())
-            .totalElements(eSignatures.getTotalElements())
-            .totalPages(eSignatures.getTotalPages())
-            .first(eSignatures.isFirst())
-            .last(eSignatures.isLast())
-            .build();
+        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            eSignatures, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<ESignature>>builder()
             .statusCode(200)
@@ -233,6 +227,9 @@ public class ESignatureQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -253,15 +250,8 @@ public class ESignatureQueryController {
                 .build());
         }
         
-        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponse.<ESignature>builder()
-            .content(eSignatures.getContent())
-            .pageNumber(eSignatures.getNumber())
-            .pageSize(eSignatures.getSize())
-            .totalElements(eSignatures.getTotalElements())
-            .totalPages(eSignatures.getTotalPages())
-            .first(eSignatures.isFirst())
-            .last(eSignatures.isLast())
-            .build();
+        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            eSignatures, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<ESignature>>builder()
             .statusCode(200)
@@ -350,6 +340,9 @@ public class ESignatureQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -370,15 +363,8 @@ public class ESignatureQueryController {
                 .build());
         }
         
-        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponse.<ESignature>builder()
-            .content(eSignatures.getContent())
-            .pageNumber(eSignatures.getNumber())
-            .pageSize(eSignatures.getSize())
-            .totalElements(eSignatures.getTotalElements())
-            .totalPages(eSignatures.getTotalPages())
-            .first(eSignatures.isFirst())
-            .last(eSignatures.isLast())
-            .build();
+        PaginatedResponse<ESignature> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            eSignatures, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<ESignature>>builder()
             .statusCode(200)

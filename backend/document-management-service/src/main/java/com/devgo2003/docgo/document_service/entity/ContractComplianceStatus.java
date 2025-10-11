@@ -25,4 +25,8 @@ public class ContractComplianceStatus {
 
     @Field("recommendations")
     private List<String> recommendations;
+
+    // Additional field for backward compatibility
+    @Field("contract_id")
+    private String contractId;
 }

@@ -26,4 +26,8 @@ public class ContractRiskAssessment {
 
     @Field("mitigation_measures")
     private List<String> mitigationMeasures;
+
+    // Additional field for backward compatibility
+    @Field("contract_id")
+    private String contractId;
 }

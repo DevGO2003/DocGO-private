@@ -108,6 +108,19 @@ public class ContractSummary extends BaseEntity implements Persistable<String> {
     @Pattern(regexp = "^([0-9]|[1-9][0-9]|100)$", message = "Điểm tin cậy AI phải từ 0-100")
     private String aiConfidenceScore;
 
+    // Additional fields for AI processing results
+    @Field("summary_text")
+    @Size(max = 2000, message = "Tóm tắt không được vượt quá 2000 ký tự")
+    private String summaryText;
+
+    @Field("key_points")
+    @Size(max = 3000, message = "Điểm chính không được vượt quá 3000 ký tự")
+    private String keyPoints;
+
+    @Field("recommendations")
+    @Size(max = 2000, message = "Khuyến nghị không được vượt quá 2000 ký tự")
+    private String recommendations;
+
     @Override
     public String getId() {
         return this.id;

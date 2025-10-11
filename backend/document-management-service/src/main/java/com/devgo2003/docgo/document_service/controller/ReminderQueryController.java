@@ -4,6 +4,7 @@ import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.entity.Reminder;
 import com.devgo2003.docgo.document_service.service.ReminderService;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -136,15 +137,8 @@ public class ReminderQueryController {
                 .build());
         }
         
-        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponse.<Reminder>builder()
-            .content(reminders.getContent())
-            .pageNumber(reminders.getNumber())
-            .pageSize(reminders.getSize())
-            .totalElements(reminders.getTotalElements())
-            .totalPages(reminders.getTotalPages())
-            .first(reminders.isFirst())
-            .last(reminders.isLast())
-            .build();
+        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            reminders, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Reminder>>builder()
             .statusCode(200)
@@ -233,6 +227,9 @@ public class ReminderQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -253,15 +250,8 @@ public class ReminderQueryController {
                 .build());
         }
         
-        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponse.<Reminder>builder()
-            .content(reminders.getContent())
-            .pageNumber(reminders.getNumber())
-            .pageSize(reminders.getSize())
-            .totalElements(reminders.getTotalElements())
-            .totalPages(reminders.getTotalPages())
-            .first(reminders.isFirst())
-            .last(reminders.isLast())
-            .build();
+        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            reminders, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Reminder>>builder()
             .statusCode(200)
@@ -350,6 +340,9 @@ public class ReminderQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -370,15 +363,8 @@ public class ReminderQueryController {
                 .build());
         }
         
-        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponse.<Reminder>builder()
-            .content(reminders.getContent())
-            .pageNumber(reminders.getNumber())
-            .pageSize(reminders.getSize())
-            .totalElements(reminders.getTotalElements())
-            .totalPages(reminders.getTotalPages())
-            .first(reminders.isFirst())
-            .last(reminders.isLast())
-            .build();
+        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            reminders, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Reminder>>builder()
             .statusCode(200)
@@ -457,7 +443,16 @@ public class ReminderQueryController {
             @RequestParam(defaultValue = "0") int pageNumber,
             
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
+            @Parameter(description = "Trường sắp xếp (mặc định: scheduledAt)") 
+            @RequestParam(defaultValue = "scheduledAt") String sortBy,
+            
+            @Parameter(description = "Hướng sắp xếp (mặc định: ASC)") 
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
         
         log.info("Getting upcoming reminders within {} days, page: {}, size: {}", days, pageNumber, pageSize);
         
@@ -473,15 +468,8 @@ public class ReminderQueryController {
                 .build());
         }
         
-        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponse.<Reminder>builder()
-            .content(reminders.getContent())
-            .pageNumber(reminders.getNumber())
-            .pageSize(reminders.getSize())
-            .totalElements(reminders.getTotalElements())
-            .totalPages(reminders.getTotalPages())
-            .first(reminders.isFirst())
-            .last(reminders.isLast())
-            .build();
+        PaginatedResponse<Reminder> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            reminders, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Reminder>>builder()
             .statusCode(200)

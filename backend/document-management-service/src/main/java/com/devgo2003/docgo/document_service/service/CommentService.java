@@ -5,7 +5,9 @@ import com.devgo2003.docgo.document_service.entity.Contract;
 import com.devgo2003.docgo.document_service.dto.CommentCreateRequest;
 import com.devgo2003.docgo.document_service.repository.CommentRepository;
 import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.document_service.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -307,5 +309,16 @@ public class CommentService {
      */
     public List<Comment> getAllComments() {
         return commentRepository.findByIsDeletedFalse();
+    }
+
+    /**
+     * Lấy tất cả comment với pagination và filtering
+     */
+    public Page<Comment> getAllComments(int pageNumber, int pageSize, String sortBy, String sortDirection, boolean includeDeleted) {
+        // Get all comments
+        List<Comment> allComments = commentRepository.findByIsDeletedFalse();
+        
+        // Convert to Page using PageUtil
+        return PageUtil.createPageFromList(allComments, pageNumber, pageSize, sortBy, sortDirection);
     }
 }

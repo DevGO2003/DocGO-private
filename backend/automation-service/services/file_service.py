@@ -16,6 +16,7 @@ from schemas.file_schemas import (
     FileMetadata,
     FileDetailsResponse
 )
+from config import Config
 
 
 class FileStorageService:

@@ -4,6 +4,7 @@ import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.entity.Comment;
 import com.devgo2003.docgo.document_service.service.CommentService;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -136,15 +137,8 @@ public class CommentQueryController {
                 .build());
         }
         
-        PaginatedResponse<Comment> paginatedResponse = PaginatedResponse.<Comment>builder()
-            .content(comments.getContent())
-            .pageNumber(comments.getNumber())
-            .pageSize(comments.getSize())
-            .totalElements(comments.getTotalElements())
-            .totalPages(comments.getTotalPages())
-            .first(comments.isFirst())
-            .last(comments.isLast())
-            .build();
+        PaginatedResponse<Comment> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            comments, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Comment>>builder()
             .statusCode(200)
@@ -233,6 +227,9 @@ public class CommentQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -253,15 +250,8 @@ public class CommentQueryController {
                 .build());
         }
         
-        PaginatedResponse<Comment> paginatedResponse = PaginatedResponse.<Comment>builder()
-            .content(comments.getContent())
-            .pageNumber(comments.getNumber())
-            .pageSize(comments.getSize())
-            .totalElements(comments.getTotalElements())
-            .totalPages(comments.getTotalPages())
-            .first(comments.isFirst())
-            .last(comments.isLast())
-            .build();
+        PaginatedResponse<Comment> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            comments, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Comment>>builder()
             .statusCode(200)
@@ -350,6 +340,9 @@ public class CommentQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -370,15 +363,8 @@ public class CommentQueryController {
                 .build());
         }
         
-        PaginatedResponse<Comment> paginatedResponse = PaginatedResponse.<Comment>builder()
-            .content(comments.getContent())
-            .pageNumber(comments.getNumber())
-            .pageSize(comments.getSize())
-            .totalElements(comments.getTotalElements())
-            .totalPages(comments.getTotalPages())
-            .first(comments.isFirst())
-            .last(comments.isLast())
-            .build();
+        PaginatedResponse<Comment> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            comments, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Comment>>builder()
             .statusCode(200)

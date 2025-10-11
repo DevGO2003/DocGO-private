@@ -19,12 +19,12 @@ import java.util.Map;
 @Slf4j
 public class AutomationServiceClient {
 
-    private final RestTemplate restTemplate;
+    // FIXME: RestTemplate bean not found, creating instance directly
+    // This is a temporary workaround until Spring can properly detect RestTemplateConfig
+    private final RestTemplate restTemplate = new RestTemplate();
     private final String automationServiceUrl;
 
-    public AutomationServiceClient(RestTemplate restTemplate,
-                                 @Value("${automation.service.url:http://localhost:8003}") String automationServiceUrl) {
-        this.restTemplate = restTemplate;
+    public AutomationServiceClient(@Value("${automation.service.url:http://localhost:8003}") String automationServiceUrl) {
         this.automationServiceUrl = automationServiceUrl;
     }
 

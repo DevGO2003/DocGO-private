@@ -49,4 +49,6 @@ public interface ContractRepository extends MongoRepository<Contract, String> {
     boolean existsByContractNumber(String contractNumber);
     
     boolean existsByContractNumberAndIdNot(String contractNumber, String id);
+    
+    boolean existsBySystemId(String systemId);
 }

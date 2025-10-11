@@ -10,28 +10,21 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import logging
 logging.basicConfig(level=logging.INFO)
 
-from config import (
-	get_kafka_bootstrap_servers,
-	get_kafka_file_uploaded_topic,
-	get_kafka_text_extracted_topic,
-	get_kafka_document_classified_topic,
-	get_kafka_contract_summary_topic,
-	get_kafka_client_id,
-)
+from config import Config
 from services.ai_processing_service import AutomationService
 from schemas.contract_summary import ContractSummary
 import google.generativeai as genai
-from config import get_gemini_api_key
+# from config import get_gemini_api_key  # Already imported Config above
 
 
 class AIKafkaWorker:
 	def __init__(self):
-		self.bootstrap_servers: str = get_kafka_bootstrap_servers()
-		self.consumer_topic: str = get_kafka_file_uploaded_topic()
-		self.text_extracted_topic: str = get_kafka_text_extracted_topic()
-		self.document_classified_topic: str = get_kafka_document_classified_topic()
-		self.contract_summary_topic: str = get_kafka_contract_summary_topic()
-		self.client_id: str = get_kafka_client_id()  # "automation-service"
+		self.bootstrap_servers: str = Config.KAFKA_BOOTSTRAP_SERVERS
+		self.consumer_topic: str = Config.KAFKA_FILE_UPLOADED_TOPIC
+		self.text_extracted_topic: str = Config.KAFKA_TEXT_EXTRACTED_TOPIC
+		self.document_classified_topic: str = Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC
+		self.contract_summary_topic: str = Config.KAFKA_CONTRACT_SUMMARY_TOPIC
+		self.client_id: str = Config.KAFKA_CLIENT_ID  # "automation-service"
 		self.consumer: Optional[AIOKafkaConsumer] = None
 		self.producer: Optional[AIOKafkaProducer] = None
 		self._task: Optional[asyncio.Task] = None

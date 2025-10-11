@@ -72,9 +72,9 @@ public class ContractSummarySeedScript implements CommandLineRunner {
         summary.setTitle(contract.getTitle());
         summary.setStatus(contract.getStatus());
         summary.setContractType(contract.getContractType());
-        summary.setObject(contract.getContractObject());
+        summary.setContractObject(contract.getContractObject());
         summary.setEffectiveDate(contract.getEffectiveDate());
-        summary.setTerm(contract.getContractTerm());
+        summary.setContractTerm(contract.getContractTerm());
         
         // Parties
         List<ContractParty> parties = Arrays.asList(
@@ -85,7 +85,7 @@ public class ContractSummarySeedScript implements CommandLineRunner {
         
         // Payment details
         ContractPaymentDetails paymentDetails = new ContractPaymentDetails();
-        paymentDetails.setTotalValue(Double.parseDouble(contract.getTotalValue()));
+        paymentDetails.setTotalValue(contract.getTotalValue().toString());
         paymentDetails.setSchedule("Thanh toán 50% khi ký hợp đồng, 50% khi hoàn thành");
         paymentDetails.setCurrency(contract.getCurrency());
         paymentDetails.setPaymentMethod(contract.getPaymentMethod());
@@ -143,7 +143,7 @@ public class ContractSummarySeedScript implements CommandLineRunner {
         summary.setUpdatedAt(LocalDateTime.now());
         summary.setCreatedBy("system");
         summary.setUpdatedBy("system");
-        summary.setDeleted(false);
+        summary.setIsDeleted(false);
         
         return summary;
     }
@@ -187,7 +187,7 @@ public class ContractSummarySeedScript implements CommandLineRunner {
     private ContractReminder createReminder(String type, LocalDateTime date, String content) {
         ContractReminder reminder = new ContractReminder();
         reminder.setType(type);
-        reminder.setDate(date);
+        reminder.setDate(date.toString());
         reminder.setContent(content);
         return reminder;
     }

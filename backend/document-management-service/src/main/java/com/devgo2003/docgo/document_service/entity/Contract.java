@@ -53,6 +53,10 @@ public class Contract extends BaseEntity implements Persistable<String> {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
 
+    @Field("expiry_date")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime expiryDate;
+
     @Field("system_id")
     @Size(max = 100, message = "System ID không được vượt quá 100 ký tự")
     private String systemId;

@@ -17,6 +17,7 @@ from kafka_worker import worker
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
+from config import Config
 
 app = FastAPI(
     title="Automation Service API",

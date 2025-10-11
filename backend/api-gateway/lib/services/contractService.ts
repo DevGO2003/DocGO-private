@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { Config } from '../config';
 
 export interface Contract {
   id?: string;
@@ -83,7 +84,7 @@ class ContractService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002';
+    this.baseURL = Config.getDocumentManagementServiceUrl();
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 15000,

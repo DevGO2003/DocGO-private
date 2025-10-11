@@ -22,6 +22,24 @@ public class ContractAttachment extends BaseEntity {
 
     @Field("file_path")
     private String filePath;
+
+    @Field("file_type")
+    private String fileType;
+
+    @Field("file_size")
+    private Long fileSize;
+
+    @Field("mime_type")
+    private String mimeType;
+
+    @Field("upload_date")
+    private java.time.LocalDateTime uploadDate;
+
+    @Field("uploaded_by")
+    private String uploadedBy;
+
+    @Field("description")
+    private String description;
     
     @Override
     public boolean isNew() {

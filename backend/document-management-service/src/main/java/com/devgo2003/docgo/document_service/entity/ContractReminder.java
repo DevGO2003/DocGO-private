@@ -27,4 +27,14 @@ public class ContractReminder {
     @NotBlank(message = "Nội dung nhắc nhở không được để trống")
     @Size(max = 500, message = "Nội dung nhắc nhở không được vượt quá 500 ký tự")
     private String content;
+
+    // Additional fields for backward compatibility
+    @Field("contract_id")
+    private String contractId;
+
+    @Field("reminder_type")
+    private String reminderType;
+
+    @Field("reminder_date")
+    private String reminderDate;
 }

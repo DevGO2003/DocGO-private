@@ -141,6 +141,27 @@ class Config:
             return f"redis://:{cls.REDIS_PASSWORD}@{cls.REDIS_HOST}:{cls.REDIS_PORT}"
         return f"redis://{cls.REDIS_HOST}:{cls.REDIS_PORT}"
     
+    @classmethod
+    def get_redis_password(cls) -> str:
+        """Get Redis password"""
+        return cls.REDIS_PASSWORD
+    
+    @classmethod
+    def get_redis_db(cls) -> int:
+        """Get Redis database number"""
+        return cls.REDIS_DATABASE
+    
+    @classmethod
+    def get_batch_config(cls) -> dict:
+        """Get batch processing configuration"""
+        return {
+            "max_workers": int(os.getenv("BATCH_MAX_WORKERS", "4")),
+            "batch_size": int(os.getenv("BATCH_SIZE", "10")),
+            "timeout": int(os.getenv("BATCH_TIMEOUT", "300")),  # 5 minutes
+            "retry_attempts": int(os.getenv("BATCH_RETRY_ATTEMPTS", "3")),
+            "retry_delay": int(os.getenv("BATCH_RETRY_DELAY", "5"))  # seconds
+        }
+    
     # ==========================================
     # LOGGING CONFIGURATION
     # ==========================================
@@ -175,6 +196,50 @@ class Config:
         
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+    # ==========================================
+    # NOTIFICATION CONFIGURATION
+    # ==========================================
+    @classmethod
+    def get_smtp_config(cls) -> dict:
+        """Get SMTP configuration for email notifications"""
+        return {
+            "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
+            "port": int(os.getenv("SMTP_PORT", "587")),
+            "username": os.getenv("SMTP_USERNAME", ""),
+            "password": os.getenv("SMTP_PASSWORD", ""),
+            "use_tls": os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+        }
+
+    @classmethod
+    def get_twilio_config(cls) -> dict:
+        """Get Twilio configuration for SMS notifications"""
+        return {
+            "account_sid": os.getenv("TWILIO_ACCOUNT_SID", ""),
+            "auth_token": os.getenv("TWILIO_AUTH_TOKEN", ""),
+            "phone_number": os.getenv("TWILIO_PHONE_NUMBER", "")
+        }
+
+    @classmethod
+    def get_websocket_config(cls) -> dict:
+        """Get WebSocket configuration for real-time notifications"""
+        return {
+            "enabled": os.getenv("WEBSOCKET_ENABLED", "false").lower() == "true",
+            "host": os.getenv("WEBSOCKET_HOST", "localhost"),
+            "port": int(os.getenv("WEBSOCKET_PORT", "8080")),
+            "path": os.getenv("WEBSOCKET_PATH", "/ws")
+        }
+
+    @classmethod
+    def get_event_config(cls) -> dict:
+        """Get event processing configuration"""
+        return {
+            "enabled": os.getenv("EVENT_PROCESSING_ENABLED", "true").lower() == "true",
+            "max_retries": int(os.getenv("EVENT_MAX_RETRIES", "3")),
+            "retry_delay": int(os.getenv("EVENT_RETRY_DELAY", "5")),  # seconds
+            "batch_size": int(os.getenv("EVENT_BATCH_SIZE", "100")),
+            "timeout": int(os.getenv("EVENT_TIMEOUT", "30"))  # seconds
+        }
 
 
 # Legacy function wrappers for backward compatibility
@@ -217,3 +282,19 @@ def get_kafka_contract_summary_topic():
 def get_kafka_client_id():
     """Legacy function - use Config.KAFKA_CLIENT_ID instead"""
     return Config.KAFKA_CLIENT_ID
+
+def get_smtp_config():
+    """Legacy function - use Config.get_smtp_config() instead"""
+    return Config.get_smtp_config()
+
+def get_twilio_config():
+    """Legacy function - use Config.get_twilio_config() instead"""
+    return Config.get_twilio_config()
+
+def get_websocket_config():
+    """Legacy function - use Config.get_websocket_config() instead"""
+    return Config.get_websocket_config()
+
+def get_event_config():
+    """Legacy function - use Config.get_event_config() instead"""
+    return Config.get_event_config()

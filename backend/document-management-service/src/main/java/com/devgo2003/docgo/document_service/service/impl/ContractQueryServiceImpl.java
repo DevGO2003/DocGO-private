@@ -332,8 +332,8 @@ public class ContractQueryServiceImpl implements IContractQueryService {
             .id(contract.getId())
             .contractNumber(contract.getContractNumber())
             .title(contract.getTitle())
-            .status(contract.getStatus())
-            .contractType(contract.getContractType())
+            .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+            .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .build();
     }
 
@@ -343,8 +343,8 @@ public class ContractQueryServiceImpl implements IContractQueryService {
             .id(contract.getId())
             .contractNumber(contract.getContractNumber())
             .title(contract.getTitle())
-            .status(contract.getStatus())
-            .contractType(contract.getContractType())
+            .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+            .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .build();
     }
 
@@ -354,8 +354,8 @@ public class ContractQueryServiceImpl implements IContractQueryService {
             .id(contract.getId())
             .contractNumber(contract.getContractNumber())
             .title(contract.getTitle())
-            .status(contract.getStatus())
-            .contractType(contract.getContractType())
+            .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+            .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .build();
     }
 
@@ -365,8 +365,8 @@ public class ContractQueryServiceImpl implements IContractQueryService {
             .id(contract.getId())
             .contractNumber(contract.getContractNumber())
             .title(contract.getTitle())
-            .status(contract.getStatus())
-            .contractType(contract.getContractType())
+            .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+            .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .build();
     }
 }

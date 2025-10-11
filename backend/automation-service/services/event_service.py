@@ -6,9 +6,7 @@ from typing import List, Dict, Any, Optional, Callable
 # import motor.motor_asyncio  # MongoDB removed
 import redis.asyncio as redis
 
-from config import (
-    get_redis_url, get_redis_password, get_redis_db, get_event_config
-)
+from config import Config
 from schemas.event_schemas import (
     EventPayload, EventType, EventStatus, EventHandlerRequest,
     EventHandlerResponse, EventSubscriptionRequest, EventSubscriptionResponse,
@@ -19,10 +17,10 @@ from schemas.event_schemas import (
 class EventService:
     def __init__(self):
         # MongoDB removed - Automation Service không cần database
-        self.redis_url = get_redis_url()
-        self.redis_password = get_redis_password()
-        self.redis_db = get_redis_db()
-        self.event_config = get_event_config()
+        self.redis_url = Config.get_redis_url()
+        self.redis_password = Config.get_redis_password()
+        self.redis_db = Config.get_redis_db()
+        self.event_config = Config.get_event_config()
         
         # Initialize connections
         # MongoDB client removed

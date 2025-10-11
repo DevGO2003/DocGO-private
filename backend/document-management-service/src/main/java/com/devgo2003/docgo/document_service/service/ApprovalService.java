@@ -5,7 +5,9 @@ import com.devgo2003.docgo.document_service.entity.Contract;
 import com.devgo2003.docgo.document_service.dto.ApprovalCreateRequest;
 import com.devgo2003.docgo.document_service.repository.ApprovalRepository;
 import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.document_service.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -60,6 +62,17 @@ public class ApprovalService {
      */
     public List<Approval> getAllApprovals() {
         return approvalRepository.findByIsDeletedFalse();
+    }
+
+    /**
+     * Lấy tất cả approval với pagination và filtering
+     */
+    public Page<Approval> getAllApprovals(int pageNumber, int pageSize, String sortBy, String sortDirection, boolean includeDeleted) {
+        // Get all approvals
+        List<Approval> allApprovals = approvalRepository.findByIsDeletedFalse();
+        
+        // Convert to Page using PageUtil
+        return PageUtil.createPageFromList(allApprovals, pageNumber, pageSize, sortBy, sortDirection);
     }
 
     /**

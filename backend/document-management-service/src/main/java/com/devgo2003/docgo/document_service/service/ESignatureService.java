@@ -5,7 +5,9 @@ import com.devgo2003.docgo.document_service.entity.Contract;
 import com.devgo2003.docgo.document_service.dto.ESignatureCreateRequest;
 import com.devgo2003.docgo.document_service.repository.ESignatureRepository;
 import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.document_service.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -465,6 +467,17 @@ public class ESignatureService {
      */
     public List<ESignature> getAllESignatures() {
         return eSignatureRepository.findAll();
+    }
+
+    /**
+     * Lấy tất cả e-signature với pagination và filtering
+     */
+    public Page<ESignature> getAllESignatures(int pageNumber, int pageSize, String sortBy, String sortDirection, boolean includeDeleted) {
+        // Get all e-signatures
+        List<ESignature> allESignatures = eSignatureRepository.findAll();
+        
+        // Convert to Page using PageUtil
+        return PageUtil.createPageFromList(allESignatures, pageNumber, pageSize, sortBy, sortDirection);
     }
 
     /**

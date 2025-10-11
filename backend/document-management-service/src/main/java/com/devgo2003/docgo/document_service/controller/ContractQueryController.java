@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.document_service.controller;
 
 import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
 import com.devgo2003.docgo.document_service.dto.ContractDetailResponseDto;
@@ -143,15 +144,8 @@ public class ContractQueryController {
                 .build());
         }
         
-        PaginatedResponse<ContractResponseDto> paginatedResponse = PaginatedResponse.<ContractResponseDto>builder()
-            .content(contracts.getContent())
-            .pageNumber(contracts.getNumber())
-            .pageSize(contracts.getSize())
-            .totalElements(contracts.getTotalElements())
-            .totalPages(contracts.getTotalPages())
-            .first(contracts.isFirst())
-            .last(contracts.isLast())
-            .build();
+        PaginatedResponse<ContractResponseDto> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            contracts, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<ContractResponseDto>>builder()
             .statusCode(200)
@@ -476,8 +470,8 @@ public class ContractQueryController {
             .id(contract.getId())
             .contractNumber(contract.getContractNumber())
             .title(contract.getTitle())
-            .status(contract.getStatus())
-            .contractType(contract.getContractType())
+            .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+            .contractType(contract.getContractType() != null ? contract.getContractType().name() : null)
             .build();
     }
 }

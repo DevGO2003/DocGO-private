@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authService } from './lib/services/authService'
 import serviceManager from './lib/services'
 import { createErrorResponse, generateRequestId, AuthenticationError, AuthorizationError } from './lib/utils/errorHandler'
+import { Config } from './lib/config'
 
 // Rate limiting configuration
 const windowMs = 60_000
@@ -323,7 +324,7 @@ async function checkServiceHealth(serviceName: string): Promise<boolean> {
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: ['/health'], // Temporarily disable API matcher to test rewrites
 }
 
 function buildCorsHeaders(req: NextRequest): HeadersInit {

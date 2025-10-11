@@ -4,6 +4,7 @@ import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.entity.Version;
 import com.devgo2003.docgo.document_service.service.VersionService;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -136,15 +137,8 @@ public class VersionQueryController {
                 .build());
         }
         
-        PaginatedResponse<Version> paginatedResponse = PaginatedResponse.<Version>builder()
-            .content(versions.getContent())
-            .pageNumber(versions.getNumber())
-            .pageSize(versions.getSize())
-            .totalElements(versions.getTotalElements())
-            .totalPages(versions.getTotalPages())
-            .first(versions.isFirst())
-            .last(versions.isLast())
-            .build();
+        PaginatedResponse<Version> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            versions, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Version>>builder()
             .statusCode(200)
@@ -233,6 +227,9 @@ public class VersionQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -253,15 +250,8 @@ public class VersionQueryController {
                 .build());
         }
         
-        PaginatedResponse<Version> paginatedResponse = PaginatedResponse.<Version>builder()
-            .content(versions.getContent())
-            .pageNumber(versions.getNumber())
-            .pageSize(versions.getSize())
-            .totalElements(versions.getTotalElements())
-            .totalPages(versions.getTotalPages())
-            .first(versions.isFirst())
-            .last(versions.isLast())
-            .build();
+        PaginatedResponse<Version> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            versions, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Version>>builder()
             .statusCode(200)

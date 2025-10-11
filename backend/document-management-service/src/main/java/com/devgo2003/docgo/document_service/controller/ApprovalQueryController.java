@@ -4,6 +4,7 @@ import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.entity.Approval;
 import com.devgo2003.docgo.document_service.service.ApprovalService;
+import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -110,14 +111,14 @@ public class ApprovalQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm") 
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
             @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") 
             @RequestParam(defaultValue = "DESC") String sortDirection,
-            
-            @Parameter(description = "Từ khóa tìm kiếm", required = true) 
-            @RequestParam String searchTerm,
             
             @Parameter(description = "Bao gồm phê duyệt đã xóa (mặc định: false)") 
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
@@ -136,15 +137,8 @@ public class ApprovalQueryController {
                 .build());
         }
         
-        PaginatedResponse<Approval> paginatedResponse = PaginatedResponse.<Approval>builder()
-            .content(approvals.getContent())
-            .pageNumber(approvals.getNumber())
-            .pageSize(approvals.getSize())
-            .totalElements(approvals.getTotalElements())
-            .totalPages(approvals.getTotalPages())
-            .first(approvals.isFirst())
-            .last(approvals.isLast())
-            .build();
+        PaginatedResponse<Approval> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            approvals, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Approval>>builder()
             .statusCode(200)
@@ -233,6 +227,9 @@ public class ApprovalQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm") 
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -253,15 +250,8 @@ public class ApprovalQueryController {
                 .build());
         }
         
-        PaginatedResponse<Approval> paginatedResponse = PaginatedResponse.<Approval>builder()
-            .content(approvals.getContent())
-            .pageNumber(approvals.getNumber())
-            .pageSize(approvals.getSize())
-            .totalElements(approvals.getTotalElements())
-            .totalPages(approvals.getTotalPages())
-            .first(approvals.isFirst())
-            .last(approvals.isLast())
-            .build();
+        PaginatedResponse<Approval> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            approvals, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Approval>>builder()
             .statusCode(200)
@@ -350,6 +340,9 @@ public class ApprovalQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -370,15 +363,8 @@ public class ApprovalQueryController {
                 .build());
         }
         
-        PaginatedResponse<Approval> paginatedResponse = PaginatedResponse.<Approval>builder()
-            .content(approvals.getContent())
-            .pageNumber(approvals.getNumber())
-            .pageSize(approvals.getSize())
-            .totalElements(approvals.getTotalElements())
-            .totalPages(approvals.getTotalPages())
-            .first(approvals.isFirst())
-            .last(approvals.isLast())
-            .build();
+        PaginatedResponse<Approval> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            approvals, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Approval>>builder()
             .statusCode(200)
@@ -539,6 +525,9 @@ public class ApprovalQueryController {
             @Parameter(description = "Kích thước trang (mặc định: 10)") 
             @RequestParam(defaultValue = "10") int pageSize,
             
+            @Parameter(description = "Từ khóa tìm kiếm")
+            @RequestParam(defaultValue = "") String searchTerm,
+            
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") 
             @RequestParam(defaultValue = "createdAt") String sortBy,
             
@@ -559,15 +548,8 @@ public class ApprovalQueryController {
                 .build());
         }
         
-        PaginatedResponse<Approval> paginatedResponse = PaginatedResponse.<Approval>builder()
-            .content(approvals.getContent())
-            .pageNumber(approvals.getNumber())
-            .pageSize(approvals.getSize())
-            .totalElements(approvals.getTotalElements())
-            .totalPages(approvals.getTotalPages())
-            .first(approvals.isFirst())
-            .last(approvals.isLast())
-            .build();
+        PaginatedResponse<Approval> paginatedResponse = PaginatedResponseUtil.buildPaginatedResponse(
+            approvals, pageNumber, pageSize, searchTerm, sortBy, sortDirection);
         
         return ResponseEntity.ok(RestResponse.<PaginatedResponse<Approval>>builder()
             .statusCode(200)

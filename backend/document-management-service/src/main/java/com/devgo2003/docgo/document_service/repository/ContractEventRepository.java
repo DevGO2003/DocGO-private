@@ -10,6 +10,8 @@ import java.util.List;
 
 @Repository
 public interface ContractEventRepository extends MongoRepository<ContractEvent, String> {
+    List<ContractEvent> findByContractId(String contractId);
+    
     List<ContractEvent> findByContractIdOrderByTimestampDesc(String contractId);
     
     Page<ContractEvent> findByContractIdOrderByTimestampDesc(String contractId, Pageable pageable);

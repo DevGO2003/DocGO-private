@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ServiceConfig, RestResponse } from '@/types/index';
 import logger from './logger';
-import { config, getServiceConfig } from './config';
+import { Config } from './config';
 
 class ServiceManager {
   private services: Map<string, AxiosInstance> = new Map();
@@ -13,7 +13,7 @@ class ServiceManager {
 
   private initializeServices(): void {
     // Initialize services using centralized config
-    Object.entries(config.services).forEach(([key, serviceConfig]) => {
+    Object.entries(Config.getServices()).forEach(([key, serviceConfig]) => {
       this.addService(key, serviceConfig);
     });
   }

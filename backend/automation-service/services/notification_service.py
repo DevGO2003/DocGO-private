@@ -14,10 +14,7 @@ import redis.asyncio as redis
 from twilio.rest import Client as TwilioClient
 from twilio.base.exceptions import TwilioException
 
-from config import (
-    get_redis_url, get_redis_password, get_redis_db,
-    get_smtp_config, get_twilio_config, get_websocket_config
-)
+from config import Config
 from schemas.notification_schemas import (
     NotificationRequest, NotificationResponse, NotificationType,
     NotificationStatus, NotificationPriority, NotificationTemplate,
@@ -28,12 +25,12 @@ from schemas.notification_schemas import (
 class NotificationService:
     def __init__(self):
         # MongoDB removed - Automation Service không cần database
-        self.redis_url = get_redis_url()
-        self.redis_password = get_redis_password()
-        self.redis_db = get_redis_db()
-        self.smtp_config = get_smtp_config()
-        self.twilio_config = get_twilio_config()
-        self.websocket_config = get_websocket_config()
+        self.redis_url = Config.get_redis_url()
+        self.redis_password = Config.get_redis_password()
+        self.redis_db = Config.get_redis_db()
+        self.smtp_config = Config.get_smtp_config()
+        self.twilio_config = Config.get_twilio_config()
+        self.websocket_config = Config.get_websocket_config()
         
         # Initialize connections
         # MongoDB client removed

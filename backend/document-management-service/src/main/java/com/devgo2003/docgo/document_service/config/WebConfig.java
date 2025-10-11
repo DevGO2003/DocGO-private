@@ -1,18 +1,18 @@
 package com.devgo2003.docgo.document_service.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.Arrays;
 
 /**
  * Cấu hình CORS cho document-management-service
  * Cho phép frontend (localhost:3000) gọi API
+ * 
+ * FIXME: Removed corsConfigurationSource bean to avoid conflict with SecurityConfig
+ * Spring Security will use the corsConfigurationSource from SecurityConfig instead
+ * 
+ * ISSUE: Container still using old image despite rebuild --no-cache
+ * Need to check if Docker is using cached layers or if there's another issue
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -27,17 +27,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
-        return source;
-    }
+    // REMOVED: corsConfigurationSource bean to avoid conflict with SecurityConfig
+    // Spring Security will use the corsConfigurationSource from SecurityConfig instead
 }

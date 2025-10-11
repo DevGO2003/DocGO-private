@@ -17,17 +17,27 @@ export const config = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { path } = req.query;
-    const fullPath = Array.isArray(path) ? path.join('/') : path || '';
+    // Get the path from req.query.path (Next.js dynamic route parameter)
+    const pathArray = req.query.path as string[] || [];
+    const fullPath = pathArray.join('/');
     const method = req.method || 'GET';
 
-  // Reconstruct full API path (avoid duplicating /v1 since it is already the first segment in fullPath)
+  // Reconstruct full API path
   const fullApiPath = `/api/${fullPath}`;
   
   logger.info(`🔄 Proxy request: ${method} ${fullApiPath}`);
 
   // Determine service key and keep original endpoint
   const parts = fullPath.split('/').filter(Boolean);
+  
+  logger.info(`🔍 [DEBUG] Path parsing:`, {
+    fullPath,
+    parts,
+    partsLength: parts.length,
+    originalUrl: req.url,
+    pathArray,
+    queryPath: req.query.path
+  });
 
   // Map of tokens to service keys
   const tokenToService: Record<string, string> = {
@@ -87,6 +97,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Default to user-management if still unknown
     serviceKey = 'user-management';
   }
+  
+  logger.info(`🎯 [DEBUG] Service key determined:`, {
+    serviceKey,
+    fullPath,
+    parts
+  });
 
   // Keep original endpoint including /api/v1/...
   const endpoint = fullApiPath;

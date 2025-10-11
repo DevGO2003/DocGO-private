@@ -7,9 +7,7 @@ from typing import List, Dict, Any, Optional
 import redis.asyncio as redis
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from config import (
-    get_redis_url, get_redis_password, get_redis_db, get_batch_config
-)
+from config import Config
 from schemas.batch_schemas import (
     BatchJobRequest, BatchJobResponse, BatchJobStatus, BatchJobType,
     BatchJobPriority, BatchProcessingRequest, BatchProcessingResponse
@@ -19,10 +17,10 @@ from services.ai_processing_service import AutomationService
 class BatchService:
     def __init__(self):
         # MongoDB removed - Automation Service không cần database
-        self.redis_url = get_redis_url()
-        self.redis_password = get_redis_password()
-        self.redis_db = get_redis_db()
-        self.batch_config = get_batch_config()
+        self.redis_url = Config.get_redis_url()
+        self.redis_password = Config.get_redis_password()
+        self.redis_db = Config.get_redis_db()
+        self.batch_config = Config.get_batch_config()
         
         # Initialize connections
         # MongoDB client removed

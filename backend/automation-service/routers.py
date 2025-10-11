@@ -6,7 +6,7 @@ import aiohttp
 from docx import Document
 import PyPDF2
 import os
-from config import get_gemini_api_key
+from config import Config
 import google.generativeai as genai
 import json
 import uuid
@@ -384,7 +384,7 @@ async def classify_api(
     if not content or not content.strip():
         raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
 
-    api_key = gemini_api_key or get_gemini_api_key()
+    api_key = gemini_api_key or Config.get_gemini_api_key()
 
     try:
         categories = [
@@ -605,7 +605,7 @@ async def classify_api(
     
     if not content or not content.strip():
         raise HTTPException(status_code=204, detail="Không có nội dung để gửi cho AI.")
-    api_key = gemini_api_key or get_gemini_api_key()
+    api_key = gemini_api_key or Config.get_gemini_api_key()
     try:
         prompt = (
             "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
@@ -702,7 +702,7 @@ async def classify_api(
                 api_key_info = f"+ {gemini_api_key[:10]}..."
             else:
                 try:
-                    env_api_key = get_gemini_api_key()
+                    env_api_key = Config.get_gemini_api_key()
                     if env_api_key:
                         api_key_info = f"+ {env_api_key[:10]}..."
                 except:

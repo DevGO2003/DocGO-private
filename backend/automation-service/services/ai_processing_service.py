@@ -7,7 +7,7 @@ import json
 import uuid
 from typing import Optional, Dict, Any
 import google.generativeai as genai
-from config import get_gemini_api_key
+from config import Config
 
 
 class AutomationService:
@@ -23,7 +23,7 @@ class AutomationService:
     
     def __init__(self):
         if not self._initialized:
-            self.api_key = get_gemini_api_key()
+            self.api_key = Config.get_gemini_api_key()
             genai.configure(api_key=self.api_key)
             # Allow override via ENV, fallback to preferred order
             import os
