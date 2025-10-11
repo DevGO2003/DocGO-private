@@ -29,7 +29,7 @@ class FileStorageService:
         self.s3_region = os.getenv("S3_REGION", "us-east-1")
         self.s3_access_key = os.getenv("S3_ACCESS_KEY_ID", "")
         self.s3_secret_key = os.getenv("S3_SECRET_ACCESS_KEY", "")
-        self.base_url = os.getenv("BASE_URL", "http://localhost:8003")
+        self.base_url = Config.get_base_url()
         self.max_file_size = int(os.getenv("MAX_FILE_SIZE", "104857600"))  # 100MB default
         
         # Ensure upload directory exists

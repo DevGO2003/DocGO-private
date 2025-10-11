@@ -42,14 +42,14 @@ class IntegrationService {
       {
         name: 'redis',
         type: 'database',
-        endpoint: process.env.REDIS_URL || 'redis://localhost:6379',
+        endpoint: Config.REDIS_URL,
         authentication: { type: 'none' },
         enabled: true
       },
       {
         name: 'mongodb',
         type: 'database',
-        endpoint: process.env.MONGODB_URL || 'mongodb://localhost:27017',
+        endpoint: process.env.MONGODB_ATLAS_URI || 'mongodb://localhost:27017',
         authentication: { type: 'none' },
         enabled: true
       }

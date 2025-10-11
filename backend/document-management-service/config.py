@@ -1,205 +1,185 @@
 import os
-from typing import Optional
-
-import boto3
-from botocore.client import Config
-from botocore.exceptions import ClientError, NoCredentialsError
 from dotenv import load_dotenv
 from pathlib import Path
-import motor.motor_asyncio
-import redis.asyncio as redis
-
+from typing import List, Dict, Any
 
 # Load .env file
 _service_dir = Path(__file__).resolve().parent
-_env_file = _service_dir / "env" / ".env"
+_env_file = _service_dir / ".env"
 
 # Load .env if exists
 if _env_file.exists():
-	load_dotenv(dotenv_path=_env_file, override=False)
-	print(f"✅ Loaded .env from {_env_file}")
+    load_dotenv(dotenv_path=_env_file, override=False)
+    print(f"Loaded .env from {_env_file}")
 # Finally fallback to default lookup (CWD)
 else:
-	load_dotenv()  # fallback to default lookup (CWD)
-	print("✅ Loaded .env from CWD")
+    load_dotenv()  # fallback to default lookup (CWD)
+    print("Loaded .env from CWD")
 
 
-def get_env(name: str, default: Optional[str] = None) -> Optional[str]:
-	"""Read environment variable with a default value."""
-	return os.getenv(name, default)
+class Config:
+    """
+    Centralized configuration management for Document Management Service
+    Tất cả biến môi trường được quản lý tập trung với fallback values chuẩn hóa
+    """
+    
+    # ==========================================
+    # ENVIRONMENT DETECTION
+    # ==========================================
+    @classmethod
+    def is_docker(cls) -> bool:
+        """Detect if running in Docker environment"""
+        return os.getenv("ENVIRONMENT") in ["docker", "production"]
+    
+    # ==========================================
+    # SERVICE CONFIGURATION
+    # ==========================================
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    SPRING_PROFILES_ACTIVE: str = os.getenv("SPRING_PROFILES_ACTIVE", "dev")
+    SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8002"))
+    SERVER_HOST: str = os.getenv("SERVER_HOST", "0.0.0.0")
+    
+    # ==========================================
+    # INFRASTRUCTURE SERVICES (Shared from root .env)
+    # ==========================================
+    # MongoDB Configuration
+    MONGODB_ATLAS_URI: str = os.getenv("MONGODB_ATLAS_URI", "")
+    MONGODB_DATABASE: str = os.getenv("MONGODB_DOCUMENT_DATABASE", "docgo_document_service")
+    
+    # Redis Configuration
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "redis")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
+    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+    REDIS_DATABASE: int = int(os.getenv("REDIS_DATABASE", "0"))
+    
+    # Kafka Configuration
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
+    KAFKA_CLIENT_ID: str = os.getenv("KAFKA_CLIENT_ID", f"{os.getenv('KAFKA_CLIENT_ID_PREFIX', 'docgo')}-document-management")
+    KAFKA_GROUP_ID: str = os.getenv("KAFKA_GROUP_ID", f"{os.getenv('KAFKA_GROUP_ID_PREFIX', 'docgo-group')}-document-management")
+    SPRING_KAFKA_ENABLED: bool = os.getenv("SPRING_KAFKA_ENABLED", "true").lower() == "true"
+    
+    # ==========================================
+    # SERVICE URLS (Smart URL building)
+    # ==========================================
+    @classmethod
+    def get_user_service_url(cls) -> str:
+        """Get User Management Service URL with smart fallback"""
+        return os.getenv("USER_MANAGEMENT_SERVICE_URL", 
+                        "http://user-management-service:8001" if cls.is_docker() 
+                        else "http://localhost:8001")
+    
+    @classmethod
+    def get_automation_service_url(cls) -> str:
+        """Get Automation Service URL with smart fallback"""
+        return os.getenv("AUTOMATION_SERVICE_URL", 
+                        "http://automation-service:8003" if cls.is_docker() 
+                        else "http://localhost:8003")
+    
+    @classmethod
+    def get_ai_service_url(cls) -> str:
+        """Get AI Service URL with smart fallback"""
+        return os.getenv("AI_SERVICE_URL", 
+                        "http://ai-processing-service:8000" if cls.is_docker() 
+                        else "http://localhost:8000")
+    
+    @classmethod
+    def get_file_service_url(cls) -> str:
+        """Get File Service URL with smart fallback"""
+        return os.getenv("FILE_SERVICE_URL", 
+                        "http://file-storage-service:8000" if cls.is_docker() 
+                        else "http://localhost:8000")
+    
+    # ==========================================
+    # FILE UPLOAD CONFIGURATION
+    # ==========================================
+    MAX_FILE_SIZE: str = os.getenv("MAX_FILE_SIZE", "50MB")
+    UPLOAD_DIRECTORY: str = os.getenv("UPLOAD_DIRECTORY", "uploads")
+    
+    # ==========================================
+    # REDIS TOPICS (Service-specific)
+    # ==========================================
+    REDIS_CONTRACT_SUMMARY_UPDATED_TOPIC: str = os.getenv("REDIS_CONTRACT_SUMMARY_UPDATED_TOPIC", "contract.summary.updated")
+    REDIS_CONTRACT_UPDATED_TOPIC: str = os.getenv("REDIS_CONTRACT_UPDATED_TOPIC", "contract.updated")
+    REDIS_APPROVAL_CREATED_TOPIC: str = os.getenv("REDIS_APPROVAL_CREATED_TOPIC", "approval.created")
+    REDIS_VERSION_CREATED_TOPIC: str = os.getenv("REDIS_VERSION_CREATED_TOPIC", "version.created")
+    REDIS_COMMENT_CREATED_TOPIC: str = os.getenv("REDIS_COMMENT_CREATED_TOPIC", "comment.created")
+    REDIS_ESIGNATURE_CREATED_TOPIC: str = os.getenv("REDIS_ESIGNATURE_CREATED_TOPIC", "esignature.created")
+    REDIS_REMINDER_CREATED_TOPIC: str = os.getenv("REDIS_REMINDER_CREATED_TOPIC", "reminder.created")
+    REDIS_AUDIT_LOG_CREATED_TOPIC: str = os.getenv("REDIS_AUDIT_LOG_CREATED_TOPIC", "audit.log.created")
+    
+    # ==========================================
+    # REDIS CONNECTION HELPERS
+    # ==========================================
+    @classmethod
+    def get_redis_url(cls) -> str:
+        """Get Redis connection URL"""
+        if cls.REDIS_PASSWORD:
+            return f"redis://:{cls.REDIS_PASSWORD}@{cls.REDIS_HOST}:{cls.REDIS_PORT}"
+        return f"redis://{cls.REDIS_HOST}:{cls.REDIS_PORT}"
+    
+    @classmethod
+    def get_spring_redis_host(cls) -> str:
+        """Get Redis host for Spring configuration"""
+        return cls.REDIS_HOST
+    
+    @classmethod
+    def get_spring_redis_port(cls) -> int:
+        """Get Redis port for Spring configuration"""
+        return cls.REDIS_PORT
+    
+    @classmethod
+    def get_spring_redis_password(cls) -> str:
+        """Get Redis password for Spring configuration"""
+        return cls.REDIS_PASSWORD
+    
+    @classmethod
+    def get_spring_redis_database(cls) -> int:
+        """Get Redis database for Spring configuration"""
+        return cls.REDIS_DATABASE
+    
+    # ==========================================
+    # MONGODB CONNECTION HELPERS
+    # ==========================================
+    @classmethod
+    def get_mongodb_uri(cls) -> str:
+        """Get MongoDB URI for Spring configuration"""
+        if cls.MONGODB_ATLAS_URI:
+            return f"{cls.MONGODB_ATLAS_URI}/{cls.MONGODB_DATABASE}?retryWrites=true&w=majority&appName=devgo-docgo-cluster0"
+        return f"mongodb://localhost:27017/{cls.MONGODB_DATABASE}"
+    
+    # ==========================================
+    # LOGGING CONFIGURATION
+    # ==========================================
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    
+    # ==========================================
+    # VALIDATION
+    # ==========================================
+    @classmethod
+    def validate_required_config(cls) -> None:
+        """Validate that all required configuration is present"""
+        required_vars = []
+        
+        if not cls.MONGODB_ATLAS_URI:
+            required_vars.append("MONGODB_ATLAS_URI")
+        
+        if required_vars:
+            raise ValueError(f"Missing required environment variables: {', '.join(required_vars)}")
 
 
-# S3 / Filebase configuration
-S3_ENDPOINT: str = get_env("S3_ENDPOINT")
-S3_REGION: str = get_env("S3_REGION")
-S3_ACCESS_KEY_ID: str = get_env("S3_ACCESS_KEY", get_env("S3_ACCESS_KEY_ID"))
-S3_SECRET_ACCESS_KEY: str = get_env("S3_SECRET_KEY", get_env("S3_SECRET_ACCESS_KEY"))
-S3_BUCKET: str = get_env("S3_BUCKET_NAME", get_env("S3_BUCKET"))
-S3_ENABLED: bool = get_env("S3_ENABLED", "true").lower() == "true"
-S3_PUBLIC_BUCKET: bool = get_env("S3_PUBLIC_BUCKET", "false").lower() == "true"
-S3_ADDRESSING_STYLE: str = get_env("S3_ADDRESSING_STYLE", "virtual")  # virtual | path
-S3_KEY_STYLE: str = get_env("S3_KEY_STYLE", "detailed")  # detailed | simple
-S3_METADATA_MINIMAL: bool = get_env("S3_METADATA_MINIMAL", "false").lower() == "true"
-S3_SANITIZE_KEYS: bool = get_env("S3_SANITIZE_KEYS", "true").lower() == "true"
+# Legacy function wrappers for backward compatibility
+def get_redis_url():
+    """Legacy function - use Config.get_redis_url() instead"""
+    return Config.get_redis_url()
 
-# Debug S3 configuration
-print(f"🔧 S3 Configuration:")
-print(f"   S3_ENABLED: {S3_ENABLED}")
-print(f"   S3_ENDPOINT: {S3_ENDPOINT}")
-print(f"   S3_REGION: {S3_REGION}")
-print(f"   S3_BUCKET: {S3_BUCKET}")
-print(f"   S3_PUBLIC_BUCKET: {S3_PUBLIC_BUCKET}")
-print(f"   S3_ADDRESSING_STYLE: {S3_ADDRESSING_STYLE}")
+def get_redis_password():
+    """Legacy function"""
+    return Config.REDIS_PASSWORD
 
-s3_client = boto3.client(
-	"s3",
-	endpoint_url=S3_ENDPOINT,
-	aws_access_key_id=S3_ACCESS_KEY_ID,
-	aws_secret_access_key=S3_SECRET_ACCESS_KEY,
-	region_name=S3_REGION,
-	config=Config(signature_version="s3v4", s3={"addressing_style": S3_ADDRESSING_STYLE}),
-)
+def get_redis_db():
+    """Legacy function"""
+    return Config.REDIS_DATABASE
 
-
-# Optional IPFS (Filebase RPC) configuration
-IPFS_RPC_ENDPOINT: str = get_env("IPFS_RPC_ENDPOINT", "https://rpc.filebase.io")
-IPFS_RPC_TOKEN: Optional[str] = get_env("IPFS_RPC_TOKEN")
-
-
-def ensure_bucket_exists():
-	"""Đảm bảo bucket S3 tồn tại nếu đã bật S3 và cấu hình hợp lệ."""
-	if not S3_ENABLED:
-		return
-	if not S3_BUCKET:
-		raise ValueError("S3_ENABLED=true nhưng S3_BUCKET chưa được cấu hình")
-	try:
-		s3_client.head_bucket(Bucket=S3_BUCKET)
-		print(f"✅ Bucket '{S3_BUCKET}' đã tồn tại")
-	except ClientError as e:
-		error_code = e.response['Error'].get('Code') if hasattr(e, 'response') else None
-		if error_code == '404':
-			try:
-				s3_client.create_bucket(Bucket=S3_BUCKET)
-				print(f"✅ Đã tạo bucket '{S3_BUCKET}' thành công")
-			except ClientError as create_error:
-				print(f"❌ Không thể tạo bucket '{S3_BUCKET}': {create_error}")
-				raise
-		else:
-			print(f"❌ Lỗi kiểm tra bucket '{S3_BUCKET}': {e}")
-			raise
-	except NoCredentialsError:
-		print("❌ Không tìm thấy credentials S3. Vui lòng kiểm tra S3_ACCESS_KEY_ID và S3_SECRET_ACCESS_KEY")
-		raise
-
-
-def ensure_local_directories():
-	"""Đảm bảo các thư mục local tồn tại."""
-	directories = [UPLOAD_DIR, TEMP_DIR]
-	for directory in directories:
-		if not os.path.exists(directory):
-			os.makedirs(directory)
-			print(f"✅ Đã tạo thư mục '{directory}'")
-
-
-def get_presigned_get_url(object_key: str, expires_in_seconds: int = 3600) -> str:
-	"""Generate a presigned GET URL for the given S3 key."""
-	return s3_client.generate_presigned_url(
-		"get_object",
-		Params={"Bucket": S3_BUCKET, "Key": object_key},
-		ExpiresIn=expires_in_seconds,
-	)
-
-def build_public_url(object_key: str) -> str:
-	"""Build a public URL in virtual-hosted style if bucket is public."""
-	if not S3_BUCKET:
-		return ""
-	return f"https://{S3_BUCKET}.s3.filebase.com/{object_key}"
-
-def is_s3_enabled() -> bool:
-	return bool(S3_ENABLED and S3_BUCKET)
-
-def get_s3_client():
-	"""Get S3 client instance."""
-	return s3_client
-
-def get_bucket_name() -> str:
-	"""Get S3 bucket name."""
-	return S3_BUCKET
-
-def get_s3_endpoint() -> str:
-	"""Get S3 endpoint URL."""
-	return S3_ENDPOINT
-
-def get_s3_region() -> str:
-	"""Get S3 region."""
-	return S3_REGION
-
-def is_s3_metadata_minimal() -> bool:
-	return S3_METADATA_MINIMAL
-
-def is_s3_sanitize_keys() -> bool:
-	return S3_SANITIZE_KEYS
-
-# ClamAV configuration
-CLAMD_HOST: str = get_env("CLAMD_HOST", "localhost")
-CLAMD_PORT: int = int(get_env("CLAMD_PORT", "3310"))
-USE_CLAMD: bool = get_env("USE_CLAMD", "true").lower() == "true"
-
-# File storage configuration
-MAX_FILE_SIZE: int = int(get_env("MAX_FILE_SIZE", "104857600"))  # 100MB default
-ALLOWED_FILE_TYPES: list = get_env("ALLOWED_FILE_TYPES", "pdf,docx,txt,jpg,jpeg,png,gif").split(",")
-UPLOAD_DIR: str = get_env("UPLOAD_DIR", "uploads")
-TEMP_DIR: str = get_env("TEMP_DIR", "temp")
-
-
-# MongoDB configuration
-MONGODB_URL: str = get_env("MONGODB_ATLAS_URI", get_env("MONGODB_URL", "mongodb://localhost:27017"))
-MONGODB_DATABASE: str = get_env("MONGODB_DATABASE", "docgo_file")
-MONGODB_FILES_COLLECTION: str = get_env("MONGODB_FILES_COLLECTION", "files")
-MONGODB_ASSETS_COLLECTION: str = get_env("MONGODB_ASSETS_COLLECTION", "assets")
-
-# Redis configuration
-REDIS_URL: str = get_env("REDIS_URL", "redis://localhost:6379")
-REDIS_DB: int = int(get_env("REDIS_DB", "0"))
-REDIS_PASSWORD: Optional[str] = get_env("REDIS_CLOUD_PASSWORD", get_env("REDIS_PASSWORD"))
-
-# Kafka configuration
-KAFKA_BOOTSTRAP_SERVERS: str = get_env("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-KAFKA_FILE_UPLOADED_TOPIC: str = get_env("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
-KAFKA_CLIENT_ID: str = get_env("KAFKA_CLIENT_ID", "file-storage-asset-service")
-KAFKA_MESSAGE_KEY_FIELD: str = get_env("KAFKA_MESSAGE_KEY_FIELD", "key")  # key | fileId | filename
-
-# MongoDB client
-mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
-mongodb_database = mongodb_client[MONGODB_DATABASE]
-files_collection = mongodb_database[MONGODB_FILES_COLLECTION]
-assets_collection = mongodb_database[MONGODB_ASSETS_COLLECTION]
-
-# Redis client
-redis_client = redis.from_url(
-    REDIS_URL,
-    db=REDIS_DB,
-    password=REDIS_PASSWORD,
-    decode_responses=True
-)
-
-def get_mongodb_client():
-    """Get MongoDB client instance."""
-    return mongodb_client
-
-def get_mongodb_database():
-    """Get MongoDB database instance."""
-    return mongodb_database
-
-def get_files_collection():
-    """Get files collection instance."""
-    return files_collection
-
-def get_assets_collection():
-    """Get assets collection instance."""
-    return assets_collection
-
-def get_redis_client():
-    """Get Redis client instance."""
-    return redis_client
-
+def get_kafka_bootstrap_servers():
+    """Legacy function - use Config.KAFKA_BOOTSTRAP_SERVERS instead"""
+    return Config.KAFKA_BOOTSTRAP_SERVERS

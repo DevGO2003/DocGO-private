@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
   try {
-    const target = `http://localhost:8012/api/v1/file-storage-asset-service/files/${fileId}/signed-url`
+    const target = `${Config.getFileServiceUrl()}/api/v1/file-storage-asset-service/files/${fileId}/signed-url`
     const r = await fetch(target, {
       method: 'POST',
       headers: { 'content-type': 'application/json', ...req.headers as any },

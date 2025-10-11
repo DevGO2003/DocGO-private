@@ -39,7 +39,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:8000',
+        url: Config.getApiGatewayUrl(),
         description: 'Development Server'
       },
       {

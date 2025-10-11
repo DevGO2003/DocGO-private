@@ -328,7 +328,7 @@ export const config = {
 
 function buildCorsHeaders(req: NextRequest): HeadersInit {
   const origin = req.headers.get('origin') || ''
-  const envOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',').map(o => o.trim()).filter(Boolean)
+  const envOrigins = Config.getCorsOrigins()
   const isAllowed = origin && envOrigins.some(allowed => allowed === origin)
   const allowOrigin = isAllowed ? origin : envOrigins[0] || ''
 

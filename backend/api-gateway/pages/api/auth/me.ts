@@ -39,7 +39,7 @@ export default async function handler(req: any, res: any) {
     const result = await authService.getProfile(token)
 
     // Ensure CORS for browser access
-    const origin = 'http://localhost:3000'
+    const origin = Config.getCorsOrigins()[0]
     res.setHeader('Access-Control-Allow-Origin', origin)
     res.setHeader('Access-Control-Allow-Credentials', 'true')
 

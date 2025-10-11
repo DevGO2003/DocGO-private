@@ -48,16 +48,34 @@ Số lượng service ứng dụng: 4 microservices chính (api-gateway, user-ma
 
 ## 🚀 Cách chạy
 
-### 1. Sử dụng Docker Compose (Khuyến nghị)
+### 1. Cấu hình môi trường
+
+DocGO sử dụng cấu trúc biến môi trường phân tầng để quản lý cấu hình:
+
+#### Root Environment (Infrastructure Shared)
+```bash
+# Copy và cấu hình file môi trường chính
+cp .env.example .env
+# Chỉnh sửa các biến infrastructure shared (MongoDB, Kafka, Redis)
+```
+
+#### Service-specific Environment
+```bash
+# Mỗi service có file .env riêng
+backend/user-management-service/.env
+backend/document-management-service/.env
+backend/automation-service/.env
+backend/api-gateway/.env
+```
+
+**📖 Chi tiết cấu hình**: Xem [ENV_GUIDE.md](./ENV_GUIDE.md) để hiểu rõ cấu trúc biến môi trường và cách override.
+
+### 2. Sử dụng Docker Compose (Khuyến nghị)
 
 ```bash
 # Clone repository
 git clone https://github.com/DevGO2003/DocGO.git
 cd DocGO
-
-# Setup environment variables
-cp .env.example .env
-# Chỉnh sửa .env với các giá trị thực tế (MongoDB URI, JWT Secret, Gemini API Key)
 
 # Chạy toàn bộ hệ thống
 docker-compose up -d
@@ -70,12 +88,17 @@ docker-compose up -d automation-service
 docker-compose up -d api-gateway
 docker-compose up -d web-app
 
-# Xem logs
+# Xem logs với structured logging
 docker-compose logs -f [service-name]
 
 # Dừng hệ thống
 docker-compose down
 ```
+
+### 3. Monitoring & Logs
+- **Structured Logging**: Tất cả logs được format JSON với correlation ID
+- **Request Tracing**: Mỗi request có unique ID để trace qua các services
+- **Health Checks**: Mỗi service có health endpoint để monitoring
 
 ### 2. Development với Volume Mount (Hot Reload)
 

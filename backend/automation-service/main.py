@@ -57,8 +57,7 @@ app.add_middleware(
     CORSMiddleware,
     # Explicit origins are required when allow_credentials=True
     allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:8000",
+        *Config.get_cors_origins(),
     ],
     allow_credentials=True,
     allow_methods=["*"],

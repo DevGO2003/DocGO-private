@@ -27,10 +27,10 @@ class HealthMonitoringService {
 
   private initializeServices(): void {
     // Service URLs - only existing services
-    this.services.set('api-gateway', process.env.API_GATEWAY_URL || 'http://localhost:8000');
-    this.services.set('user-management-service', process.env.USER_MANAGEMENT_SERVICE_URL || 'http://localhost:8001');
-    this.services.set('document-management-service', process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002');
-    this.services.set('automation-service', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:8003');
+    this.services.set('api-gateway', Config.getApiGatewayUrl());
+    this.services.set('user-management-service', Config.getUserManagementServiceUrl());
+    this.services.set('document-management-service', Config.getDocumentManagementServiceUrl());
+    this.services.set('automation-service', Config.getAutomationServiceUrl());
   }
 
   async checkServiceHealth(serviceName: string): Promise<HealthStatus> {

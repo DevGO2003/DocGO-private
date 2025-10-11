@@ -92,10 +92,7 @@ services:
       - ./backend/user-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8001
-      - MONGODB_DATABASE=${MONGODB_USER_DATABASE}
-      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-user-management
-      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-user-management
+      - ENVIRONMENT=docker
     depends_on:
       - kafka
       - redis
@@ -119,10 +116,7 @@ services:
       - ./backend/document-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8002
-      - MONGODB_DATABASE=${MONGODB_DOCUMENT_DATABASE}
-      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-document-management
-      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-document-management
+      - ENVIRONMENT=docker
     depends_on:
       - kafka
       - redis
@@ -147,10 +141,6 @@ services:
       - ./backend/automation-service/.env
     environment:
       - ENVIRONMENT=docker
-      - PORT=8003
-      - MONGODB_DATABASE=${MONGODB_AUTOMATION_DATABASE}
-      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID_PREFIX}-automation
-      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID_PREFIX}-automation
     depends_on:
       - kafka
       - redis
@@ -176,8 +166,7 @@ services:
       - .env
       - ./backend/api-gateway/.env
     environment:
-      - PORT=8000
-      - NODE_ENV=development
+      - ENVIRONMENT=docker
     depends_on:
       - kafka
       - redis
@@ -209,12 +198,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - NEXT_PUBLIC_API_URL=http://localhost:${API_GATEWAY_PORT:-8000}
-      - NEXT_PUBLIC_USER_SERVICE_URL=http://localhost:${USER_MANAGEMENT_PORT:-8001}
-      - NEXT_PUBLIC_DOCUMENT_SERVICE_URL=http://localhost:${DOCUMENT_MANAGEMENT_PORT:-8002}
-      - NEXT_PUBLIC_AUTOMATION_SERVICE_URL=http://localhost:${AUTOMATION_PORT:-8003}
+      - ENVIRONMENT=docker
     depends_on:
       - api-gateway
     networks:

@@ -73,7 +73,7 @@ async def get_s3_config():
         s3_region = os.getenv("S3_REGION", "us-east-1")
         s3_access_key = os.getenv("S3_ACCESS_KEY_ID", "")
         s3_secret_key = os.getenv("S3_SECRET_ACCESS_KEY", "")
-        base_url = os.getenv("BASE_URL", "http://localhost:8003")
+        base_url = Config.get_base_url()
         upload_directory = os.getenv("UPLOAD_DIR", "uploads")
         max_file_size = os.getenv("MAX_FILE_SIZE", "104857600")
         
@@ -84,7 +84,7 @@ async def get_s3_config():
         debug = os.getenv("DEBUG", "false")
         
         # Lấy cấu hình Kafka
-        kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+        kafka_servers = Config.KAFKA_BOOTSTRAP_SERVERS
         kafka_group_id = os.getenv("KAFKA_GROUP_ID", "automation-service")
         
         # Lấy cấu hình Redis

@@ -46,7 +46,7 @@ const nextConfig = {
       // Proxy API calls to backend, but exclude health endpoint, mock API, and static files
       {
         source: '/api/((?!health|mock).*)',
-        destination: 'http://localhost:8000/api/$1',
+        destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000'}/api/$1`,
       },
     ]
   },
