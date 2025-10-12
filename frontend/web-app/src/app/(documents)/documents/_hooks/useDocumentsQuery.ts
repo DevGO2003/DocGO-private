@@ -15,6 +15,7 @@ export type UseDocumentsParams = {
   status?: string
   type?: string
   tags?: string[]
+  documentType?: string
 }
 
 export function useDocumentsQuery(initial?: Partial<UseDocumentsParams>) {
@@ -28,12 +29,14 @@ export function useDocumentsQuery(initial?: Partial<UseDocumentsParams>) {
     status: initial?.status ?? 'ALL',
     type: initial?.type ?? 'ALL',
     tags: initial?.tags ?? [],
+    documentType: initial?.documentType,
   })
   const [data, setData] = useState<Paginated<Document>>({ content: [], totalElements: 0, totalPages: 1 })
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const abortRef = useRef<AbortController | null>(null)
   const [refreshIndex, setRefreshIndex] = useState<number>(0)
+  const tagsString = (params.tags || []).join(',')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -53,6 +56,7 @@ export function useDocumentsQuery(initial?: Partial<UseDocumentsParams>) {
     if (params.status && params.status !== 'ALL') query.status = params.status
     if (params.type && params.type !== 'ALL') query.type = params.type
     if (params.tags && params.tags.length > 0) query.tags = params.tags.join(',')
+    if (params.documentType) query.documentType = params.documentType
 
     fetchDocuments(query)
       .then((res) => setData(res))
@@ -60,7 +64,7 @@ export function useDocumentsQuery(initial?: Partial<UseDocumentsParams>) {
       .finally(() => setLoading(false))
 
     return () => controller.abort()
-  }, [params.pageNumber, params.pageSize, params.sortBy, params.sortDirection, params.searchTerm, params.includeDeleted, params.status, params.type, (params.tags || []).join(','), refreshIndex])
+  }, [params.pageNumber, params.pageSize, params.sortBy, params.sortDirection, params.searchTerm, params.includeDeleted, params.status, params.type, tagsString, params.documentType, refreshIndex])
 
   const refetch = () => setRefreshIndex((i) => i + 1)
 

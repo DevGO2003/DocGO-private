@@ -19,7 +19,15 @@ export async function fetchDocuments(params: Record<string, any>): Promise<Pagin
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v))
   })
-  const res = await fetch(url.toString(), { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
+  const res = await fetch(url.toString(), { 
+    method: 'GET', 
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }, 
+    credentials: 'include',
+    cache: 'no-store' 
+  })
   const data = await unwrap<any>(res)
   return mapPaginated<Document>(data, mapApiDocumentToUi)
 }
@@ -28,7 +36,15 @@ export async function fetchDocument(id: string): Promise<Document | null> {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000'}${API_ENDPOINTS.detail(id)}`
     console.log('Fetching document with URL:', url)
-    const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
+    const res = await fetch(url, { 
+      method: 'GET', 
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }, 
+      credentials: 'include',
+      cache: 'no-store' 
+    })
     
     console.log('Response status:', res.status)
     

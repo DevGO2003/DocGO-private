@@ -181,6 +181,14 @@ export default function DocumentsPage() {
     setHasMoreData(mapped.length < (queryData?.totalElements || 0))
   }, [queryLoading, queryData])
 
+  // Refetch data when activeTab changes
+  useEffect(() => {
+    setParams(prev => ({
+      ...prev,
+      documentType: activeTab === 'contract' ? 'CONTRACT' : undefined
+    }))
+  }, [activeTab, setParams])
+
   // Separate effect for search input to update debouncedSearch
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -350,7 +358,7 @@ export default function DocumentsPage() {
             </div>
           ) : viewMode === 'grid' ? (
             <DocumentsTable
-              items={activeTab === 'all' ? items : items.filter(c => c.contractNumber || c.contractType)}
+              items={items}
               selectedItems={selectedItems}
               onToggleSelect={toggleSelectItem}
               onSelectAll={selectAll}

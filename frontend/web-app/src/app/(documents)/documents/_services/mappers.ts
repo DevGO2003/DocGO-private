@@ -29,6 +29,10 @@ export function mapApiDocumentToUi(doc: any): Document {
     expiryDate: doc.endDate || '',
     riskLevel: doc.riskLevel,
     attachments: [],
+    documentType: doc.documentType || doc.document_type || 'CONTRACT',
+    fileType: doc.fileType || doc.file_type,
+    fileSize: doc.fileSize || doc.file_size,
+    category: doc.category,
   }
 }
 

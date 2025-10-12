@@ -120,6 +120,10 @@ public class DocumentController {
             Loại: string
             Mô tả: ID của người dùng để lọc documents
             
+            📄 documentType (tùy chọn, query)
+            Loại: string
+            Mô tả: Loại tài liệu (CONTRACT|GENERAL_FILE)
+            
             ## 🔹 Đầu ra
 
             📝 data
@@ -165,9 +169,10 @@ public class DocumentController {
             @Parameter(description = "Page number (default: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
             @Parameter(description = "Page size (default: 10)") @RequestParam(value = "size", defaultValue = "10") int size,
             @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
-            @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
+            @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view,
+            @Parameter(description = "Loại tài liệu (CONTRACT|GENERAL_FILE)") @RequestParam(value = "documentType", required = false) String documentType
     ) {
-        Page<DocumentEntity> documents = fileStorageService.getAllDocuments(page, size, userId);
+        Page<DocumentEntity> documents = fileStorageService.getDocumentsByType(page, size, userId, documentType);
         return ResponseEntity.ok(RestResponse.success(documents, "Documents retrieved successfully"));
     }
 }

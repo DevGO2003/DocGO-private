@@ -82,15 +82,25 @@ export function loggingMiddleware(request: NextRequest): void {
 // CORS middleware
 export function corsMiddleware(request: NextRequest): NextResponse | null {
   if (request.method === 'OPTIONS') {
-    const corsOrigin = process.env.CORS_ORIGIN || '*';
-    logger.info(`🌐 CORS Origin: ${corsOrigin}`);
+    // Get allowed origins from environment
+    const corsOrigins = process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:8000';
+    const allowedOrigins = corsOrigins.split(',').map(origin => origin.trim());
+    
+    // Get request origin
+    const requestOrigin = request.headers.get('origin');
+    
+    // Check if request origin is allowed
+    const allowedOrigin = allowedOrigins.includes(requestOrigin || '') ? requestOrigin : allowedOrigins[0];
+    
+    logger.info(`🌐 CORS Preflight: Origin=${requestOrigin}, Allowed=${allowedOrigin}`);
     
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': corsOrigin,
+        'Access-Control-Allow-Origin': allowedOrigin || '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Correlation-Id, X-Actor',
+        'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '86400'
       }
     });

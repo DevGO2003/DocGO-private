@@ -10,4 +10,5 @@ public interface FileStorageService {
     FileUploadResponse uploadFile(MultipartFile file, String userId, String folder);
     FileDownloadResponse downloadFile(String fileId, String userId);
     Page<DocumentEntity> getAllDocuments(int page, int size, String userId);
+    Page<DocumentEntity> getDocumentsByType(int page, int size, String userId, String documentType);
 }

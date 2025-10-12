@@ -101,4 +101,31 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new RuntimeException("Failed to get documents: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public Page<DocumentEntity> getDocumentsByType(int page, int size, String userId, String documentType) {
+        try {
+            System.out.println("🔍 FileStorageServiceImpl: Getting documents by type - page: " + page + ", size: " + size + ", userId: " + userId + ", documentType: " + documentType);
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            
+            Page<DocumentEntity> result;
+            if (documentType != null && !documentType.isEmpty()) {
+                if (userId != null && !userId.isEmpty()) {
+                    result = documentRepository.findByUserIdAndDocumentType(userId, documentType, pageable);
+                    System.out.println("🔍 FileStorageServiceImpl: Found " + result.getTotalElements() + " documents for user: " + userId + " and type: " + documentType);
+                } else {
+                    result = documentRepository.findByDocumentType(documentType, pageable);
+                    System.out.println("🔍 FileStorageServiceImpl: Found " + result.getTotalElements() + " documents for type: " + documentType);
+                }
+            } else {
+                return getAllDocuments(page, size, userId);
+            }
+            
+            return result;
+        } catch (Exception e) {
+            System.err.println("🔍 FileStorageServiceImpl: Error getting documents by type: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get documents by type: " + e.getMessage(), e);
+        }
+    }
 }

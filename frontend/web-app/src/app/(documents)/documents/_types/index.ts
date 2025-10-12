@@ -28,6 +28,10 @@ export type Document = {
   expiryDate: string
   riskLevel?: string
   attachments?: Attachment[]
+  documentType?: 'CONTRACT' | 'GENERAL_FILE'
+  fileType?: string
+  fileSize?: number
+  category?: string
 }
 
 export type Paginated<T> = {

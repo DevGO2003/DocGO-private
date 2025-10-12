@@ -54,6 +54,10 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     // Metadata
     private String category;
     
+    @Field("document_type")
+    @NotNull(message = "Loại tài liệu không được để trống")
+    private String documentType; // CONTRACT, GENERAL_FILE
+    
     @Override
     public String getId() { 
         return id; 
