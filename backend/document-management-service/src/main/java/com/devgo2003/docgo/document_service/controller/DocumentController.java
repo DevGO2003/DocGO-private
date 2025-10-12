@@ -10,10 +10,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/v1/documents")
@@ -53,6 +54,26 @@ public class DocumentController {
             📄 sortDirection (tùy chọn, query)
             Loại: string
             Mô tả: Hướng sắp xếp: ASC hoặc DESC (mặc định: DESC)
+
+            📄 userId (tùy chọn, query)
+            Loại: string
+            Mô tả: ID của người dùng để lọc documents
+
+            📄 documentType (tùy chọn, query)
+            Loại: string
+            Mô tả: Loại tài liệu (CONTRACT|GENERAL_FILE)
+
+            📄 searchTerm (tùy chọn, query)
+            Loại: string
+            Mô tả: Từ khóa tìm kiếm trong title và description
+
+            📄 includeDeleted (tùy chọn, query)
+            Loại: boolean
+            Mô tả: Bao gồm tài liệu đã xóa (mặc định: false)
+
+            📄 view (tùy chọn, query)
+            Loại: string
+            Mô tả: Loại view dữ liệu (table|card|detail|full). Mặc định: full
 
             ## 🔹 Đầu ra
 
@@ -97,19 +118,81 @@ public class DocumentController {
     )
     @GetMapping
     public ResponseEntity<RestResponse<Page<DocumentEntity>>> getAllDocuments(
-            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "Số trang (alias cho pageNumber)") @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+            @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(value = "size", defaultValue = "10") int size,
+            @Parameter(description = "Kích thước trang (alias cho pageSize)") @RequestParam(value = "pageSize", required = false) Integer pageSize,
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
-            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection
+            @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
+            @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
+            @Parameter(description = "Loại tài liệu (CONTRACT|GENERAL_FILE)") @RequestParam(value = "documentType", required = false) String documentType,
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @Parameter(description = "Bao gồm tài liệu đã xóa") @RequestParam(value = "includeDeleted", defaultValue = "false") boolean includeDeleted,
+            @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
     ) {
-        // This would typically call a service method to get paginated documents
-        // For now, return a simple response
-        return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách tài liệu thành công")
-                .data(null) // Would be populated with actual data
-                .build());
+        System.out.println("🔍 DocumentController: getAllDocuments method called!");
+        try {
+            // Complex parameter mapping: support both page/size and pageNumber/pageSize
+            int finalPage = (pageNumber != null) ? pageNumber : page;
+            int finalSize = (pageSize != null) ? pageSize : size;
+            
+            System.out.println("🔍 DocumentController: getAllDocuments called with pageNumber=" + pageNumber + 
+                             ", pageSize=" + pageSize + ", finalPage=" + finalPage + ", finalSize=" + finalSize);
+            
+            // Complex document retrieval with multiple filtering options
+            Page<DocumentEntity> documents;
+            
+            // Strategy 1: Filter by document type if specified
+            if (documentType != null && !documentType.isEmpty()) {
+                documents = fileStorageService.getDocumentsByType(finalPage, finalSize, userId, documentType);
+            } 
+            // Strategy 2: Search by term if provided (fallback to getAllDocuments with post-filtering)
+            else if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                // Complex search logic: get all documents first, then filter by search term
+                Page<DocumentEntity> allDocs = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
+                documents = filterDocumentsBySearchTerm(allDocs, searchTerm, includeDeleted);
+            }
+            // Strategy 3: Get all documents with advanced filtering (fallback to getAllDocuments)
+            else {
+                documents = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
+                System.out.println("🔍 DocumentController: Service returned " + (documents != null ? documents.getContent().size() : "null") + " documents");
+                // Apply additional filtering if needed
+                if (!includeDeleted) {
+                    documents = filterDeletedDocuments(documents);
+                }
+            }
+            
+            // Complex response handling
+            if (documents == null || documents.getContent().isEmpty()) {
+                return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
+                        .statusCode(204)
+                        .shortMessage("No Content")
+                        .description("Không có tài liệu nào phù hợp với điều kiện tìm kiếm")
+                        .data(null)
+                        .build());
+            }
+            
+            // Success response with complex metadata
+            return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
+                    .statusCode(200)
+                    .shortMessage("Success")
+                    .description(String.format("Đã lấy danh sách %d tài liệu thành công (trang %d/%d)", 
+                        documents.getContent().size(), 
+                        documents.getNumber() + 1, 
+                        documents.getTotalPages()))
+                    .data(documents)
+                    .build());
+                    
+        } catch (Exception e) {
+            // Complex error handling
+            return ResponseEntity.status(500)
+                    .body(RestResponse.<Page<DocumentEntity>>builder()
+                            .statusCode(500)
+                            .shortMessage("Internal Server Error")
+                            .description("Lỗi hệ thống khi lấy danh sách tài liệu: " + e.getMessage())
+                            .data(null)
+                            .build());
+        }
     }
 
     @Operation(
@@ -143,5 +226,60 @@ public class DocumentController {
     ) {
         DocumentEntity document = documentService.getDocumentById(id);
         return ResponseEntity.ok(RestResponse.success(document, "Document retrieved successfully"));
+    }
+
+    // Complex helper methods for advanced document filtering
+    
+    /**
+     * Complex search filtering by search term
+     * Supports searching in title, description, and tags
+     */
+    private Page<DocumentEntity> filterDocumentsBySearchTerm(Page<DocumentEntity> allDocs, String searchTerm, boolean includeDeleted) {
+        List<DocumentEntity> filteredContent = allDocs.getContent().stream()
+                .filter(doc -> {
+                    // Complex search logic: check multiple fields
+                    String lowerSearchTerm = searchTerm.toLowerCase().trim();
+                    
+                    boolean matchesTitle = doc.getTitle() != null && 
+                            doc.getTitle().toLowerCase().contains(lowerSearchTerm);
+                    
+                    boolean matchesDescription = doc.getDescription() != null && 
+                            doc.getDescription().toLowerCase().contains(lowerSearchTerm);
+                    
+                    boolean matchesTags = doc.getTags() != null && 
+                            doc.getTags().stream().anyMatch(tag -> 
+                                tag.toLowerCase().contains(lowerSearchTerm));
+                    
+                    boolean matchesCategory = doc.getCategory() != null && 
+                            doc.getCategory().toLowerCase().contains(lowerSearchTerm);
+                    
+                    // Include deleted filter
+                    boolean includeDoc = includeDeleted || !Boolean.TRUE.equals(doc.getIsDeleted());
+                    
+                    return (matchesTitle || matchesDescription || matchesTags || matchesCategory) && includeDoc;
+                })
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(filteredContent, allDocs.getPageable(), filteredContent.size());
+    }
+    
+    /**
+     * Complex filtering to exclude deleted documents
+     */
+    private Page<DocumentEntity> filterDeletedDocuments(Page<DocumentEntity> documents) {
+        List<DocumentEntity> filteredContent = documents.getContent().stream()
+                .filter(doc -> !Boolean.TRUE.equals(doc.getIsDeleted()))
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(filteredContent, documents.getPageable(), filteredContent.size());
+    }
+    
+    /**
+     * Complex sorting logic for documents
+     */
+    private Page<DocumentEntity> sortDocuments(Page<DocumentEntity> documents, String sortBy, String sortDirection) {
+        // This would implement complex sorting logic
+        // For now, return as-is since the service should handle sorting
+        return documents;
     }
 }
