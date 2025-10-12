@@ -15,3 +15,4 @@ public class KeyClause {
     private String importance;
     private String risk;
 }
+

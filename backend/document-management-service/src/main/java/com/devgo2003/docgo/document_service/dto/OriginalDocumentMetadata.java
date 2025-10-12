@@ -28,3 +28,4 @@ public class OriginalDocumentMetadata {
     private String xmpInstanceID;
     private List<String> pdfaExtensionSchemas;
 }
+

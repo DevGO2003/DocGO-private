@@ -22,3 +22,4 @@ public class ArchivedDocumentMetadata {
     private String archivedDcTitle;
     private String archivedDcCreator;
 }
+

@@ -24,25 +24,30 @@ public class SampleDataSeeder implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // Check if sample data already exists
-        if (documentRepository.findById("DOC-2024-004").isPresent()) {
-            System.out.println("Sample data already exists, skipping...");
-            return;
+        // Force recreate sample data with new ID
+        String documentId = "DOC-2024-004-NEW";
+        documentRepository.deleteById("DOC-2024-004");
+        documentRepository.deleteById(documentId);
+        commentRepository.deleteByDocumentId("DOC-2024-004");
+        commentRepository.deleteByDocumentId(documentId);
+        System.out.println("Cleared existing sample data, creating new with ID: " + documentId);
+        
+        // Always create sample data
+        if (true) {
+            // Create sample document
+            DocumentEntity document = createSampleDocument(documentId);
+            documentRepository.save(document);
+            
+            // Create sample comments
+            createSampleComments(documentId);
+            
+            System.out.println("Sample data created successfully with ID: " + documentId);
         }
-        
-        // Create sample document
-        DocumentEntity document = createSampleDocument();
-        documentRepository.save(document);
-        
-        // Create sample comments
-        createSampleComments();
-        
-        System.out.println("Sample data created successfully!");
     }
     
-    private DocumentEntity createSampleDocument() {
+    private DocumentEntity createSampleDocument(String documentId) {
         DocumentEntity document = new DocumentEntity();
-        document.setId("DOC-2024-004");
+        document.setId(documentId);
         document.setTitle("Hợp đồng phát triển phần mềm quản lý tài liệu");
         document.setDescription("Hợp đồng phát triển hệ thống quản lý tài liệu cho công ty ABC với các tính năng quản lý, phân tích và báo cáo.");
         document.setStatus("ACTIVE");
@@ -245,12 +250,12 @@ public class SampleDataSeeder implements CommandLineRunner {
         return document;
     }
     
-    private void createSampleComments() {
+    private void createSampleComments(String documentId) {
         List<CommentEntity> comments = Arrays.asList(
-            createComment("DOC-2024-004", "user-001", "Admin", "Vui lòng kiểm tra điều khoản thanh toán."),
-            createComment("DOC-2024-004", "user-002", "Legal", "Đã rà soát, đề xuất chỉnh sửa mục 7."),
-            createComment("DOC-2024-004", "user-003", "Finance", "Ngân sách đã được phê duyệt. Có thể tiến hành ký hợp đồng."),
-            createComment("DOC-2024-004", "user-004", "Manager", "Cần thêm điều khoản về bảo mật thông tin khách hàng.")
+            createComment(documentId, "user-001", "Admin", "Vui lòng kiểm tra điều khoản thanh toán."),
+            createComment(documentId, "user-002", "Legal", "Đã rà soát, đề xuất chỉnh sửa mục 7."),
+            createComment(documentId, "user-003", "Finance", "Ngân sách đã được phê duyệt. Có thể tiến hành ký hợp đồng."),
+            createComment(documentId, "user-004", "Manager", "Cần thêm điều khoản về bảo mật thông tin khách hàng.")
         );
         
         commentRepository.saveAll(comments);

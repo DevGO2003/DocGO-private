@@ -16,3 +16,4 @@ if (Test-Path "pom.xml") {
     Write-Host "Danh sách file:"
     Get-ChildItem
 }
+

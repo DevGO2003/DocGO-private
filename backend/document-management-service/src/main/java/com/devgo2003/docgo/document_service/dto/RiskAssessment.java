@@ -16,3 +16,4 @@ public class RiskAssessment {
     private List<String> riskFactors;
     private List<String> mitigationMeasures;
 }
+

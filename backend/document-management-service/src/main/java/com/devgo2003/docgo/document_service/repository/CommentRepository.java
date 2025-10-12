@@ -23,4 +23,6 @@ public interface CommentRepository extends MongoRepository<CommentEntity, String
     long countByDocumentId(String documentId);
     
     long countByParentCommentId(String parentCommentId);
+    
+    void deleteByDocumentId(String documentId);
 }

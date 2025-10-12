@@ -60,3 +60,4 @@ public class CommentEntity extends BaseEntity implements Persistable<String> {
         return id == null; 
     }
 }
+

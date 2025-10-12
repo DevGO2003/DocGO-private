@@ -17,3 +17,4 @@ public class Party {
     private String contact;
     private String address;
 }
+

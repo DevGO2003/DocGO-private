@@ -22,3 +22,4 @@ public class FileSystemMetadata {
     private String archiveMD5;
     private Long archiveFileSize;
 }
+

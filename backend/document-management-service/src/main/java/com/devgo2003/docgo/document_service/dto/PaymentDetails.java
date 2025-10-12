@@ -15,3 +15,4 @@ public class PaymentDetails {
     private String schedule;
     private String paymentMethod;
 }
+

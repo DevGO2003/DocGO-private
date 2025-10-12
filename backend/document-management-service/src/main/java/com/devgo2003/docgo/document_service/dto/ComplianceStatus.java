@@ -16,3 +16,4 @@ public class ComplianceStatus {
     private List<String> issues;
     private List<String> recommendations;
 }
+
