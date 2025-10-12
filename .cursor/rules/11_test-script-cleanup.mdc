@@ -1,0 +1,78 @@
+---
+id: "rule-test-script-cleanup"
+name: "Quy tắc tự động dọn dẹp file test và README"
+description: "Tự động xóa file test scripts và README không cần thiết sau khi hoàn thành task"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 90
+tags: ["cleanup", "test", "readme", "automation"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["chat", "code"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-10-12T00:00:00Z"
+updatedAt: "2025-10-12T00:00:00Z"
+notes: "Áp dụng tự động để giữ workspace sạch sẽ"
+language: vi
+---
+
+# Quy tắc tự động dọn dẹp file test và README
+
+## Mục tiêu
+- Tự động xóa file test scripts không được sử dụng sau khi hoàn thành task
+- Giới hạn README files chỉ ở các vị trí quan trọng
+- Giữ workspace sạch sẽ và dễ quản lý
+
+## Quy tắc Test Scripts
+
+### Khi nào xóa test scripts
+- Sau khi thực hiện xong yêu cầu của user
+- File test script không được sử dụng trong 1 session
+- File test script được tạo tạm để thử nghiệm
+
+### Các loại test scripts cần xóa
+- `test*.sh`, `test*.bat`, `test*.ps1`
+- Scripts tạm trong thư mục root
+- Scripts không có documentation
+
+## Quy tắc README Files
+
+### README files được phép tồn tại (5 files)
+1. `README.md` (root project)
+2. `backend/user-management-service/README.md`
+3. `backend/document-management-service/README.md`
+4. `backend/automation-service/README.md`
+5. `backend/api-gateway/README.md`
+
+### Vị trí không được phép có README
+- Frontend folders (trừ root frontend nếu cần)
+- Component folders
+- Documents folders
+- Test data folders
+- Architecture folders (nên dùng .mdc trong .cursor/rules)
+
+### Ngoại lệ
+- README trong `.cursor/**` được phép
+- README có nội dung quan trọng cần được review trước khi xóa
+
+## Workflow
+
+1. Sau khi hoàn thành task
+2. Kiểm tra các file test scripts được tạo ra
+3. Kiểm tra các README files không nằm trong danh sách cho phép
+4. Thông báo user về các files sẽ bị xóa
+5. Thực hiện xóa sau khi user confirm (hoặc tự động nếu alwaysApply=true)
+
+## Lưu ý
+- Không xóa test scripts có documentation rõ ràng
+- Không xóa README nếu có nội dung quan trọng chưa được chuyển đi đâu
+- Luôn log actions để có thể rollback nếu cần

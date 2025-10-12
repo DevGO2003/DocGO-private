@@ -14,7 +14,8 @@ async function unwrap<T>(res: Response): Promise<T> {
 }
 
 export async function fetchDocuments(params: Record<string, any>): Promise<Paginated<Document>> {
-  const url = new URL(API_ENDPOINTS.list, typeof window === 'undefined' ? 'http://localhost' : window.location.origin)
+  const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000'
+  const url = new URL(API_ENDPOINTS.list, baseUrl)
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v))
   })
@@ -25,7 +26,7 @@ export async function fetchDocuments(params: Record<string, any>): Promise<Pagin
 
 export async function fetchDocument(id: string): Promise<Document | null> {
   try {
-    const url = `http://localhost:8002${API_ENDPOINTS.detail(id)}`
+    const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000'}${API_ENDPOINTS.detail(id)}`
     console.log('Fetching document with URL:', url)
     const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, cache: 'no-store' })
     

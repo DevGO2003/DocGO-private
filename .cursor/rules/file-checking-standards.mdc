@@ -1,3 +1,30 @@
+---
+id: "rule-file-checking"
+name: "Quy tắc kiểm tra file tồn tại"
+description: "Quy tắc kiểm tra file tồn tại trước khi thao tác, tránh ghi đè file quan trọng"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 95
+tags: ["file", "safety", "checking"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-10-12T00:00:00Z"
+updatedAt: "2025-10-12T00:00:00Z"
+notes: "Quy tắc an toàn quan trọng - luôn kiểm tra file trước khi thao tác"
+language: vi
+---
+
 # Quy tắc kiểm tra file tồn tại
 
 ## Mục tiêu

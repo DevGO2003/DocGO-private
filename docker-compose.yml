@@ -115,7 +115,6 @@ services:
       - .env
       - ./backend/document-management-service/.env
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
       - ENVIRONMENT=docker
     depends_on:
       - kafka
