@@ -8,6 +8,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import routers
 from contract_router import router as contract_router
 from file_router import router as file_router
+import time
+
+# Hot reload test
+print(f"🔥 HOT RELOAD TEST: {time.time()}")
 from s3_router import router as s3_router
 import os
 import asyncio

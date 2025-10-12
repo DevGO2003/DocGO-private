@@ -107,7 +107,7 @@ services:
     container_name: document-management-service
     build:
       context: ./backend/document-management-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     
     ports:
       - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8002"
@@ -122,6 +122,8 @@ services:
     networks:
       - docgo-network
     volumes:
+      - ./backend/document-management-service:/app
+      - maven-repo:/root/.m2
       - ./backend/document-management-service/uploads:/app/uploads
       - ./logs/document-management:/app/logs
     restart: unless-stopped
@@ -131,7 +133,7 @@ services:
     container_name: automation-service
     build:
       context: ./backend/automation-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     
     ports:
       - "${AUTOMATION_PORT:-8003}:8003"
@@ -220,6 +222,8 @@ volumes:
   zookeeper-logs:
     driver: local
   redis-data:
+    driver: local
+  maven-repo:
     driver: local
 
 # ==========================================

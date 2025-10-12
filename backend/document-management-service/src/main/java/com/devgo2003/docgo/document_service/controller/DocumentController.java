@@ -13,6 +13,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,6 +135,7 @@ public class DocumentController {
             @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
     ) {
         System.out.println("🔍 DocumentController: getAllDocuments method called!");
+        System.out.println("🔥 HOT RELOAD TEST: " + System.currentTimeMillis());
         try {
             // Complex parameter mapping: support both page/size and pageNumber/pageSize
             int finalPage = (pageNumber != null) ? pageNumber : page;

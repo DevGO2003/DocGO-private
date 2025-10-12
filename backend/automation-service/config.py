@@ -60,10 +60,10 @@ class Config:
     @classmethod
     def get_gemini_api_key(cls) -> str:
         """Lấy Gemini API Key - BẮT BUỘC"""
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
-    return api_key
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
+        return api_key
 
     # ==========================================
     # S3 CONFIGURATION (Required - No fallback)
@@ -204,18 +204,18 @@ class Config:
     @classmethod
     def get_smtp_config(cls) -> dict:
         """Get SMTP configuration for email notifications"""
-    return {
-        "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
-        "port": int(os.getenv("SMTP_PORT", "587")),
+        return {
+            "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
+            "port": int(os.getenv("SMTP_PORT", "587")),
             "username": os.getenv("SMTP_USERNAME", ""),
             "password": os.getenv("SMTP_PASSWORD", ""),
-        "use_tls": os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-    }
+            "use_tls": os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+        }
 
     @classmethod
     def get_twilio_config(cls) -> dict:
         """Get Twilio configuration for SMS notifications"""
-    return {
+        return {
             "account_sid": os.getenv("TWILIO_ACCOUNT_SID", ""),
             "auth_token": os.getenv("TWILIO_AUTH_TOKEN", ""),
             "phone_number": os.getenv("TWILIO_PHONE_NUMBER", "")
@@ -224,7 +224,7 @@ class Config:
     @classmethod
     def get_websocket_config(cls) -> dict:
         """Get WebSocket configuration for real-time notifications"""
-    return {
+        return {
             "enabled": os.getenv("WEBSOCKET_ENABLED", "false").lower() == "true",
             "host": os.getenv("WEBSOCKET_HOST", "localhost"),
             "port": int(os.getenv("WEBSOCKET_PORT", "8080")),
@@ -234,7 +234,7 @@ class Config:
     @classmethod
     def get_event_config(cls) -> dict:
         """Get event processing configuration"""
-    return {
+        return {
             "enabled": os.getenv("EVENT_PROCESSING_ENABLED", "true").lower() == "true",
             "max_retries": int(os.getenv("EVENT_MAX_RETRIES", "3")),
             "retry_delay": int(os.getenv("EVENT_RETRY_DELAY", "5")),  # seconds
