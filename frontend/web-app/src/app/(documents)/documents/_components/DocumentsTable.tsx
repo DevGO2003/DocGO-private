@@ -38,7 +38,7 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
           </div>
         </div>
 
-        <div className="grid gap-4" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'}}>
+        <div className="grid gap-4" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 280px))'}}>
           {items.map(doc => {
             const isSelected = selectedItems.includes(doc.id)
             
