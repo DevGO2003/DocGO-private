@@ -6,11 +6,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import java.util.List;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
+import com.devgo2003.docgo.document_service.dto.*;
 
 @Document(collection = "documents")
 @Getter
@@ -57,6 +59,60 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     @Field("document_type")
     @NotNull(message = "Loại tài liệu không được để trống")
     private String documentType; // CONTRACT, GENERAL_FILE
+    
+    // Contract info
+    @Field("contract_type")
+    private String contractType;
+    
+    @Field("effective_date")
+    private LocalDateTime effectiveDate;
+    
+    @Field("expiry_date")
+    private LocalDateTime expiryDate;
+    
+    @Field("total_value")
+    private Double totalValue;
+    
+    private String currency;
+    
+    @Field("risk_level")
+    private String riskLevel;
+    
+    // Nested objects
+    private List<Party> parties;
+    
+    @Field("payment_details")
+    private PaymentDetails paymentDetails;
+    
+    @Field("key_clauses")
+    private List<KeyClause> keyClauses;
+    
+    @Field("unfavorable_clauses")
+    private List<String> unfavorableClauses;
+    
+    private List<Reminder> reminders;
+    
+    @Field("risk_assessment")
+    private RiskAssessment riskAssessment;
+    
+    @Field("compliance_status")
+    private ComplianceStatus complianceStatus;
+    
+    @Field("author_notes")
+    private List<AuthorNote> authorNotes;
+    
+    // Content
+    private String content;
+    
+    // Metadata
+    @Field("file_system_metadata")
+    private FileSystemMetadata fileSystemMetadata;
+    
+    @Field("original_document_metadata")
+    private OriginalDocumentMetadata originalDocumentMetadata;
+    
+    @Field("archived_document_metadata")
+    private ArchivedDocumentMetadata archivedDocumentMetadata;
     
     @Override
     public String getId() { 

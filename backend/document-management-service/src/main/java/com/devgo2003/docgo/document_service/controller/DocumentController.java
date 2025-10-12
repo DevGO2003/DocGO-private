@@ -3,7 +3,10 @@ package com.devgo2003.docgo.document_service.controller;
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
 import com.devgo2003.docgo.document_service.entity.DocumentEntity;
+import com.devgo2003.docgo.document_service.entity.CommentEntity;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
+import com.devgo2003.docgo.document_service.service.DocumentService;
+import com.devgo2003.docgo.document_service.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,10 +28,14 @@ import org.springframework.web.bind.annotation.*;
 public class DocumentController {
 
     private final FileStorageService fileStorageService;
+    private final DocumentService documentService;
+    private final CommentService commentService;
 
     @Autowired
-    public DocumentController(FileStorageService fileStorageService) {
+    public DocumentController(FileStorageService fileStorageService, DocumentService documentService, CommentService commentService) {
         this.fileStorageService = fileStorageService;
+        this.documentService = documentService;
+        this.commentService = commentService;
     }
 
     @Operation(
@@ -174,5 +181,232 @@ public class DocumentController {
     ) {
         Page<DocumentEntity> documents = fileStorageService.getDocumentsByType(page, size, userId, documentType);
         return ResponseEntity.ok(RestResponse.success(documents, "Documents retrieved successfully"));
+    }
+
+    @Operation(
+            summary = "Lấy chi tiết tài liệu",
+            description = """
+            ## 📖 Mô tả
+            Lấy thông tin chi tiết của một tài liệu theo ID.
+
+            ## 🔹 Đầu vào
+
+            📄 id (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của tài liệu cần lấy thông tin
+            
+            ## 🔹 Đầu ra
+
+            📝 data
+            Loại: DocumentEntity
+            Mô tả: Thông tin chi tiết tài liệu bao gồm tất cả metadata và nested objects
+            
+            📊 apiVersion
+            Loại: string
+            Mô tả: Phiên bản API (v1)
+            
+            🔢 statusCode
+            Loại: integer
+            Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+            
+            📋 shortMessage
+            Loại: string
+            Mô tả: Thông báo ngắn gọn về kết quả
+            
+            📖 description
+            Loại: string
+            Mô tả: Mô tả chi tiết về kết quả xử lý
+            
+            🕒 timestamp
+            Loại: string (ISO-8601)
+            Mô tả: Thời gian xử lý yêu cầu
+            
+            🆔 requestId
+            Loại: string (UUID)
+            Mô tả: Định danh duy nhất của yêu cầu
+            
+            🛣️ path
+            Loại: string
+            Mô tả: Đường dẫn API được gọi
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Document retrieved successfully",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DocumentEntity.class))),
+                    @ApiResponse(responseCode = "404", description = "Document not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<RestResponse<DocumentEntity>> getDocumentById(
+            @Parameter(description = "ID của tài liệu", required = true) @PathVariable String id
+    ) {
+        DocumentEntity document = documentService.getDocumentById(id);
+        return ResponseEntity.ok(RestResponse.success(document, "Document retrieved successfully"));
+    }
+
+    @Operation(
+            summary = "Lấy danh sách bình luận của tài liệu",
+            description = """
+            ## 📖 Mô tả
+            Lấy danh sách bình luận của một tài liệu với phân trang.
+
+            ## 🔹 Đầu vào
+
+            📄 documentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của tài liệu
+            
+            📄 page (tùy chọn, query)
+            Loại: integer
+            Mô tả: Số trang (mặc định: 0)
+            
+            📄 size (tùy chọn, query)  
+            Loại: integer
+            Mô tả: Kích thước trang (mặc định: 10)
+            
+            ## 🔹 Đầu ra
+
+            📝 data
+            Loại: Page<CommentEntity>
+            Mô tả: Danh sách bình luận với phân trang
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Comments retrieved successfully"),
+                    @ApiResponse(responseCode = "404", description = "Document not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @GetMapping("/{documentId}/comments")
+    public ResponseEntity<RestResponse<Page<CommentEntity>>> getComments(
+            @Parameter(description = "ID của tài liệu", required = true) @PathVariable String documentId,
+            @Parameter(description = "Page number (default: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "Page size (default: 10)") @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        // Verify document exists
+        documentService.getDocumentById(documentId);
+        
+        Page<CommentEntity> comments = commentService.getCommentsByDocumentId(documentId, 
+            org.springframework.data.domain.PageRequest.of(page, size));
+        return ResponseEntity.ok(RestResponse.success(comments, "Comments retrieved successfully"));
+    }
+
+    @Operation(
+            summary = "Thêm bình luận mới",
+            description = """
+            ## 📖 Mô tả
+            Thêm bình luận mới cho một tài liệu.
+
+            ## 🔹 Đầu vào
+
+            📄 documentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của tài liệu
+            
+            📄 comment (bắt buộc, body)
+            Loại: CommentEntity
+            Mô tả: Thông tin bình luận
+            
+            ## 🔹 Đầu ra
+
+            📝 data
+            Loại: CommentEntity
+            Mô tả: Bình luận đã được tạo
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Comment created successfully"),
+                    @ApiResponse(responseCode = "404", description = "Document not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PostMapping("/{documentId}/comments")
+    public ResponseEntity<RestResponse<CommentEntity>> addComment(
+            @Parameter(description = "ID của tài liệu", required = true) @PathVariable String documentId,
+            @RequestBody CommentEntity comment
+    ) {
+        // Verify document exists
+        documentService.getDocumentById(documentId);
+        
+        CommentEntity savedComment = commentService.addComment(documentId, comment);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(RestResponse.success(savedComment, "Comment created successfully"));
+    }
+
+    @Operation(
+            summary = "Cập nhật bình luận",
+            description = """
+            ## 📖 Mô tả
+            Cập nhật nội dung của một bình luận.
+
+            ## 🔹 Đầu vào
+
+            📄 documentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của tài liệu
+            
+            📄 commentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của bình luận
+            
+            📄 comment (bắt buộc, body)
+            Loại: CommentEntity
+            Mô tả: Thông tin bình luận cập nhật
+            
+            ## 🔹 Đầu ra
+
+            📝 data
+            Loại: CommentEntity
+            Mô tả: Bình luận đã được cập nhật
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Comment updated successfully"),
+                    @ApiResponse(responseCode = "404", description = "Comment or document not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PutMapping("/{documentId}/comments/{commentId}")
+    public ResponseEntity<RestResponse<CommentEntity>> updateComment(
+            @Parameter(description = "ID của tài liệu", required = true) @PathVariable String documentId,
+            @Parameter(description = "ID của bình luận", required = true) @PathVariable String commentId,
+            @RequestBody CommentEntity comment
+    ) {
+        CommentEntity updatedComment = commentService.updateComment(documentId, commentId, comment);
+        return ResponseEntity.ok(RestResponse.success(updatedComment, "Comment updated successfully"));
+    }
+
+    @Operation(
+            summary = "Xóa bình luận",
+            description = """
+            ## 📖 Mô tả
+            Xóa một bình luận khỏi tài liệu.
+
+            ## 🔹 Đầu vào
+
+            📄 documentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của tài liệu
+            
+            📄 commentId (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của bình luận
+            
+            ## 🔹 Đầu ra
+
+            📝 data
+            Loại: null
+            Mô tả: Bình luận đã được xóa
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Comment deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Comment or document not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @DeleteMapping("/{documentId}/comments/{commentId}")
+    public ResponseEntity<RestResponse<Void>> deleteComment(
+            @Parameter(description = "ID của tài liệu", required = true) @PathVariable String documentId,
+            @Parameter(description = "ID của bình luận", required = true) @PathVariable String commentId
+    ) {
+        commentService.deleteComment(documentId, commentId);
+        return ResponseEntity.ok(RestResponse.success(null, "Comment deleted successfully"));
     }
 }
