@@ -1,12 +1,18 @@
 package com.devgo2003.docgo.document_service.service.impl;
 
 import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
-import com.devgo2003.docgo.document_service.dto.FileListResponse;
 import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
+import com.devgo2003.docgo.document_service.entity.DocumentEntity;
+import com.devgo2003.docgo.document_service.repository.DocumentRepository;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +24,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Value("${app.s3.bucket:docgo-files}")
     private String s3Bucket;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     @Override
     public FileUploadResponse uploadFile(MultipartFile file, String userId, String folder) {
@@ -68,23 +77,28 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public FileListResponse getAllFiles(int page, int size, String userId) {
+    public Page<DocumentEntity> getAllDocuments(int page, int size, String userId) {
         try {
-            // For now, we'll return empty list
-            // In real implementation, you would query from database here
+            System.out.println("🔍 FileStorageServiceImpl: Getting documents - page: " + page + ", size: " + size + ", userId: " + userId);
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
             
-            List<FileListResponse.FileMetadata> files = new ArrayList<>();
+            long totalCount = documentRepository.count();
+            System.out.println("🔍 FileStorageServiceImpl: Total documents in repository: " + totalCount);
             
-            return FileListResponse.builder()
-                .files(files)
-                .currentPage(page)
-                .pageSize(size)
-                .totalElements(0)
-                .totalPages(0)
-                .build();
-                
+            Page<DocumentEntity> result;
+            if (userId != null && !userId.isEmpty()) {
+                result = documentRepository.findByUserId(userId, pageable);
+                System.out.println("🔍 FileStorageServiceImpl: Found " + result.getTotalElements() + " documents for user: " + userId);
+            } else {
+                result = documentRepository.findAll(pageable);
+                System.out.println("🔍 FileStorageServiceImpl: Found " + result.getTotalElements() + " documents total");
+            }
+            
+            return result;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get files: " + e.getMessage(), e);
+            System.err.println("🔍 FileStorageServiceImpl: Error getting documents: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get documents: " + e.getMessage(), e);
         }
     }
 }

@@ -2,8 +2,7 @@ package com.devgo2003.docgo.document_service.controller;
 
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
 import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
-import com.devgo2003.docgo.document_service.dto.FileListResponse;
-// removed: import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
+import com.devgo2003.docgo.document_service.entity.DocumentEntity;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,14 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-// removed: import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/v1/documents")
@@ -33,7 +30,6 @@ public class DocumentController {
     public DocumentController(FileStorageService fileStorageService) {
         this.fileStorageService = fileStorageService;
     }
-
 
     @Operation(
             summary = "Tải xuống tài liệu",
@@ -52,7 +48,7 @@ public class DocumentController {
             Mô tả: ID của người dùng yêu cầu download
             
             ## 🔹 Đầu ra
-            
+
             📝 data
             Loại: FileDownloadResponse
             Mô tả: File content và metadata
@@ -125,9 +121,9 @@ public class DocumentController {
             Mô tả: ID của người dùng để lọc documents
             
             ## 🔹 Đầu ra
-            
+
             📝 data
-            Loại: FileListResponse
+            Loại: Page<DocumentEntity>
             Mô tả: Danh sách documents với phân trang
             
             📊 apiVersion
@@ -160,18 +156,18 @@ public class DocumentController {
             """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Documents retrieved successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = FileListResponse.class))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
     @GetMapping
-    public ResponseEntity<RestResponse<FileListResponse>> getAllDocuments(
+    public ResponseEntity<RestResponse<Page<DocumentEntity>>> getAllDocuments(
             @Parameter(description = "Page number (default: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
             @Parameter(description = "Page size (default: 10)") @RequestParam(value = "size", defaultValue = "10") int size,
             @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
             @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
     ) {
-        FileListResponse documents = fileStorageService.getAllFiles(page, size, userId);
+        Page<DocumentEntity> documents = fileStorageService.getAllDocuments(page, size, userId);
         return ResponseEntity.ok(RestResponse.success(documents, "Documents retrieved successfully"));
     }
 }

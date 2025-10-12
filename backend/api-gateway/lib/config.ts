@@ -44,10 +44,10 @@ export class Config {
   // ==========================================
   static isDocker(): boolean {
     return process.env.ENVIRONMENT === 'docker' || 
-           process.env.NODE_ENV === 'production' ||
+                   process.env.NODE_ENV === 'production' ||
            process.env.DOCKERIZED === '1' ||
-           process.env.DOCKER_CONTAINER === '1' ||
-           (process.env.HOSTNAME && process.env.HOSTNAME.length === 12);
+                   process.env.DOCKER_CONTAINER === '1' ||
+                   (process.env.HOSTNAME && process.env.HOSTNAME.length === 12);
   }
 
   // ==========================================
@@ -120,37 +120,37 @@ export class Config {
   // ==========================================
   static getServices(): Record<string, ServiceConfig> {
     return {
-      'api-gateway': {
-        name: 'api-gateway',
+    'api-gateway': {
+      name: 'api-gateway',
         url: this.getApiGatewayUrl(),
-        port: 8000,
-        healthCheck: '/health',
-        timeout: 10000
-      },
-      
-      'user-management': {
-        name: 'user-management-service',
+      port: 8000,
+      healthCheck: '/health',
+      timeout: 10000
+    },
+    
+    'user-management': {
+      name: 'user-management-service',
         url: this.getUserManagementServiceUrl(),
-        port: 8001,
-        healthCheck: '/api/v1/user-management-service/v1/health',
-        timeout: 15000
-      },
-      
-      'document-management': {
-        name: 'document-management-service',
+      port: 8001,
+      healthCheck: '/api/v1/user-management-service/v1/health',
+      timeout: 15000
+    },
+    
+    'document-management': {
+      name: 'document-management-service',
         url: this.getDocumentManagementServiceUrl(),
-        port: 8002,
-        healthCheck: '/api/v1/document-management-service/v1/health',
-        timeout: 10000
-      },
-      
-      'automation': {
-        name: 'automation-service',
+      port: 8002,
+      healthCheck: '/api/v1/document-management-service/v1/health',
+      timeout: 10000
+    },
+    
+    'automation': {
+      name: 'automation-service',
         url: this.getAutomationServiceUrl(),
-        port: 8003,
-        healthCheck: '/api/v1/automation-service/v1/health',
-        timeout: 15000
-      }
+      port: 8003,
+      healthCheck: '/api/v1/automation-service/v1/health',
+      timeout: 15000
+    }
     };
   }
 
@@ -160,16 +160,16 @@ export class Config {
   static getConfig(): GatewayConfig {
     return {
       services: this.getServices(),
-      redis: {
+  redis: {
         url: this.REDIS_URL,
         host: this.REDIS_HOST,
         port: this.REDIS_PORT,
         password: this.REDIS_PASSWORD
       },
-      kafka: {
+  kafka: {
         brokers: this.KAFKA_BROKERS
-      },
-      logging: {
+  },
+  logging: {
         level: this.LOG_LEVEL,
         environment: this.NODE_ENV
       },
