@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent } from '@/components/ui'
-import { DocumentTextIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -12,8 +11,7 @@ import {
   VersioningPanel,
   UploadPanel,
   FilePreview,
-  SystemInfoPanel,
-  GlobalDragOverlay
+  SystemInfoPanel
 } from './_components'
 
 export default function UploadDocumentPage() {
@@ -22,24 +20,49 @@ export default function UploadDocumentPage() {
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
   const [baseContractId, setBaseContractId] = useState('')
   const [newVersionName, setNewVersionName] = useState('')
-  const [globalDragActive, setGlobalDragActive] = useState(false)
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Check for dropped file from sessionStorage
+  useEffect(() => {
+    const droppedFileData = sessionStorage.getItem('droppedFile')
+    if (droppedFileData) {
+      try {
+        const fileData = JSON.parse(droppedFileData)
+        
+        // Convert data URL back to file
+        const byteCharacters = atob(fileData.content.split(',')[1])
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        
+        const file = new File([byteArray], fileData.name, {
+          type: fileData.type,
+          lastModified: fileData.lastModified
+        })
+        
+        setSelectedFile(file)
+        sessionStorage.removeItem('droppedFile') // Clean up
+        toast.success(`Đã chọn file: ${fileData.name}`)
+      } catch (error) {
+        console.error('Error parsing dropped file data:', error)
+        sessionStorage.removeItem('droppedFile')
+      }
+    }
+  }, [])
 
   // Global drag and drop handlers
   useEffect(() => {
     const handleDragEnter = (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      setGlobalDragActive(true)
     }
 
     const handleDragLeave = (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (e.target === document) {
-        setGlobalDragActive(false)
-      }
     }
 
     const handleDragOver = (e: DragEvent) => {
@@ -50,20 +73,13 @@ export default function UploadDocumentPage() {
     const handleDrop = (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      setGlobalDragActive(false)
 
       const files = e.dataTransfer?.files
       if (files && files.length > 0) {
+        // Hỗ trợ mọi loại file
         const file = files[0]
-        if (file.type === 'application/pdf' || 
-            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-            file.type === 'text/plain' ||
-            file.type.startsWith('image/')) {
-          setSelectedFile(file)
-          toast.success(`Đã chọn file: ${file.name}`)
-        } else {
-          toast.error('Chỉ hỗ trợ file PDF, DOCX, TXT, Images')
-        }
+        setSelectedFile(file)
+        toast.success(`Đã chọn file: ${file.name}`)
       }
     }
 
@@ -178,8 +194,6 @@ export default function UploadDocumentPage() {
           </PrimaryContent>
         </div>
 
-        {/* Global Drag Overlay */}
-        <GlobalDragOverlay globalDragActive={globalDragActive} />
       </div>
     </DashboardLayout>
   )

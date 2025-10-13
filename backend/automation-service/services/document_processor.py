@@ -71,21 +71,30 @@ class DocumentProcessor:
             # Bước 2: OCR Processing
             ocr_text = await self._process_ocr(file_bytes, file_type)
             result["ocr_text"] = ocr_text
-            result["ocr_status"] = "COMPLETED"
             
-            logger.info(f"OCR completed: {len(ocr_text)} characters extracted")
+            # Đánh giá kết quả OCR
+            if ocr_text and len(ocr_text.strip()) >= 10:
+                result["ocr_status"] = "COMPLETED"
+                logger.info(f"OCR completed: {len(ocr_text)} characters extracted")
+            else:
+                result["ocr_status"] = "FAILED"
+                logger.warning(f"OCR failed or insufficient text: {len(ocr_text) if ocr_text else 0} characters")
             
-            # Bước 3: Document Classification
+            # Bước 3: Document Classification - dựa vào cả OCR text và file type
             classification_result = await self._classify_document(ocr_text, file_type)
             result["classification_result"] = classification_result
             
             logger.info(f"Classification completed: {classification_result.get('document_type', 'UNKNOWN')}")
             
-            # Bước 4: Contract Summary (nếu là hợp đồng)
-            if classification_result.get('document_type') == 'CONTRACT':
+            # Bước 4: Contract Summary (nếu là hợp đồng và có đủ text)
+            if (classification_result.get('document_type') == 'CONTRACT' and 
+                ocr_text and len(ocr_text.strip()) >= 50):
                 summary = await self._summarize_contract(ocr_text)
                 classification_result['summary'] = summary
                 logger.info("Contract summary completed")
+            elif classification_result.get('document_type') == 'CONTRACT':
+                logger.warning("Contract detected but insufficient text for summary")
+                classification_result['summary'] = "Không đủ nội dung để tóm tắt hợp đồng"
             
             # Bước 5: Update Document Entity
             await self._update_document_entity(document_id, result)
@@ -119,58 +128,105 @@ class DocumentProcessor:
             return None
     
     async def _process_ocr(self, file_bytes: bytes, file_type: str) -> str:
-        """Xử lý OCR"""
+        """Xử lý OCR - hỗ trợ nhiều loại file"""
         try:
             if not self.ocr_service.is_tesseract_available():
-                raise Exception("Tesseract OCR is not available")
+                logger.warning("Tesseract OCR is not available, returning empty text")
+                return ""
             
             ocr_text = self.ocr_service.extract_text_from_file(file_bytes, file_type)
             
-            if not ocr_text or len(ocr_text.strip()) < 10:
-                raise Exception("OCR extraction resulted in insufficient text")
-            
-            return ocr_text
+            # Trả về text ngay cả khi ngắn, để classification có thể dựa vào file_type
+            return ocr_text or ""
             
         except Exception as e:
-            logger.error(f"OCR processing failed: {str(e)}")
-            raise Exception(f"OCR processing failed: {str(e)}")
+            logger.warning(f"OCR processing failed for {file_type}: {str(e)}")
+            return ""
+    
+    def _classify_by_file_type(self, file_type: str) -> Dict[str, Any]:
+        """Phân loại dựa vào loại file"""
+        if file_type == 'application/pdf':
+            return {
+                "document_type": "GENERAL_FILE",
+                "confidence": 0.6,
+                "reasoning": "PDF file - cần OCR để phân loại chi tiết",
+                "key_terms": ["pdf"]
+            }
+        elif file_type.startswith('image/'):
+            return {
+                "document_type": "GENERAL_FILE", 
+                "confidence": 0.5,
+                "reasoning": "Image file - cần OCR để phân loại",
+                "key_terms": ["image"]
+            }
+        elif file_type == 'text/plain':
+            return {
+                "document_type": "GENERAL_FILE",
+                "confidence": 0.7,
+                "reasoning": "Text file - cần đọc nội dung để phân loại",
+                "key_terms": ["text"]
+            }
+        elif file_type in [
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword'
+        ]:
+            return {
+                "document_type": "GENERAL_FILE",
+                "confidence": 0.6,
+                "reasoning": "Word document - cần OCR để phân loại",
+                "key_terms": ["word", "document"]
+            }
+        else:
+            return {
+                "document_type": "GENERAL_FILE",
+                "confidence": 0.4,
+                "reasoning": f"Unknown file type: {file_type}",
+                "key_terms": [file_type.split('/')[0]]
+            }
     
     async def _classify_document(self, text: str, file_type: str) -> Dict[str, Any]:
-        """Phân loại tài liệu"""
+        """Phân loại tài liệu - dựa vào cả nội dung và loại file"""
         try:
-            # Tạo prompt cho classification
-            classification_prompt = f"""
-            Phân tích tài liệu sau và xác định loại tài liệu:
+            # Phân loại dựa vào file type trước
+            file_type_classification = self._classify_by_file_type(file_type)
             
-            Loại file: {file_type}
-            Nội dung: {text[:2000]}...
+            # Nếu có text từ OCR, sử dụng AI để phân loại chi tiết
+            if text and len(text.strip()) >= 10:
+                classification_prompt = f"""
+                Phân tích tài liệu sau và xác định loại tài liệu:
+                
+                Loại file: {file_type}
+                Nội dung: {text[:2000]}...
+                
+                Hãy phân loại tài liệu này thành một trong các loại sau:
+                1. CONTRACT - Hợp đồng, thỏa thuận, giao kết
+                2. INVOICE - Hóa đơn, bill
+                3. RECEIPT - Biên lai, phiếu thu
+                4. REPORT - Báo cáo, tài liệu báo cáo
+                5. CERTIFICATE - Chứng chỉ, bằng cấp
+                6. GENERAL_FILE - Tài liệu chung khác
+                
+                Trả về kết quả dưới dạng JSON:
+                {{
+                    "document_type": "CONTRACT|INVOICE|RECEIPT|REPORT|CERTIFICATE|GENERAL_FILE",
+                    "confidence": 0.0-1.0,
+                    "reasoning": "Lý do phân loại",
+                    "key_terms": ["từ khóa", "quan trọng"]
+                }}
+                """
+                
+                # Gọi AI service để phân loại
+                ai_result = await self.ai_service.classify_document(classification_prompt)
+                return ai_result
+            else:
+                # Nếu không có text, dựa vào file type
+                logger.info(f"Using file type classification: {file_type_classification}")
+                return file_type_classification
             
-            Hãy phân loại tài liệu này thành một trong các loại sau:
-            1. CONTRACT - Hợp đồng, thỏa thuận, giao kết
-            2. INVOICE - Hóa đơn, bill
-            3. RECEIPT - Biên lai, phiếu thu
-            4. REPORT - Báo cáo, tài liệu báo cáo
-            5. CERTIFICATE - Chứng chỉ, bằng cấp
-            6. GENERAL_FILE - Tài liệu chung khác
-            
-            Trả về kết quả dưới dạng JSON:
-            {{
-                "document_type": "CONTRACT|INVOICE|RECEIPT|REPORT|CERTIFICATE|GENERAL_FILE",
-                "confidence": 0.0-1.0,
-                "reasoning": "Lý do phân loại",
-                "key_terms": ["từ khóa", "quan trọng"]
-            }}
-            """
-            
-            response = await self.ai_service.process_with_gemini(classification_prompt)
-            
-            # Parse JSON response
-            try:
-                classification_result = json.loads(response)
-                return classification_result
-            except json.JSONDecodeError:
-                # Fallback nếu không parse được JSON
-                return {
+        except Exception as e:
+            logger.error(f"Document classification failed: {str(e)}")
+            # Fallback classification
+            return {
                     "document_type": "GENERAL_FILE",
                     "confidence": 0.5,
                     "reasoning": "Không thể phân loại tự động",

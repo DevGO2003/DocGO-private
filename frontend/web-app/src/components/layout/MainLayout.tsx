@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PageTransition } from '../PageTransition'
+import GlobalDragDrop from './GlobalDragDrop'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -173,14 +174,16 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   // }
 
   return (
-    <MainLayout
-      showSidebar={true}
-      showHeader={true}
-      showFooter={false}
-      sidebarCollapsed={false}
-    >
-      {children}
-    </MainLayout>
+    <GlobalDragDrop>
+      <MainLayout
+        showSidebar={true}
+        showHeader={true}
+        showFooter={false}
+        sidebarCollapsed={false}
+      >
+        {children}
+      </MainLayout>
+    </GlobalDragDrop>
   )
 }
 

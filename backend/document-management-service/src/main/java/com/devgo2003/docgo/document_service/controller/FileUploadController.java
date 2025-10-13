@@ -36,18 +36,19 @@ public class FileUploadController {
     @Autowired
     private RedisEventPublisher eventPublisher;
     
-    // Allowed file types
-    private static final List<String> ALLOWED_FILE_TYPES = Arrays.asList(
-            "application/pdf",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/plain",
-            "image/jpeg",
-            "image/jpg",
-            "image/png"
+    // Hỗ trợ mọi loại file - chỉ giới hạn kích thước
+    private static final List<String> BLOCKED_FILE_TYPES = Arrays.asList(
+            "application/x-executable",
+            "application/x-msdownload",
+            "application/x-msdos-program",
+            "application/x-winexe",
+            "application/x-msi",
+            "application/x-sh",
+            "application/x-bat"
     );
     
-    private static final List<String> ALLOWED_FILE_EXTENSIONS = Arrays.asList(
-            ".pdf", ".docx", ".txt", ".jpg", ".jpeg", ".png"
+    private static final List<String> BLOCKED_FILE_EXTENSIONS = Arrays.asList(
+            ".exe", ".msi", ".bat", ".cmd", ".sh", ".app", ".dmg", ".deb", ".rpm"
     );
     
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -62,7 +63,7 @@ public class FileUploadController {
             
             📁 **file** (bắt buộc, multipart/form-data)
             - **Loại dữ liệu**: MultipartFile
-            - **Định dạng hỗ trợ**: PDF, DOCX, TXT, JPG, JPEG, PNG
+            - **Định dạng hỗ trợ**: Mọi loại file (trừ executable)
             - **Kích thước tối đa**: 50MB
             - **Mô tả**: File tài liệu cần upload
             
@@ -170,14 +171,15 @@ public class FileUploadController {
         String contentType = file.getContentType();
         String filename = file.getOriginalFilename();
         
-        if (contentType != null && !ALLOWED_FILE_TYPES.contains(contentType)) {
-            throw new IllegalArgumentException("Định dạng file không được hỗ trợ: " + contentType);
+        // Chỉ block các file executable nguy hiểm
+        if (contentType != null && BLOCKED_FILE_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Loại file này không được phép upload: " + contentType);
         }
         
         if (filename != null) {
             String extension = filename.substring(filename.lastIndexOf('.')).toLowerCase();
-            if (!ALLOWED_FILE_EXTENSIONS.contains(extension)) {
-                throw new IllegalArgumentException("Định dạng file không được hỗ trợ: " + extension);
+            if (BLOCKED_FILE_EXTENSIONS.contains(extension)) {
+                throw new IllegalArgumentException("Định dạng file này không được phép upload: " + extension);
             }
         }
     }

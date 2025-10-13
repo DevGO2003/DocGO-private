@@ -154,7 +154,7 @@ class OCRService:
     
     def extract_text_from_file(self, file_bytes: bytes, file_type: str) -> str:
         """
-        Trích xuất văn bản từ file dựa trên loại file
+        Trích xuất văn bản từ file dựa trên loại file - hỗ trợ nhiều loại file
         
         Args:
             file_bytes: Dữ liệu file dạng bytes
@@ -165,12 +165,64 @@ class OCRService:
         """
         logger.info(f"Extracting text from file type: {file_type}")
         
-        if file_type in ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/tiff']:
+        # Hình ảnh - hỗ trợ nhiều format
+        if file_type.startswith('image/'):
             return self.extract_text_from_image(file_bytes)
+        
+        # PDF
         elif file_type == 'application/pdf':
             return self.extract_text_from_pdf(file_bytes)
+        
+        # Text files
+        elif file_type == 'text/plain':
+            try:
+                return file_bytes.decode('utf-8')
+            except UnicodeDecodeError:
+                return file_bytes.decode('latin-1')
+        
+        # Office documents - thử OCR như hình ảnh
+        elif file_type in [
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # DOCX
+            'application/msword',  # DOC
+            'application/vnd.ms-excel',  # XLS
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # XLSX
+            'application/vnd.ms-powerpoint',  # PPT
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'  # PPTX
+        ]:
+            logger.warning(f"Office document OCR not fully implemented: {file_type}")
+            return ""
+        
+        # Archive files
+        elif file_type in [
+            'application/zip',
+            'application/x-rar-compressed',
+            'application/x-7z-compressed'
+        ]:
+            logger.warning(f"Archive file OCR not supported: {file_type}")
+            return ""
+        
+        # Video/Audio files
+        elif file_type.startswith('video/') or file_type.startswith('audio/'):
+            logger.warning(f"Media file OCR not supported: {file_type}")
+            return ""
+        
+        # Executable files
+        elif file_type in [
+            'application/x-executable',
+            'application/x-msdownload',
+            'application/x-msdos-program'
+        ]:
+            logger.warning(f"Executable file OCR not supported: {file_type}")
+            return ""
+        
+        # Unknown file types - thử OCR như hình ảnh
         else:
-            raise ValueError(f"Unsupported file type for OCR: {file_type}")
+            logger.info(f"Unknown file type, attempting OCR as image: {file_type}")
+            try:
+                return self.extract_text_from_image(file_bytes)
+            except Exception as e:
+                logger.warning(f"OCR failed for unknown file type {file_type}: {str(e)}")
+                return ""
     
     def _clean_text(self, text: str) -> str:
         """Làm sạch văn bản sau OCR"""
