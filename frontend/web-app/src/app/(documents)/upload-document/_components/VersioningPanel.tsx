@@ -21,11 +21,12 @@ export default function VersioningPanel({
 }: VersioningPanelProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h4 className="text-lg font-semibold text-gray-900">Tạo phiên bản từ hợp đồng cũ</h4>
-            <p className="text-sm text-gray-600 mt-1">Chọn hợp đồng đã có để tạo phiên bản mới (ví dụ: v2, v3).</p>
+            <h4 className="text-base font-semibold text-gray-900">
+              Tạo phiên bản từ hợp đồng cũ <span className="text-gray-500 font-normal">• Chọn hợp đồng đã có để tạo phiên bản mới</span>
+            </h4>
           </div>
           <label className="inline-flex items-center cursor-pointer select-none">
             <input 

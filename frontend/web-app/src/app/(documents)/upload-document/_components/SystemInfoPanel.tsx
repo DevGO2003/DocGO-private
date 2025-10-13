@@ -5,14 +5,15 @@ import React from 'react'
 export default function SystemInfoPanel() {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900">Thông tin hệ thống</h3>
-        <p className="text-sm text-gray-600">Công nghệ AI và tính năng</p>
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="text-base font-semibold text-gray-900">
+          Thông tin hệ thống <span className="text-gray-500 font-normal">• Công nghệ AI và tính năng</span>
+        </h3>
       </div>
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* AI Technology */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-3">
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +33,7 @@ export default function SystemInfoPanel() {
           </div>
 
           {/* Features */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +72,7 @@ export default function SystemInfoPanel() {
           </div>
 
           {/* Tip */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

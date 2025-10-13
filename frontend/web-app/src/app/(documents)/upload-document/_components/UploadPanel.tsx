@@ -41,12 +41,13 @@ export default function UploadPanel({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900">Upload file</h3>
-        <p className="text-sm text-gray-600">Chọn file để xử lý OCR và phân loại</p>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-full flex flex-col">
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="text-base font-semibold text-gray-900">
+          Upload file <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>
+        </h3>
       </div>
-      <div className="p-6">
+      <div className="p-4 flex-1">
         <input
           ref={ocrFileInputRef}
           type="file"
@@ -57,8 +58,8 @@ export default function UploadPanel({
         
         {selectedFile ? (
           // File Selected State
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                 {getFileIcon(selectedFile.name)}
               </div>
@@ -108,12 +109,12 @@ export default function UploadPanel({
           </div>
         ) : (
           // Empty State
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <DocumentTextIcon className="w-8 h-8 text-blue-600" />
             </div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">Kéo thả file vào đây để upload</h4>
-            <p className="text-sm text-gray-600 mb-4">PDF, DOCX, TXT, Images • Tối đa 50MB</p>
+            <h4 className="text-base font-semibold text-gray-900 mb-2">Kéo thả file vào đây để upload</h4>
+            <p className="text-sm text-gray-600 mb-3">PDF, DOCX, TXT, Images • Tối đa 50MB</p>
             <button
               onClick={() => ocrFileInputRef.current?.click()}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"

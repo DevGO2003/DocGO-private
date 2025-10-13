@@ -29,13 +29,14 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900">Xem trước nội dung file</h3>
-        <p className="text-sm text-gray-600">{selectedFile ? selectedFile.name : 'Chọn file để xem trước'}</p>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-full flex flex-col">
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="text-base font-semibold text-gray-900">
+          Xem trước nội dung file <span className="text-gray-500 font-normal">• {selectedFile ? selectedFile.name : 'Chọn file để xem trước'}</span>
+        </h3>
       </div>
-      <div className="p-6">
-        <div className="h-96 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex-1 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 min-h-0">
           {selectedFile ? (
             selectedFile.type === 'application/pdf' ? (
               // PDF Preview với iframe
@@ -100,7 +101,7 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
           )}
         </div>
         {selectedFile && (
-          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+          <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
             <span>Kích thước: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
             <span>Loại: {selectedFile.type || 'Không xác định'}</span>
           </div>
