@@ -19,6 +19,10 @@ from openpyxl import load_workbook
 from striprtf.striprtf import rtf_to_text
 import csv
 from services.ai_processing_service import AutomationService
+from services.document_processor import DocumentProcessor
+
+# Initialize document processor
+document_processor = DocumentProcessor()
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
@@ -1326,6 +1330,55 @@ async def get_batch_jobs_api(
             timestamp=datetime.now(timezone.utc),
             requestId=str(uuid.uuid4())
         )
+
+@router.post("/document/retry-ocr/{document_id}", summary="Retry OCR cho document", tags=["🤖 APIs Xử lý AI"])
+async def retry_ocr_api(
+    request: Request,
+    document_id: str
+):
+    """
+    ## 📖 Mô tả
+    API retry OCR cho document đã tồn tại khi OCR lần đầu thất bại.
+    
+    ## 🔹 Đầu vào
+    
+    🆔 **document_id** (bắt buộc, path)
+    - **Loại**: string
+    - **Mô tả**: ID của document cần retry OCR
+    
+    ## 🔹 Đầu ra
+    
+    📄 **data**
+    - **Loại**: object
+    - **Mô tả**: Kết quả retry OCR với trạng thái và thông tin chi tiết
+    """
+    try:
+        logger.info(f"Retry OCR request for document: {document_id}")
+        
+        result = await document_processor.retry_ocr(document_id)
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Retry OCR thành công",
+            data=result,
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+        
+    except Exception as e:
+        logger.error(f"Retry OCR failed: {str(e)}")
+        return RestResponse(
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            description=f"Lỗi khi retry OCR: {str(e)}",
+            data=None,
+            path=request.url.path,
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+
 
 @router.get("/health", summary="Health check", tags=["🏥 APIs Kiểm tra Hệ thống"])
 async def health_check():

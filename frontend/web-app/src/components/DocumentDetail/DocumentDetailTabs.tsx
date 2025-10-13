@@ -12,6 +12,7 @@ import { AIAnalysisTab } from './contract/AIAnalysisTab'
 import { WorkflowTab } from './contract/WorkflowTab'
 import { DetailsTab } from './overview/DetailsTab'
 import { ContentTab } from './overview/ContentTab'
+import { OCRTab } from './overview/OCRTab'
 import { MetadataTab } from './overview/MetadataTab'
 import { NotesTab } from './overview/NotesTab'
 import { HistoryTab } from './overview/HistoryTab'
@@ -92,6 +93,12 @@ export const documentDetailSubTabs = [
     name: 'Nội dung',
     icon: DocumentTextIcon,
     description: 'Nội dung tài liệu'
+  },
+  {
+    id: 'ocr',
+    name: 'Nội dung OCR',
+    icon: CpuChipIcon,
+    description: 'Văn bản được trích xuất từ OCR'
   },
   {
     id: 'metadata',
@@ -222,6 +229,8 @@ export function DocumentDetailTabs({ documentData, onTabChange, contractSummary,
           return <DetailsTab documentData={documentData} />
         case 'content':
           return <ContentTab documentData={documentData} />
+        case 'ocr':
+          return <OCRTab documentData={documentData} />
         case 'metadata':
           return <MetadataTab documentData={documentData} />
         case 'notes':

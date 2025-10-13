@@ -1,6 +1,7 @@
 package com.devgo2003.docgo.document_service.controller;
 
 import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.document_service.dto.ProcessingResultRequest;
 import com.devgo2003.docgo.document_service.entity.DocumentEntity;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
 import com.devgo2003.docgo.document_service.service.DocumentService;
@@ -18,11 +19,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/document-management-service/v1/documents")
 @Tag(name = "📄 APIs Quản lý Tài liệu", description = "APIs quản lý tài liệu và tệp tin trong hệ thống DocGO")
+@Slf4j
 public class DocumentController {
 
     private final FileStorageService fileStorageService;
@@ -178,9 +183,9 @@ public class DocumentController {
             }
             
             // Success response with complex metadata
-            return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
-                    .statusCode(200)
-                    .shortMessage("Success")
+        return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
                     .description(String.format("Đã lấy danh sách %d tài liệu thành công (trang %d/%d)", 
                         documents.getContent().size(), 
                         documents.getNumber() + 1, 
@@ -196,7 +201,7 @@ public class DocumentController {
                             .shortMessage("Internal Server Error")
                             .description("Lỗi hệ thống khi lấy danh sách tài liệu: " + e.getMessage())
                             .data(null)
-                            .build());
+                .build());
         }
     }
 
@@ -277,6 +282,87 @@ public class DocumentController {
                 .collect(Collectors.toList());
         
         return new PageImpl<>(filteredContent, documents.getPageable(), filteredContent.size());
+    }
+    
+    @Operation(
+            summary = "Cập nhật kết quả xử lý tài liệu",
+            description = """
+            ## 📖 Mô tả
+            API cập nhật kết quả xử lý tài liệu từ Automation Service sau khi OCR và phân loại hoàn tất.
+            
+            ## 🔹 Đầu vào
+            
+            🆔 **id** (bắt buộc, path)
+            - **Loại**: string
+            - **Mô tả**: ID của document cần cập nhật
+            
+            📄 **processingResult** (bắt buộc, body)
+            - **Loại**: ProcessingResultRequest
+            - **Mô tả**: Kết quả xử lý từ Automation Service
+            
+            ## 🔹 Đầu ra
+            
+            📝 **data**
+            - **Loại**: DocumentEntity
+            - **Mô tả**: Document đã được cập nhật
+            """,
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Document updated successfully"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PutMapping("/{id}/processing-result")
+    public ResponseEntity<RestResponse<DocumentEntity>> updateProcessingResult(
+            @Parameter(description = "ID của document cần cập nhật") @PathVariable String id,
+            @Parameter(description = "Kết quả xử lý từ Automation Service") @RequestBody ProcessingResultRequest processingResult
+    ) {
+        try {
+            log.info("Updating processing result for document: {}", id);
+            
+            DocumentEntity document = documentService.findById(id);
+            if (document == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Update processing fields
+            document.setOcrText(processingResult.getOcrText());
+            document.setOcrStatus(processingResult.getOcrStatus());
+            document.setClassificationResult(processingResult.getClassificationResult());
+            document.setProcessingStatus(processingResult.getProcessingStatus());
+            document.setProcessingError(processingResult.getProcessingError());
+            document.setUpdatedAt(LocalDateTime.now());
+            
+            // Update document type based on classification
+            if (processingResult.getClassificationResult() != null) {
+                Map<String, Object> classification = (Map<String, Object>) processingResult.getClassificationResult();
+                String documentType = (String) classification.get("document_type");
+                if (documentType != null) {
+                    document.setDocumentType(documentType);
+                }
+            }
+            
+            DocumentEntity updatedDocument = documentService.save(document);
+            
+            log.info("Processing result updated successfully for document: {}", id);
+            
+            return ResponseEntity.ok(RestResponse.<DocumentEntity>builder()
+                    .statusCode(200)
+                    .shortMessage("Success")
+                    .description("Đã cập nhật kết quả xử lý tài liệu thành công")
+                    .data(updatedDocument)
+                    .build());
+                    
+        } catch (Exception e) {
+            log.error("Failed to update processing result for document {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).body(RestResponse.<DocumentEntity>builder()
+                    .statusCode(500)
+                    .shortMessage("Internal Server Error")
+                    .description("Lỗi hệ thống khi cập nhật kết quả xử lý: " + e.getMessage())
+                    .data(null)
+                    .build());
+        }
     }
     
     /**

@@ -104,6 +104,22 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     // Content
     private String content;
     
+    // OCR and Processing fields
+    @Field("ocr_text")
+    private String ocrText; // Văn bản được OCR
+    
+    @Field("ocr_status")
+    private String ocrStatus; // PENDING, PROCESSING, COMPLETED, FAILED
+    
+    @Field("classification_result")
+    private Object classificationResult; // Kết quả phân loại từ AI
+    
+    @Field("processing_status")
+    private String processingStatus; // PENDING, PROCESSING, COMPLETED, FAILED
+    
+    @Field("processing_error")
+    private String processingError; // Lỗi nếu có
+    
     // Metadata
     @Field("file_system_metadata")
     private FileSystemMetadata fileSystemMetadata;

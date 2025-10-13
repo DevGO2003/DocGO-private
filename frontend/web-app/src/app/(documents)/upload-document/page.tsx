@@ -108,30 +108,49 @@ export default function UploadDocumentPage() {
       const formData = new FormData()
       formData.append('file', selectedFile)
       
-      if (apiKey) {
-        formData.append('api_key', apiKey)
-      }
-
-      // Add versioning data if enabled
+      // Add metadata if needed
       if (createFromOldVersion && baseContractId) {
-        formData.append('base_contract_id', baseContractId)
-        if (newVersionName) {
-          formData.append('new_version_name', newVersionName)
-        }
+        formData.append('metadata', JSON.stringify({
+          baseContractId,
+          newVersionName: newVersionName || undefined
+        }))
       }
 
-      const response = await automationAPI.extractText(selectedFile, apiKey)
+      // Call API Gateway upload endpoint
+      const response = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-User-ID': 'system' // TODO: Get from auth context
+        }
+      })
+
+      const result = await response.json()
       
-      if (response.data.statusCode === 200) {
-        setExtractedText(response.data.data?.extractedText || 'Không có văn bản được trích xuất')
+      if (response.ok && result.statusCode === 201) {
+        const uploadResponse = result.data
+        
+        toast.success('File đã được upload thành công và đang được xử lý!')
+        
+        // Show success modal with options
         setIsOcrModalOpen(true)
-        toast.success('Trích xuất văn bản thành công!')
+        setExtractedText(`File đã được upload thành công!
+        
+File ID: ${uploadResponse.fileId}
+Document ID: ${uploadResponse.fileId}
+Filename: ${uploadResponse.filename}
+Size: ${(uploadResponse.fileSize / 1024 / 1024).toFixed(2)} MB
+Status: ${uploadResponse.status}
+
+File đang được xử lý OCR và phân loại tự động. Bạn có thể:
+1. Xem danh sách tài liệu để theo dõi tiến trình
+2. Mở tài liệu vừa upload để xem kết quả`)
       } else {
-        throw new Error(response.data.shortMessage || 'Có lỗi xảy ra khi xử lý file')
+        throw new Error(result.description || 'Có lỗi xảy ra khi upload file')
       }
     } catch (error) {
-      console.error('OCR Error:', error)
-      toast.error('Có lỗi xảy ra khi trích xuất văn bản')
+      console.error('Upload Error:', error)
+      toast.error('Có lỗi xảy ra khi upload file')
     } finally {
       setOcrLoading(false)
     }
@@ -142,7 +161,7 @@ export default function UploadDocumentPage() {
       <div className="min-h-screen bg-gray-50">
         <HeaderPanel 
           title="Upload file OCR hợp đồng"
-          description="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
+          subtitle="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
         />
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -406,19 +425,21 @@ export default function UploadDocumentPage() {
           </div>
         </div>
 
-        {/* OCR Results Modal */}
+        {/* Upload Success Modal */}
         {isOcrModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 px-6 py-4 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                      <DocumentTextIcon className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Kết quả trích xuất văn bản</h3>
-                      <p className="text-sm text-gray-600">Nội dung đã được AI xử lý và trích xuất</p>
+                      <h3 className="text-lg font-semibold text-gray-900">Upload thành công!</h3>
+                      <p className="text-sm text-gray-600">File đang được xử lý OCR và phân loại tự động</p>
                     </div>
                   </div>
                   <button
@@ -432,24 +453,58 @@ export default function UploadDocumentPage() {
                 </div>
               </div>
               <div className="p-6">
-                <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+                <div className="bg-gray-50 rounded-xl p-4 mb-6">
                   <pre className="text-sm text-gray-800 whitespace-pre-wrap">{extractedText}</pre>
                 </div>
-                <div className="flex justify-end space-x-3 mt-6">
+                
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-blue-800">Tiếp theo</span>
+                    </div>
+                    <p className="text-sm text-blue-700">
+                      File đang được xử lý OCR và phân loại tự động. Quá trình này có thể mất vài phút.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => {
+                        setIsOcrModalOpen(false)
+                        router.push('/documents')
+                      }}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      Xem danh sách tài liệu
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setIsOcrModalOpen(false)
+                        // TODO: Navigate to specific document when we have the document ID
+                        router.push('/documents')
+                      }}
+                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      Mở tài liệu vừa tải
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={() => setIsOcrModalOpen(false)}
-                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Đóng
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(extractedText)
-                      toast.success('Đã sao chép văn bản!')
-                    }}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Sao chép
                   </button>
                 </div>
               </div>
