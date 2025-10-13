@@ -160,20 +160,20 @@ export default function UploadDocumentPage() {
           {/* Content */}
           <PrimaryContent>
             <div className="space-y-6">
-              {/* Dòng 1: Full width version panel */}
-              <VersioningPanel
-                createFromOldVersion={createFromOldVersion}
-                setCreateFromOldVersion={setCreateFromOldVersion}
-                baseContractId={baseContractId}
-                setBaseContractId={setBaseContractId}
-                newVersionName={newVersionName}
-                setNewVersionName={setNewVersionName}
-              />
-
-              {/* Dòng 2-3: Grid 2 hàng - Trái (Upload + Info), Phải (Preview chiếm 2 hàng) */}
+              {/* Grid 2 hàng: Cột phải Preview chiếm 3 cột và 2 hàng */}
               <div className="grid grid-cols-1 lg:grid-cols-5 lg:grid-rows-2 gap-6">
-                {/* Trái hàng 1: Upload (2/5) */}
-                <div className="lg:col-span-2 lg:row-span-1">
+                {/* Hàng 1 - Cột trái gồm 2 khối mỗi khối 1 cột */}
+                <div className="lg:col-span-1 lg:row-span-1">
+                  <VersioningPanel
+                    createFromOldVersion={createFromOldVersion}
+                    setCreateFromOldVersion={setCreateFromOldVersion}
+                    baseContractId={baseContractId}
+                    setBaseContractId={setBaseContractId}
+                    newVersionName={newVersionName}
+                    setNewVersionName={setNewVersionName}
+                  />
+                </div>
+                <div className="lg:col-span-1 lg:row-span-1">
                   <UploadPanel
                     selectedFile={selectedFile}
                     setSelectedFile={setSelectedFile}
@@ -184,12 +184,12 @@ export default function UploadDocumentPage() {
                   />
                 </div>
 
-                {/* Phải: Preview chiếm 2 hàng (3/5) */}
+                {/* Cột phải: Preview chiếm 3 cột và 2 hàng */}
                 <div className="lg:col-span-3 lg:row-span-2">
                   <FilePreview selectedFile={selectedFile} />
                 </div>
 
-                {/* Trái hàng 2: Thông tin hệ thống (2/5) */}
+                {/* Hàng 2 - Cột trái: System Info chiếm 2 cột */}
                 <div className="lg:col-span-2 lg:row-span-1">
                   <SystemInfoPanel />
                 </div>
