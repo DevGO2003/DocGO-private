@@ -5,6 +5,7 @@ import com.devgo2003.docgo.document_service.dto.ProcessingResultRequest;
 import com.devgo2003.docgo.document_service.entity.DocumentEntity;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
 import com.devgo2003.docgo.document_service.service.DocumentService;
+import com.devgo2003.docgo.document_service.repository.DocumentRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,12 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 public class DocumentController {
 
     private final FileStorageService fileStorageService;
+    private final DocumentRepository documentRepository;
     private final DocumentService documentService;
 
     @Autowired
-    public DocumentController(FileStorageService fileStorageService, DocumentService documentService) {
+    public DocumentController(FileStorageService fileStorageService, DocumentService documentService, DocumentRepository documentRepository) {
         this.fileStorageService = fileStorageService;
         this.documentService = documentService;
+        this.documentRepository = documentRepository;
     }
 
 
@@ -321,7 +324,7 @@ public class DocumentController {
         try {
             log.info("Updating processing result for document: {}", id);
             
-            DocumentEntity document = documentService.findById(id);
+            DocumentEntity document = documentService.findDocumentById(id).orElse(null);
             if (document == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -343,7 +346,7 @@ public class DocumentController {
                 }
             }
             
-            DocumentEntity updatedDocument = documentService.save(document);
+            DocumentEntity updatedDocument = documentRepository.save(document);
             
             log.info("Processing result updated successfully for document: {}", id);
             

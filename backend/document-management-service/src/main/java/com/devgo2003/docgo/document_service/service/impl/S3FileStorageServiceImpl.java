@@ -1,10 +1,16 @@
 package com.devgo2003.docgo.document_service.service.impl;
 
 import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
+import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
+import com.devgo2003.docgo.document_service.entity.DocumentEntity;
 import com.devgo2003.docgo.document_service.service.FileStorageService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -19,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
+@Primary
 @Slf4j
 public class S3FileStorageServiceImpl implements FileStorageService {
     
@@ -107,6 +114,24 @@ public class S3FileStorageServiceImpl implements FileStorageService {
             return "";
         }
         return filename.substring(lastDotIndex);
+    }
+    
+    @Override
+    public FileDownloadResponse downloadFile(String fileId, String userId) {
+        // TODO: Implement file download
+        throw new UnsupportedOperationException("File download not implemented yet");
+    }
+    
+    @Override
+    public Page<DocumentEntity> getAllDocuments(int page, int size, String userId) {
+        // TODO: Implement get all documents
+        return new PageImpl<>(new ArrayList<>());
+    }
+    
+    @Override
+    public Page<DocumentEntity> getDocumentsByType(int page, int size, String userId, String documentType) {
+        // TODO: Implement get documents by type
+        return new PageImpl<>(new ArrayList<>());
     }
 }
 

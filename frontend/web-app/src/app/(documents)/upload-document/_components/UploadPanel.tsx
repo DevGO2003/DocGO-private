@@ -101,7 +101,7 @@ export default function UploadPanel({
               ) : (
                 <>
                   <ArrowUpTrayIcon className="w-4 h-4 mr-2" />
-                  Xác nhận tải hợp đồng
+                  Xác nhận tải lên tài liệu
                 </>
               )}
             </button>

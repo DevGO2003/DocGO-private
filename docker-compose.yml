@@ -206,8 +206,9 @@ services:
       - docgo-network
     volumes:
       - ./frontend/web-app:/app
-      - /app/node_modules
-      - /app/.next
+      # Use node_modules baked into the image to avoid empty anonymous volume hiding installed deps
+      # Remove .next cache mount to avoid stale build artifacts inside container
+      # - /app/.next
       - ./logs/web-app:/app/logs
     restart: unless-stopped
 

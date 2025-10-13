@@ -8,7 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for development)
-RUN npm ci
+# Use npm install to sync with package-lock in repo and avoid EUSAGE mismatch in CI/build
+RUN npm install
 
 # Copy source code
 COPY . .

@@ -3,7 +3,7 @@
 
 const nextConfig = {
   // i18n, // Disabled to prevent 404 with /en/ prefix
-  // Hot reload optimization for Docker
+  // Hot reload optimization for Docker + PDF.js support
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
       config.watchOptions = {
@@ -11,6 +11,15 @@ const nextConfig = {
         aggregateTimeout: 300,
       }
     }
+    
+    // PDF.js webpack configuration
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      canvas: false,
+    }
+    
+    // Keep canvas disabled to avoid native deps; allow pdfjs-dist to load normally
+    
     return config
   },
   images: {

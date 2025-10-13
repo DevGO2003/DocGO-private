@@ -112,14 +112,14 @@ export default function UploadDocumentPage() {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await fetch('/api/files/upload', {
+      const response = await fetch('http://localhost:8000/api/v1/document-management-service/v1/files/upload', {
         method: 'POST',
         body: formData,
       })
 
       const result = await response.json()
 
-      if (response.ok) {
+      if (response.ok && result.statusCode === 201) {
         toast.success('Upload thành công!')
         
         // Show success modal with navigation options
@@ -128,10 +128,12 @@ export default function UploadDocumentPage() {
           if (shouldViewList) {
             router.push('/documents')
           } else {
-            const shouldViewNew = confirm('Bạn có muốn xem tài liệu vừa upload không?')
-            if (shouldViewNew && result.data?.id) {
-              router.push(`/documents/${result.data.id}`)
-            }
+            // Since backend doesn't return documentId, we can only navigate to documents list
+            toast('Tài liệu đã được upload và đang được xử lý. Vui lòng kiểm tra trong danh sách tài liệu.', {
+              icon: 'ℹ️',
+              duration: 4000,
+            })
+            router.push('/documents')
           }
         }, 500)
       } else {
@@ -168,10 +170,10 @@ export default function UploadDocumentPage() {
                 setNewVersionName={setNewVersionName}
               />
 
-              {/* Dòng 2: Chia tỷ lệ 2|3 - Upload | Preview */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                {/* Khung upload (2/5) */}
-                <div className="lg:col-span-2">
+              {/* Dòng 2-3: Grid 2 hàng - Trái (Upload + Info), Phải (Preview chiếm 2 hàng) */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 lg:grid-rows-2 gap-6">
+                {/* Trái hàng 1: Upload (2/5) */}
+                <div className="lg:col-span-2 lg:row-span-1">
                   <UploadPanel
                     selectedFile={selectedFile}
                     setSelectedFile={setSelectedFile}
@@ -182,14 +184,16 @@ export default function UploadDocumentPage() {
                   />
                 </div>
 
-                {/* Cửa sổ preview file (3/5) */}
-                <div className="lg:col-span-3">
+                {/* Phải: Preview chiếm 2 hàng (3/5) */}
+                <div className="lg:col-span-3 lg:row-span-2">
                   <FilePreview selectedFile={selectedFile} />
                 </div>
-              </div>
 
-              {/* Dòng 3: Full width thông tin */}
-              <SystemInfoPanel />
+                {/* Trái hàng 2: Thông tin hệ thống (2/5) */}
+                <div className="lg:col-span-2 lg:row-span-1">
+                  <SystemInfoPanel />
+                </div>
+              </div>
             </div>
           </PrimaryContent>
         </div>
