@@ -207,6 +207,7 @@ services:
     volumes:
       - ./frontend/web-app:/app
       # Use node_modules baked into the image to avoid empty anonymous volume hiding installed deps
+      - /app/node_modules
       # Remove .next cache mount to avoid stale build artifacts inside container
       # - /app/.next
       - ./logs/web-app:/app/logs
