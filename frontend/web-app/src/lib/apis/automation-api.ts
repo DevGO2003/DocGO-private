@@ -170,16 +170,34 @@ export class AutomationAPI {
   }
 
   // File Management
-  async uploadFile(file: File, metadata?: any) {
+  async uploadFile(file: File, metadata?: any, options?: { folder?: string; user_id?: string }) {
     const formData = new FormData()
     formData.append('file', file)
     if (metadata) {
       formData.append('metadata', JSON.stringify(metadata))
     }
     
-    return apiClient.post<ApiResponse<FileUploadResult>>(`${this.basePath}/files`, formData, {
+    // Build URL with query parameters - Use API Gateway endpoint
+    const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+    const url = new URL('/api/files/upload', baseURL)
+    if (options?.folder) {
+      url.searchParams.append('folder', options.folder)
+    }
+    if (options?.user_id) {
+      url.searchParams.append('user_id', options.user_id)
+    }
+    
+    console.log('[AutomationAPI] Uploading file:', {
+      url: url.toString(),
+      file: file.name,
+      size: file.size,
+      type: file.type,
+      formData: formData instanceof FormData
+    })
+    
+    return apiClient.post<ApiResponse<FileUploadResult>>(url.toString(), formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        // Don't set Content-Type manually for FormData - let browser set it with boundary
       },
     })
   }

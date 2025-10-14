@@ -28,12 +28,30 @@ class ApiClient {
       withCredentials: true,
     })
     
-    // Add request interceptor to handle mock API calls
+    // Add request interceptor to handle mock API calls and FormData
     this.client.interceptors.request.use((config) => {
       // If the request is for mock API, use localhost:3000
       if (config.url?.includes('/api/mock/')) {
         config.baseURL = 'http://localhost:3000'
       }
+      
+      // Don't set Content-Type for FormData - let browser set it with boundary
+      if (config.data instanceof FormData) {
+        delete config.headers['Content-Type']
+        console.log('[API Request] Removed Content-Type for FormData')
+      }
+      
+      // Debug logging for upload requests
+      if (config.url?.includes('/api/files/upload')) {
+        console.log('[API Request] Upload request:', {
+          url: config.url,
+          method: config.method,
+          dataType: config.data?.constructor?.name,
+          isFormData: config.data instanceof FormData,
+          contentType: config.headers['Content-Type']
+        })
+      }
+      
       return config
     })
 
@@ -60,9 +78,28 @@ class ApiClient {
 
     this.client.interceptors.response.use(
       (response) => {
+        // Debug logging for upload responses
+        if (response.config.url?.includes('/api/files/upload')) {
+          console.log('[API Response] Upload response:', {
+            status: response.status,
+            statusCode: response.data?.statusCode,
+            shortMessage: response.data?.shortMessage,
+            description: response.data?.description
+          })
+        }
+        
         if (response.data && typeof response.data.statusCode === 'number') {
           const sc = response.data.statusCode
           const isSuccessCode = sc === 200 || sc === 201 || sc === 204
+          
+          if (response.config.url?.includes('/api/files/upload')) {
+            console.log('[API Response] Status check:', {
+              statusCode: sc,
+              isSuccessCode,
+              willReject: !isSuccessCode
+            })
+          }
+          
           if (!isSuccessCode) {
             const error = { response: { status: response.status, data: response.data } }
             this.handleApiError(error)
@@ -72,6 +109,17 @@ class ApiClient {
         return response
       },
       async (error) => {
+        // Debug logging for upload errors
+        if (error.config?.url?.includes('/api/files/upload')) {
+          console.log('[API Error] Upload error:', {
+            status: error.response?.status,
+            statusCode: error.response?.data?.statusCode,
+            shortMessage: error.response?.data?.shortMessage,
+            description: error.response?.data?.description,
+            error: error.message
+          })
+        }
+        
         const originalRequest = error.config
         const isUnauthorized = error.response?.status === 401 || (error.response?.data?.statusCode === 401)
         const isForbidden = error.response?.status === 403 || (error.response?.data?.statusCode === 403)

@@ -10,6 +10,17 @@ export const config = {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers.origin || 'http://localhost:3000'
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+    res.setHeader('Access-Control-Max-Age', '86400')
+    return res.status(200).end()
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -73,12 +84,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'
     const automationUserId = Array.isArray(fields.user_id) ? fields.user_id[0] : fields.user_id || userId
     
-    // Add query parameters to form data
-    formData.append('folder', folder)
-    formData.append('user_id', automationUserId)
+    // Build URL with query parameters
+    const automationUrl = new URL(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/files`)
+    automationUrl.searchParams.append('folder', folder)
+    automationUrl.searchParams.append('user_id', automationUserId)
 
     // Forward to Automation Service
-    const response = await fetch(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/files`, {
+    const response = await fetch(automationUrl.toString(), {
       method: 'POST',
       body: formData,
       headers: {
@@ -91,6 +103,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Clean up temporary file
     fs.unlinkSync(file.filepath)
 
+    // Set CORS headers for POST response
+    const origin = req.headers.origin || 'http://localhost:3000'
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+
     if (response.ok) {
       return res.status(201).json(result)
     } else {
@@ -99,6 +118,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('Upload proxy error:', error)
+    
+    // Set CORS headers for error response
+    const origin = req.headers.origin || 'http://localhost:3000'
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+    
     return res.status(500).json({ 
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'

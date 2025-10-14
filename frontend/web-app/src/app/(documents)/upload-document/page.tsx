@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { automationAPI } from '@/lib/apis'
 
 // Import components
 import {
@@ -109,20 +110,20 @@ export default function UploadDocumentPage() {
 
     setOcrLoading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', selectedFile)
-
-      const response = await fetch('http://localhost:8000/api/files/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-User-ID': 'user123' // TODO: Get from auth context
-        }
+      // Sử dụng automationAPI thay vì direct fetch call
+      const response = await automationAPI.uploadFile(selectedFile, undefined, {
+        folder: 'documents',
+        user_id: 'user123' // TODO: Get from auth context
       })
 
-      const result = await response.json()
+      console.log('[Upload Page] Response received:', {
+        status: response.status,
+        data: response.data,
+        statusCode: response.data?.statusCode,
+        shortMessage: response.data?.shortMessage
+      })
 
-      if (response.ok && result.statusCode === 201) {
+      if (response.data.statusCode === 201 || response.status === 201) {
         toast.success('Upload thành công!')
         
         // Show success modal with navigation options
@@ -140,11 +141,15 @@ export default function UploadDocumentPage() {
           }
         }, 500)
       } else {
-        toast.error(result.description || 'Upload thất bại')
+        toast.error(response.data.description || 'Upload thất bại')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error('Có lỗi xảy ra khi upload file')
+      // Error handling được tự động xử lý bởi apiClient interceptors
+      // Chỉ hiển thị toast nếu chưa có toast nào được hiển thị
+      if (!error.response?.data?.statusCode || error.response.data.statusCode >= 400) {
+        toast.error('Có lỗi xảy ra khi upload file')
+      }
     } finally {
       setOcrLoading(false)
     }
