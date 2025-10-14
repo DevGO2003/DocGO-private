@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
+import { formatFileSize } from '@/utils/helpers'
 import dynamic from 'next/dynamic'
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
 
@@ -101,7 +102,7 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
         </div>
         {selectedFile && (
           <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-            <span>Kích thước: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+            <span>Kích thước: {formatFileSize(selectedFile.size)}</span>
             <span>Loại: {selectedFile.type || 'Không xác định'}</span>
           </div>
         )}

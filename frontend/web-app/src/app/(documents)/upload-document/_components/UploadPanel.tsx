@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { formatFileSize } from '@/utils/helpers'
 import { DocumentTextIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 
 interface UploadPanelProps {
@@ -65,7 +66,7 @@ export default function UploadPanel({
               <div className="min-w-0 w-full col-start-2 row-start-1">
                 <h4 className="text-sm font-semibold text-gray-900 break-words" title={selectedFile.name}>{selectedFile.name}</h4>
                 <p className="text-xs text-gray-600 mb-2">
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • {selectedFile.type || 'Không xác định'}
+                  {formatFileSize(selectedFile.size)} • {selectedFile.type || 'Không xác định'}
                 </p>
               </div>
               <div className="col-span-2 grid grid-cols-2 gap-2">

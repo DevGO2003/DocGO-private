@@ -37,7 +37,7 @@ class FileStorageService:
         os.makedirs(self.upload_directory, exist_ok=True)
     
     def upload_file(self, file: UploadFile, folder: Optional[str] = None, user_id: Optional[str] = None) -> FileUploadResponse:
-        """Upload file to storage"""
+        """Upload file to storage with dual-write: always local, optional S3 when enabled"""
         try:
             # Generate unique file ID
             file_id = str(uuid.uuid4())
@@ -56,8 +56,17 @@ class FileStorageService:
             # Generate S3 key
             s3_key = self._generate_s3_key(file_id, file.filename, folder, user_id)
             
+            # 1) Always write local first
+            local_path = os.path.join(self.upload_directory, file.filename)
+            with open(local_path, "wb") as f:
+                f.write(file_content)
+
+            file_url = f"{self.base_url}/api/v1/automation-service/v1/files/{file_id}/download"
+            status = "uploaded_local"
+            message = "File đã được upload local thành công"
+
+            # 2) Optionally write to S3
             if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
-                # Upload to S3 (Filebase)
                 try:
                     import boto3
                     s3_client = boto3.client(
@@ -67,43 +76,20 @@ class FileStorageService:
                         aws_access_key_id=self.s3_access_key,
                         aws_secret_access_key=self.s3_secret_key
                     )
-                    
-                    # Upload to S3
+
                     s3_client.put_object(
                         Bucket=self.s3_bucket,
                         Key=s3_key,
                         Body=file_content,
                         ContentType=file.content_type or "application/octet-stream"
                     )
-                    
-                    # Generate presigned URL for download
-                    file_url = s3_client.generate_presigned_url(
-                        'get_object',
-                        Params={'Bucket': self.s3_bucket, 'Key': s3_key},
-                        ExpiresIn=3600  # 1 hour
-                    )
-                    
-                    status = "uploaded_to_s3"
-                    message = "File đã được upload lên S3 thành công"
-                    
+
+                    status = "uploaded_local_and_s3"
+                    message = "File đã được upload local và S3 thành công"
                 except Exception as s3_error:
-                    # Fallback to local storage if S3 fails
-                    local_path = os.path.join(self.upload_directory, file.filename)
-                    with open(local_path, "wb") as f:
-                        f.write(file_content)
-                    
-                    file_url = f"{self.base_url}/api/v1/automation-service/v1/files/{file_id}/download"
-                    status = "uploaded_local_fallback"
-                    message = f"Upload S3 thất bại, đã lưu local: {str(s3_error)}"
-            else:
-                # Upload to local storage
-                local_path = os.path.join(self.upload_directory, file.filename)
-                with open(local_path, "wb") as f:
-                    f.write(file_content)
-                
-                file_url = f"{self.base_url}/api/v1/automation-service/v1/files/{file_id}/download"
-                status = "uploaded_local"
-                message = "File đã được upload local thành công"
+                    # Keep local; annotate message
+                    status = "uploaded_local_s3_failed"
+                    message = f"Đã lưu local; upload S3 thất bại: {str(s3_error)}"
             
             return FileUploadResponse(
                 file_id=file_id,

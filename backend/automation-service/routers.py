@@ -21,6 +21,7 @@ from striprtf.striprtf import rtf_to_text
 import csv
 from services.ai_processing_service import AutomationService
 from services.document_processor import DocumentProcessor
+from services.file_service import FileStorageService
 
 # Initialize document processor
 document_processor = DocumentProcessor()
@@ -58,31 +59,19 @@ async def upload_document_api(
     from services.document_processor import DocumentProcessor
 
     try:
-        base_upload_dir = Path(os.path.dirname(__file__)) / Config.UPLOAD_DIR
-        base_upload_dir.mkdir(parents=True, exist_ok=True)
-        temp_path = base_upload_dir / file.filename
-        content = await file.read()
-        with open(temp_path, "wb") as f:
-            f.write(content)
-
-        size = len(content)
+        # Dùng FileStorageService để lưu file (local + S3 nếu bật)
+        fs_service = FileStorageService()
+        # FastAPI UploadFile cần reset lại pointer nếu đã đọc trước đó
+        # đảm bảo đọc nội dung trong service
+        upload_result = fs_service.upload_file(file, folder, user_id)
+        size = upload_result.file_size
         document_id = str(uuid.uuid4())
 
         # Nếu nhỏ hơn hoặc bằng ngưỡng → xử lý sync
         if size <= Config.MAX_SYNC_SIZE:
             processor = DocumentProcessor()
-            # OCR/parse tối thiểu: đọc text nếu là pdf/docx/txt, ảnh thì để rỗng
+            # OCR tối thiểu: bỏ qua để đơn giản; có thể bổ sung nếu cần
             ocr_text = ""
-            try:
-                filename_lower = file.filename.lower()
-                if filename_lower.endswith(".txt"):
-                    ocr_text = content.decode("utf-8", errors="ignore")
-                elif filename_lower.endswith(".pdf"):
-                    ocr_text = read_pdf(str(temp_path))
-                elif filename_lower.endswith(".docx"):
-                    ocr_text = read_docx(str(temp_path))
-            except Exception:
-                ocr_text = ""
 
             # Gọi Document Service tạo record
             ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
@@ -90,6 +79,8 @@ async def upload_document_api(
                 "fileName": file.filename,
                 "fileSize": size,
                 "fileType": file.content_type,
+                "fileUrl": upload_result.file_url,
+                "fileId": upload_result.file_id,
                 "processingStatus": "COMPLETED",
                 "ocrText": ocr_text,
                 "classificationResult": {}
@@ -112,7 +103,7 @@ async def upload_document_api(
             )
 
         # Ngược lại → trả 202 và xử lý nền (giả lập)
-        async def background_pipeline(doc_id: str, file_path: str):
+        async def background_pipeline(doc_id: str):
             import asyncio
             # Phát tiến độ qua memory hub (giản lược; WS endpoint sẽ poll từ client)
             # Giả lập thời gian xử lý
@@ -144,7 +135,7 @@ async def upload_document_api(
                 created = await resp.json()
                 created_id = created.get("data", {}).get("id") or created.get("data", {}).get("_id")
         import asyncio
-        asyncio.create_task(background_pipeline(created_id, str(temp_path)))
+        asyncio.create_task(background_pipeline(created_id))
 
         return RestResponse(
             statusCode=202,
