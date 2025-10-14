@@ -1,4 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { Config } from './config';
 
 /**
  * Swagger configuration cho API Gateway BFF

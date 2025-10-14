@@ -10,13 +10,16 @@ export const config = {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Always set CORS for this route
+  const origin = req.headers.origin || 'http://localhost:3000'
+  res.setHeader('Access-Control-Allow-Origin', origin)
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader('Vary', 'Origin')
+
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    const origin = req.headers.origin || 'http://localhost:3000'
-    res.setHeader('Access-Control-Allow-Origin', origin)
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
-    res.setHeader('Access-Control-Allow-Credentials', 'true')
     res.setHeader('Access-Control-Max-Age', '86400')
     return res.status(200).end()
   }
@@ -44,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const allowedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/json',
       'text/plain',
       'image/jpeg',
       'image/jpg',
@@ -104,11 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     fs.unlinkSync(file.filepath)
 
     // Set CORS headers for POST response
-    const origin = req.headers.origin || 'http://localhost:3000'
-    res.setHeader('Access-Control-Allow-Origin', origin)
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
-    res.setHeader('Access-Control-Allow-Credentials', 'true')
+    // CORS headers already set at top
 
     if (response.ok) {
       return res.status(201).json(result)
