@@ -20,8 +20,8 @@ export default function VersioningPanel({
   setNewVersionName
 }: VersioningPanelProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-full flex flex-col">
-      <div className="p-4 flex-1">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-80 overflow-hidden flex flex-col">
+      <div className="p-4 overflow-auto">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h4 className="text-base font-semibold text-gray-900">

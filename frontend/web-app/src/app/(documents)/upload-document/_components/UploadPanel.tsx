@@ -41,13 +41,13 @@ export default function UploadPanel({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-full flex flex-col">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-80 overflow-hidden flex flex-col">
       <div className="p-4 border-b border-gray-100">
         <h3 className="text-base font-semibold text-gray-900">
           Upload file <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>
         </h3>
       </div>
-      <div className="p-4 flex-1">
+      <div className="p-4 overflow-auto">
         <input
           ref={ocrFileInputRef}
           type="file"
@@ -58,26 +58,26 @@ export default function UploadPanel({
         {selectedFile ? (
           // File Selected State
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <div className="grid grid-cols-[40px_1fr] gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center col-start-1 row-start-1">
                 {getFileIcon(selectedFile.name)}
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-gray-900 truncate">{selectedFile.name}</h4>
-                <p className="text-xs text-gray-600">
+              <div className="min-w-0 w-full col-start-2 row-start-1">
+                <h4 className="text-sm font-semibold text-gray-900 break-words" title={selectedFile.name}>{selectedFile.name}</h4>
+                <p className="text-xs text-gray-600 mb-2">
                   {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • {selectedFile.type || 'Không xác định'}
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="col-span-2 grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setSelectedFile(null)}
-                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="inline-flex w-full justify-center px-3 py-1.5 text-xs border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   Chọn file khác
                 </button>
                 <button
                   onClick={() => ocrFileInputRef.current?.click()}
-                  className="px-3 py-1.5 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
+                  className="inline-flex w-full justify-center px-3 py-1.5 text-xs border border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 rounded-lg transition-colors"
                 >
                   Thay đổi
                 </button>
