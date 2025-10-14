@@ -29,106 +29,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Parse multipart form data
-    const form = formidable({
-      maxFileSize: 50 * 1024 * 1024, // 50MB
-      uploadDir: '/tmp',
-      keepExtensions: true,
-    })
+    // Passthrough streaming proxy: không parse multipart, forward nguyên request stream
+    const baseUrl = process.env.AS_BASE_URL || process.env.AUTOMATION_SERVICE_URL || 'http://localhost:8003'
+    const automationUrl = new URL(`${baseUrl}/api/v1/automation-service/v1/documents/upload`)
 
-    const [fields, files] = await form.parse(req)
-    
-    const file = Array.isArray(files.file) ? files.file[0] : files.file
-    if (!file) {
-      return res.status(400).json({ error: 'No file provided' })
+    // Sao chép headers, giữ nguyên Content-Type (boundary) và Content-Length nếu có
+    const forwardedHeaders: Record<string, string> = {}
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (typeof v === 'string') forwardedHeaders[k] = v
     }
+    delete forwardedHeaders['host']
 
-    // Validate file type
-    const allowedTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/json',
-      'text/plain',
-      'image/jpeg',
-      'image/jpg',
-      'image/png'
-    ]
-    
-    const allowedExtensions = ['.pdf', '.docx', '.txt', '.jpg', '.jpeg', '.png']
-    const fileExtension = path.extname(file.originalFilename || '').toLowerCase()
-    
-    if (!allowedTypes.includes(file.mimetype) && !allowedExtensions.includes(fileExtension)) {
-      return res.status(400).json({ error: 'Unsupported file type' })
-    }
-
-    // Prepare form data for Document Management Service
-    const formData = new FormData()
-    
-    // Read file and append to form data
-    const fileBuffer = fs.readFileSync(file.filepath)
-    const blob = new Blob([fileBuffer], { type: file.mimetype })
-    formData.append('file', blob, file.originalFilename)
-    
-    // Add metadata if provided
-    const metadata = Array.isArray(fields.metadata) ? fields.metadata[0] : fields.metadata
-    if (metadata) {
-      formData.append('metadata', metadata)
-    }
-    
-    // Add tags if provided
-    const tags = Array.isArray(fields.tags) ? fields.tags[0] : fields.tags
-    if (tags) {
-      formData.append('tags', tags)
-    }
-
-    // Get user ID from header
-    const userId = req.headers['x-user-id'] as string || 'system'
-
-    // Add query parameters for Automation Service
-    const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'
-    const automationUserId = Array.isArray(fields.user_id) ? fields.user_id[0] : fields.user_id || userId
-    
-    // Build URL with query parameters
-    const automationUrl = new URL(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/files`)
-    automationUrl.searchParams.append('folder', folder)
-    automationUrl.searchParams.append('user_id', automationUserId)
-
-    // Forward to Automation Service
-    const response = await fetch(automationUrl.toString(), {
+    const upstream = await fetch(automationUrl.toString(), {
       method: 'POST',
-      body: formData,
-      headers: {
-        'X-User-ID': userId,
-      },
+      // @ts-ignore
+      duplex: 'half',
+      headers: forwardedHeaders,
+      // @ts-ignore
+      body: req as any,
     })
 
-    const result = await response.json()
-
-    // Clean up temporary file
-    fs.unlinkSync(file.filepath)
-
-    // Set CORS headers for POST response
-    // CORS headers already set at top
-
-    if (response.ok) {
-      return res.status(201).json(result)
-    } else {
-      return res.status(response.status).json(result)
+    const text = await upstream.text()
+    try {
+      const json = JSON.parse(text)
+      return res.status(200).json(json)
+    } catch {
+      res.status(200).setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json')
+      return res.send(text)
     }
-
   } catch (error) {
-    console.error('Upload proxy error:', error)
-    
-    // Set CORS headers for error response
+    console.error('Upload proxy error (passthrough):', error)
     const origin = req.headers.origin || 'http://localhost:3000'
     res.setHeader('Access-Control-Allow-Origin', origin)
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-ID, Authorization')
     res.setHeader('Access-Control-Allow-Credentials', 'true')
-    
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    return res.status(200).json({
+      apiVersion: 'v1',
+      statusCode: 500,
+      shortMessage: 'Internal Server Error',
+      description: error instanceof Error ? error.message : 'Unknown error',
+      data: null,
+      path: '/api/files/upload'
     })
   }
 }

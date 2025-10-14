@@ -2,6 +2,7 @@ package com.devgo2003.docgo.document_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.devgo2003.docgo.document_service.event.RedisEventConsumer;
 
 @Configuration
+@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
 public class RedisConfig {
     
     @Bean

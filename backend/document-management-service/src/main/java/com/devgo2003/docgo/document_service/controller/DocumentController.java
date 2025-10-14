@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -40,6 +41,35 @@ public class DocumentController {
         this.fileStorageService = fileStorageService;
         this.documentService = documentService;
         this.documentRepository = documentRepository;
+    }
+
+    @Operation(
+            summary = "Tạo mới tài liệu",
+            description = "Tạo bản ghi Document theo chuẩn RestResponse, luôn trả HTTP 200 và statusCode 201",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Document created")
+            }
+    )
+    @PostMapping
+    public ResponseEntity<RestResponse<DocumentEntity>> createDocument(@RequestBody DocumentEntity payload) {
+        try {
+            if (payload.getStatus() == null) payload.setStatus("ACTIVE");
+            if (payload.getProcessingStatus() == null) payload.setProcessingStatus("PENDING");
+            DocumentEntity saved = documentRepository.save(payload);
+            return ResponseEntity.ok(RestResponse.<DocumentEntity>builder()
+                    .statusCode(201)
+                    .shortMessage("Created")
+                    .description("Tạo tài liệu thành công")
+                    .data(saved)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(RestResponse.<DocumentEntity>builder()
+                    .statusCode(500)
+                    .shortMessage("Internal Server Error")
+                    .description("Lỗi khi tạo tài liệu: " + e.getMessage())
+                    .data(null)
+                    .build());
+        }
     }
 
 

@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query, Form
+from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query, Form, WebSocket, WebSocketDisconnect
 import logging
 import asyncio
 import aiohttp
@@ -7,6 +7,7 @@ from docx import Document
 import PyPDF2
 import os
 from config import Config
+import os
 import google.generativeai as genai
 import json
 import uuid
@@ -43,6 +44,142 @@ from schemas.event_schemas import (
 from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 
 router = APIRouter(prefix="/api/v1/automation-service/v1")
+@router.post("/documents/upload", summary="Upload tài liệu (hybrid sync/async)", tags=["📁 APIs Quản lý File"])
+async def upload_document_api(
+    request: Request,
+    file: UploadFile = File(..., description="Tệp tài liệu (pdf, docx, txt, jpg, png)"),
+    folder: str = Query("documents"),
+    user_id: str = Query("system")
+):
+    from schemas.response import RestResponse
+    from datetime import datetime
+    import uuid
+    from pathlib import Path
+    from services.document_processor import DocumentProcessor
+
+    try:
+        base_upload_dir = Path(os.path.dirname(__file__)) / Config.UPLOAD_DIR
+        base_upload_dir.mkdir(parents=True, exist_ok=True)
+        temp_path = base_upload_dir / file.filename
+        content = await file.read()
+        with open(temp_path, "wb") as f:
+            f.write(content)
+
+        size = len(content)
+        document_id = str(uuid.uuid4())
+
+        # Nếu nhỏ hơn hoặc bằng ngưỡng → xử lý sync
+        if size <= Config.MAX_SYNC_SIZE:
+            processor = DocumentProcessor()
+            # OCR/parse tối thiểu: đọc text nếu là pdf/docx/txt, ảnh thì để rỗng
+            ocr_text = ""
+            try:
+                filename_lower = file.filename.lower()
+                if filename_lower.endswith(".txt"):
+                    ocr_text = content.decode("utf-8", errors="ignore")
+                elif filename_lower.endswith(".pdf"):
+                    ocr_text = read_pdf(str(temp_path))
+                elif filename_lower.endswith(".docx"):
+                    ocr_text = read_docx(str(temp_path))
+            except Exception:
+                ocr_text = ""
+
+            # Gọi Document Service tạo record
+            ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
+            payload = {
+                "fileName": file.filename,
+                "fileSize": size,
+                "fileType": file.content_type,
+                "processingStatus": "COMPLETED",
+                "ocrText": ocr_text,
+                "classificationResult": {}
+            }
+            async with aiohttp.ClientSession() as session:
+                async def _post_json():
+                    async with session.post(ds_url, json=payload) as resp:
+                        data = await resp.json()
+                        return data
+                ds_resp = await _post_json()
+
+            return RestResponse(
+                statusCode=201,
+                shortMessage="Created",
+                description="Upload và xử lý đồng bộ thành công",
+                data={"documentId": ds_resp.get("data", {}).get("id") or ds_resp.get("data", {}).get("_id")},
+                path=str(request.url.path),
+                timestamp=datetime.now(),
+                requestId=document_id
+            )
+
+        # Ngược lại → trả 202 và xử lý nền (giả lập)
+        async def background_pipeline(doc_id: str, file_path: str):
+            import asyncio
+            # Phát tiến độ qua memory hub (giản lược; WS endpoint sẽ poll từ client)
+            # Giả lập thời gian xử lý
+            for _ in [20, 50, 70, 90]:
+                await asyncio.sleep(0.5)
+            # Hoàn tất: cập nhật DS
+            ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/v1/documents/{doc_id}/processing-result"
+            update_payload = {
+                "processingStatus": "COMPLETED",
+                "ocrText": "",
+                "classificationResult": {}
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.put(ds_put_url, json=update_payload) as _:
+                    pass
+
+        # Tạo trước bản ghi ở DS với trạng thái PROCESSING
+        ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
+        create_payload = {
+            "fileName": file.filename,
+            "fileSize": size,
+            "fileType": file.content_type,
+            "processingStatus": "PROCESSING",
+            "ocrText": "",
+            "classificationResult": {}
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(ds_url, json=create_payload) as resp:
+                created = await resp.json()
+                created_id = created.get("data", {}).get("id") or created.get("data", {}).get("_id")
+        import asyncio
+        asyncio.create_task(background_pipeline(created_id, str(temp_path)))
+
+        return RestResponse(
+            statusCode=202,
+            shortMessage="Accepted",
+            description="Tệp lớn, đã nhận và đang xử lý nền",
+            data={"documentId": created_id},
+            path=str(request.url.path),
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+    except HTTPException as e:
+        from schemas.response import RestResponse as RR
+        return RR(
+            statusCode=e.status_code,
+            shortMessage="Error",
+            description=e.detail,
+            data=None,
+            path=str(request.url.path),
+            timestamp=datetime.now(),
+            requestId=str(uuid.uuid4())
+        )
+
+
+@router.websocket("/documents/progress/{document_id}")
+async def documents_progress_ws(websocket: WebSocket, document_id: str):
+    await websocket.accept()
+    try:
+        for progress in [20, 50, 70, 90, 100]:
+            await websocket.send_json({"documentId": document_id, "progress": progress})
+            import asyncio
+            await asyncio.sleep(0.4)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await websocket.close()
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)

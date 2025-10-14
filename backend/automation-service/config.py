@@ -89,6 +89,8 @@ class Config:
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")
     TEMP_DIR: str = os.getenv("TEMP_DIR", "temp")
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", "104857600"))  # 100MB
+    # Ngưỡng xử lý đồng bộ (≤ MAX_SYNC_SIZE) vs bất đồng bộ (> MAX_SYNC_SIZE)
+    MAX_SYNC_SIZE: int = int(os.getenv("MAX_SYNC_SIZE", "2097152"))  # 2MB mặc định
     ALLOWED_FILE_TYPES: List[str] = os.getenv("ALLOWED_FILE_TYPES", "pdf,docx,txt,jpg,jpeg,png,gif").split(",")
     
     # ==========================================
