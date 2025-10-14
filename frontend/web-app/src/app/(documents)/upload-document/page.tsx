@@ -112,9 +112,12 @@ export default function UploadDocumentPage() {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await fetch('http://localhost:8000/api/v1/document-management-service/v1/files/upload', {
+      const response = await fetch('http://localhost:8000/api/files/upload', {
         method: 'POST',
         body: formData,
+        headers: {
+          'X-User-ID': 'user123' // TODO: Get from auth context
+        }
       })
 
       const result = await response.json()

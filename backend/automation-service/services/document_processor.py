@@ -3,8 +3,8 @@ import json
 import httpx
 from typing import Dict, Any, Optional
 from services.ocr_service import OCRService
-from services.ai_processing_service import AIProcessingService
-from config import get_settings
+from services.ai_processing_service import AutomationService
+from config import Config
 import boto3
 from botocore.exceptions import ClientError
 from io import BytesIO
@@ -19,16 +19,16 @@ class DocumentProcessor:
     
     def __init__(self):
         self.ocr_service = OCRService()
-        self.ai_service = AIProcessingService()
-        self.settings = get_settings()
+        self.ai_service = AutomationService()
+        self.settings = Config
         
         # S3 client để download file
         self.s3_client = boto3.client(
             's3',
-            endpoint_url=self.settings.FILEBASE_ENDPOINT,
-            aws_access_key_id=self.settings.FILEBASE_ACCESS_KEY,
-            aws_secret_access_key=self.settings.FILEBASE_SECRET_KEY,
-            region_name=self.settings.FILEBASE_REGION
+            endpoint_url=Config.S3_ENDPOINT,
+            aws_access_key_id=Config.S3_ACCESS_KEY_ID,
+            aws_secret_access_key=Config.S3_SECRET_ACCESS_KEY,
+            region_name=Config.S3_REGION
         )
         
         logger.info("Document Processor initialized")
@@ -283,7 +283,7 @@ class DocumentProcessor:
             # Gọi API update document
             async with httpx.AsyncClient() as client:
                 response = await client.put(
-                    f"{self.settings.DOCUMENT_SERVICE_URL}/api/v1/document-management-service/v1/documents/{document_id}/processing-result",
+                    f"{Config.DOCUMENT_SERVICE_URL}/api/v1/document-management-service/v1/documents/{document_id}/processing-result",
                     json=update_data,
                     timeout=30.0
                 )

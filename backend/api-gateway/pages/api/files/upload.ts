@@ -69,8 +69,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get user ID from header
     const userId = req.headers['x-user-id'] as string || 'system'
 
-    // Forward to Document Management Service
-    const response = await fetch(`${process.env.DOCUMENT_SERVICE_URL}/api/v1/document-management-service/v1/files/upload`, {
+    // Add query parameters for Automation Service
+    const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'
+    const automationUserId = Array.isArray(fields.user_id) ? fields.user_id[0] : fields.user_id || userId
+    
+    // Add query parameters to form data
+    formData.append('folder', folder)
+    formData.append('user_id', automationUserId)
+
+    // Forward to Automation Service
+    const response = await fetch(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/files`, {
       method: 'POST',
       body: formData,
       headers: {

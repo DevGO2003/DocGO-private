@@ -45,11 +45,11 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
     // PDF
     if (type === 'application/pdf' || ext === 'pdf') return PdfPreview
 
-    // Office spreadsheets (supported by OfficePreview via XLSX)
-    if (/^(xlsx|xls)$/i.test(ext)) return OfficePreview
+    // Office documents (supported by OfficePreview via XLSX and DOCX)
+    if (/^(xlsx|xls|docx|doc)$/i.test(ext)) return OfficePreview
 
-    // Other Office docs (doc/docx/ppt/pptx) are not parsed yet -> fallback
-    if (/^(pptx|ppt|docx|doc)$/i.test(ext)) return GenericPreview
+    // PowerPoint files (not parsed yet -> fallback)
+    if (/^(pptx|ppt)$/i.test(ext)) return GenericPreview
 
     // Archives
     if (/^(zip|rar|7z)$/i.test(ext)) return ArchivePreview

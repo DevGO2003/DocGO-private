@@ -48,13 +48,13 @@ export default function UploadPanel({
         </h3>
       </div>
       <div className="p-4 flex-1">
-                      <input
-                        ref={ocrFileInputRef}
-                        type="file"
-                        onChange={handleOcrFileSelect}
-                        className="hidden"
-                      />
-        
+        <input
+          ref={ocrFileInputRef}
+          type="file"
+          onChange={handleOcrFileSelect}
+          className="hidden"
+        />
+
         {selectedFile ? (
           // File Selected State
           <div className="space-y-3">
@@ -83,7 +83,7 @@ export default function UploadPanel({
                 </button>
               </div>
             </div>
-            
+
             {/* Upload Button */}
             <button
               onClick={handleOcrExtract}
