@@ -9,10 +9,7 @@ from config import get_settings
 logger = logging.getLogger(__name__)
 
 class RedisEventConsumer:
-    """
-    Redis Event Consumer cho Automation Service
-    Lắng nghe events từ Document Management Service và xử lý
-    """
+    
     
     def __init__(self):
         self.settings = get_settings()
@@ -23,7 +20,7 @@ class RedisEventConsumer:
         logger.info("Redis Event Consumer initialized")
     
     async def start(self):
-        """Khởi động Redis consumer"""
+        
         try:
             # Kết nối Redis
             self.redis_client = redis.from_url(
@@ -45,14 +42,14 @@ class RedisEventConsumer:
             raise
     
     async def stop(self):
-        """Dừng Redis consumer"""
+        
         self.is_running = False
         if self.redis_client:
             await self.redis_client.close()
         logger.info("Redis consumer stopped")
     
     async def _subscribe_to_events(self):
-        """Subscribe to Redis channels"""
+        
         try:
             # Subscribe to file uploaded events
             pubsub = self.redis_client.pubsub()
@@ -73,7 +70,7 @@ class RedisEventConsumer:
             raise
     
     async def _handle_file_uploaded_event(self, event_data: str):
-        """Xử lý FileUploaded event"""
+        
         try:
             logger.info(f"Received file uploaded event: {event_data}")
             
@@ -110,7 +107,7 @@ class RedisEventConsumer:
             logger.error(f"Error handling file uploaded event: {str(e)}")
     
     async def publish_document_processed_event(self, document_id: str, result: Dict[str, Any]):
-        """Publish DocumentProcessed event"""
+        
         try:
             event = {
                 "eventId": f"doc-processed-{document_id}",
@@ -141,11 +138,11 @@ class RedisEventConsumer:
 event_consumer = RedisEventConsumer()
 
 async def start_event_consumer():
-    """Khởi động event consumer"""
+    
     await event_consumer.start()
 
 async def stop_event_consumer():
-    """Dừng event consumer"""
+    
     await event_consumer.stop()
 
 

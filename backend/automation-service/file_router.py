@@ -1,4 +1,4 @@
-"""Automation Service - File Router"""
+
 
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, Response
 from fastapi.responses import StreamingResponse
@@ -31,7 +31,6 @@ async def upload_file(
             apiVersion="v1",
             statusCode=201,
             shortMessage="Created",
-            description="File đã được upload thành công.",
             data=response,
             timestamp=response.upload_time.isoformat(),
             requestId=str(uuid.uuid4()),
@@ -42,7 +41,6 @@ async def upload_file(
             apiVersion="v1",
             statusCode=e.status_code,
             shortMessage="Error",
-            description=e.detail,
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -56,7 +54,7 @@ async def download_file(
     user_id: Optional[str] = Query(None),
     version: Optional[int] = Query(None)
 ):
-    """Download file từ storage theo file_id; hỗ trợ chỉ định version."""
+    
     try:
         response = file_service.download_file(file_id, user_id, version)
         
@@ -84,7 +82,7 @@ async def get_all_files(
     sort_direction: Optional[List[str]] = Query(None),
     include_deleted: bool = Query(False)
 ):
-    """Lấy danh sách files với phân trang và sắp xếp."""
+    
     try:
         # Validate view type
         try:
@@ -124,7 +122,6 @@ async def get_all_files(
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description=f"Đã lấy danh sách files thành công với view {view_type.value}",
             data=paginated_response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -135,7 +132,6 @@ async def get_all_files(
             apiVersion="v1",
             statusCode=e.status_code,
             shortMessage="Error",
-            description=e.detail,
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -147,14 +143,13 @@ async def get_all_files(
 async def get_file_details(
     file_id: str
 ):
-    """Lấy thông tin chi tiết file theo file_id."""
+    
     try:
         response = file_service.get_file_details(file_id)
         return RestResponse(
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Đã lấy thông tin chi tiết file thành công",
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -165,7 +160,6 @@ async def get_file_details(
             apiVersion="v1",
             statusCode=e.status_code,
             shortMessage="Error",
-            description=e.detail,
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -179,26 +173,12 @@ async def delete_file(
     user_id: Optional[str] = Query(None),
     version: Optional[int] = Query(None)
 ):
-    """
-    Xoa file hoac phien ban cu the
-
-    Dau vao:
-    - file_id (bat buoc, path): ID file
-    - user_id (tuy chon, query)
-    - version (tuy chon, query)
-
-    Dau ra:
-    - data: ket qua xoa
-    """
+    
     try:
         result = file_service.delete_file(file_id, user_id, version)
         response = {"success": result}
-        description = f"Da xoa phien ban {version} cua file thanh cong" if version else "Da xoa toan bo file thanh cong"
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=200,
+        statusCode=200,
             shortMessage="Success",
-            description=description,
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -209,7 +189,6 @@ async def delete_file(
             apiVersion="v1",
             statusCode=e.status_code,
             shortMessage="Error",
-            description=e.detail,
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -223,24 +202,14 @@ async def check_file_version(
     file_size: int = Query(...),
     last_modified: Optional[str] = Query(None)
 ):
-    """
-    Kiem tra version conflict khi upload file.
-
-    Dau vao:
-    - filename (bat buoc, query)
-    - file_size (bat buoc, query)
-    - last_modified (tuy chon, query, ISO format)
-
-    Dau ra: JSON thong tin conflict
-    """
+    
     try:
         existing_files = await file_service.get_files_by_name(filename)
         if not existing_files:
             return RestResponse[dict](
                 apiVersion="v1",
                 statusCode=200,
-                shortMessage="Success",
-                description="Khong co file trung ten, co the upload an toan",
+                shortMessage="Success", co the upload an toan",
                 data={
                     "hasConflict": False,
                     "existingFile": None,
@@ -288,7 +257,6 @@ async def check_file_version(
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Da kiem tra version conflict thanh cong",
             data={
                 "hasConflict": has_conflict,
                 "existingFile": {
@@ -314,8 +282,7 @@ async def check_file_version(
         return RestResponse[dict](
             apiVersion="v1",
             statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Loi khi kiem tra version conflict: {str(e)}",
+            shortMessage="Internal Server Error")}",
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),

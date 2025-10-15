@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchDocument } from '../_services/documentsApi'
+import { fetchFileById } from '../_services/file-api'
+import { mapFileApiToUiDocument } from '../_services/file-mapper'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
 import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
@@ -27,82 +28,94 @@ export default function DocumentDetailPage() {
       try {
         setError('')
         
-        // Fetch document from backend API
-        console.log('Fetching document with ID:', params.id)
-        const document = await fetchDocument(params.id)
-        console.log('Document result:', document)
-        
-        if (!document) {
+        // Fetch file detail from File Management Service
+        console.log('Fetching file (detail) with ID:', params.id)
+        const resp = await fetchFileById(params.id)
+        if (!resp?.data) {
           // Document not found, redirect to 404
           console.log('Document not found, redirecting to /not-found')
           router.replace('/not-found')
           return
         }
         
-        // Map document data to UI format
+        // Map API file detail to UI structure expected by tabs
+        const doc = mapFileApiToUiDocument(resp.data)
         const mappedData = {
-          id: document.id,
-          title: document.title,
-          description: document.description,
-          status: document.status,
-          contractType: document.contractType,
-          tags: document.tags,
-          parties: document.parties,
-          effectiveDate: document.effectiveDate,
-          expiryDate: document.expiryDate,
+          id: doc.id,
+          title: doc.title,
+          description: doc.description,
+          status: doc.status,
+          contractType: doc.contractType,
+          tags: doc.tags,
+          parties: doc.parties,
+          effectiveDate: doc.effectiveDate || null,
+          expiryDate: doc.expiryDate || null,
           paymentDetails: {
-            totalValue: document.totalValue,
-            currency: document.currency,
-            schedule: '',
-            paymentMethod: '',
+            totalValue: doc.totalValue ?? null,
+            currency: doc.currency ?? 'VND',
+            schedule: resp.data.contract?.payment?.schedule || '',
+            paymentMethod: resp.data.contract?.payment?.method || '',
           },
-          keyClauses: [],
-          unfavorableClauses: [],
-          reminders: [],
-          riskAssessment: { riskLevel: document.riskLevel || 'LOW', riskFactors: [], mitigationMeasures: [] },
-          complianceStatus: { status: 'COMPLIANT', issues: [], recommendations: [] },
-          content: document.description || '',
+          keyClauses: (resp.data.contract?.clauses?.key || []).map((x: any) => ({
+            name: x.name || '',
+            description: x.description || '',
+            importance: x.importance || '',
+            risk: x.risk || '',
+          })),
+          unfavorableClauses: resp.data.contract?.clauses?.unfavorable || [],
+          reminders: resp.data.contract?.reminders || [],
+          riskAssessment: {
+            riskLevel: doc.riskLevel || 'LOW',
+            riskFactors: resp.data.contract?.risk?.factors || [],
+            mitigationMeasures: resp.data.contract?.risk?.mitigations || [],
+          },
+          complianceStatus: {
+            status: resp.data.contract?.compliance?.status || 'COMPLIANT',
+            issues: resp.data.contract?.compliance?.issues || [],
+            recommendations: resp.data.contract?.compliance?.recommendations || [],
+          },
+          content: resp.data.content?.plaintext || doc.description || '',
           authorNotes: [],
           fileSystemMetadata: {
-            dateModified: document.updatedAt,
-            dateAdded: document.createdAt,
-            mediaFilename: `${document.title}.pdf`,
-            originalFilename: `${document.title}.docx`,
-            originalMD5: '',
-            originalFileSize: 0,
-            originalMimeType: 'application/pdf',
-            archiveMD5: '',
-            archiveFileSize: 0
+            dateModified: (resp.data as any)?.metadata?.fileSystem?.dateModified || doc.updatedAt,
+            dateAdded: (resp.data as any)?.metadata?.fileSystem?.dateAdded || doc.createdAt,
+            mediaFilename: (resp.data as any)?.metadata?.fileSystem?.mediaFilename || (doc.title ? `${doc.title}.pdf` : ''),
+            originalFilename: (resp.data as any)?.metadata?.fileSystem?.originalFilename || '',
+            originalMD5: (resp.data as any)?.metadata?.fileSystem?.originalMD5 || '',
+            originalFileSize: (resp.data as any)?.metadata?.fileSystem?.originalFileSize || 0,
+            originalMimeType: (resp.data as any)?.metadata?.fileSystem?.originalMimeType || doc.fileType || 'application/pdf',
+            archiveMD5: (resp.data as any)?.metadata?.fileSystem?.archiveMD5 || '',
+            archiveFileSize: (resp.data as any)?.metadata?.fileSystem?.archiveFileSize || 0
           },
           originalDocumentMetadata: {
-            dcFormat: 'application/pdf',
-            dcTitle: document.title,
-            dcCreator: 'System',
-            dcDescription: document.description,
-            dcSubject: (document.tags || []).join(', '),
-            xmpCreateDate: document.createdAt,
-            xmpCreatorTool: 'DocGO System',
-            xmpModifyDate: document.updatedAt,
-            xmpMetadataDate: document.updatedAt,
-            pdfKeywords: (document.tags || []).join(', '),
-            pdfProducer: 'DocGO System',
-            xmpDocumentID: `uuid:${document.id}`,
-            xmpInstanceID: `uuid:${document.id}`,
+            dcFormat: (resp.data as any)?.metadata?.originalDocument?.dcFormat || doc.fileType || 'application/pdf',
+            dcTitle: (resp.data as any)?.metadata?.originalDocument?.dcTitle || doc.title,
+            dcCreator: (resp.data as any)?.metadata?.originalDocument?.dcCreator || 'System',
+            dcDescription: (resp.data as any)?.metadata?.originalDocument?.dcDescription || doc.description,
+            dcSubject: (doc.tags || []).join(', '),
+            xmpCreateDate: (resp.data as any)?.metadata?.originalDocument?.xmpCreateDate || doc.createdAt,
+            xmpCreatorTool: (resp.data as any)?.metadata?.originalDocument?.xmpCreatorTool || 'DocGO System',
+            xmpModifyDate: (resp.data as any)?.metadata?.originalDocument?.xmpModifyDate || doc.updatedAt,
+            xmpMetadataDate: (resp.data as any)?.metadata?.originalDocument?.xmpMetadataDate || doc.updatedAt,
+            pdfKeywords: (doc.tags || []).join(', '),
+            pdfProducer: (resp.data as any)?.metadata?.originalDocument?.pdfProducer || 'DocGO System',
+            xmpDocumentID: `uuid:${doc.id}`,
+            xmpInstanceID: `uuid:${doc.id}`,
             pdfaExtensionSchemas: ['PDF/A-1b']
           },
           archivedDocumentMetadata: {
-            archivedPdfProducer: 'DocGO Archiver',
-            archivedMetadataDate: document.updatedAt,
-            archivedModifyDate: document.updatedAt,
-            archivedCreateDate: document.createdAt,
-            archivedCreatorTool: 'DocGO System',
-            archivedDocumentID: `uuid:archived-${document.id}`,
-            archivedDcFormat: 'application/pdf',
-            archivedDcTitle: `${document.title} (Archived)`,
-            archivedDcCreator: 'DocGO System'
+            archivedPdfProducer: (resp.data as any)?.metadata?.archivedDocument?.archivedPdfProducer || 'DocGO Archiver',
+            archivedMetadataDate: (resp.data as any)?.metadata?.archivedDocument?.archivedMetadataDate || doc.updatedAt,
+            archivedModifyDate: (resp.data as any)?.metadata?.archivedDocument?.archivedModifyDate || doc.updatedAt,
+            archivedCreateDate: (resp.data as any)?.metadata?.archivedDocument?.archivedCreateDate || doc.createdAt,
+            archivedCreatorTool: (resp.data as any)?.metadata?.archivedDocument?.archivedCreatorTool || 'DocGO System',
+            archivedDocumentID: (resp.data as any)?.metadata?.archivedDocument?.archivedDocumentID || `uuid:archived-${doc.id}`,
+            archivedDcFormat: (resp.data as any)?.metadata?.archivedDocument?.archivedDcFormat || doc.fileType || 'application/pdf',
+            archivedDcTitle: (resp.data as any)?.metadata?.archivedDocument?.archivedDcTitle || `${doc.title} (Archived)`,
+            archivedDcCreator: (resp.data as any)?.metadata?.archivedDocument?.archivedDcCreator || 'DocGO System'
           }
         }
-        
+
         setData(mappedData)
         
         // TODO: Fetch ContractSummary from backend API if available

@@ -160,7 +160,6 @@ async def upload_document_api(
             return RestResponse(
                 statusCode=201,
                 shortMessage="Created",
-                description="Upload và xử lý đồng bộ thành công",
                 data={
                     "documentId": ds_resp.get("data", {}).get("id") or ds_resp.get("data", {}).get("_id"),
                     "fileUrl": upload_result.file_url,
@@ -252,16 +251,16 @@ async def upload_document_api(
                         "totalValue": total_num,
                         "currency": curr
                     }
-                update_payload = {
-                    "processingStatus": "COMPLETED",
+            update_payload = {
+                "processingStatus": "COMPLETED",
                     "ocrText": ocr_text,
                     "classificationResult": classification_result,
                     "summaryResult": summary_result,
                     "category": category,
                     "contractMetadata": contract_metadata,
                     "documentType": file.content_type
-                }
-                async with aiohttp.ClientSession() as session:
+            }
+            async with aiohttp.ClientSession() as session:
                     async with session.put(ds_put_url, json=update_payload) as resp:
                         if resp.status != 200:
                             logger.error(f"Failed to update document service for {doc_id}: {resp.status}")
@@ -300,8 +299,7 @@ async def upload_document_api(
 
         return RestResponse(
             statusCode=202,
-            shortMessage="Accepted",
-            description="Tệp lớn, đã nhận và đang xử lý nền",
+            shortMessage="Accepted", đã nhận và đang xử lý nền",
             data={
                 "documentId": created_id,
                 "fileUrl": upload_result.file_url,
@@ -316,7 +314,6 @@ async def upload_document_api(
         return RR(
             statusCode=e.status_code,
             shortMessage="Error",
-            description=e.detail,
             data=None,
             path=str(request.url.path),
             timestamp=datetime.now(),
@@ -342,7 +339,7 @@ async def documents_progress_ws(websocket: WebSocket, document_id: str):
                 if message == "ping":
                     await websocket.send_text("pong")
                     
-            except WebSocketDisconnect:
+    except WebSocketDisconnect:
                 logger.info(f"WebSocket disconnected for {document_id}")
                 break
             except Exception as e:
@@ -413,7 +410,6 @@ async def extract_api(
         return RestResponse(
             statusCode=204,
             shortMessage="No Content",
-            description="File không chứa nội dung văn bản.",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(),
@@ -423,7 +419,6 @@ async def extract_api(
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Trích xuất toàn bộ nội dung file thành công.",
         data=extracted_content,
         path=request.url.path,
         timestamp=datetime.now(),
@@ -594,7 +589,6 @@ async def classify_api(
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description="Phân loại tài liệu thành công.",
             data=data_out,
             path=request.url.path,
             timestamp=datetime.now(),
@@ -605,7 +599,6 @@ async def classify_api(
         return RestResponse(
             statusCode=500,
             shortMessage="Internal Server Error",
-            description=f"Lỗi xảy ra khi gọi AI classify: {e}",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(),
@@ -825,8 +818,7 @@ async def classify_api(
             # Bổ sung chi tiết lỗi từ exception vào description
             return RestResponse(
                 statusCode=422,
-                shortMessage="Unprocessable Entity",
-                description=f"AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp. | Chi tiết: {str(e)}",
+                shortMessage="Unprocessable Entity")}",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
@@ -839,7 +831,6 @@ async def classify_api(
             return RestResponse(
                 statusCode=422,
                 shortMessage="Unprocessable Entity",
-                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp. | Chi tiết: Không nhận được phản hồi hợp lệ từ AI.",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
@@ -863,7 +854,6 @@ async def classify_api(
             return RestResponse(
                 statusCode=422,
                 shortMessage="Unprocessable Entity",
-                description=f"API key không hợp lệ. Vui lòng kiểm tra lại API key. {api_key_info}",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
@@ -901,7 +891,6 @@ async def classify_api(
             return RestResponse(
                 statusCode=422,
                 shortMessage="Unprocessable Entity",
-                description="AI không thể tóm tắt thông tin từ tài liệu này. Có thể do định dạng không hỗ trợ hoặc nội dung không phù hợp.",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
@@ -959,7 +948,6 @@ async def classify_api(
         return RestResponse(
             statusCode=500,
             shortMessage="Internal Server Error",
-            description="Lỗi xảy ra khi gọi AI service. Vui lòng thử lại sau.",
             data={"error": error_message, "rawContent": preview},
             path=request.url.path,
             timestamp=datetime.now(),
@@ -969,7 +957,6 @@ async def classify_api(
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Tóm tắt hợp đồng thành công.",
         data=data_out,
         path=request.url.path,
         timestamp=datetime.now(),
@@ -1045,7 +1032,6 @@ async def get_gemini_config(request: Request):
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Đã lấy cấu hình Gemini thành công",
             data=config_data,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
@@ -1056,8 +1042,7 @@ async def get_gemini_config(request: Request):
         return RestResponse(
             apiVersion="v1",
             statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi lấy cấu hình Gemini: {str(e)}",
+            shortMessage="Internal Server Error")}",
             data=None,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
@@ -1085,8 +1070,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=200,
 #             shortMessage="Success",
-#             description="Gửi notification thành công",
-#             data=result.model_dump(),
+#             #             data=result.model_dump(),
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
 #             requestId=str(uuid.uuid4())
@@ -1096,7 +1080,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=500,
 #             shortMessage="Internal Server Error",
-#             description=f"Lỗi khi gửi notification: {str(e)}",
+#             )}",
 #             data=None,
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
@@ -1106,12 +1090,12 @@ event_service = EventService()
 # @router.get("/notifications/history", summary="Lịch sử notification", tags=["📧 API Thông báo"])
 # async def get_notification_history_api(
 #     request: Request,
-#     page: int = Query(1, ge=1, description="Số trang"),
-#     limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
-#     notification_type: str = Query(None, description="Loại notification"),
-#     status: str = Query(None, description="Trạng thái notification"),
-#     start_date: str = Query(None, description="Ngày bắt đầu (ISO format)"),
-#     end_date: str = Query(None, description="Ngày kết thúc (ISO format)")
+#     page: int = Query(1, ge=1),
+#     limit: int = Query(10, ge=1, le=100),
+#     notification_type: str = Query(None),
+#     status: str = Query(None),
+#     start_date: str = Query(None)"),
+#     end_date: str = Query(None)")
 # ):
 #     try:
 #         await notification_service.initialize()
@@ -1136,8 +1120,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=200,
 #             shortMessage="Success",
-#             description="Lấy lịch sử notification thành công",
-#             data=result,
+#             #             data=result,
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
 #             requestId=str(uuid.uuid4())
@@ -1147,7 +1130,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=500,
 #             shortMessage="Internal Server Error",
-#             description=f"Lỗi khi lấy lịch sử notification: {str(e)}",
+#             )}",
 #             data=None,
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
@@ -1166,8 +1149,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=201,
 #             shortMessage="Created",
-#             description="Tạo notification template thành công",
-#             data=result.model_dump(),
+#             #             data=result.model_dump(),
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
 #             requestId=str(uuid.uuid4())
@@ -1177,7 +1159,7 @@ event_service = EventService()
 #         return RestResponse(
 #             statusCode=500,
 #             shortMessage="Internal Server Error",
-#             description=f"Lỗi khi tạo notification template: {str(e)}",
+#             )}",
 #             data=None,
 #             path=request.url.path,
 #             timestamp=datetime.now(timezone.utc),
@@ -1197,8 +1179,7 @@ async def process_batch_api(
         # Tạo batch job
         job_request = BatchJobRequest(
             type="ai_processing",
-            name=f"Batch processing {len(batch_request.files)} files",
-            description=f"Xử lý {batch_request.processing_type} cho {len(batch_request.files)} files",
+            name=f"Batch processing {len(batch_request.files)} files")} files",
             data={
                 "files": batch_request.files,
                 "processing_type": batch_request.processing_type,
@@ -1222,7 +1203,6 @@ async def process_batch_api(
         return RestResponse(
             statusCode=201,
             shortMessage="Created",
-            description="Tạo batch job thành công",
             data=result.model_dump(),
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1232,8 +1212,7 @@ async def process_batch_api(
     except Exception as e:
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi tạo batch job: {str(e)}",
+            shortMessage="Internal Server Error")}",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1252,7 +1231,6 @@ async def get_batch_job_status_api(
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description="Lấy trạng thái batch job thành công",
             data=result.model_dump(),
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1262,8 +1240,7 @@ async def get_batch_job_status_api(
     except ValueError as e:
         return RestResponse(
             statusCode=404,
-            shortMessage="Not Found",
-            description=str(e),
+            shortMessage="Not Found"),
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1272,8 +1249,7 @@ async def get_batch_job_status_api(
     except Exception as e:
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi lấy trạng thái batch job: {str(e)}",
+            shortMessage="Internal Server Error")}",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1298,7 +1274,6 @@ async def get_batch_jobs_api(
         return RestResponse(
             statusCode=200,
             shortMessage="Success",
-            description="Retry OCR thành công",
             data=result,
             path=request.url.path,
             timestamp=datetime.now(),
@@ -1309,8 +1284,7 @@ async def get_batch_jobs_api(
         logger.error(f"Retry OCR failed: {str(e)}")
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi retry OCR: {str(e)}",
+            shortMessage="Internal Server Error")}",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(),
@@ -1323,7 +1297,6 @@ async def health_check():
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Service đang hoạt động bình thường",
         data={
             "status": "healthy",
             "service": "Automation Service",

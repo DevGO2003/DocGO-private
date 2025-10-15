@@ -12,10 +12,7 @@ from io import BytesIO
 logger = logging.getLogger(__name__)
 
 class DocumentProcessor:
-    """
-    Document Processor pipeline: OCR → Classify → Summary
-    Xử lý tài liệu từ upload đến hoàn thành
-    """
+    
     
     def __init__(self):
         self.ocr_service = OCRService()
@@ -35,19 +32,7 @@ class DocumentProcessor:
     
     async def process_document(self, file_id: str, document_id: str, file_type: str, 
                              s3_key: str, s3_bucket: str) -> Dict[str, Any]:
-        """
-        Xử lý tài liệu hoàn chỉnh: Download → OCR → Classify → Summary
         
-        Args:
-            file_id: ID của file
-            document_id: ID của document
-            file_type: Loại file (image/jpeg, application/pdf, etc.)
-            s3_key: S3 key của file
-            s3_bucket: S3 bucket
-            
-        Returns:
-            Kết quả xử lý
-        """
         result = {
             "document_id": document_id,
             "file_id": file_id,
@@ -118,7 +103,7 @@ class DocumentProcessor:
             return result
     
     async def _download_file_from_s3(self, s3_key: str, s3_bucket: str) -> Optional[bytes]:
-        """Download file từ S3"""
+        
         try:
             response = self.s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
             file_bytes = response['Body'].read()
@@ -128,7 +113,7 @@ class DocumentProcessor:
             return None
     
     async def _process_ocr(self, file_bytes: bytes, file_type: str) -> str:
-        """Xử lý OCR - hỗ trợ nhiều loại file"""
+        
         try:
             if not self.ocr_service.is_tesseract_available():
                 logger.warning("Tesseract OCR is not available, returning empty text")
@@ -144,7 +129,7 @@ class DocumentProcessor:
             return ""
     
     def _classify_by_file_type(self, file_type: str) -> Dict[str, Any]:
-        """Phân loại dựa vào loại file"""
+        
         if file_type == 'application/pdf':
             return {
                 "document_type": "GENERAL_FILE",
@@ -185,35 +170,14 @@ class DocumentProcessor:
             }
     
     async def _classify_document(self, text: str, file_type: str) -> Dict[str, Any]:
-        """Phân loại tài liệu - dựa vào cả nội dung và loại file"""
+        
         try:
             # Phân loại dựa vào file type trước
             file_type_classification = self._classify_by_file_type(file_type)
             
             # Nếu có text từ OCR, sử dụng AI để phân loại chi tiết
             if text and len(text.strip()) >= 10:
-                classification_prompt = f"""
-                Phân tích tài liệu sau và xác định loại tài liệu:
-                
-                Loại file: {file_type}
-                Nội dung: {text[:2000]}...
-                
-                Hãy phân loại tài liệu này thành một trong các loại sau:
-                1. CONTRACT - Hợp đồng, thỏa thuận, giao kết
-                2. INVOICE - Hóa đơn, bill
-                3. RECEIPT - Biên lai, phiếu thu
-                4. REPORT - Báo cáo, tài liệu báo cáo
-                5. CERTIFICATE - Chứng chỉ, bằng cấp
-                6. GENERAL_FILE - Tài liệu chung khác
-                
-                Trả về kết quả dưới dạng JSON:
-                {{
-                    "document_type": "CONTRACT|INVOICE|RECEIPT|REPORT|CERTIFICATE|GENERAL_FILE",
-                    "confidence": 0.0-1.0,
-                    "reasoning": "Lý do phân loại",
-                    "key_terms": ["từ khóa", "quan trọng"]
-                }}
-                """
+                classification_prompt = f
                 
                 # Gọi AI service để phân loại
                 ai_result = await self.ai_service.classify_document(classification_prompt)
@@ -244,23 +208,9 @@ class DocumentProcessor:
             }
     
     async def _summarize_contract(self, text: str) -> str:
-        """Tóm tắt hợp đồng"""
+        
         try:
-            summary_prompt = f"""
-            Tóm tắt hợp đồng sau bằng tiếng Việt:
-            
-            {text[:4000]}...
-            
-            Hãy tóm tắt các điểm chính:
-            1. Loại hợp đồng
-            2. Các bên tham gia
-            3. Giá trị/giao dịch
-            4. Thời hạn
-            5. Điều khoản quan trọng
-            6. Rủi ro cần lưu ý
-            
-            Trả về tóm tắt ngắn gọn, dễ hiểu.
-            """
+            summary_prompt = f
             
             summary = await self.ai_service.process_with_gemini(summary_prompt)
             return summary
@@ -270,7 +220,7 @@ class DocumentProcessor:
             return f"Không thể tóm tắt hợp đồng: {str(e)}"
     
     async def _update_document_entity(self, document_id: str, result: Dict[str, Any]):
-        """Update Document Entity qua HTTP call"""
+        
         try:
             update_data = {
                 "ocrText": result.get("ocr_text", ""),
@@ -298,15 +248,7 @@ class DocumentProcessor:
             raise
     
     async def retry_ocr(self, document_id: str) -> Dict[str, Any]:
-        """
-        Retry OCR cho document đã tồn tại
         
-        Args:
-            document_id: ID của document
-            
-        Returns:
-            Kết quả retry OCR
-        """
         try:
             logger.info(f"Retrying OCR for document: {document_id}")
             

@@ -10,9 +10,10 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractStatus, translateContractType, translateContractTag } from '@/utils/tagTranslations'
 import DocumentsFilters from './_components/DocumentsFilters'
 import DocumentsTable from './_components/DocumentsTable'
+import { fetchFiles } from './_services/file-list-api'
+import { mapFileApiPageToPaginatedDocuments } from './_services/file-list-mapper'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 import { tagAPI } from '@/lib/api'
-import { useDocumentsQuery } from './_hooks/useDocumentsQuery'
 import { DEFAULT_PAGE_SIZE } from './_constants'
 
 type ContractItem = {
@@ -33,6 +34,7 @@ type ContractItem = {
   expiryDate: string
   riskLevel?: string
   reminders?: any[]
+  documentType?: string | null
 }
 
 // local-only view model to match existing CustomTable props
@@ -107,7 +109,8 @@ export default function DocumentsPage() {
   // switched to hook-based fetching
 
   // Hàm refresh riêng với loading state và toast notification
-  const refreshData = async () => { setRefreshing(true); try { refetch(); } finally { setRefreshing(false) } }
+  const [reloadTick, setReloadTick] = useState(0)
+  const refreshData = async () => { setRefreshing(true); try { setReloadTick(x => x + 1) } finally { setRefreshing(false) } }
 
   // Load available tags once
   useEffect(() => {
@@ -143,51 +146,63 @@ export default function DocumentsPage() {
     loadTags()
   }, [])
 
-  // hook binding to params
-  const { data: queryData, loading: queryLoading, error: queryError, params: q, setParams, refetch } = useDocumentsQuery({
-        pageSize,
-    sortBy,
-    sortDirection: sortDirection.toUpperCase() as 'ASC' | 'DESC',
-    searchTerm: debouncedSearch,
-        status,
-        type,
-    tags: selectedTags,
-  })
   useEffect(() => {
-    setLoading(queryLoading)
-    const mapped = (queryData?.content || []).map(c => ({
-      id: String(c.id),
-      title: c.title,
-      description: c.description,
-      status: c.status,
-      contractType: c.contractType,
-      tags: c.tags || [],
-      contractNumber: c.contractNumber,
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt,
-      creatorId: 0,
-      parties: c.parties,
-      totalValue: c.totalValue,
-      currency: c.currency,
-      effectiveDate: c.effectiveDate,
-      expiryDate: c.expiryDate,
-      riskLevel: c.riskLevel,
-      reminders: [],
-    }))
-    setItems(mapped)
-    setDisplayedItems(mapped)
-    setAllItems(mapped)
-    setTotalPages(queryData?.totalPages || 1)
-    setHasMoreData(mapped.length < (queryData?.totalElements || 0))
-  }, [queryLoading, queryData])
+    let aborted = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const payload = await fetchFiles({
+          page,
+          size: pageSize,
+          sortBy,
+          sortDirection: (sortDirection.toUpperCase() as 'ASC' | 'DESC'),
+          includeDeleted: false,
+          view: 'full',
+          searchTerm: debouncedSearch || undefined,
+          documentType: activeTab === 'contract' ? 'CONTRACT' : undefined,
+        })
+        if (aborted) return
+        const paginated = mapFileApiPageToPaginatedDocuments(payload)
+        const mapped = paginated.content.map(c => ({
+          id: String(c.id),
+          title: c.title,
+          description: c.description,
+          status: c.status,
+          contractType: c.contractType,
+          tags: c.tags || [],
+          contractNumber: c.contractNumber,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          creatorId: 0,
+          parties: c.parties,
+          totalValue: c.totalValue,
+          currency: c.currency,
+          effectiveDate: c.effectiveDate,
+          expiryDate: c.expiryDate,
+          riskLevel: c.riskLevel,
+          reminders: [],
+          documentType: (c as any).documentType,
+        }))
+        setItems(mapped)
+        setDisplayedItems(mapped)
+        setAllItems(mapped)
+        setTotalPages(paginated.totalPages || 1)
+        setHasMoreData(mapped.length < (paginated.totalElements || 0))
+      } catch (e:any) {
+        console.error('[Documents] Lỗi tải danh sách:', e)
+        setItems([])
+        setDisplayedItems([])
+        setAllItems([])
+        setTotalPages(0)
+        setHasMoreData(false)
+      } finally {
+        if (!aborted) setLoading(false)
+      }
+    }
+    load()
+    return () => { aborted = true }
+  }, [page, pageSize, sortBy, sortDirection, debouncedSearch, activeTab, reloadTick])
 
-  // Refetch data when activeTab changes
-  useEffect(() => {
-    setParams(prev => ({
-      ...prev,
-      documentType: activeTab === 'contract' ? 'CONTRACT' : undefined
-    }))
-  }, [activeTab, setParams])
 
   // Separate effect for search input to update debouncedSearch
   useEffect(() => {

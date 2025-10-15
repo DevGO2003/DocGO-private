@@ -1,7 +1,4 @@
-"""
-Progress Manager for tracking document processing progress
-Manages progress state in memory with support for multiple connections per document
-"""
+
 
 import asyncio
 import time
@@ -12,10 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ProgressManager:
-    """
-    Manages progress state for document processing
-    Supports multiple connections per document_id
-    """
+    
     
     def __init__(self):
         # In-memory storage: {document_id: ProgressState}
@@ -26,16 +20,7 @@ class ProgressManager:
         self._lock = asyncio.Lock()
     
     async def set_progress(self, document_id: str, progress: int, stage: str, message: str = "", metadata: Optional[Dict] = None):
-        """
-        Set progress for a document
         
-        Args:
-            document_id: Document ID
-            progress: Progress percentage (0-100)
-            stage: Current processing stage
-            message: Human-readable message
-            metadata: Additional metadata
-        """
         async with self._lock:
             self._progress_states[document_id] = {
                 "progress": progress,
@@ -49,26 +34,12 @@ class ProgressManager:
             logger.info(f"Progress updated for {document_id}: {progress}% - {stage}")
     
     async def get_progress(self, document_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get current progress for a document
         
-        Args:
-            document_id: Document ID
-            
-        Returns:
-            Progress state dict or None if not found
-        """
         async with self._lock:
             return self._progress_states.get(document_id)
     
     async def add_connection(self, document_id: str, websocket):
-        """
-        Add WebSocket connection for a document
         
-        Args:
-            document_id: Document ID
-            websocket: WebSocket connection
-        """
         async with self._lock:
             if document_id not in self._connections:
                 self._connections[document_id] = []
@@ -76,13 +47,7 @@ class ProgressManager:
             logger.info(f"Added connection for {document_id}. Total connections: {len(self._connections[document_id])}")
     
     async def remove_connection(self, document_id: str, websocket):
-        """
-        Remove WebSocket connection for a document
         
-        Args:
-            document_id: Document ID
-            websocket: WebSocket connection
-        """
         async with self._lock:
             if document_id in self._connections:
                 try:
@@ -94,26 +59,12 @@ class ProgressManager:
                     pass  # Connection not in list
     
     async def get_connections(self, document_id: str) -> list:
-        """
-        Get all connections for a document
         
-        Args:
-            document_id: Document ID
-            
-        Returns:
-            List of WebSocket connections
-        """
         async with self._lock:
             return self._connections.get(document_id, [])
     
     async def broadcast_progress(self, document_id: str, data: Dict[str, Any]):
-        """
-        Broadcast progress update to all connections for a document
         
-        Args:
-            document_id: Document ID
-            data: Progress data to broadcast
-        """
         connections = await self.get_connections(document_id)
         
         if not connections:
@@ -135,12 +86,7 @@ class ProgressManager:
             await self.remove_connection(document_id, websocket)
     
     async def cleanup_old_progress(self, max_age_seconds: int = 3600):
-        """
-        Clean up old progress states
         
-        Args:
-            max_age_seconds: Maximum age in seconds (default: 1 hour)
-        """
         current_time = time.time()
         async with self._lock:
             to_remove = []
@@ -155,22 +101,12 @@ class ProgressManager:
                 logger.info(f"Cleaned up old progress for {doc_id}")
     
     async def get_all_progress(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get all current progress states (for debugging)
         
-        Returns:
-            Dict of all progress states
-        """
         async with self._lock:
             return self._progress_states.copy()
     
     async def clear_progress(self, document_id: str):
-        """
-        Clear progress for a specific document
         
-        Args:
-            document_id: Document ID
-        """
         async with self._lock:
             if document_id in self._progress_states:
                 del self._progress_states[document_id]

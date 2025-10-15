@@ -1,7 +1,4 @@
-"""
-WebSocket Manager for handling real-time progress updates
-Manages WebSocket connections and broadcasts progress updates
-"""
+
 
 import asyncio
 import logging
@@ -15,9 +12,7 @@ from .progress_manager import progress_manager
 logger = logging.getLogger(__name__)
 
 class WebSocketManager:
-    """
-    Manages WebSocket connections for real-time progress updates
-    """
+    
     
     def __init__(self):
         # Connection tracking: {document_id: [websocket_connections]}
@@ -26,13 +21,7 @@ class WebSocketManager:
         self._lock = asyncio.Lock()
     
     async def connect(self, websocket: WebSocket, document_id: str):
-        """
-        Connect a WebSocket to a document's progress stream
         
-        Args:
-            websocket: WebSocket connection
-            document_id: Document ID to track
-        """
         try:
             await websocket.accept()
             
@@ -56,13 +45,7 @@ class WebSocketManager:
             await self.disconnect(websocket, document_id)
     
     async def disconnect(self, websocket: WebSocket, document_id: str):
-        """
-        Disconnect a WebSocket from a document's progress stream
         
-        Args:
-            websocket: WebSocket connection
-            document_id: Document ID
-        """
         try:
             async with self._lock:
                 if document_id in self._connections:
@@ -82,16 +65,7 @@ class WebSocketManager:
             logger.error(f"Failed to disconnect WebSocket for {document_id}: {e}")
     
     async def broadcast_progress(self, document_id: str, progress: int, stage: str, message: str = "", metadata: Optional[Dict] = None):
-        """
-        Broadcast progress update to all connections for a document
         
-        Args:
-            document_id: Document ID
-            progress: Progress percentage (0-100)
-            stage: Current processing stage
-            message: Human-readable message
-            metadata: Additional metadata
-        """
         # Update progress in manager
         await progress_manager.set_progress(document_id, progress, stage, message, metadata)
         
@@ -127,14 +101,7 @@ class WebSocketManager:
             await self.disconnect(websocket, document_id)
     
     async def _send_progress_update(self, websocket: WebSocket, document_id: str, data: Dict[str, Any]):
-        """
-        Send progress update to a specific WebSocket
         
-        Args:
-            websocket: WebSocket connection
-            document_id: Document ID
-            data: Progress data
-        """
         try:
             await websocket.send_json(data)
         except WebSocketDisconnect:
@@ -145,32 +112,17 @@ class WebSocketManager:
             raise
     
     async def get_connection_count(self, document_id: str) -> int:
-        """
-        Get number of connections for a document
         
-        Args:
-            document_id: Document ID
-            
-        Returns:
-            Number of connections
-        """
         connections = await progress_manager.get_connections(document_id)
         return len(connections)
     
     async def get_all_connections(self) -> Dict[str, int]:
-        """
-        Get all connections count by document ID
         
-        Returns:
-            Dict of document_id -> connection_count
-        """
         async with self._lock:
             return {doc_id: len(connections) for doc_id, connections in self._connections.items()}
     
     async def cleanup_disconnected(self):
-        """
-        Clean up disconnected WebSocket connections
-        """
+        
         async with self._lock:
             for document_id, connections in list(self._connections.items()):
                 active_connections = []
@@ -190,14 +142,7 @@ class WebSocketManager:
                     logger.info(f"Cleaned up all connections for {document_id}")
     
     async def send_error(self, document_id: str, error_message: str, error_code: str = "PROCESSING_ERROR"):
-        """
-        Send error message to all connections for a document
         
-        Args:
-            document_id: Document ID
-            error_message: Error message
-            error_code: Error code
-        """
         error_data = {
             "documentId": document_id,
             "error": True,
@@ -215,13 +160,7 @@ class WebSocketManager:
                 await self.disconnect(websocket, document_id)
     
     async def send_completion(self, document_id: str, result_data: Optional[Dict] = None):
-        """
-        Send completion message to all connections for a document
         
-        Args:
-            document_id: Document ID
-            result_data: Final result data
-        """
         completion_data = {
             "documentId": document_id,
             "progress": 100,

@@ -8,9 +8,7 @@ import com.devgo2003.docgo.file_service.service.DocumentService;
 import com.devgo2003.docgo.file_service.repository.DocumentRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+ 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -54,10 +52,7 @@ public class DocumentController {
 
     @Operation(
             summary = "Tạo mới tài liệu",
-            description = "Tạo bản ghi Document theo chuẩn RestResponse, luôn trả HTTP 200 và statusCode 201",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Document created")
-            }
+            description = "Tạo bản ghi Document theo chuẩn RestResponse, luôn trả HTTP 200 và statusCode 201"
     )
     @PostMapping
     public ResponseEntity<RestResponse<DocumentEntity>> createDocument(@RequestBody DocumentEntity payload) {
@@ -159,13 +154,7 @@ public class DocumentController {
             🛣️ path
             Loại: string
             Mô tả: Đường dẫn API được gọi
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Documents retrieved successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
-                    @ApiResponse(responseCode = "204", description = "No documents found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
+            """
     )
     @GetMapping
     public ResponseEntity<RestResponse<Page<ApiDocument>>> getAllDocuments(
@@ -281,13 +270,7 @@ public class DocumentController {
             📝 data
             Loại: DocumentEntity
             Mô tả: Thông tin chi tiết tài liệu
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Document retrieved successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DocumentEntity.class))),
-                    @ApiResponse(responseCode = "404", description = "Document not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
+            """
     )
     @GetMapping("/{id}")
     public ResponseEntity<?> getDocumentById(
@@ -376,13 +359,7 @@ public class DocumentController {
             📝 **data**
             - **Loại**: DocumentEntity
             - **Mô tả**: Document đã được cập nhật
-            """,
-            responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Document updated successfully"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Document not found"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
-            }
+            """
     )
     @PutMapping("/{id}/processing-result")
     public ResponseEntity<RestResponse<DocumentEntity>> updateProcessingResult(

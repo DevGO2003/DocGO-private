@@ -1,64 +1,127 @@
-<!-- 33aa7c24-f656-47f9-a5b2-37df5b9a6db0 f189ba15-343a-44cd-ac1a-600446c1269d -->
-# Kế hoạch: Chuẩn hóa schema document card và UI
+<!-- 33aa7c24-f656-47f9-a5b2-37df5b9a6db0 b9963e00-dcba-4e6c-95e3-c96b3cdf2ee5 -->
+# FE render documents list from File Management Service
 
-## Phạm vi
-- Cập nhật schema tài liệu theo yêu cầu: `documentType` là MIME/extension; `category` là loại nghiệp vụ (ví dụ: HOP_DONG_DICH_VU).
-- Migration full dữ liệu hiện có; logic xác định category: ưu tiên user metadata, fallback AI.
-- Cập nhật API Document Service, Automation Service, Frontend hiển thị card.
+## Scope
+Render `/documents` using `GET /api/v1/file-management-service/v1/files` with pagination/sort. Keep existing cards (`ContractCard`/`GeneralFileCard`).
 
-## Thay đổi chính
-### 1) Backend – Document Management Service (Spring)
-- Sửa entity `DocumentEntity` và DTO response:
-  - `documentType: string` (MIME), `extension: string`, `category: enum|string`.
-  - Thêm `contractMetadata` (optional) chỉ khi category là hợp đồng.
-- Cập nhật repository/query nếu có filter theo documentType cũ.
-- Adapter mapping từ DB → API response theo chuẩn mới.
-- Endpoint `GET /documents` vẫn giữ params cũ; không trả HTTP 204, dùng statusCode 204 trong body như tiêu chuẩn hiện có.
+## Changes
 
-### 2) Backend – Automation Service (FastAPI)
-- Khi upload, điền `documentType` từ `file.content_type`, `extension` từ tên file.
-- Xác định `category` theo chiến lược kết hợp (user metadata > AI fallback).
-- Nếu category là hợp đồng, tạo `contractMetadata` (effectiveDate/expiryDate/totalValue/currency) từ AI hoặc payload.
-- Publish Kafka event với payload chuẩn mới để đồng bộ sang Document Service.
+### 1) Types (reuse)
+- Reuse `FileApiData` and `RestResponse` from `/_types/file-api.ts`.
+- Add a lightweight `FileApiPage<T>` type for list pagination if needed.
 
-### 3) Migration dữ liệu (full)
-- Viết job migration (1 lần) đọc tất cả documents:
-  - Điền `documentType` từ metadata/s3Key/filename → map MIME.
-  - Suy luận `extension` từ filename.
-  - Xác định `category`: nếu có dữ liệu hợp đồng (effective/expiry/totalValue) → HOP_DONG_CHUNG; nếu có nhãn AI → map tương ứng; nếu có user metadata → ưu tiên.
-  - Chuẩn hóa record và lưu lại.
-- Ghi log progress và id các bản ghi lỗi để retry.
+### 2) Service (Data access)
+- Add `frontend/web-app/src/app/(documents)/documents/_services/file-list-api.ts` with:
+  - `fetchFiles(params)` → calls list endpoint with `page,size,sortBy,sortDirection,includeDeleted=false,view=full`.
+  - Returns parsed JSON `RestResponse<Page<FileApiData>>`.
 
-### 4) Frontend – web-app
-- Cập nhật types `Document` theo schema mới.
-- `DocumentsTable.tsx`: chọn card theo `category` (bắt đầu bằng `HOP_DONG_` → `ContractCard`, ngược lại `GeneralFileCard`).
-- `ContractCard.tsx`: dùng `contractMetadata.*` thay cho field rải rác; fallback hiển thị `N/A` nếu thiếu.
-- Hiển thị badge loại file theo `extension` (fallback `documentType`).
+### 3) Mapper (API → UI list)
+- Add `frontend/web-app/src/app/(documents)/documents/_services/file-list-mapper.ts`:
+  - `mapFileApiToUiDocument` (reuse from detail) for each item.
+  - `mapFileApiPageToPaginatedDocuments(resp)` → `{ content, totalElements, totalPages }` for UI.
+  - Ensure `documentType` is passed through (`CONTRACT` vs GENERAL/null) and `contractMetadata` populated.
 
-### 5) API Contract & Docs
-- Cập nhật OpenAPI/Swagger mô tả output mới (Java SpringDoc + FastAPI docs) theo Event & API Standards.
-- Đảm bảo backward-compat tạm thời: nếu client cũ đọc trường cũ, thêm mapper tạm (deprecate) trong 1 phiên bản.
+### 4) Controller (List page loader)
+- Update `frontend/web-app/src/app/(documents)/documents/page.tsx`:
+  - Server component preferred: read searchParams (`page`, `size`, `sortBy`, `sortDirection`), default `page=0,size=10,sortBy=createdAt,sortDirection=DESC`.
+  - Call `fetchFiles`, map via `mapFileApiPageToPaginatedDocuments`.
+  - Render existing `DocumentsTable` with mapped `Paginated<Document>`.
+  - Ensure link to detail: `/documents/${doc.id}`.
 
-### 6) Kiểm thử
-- Unit + Integration cho mapping/migration.
-- E2E: upload nhỏ (<2MB) sync và lớn (>=2MB) async, xác minh WebSocket progress, xác minh hiển thị UI mới.
-- Kiểm tra `getAllDocuments` trả đúng dữ liệu sau migration.
+### 5) DocumentsTable compatibility
+- Verify `DocumentsTable.tsx` expects `Paginated<Document>` and decides card: `doc.documentType === 'CONTRACT' ? <ContractCard/> : <GeneralFileCard/>`.
+- If it needs props rename/shape, adapt minimal shim in page.tsx before passing.
 
-## Rủi ro & Giảm thiểu
-- Sai map MIME: dùng thư viện chuẩn + danh sách override.
-- Dữ liệu thiếu contract fields: set `category` non-contract, hoặc `HOP_DONG_CHUNG` và `contractMetadata` rỗng, ghi log để xử lý thủ công.
-- Tương thích ngược: giữ field cũ ở DTO trong 1 phiên bản với @JsonProperty(access = READ_ONLY) và đánh dấu deprecated (tuỳ chọn), hoặc chỉ cập nhật FE đồng bộ.
+### 6) Query/pagination controls
+- Preserve current UI controls (if any). If none, simple pager:
+  - `Next`/`Prev` `Link` using `page`/`size` out of `searchParams`.
 
+### 7) Env/config
+- Reuse `NEXT_PUBLIC_FILE_MGMT_BASE_URL`.
+
+### 8) Tests
+- Unit: list mapper maps `CONTRACT` and GENERAL items correctly.
+- Integration: list page renders both card types; pagination total displayed correctly.
+
+## Snippets
+
+### file-list-api.ts
+```ts
+import type { FileApiResponse } from '../_types/file-api'
+const BASE_URL = process.env.NEXT_PUBLIC_FILE_MGMT_BASE_URL || 'http://localhost:8002'
+export async function fetchFiles(params: { page?: number; size?: number; sortBy?: string; sortDirection?: 'ASC'|'DESC'; includeDeleted?: boolean; view?: 'full'|'card'|'table' }): Promise<any> {
+  const q = new URLSearchParams({
+    page: String(params.page ?? 0),
+    size: String(params.size ?? 10),
+    sortBy: params.sortBy ?? 'createdAt',
+    sortDirection: params.sortDirection ?? 'DESC',
+    includeDeleted: String(params.includeDeleted ?? false),
+    view: params.view ?? 'full',
+  })
+  const url = `${BASE_URL}/api/v1/file-management-service/v1/files?${q.toString()}`
+  const res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+  if (!res.ok) throw new Error(`Fetch files failed: ${res.status} ${res.statusText}`)
+  return res.json()
+}
+```
+
+### file-list-mapper.ts
+```ts
+import type { Paginated, Document } from '../_types'
+import type { FileApiData } from '../_types/file-api'
+import { mapFileApiToUiDocument } from './file-mapper'
+
+export function mapFileApiPageToPaginatedDocuments(payload: any): Paginated<Document> {
+  const data = payload?.data
+  if (Array.isArray(data?.content)) {
+    return {
+      content: data.content.map((x: FileApiData) => mapFileApiToUiDocument(x)),
+      totalElements: Number(data.totalElements ?? 0),
+      totalPages: Number(data.totalPages ?? 1),
+    }
+  }
+  return { content: [], totalElements: 0, totalPages: 0 }
+}
+```
+
+### documents/page.tsx
+```ts
+import { fetchFiles } from './_services/file-list-api'
+import { mapFileApiPageToPaginatedDocuments } from './_services/file-list-mapper'
+import DocumentsTable from './_components/DocumentsTable'
+
+export default async function DocumentsPage({ searchParams }: { searchParams: Record<string, string|undefined> }) {
+  const page = Number(searchParams.page ?? 0)
+  const size = Number(searchParams.size ?? 10)
+  const sortBy = String(searchParams.sortBy ?? 'createdAt')
+  const sortDirection = (searchParams.sortDirection === 'ASC' ? 'ASC' : 'DESC') as 'ASC'|'DESC'
+  let payload
+  try { payload = await fetchFiles({ page, size, sortBy, sortDirection, includeDeleted: false, view: 'full' }) } catch (e:any) {
+    return <div className="p-6 text-red-600">Lỗi tải danh sách: {e?.message}</div>
+  }
+  const paginated = mapFileApiPageToPaginatedDocuments(payload)
+  return (
+    <div className="p-4">
+      <DocumentsTable paginatedDocuments={paginated} />
+    </div>
+  )
+}
+```
+
+## Edge cases
+- `overview.documentType` null → mapper sets `documentType` undefined → `GeneralFileCard`.
+- Missing `file.type/size` → undefined; cards already handle fallback.
+- Non-200 → hiển thị lỗi gọn.
+
+## Acceptance
+- `/documents` hiển thị danh sách từ File API, phân trang hoạt động, card CONTRACT hiện trường hợp hợp đồng, GENERAL hiện thông tin file.
 
 ### To-dos
 
-- [ ] Cập nhật DocumentEntity/DTO: documentType, extension, category, contractMetadata
-- [ ] Update mapper từ DB → API response theo schema mới
-- [ ] Automation Service set documentType/extension và xác định category (metadata > AI)
-- [ ] Chuẩn hóa payload Kafka đồng bộ sang Document Service
-- [ ] Viết job migration full chuẩn hóa dữ liệu cũ
-- [ ] Cập nhật types FE theo schema mới
-- [ ] Sửa DocumentsTable chọn card theo category; ContractCard dùng contractMetadata
-- [ ] Cập nhật Swagger/OpenAPI mô tả schema mới
-- [ ] Unit/Integration test cho mapper, migration, upload
-- [ ] E2E: upload sync/async, WebSocket progress, FE hiển thị
+- [ ] Confirm list API types reuse or add FileApiPage<T>
+- [ ] Create fetchFiles service for list endpoint
+- [ ] Map list response to Paginated<Document>
+- [ ] Update /documents/page.tsx to load list from File API
+- [ ] Verify DocumentsTable props/conditional render for cards
+- [ ] Unit test list mapper for CONTRACT/GENERAL items
+- [ ] Integration test list page loader renders cards correctly

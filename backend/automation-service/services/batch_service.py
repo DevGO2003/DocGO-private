@@ -28,7 +28,7 @@ class BatchService:
         self.executor = ThreadPoolExecutor(max_workers=self.batch_config["max_workers"])
         
     async def initialize(self):
-        """Khởi tạo kết nối database và Redis"""
+        
         try:
             # MongoDB connection removed
             
@@ -44,7 +44,7 @@ class BatchService:
             raise
 
     async def close(self):
-        """Đóng kết nối"""
+        
         # MongoDB client removed
         if self.redis_client:
             await self.redis_client.close()
@@ -52,7 +52,7 @@ class BatchService:
             self.executor.shutdown(wait=True)
 
     async def create_batch_job(self, request: BatchJobRequest) -> BatchJobResponse:
-        """Tạo batch job mới"""
+        
         try:
             job_id = str(uuid.uuid4())
             now = datetime.now(timezone.utc)
@@ -92,7 +92,7 @@ class BatchService:
             raise
 
     async def get_batch_job_status(self, job_id: str) -> BatchJobResponse:
-        """Lấy trạng thái batch job"""
+        
         try:
             job_doc = await self.mongodb_db_instance[self.collections["batch_jobs"]].find_one(
                 {"id": job_id}
@@ -108,7 +108,7 @@ class BatchService:
             raise
 
     async def process_batch_job(self, job_id: str):
-        """Xử lý batch job"""
+        
         try:
             # Lấy job data
             job_doc = await self.mongodb_db_instance[self.collections["batch_jobs"]].find_one(
@@ -152,7 +152,7 @@ class BatchService:
             raise
 
     async def _execute_job(self, job: BatchJobResponse) -> Dict[str, Any]:
-        """Thực thi job theo loại"""
+        
         if job.type == BatchJobType.AI_PROCESSING:
             return await self._execute_ai_processing_job(job)
         elif job.type == BatchJobType.NOTIFICATION_SEND:
@@ -163,7 +163,7 @@ class BatchService:
             raise ValueError(f"Unsupported job type: {job.type}")
 
     async def _execute_ai_processing_job(self, job: BatchJobResponse) -> Dict[str, Any]:
-        """Thực thi AI processing job"""
+        
         try:
             files = job.data.get("files", [])
             processing_type = job.data.get("processing_type", "extract")
@@ -218,7 +218,7 @@ class BatchService:
             raise
 
     async def _execute_notification_job(self, job: BatchJobResponse) -> Dict[str, Any]:
-        """Thực thi notification job"""
+        
         try:
             notifications = job.data.get("notifications", [])
             results = []
@@ -244,7 +244,7 @@ class BatchService:
             raise
 
     async def _execute_file_processing_job(self, job: BatchJobResponse) -> Dict[str, Any]:
-        """Thực thi file processing job"""
+        
         try:
             files = job.data.get("files", [])
             results = []
@@ -269,22 +269,22 @@ class BatchService:
             raise
 
     async def _extract_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
-        """Extract nội dung file"""
+        
         # Implement file extraction logic
         return {"extracted_text": "Sample extracted text"}
 
     async def _summarize_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
-        """Summarize nội dung file"""
+        
         # Implement file summarization logic
         return {"summary": "Sample summary"}
 
     async def _classify_file_content(self, file_data: Dict[str, Any], ai_service: AutomationService) -> Dict[str, Any]:
-        """Classify nội dung file"""
+        
         # Implement file classification logic
         return {"classification": "contract", "confidence": 0.95}
 
     async def _add_to_queue(self, job_id: str, priority: BatchJobPriority):
-        """Thêm job vào Redis queue"""
+        
         try:
             queue_name = self.batch_config["queue_name"]
             priority_score = self._get_priority_score(priority)
@@ -299,7 +299,7 @@ class BatchService:
             raise
 
     def _get_priority_score(self, priority: BatchJobPriority) -> int:
-        """Chuyển đổi priority thành score cho Redis sorted set"""
+        
         priority_scores = {
             BatchJobPriority.URGENT: 1,
             BatchJobPriority.HIGH: 2,
@@ -319,7 +319,7 @@ class BatchService:
         result: Optional[Dict[str, Any]] = None,
         error_message: Optional[str] = None
     ):
-        """Cập nhật trạng thái job"""
+        
         update_data = {"status": status}
         if progress is not None:
             update_data["progress"] = progress
@@ -340,7 +340,7 @@ class BatchService:
         )
 
     async def _update_job_progress(self, job_id: str, progress: int, current_item: str = None):
-        """Cập nhật tiến độ job"""
+        
         update_data = {"progress": progress}
         if current_item:
             update_data["current_item"] = current_item
@@ -360,7 +360,7 @@ class BatchService:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None
     ) -> Dict[str, Any]:
-        """Lấy danh sách batch jobs"""
+        
         try:
             # Build filter
             filter_dict = {}
@@ -403,7 +403,7 @@ class BatchService:
             raise
 
     async def cancel_batch_job(self, job_id: str) -> bool:
-        """Hủy batch job"""
+        
         try:
             # Cập nhật trạng thái thành CANCELLED
             await self._update_job_status(
@@ -421,7 +421,7 @@ class BatchService:
             return False
 
     async def retry_batch_job(self, job_id: str) -> bool:
-        """Retry batch job"""
+        
         try:
             # Reset job status
             await self._update_job_status(

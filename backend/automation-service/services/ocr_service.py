@@ -12,10 +12,7 @@ from io import BytesIO
 logger = logging.getLogger(__name__)
 
 class OCRService:
-    """
-    OCR Service sử dụng Tesseract để trích xuất văn bản từ hình ảnh và PDF
-    Hỗ trợ tiếng Việt và tiếng Anh
-    """
+    
     
     def __init__(self):
         # Cấu hình Tesseract path
@@ -29,7 +26,7 @@ class OCRService:
         logger.info(f"OCR Service initialized with Tesseract path: {self.tesseract_path}")
     
     def _get_tesseract_path(self) -> Optional[str]:
-        """Tìm đường dẫn Tesseract executable"""
+        
         possible_paths = [
             "/usr/bin/tesseract",  # Linux
             "/usr/local/bin/tesseract",  # macOS
@@ -54,15 +51,7 @@ class OCRService:
         return None
     
     def extract_text_from_image(self, image_bytes: bytes) -> str:
-        """
-        Trích xuất văn bản từ hình ảnh (JPG, PNG, etc.)
         
-        Args:
-            image_bytes: Dữ liệu hình ảnh dạng bytes
-            
-        Returns:
-            Văn bản được trích xuất
-        """
         try:
             logger.info("Starting OCR extraction from image")
             
@@ -91,15 +80,7 @@ class OCRService:
             raise Exception(f"OCR extraction failed: {str(e)}")
     
     def extract_text_from_pdf(self, pdf_bytes: bytes) -> str:
-        """
-        Trích xuất văn bản từ PDF (cả PDF thông thường và PDF scan)
         
-        Args:
-            pdf_bytes: Dữ liệu PDF dạng bytes
-            
-        Returns:
-            Văn bản được trích xuất
-        """
         try:
             logger.info("Starting PDF text extraction")
             
@@ -141,7 +122,7 @@ class OCRService:
             raise Exception(f"PDF text extraction failed: {str(e)}")
     
     def _extract_text_from_pdf_direct(self, pdf_bytes: bytes) -> str:
-        """Trích xuất văn bản trực tiếp từ PDF (không OCR)"""
+        
         pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_bytes))
         text = ""
         
@@ -153,16 +134,7 @@ class OCRService:
         return text
     
     def extract_text_from_file(self, file_bytes: bytes, file_type: str) -> str:
-        """
-        Trích xuất văn bản từ file dựa trên loại file - hỗ trợ nhiều loại file
         
-        Args:
-            file_bytes: Dữ liệu file dạng bytes
-            file_type: Loại file (image/jpeg, image/png, application/pdf, etc.)
-            
-        Returns:
-            Văn bản được trích xuất
-        """
         logger.info(f"Extracting text from file type: {file_type}")
         
         # Hình ảnh - hỗ trợ nhiều format
@@ -225,7 +197,7 @@ class OCRService:
                 return ""
     
     def _clean_text(self, text: str) -> str:
-        """Làm sạch văn bản sau OCR"""
+        
         if not text:
             return ""
         
@@ -242,7 +214,7 @@ class OCRService:
         return '\n'.join(cleaned_lines)
     
     def is_tesseract_available(self) -> bool:
-        """Kiểm tra xem Tesseract có sẵn không"""
+        
         try:
             version = pytesseract.get_tesseract_version()
             logger.info(f"Tesseract version: {version}")
@@ -252,7 +224,7 @@ class OCRService:
             return False
     
     def get_supported_languages(self) -> list:
-        """Lấy danh sách ngôn ngữ được hỗ trợ"""
+        
         try:
             langs = pytesseract.get_languages()
             return langs

@@ -32,7 +32,7 @@ class EventService:
         self.subscriptions: Dict[str, str] = {}  # channel -> subscription_id
         
     async def initialize(self):
-        """Khởi tạo kết nối database và Redis"""
+        
         try:
             # MongoDB connection removed
             
@@ -51,7 +51,7 @@ class EventService:
             raise
 
     async def close(self):
-        """Đóng kết nối"""
+        
         if self.pubsub:
             await self.pubsub.close()
         # MongoDB client removed
@@ -59,7 +59,7 @@ class EventService:
             await self.redis_client.close()
 
     async def publish_event(self, request: EventPublishRequest) -> EventPublishResponse:
-        """Publish event lên Redis channel"""
+        
         try:
             # Publish event
             await self.redis_client.publish(
@@ -85,7 +85,7 @@ class EventService:
             )
 
     async def subscribe_to_events(self, request: EventSubscriptionRequest) -> EventSubscriptionResponse:
-        """Subscribe to Redis channels"""
+        
         try:
             subscription_id = str(uuid.uuid4())
             
@@ -109,7 +109,7 @@ class EventService:
             raise
 
     async def _listen_for_events(self, handler_type: str, auto_ack: bool = True):
-        """Lắng nghe events từ Redis"""
+        
         try:
             async for message in self.pubsub.listen():
                 if message["type"] == "message":
@@ -128,7 +128,7 @@ class EventService:
             print(f"Error listening for events: {e}")
 
     async def _handle_event(self, event: EventPayload, handler_type: str, auto_ack: bool = True):
-        """Xử lý event"""
+        
         try:
             # Tìm handler phù hợp
             handler = self.handlers.get(handler_type)
@@ -154,12 +154,12 @@ class EventService:
             print(f"Error handling event {event.eventId}: {e}")
 
     def register_handler(self, handler_type: str, handler: Callable):
-        """Đăng ký event handler"""
+        
         self.handlers[handler_type] = handler
         print(f"Handler registered for type: {handler_type}")
 
     async def _save_event(self, event: EventPayload):
-        """Lưu event vào MongoDB"""
+        
         try:
             event_dict = event.model_dump()
             event_dict["_id"] = event.eventId
@@ -180,7 +180,7 @@ class EventService:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None
     ) -> EventHistoryResponse:
-        """Lấy lịch sử events"""
+        
         try:
             # Build filter
             filter_dict = {}
@@ -233,7 +233,7 @@ class EventService:
         actor: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> EventPayload:
-        """Tạo event mới"""
+        
         try:
             event = EventPayload(
                 eventVersion="v1",
@@ -259,7 +259,7 @@ class EventService:
         data: Dict[str, Any],
         user_id: Optional[str] = None
     ):
-        """Publish WebSocket event"""
+        
         try:
             websocket_event = WebSocketEvent(
                 event_type=event_type,
@@ -278,7 +278,7 @@ class EventService:
             print(f"Error publishing WebSocket event: {e}")
 
     async def handle_file_uploaded_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
-        """Handler cho file uploaded event"""
+        
         try:
             event = request.event
             
@@ -305,7 +305,7 @@ class EventService:
             )
 
     async def handle_ai_processing_completed_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
-        """Handler cho AI processing completed event"""
+        
         try:
             event = request.event
             
@@ -332,7 +332,7 @@ class EventService:
             )
 
     async def handle_notification_sent_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
-        """Handler cho notification sent event"""
+        
         try:
             event = request.event
             
@@ -358,7 +358,7 @@ class EventService:
             )
 
     async def start_event_processing(self):
-        """Bắt đầu xử lý events"""
+        
         try:
             # Đăng ký các handlers
             self.register_handler("file_uploaded", self.handle_file_uploaded_event)

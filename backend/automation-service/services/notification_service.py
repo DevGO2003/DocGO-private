@@ -38,7 +38,7 @@ class NotificationService:
         self.twilio_client = None
         
     async def initialize(self):
-        """Khởi tạo kết nối database và external services"""
+        
         try:
             # MongoDB connection removed
             
@@ -61,13 +61,13 @@ class NotificationService:
             raise
 
     async def close(self):
-        """Đóng kết nối"""
+        
         # MongoDB client removed
         if self.redis_client:
             await self.redis_client.close()
 
     async def send_notification(self, request: NotificationRequest) -> NotificationResponse:
-        """Gửi notification theo loại"""
+        
         notification_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc)
         
@@ -127,7 +127,7 @@ class NotificationService:
             raise
 
     async def _send_email(self, request: NotificationRequest, notification_id: str):
-        """Gửi email notification"""
+        
         try:
             msg = MIMEMultipart()
             msg['From'] = self.smtp_config["username"]
@@ -149,7 +149,7 @@ class NotificationService:
             raise
 
     async def _send_sms(self, request: NotificationRequest, notification_id: str):
-        """Gửi SMS notification"""
+        
         if not self.twilio_client:
             raise Exception("Twilio client not configured")
         
@@ -167,14 +167,14 @@ class NotificationService:
             raise
 
     async def _send_push(self, request: NotificationRequest, notification_id: str):
-        """Gửi push notification"""
+        
         # Implement push notification logic here
         # This would typically integrate with FCM, APNS, or similar service
         print(f"Push notification sent to {len(request.recipients)} recipients")
         pass
 
     async def _send_websocket(self, request: NotificationRequest, notification_id: str):
-        """Gửi WebSocket notification"""
+        
         try:
             # Publish to Redis channel for WebSocket server to pick up
             websocket_data = {
@@ -206,7 +206,7 @@ class NotificationService:
         failed_at: Optional[datetime] = None,
         error_message: Optional[str] = None
     ):
-        """Cập nhật trạng thái notification"""
+        
         update_data = {"status": status}
         if sent_at:
             update_data["sent_at"] = sent_at
@@ -229,7 +229,7 @@ class NotificationService:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None
     ) -> Dict[str, Any]:
-        """Lấy lịch sử notification"""
+        
         try:
             # Build filter
             filter_dict = {}
@@ -270,7 +270,7 @@ class NotificationService:
             raise
 
     async def create_notification_template(self, template: NotificationTemplate) -> NotificationTemplate:
-        """Tạo notification template"""
+        
         try:
             template.id = str(uuid.uuid4())
             template.created_at = datetime.now(timezone.utc)
@@ -286,7 +286,7 @@ class NotificationService:
             raise
 
     async def get_notification_templates(self) -> List[NotificationTemplate]:
-        """Lấy danh sách notification templates"""
+        
         try:
             cursor = self.mongodb_db_instance[self.collections["notification_templates"]].find(
                 {"is_active": True}
@@ -303,7 +303,7 @@ class NotificationService:
             raise
 
     async def send_bulk_notifications(self, requests: List[NotificationRequest]) -> List[NotificationResponse]:
-        """Gửi nhiều notification cùng lúc"""
+        
         results = []
         
         for request in requests:

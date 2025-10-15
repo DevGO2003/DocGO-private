@@ -1,6 +1,4 @@
-"""
-AI Processing Service - Gom các chức năng chung giữa API và Event handler
-"""
+
 
 import logging
 import json
@@ -11,7 +9,7 @@ from config import Config
 
 
 class AutomationService:
-    """Service xử lý AI chung cho cả API và Event handler - Singleton pattern"""
+    
     
     _instance = None
     _initialized = False
@@ -52,7 +50,7 @@ class AutomationService:
             self._initialized = True
     
     def get_contract_summary_prompt(self, content: str, filename: str) -> str:
-        """Tạo prompt chuẩn cho việc tóm tắt hợp đồng - dùng chung cho API và Event"""
+        
         return (
             "Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
             "YÊU CẦU PHÂN TÍCH:\n"
@@ -145,7 +143,7 @@ class AutomationService:
         )
     
     def generate_contract_summary(self, content: str, filename: str) -> Optional[Dict[str, Any]]:
-        """Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
+        
         import time
         import random
         import os
@@ -218,8 +216,7 @@ class AutomationService:
                         text = text.replace('–', '-')
                         text = text.replace('"', '"')
                         text = text.replace('"', '"')
-                        text = text.replace(''', "'")
-                        text = text.replace(''', "'")
+                        text = text.replace(, "'")
                     return text
                 
                 def normalize_object(obj):
@@ -330,7 +327,7 @@ class AutomationService:
         return self._create_fallback_summary(content, filename)
     
     def _create_fallback_summary(self, content: str, filename: str) -> Dict[str, Any]:
-        """Tạo summary cơ bản khi không thể gọi Gemini"""
+        
         logging.info(f"[AI_FALLBACK_SUMMARY] Creating fallback summary for: {filename}")
         
         # Extract basic information using simple text processing
@@ -394,20 +391,10 @@ class AutomationService:
         }
     
     def classify_document(self, content: str, filename: str) -> Dict[str, Any]:
-        """Phân loại tài liệu sử dụng Gemini AI"""
+        
         try:
             # Quick classification prompt
-            classification_prompt = f"""
-            Phân loại tài liệu sau đây. Trả về JSON với format:
-            {{
-                "classification": "CONTRACT|GENERAL|INVOICE|OTHER",
-                "confidence": 0.0-1.0,
-                "categories": ["danh sách các thể loại"]
-            }}
-            
-            Tài liệu: {filename}
-            Nội dung: {content[:2000]}
-            """
+            classification_prompt = f
             
             response = self.model.generate_content(classification_prompt)
             
@@ -433,7 +420,7 @@ class AutomationService:
             return {"classification": "GENERAL", "confidence": 0.5, "categories": ["document"]}
     
     def extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
-        """Trích xuất text từ file sử dụng Gemini AI"""
+        
         try:
             # For now, return a placeholder. In real implementation, this would process the file content
             if content_type.startswith('text/'):

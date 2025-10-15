@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script for automation-service
-"""
+
 import requests
 import time
 import subprocess
@@ -9,7 +7,7 @@ import sys
 import os
 
 def test_service():
-    """Test the automation service"""
+    
     print("🧪 Testing Automation Service...")
     
     # Test health endpoint
@@ -27,7 +25,7 @@ def test_service():
         return False
 
 def test_docs_endpoint():
-    """Test docs endpoint"""
+    
     try:
         response = requests.get("http://127.0.0.1:8017/docs", timeout=5)
         if response.status_code == 200:

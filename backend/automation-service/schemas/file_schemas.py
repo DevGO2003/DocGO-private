@@ -1,7 +1,4 @@
-"""
-File schemas for Automation Service
-Converted from Document Management Service DTOs
-"""
+
 
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -9,17 +6,17 @@ from pydantic import BaseModel, Field
 
 
 class FileUploadResponse(BaseModel):
-    """Response schema for file upload"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    file_size: int = Field(..., description="File size in bytes")
-    file_type: str = Field(..., description="MIME type of the file")
-    status: str = Field(..., description="Upload status")
-    upload_time: datetime = Field(..., description="Upload timestamp")
-    message: str = Field(..., description="Status message")
-    s3_key: str = Field(..., description="S3 object key")
-    bucket: str = Field(..., description="S3 bucket name")
-    file_url: str = Field(..., description="Public URL to access the file")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    file_size: int = Field(...)
+    file_type: str = Field(...)
+    status: str = Field(...)
+    upload_time: datetime = Field(...)
+    message: str = Field(...)
+    s3_key: str = Field(...)
+    bucket: str = Field(...)
+    file_url: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -28,11 +25,11 @@ class FileUploadResponse(BaseModel):
 
 
 class FileDownloadResponse(BaseModel):
-    """Response schema for file download"""
-    filename: str = Field(..., description="Filename for download")
-    content_type: str = Field(..., description="MIME type of the file")
-    file_content: bytes = Field(..., description="File content as bytes")
-    file_size: int = Field(..., description="File size in bytes")
+    
+    filename: str = Field(...)
+    content_type: str = Field(...)
+    file_content: bytes = Field(...)
+    file_size: int = Field(...)
 
     class Config:
         json_encoders = {
@@ -41,17 +38,17 @@ class FileDownloadResponse(BaseModel):
 
 
 class FileMetadata(BaseModel):
-    """File metadata schema"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    s3_key: str = Field(..., description="S3 object key")
-    bucket: str = Field(..., description="S3 bucket name")
-    file_size: int = Field(..., description="File size in bytes")
-    file_type: str = Field(..., description="MIME type of the file")
-    status: str = Field(..., description="File status")
-    upload_time: datetime = Field(..., description="Upload timestamp")
-    uploaded_by: str = Field(..., description="User who uploaded the file")
-    metadata: Dict[str, str] = Field(default_factory=dict, description="Additional metadata")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    s3_key: str = Field(...)
+    bucket: str = Field(...)
+    file_size: int = Field(...)
+    file_type: str = Field(...)
+    status: str = Field(...)
+    upload_time: datetime = Field(...)
+    uploaded_by: str = Field(...)
+    metadata: Dict[str, str] = Field(default_factory=dict)
 
     class Config:
         json_encoders = {
@@ -60,12 +57,12 @@ class FileMetadata(BaseModel):
 
 
 class FileListResponse(BaseModel):
-    """Response schema for file list with pagination"""
-    files: List[FileMetadata] = Field(..., description="List of file metadata")
-    total_elements: int = Field(..., description="Total number of files")
-    total_pages: int = Field(..., description="Total number of pages")
-    current_page: int = Field(..., description="Current page number")
-    page_size: int = Field(..., description="Number of files per page")
+    
+    files: List[FileMetadata] = Field(...)
+    total_elements: int = Field(...)
+    total_pages: int = Field(...)
+    current_page: int = Field(...)
+    page_size: int = Field(...)
 
     class Config:
         json_encoders = {
@@ -74,20 +71,20 @@ class FileListResponse(BaseModel):
 
 
 class FileDetailsResponse(BaseModel):
-    """Response schema for file details"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    file_size: int = Field(..., description="File size in bytes")
-    file_type: str = Field(..., description="MIME type of the file")
-    status: str = Field(..., description="File status")
-    upload_time: datetime = Field(..., description="Upload timestamp")
-    uploaded_by: str = Field(..., description="User who uploaded the file")
-    s3_key: str = Field(..., description="S3 object key")
-    bucket: str = Field(..., description="S3 bucket name")
-    file_url: str = Field(..., description="Public URL to access the file")
-    checksum: Optional[str] = Field(None, description="File checksum")
-    access_count: int = Field(0, description="Number of times file was accessed")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    file_size: int = Field(...)
+    file_type: str = Field(...)
+    status: str = Field(...)
+    upload_time: datetime = Field(...)
+    uploaded_by: str = Field(...)
+    s3_key: str = Field(...)
+    bucket: str = Field(...)
+    file_url: str = Field(...)
+    checksum: Optional[str] = Field(None)
+    access_count: int = Field(0)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         json_encoders = {

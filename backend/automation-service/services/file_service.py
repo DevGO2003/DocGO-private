@@ -1,7 +1,4 @@
-"""
-File Storage Service for Automation Service
-Converted from Document Management Service implementation
-"""
+
 
 import os
 import uuid
@@ -20,7 +17,7 @@ from config import Config
 
 
 class FileStorageService:
-    """File storage service implementation"""
+    
     
     def __init__(self):
         self.upload_directory = os.getenv("UPLOAD_DIR", "uploads")
@@ -37,7 +34,7 @@ class FileStorageService:
         os.makedirs(self.upload_directory, exist_ok=True)
     
     def upload_file(self, file: UploadFile, folder: Optional[str] = None, user_id: Optional[str] = None) -> FileUploadResponse:
-        """Upload file to storage with dual-write: always local, optional S3 when enabled"""
+        
         try:
             # Generate unique file ID
             file_id = str(uuid.uuid4())
@@ -110,7 +107,7 @@ class FileStorageService:
             raise HTTPException(status_code=500, detail=f"Lỗi upload file: {str(e)}")
     
     def download_file(self, file_id: str, user_id: Optional[str] = None, version: Optional[int] = None) -> FileDownloadResponse:
-        """Download file from storage"""
+        
         try:
             if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
                 # Download from S3 (Filebase)
@@ -217,7 +214,7 @@ class FileStorageService:
                      sort_by: Optional[List[str]] = None, 
                      sort_direction: Optional[List[str]] = None, 
                      include_deleted: bool = False) -> FileListResponse:
-        """Get all files with pagination"""
+        
         try:
             if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
                 # List files from S3 (Filebase)
@@ -351,7 +348,7 @@ class FileStorageService:
             raise HTTPException(status_code=500, detail=f"Lỗi lấy danh sách files: {str(e)}")
     
     async def get_files_by_name(self, filename: str) -> List[Dict[str, Any]]:
-        """Get files by filename for version conflict checking"""
+        
         try:
             # For now, we'll return mock data
             # In real implementation, you would query from database
@@ -379,7 +376,7 @@ class FileStorageService:
             return []
     
     def get_file_details(self, file_id: str) -> Dict[str, Any]:
-        """Get file details"""
+        
         try:
             # For now, we'll return mock data
             # In real implementation, you would query from database
@@ -407,7 +404,7 @@ class FileStorageService:
             raise HTTPException(status_code=500, detail=f"Lỗi lấy thông tin file: {str(e)}")
     
     def delete_file(self, file_id: str, user_id: Optional[str] = None, version: Optional[int] = None) -> bool:
-        """Delete file or specific version"""
+        
         try:
             # For now, we'll simulate file deletion
             # In real implementation, you would delete from S3 and database
@@ -418,12 +415,12 @@ class FileStorageService:
             raise HTTPException(status_code=500, detail=f"Lỗi xóa file: {str(e)}")
     
     def _generate_s3_key(self, file_id: str, filename: str, folder: Optional[str] = None, user_id: Optional[str] = None) -> str:
-        """Generate S3 key for file storage"""
+        
         # Create folder structure: {folder or documents}/{file_id}_{filename}
         # Use 'documents' as default folder to match existing S3 structure
         folder_path = folder or "documents"
         return f"{folder_path}/{file_id}_{filename}"
     
     def _calculate_checksum(self, content: bytes) -> str:
-        """Calculate MD5 checksum for file content"""
+        
         return hashlib.md5(content).hexdigest()

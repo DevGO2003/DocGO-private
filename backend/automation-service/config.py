@@ -18,17 +18,14 @@ else:
 
 
 class Config:
-    """
-    Centralized configuration management for Automation Service
-    Tất cả biến môi trường được quản lý tập trung với fallback values chuẩn hóa
-    """
+    
     
     # ==========================================
     # ENVIRONMENT DETECTION
     # ==========================================
     @classmethod
     def is_docker(cls) -> bool:
-        """Detect if running in Docker environment"""
+        
         return os.getenv("ENVIRONMENT") in ["docker", "production"]
     
     # ==========================================
@@ -59,7 +56,7 @@ class Config:
     # ==========================================
     @classmethod
     def get_gemini_api_key(cls) -> str:
-        """Lấy Gemini API Key - BẮT BUỘC"""
+        
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
@@ -106,21 +103,21 @@ class Config:
     # ==========================================
     @classmethod
     def get_user_service_url(cls) -> str:
-        """Get User Management Service URL with smart fallback"""
+        
         return os.getenv("USER_MANAGEMENT_SERVICE_URL", 
                         "http://user-management-service:8001" if cls.is_docker() 
                         else "http://localhost:8001")
     
     @classmethod
     def get_document_service_url(cls) -> str:
-        """Get Document Management Service URL with smart fallback"""
+        
         return os.getenv("DOCUMENT_MANAGEMENT_SERVICE_URL", 
                         "http://document-management-service:8002" if cls.is_docker() 
                         else "http://localhost:8002")
     
     @classmethod
     def get_base_url(cls) -> str:
-        """Get base URL for this service with smart fallback"""
+        
         return os.getenv("BASE_URL", 
                         f"http://automation-service:{cls.PORT}" if cls.is_docker() 
                         else f"http://localhost:{cls.PORT}")
@@ -130,7 +127,7 @@ class Config:
     # ==========================================
     @classmethod
     def get_cors_origins(cls) -> List[str]:
-        """Get CORS origins with smart fallback"""
+        
         origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000")
         return [origin.strip() for origin in origins.split(",")]
     
@@ -139,24 +136,24 @@ class Config:
     # ==========================================
     @classmethod
     def get_redis_url(cls) -> str:
-        """Get Redis connection URL"""
+        
         if cls.REDIS_PASSWORD:
             return f"redis://:{cls.REDIS_PASSWORD}@{cls.REDIS_HOST}:{cls.REDIS_PORT}"
         return f"redis://{cls.REDIS_HOST}:{cls.REDIS_PORT}"
     
     @classmethod
     def get_redis_password(cls) -> str:
-        """Get Redis password"""
+        
         return cls.REDIS_PASSWORD
     
     @classmethod
     def get_redis_db(cls) -> int:
-        """Get Redis database number"""
+        
         return cls.REDIS_DATABASE
     
     @classmethod
     def get_batch_config(cls) -> dict:
-        """Get batch processing configuration"""
+        
         return {
             "max_workers": int(os.getenv("BATCH_MAX_WORKERS", "4")),
             "batch_size": int(os.getenv("BATCH_SIZE", "10")),
@@ -175,7 +172,7 @@ class Config:
     # ==========================================
     @classmethod
     def validate_required_config(cls) -> None:
-        """Validate that all required configuration is present"""
+        
         required_vars = [
             ("GEMINI_API_KEY", cls.get_gemini_api_key),
         ]
@@ -205,7 +202,7 @@ class Config:
     # ==========================================
     @classmethod
     def get_smtp_config(cls) -> dict:
-        """Get SMTP configuration for email notifications"""
+        
         return {
             "host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
             "port": int(os.getenv("SMTP_PORT", "587")),
@@ -216,7 +213,7 @@ class Config:
 
     @classmethod
     def get_twilio_config(cls) -> dict:
-        """Get Twilio configuration for SMS notifications"""
+        
         return {
             "account_sid": os.getenv("TWILIO_ACCOUNT_SID", ""),
             "auth_token": os.getenv("TWILIO_AUTH_TOKEN", ""),
@@ -225,7 +222,7 @@ class Config:
 
     @classmethod
     def get_websocket_config(cls) -> dict:
-        """Get WebSocket configuration for real-time notifications"""
+        
         return {
             "enabled": os.getenv("WEBSOCKET_ENABLED", "false").lower() == "true",
             "host": os.getenv("WEBSOCKET_HOST", "localhost"),
@@ -235,7 +232,7 @@ class Config:
 
     @classmethod
     def get_event_config(cls) -> dict:
-        """Get event processing configuration"""
+        
         return {
             "enabled": os.getenv("EVENT_PROCESSING_ENABLED", "true").lower() == "true",
             "max_retries": int(os.getenv("EVENT_MAX_RETRIES", "3")),
@@ -247,57 +244,57 @@ class Config:
 
 # Legacy function wrappers for backward compatibility
 def get_gemini_api_key():
-    """Legacy function - use Config.get_gemini_api_key() instead"""
+    
     return Config.get_gemini_api_key()
 
 def get_redis_url():
-    """Legacy function - use Config.get_redis_url() instead"""
+    
     return Config.get_redis_url()
 
 def get_redis_password():
-    """Legacy function"""
+    
     return Config.REDIS_PASSWORD
 
 def get_redis_db():
-    """Legacy function"""
+    
     return Config.REDIS_DATABASE
 
 def get_kafka_bootstrap_servers():
-    """Legacy function - use Config.KAFKA_BOOTSTRAP_SERVERS instead"""
+    
     return Config.KAFKA_BOOTSTRAP_SERVERS
 
 def get_kafka_file_uploaded_topic():
-    """Legacy function - use Config.KAFKA_FILE_UPLOADED_TOPIC instead"""
+    
     return Config.KAFKA_FILE_UPLOADED_TOPIC
 
 def get_kafka_text_extracted_topic():
-    """Legacy function - use Config.KAFKA_TEXT_EXTRACTED_TOPIC instead"""
+    
     return Config.KAFKA_TEXT_EXTRACTED_TOPIC
 
 def get_kafka_document_classified_topic():
-    """Legacy function - use Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC instead"""
+    
     return Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC
 
 def get_kafka_contract_summary_topic():
-    """Legacy function - use Config.KAFKA_CONTRACT_SUMMARY_TOPIC instead"""
+    
     return Config.KAFKA_CONTRACT_SUMMARY_TOPIC
 
 def get_kafka_client_id():
-    """Legacy function - use Config.KAFKA_CLIENT_ID instead"""
+    
     return Config.KAFKA_CLIENT_ID
 
 def get_smtp_config():
-    """Legacy function - use Config.get_smtp_config() instead"""
+    
     return Config.get_smtp_config()
 
 def get_twilio_config():
-    """Legacy function - use Config.get_twilio_config() instead"""
+    
     return Config.get_twilio_config()
 
 def get_websocket_config():
-    """Legacy function - use Config.get_websocket_config() instead"""
+    
     return Config.get_websocket_config()
 
 def get_event_config():
-    """Legacy function - use Config.get_event_config() instead"""
+    
     return Config.get_event_config()

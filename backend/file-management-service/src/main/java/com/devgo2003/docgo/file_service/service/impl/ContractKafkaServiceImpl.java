@@ -46,9 +46,6 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     @Autowired
     private IContractService contractService;
 
-    @Autowired
-    private com.devgo2003.docgo.file_service.repository.AuditEventRepository auditEventRepository;
-
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */

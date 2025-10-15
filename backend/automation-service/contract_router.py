@@ -144,7 +144,6 @@ async def contract_summarize_api(
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Đã tóm tắt hợp đồng thành công",
         data=result,
         timestamp=datetime.now(timezone.utc).isoformat(),
         requestId=str(uuid.uuid4()),

@@ -3,23 +3,19 @@ package com.devgo2003.docgo.file_service.dto;
 import com.devgo2003.docgo.file_service.enums.ContractCategory;
 import com.devgo2003.docgo.file_service.enums.ContractStatus;
 import com.devgo2003.docgo.file_service.enums.ContractType;
-import io.swagger.v3.oas.annotations.media.Schema;
+ 
 
 import java.util.List;
 
 /**
  * DTO cho response của Category API
  */
-@Schema(description = "Response cho Category API")
 public class CategoryResponse {
     
-    @Schema(description = "Danh sách categories", example = "[\"COMMERCIAL_SALES_DIRECT\", \"LEGAL_COMPLIANCE_GDPR\"]")
     private List<CategoryItem> categories;
     
-    @Schema(description = "Danh sách main categories", example = "[\"COMMERCIAL\", \"LEGAL\", \"FINANCIAL\"]")
     private List<String> mainCategories;
     
-    @Schema(description = "Tổng số categories", example = "100")
     private int totalCount;
     
     public CategoryResponse() {}
@@ -58,25 +54,18 @@ public class CategoryResponse {
     /**
      * Inner class cho Category Item
      */
-    @Schema(description = "Category item")
     public static class CategoryItem {
         
-        @Schema(description = "Giá trị category", example = "COMMERCIAL_SALES_DIRECT")
         private String value;
         
-        @Schema(description = "Tên hiển thị", example = "Bán hàng trực tiếp")
         private String displayName;
         
-        @Schema(description = "Main category", example = "COMMERCIAL")
         private String mainCategory;
         
-        @Schema(description = "Sub category", example = "SALES")
         private String subCategory;
         
-        @Schema(description = "Specific category", example = "DIRECT_SALES")
         private String specificCategory;
         
-        @Schema(description = "Mô tả", example = "Hợp đồng bán hàng trực tiếp")
         private String description;
         
         public CategoryItem() {}
@@ -158,13 +147,10 @@ public class CategoryResponse {
     /**
      * DTO cho Status Response
      */
-    @Schema(description = "Response cho Status API")
     public static class StatusResponse {
         
-        @Schema(description = "Danh sách statuses")
         private List<StatusItem> statuses;
         
-        @Schema(description = "Tổng số statuses")
         private int totalCount;
         
         public StatusResponse() {}
@@ -194,25 +180,18 @@ public class CategoryResponse {
         /**
          * Inner class cho Status Item
          */
-        @Schema(description = "Status item")
         public static class StatusItem {
             
-            @Schema(description = "Giá trị status", example = "ACTIVE")
             private String value;
             
-            @Schema(description = "Tên hiển thị", example = "Đang hiệu lực")
             private String displayName;
             
-            @Schema(description = "Mô tả", example = "Hợp đồng đang có hiệu lực")
             private String description;
             
-            @Schema(description = "Có thể chỉnh sửa không", example = "false")
             private boolean editable;
             
-            @Schema(description = "Có hiệu lực không", example = "true")
             private boolean active;
             
-            @Schema(description = "Trạng thái cuối cùng", example = "false")
             private boolean finalStatus;
             
             public StatusItem() {}
@@ -295,16 +274,12 @@ public class CategoryResponse {
     /**
      * DTO cho Type Response
      */
-    @Schema(description = "Response cho Type API")
     public static class TypeResponse {
         
-        @Schema(description = "Danh sách types")
         private List<TypeItem> types;
         
-        @Schema(description = "Danh sách groups")
         private List<String> groups;
         
-        @Schema(description = "Tổng số types")
         private int totalCount;
         
         public TypeResponse() {}
@@ -343,19 +318,14 @@ public class CategoryResponse {
         /**
          * Inner class cho Type Item
          */
-        @Schema(description = "Type item")
         public static class TypeItem {
             
-            @Schema(description = "Giá trị type", example = "SERVICE_AGREEMENT")
             private String value;
             
-            @Schema(description = "Tên hiển thị", example = "Hợp đồng dịch vụ")
             private String displayName;
             
-            @Schema(description = "Mô tả", example = "Hợp đồng cung cấp dịch vụ")
             private String description;
             
-            @Schema(description = "Nhóm", example = "SERVICE")
             private String group;
             
             public TypeItem() {}

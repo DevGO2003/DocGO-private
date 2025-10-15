@@ -17,9 +17,6 @@ import com.devgo2003.docgo.file_service.dto.BulkDeleteRequest;
 import com.devgo2003.docgo.file_service.dto.BulkDeleteResponse;
 import com.devgo2003.docgo.file_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -308,16 +305,7 @@ public class ContractController {
         🛣️ path
         Loại: string
         Mô tả: Đường dẫn API được gọi
-        """,
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                schema = @Schema(implementation = ContractCreateRequest.class),
-                examples = @ExampleObject(
-                    value = "{\n  \"contractNumber\": \"HD-2024-001\",\n  \"title\": \"Hợp đồng cung cấp dịch vụ\",\n  \"status\": \"DRAFT\",\n  \"contractType\": \"SERVICE_AGREEMENT\",\n  \"partiesJson\": \"[{\\\"name\\\": \\\"Công ty A\\\", \\\"role\\\": \\\"Client\\\"}]\",\n  \"startDate\": \"2024-01-01T00:00:00\",\n  \"endDate\": \"2024-12-31T23:59:59\",\n  \"systemId\": \"SYS-001\"\n}"
-                )
-            )
-        )
+        """
     )
     @PostMapping
     public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {

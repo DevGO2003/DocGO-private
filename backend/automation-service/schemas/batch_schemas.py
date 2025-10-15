@@ -24,24 +24,24 @@ class BatchJobPriority(str, Enum):
     URGENT = "urgent"
 
 class BatchJobRequest(BaseModel):
-    type: BatchJobType = Field(..., description="Loại batch job")
-    name: str = Field(..., description="Tên job")
-    description: Optional[str] = Field(None, description="Mô tả job")
-    data: Dict[str, Any] = Field(..., description="Dữ liệu đầu vào")
-    priority: BatchJobPriority = Field(default=BatchJobPriority.NORMAL, description="Độ ưu tiên")
-    scheduled_at: Optional[datetime] = Field(None, description="Thời gian lên lịch chạy")
-    max_retries: int = Field(default=3, ge=0, le=10, description="Số lần retry tối đa")
-    timeout: Optional[int] = Field(None, ge=1, description="Timeout (giây)")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Metadata bổ sung")
+    type: BatchJobType = Field(...)
+    name: str = Field(...)
+    description: Optional[str] = Field(None)
+    data: Dict[str, Any] = Field(...)
+    priority: BatchJobPriority = Field(default=BatchJobPriority.NORMAL)
+    scheduled_at: Optional[datetime] = Field(None)
+    max_retries: int = Field(default=3, ge=0, le=10)
+    timeout: Optional[int] = Field(None, ge=1)")
+    metadata: Optional[Dict[str, Any]] = Field(None)
 
 class BatchJobResponse(BaseModel):
-    id: str = Field(..., description="ID job")
+    id: str = Field(...)
     type: BatchJobType
     name: str
     description: Optional[str] = None
     status: BatchJobStatus
     priority: BatchJobPriority
-    progress: int = Field(0, ge=0, le=100, description="Tiến độ (%)")
+    progress: int = Field(0, ge=0, le=100)")
     data: Dict[str, Any]
     result: Optional[Dict[str, Any]] = None
     error_message: Optional[str] = None
@@ -55,16 +55,16 @@ class BatchJobResponse(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 class BatchJobStatusRequest(BaseModel):
-    job_id: str = Field(..., description="ID job cần kiểm tra")
+    job_id: str = Field(...)
 
 class BatchJobListRequest(BaseModel):
-    page: int = Field(default=1, ge=1, description="Số trang")
-    limit: int = Field(default=10, ge=1, le=100, description="Số lượng mỗi trang")
-    type: Optional[BatchJobType] = Field(None, description="Lọc theo loại")
-    status: Optional[BatchJobStatus] = Field(None, description="Lọc theo trạng thái")
-    priority: Optional[BatchJobPriority] = Field(None, description="Lọc theo độ ưu tiên")
-    start_date: Optional[datetime] = Field(None, description="Ngày bắt đầu")
-    end_date: Optional[datetime] = Field(None, description="Ngày kết thúc")
+    page: int = Field(default=1, ge=1)
+    limit: int = Field(default=10, ge=1, le=100)
+    type: Optional[BatchJobType] = Field(None)
+    status: Optional[BatchJobStatus] = Field(None)
+    priority: Optional[BatchJobPriority] = Field(None)
+    start_date: Optional[datetime] = Field(None)
+    end_date: Optional[datetime] = Field(None)
 
 class BatchJobListResponse(BaseModel):
     jobs: List[BatchJobResponse]
@@ -74,22 +74,22 @@ class BatchJobListResponse(BaseModel):
     total_pages: int
 
 class BatchJobCancelRequest(BaseModel):
-    job_id: str = Field(..., description="ID job cần hủy")
+    job_id: str = Field(...)
 
 class BatchJobRetryRequest(BaseModel):
-    job_id: str = Field(..., description="ID job cần retry")
+    job_id: str = Field(...)
 
 class BatchProcessingRequest(BaseModel):
-    files: List[Dict[str, Any]] = Field(..., description="Danh sách file cần xử lý")
-    processing_type: str = Field(..., description="Loại xử lý (extract, summarize, classify)")
-    options: Optional[Dict[str, Any]] = Field(None, description="Tùy chọn xử lý")
-    callback_url: Optional[str] = Field(None, description="URL callback khi hoàn thành")
+    files: List[Dict[str, Any]] = Field(...)
+    processing_type: str = Field(..., summarize, classify)")
+    options: Optional[Dict[str, Any]] = Field(None)
+    callback_url: Optional[str] = Field(None)
 
 class BatchProcessingResponse(BaseModel):
-    job_id: str = Field(..., description="ID job batch")
-    total_files: int = Field(..., description="Tổng số file")
-    estimated_time: Optional[int] = Field(None, description="Thời gian ước tính (giây)")
-    status_url: str = Field(..., description="URL kiểm tra trạng thái")
+    job_id: str = Field(...)
+    total_files: int = Field(...)
+    estimated_time: Optional[int] = Field(None)")
+    status_url: str = Field(...)
 
 class BatchJobProgress(BaseModel):
     job_id: str

@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 class JsonFormatter(logging.Formatter):
-    """Custom JSON formatter for structured logging"""
+    
     
     def format(self, record: logging.LogRecord) -> str:
         log_entry = {
@@ -41,7 +41,7 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(log_entry, ensure_ascii=False)
 
 class Logger:
-    """Centralized logger for Automation Service"""
+    
     
     _instance: Optional['Logger'] = None
     _logger: Optional[logging.Logger] = None
@@ -56,7 +56,7 @@ class Logger:
             self._setup_logger()
     
     def _setup_logger(self):
-        """Setup logger with JSON formatting"""
+        
         self._logger = logging.getLogger('automation-service')
         self._logger.setLevel(getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper()))
         
@@ -81,7 +81,7 @@ class Logger:
         self._logger.propagate = False
     
     def _log_with_context(self, level: str, message: str, **kwargs):
-        """Log with additional context"""
+        
         extra_fields = kwargs.pop('extra_fields', {})
         request_id = kwargs.pop('request_id', None)
         correlation_id = kwargs.pop('correlation_id', None)
@@ -107,27 +107,27 @@ class Logger:
         self._logger.handle(record)
     
     def info(self, message: str, **kwargs):
-        """Log info message"""
+        
         self._log_with_context('INFO', message, **kwargs)
     
     def debug(self, message: str, **kwargs):
-        """Log debug message"""
+        
         self._log_with_context('DEBUG', message, **kwargs)
     
     def warning(self, message: str, **kwargs):
-        """Log warning message"""
+        
         self._log_with_context('WARNING', message, **kwargs)
     
     def error(self, message: str, **kwargs):
-        """Log error message"""
+        
         self._log_with_context('ERROR', message, **kwargs)
     
     def critical(self, message: str, **kwargs):
-        """Log critical message"""
+        
         self._log_with_context('CRITICAL', message, **kwargs)
     
     def log_request(self, method: str, url: str, request_id: str, correlation_id: str, **kwargs):
-        """Log incoming request"""
+        
         self.info(
             f"Incoming request: {method} {url}",
             request_id=request_id,
@@ -141,7 +141,7 @@ class Logger:
         )
     
     def log_proxy_request(self, target_service: str, target_url: str, method: str, request_id: str, correlation_id: str):
-        """Log outgoing proxy request"""
+        
         self.info(
             f"Proxying request to {target_service}: {method} {target_url}",
             request_id=request_id,
@@ -155,7 +155,7 @@ class Logger:
         )
     
     def log_response(self, status_code: int, duration_ms: int, request_id: str, correlation_id: str, **kwargs):
-        """Log response"""
+        
         level = "error" if status_code >= 400 else "info"
         stage = "error" if status_code >= 400 else "response"
         
@@ -172,7 +172,7 @@ class Logger:
         )
     
     def log_external_call(self, service: str, url: str, method: str, status_code: int, duration_ms: int, request_id: str, correlation_id: str):
-        """Log external service call"""
+        
         level = "error" if status_code >= 400 else "info"
         
         getattr(self, level)(
@@ -190,7 +190,7 @@ class Logger:
         )
     
     def log_database_query(self, operation: str, collection: str, duration_ms: int, request_id: str, correlation_id: str, **kwargs):
-        """Log database query"""
+        
         self.info(
             f"Database {operation} on {collection} ({duration_ms}ms)",
             request_id=request_id,
@@ -209,26 +209,26 @@ logger = Logger()
 
 # Convenience functions
 def get_logger() -> Logger:
-    """Get the global logger instance"""
+    
     return logger
 
 def log_request(method: str, url: str, request_id: str, correlation_id: str, **kwargs):
-    """Log incoming request"""
+    
     logger.log_request(method, url, request_id, correlation_id, **kwargs)
 
 def log_proxy_request(target_service: str, target_url: str, method: str, request_id: str, correlation_id: str):
-    """Log outgoing proxy request"""
+    
     logger.log_proxy_request(target_service, target_url, method, request_id, correlation_id)
 
 def log_response(status_code: int, duration_ms: int, request_id: str, correlation_id: str, **kwargs):
-    """Log response"""
+    
     logger.log_response(status_code, duration_ms, request_id, correlation_id, **kwargs)
 
 def log_external_call(service: str, url: str, method: str, status_code: int, duration_ms: int, request_id: str, correlation_id: str):
-    """Log external service call"""
+    
     logger.log_external_call(service, url, method, status_code, duration_ms, request_id, correlation_id)
 
 def log_database_query(operation: str, collection: str, duration_ms: int, request_id: str, correlation_id: str, **kwargs):
-    """Log database query"""
+    
     logger.log_database_query(operation, collection, duration_ms, request_id, correlation_id, **kwargs)
 

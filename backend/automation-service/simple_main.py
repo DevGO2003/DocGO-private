@@ -2,8 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 
 app = FastAPI(
-    title="Automation Service",
-    description="Một dịch vụ tự động hóa nghiệp vụ với tích hợp thanh toán, promotion, notification, batch processing và event handling.",
+    title="Automation Service", promotion, notification, batch processing và event handling.",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -20,7 +19,6 @@ async def health_check():
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Service đang hoạt động bình thường",
         data={
             "status": "healthy",
             "service": "Automation Service",

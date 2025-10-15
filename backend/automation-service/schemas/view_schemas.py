@@ -1,7 +1,4 @@
-"""
-View schemas for projection support in Automation Service
-Cung cấp các view khác nhau cho cùng một resource để tối ưu performance
-"""
+
 
 from datetime import datetime
 from typing import List, Optional, Dict, Any, Generic, TypeVar
@@ -12,7 +9,7 @@ T = TypeVar('T')
 
 
 class ViewType(str, Enum):
-    """Các loại view được hỗ trợ"""
+    
     CARD = "card"
     TABLE = "table"
     DETAIL = "detail"
@@ -24,13 +21,13 @@ class ViewType(str, Enum):
 # ============================================================================
 
 class FileCardView(BaseModel):
-    """View cho hiển thị file dạng card - chỉ các field cần thiết"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    file_type: str = Field(..., description="MIME type of the file")
-    status: str = Field(..., description="File status")
-    upload_time: datetime = Field(..., description="Upload timestamp")
-    file_url: str = Field(..., description="Public URL to access the file")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    file_type: str = Field(...)
+    status: str = Field(...)
+    upload_time: datetime = Field(...)
+    file_url: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -39,14 +36,14 @@ class FileCardView(BaseModel):
 
 
 class FileTableView(BaseModel):
-    """View cho hiển thị file dạng bảng - nhiều field hơn card view"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    file_type: str = Field(..., description="MIME type of the file")
-    file_size: int = Field(..., description="File size in bytes")
-    status: str = Field(..., description="File status")
-    upload_time: datetime = Field(..., description="Upload timestamp")
-    uploaded_by: str = Field(..., description="User who uploaded the file")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    file_type: str = Field(...)
+    file_size: int = Field(...)
+    status: str = Field(...)
+    upload_time: datetime = Field(...)
+    uploaded_by: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -55,10 +52,10 @@ class FileTableView(BaseModel):
 
 
 class FileSummaryView(BaseModel):
-    """View cho tóm tắt file - rất ít field"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
-    status: str = Field(..., description="File status")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
+    status: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -67,9 +64,9 @@ class FileSummaryView(BaseModel):
 
 
 class FileMinimalView(BaseModel):
-    """View tối thiểu cho file - chỉ id và name"""
-    file_id: str = Field(..., description="Unique file identifier")
-    filename: str = Field(..., description="Original filename")
+    
+    file_id: str = Field(...)
+    filename: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -82,12 +79,12 @@ class FileMinimalView(BaseModel):
 # ============================================================================
 
 class BatchJobCardView(BaseModel):
-    """View cho hiển thị batch job dạng card"""
-    job_id: str = Field(..., description="Unique job identifier")
-    job_name: str = Field(..., description="Job name")
-    status: str = Field(..., description="Job status")
-    created_at: datetime = Field(..., description="Creation timestamp")
-    progress: int = Field(..., description="Progress percentage (0-100)")
+    
+    job_id: str = Field(...)
+    job_name: str = Field(...)
+    status: str = Field(...)
+    created_at: datetime = Field(...)
+    progress: int = Field(...)")
 
     class Config:
         json_encoders = {
@@ -96,15 +93,15 @@ class BatchJobCardView(BaseModel):
 
 
 class BatchJobTableView(BaseModel):
-    """View cho hiển thị batch job dạng bảng"""
-    job_id: str = Field(..., description="Unique job identifier")
-    job_name: str = Field(..., description="Job name")
-    status: str = Field(..., description="Job status")
-    created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
-    progress: int = Field(..., description="Progress percentage (0-100)")
-    total_files: int = Field(..., description="Total files to process")
-    processed_files: int = Field(..., description="Files processed so far")
+    
+    job_id: str = Field(...)
+    job_name: str = Field(...)
+    status: str = Field(...)
+    created_at: datetime = Field(...)
+    updated_at: datetime = Field(...)
+    progress: int = Field(...)")
+    total_files: int = Field(...)
+    processed_files: int = Field(...)
 
     class Config:
         json_encoders = {
@@ -113,11 +110,11 @@ class BatchJobTableView(BaseModel):
 
 
 class BatchJobSummaryView(BaseModel):
-    """View cho tóm tắt batch job"""
-    job_id: str = Field(..., description="Unique job identifier")
-    job_name: str = Field(..., description="Job name")
-    status: str = Field(..., description="Job status")
-    progress: int = Field(..., description="Progress percentage (0-100)")
+    
+    job_id: str = Field(...)
+    job_name: str = Field(...)
+    status: str = Field(...)
+    progress: int = Field(...)")
 
     class Config:
         json_encoders = {
@@ -126,9 +123,9 @@ class BatchJobSummaryView(BaseModel):
 
 
 class BatchJobMinimalView(BaseModel):
-    """View tối thiểu cho batch job"""
-    job_id: str = Field(..., description="Unique job identifier")
-    job_name: str = Field(..., description="Job name")
+    
+    job_id: str = Field(...)
+    job_name: str = Field(...)
 
     class Config:
         json_encoders = {
@@ -141,10 +138,10 @@ class BatchJobMinimalView(BaseModel):
 # ============================================================================
 
 class PaginatedViewResponse(BaseModel, Generic[T]):
-    """Response cho danh sách có phân trang với view support"""
-    view: str = Field(..., description="View type được sử dụng")
-    items: List[T] = Field(..., description="List of items theo view type")
-    pagination: Dict[str, Any] = Field(..., description="Pagination information")
+    
+    view: str = Field(...)
+    items: List[T] = Field(...)
+    pagination: Dict[str, Any] = Field(...)
 
     class Config:
         json_encoders = {
@@ -157,11 +154,11 @@ class PaginatedViewResponse(BaseModel, Generic[T]):
 # ============================================================================
 
 class ViewMapper:
-    """Utility class để map data sang các view khác nhau"""
+    
     
     @staticmethod
     def map_file_to_view(file_data: Dict[str, Any], view_type: ViewType) -> BaseModel:
-        """Map file data sang view tương ứng"""
+        
         if view_type == ViewType.CARD:
             return FileCardView(
                 file_id=file_data["file_id"],
@@ -187,7 +184,7 @@ class ViewMapper:
     
     @staticmethod
     def map_batch_job_to_view(job_data: Dict[str, Any], view_type: ViewType) -> BaseModel:
-        """Map batch job data sang view tương ứng"""
+        
         if view_type == ViewType.CARD:
             return BatchJobCardView(
                 job_id=job_data["job_id"],

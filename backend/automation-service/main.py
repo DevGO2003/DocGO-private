@@ -25,7 +25,6 @@ from config import Config
 
 app = FastAPI(
     title="Automation Service API",
-    description="API quản lý tài liệu - Dịch vụ quản lý tài liệu và hợp đồng của DocGO",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -87,7 +86,6 @@ def custom_openapi():
     openapi_schema = get_openapi(
         title=app.title,
         version=app.version,
-        description=app.description,
         routes=app.routes,
         openapi_version="3.1.0"
     )
@@ -125,87 +123,22 @@ app.openapi = custom_openapi
 
 @app.get("/", summary="Trang chủ", tags=["🏠 APIs Gốc"])
 async def read_root():
-    """
-    ## 📖 Mô tả
-    API gốc của Automation Service - tự động chuyển hướng đến trang tài liệu API.
-    Endpoint này giúp người dùng dễ dàng truy cập vào Swagger UI để xem và test các API.
     
-    ## 🔹 Đầu vào
-    
-    Không có tham số đầu vào.
-    
-    ## 🔹 Đầu ra
-    
-    🔄 **Redirect Response** (HTTP 302)
-    - **Mô tả**: Tự động chuyển hướng đến `/docs`
-    - **Mục đích**: Hiển thị Swagger UI với tài liệu API đầy đủ
-    """
     return RedirectResponse(url="/docs", status_code=302)
 
 @app.get("/swagger-ui/index.html", summary="Swagger UI", tags=["🏠 APIs Gốc"])
 async def swagger_ui_redirect():
-    """
-    ## 📖 Mô tả
-    API chuyển hướng Swagger UI - tuân thủ chuẩn SpringDoc.
-    Endpoint này đảm bảo tương thích với các hệ thống sử dụng SpringDoc OpenAPI.
     
-    ## 🔹 Đầu vào
-    
-    Không có tham số đầu vào.
-    
-    ## 🔹 Đầu ra
-    
-    🔄 **Redirect Response** (HTTP 302)
-    - **Mô tả**: Chuyển hướng từ `/swagger-ui/index.html` đến `/docs`
-    - **Mục đích**: Tuân thủ chuẩn SpringDoc và đảm bảo tương thích
-    """
     return RedirectResponse(url="/docs", status_code=302)
 
 @app.get("/health", summary="Health check", tags=["🏠 APIs Gốc"])
 async def health_check():
-    """
-    ## 📖 Mô tả
-    API kiểm tra sức khỏe của Automation Service - health check endpoint.
-    Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
     
-    ## 🔹 Đầu vào
-    
-    Không có tham số đầu vào.
-    
-    ## 🔹 Đầu ra
-    
-    📄 **data** (object)
-    - **Mô tả**: Thông tin chi tiết về trạng thái service
-    - **Bao gồm**:
-      - `status`: Trạng thái service ("healthy")
-      - `service`: Tên service ("Automation Service")
-      - `version`: Phiên bản service ("2.0.0")
-      - `ai_model`: Mô hình AI được sử dụng ("Gemini 2.0 Flash")
-      - `supported_formats`: Các định dạng file được hỗ trợ
-      - `timestamp`: Thời gian kiểm tra
-    
-    📊 **apiVersion** (string)
-    - **Mô tả**: Phiên bản API hiện tại
-    - **Giá trị**: "v1"
-    
-    🔢 **statusCode** (integer)
-    - **Mô tả**: Mã trạng thái xử lý
-    - **Giá trị**: 200 (thành công)
-    
-    📋 **shortMessage** (string)
-    - **Mô tả**: Thông báo ngắn gọn về kết quả
-    - **Giá trị**: "Success"
-    
-    📖 **description** (string)
-    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
-    - **Ví dụ**: "Service đang hoạt động bình thường"
-    """
     from schemas.response import RestResponse
     
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
-        description="Service đang hoạt động bình thường",
         data={
             "status": "healthy",
             "service": "Automation Service",
@@ -253,9 +186,7 @@ async def on_shutdown():
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    """
-    Validation error handler - trả về HTTP 200 với statusCode 400 trong RestResponse format
-    """
+    
     from schemas.response import ErrorResponse
     
     error_details = []
@@ -265,7 +196,6 @@ async def validation_exception_handler(request, exc):
     error_response = ErrorResponse(
         statusCode=400,
         shortMessage="Bad Request",
-        description="Dữ liệu đầu vào không hợp lệ",
         error="; ".join(error_details),
         path=str(request.url),
         timestamp=datetime.now(),
@@ -279,9 +209,7 @@ async def validation_exception_handler(request, exc):
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
-    """
-    Custom HTTP exception handler - trả về HTTP 200 với statusCode tương ứng trong RestResponse format
-    """
+    
     from schemas.response import ErrorResponse
     
     # Map HTTP status codes to statusCode trong RestResponse
@@ -300,7 +228,6 @@ async def http_exception_handler(request, exc):
     error_response = ErrorResponse(
         statusCode=mapped_status_code,
         shortMessage="Error",
-        description=f"HTTP {exc.status_code}: {exc.detail}",
         error=exc.detail,
         path=str(request.url),
         timestamp=datetime.now(),
@@ -314,15 +241,12 @@ async def http_exception_handler(request, exc):
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
-    """
-    General exception handler - trả về HTTP 200 với statusCode 500 trong RestResponse format
-    """
+    
     from schemas.response import ErrorResponse
     
     error_response = ErrorResponse(
         statusCode=500,
         shortMessage="Internal Server Error",
-        description="Lỗi không lường trước xảy ra trong quá trình xử lý",
         error=str(exc),
         path=str(request.url),
         timestamp=datetime.now(),

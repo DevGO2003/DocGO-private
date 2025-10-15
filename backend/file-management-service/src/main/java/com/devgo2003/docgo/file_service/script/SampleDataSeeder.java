@@ -1,9 +1,7 @@
 package com.devgo2003.docgo.file_service.script;
 
 import com.devgo2003.docgo.file_service.entity.DocumentEntity;
-import com.devgo2003.docgo.file_service.entity.CommentEntity;
 import com.devgo2003.docgo.file_service.repository.DocumentRepository;
-import com.devgo2003.docgo.file_service.repository.CommentRepository;
 import com.devgo2003.docgo.file_service.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -19,8 +17,6 @@ public class SampleDataSeeder implements CommandLineRunner {
     @Autowired
     private DocumentRepository documentRepository;
     
-    @Autowired
-    private CommentRepository commentRepository;
     
     @Override
     public void run(String... args) throws Exception {
@@ -28,8 +24,7 @@ public class SampleDataSeeder implements CommandLineRunner {
         String documentId = "DOC-2024-004-NEW";
         documentRepository.deleteById("DOC-2024-004");
         documentRepository.deleteById(documentId);
-        commentRepository.deleteByDocumentId("DOC-2024-004");
-        commentRepository.deleteByDocumentId(documentId);
+        // comments removed
         System.out.println("Cleared existing sample data, creating new with ID: " + documentId);
         
         // Always create sample data
@@ -38,8 +33,7 @@ public class SampleDataSeeder implements CommandLineRunner {
             DocumentEntity document = createSampleDocument(documentId);
             documentRepository.save(document);
             
-            // Create sample comments
-            createSampleComments(documentId);
+            // comments removed
             
             System.out.println("Sample data created successfully with ID: " + documentId);
         }
@@ -247,28 +241,5 @@ public class SampleDataSeeder implements CommandLineRunner {
         return document;
     }
     
-    private void createSampleComments(String documentId) {
-        List<CommentEntity> comments = Arrays.asList(
-            createComment(documentId, "user-001", "Admin", "Vui lòng kiểm tra điều khoản thanh toán."),
-            createComment(documentId, "user-002", "Legal", "Đã rà soát, đề xuất chỉnh sửa mục 7."),
-            createComment(documentId, "user-003", "Finance", "Ngân sách đã được phê duyệt. Có thể tiến hành ký hợp đồng."),
-            createComment(documentId, "user-004", "Manager", "Cần thêm điều khoản về bảo mật thông tin khách hàng.")
-        );
-        
-        commentRepository.saveAll(comments);
-    }
-    
-    private CommentEntity createComment(String documentId, String userId, String userName, String content) {
-        CommentEntity comment = new CommentEntity();
-        comment.setDocumentId(documentId);
-        comment.setUserId(userId);
-        comment.setUserName(userName);
-        comment.setContent(content);
-        comment.setIsEdited(false);
-        comment.setLikesCount(0);
-        comment.setRepliesCount(0);
-        comment.setCreatedAt(LocalDateTime.now().minusHours(2));
-        comment.setUpdatedAt(LocalDateTime.now().minusHours(2));
-        return comment;
-    }
+    // comments seeding removed
 }

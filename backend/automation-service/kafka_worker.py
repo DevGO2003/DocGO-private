@@ -176,9 +176,7 @@ class AIKafkaWorker:
 			await self._publish_error_event(event, data, str(e))
 
 	async def _handle_text_extraction_requested(self, event: dict) -> None:
-		"""
-		Handle ai.text.extraction.requested event - extract text using Gemini
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -237,9 +235,7 @@ class AIKafkaWorker:
 			await self._publish_error_event(event, data, str(e))
 
 	async def _handle_text_extracted(self, event: dict) -> None:
-		"""
-		Handle ai.text.extracted event - trigger summary creation
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -260,9 +256,7 @@ class AIKafkaWorker:
 			await self._publish_error_event(event, data, str(e))
 
 	async def _handle_summary_creation_requested(self, event: dict) -> None:
-		"""
-		Handle ai.summary.creation.requested event - create summary using Gemini
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -294,9 +288,7 @@ class AIKafkaWorker:
 			await self._publish_error_event(event, data, str(e))
 
 	async def _download_file_from_url(self, file_url: str) -> Optional[bytes]:
-		"""
-		Download file content from URL
-		"""
+		
 		try:
 			async with aiohttp.ClientSession() as session:
 				async with session.get(file_url) as response:
@@ -312,9 +304,7 @@ class AIKafkaWorker:
 			return None
 
 	async def _extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
-		"""
-		Extract text from file content using basic extraction to avoid rate limiting
-		"""
+		
 		try:
 			# Use basic extraction without Gemini to avoid rate limiting
 			# For now, use basic extraction and let the shared service handle Gemini calls
@@ -365,9 +355,7 @@ class AIKafkaWorker:
 			return f"[EXTRACT_ERROR] Error extracting text from {filename}: {str(e)}"
 
 	async def _create_summary_with_gemini(self, extracted_text: str, filename: str) -> dict:
-		"""
-		Create contract summary using shared AI service to avoid rate limiting
-		"""
+		
 		try:
 			# Use shared AI service instead of creating new Gemini configuration
 			summary_result = self.ai_service.generate_contract_summary(extracted_text, filename)
@@ -384,9 +372,7 @@ class AIKafkaWorker:
 			return {"title": filename, "summary": f"Lỗi khi tạo tóm tắt: {str(e)}"}
 
 	async def _extract_text_from_content(self, content: bytes, filename: str, content_type: str) -> str:
-		"""
-		Extract text from file content based on content type (legacy method)
-		"""
+		
 		try:
 			if content_type == "application/pdf":
 				# TODO: Implement PDF text extraction
@@ -407,9 +393,7 @@ class AIKafkaWorker:
 			return ""
 
 	async def _classify_document_with_gemini(self, content: str, filename: str, content_type: str) -> dict:
-		"""
-		Use shared AI service to classify document to avoid rate limiting
-		"""
+		
 		try:
 			# Use shared AI service instead of creating new Gemini configuration
 			result = self.ai_service.classify_document(content, filename)
@@ -420,9 +404,7 @@ class AIKafkaWorker:
 			return {"classification": "GENERAL", "confidence": 0.5, "reasoning": f"Error: {str(e)}"}
 
 	async def _publish_text_extraction_request(self, event: dict, data: dict, file_content: bytes) -> None:
-		"""
-		Publish text extraction request event for contract processing
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -462,9 +444,7 @@ class AIKafkaWorker:
 			logging.error(f"[AI_PUBLISH_ERROR] Failed to publish text extraction request: {e}")
 
 	async def _publish_error_event(self, event: dict, data: dict, error_message: str) -> None:
-		"""
-		Publish error event when processing fails
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -545,9 +525,7 @@ class AIKafkaWorker:
 		logging.info(f"[AI_PUBLISH_SUCCESS] topic={self.document_classified_topic} payload={json.dumps(classified_event, ensure_ascii=False)}")
 
 	async def _publish_summary_creation_request(self, event: dict, data: dict, extracted_text: str) -> None:
-		"""
-		Publish summary creation request event
-		"""
+		
 		if not self.producer:
 			return
 			
@@ -651,59 +629,13 @@ class AIKafkaWorker:
 		}
 
 	async def _extract_text_from_file(self, data: dict) -> str:
-		"""Đọc nội dung thật từ file PDF/DOCX."""
+		
 		try:
 			# Tạm thời dùng nội dung mẫu cho test, sau này sẽ đọc từ S3/Filebase
 			# TODO: Implement real file reading from S3/Filebase
 			filename = data.get("filename", "")
 			if "contract" in filename.lower() or "hopdong" in filename.lower():
-				return """
-HỢP ĐỒNG DỊCH VỤ TƯ VẤN MARKETING
-
-Số hợp đồng: SC-2024-001
-Ngày ký: 15/01/2024
-
-BÊN A (Bên cung cấp dịch vụ): Công ty TNHH ABC Marketing
-Địa chỉ: 123 Đường XYZ, Quận 1, TP.HCM
-Mã số thuế: 0123456789
-Người đại diện: Nguyễn Văn A
-Chức vụ: Giám đốc
-
-BÊN B (Bên sử dụng dịch vụ): Công ty CP Thương mại XYZ
-Địa chỉ: 456 Đường UVW, Quận 3, TP.HCM
-Mã số thuế: 9876543210
-Người đại diện: Trần Thị B
-Chức vụ: Giám đốc
-
-ĐIỀU 1: ĐỐI TƯỢNG HỢP ĐỒNG
-Bên A cam kết cung cấp dịch vụ tư vấn và triển khai các chiến dịch marketing cho sản phẩm mới của Bên B.
-
-ĐIỀU 2: THỜI HẠN HỢP ĐỒNG
-Hợp đồng có hiệu lực từ ngày 15/01/2024 đến ngày 15/01/2025 (12 tháng).
-
-ĐIỀU 3: GIÁ TRỊ HỢP ĐỒNG
-Tổng giá trị: 50,000,000 VND (Năm mươi triệu đồng)
-Thanh toán: 30% khi ký hợp đồng, 40% sau 6 tháng, 30% khi nghiệm thu
-
-ĐIỀU 4: NGHĨA VỤ CÁC BÊN
-- Bên A: Cung cấp dịch vụ tư vấn marketing chuyên nghiệp
-- Bên B: Cung cấp thông tin cần thiết và thanh toán đúng hạn
-
-ĐIỀU 5: BẢO MẬT THÔNG TIN
-Các bên cam kết bảo mật thông tin liên quan đến hợp đồng và hoạt động kinh doanh của đối tác.
-
-ĐIỀU 6: CHẤM DỨT HỢP ĐỒNG
-Hợp đồng có thể chấm dứt trước thời hạn nếu một trong hai bên vi phạm nghiêm trọng các điều khoản.
-
-ĐIỀU 7: QUYỀN SỞ HỮU TRÍ TUỆ
-Quyền sở hữu trí tuệ đối với các sản phẩm và dịch vụ được tạo ra trong quá trình thực hiện hợp đồng thuộc về Bên A.
-
-Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.
-
-BÊN A                                    BÊN B
-Nguyễn Văn A                            Trần Thị B
-(Ký tên, đóng dấu)                      (Ký tên, đóng dấu)
-				"""
+				return 
 			else:
 				return f"Nội dung file {filename} (đã đọc thành công)"
 		except Exception as e:
@@ -711,11 +643,11 @@ Nguyễn Văn A                            Trần Thị B
 			return f"Lỗi đọc file {data.get('filename', 'unknown')}: {e}"
 
 	def _get_contract_summary_prompt(self, content: str, filename: str) -> str:
-		"""Tạo prompt chuẩn cho việc tóm tắt hợp đồng - dùng chung cho API và Event"""
+		
 		return self.ai_service.get_contract_summary_prompt(content, filename)
 
 	async def _generate_contract_summary(self, content: str, filename: str) -> Optional[dict]:
-		"""Gọi Gemini để tạo JSON tóm tắt hợp đồng; fallback nếu lỗi."""
+		
 		return self.ai_service.generate_contract_summary(content, filename)
 
 
