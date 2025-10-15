@@ -30,7 +30,7 @@
         "DISCORD_TOKEN": "MTQyMDIyNzQ4NTQwODE3MDA3NQ.GKkS8E.g9ryoJzKECLDVYN5JE3Yg8T5Si9yHUZWFJusWk"
       }
     },
-    "chrome-devtools": {
+    "Chrome": {
       "command": "npx",
       "args": [
         "chrome-devtools-mcp@latest",

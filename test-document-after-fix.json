@@ -1,0 +1,13 @@
+{
+  "title": "Test Document JSON Upload - After Fix",
+  "description": "Tài liệu test upload file JSON sau khi sửa ContractCard logic",
+  "content": "Đây là nội dung test cho file JSON được upload sau khi sửa logic hiển thị",
+  "metadata": {
+    "author": "Test User",
+    "version": "2.0",
+    "created": "2025-10-15",
+    "type": "test-document-after-fix"
+  },
+  "tags": ["test", "json", "upload", "docgo", "after-fix"],
+  "category": "Test Document After Fix"
+}

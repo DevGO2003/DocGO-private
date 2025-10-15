@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query, Form, WebSocket, WebSocketDisconnect
 import logging
 import asyncio
@@ -113,18 +112,43 @@ async def upload_document_api(
                     logger.warning(f"AI Summarization failed for {file.filename}: {e}")
                     summary_result = None
 
+            # Suy luận extension, category, contractMetadata theo chuẩn mới
+            filename_lower = file.filename.lower()
+            extension = filename_lower.split('.')[-1] if '.' in filename_lower else None
+            category = "HOP_DONG_CHUNG" if classification_result.get("isContract", False) else "TAI_LIEU_CHUNG"
+            contract_metadata = None
+            if summary_result and isinstance(summary_result, dict):
+                eff = summary_result.get("effectiveDate")
+                exp = summary_result.get("expiryDate")
+                total = summary_result.get("paymentDetails", {}).get("totalValue") if isinstance(summary_result.get("paymentDetails"), dict) else summary_result.get("totalValue")
+                try:
+                    total_num = float(total) if total is not None and not isinstance(total, (int, float)) else total
+                except Exception:
+                    total_num = None
+                curr = summary_result.get("paymentDetails", {}).get("currency") if isinstance(summary_result.get("paymentDetails"), dict) else summary_result.get("currency")
+                contract_metadata = {
+                    "effectiveDate": eff,
+                    "expiryDate": exp,
+                    "totalValue": total_num,
+                    "currency": curr
+                }
+
             # Gọi Document Service tạo record với đầy đủ AI results
             ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
             payload = {
                 "fileName": file.filename,
                 "fileSize": size,
                 "fileType": file.content_type,
+                "extension": extension,
+                "category": category,
+                "documentType": file.content_type,
                 "fileUrl": upload_result.file_url,
                 "fileId": upload_result.file_id,
                 "processingStatus": "COMPLETED",
                 "ocrText": ocr_text,
                 "classificationResult": classification_result,
-                "summaryResult": summary_result
+                "summaryResult": summary_result,
+                "contractMetadata": contract_metadata
             }
             async with aiohttp.ClientSession() as session:
                 async def _post_json():
@@ -210,11 +234,32 @@ async def upload_document_api(
                 
                 # Update Document Service với kết quả cuối cùng
                 ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/v1/documents/{doc_id}/processing-result"
+                # Cập nhật thêm category và contractMetadata sau khi có kết quả AI
+                category = "HOP_DONG_CHUNG" if classification_result.get("isContract", False) else "TAI_LIEU_CHUNG"
+                contract_metadata = None
+                if summary_result and isinstance(summary_result, dict):
+                    eff = summary_result.get("effectiveDate")
+                    exp = summary_result.get("expiryDate")
+                    total = summary_result.get("paymentDetails", {}).get("totalValue") if isinstance(summary_result.get("paymentDetails"), dict) else summary_result.get("totalValue")
+                    try:
+                        total_num = float(total) if total is not None and not isinstance(total, (int, float)) else total
+                    except Exception:
+                        total_num = None
+                    curr = summary_result.get("paymentDetails", {}).get("currency") if isinstance(summary_result.get("paymentDetails"), dict) else summary_result.get("currency")
+                    contract_metadata = {
+                        "effectiveDate": eff,
+                        "expiryDate": exp,
+                        "totalValue": total_num,
+                        "currency": curr
+                    }
                 update_payload = {
                     "processingStatus": "COMPLETED",
                     "ocrText": ocr_text,
                     "classificationResult": classification_result,
-                    "summaryResult": summary_result
+                    "summaryResult": summary_result,
+                    "category": category,
+                    "contractMetadata": contract_metadata,
+                    "documentType": file.content_type
                 }
                 async with aiohttp.ClientSession() as session:
                     async with session.put(ds_put_url, json=update_payload) as resp:
@@ -234,10 +279,14 @@ async def upload_document_api(
 
         # Tạo trước bản ghi ở DS với trạng thái PROCESSING
         ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
+        filename_lower = file.filename.lower()
+        extension = filename_lower.split('.')[-1] if '.' in filename_lower else None
         create_payload = {
             "fileName": file.filename,
             "fileSize": size,
             "fileType": file.content_type,
+            "extension": extension,
+            "documentType": file.content_type,
             "processingStatus": "PROCESSING",
             "ocrText": "",
             "classificationResult": {}

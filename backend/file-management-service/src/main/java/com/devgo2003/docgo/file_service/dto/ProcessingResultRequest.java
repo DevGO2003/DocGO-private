@@ -15,6 +15,10 @@ public class ProcessingResultRequest {
     private Object classificationResult;
     private String processingStatus;
     private String processingError;
+    // Bổ sung theo schema mới
+    private String category;              // HOP_DONG_CHUNG | TAI_LIEU_CHUNG | ...
+    private String documentType;          // MIME type (application/pdf, ...)
+    private ContractMetadata contractMetadata; // Metadata hợp đồng gom nhóm
 }
 
 

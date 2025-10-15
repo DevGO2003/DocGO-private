@@ -42,7 +42,16 @@ export default function DocumentsTable({ items, selectedItems, onToggleSelect, o
           {items.map(doc => {
             const isSelected = selectedItems.includes(doc.id)
             
-            if (doc.documentType === 'GENERAL_FILE') {
+            // Theo yêu cầu: nếu documentType === 'CONTRACT' thì render ContractCard, ngược lại render GeneralFileCard
+            if (process.env.NODE_ENV === 'development') {
+              console.log('🔎 DocumentsTable decision', {
+                id: doc.id,
+                documentType: doc.documentType,
+                choose: doc.documentType === 'CONTRACT' ? 'ContractCard' : 'GeneralFileCard'
+              })
+            }
+
+            if (doc.documentType !== 'CONTRACT') {
               return (
                 <GeneralFileCard
                   key={doc.id}

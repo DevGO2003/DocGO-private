@@ -28,10 +28,23 @@ export type Document = {
   expiryDate: string
   riskLevel?: string
   attachments?: Attachment[]
-  documentType?: 'CONTRACT' | 'GENERAL_FILE'
+  // documentType trước đây dùng để phân biệt CONTRACT/GENERAL.
+  // Sau chuẩn hoá, UI nên dựa vào category (nghiệp vụ). Trường này giữ lại để tương thích ngược.
+  documentType?: string | null
+  // MIME type, ví dụ: application/pdf
   fileType?: string
+  // Phần mở rộng, ví dụ: pdf, docx (fallback: suy từ fileName)
+  extension?: string
   fileSize?: number
+  // Loại nghiệp vụ, ví dụ: HOP_DONG_DICH_VU, TAI_LIEU_HUONG_DAN
   category?: string
+  // Metadata hợp đồng (chỉ có khi category là hợp đồng). Tương thích ngược với các field riêng lẻ ở trên
+  contractMetadata?: {
+    effectiveDate?: string
+    expiryDate?: string
+    totalValue?: number
+    currency?: string
+  }
 }
 
 export type Paginated<T> = {

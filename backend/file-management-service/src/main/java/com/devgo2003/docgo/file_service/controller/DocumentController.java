@@ -168,7 +168,7 @@ public class DocumentController {
             @Parameter(description = "Trường sắp xếp (mặc định: createdAt)") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Hướng sắp xếp (mặc định: DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
             @Parameter(description = "User ID (optional)") @RequestParam(value = "userId", required = false) String userId,
-            @Parameter(description = "Loại tài liệu (CONTRACT|GENERAL_FILE)") @RequestParam(value = "documentType", required = false) String documentType,
+            @Parameter(description = "Loại tài liệu (MIME type hoặc legacy CONTRACT|GENERAL_FILE)") @RequestParam(value = "documentType", required = false) String documentType,
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(value = "searchTerm", required = false) String searchTerm,
             @Parameter(description = "Bao gồm tài liệu đã xóa") @RequestParam(value = "includeDeleted", defaultValue = "false") boolean includeDeleted,
             @Parameter(description = "Loại view dữ liệu (table|card|detail|full). Mặc định: full") @RequestParam(value = "view", defaultValue = "full") String view
@@ -392,6 +392,17 @@ public class DocumentController {
                 }
             }
             
+            // Áp dụng schema mới nếu có
+            if (processingResult.getCategory() != null) {
+                document.setCategory(processingResult.getCategory());
+            }
+            if (processingResult.getDocumentType() != null) {
+                document.setDocumentType(processingResult.getDocumentType());
+            }
+            if (processingResult.getContractMetadata() != null) {
+                document.setContractMetadata(processingResult.getContractMetadata());
+            }
+
             DocumentEntity updatedDocument = documentRepository.save(document);
             
             log.info("Processing result updated successfully for document: {}", id);

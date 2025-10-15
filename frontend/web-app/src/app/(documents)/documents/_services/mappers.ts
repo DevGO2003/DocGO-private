@@ -67,21 +67,18 @@ export function mapApiDocumentToUi(doc: any): Document {
 
   // Complex document type detection with smart logic
   const getDocumentType = () => {
-    // Check multiple fields to determine if it's a contract
-    if (doc.documentType) return doc.documentType
-    if (doc.document_type) return doc.document_type
-    
-    // Smart detection based on content and category
+    // Ưu tiên giữ nguyên giá trị từ API nếu có
+    if (doc.documentType !== undefined && doc.documentType !== null) return doc.documentType
+    if (doc.document_type !== undefined && doc.document_type !== null) return doc.document_type
+
+    // Fallback: suy đoán (giữ nguyên logic cũ)
     if (doc.category && ['Financial Report', 'User Guide', 'Business Plan', 'Project Report', 'Training Material', 'HR Document', 'Presentation', 'Meeting Minutes', 'Documentation'].includes(doc.category)) {
       return 'GENERAL_FILE'
     }
-    
-    // Smart detection based on content
     if (doc.contractType || doc.totalValue || doc.effectiveDate) {
       return 'CONTRACT'
     }
-    
-    return 'GENERAL_FILE' // Safer fallback
+    return undefined
   }
 
   // Complex value calculation with multiple sources
@@ -127,6 +124,7 @@ export function mapApiDocumentToUi(doc: any): Document {
                '',
     riskLevel: doc.riskLevel || doc.riskAssessment?.riskLevel,
     attachments: [],
+    // Đảm bảo truyền qua đúng giá trị từ API nếu có
     documentType: getDocumentType(),
     fileType: doc.fileType || doc.file_type,
     fileSize: doc.fileSize || doc.file_size,

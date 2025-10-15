@@ -1,14 +1,21 @@
-HỢP ĐỒNG LAO ĐỘNG
+HỢP ĐỒNG DỊCH VỤ PHÁT TRIỂN PHẦN MỀM
 
 Điều 1: Thông tin các bên
-- Bên A: Công ty ABC
-- Bên B: Nguyễn Văn A
+- Bên A: Công ty TNHH ABC (Khách hàng)
+- Bên B: Công ty TNHH XYZ (Nhà cung cấp)
 
-Điều 2: Nội dung công việc
-- Vị trí: Developer
-- Lương: 20 triệu/tháng
-- Thời gian: 12 tháng
+Điều 2: Phạm vi công việc
+Phát triển hệ thống quản lý tài liệu với các tính năng:
+- Quản lý tài liệu
+- Phân tích và báo cáo
+- Tìm kiếm thông minh
 
-Điều 3: Điều khoản chung
-- Tuân thủ quy định pháp luật
-- Bảo mật thông tin công ty
+Điều 3: Thời gian thực hiện
+6 tháng kể từ ngày ký hợp đồng
+
+Điều 4: Giá trị hợp đồng
+Tổng giá trị: 100,000,000 VND
+Thanh toán: 50% khi ký, 50% khi nghiệm thu
+
+Điều 5: Bảo hành
+12 tháng sau nghiệm thu

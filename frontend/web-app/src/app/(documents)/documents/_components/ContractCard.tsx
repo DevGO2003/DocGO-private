@@ -100,19 +100,34 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
           </div>
           
           <div className="mt-2 text-xs text-gray-500 space-y-1">
-            {document.documentType === 'CONTRACT' ? (
-              <>
-                <div className="flex justify-between"><span>Hiệu lực</span><span>{document.effectiveDate ? new Date(document.effectiveDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
-                <div className="flex justify-between"><span>Hết hạn</span><span>{document.expiryDate ? new Date(document.expiryDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
-                <div className="flex justify-between"><span>Giá trị</span><span>{document.totalValue ? document.totalValue.toLocaleString('vi-VN') + ' ' + (document.currency || 'VND') : 'N/A'}</span></div>
-              </>
-            ) : (
-              <>
-                <div className="flex justify-between"><span>Kích thước</span><span>{document.fileSize ? (document.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'N/A'}</span></div>
-                <div className="flex justify-between"><span>Loại file</span><span>{document.fileType ? document.fileType.split('/')[1]?.toUpperCase() || document.fileType : 'N/A'}</span></div>
-                <div className="flex justify-between"><span>Ngày tạo</span><span>{document.createdAt ? new Date(document.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
-              </>
-            )}
+            {(() => {
+              // Quy ước mới: đọc từ contractMetadata nếu có, fallback về các field cũ để tương thích ngược
+              const meta = document.contractMetadata || {
+                effectiveDate: document.effectiveDate,
+                expiryDate: document.expiryDate,
+                totalValue: document.totalValue,
+                currency: document.currency
+              }
+
+              // Debug logs
+              if (process.env.NODE_ENV === 'development') {
+                console.log('🔍 ContractCard Debug:', {
+                  documentId: document.id,
+                  category: document.category,
+                  extension: document.extension,
+                  fileType: document.fileType,
+                  contractMetadata: meta
+                });
+              }
+
+              return (
+                <>
+                  <div className="flex justify-between"><span>Hiệu lực</span><span>{meta.effectiveDate ? new Date(meta.effectiveDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
+                  <div className="flex justify-between"><span>Hết hạn</span><span>{meta.expiryDate ? new Date(meta.expiryDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
+                  <div className="flex justify-between"><span>Giá trị</span><span>{meta.totalValue ? meta.totalValue.toLocaleString('vi-VN') + ' ' + (meta.currency || 'VND') : 'N/A'}</span></div>
+                </>
+              );
+            })()}
           </div>
         </div>
 

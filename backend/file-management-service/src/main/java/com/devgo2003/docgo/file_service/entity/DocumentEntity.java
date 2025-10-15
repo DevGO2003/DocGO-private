@@ -40,10 +40,13 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     private String fileName;
     
     @Field("file_type")
-    private String fileType;
+    private String fileType; // MIME type (ví dụ: application/pdf)
     
     @Field("file_size")
     private Long fileSize;
+
+    @Field("extension")
+    private String extension; // ví dụ: pdf, docx
     
     @Field("file_url")
     private String fileUrl;
@@ -57,23 +60,15 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     private String category;
     
     @Field("document_type")
-    @NotNull(message = "Loại tài liệu không được để trống")
-    private String documentType; // CONTRACT, GENERAL_FILE
+    private String documentType; // Giữ tương thích ngược (CONTRACT/GENERAL_FILE). UI mới dùng category + contractMetadata
     
     // Contract info
     @Field("contract_type")
     private String contractType;
     
-    @Field("effective_date")
-    private LocalDateTime effectiveDate;
-    
-    @Field("expiry_date")
-    private LocalDateTime expiryDate;
-    
-    @Field("total_value")
-    private Double totalValue;
-    
-    private String currency;
+    // Metadata hợp đồng gom nhóm
+    @Field("contract_metadata")
+    private com.devgo2003.docgo.document_service.dto.ContractMetadata contractMetadata;
     
     @Field("risk_level")
     private String riskLevel;
