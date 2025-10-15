@@ -22,14 +22,14 @@ function LoadingPreview() {
 }
 
 // Lazy loaders per preview type (loaded only when needed)
-const GenericPreview = dynamic(() => import('@/components/preview/GenericPreview'), { ssr: false, loading: LoadingPreview })
-const PdfPreview = dynamic(() => import('@/components/preview/PdfPreview'), { ssr: false, loading: LoadingPreview })
-const OfficePreview = dynamic(() => import('@/components/preview/OfficePreview'), { ssr: false, loading: LoadingPreview })
-const ImagePreview = dynamic(() => import('@/components/preview/ImagePreview'), { ssr: false, loading: LoadingPreview })
-const VideoPreview = dynamic(() => import('@/components/preview/VideoPreview'), { ssr: false, loading: LoadingPreview })
-const AudioPreview = dynamic(() => import('@/components/preview/AudioPreview'), { ssr: false, loading: LoadingPreview })
-const TextPreview = dynamic(() => import('@/components/preview/TextPreview'), { ssr: false, loading: LoadingPreview })
-const ArchivePreview = dynamic(() => import('@/components/preview/ArchivePreview'), { ssr: false, loading: LoadingPreview })
+const GenericPreview = dynamic(() => import('@/components/preview/GenericPreview'), { ssr: false, loading: () => LoadingPreview() })
+const PdfPreview = dynamic(() => import('@/components/preview/PdfPreview'), { ssr: false, loading: () => LoadingPreview() })
+const OfficePreview = dynamic(() => import('@/components/preview/OfficePreview'), { ssr: false, loading: () => LoadingPreview() })
+const ImagePreview = dynamic(() => import('@/components/preview/ImagePreview'), { ssr: false, loading: () => LoadingPreview() })
+const VideoPreview = dynamic(() => import('@/components/preview/VideoPreview'), { ssr: false, loading: () => LoadingPreview() })
+const AudioPreview = dynamic(() => import('@/components/preview/AudioPreview'), { ssr: false, loading: () => LoadingPreview() })
+const TextPreview = dynamic(() => import('@/components/preview/TextPreview'), { ssr: false, loading: () => LoadingPreview() })
+const ArchivePreview = dynamic(() => import('@/components/preview/ArchivePreview'), { ssr: false, loading: () => LoadingPreview() })
 
 function getExtension(fileName: string): string {
   const parts = fileName.split('.')
@@ -68,7 +68,7 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
     if (type === 'text/plain' || /^(txt|log|csv)$/i.test(ext)) return TextPreview
     if (/^(html|htm|css|js|jsx|ts|tsx|json|xml|yaml|yml|md|py|java|cpp|c|cs|php|rb|go|rs|sh|sql|vue|svelte)$/i.test(ext)) {
       // CodePreview is part of preview set
-      return dynamic(() => import('@/components/preview/CodePreview'), { ssr: false, loading: LoadingPreview }) as any
+      return dynamic(() => import('@/components/preview/CodePreview'), { ssr: false, loading: () => LoadingPreview() }) as any
     }
 
     // Fallback
@@ -111,11 +111,3 @@ export default function FilePreview({ selectedFile }: FilePreviewProps) {
   )
 }
 
-// Helper function for formatting file size
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}

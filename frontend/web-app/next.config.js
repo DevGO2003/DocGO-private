@@ -5,6 +5,22 @@ const nextConfig = {
   // i18n, // Disabled to prevent 404 with /en/ prefix
   // Hot reload optimization for Docker + PDF.js support
   webpack: (config, { dev, isServer }) => {
+    // Dynamic import optimization
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks.cacheGroups,
+          preview: {
+            test: /[\/]components[\/]preview[\/]/,
+            name: "preview",
+            chunks: "all",
+            priority: 10,
+          },
+        },
+      },
+    }
     if (dev && !isServer) {
       config.watchOptions = {
         poll: 1000,

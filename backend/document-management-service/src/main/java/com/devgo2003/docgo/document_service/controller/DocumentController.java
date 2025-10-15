@@ -208,23 +208,31 @@ public class DocumentController {
             // Complex response handling
             if (documents == null || documents.getContent().isEmpty()) {
                 return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
+                        .apiVersion("v1")
                         .statusCode(204)
                         .shortMessage("No Content")
                         .description("Không có tài liệu nào phù hợp với điều kiện tìm kiếm")
                         .data(null)
+                        .timestamp(java.time.ZonedDateTime.now())
+                        .requestId(java.util.UUID.randomUUID().toString())
+                        .path("/api/v1/document-management-service/v1/documents")
                         .build());
             }
             
             // Success response with complex metadata
         return ResponseEntity.ok(RestResponse.<Page<DocumentEntity>>builder()
+                .apiVersion("v1")
                 .statusCode(200)
                 .shortMessage("Success")
-                    .description(String.format("Đã lấy danh sách %d tài liệu thành công (trang %d/%d)", 
-                        documents.getContent().size(), 
-                        documents.getNumber() + 1, 
-                        documents.getTotalPages()))
-                    .data(documents)
-                    .build());
+                .description(String.format("Đã lấy danh sách %d tài liệu thành công (trang %d/%d)", 
+                    documents.getContent().size(), 
+                    documents.getNumber() + 1, 
+                    documents.getTotalPages()))
+                .data(documents)
+                .timestamp(java.time.ZonedDateTime.now())
+                .requestId(java.util.UUID.randomUUID().toString())
+                .path("/api/v1/document-management-service/v1/documents")
+                .build());
                     
         } catch (Exception e) {
             // Complex error handling
