@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,6 +28,18 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Autowired
     private DocumentRepository documentRepository;
+
+    // Debug: Constructor để kiểm tra service được tạo
+    public FileStorageServiceImpl() {
+        System.out.println("🔍 FileStorageServiceImpl: Constructor called - Service is being created!");
+    }
+
+    // Debug: PostConstruct để kiểm tra service được initialize
+    @PostConstruct
+    public void init() {
+        System.out.println("🔍 FileStorageServiceImpl: @PostConstruct called - Service is initialized!");
+        System.out.println("🔍 FileStorageServiceImpl: DocumentRepository is " + (documentRepository != null ? "injected" : "NULL"));
+    }
 
     @Override
     public FileUploadResponse uploadFile(MultipartFile file, String userId, String folder) {
@@ -78,6 +91,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public Page<DocumentEntity> getAllDocuments(int page, int size, String userId) {
+        System.out.println("🔍 FileStorageServiceImpl: getAllDocuments method called! - page: " + page + ", size: " + size + ", userId: " + userId);
         try {
             System.out.println("🔍 FileStorageServiceImpl: Getting documents - page: " + page + ", size: " + size + ", userId: " + userId);
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));

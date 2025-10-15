@@ -41,6 +41,7 @@ public class DocumentController {
         this.fileStorageService = fileStorageService;
         this.documentService = documentService;
         this.documentRepository = documentRepository;
+        System.out.println("🔍 DocumentController: Constructor called - FileStorageService is " + (fileStorageService != null ? "injected" : "NULL"));
     }
 
     @Operation(
@@ -197,8 +198,15 @@ public class DocumentController {
             }
             // Strategy 3: Get all documents with advanced filtering (fallback to getAllDocuments)
             else {
-                documents = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
-                System.out.println("🔍 DocumentController: Service returned " + (documents != null ? documents.getContent().size() : "null") + " documents");
+                System.out.println("🔍 DocumentController: About to call fileStorageService.getAllDocuments()");
+                try {
+                    documents = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
+                    System.out.println("🔍 DocumentController: Service returned " + (documents != null ? documents.getContent().size() : "null") + " documents");
+                } catch (Exception e) {
+                    System.err.println("🔍 DocumentController: Exception in fileStorageService.getAllDocuments(): " + e.getMessage());
+                    e.printStackTrace();
+                    documents = null;
+                }
                 // Apply additional filtering if needed
                 if (!includeDeleted) {
                     documents = filterDeletedDocuments(documents);

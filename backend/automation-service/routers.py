@@ -2,6 +2,9 @@
 from fastapi import APIRouter, File, UploadFile, Header, HTTPException, Body, Request, Query, Form, WebSocket, WebSocketDisconnect
 import logging
 import asyncio
+
+# Setup logger
+logger = logging.getLogger(__name__)
 import aiohttp
 from docx import Document
 import PyPDF2
@@ -70,10 +73,47 @@ async def upload_document_api(
         # Nếu nhỏ hơn hoặc bằng ngưỡng → xử lý sync
         if size <= Config.MAX_SYNC_SIZE:
             processor = DocumentProcessor()
-            # OCR tối thiểu: bỏ qua để đơn giản; có thể bổ sung nếu cần
+            
+            # OCR extraction
             ocr_text = ""
+            try:
+                # Read file content from upload
+                file_content = await file.read()
+                await file.seek(0)  # Reset file pointer
+                
+                # Extract text from file content
+                if file.filename.lower().endswith('.pdf'):
+                    ocr_text = processor.extract_text_from_pdf(file_content)
+                elif file.filename.lower().endswith('.docx'):
+                    ocr_text = processor.extract_text_from_docx(file_content)
+                elif file.filename.lower().endswith('.txt'):
+                    ocr_text = file_content.decode('utf-8')
+            except Exception as e:
+                logger.warning(f"OCR extraction failed for {file.filename}: {e}")
+                ocr_text = ""
 
-            # Gọi Document Service tạo record
+            # AI Classification
+            classification_result = {}
+            try:
+                from services.ai_processing_service import AutomationService
+                ai_service = AutomationService()
+                classification_result = ai_service.classify_document(ocr_text or upload_result.s3_key, file.filename)
+            except Exception as e:
+                logger.warning(f"AI Classification failed for {file.filename}: {e}")
+                classification_result = {"documentType": "other", "isContract": False, "confidence": 0.0, "reasons": ["Classification failed"]}
+
+            # AI Summarization (nếu là contract)
+            summary_result = None
+            if classification_result.get("isContract", False):
+                try:
+                    from services.ai_processing_service import AutomationService
+                    ai_service = AutomationService()
+                    summary_result = ai_service.summarize_contract(ocr_text or upload_result.s3_key, file.filename)
+                except Exception as e:
+                    logger.warning(f"AI Summarization failed for {file.filename}: {e}")
+                    summary_result = None
+
+            # Gọi Document Service tạo record với đầy đủ AI results
             ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
             payload = {
                 "fileName": file.filename,
@@ -83,7 +123,8 @@ async def upload_document_api(
                 "fileId": upload_result.file_id,
                 "processingStatus": "COMPLETED",
                 "ocrText": ocr_text,
-                "classificationResult": {}
+                "classificationResult": classification_result,
+                "summaryResult": summary_result
             }
             async with aiohttp.ClientSession() as session:
                 async def _post_json():
@@ -96,29 +137,100 @@ async def upload_document_api(
                 statusCode=201,
                 shortMessage="Created",
                 description="Upload và xử lý đồng bộ thành công",
-                data={"documentId": ds_resp.get("data", {}).get("id") or ds_resp.get("data", {}).get("_id")},
+                data={
+                    "documentId": ds_resp.get("data", {}).get("id") or ds_resp.get("data", {}).get("_id"),
+                    "fileUrl": upload_result.file_url,
+                    "ocrText": ocr_text,
+                    "classificationResult": classification_result,
+                    "summaryResult": summary_result,
+                    "processingStatus": "COMPLETED"
+                },
                 path=str(request.url.path),
                 timestamp=datetime.now(),
                 requestId=document_id
             )
 
-        # Ngược lại → trả 202 và xử lý nền (giả lập)
-        async def background_pipeline(doc_id: str):
-            import asyncio
-            # Phát tiến độ qua memory hub (giản lược; WS endpoint sẽ poll từ client)
-            # Giả lập thời gian xử lý
-            for _ in [20, 50, 70, 90]:
+        # Ngược lại → trả 202 và xử lý nền với progress tracking thật
+        # Read file content trước khi upload
+        file_content = await file.read()
+        await file.seek(0)  # Reset file pointer
+        
+        async def background_pipeline(doc_id: str, file_content: bytes):
+            from services.websocket_manager import websocket_manager
+            
+            try:
+                # Stage 1: Saving document (20%)
+                await websocket_manager.broadcast_progress(doc_id, 20, "saving_document", "Đang lưu tài liệu...")
                 await asyncio.sleep(0.5)
-            # Hoàn tất: cập nhật DS
-            ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/v1/documents/{doc_id}/processing-result"
-            update_payload = {
-                "processingStatus": "COMPLETED",
-                "ocrText": "",
-                "classificationResult": {}
-            }
-            async with aiohttp.ClientSession() as session:
-                async with session.put(ds_put_url, json=update_payload) as _:
-                    pass
+                
+                # Stage 2: Uploading to storage (40%)
+                await websocket_manager.broadcast_progress(doc_id, 40, "uploading_to_storage", "Đang tải lên storage...")
+                await asyncio.sleep(0.5)
+                
+                # Stage 3: OCR extraction (60%)
+                await websocket_manager.broadcast_progress(doc_id, 60, "ocr_extracting", "Đang trích xuất văn bản...")
+                ocr_text = ""
+                try:
+                    processor = DocumentProcessor()
+                    if file.filename.lower().endswith('.pdf'):
+                        ocr_text = processor.extract_text_from_pdf(file_content)
+                    elif file.filename.lower().endswith('.docx'):
+                        ocr_text = processor.extract_text_from_docx(file_content)
+                    elif file.filename.lower().endswith('.txt'):
+                        ocr_text = file_content.decode('utf-8')
+                except Exception as e:
+                    logger.warning(f"OCR extraction failed for {file.filename}: {e}")
+                    ocr_text = ""
+                
+                # Stage 4: AI Classification (75%)
+                await websocket_manager.broadcast_progress(doc_id, 75, "ai_classifying", "Đang phân loại tài liệu...")
+                classification_result = {}
+                try:
+                    from services.ai_processing_service import AutomationService
+                    ai_service = AutomationService()
+                    classification_result = ai_service.classify_document(ocr_text or file_content.decode('utf-8'), file.filename)
+                except Exception as e:
+                    logger.warning(f"AI Classification failed for {file.filename}: {e}")
+                    classification_result = {"documentType": "other", "isContract": False, "confidence": 0.0, "reasons": ["Classification failed"]}
+                
+                # Stage 5: AI Summarization (nếu là contract) (90%)
+                summary_result = None
+                if classification_result.get("isContract", False):
+                    await websocket_manager.broadcast_progress(doc_id, 90, "ai_summarizing", "Đang tóm tắt hợp đồng...")
+                    try:
+                        from services.ai_processing_service import AutomationService
+                        ai_service = AutomationService()
+                        summary_result = ai_service.summarize_contract(ocr_text or file_content.decode('utf-8'), file.filename)
+                    except Exception as e:
+                        logger.warning(f"AI Summarization failed for {file.filename}: {e}")
+                        summary_result = None
+                
+                # Stage 6: Processing complete (100%)
+                await websocket_manager.broadcast_progress(doc_id, 100, "processing_complete", "Xử lý hoàn tất")
+                
+                # Update Document Service với kết quả cuối cùng
+                ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/v1/documents/{doc_id}/processing-result"
+                update_payload = {
+                    "processingStatus": "COMPLETED",
+                    "ocrText": ocr_text,
+                    "classificationResult": classification_result,
+                    "summaryResult": summary_result
+                }
+                async with aiohttp.ClientSession() as session:
+                    async with session.put(ds_put_url, json=update_payload) as resp:
+                        if resp.status != 200:
+                            logger.error(f"Failed to update document service for {doc_id}: {resp.status}")
+                
+                # Send completion message
+                await websocket_manager.send_completion(doc_id, {
+                    "ocrText": ocr_text,
+                    "classificationResult": classification_result,
+                    "summaryResult": summary_result
+                })
+                
+            except Exception as e:
+                logger.error(f"Background processing failed for {doc_id}: {e}")
+                await websocket_manager.send_error(doc_id, f"Xử lý thất bại: {str(e)}", "PROCESSING_ERROR")
 
         # Tạo trước bản ghi ở DS với trạng thái PROCESSING
         ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
@@ -135,13 +247,17 @@ async def upload_document_api(
                 created = await resp.json()
                 created_id = created.get("data", {}).get("id") or created.get("data", {}).get("_id")
         import asyncio
-        asyncio.create_task(background_pipeline(created_id))
+        asyncio.create_task(background_pipeline(created_id, file_content))
 
         return RestResponse(
             statusCode=202,
             shortMessage="Accepted",
             description="Tệp lớn, đã nhận và đang xử lý nền",
-            data={"documentId": created_id},
+            data={
+                "documentId": created_id,
+                "fileUrl": upload_result.file_url,
+                "processingStatus": "PROCESSING"
+            },
             path=str(request.url.path),
             timestamp=datetime.now(),
             requestId=str(uuid.uuid4())
@@ -161,16 +277,37 @@ async def upload_document_api(
 
 @router.websocket("/documents/progress/{document_id}")
 async def documents_progress_ws(websocket: WebSocket, document_id: str):
-    await websocket.accept()
+    """
+    WebSocket endpoint for real-time progress tracking
+    Connects to document processing progress stream
+    """
+    from services.websocket_manager import websocket_manager
+    
+    await websocket_manager.connect(websocket, document_id)
+    
     try:
-        for progress in [20, 50, 70, 90, 100]:
-            await websocket.send_json({"documentId": document_id, "progress": progress})
-            import asyncio
-            await asyncio.sleep(0.4)
-    except WebSocketDisconnect:
-        pass
+        # Keep connection alive and handle incoming messages
+        while True:
+            try:
+                # Wait for client messages (ping/pong, etc.)
+                message = await websocket.receive_text()
+                logger.info(f"Received message from {document_id}: {message}")
+                
+                # Handle ping/pong or other client messages
+                if message == "ping":
+                    await websocket.send_text("pong")
+                    
+            except WebSocketDisconnect:
+                logger.info(f"WebSocket disconnected for {document_id}")
+                break
+            except Exception as e:
+                logger.error(f"Error in WebSocket for {document_id}: {e}")
+                break
+                
+    except Exception as e:
+        logger.error(f"WebSocket error for {document_id}: {e}")
     finally:
-        await websocket.close()
+        await websocket_manager.disconnect(websocket, document_id)
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
 os.makedirs(RESULTS_DIR, exist_ok=True)

@@ -88,8 +88,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'
     const automationUserId = Array.isArray(fields.user_id) ? fields.user_id[0] : fields.user_id || userId
     
-    // Build URL with query parameters
-    const automationUrl = new URL(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/files`)
+    // Build URL with query parameters - Fix endpoint to /documents/upload
+    const automationUrl = new URL(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/documents/upload`)
     automationUrl.searchParams.append('folder', folder)
     automationUrl.searchParams.append('user_id', automationUserId)
 

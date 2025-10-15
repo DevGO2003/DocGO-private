@@ -6,6 +6,7 @@ import { HeaderPanel, PrimaryContent } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { automationAPI } from '@/lib/apis'
+import UploadProgress from '@/components/UploadProgress'
 
 // Import components
 import {
@@ -21,6 +22,8 @@ export default function UploadDocumentPage() {
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
   const [baseContractId, setBaseContractId] = useState('')
   const [newVersionName, setNewVersionName] = useState('')
+  const [uploadingDocumentId, setUploadingDocumentId] = useState<string | null>(null)
+  const [showProgress, setShowProgress] = useState(false)
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -124,6 +127,7 @@ export default function UploadDocumentPage() {
       })
 
       if (response.data.statusCode === 201 || response.status === 201) {
+        // Sync upload - completed immediately
         toast.success('Upload thành công!')
         
         // Show success modal with navigation options
@@ -132,14 +136,19 @@ export default function UploadDocumentPage() {
           if (shouldViewList) {
             router.push('/documents')
           } else {
-            // Since backend doesn't return documentId, we can only navigate to documents list
-            toast('Tài liệu đã được upload và đang được xử lý. Vui lòng kiểm tra trong danh sách tài liệu.', {
-              icon: 'ℹ️',
-              duration: 4000,
-            })
             router.push('/documents')
           }
         }, 500)
+      } else if (response.data.statusCode === 202 || response.status === 202) {
+        // Async upload - show progress tracking
+        const documentId = (response.data.data as any)?.documentId
+        if (documentId) {
+          setUploadingDocumentId(documentId)
+          setShowProgress(true)
+          toast.success('File đã được nhận, đang xử lý nền...')
+        } else {
+          toast.error('Không nhận được document ID')
+        }
       } else {
         toast.error(response.data.description || 'Upload thất bại')
       }
@@ -155,6 +164,33 @@ export default function UploadDocumentPage() {
     }
   }
 
+  const handleProgressComplete = (result: any) => {
+    console.log('[Upload Page] Processing completed:', result)
+    toast.success('Xử lý hoàn tất!')
+    
+    setTimeout(() => {
+      const shouldViewList = confirm('Xử lý hoàn tất! Bạn muốn xem danh sách tài liệu?')
+      if (shouldViewList) {
+        router.push('/documents')
+      } else {
+        router.push('/documents')
+      }
+    }, 500)
+    
+    // Reset progress state
+    setShowProgress(false)
+    setUploadingDocumentId(null)
+  }
+
+  const handleProgressError = (error: string) => {
+    console.error('[Upload Page] Processing error:', error)
+    toast.error(`Lỗi xử lý: ${error}`)
+    
+    // Reset progress state
+    setShowProgress(false)
+    setUploadingDocumentId(null)
+  }
+
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gray-50">
@@ -168,6 +204,16 @@ export default function UploadDocumentPage() {
           {/* Content */}
           <PrimaryContent>
             <div className="space-y-6">
+              {/* Progress tracking for async uploads */}
+              {showProgress && uploadingDocumentId && (
+                <UploadProgress
+                  documentId={uploadingDocumentId}
+                  onComplete={handleProgressComplete}
+                  onError={handleProgressError}
+                  className="mb-6"
+                />
+              )}
+
               {/* Grid 2 hàng: Cột phải Preview chiếm 3 cột và 2 hàng */}
               <div className="grid grid-cols-1 lg:grid-cols-5 lg:grid-rows-2 gap-6">
                 {/* Hàng 1 - Cột trái gồm 2 khối mỗi khối 1 cột */}

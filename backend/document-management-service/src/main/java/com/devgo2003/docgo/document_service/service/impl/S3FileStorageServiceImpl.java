@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-@Service
+// @Service - DISABLED to avoid conflict with FileStorageServiceImpl
 @Primary
 @Slf4j
 public class S3FileStorageServiceImpl implements FileStorageService {
