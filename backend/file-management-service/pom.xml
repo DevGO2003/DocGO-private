@@ -9,11 +9,11 @@
 		<version>3.5.4</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devgo2003.docgo.backend</groupId>
-	<artifactId>document-service</artifactId>
+	<groupId>com.devgo2003.docgo.file-management-service</groupId>
+	<artifactId>file-service</artifactId>
 	<version>1.0.0</version>
-	<name>document-management-service</name>
-	<description>Document Management Service for DocGO</description>
+	<name>file-management-service</name>
+	<description>File Management Service for DocGO</description>
 
 	<properties>
 		<java.version>17</java.version>

@@ -1,13 +1,13 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.dto.ContractValidationResult;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.entity.ContractAttachment;
-import com.devgo2003.docgo.document_service.entity.ContractEvent;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
-import com.devgo2003.docgo.document_service.repository.ContractAttachmentRepository;
-import com.devgo2003.docgo.document_service.repository.ContractEventRepository;
-import com.devgo2003.docgo.document_service.service.IContractBusinessService;
+import com.devgo2003.docgo.file_service.dto.ContractValidationResult;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.entity.ContractAttachment;
+import com.devgo2003.docgo.file_service.entity.ContractEvent;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.repository.ContractAttachmentRepository;
+import com.devgo2003.docgo.file_service.repository.ContractEventRepository;
+import com.devgo2003.docgo.file_service.service.IContractBusinessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -93,7 +93,7 @@ public class ContractBusinessServiceImpl implements IContractBusinessService {
             .orElseThrow(() -> new RuntimeException("Contract not found with id: " + contractId));
         
         String oldStatus = contract.getStatus() != null ? contract.getStatus().toString() : "UNKNOWN";
-        contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.valueOf(newStatus));
+        contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.valueOf(newStatus));
         contract.setUpdatedAt(LocalDateTime.now());
         
         Contract updatedContract = contractRepository.save(contract);
@@ -115,19 +115,19 @@ public class ContractBusinessServiceImpl implements IContractBusinessService {
         // Process workflow based on action
         switch (action.toUpperCase()) {
             case "APPROVE":
-                contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.APPROVED);
+                contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.APPROVED);
                 break;
             case "REJECT":
-                contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.REJECTED);
+                contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.REJECTED);
                 break;
             case "ACTIVATE":
-                contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.ACTIVE);
+                contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.ACTIVE);
                 break;
             case "SUSPEND":
-                contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.SUSPENDED);
+                contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.SUSPENDED);
                 break;
             case "TERMINATE":
-                contract.setStatus(com.devgo2003.docgo.document_service.enums.ContractStatus.TERMINATED);
+                contract.setStatus(com.devgo2003.docgo.file_service.enums.ContractStatus.TERMINATED);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid workflow action: " + action);

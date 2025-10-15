@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.enums;
+package com.devgo2003.docgo.file_service.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

@@ -1,15 +1,15 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.dto.AiEventDto;
-import com.devgo2003.docgo.document_service.service.IAiEventProcessingService;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
-import com.devgo2003.docgo.document_service.entity.ContractParty;
-import com.devgo2003.docgo.document_service.entity.ContractSummary;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
-import com.devgo2003.docgo.document_service.repository.ContractPartyRepository;
-import com.devgo2003.docgo.document_service.repository.ContractSummaryRepository;
+import com.devgo2003.docgo.file_service.dto.AiEventDto;
+import com.devgo2003.docgo.file_service.service.IAiEventProcessingService;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.entity.ContractParty;
+import com.devgo2003.docgo.file_service.entity.ContractSummary;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.repository.ContractPartyRepository;
+import com.devgo2003.docgo.file_service.repository.ContractSummaryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

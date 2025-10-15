@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
-import com.devgo2003.docgo.document_service.service.event.ContractEventPublisher;
+import com.devgo2003.docgo.file_service.service.event.ContractEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationEventPublisher;

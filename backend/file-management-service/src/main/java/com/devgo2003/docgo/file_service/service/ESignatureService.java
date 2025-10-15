@@ -1,11 +1,11 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.entity.ESignature;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.dto.ESignatureCreateRequest;
-import com.devgo2003.docgo.document_service.repository.ESignatureRepository;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
-import com.devgo2003.docgo.document_service.util.PageUtil;
+import com.devgo2003.docgo.file_service.entity.ESignature;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.dto.ESignatureCreateRequest;
+import com.devgo2003.docgo.file_service.repository.ESignatureRepository;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;

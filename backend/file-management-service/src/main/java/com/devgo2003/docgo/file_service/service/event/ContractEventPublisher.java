@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.service.event;
+package com.devgo2003.docgo.file_service.service.event;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;

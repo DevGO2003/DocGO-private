@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/roles")
+@RequestMapping("/api/v1/user-management-service/roles")
 @RequiredArgsConstructor
 @Tag(name = "🎭 APIs Quản lý Vai trò", description = "APIs quản lý vai trò")
 public class RoleController {

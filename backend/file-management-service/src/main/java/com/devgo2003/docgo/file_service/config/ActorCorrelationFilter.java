@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

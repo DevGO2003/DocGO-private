@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.entity;
+package com.devgo2003.docgo.file_service.entity;
 
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;

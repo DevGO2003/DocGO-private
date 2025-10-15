@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.dto.TagDto;
-import com.devgo2003.docgo.document_service.entity.Tag;
+import com.devgo2003.docgo.file_service.dto.TagDto;
+import com.devgo2003.docgo.file_service.entity.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

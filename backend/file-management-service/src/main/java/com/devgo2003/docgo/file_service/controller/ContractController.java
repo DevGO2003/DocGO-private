@@ -1,21 +1,21 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
-import com.devgo2003.docgo.document_service.common.response.RequestInfo;
-import com.devgo2003.docgo.document_service.common.response.ResultInfo;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.entity.ContractAttachment;
-import com.devgo2003.docgo.document_service.entity.ContractEvent;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
-import com.devgo2003.docgo.document_service.dto.ContractWithSummaryDto;
-import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
-import com.devgo2003.docgo.document_service.dto.ContractResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractCreateRequest;
-import com.devgo2003.docgo.document_service.dto.BulkDeleteRequest;
-import com.devgo2003.docgo.document_service.dto.BulkDeleteResponse;
-import com.devgo2003.docgo.document_service.service.IContractService;
+import com.devgo2003.docgo.file_service.common.response.PaginatedResponse;
+import com.devgo2003.docgo.file_service.common.response.RequestInfo;
+import com.devgo2003.docgo.file_service.common.response.ResultInfo;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.entity.ContractAttachment;
+import com.devgo2003.docgo.file_service.entity.ContractEvent;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.file_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.file_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractCreateRequest;
+import com.devgo2003.docgo.file_service.dto.BulkDeleteRequest;
+import com.devgo2003.docgo.file_service.dto.BulkDeleteResponse;
+import com.devgo2003.docgo.file_service.service.IContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/contracts")
+@RequestMapping("/api/v1/file-management-service/contracts")
 @Tag(name = "📋 APIs Quản lý Hợp đồng", description = "APIs để quản lý hợp đồng trong hệ thống DocGO")
 public class ContractController {
 
@@ -322,7 +322,7 @@ public class ContractController {
     @PostMapping
     public ResponseEntity<RestResponse<Contract>> createContract(@Valid @RequestBody ContractCreateRequest request) {
         if (request.getContractNumber() == null) {
-            throw new com.devgo2003.docgo.document_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
+            throw new com.devgo2003.docgo.file_service.common.exception.InvalidInputException("Không được gửi id khi tạo hợp đồng mới.");
         }
         
         // Convert DTO to Entity

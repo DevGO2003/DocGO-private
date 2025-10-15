@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docgo.dev/schemas/api-response-schema.json",
+  "title": "DocGO Standard API Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "statusCode", "shortMessage", "description", "timestamp", "requestId", "path", "data"],
+  "properties": {
+    "apiVersion": { "type": "string", "const": "v1" },
+    "statusCode": { "type": "integer" },
+    "shortMessage": { "type": "string" },
+    "description": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "requestId": { "type": "string" },
+    "path": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "overview", "contract", "content", "file", "storage", "audit"],
+      "properties": {
+        "id": { "type": "string" },
+        "overview": { "$ref": "#/$defs/Overview" },
+        "contract": { "$ref": "#/$defs/Contract" },
+        "content": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plaintext", "ocr", "classification", "processing"],
+          "properties": {
+            "plaintext": { "type": ["string", "null"] },
+            "ocr": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "text": { "type": ["string", "null"] },
+                "status": { "type": ["string", "null"] }
+              }
+            },
+            "classification": { "type": ["object", "string", "null"] },
+            "processing": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": { "type": ["string", "null"] },
+                "error": { "type": ["string", "null"] }
+              }
+            }
+          }
+        },
+        "file": { "$ref": "#/$defs/FileMinimal" },
+        "storage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["s3", "local"],
+          "properties": {
+            "s3": { "$ref": "#/$defs/StorageS3" },
+            "local": { "$ref": "#/$defs/StorageLocal" }
+          }
+        },
+        "versioning": { "$ref": "#/$defs/Versioning" },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "fileSystem": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "dateModified": { "type": ["string", "null"], "format": "date-time" },
+                "dateAdded": { "type": ["string", "null"], "format": "date-time" },
+                "mediaFilename": { "type": ["string", "null"] },
+                "originalFilename": { "type": ["string", "null"] },
+                "originalMD5": { "type": ["string", "null"] },
+                "originalFileSize": { "type": ["integer", "null"] },
+                "originalMimeType": { "type": ["string", "null"] },
+                "archiveMD5": { "type": ["string", "null"] },
+                "archiveFileSize": { "type": ["integer", "null"] }
+              }
+            },
+            "originalDocument": { "type": ["object", "null"], "additionalProperties": true },
+            "archivedDocument": { "type": ["object", "null"], "additionalProperties": true }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["createdAt", "updatedAt", "isDeleted"],
+          "properties": {
+            "createdAt": { "type": ["string", "null"], "format": "date-time" },
+            "createdBy": { "type": ["string", "null"] },
+            "updatedAt": { "type": ["string", "null"], "format": "date-time" },
+            "updatedBy": { "type": ["string", "null"] },
+            "deletedAt": { "type": ["string", "null"], "format": "date-time" },
+            "deletedBy": { "type": ["string", "null"] },
+            "isDeleted": { "type": "boolean" },
+            "version": { "type": ["integer", "null"] }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Overview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "status", "documentType", "contractType", "category", "tags", "ownerUserId", "new"],
+      "properties": {
+        "title": { "type": "string" },
+        "status": { "type": "string" },
+        "documentType": { "type": "string", "enum": ["CONTRACT", "DOCUMENT", "OTHER"] },
+        "contractType": { "type": ["string", "null"] },
+        "category": { "type": ["string", "null"] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "ownerUserId": { "type": ["string", "null"] },
+        "new": { "type": "boolean" }
+      }
+    },
+    "Party": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "role"],
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "representative": { "type": ["string", "null"] },
+        "taxCode": { "type": ["string", "null"] },
+        "contact": { "type": ["string", "null"] },
+        "address": { "type": ["string", "null"] }
+      }
+    },
+    "Payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["totalValue", "currency"],
+      "properties": {
+        "totalValue": { "type": ["number", "integer"] },
+        "currency": { "type": "string" },
+        "schedule": { "type": ["string", "null"] },
+        "method": { "type": ["string", "null"] }
+      }
+    },
+    "ClauseKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "importance": { "type": ["string", "null"] },
+        "risk": { "type": ["string", "null"] }
+      }
+    },
+    "Reminder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "title"],
+      "properties": {
+        "date": { "type": "string", "format": "date-time" },
+        "title": { "type": "string" },
+        "description": { "type": ["string", "null"] }
+      }
+    },
+    "Risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "type": "string" },
+        "factors": { "type": "array", "items": { "type": "string" } },
+        "mitigations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string" },
+        "issues": { "type": "array", "items": { "type": "string" } },
+        "recommendations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Clauses": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "array", "items": { "$ref": "#/$defs/ClauseKey" } },
+        "unfavorable": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "summary"],
+      "properties": {
+        "effectiveDate": { "type": ["string", "null"], "format": "date-time" },
+        "expiryDate": { "type": ["string", "null"], "format": "date-time" },
+        "totalValue": { "type": ["number", "integer", "null"] },
+        "currency": { "type": "string" },
+        "summary": { "type": "string" },
+        "parties": { "type": "array", "items": { "$ref": "#/$defs/Party" } },
+        "payment": { "$ref": "#/$defs/Payment" },
+        "clauses": { "$ref": "#/$defs/Clauses" },
+        "reminders": { "type": "array", "items": { "$ref": "#/$defs/Reminder" } },
+        "risk": { "$ref": "#/$defs/Risk" },
+        "compliance": { "$ref": "#/$defs/Compliance" }
+      }
+    },
+    "FileMinimal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "size"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "size": { "type": "integer" },
+        "version": { "type": ["integer", "null"] }
+      }
+    },
+    "StorageS3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": { "type": ["string", "null"], "format": "uri" },
+        "bucket": { "type": ["string", "null"] },
+        "objectKey": { "type": ["string", "null"] },
+        "region": { "type": ["string", "null"] },
+        "contentType": { "type": ["string", "null"] },
+        "size": { "type": ["integer", "null"] },
+        "versionId": { "type": ["string", "null"] },
+        "checksum": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "originalMD5": { "type": ["string", "null"] },
+            "archiveMD5": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "StorageLocal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": ["string", "null"] },
+        "filename": { "type": ["string", "null"] },
+        "mimeType": { "type": ["string", "null"] },
+        "size": { "type": ["integer", "null"] },
+        "mtime": { "type": ["string", "null"], "format": "date-time" },
+        "revision": { "type": ["string", "null"] }
+      }
+    },
+    "Versioning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "currentVersion": { "type": ["integer", "null"] },
+        "versionTag": { "type": ["string", "null"] },
+        "previousVersion": { "type": ["integer", "null"] },
+        "changeSummary": { "type": ["string", "null"] },
+        "changedFields": { "type": "array", "items": { "type": "string" } },
+        "diff": { "type": ["object", "null"], "additionalProperties": true },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "version": { "type": ["integer", "null"] },
+              "versionTag": { "type": ["string", "null"] },
+              "changedAt": { "type": ["string", "null"], "format": "date-time" },
+              "changedBy": { "type": ["string", "null"] },
+              "changeType": { "type": ["string", "null"] },
+              "storage": {
+                "type": ["object", "null"],
+                "properties": {
+                  "s3": { "type": ["object", "null"], "properties": { "versionId": { "type": ["string", "null"] } } },
+                  "local": { "type": ["object", "null"], "properties": { "revision": { "type": ["string", "null"] } } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

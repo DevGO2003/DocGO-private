@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.enums;
+package com.devgo2003.docgo.file_service.enums;
 
 public enum ProcessingStatus {
     PENDING_REVIEW,

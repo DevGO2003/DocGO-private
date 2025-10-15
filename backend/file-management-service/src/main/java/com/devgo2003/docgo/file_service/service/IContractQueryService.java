@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
-import com.devgo2003.docgo.document_service.dto.ContractDetailResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractWithSummaryDto;
-import com.devgo2003.docgo.document_service.entity.Contract;
+import com.devgo2003.docgo.file_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.file_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.file_service.entity.Contract;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

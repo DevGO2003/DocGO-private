@@ -1,15 +1,15 @@
-package com.devgo2003.docgo.document_service.common.handler;
+package com.devgo2003.docgo.file_service.common.handler;
 
-import com.devgo2003.docgo.document_service.common.response.ErrorDetail;
-import com.devgo2003.docgo.document_service.common.response.ErrorResponse;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.common.response.ErrorDetail;
+import com.devgo2003.docgo.file_service.common.response.ErrorResponse;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.devgo2003.docgo.document_service.common.exception.ConflictException;
-import com.devgo2003.docgo.document_service.common.exception.InvalidInputException;
-import com.devgo2003.docgo.document_service.common.exception.NoContentException;
-import com.devgo2003.docgo.document_service.common.exception.ResourceNotFoundException;
+import com.devgo2003.docgo.file_service.common.exception.ConflictException;
+import com.devgo2003.docgo.file_service.common.exception.InvalidInputException;
+import com.devgo2003.docgo.file_service.common.exception.NoContentException;
+import com.devgo2003.docgo.file_service.common.exception.ResourceNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

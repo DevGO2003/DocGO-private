@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.script;
+package com.devgo2003.docgo.file_service.script;
 
-import com.devgo2003.docgo.document_service.enums.ContractType;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

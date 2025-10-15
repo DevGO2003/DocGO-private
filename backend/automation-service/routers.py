@@ -46,11 +46,11 @@ from schemas.event_schemas import (
 )
 from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 
-router = APIRouter(prefix="/api/v1/automation-service/v1")
+router = APIRouter(prefix="/api/v1/automation-service")
 @router.post("/documents/upload", summary="Upload tài liệu (hybrid sync/async)", tags=["📁 APIs Quản lý File"])
 async def upload_document_api(
     request: Request,
-    file: UploadFile = File(..., description="Tệp tài liệu (pdf, docx, txt, jpg, png)"),
+    file: UploadFile = File(...),
     folder: str = Query("documents"),
     user_id: str = Query("system")
 ):
@@ -134,7 +134,7 @@ async def upload_document_api(
                 }
 
             # Gọi Document Service tạo record với đầy đủ AI results
-            ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
+            ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/documents"
             payload = {
                 "fileName": file.filename,
                 "fileSize": size,
@@ -233,7 +233,7 @@ async def upload_document_api(
                 await websocket_manager.broadcast_progress(doc_id, 100, "processing_complete", "Xử lý hoàn tất")
                 
                 # Update Document Service với kết quả cuối cùng
-                ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/v1/documents/{doc_id}/processing-result"
+                ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/documents/{doc_id}/processing-result"
                 # Cập nhật thêm category và contractMetadata sau khi có kết quả AI
                 category = "HOP_DONG_CHUNG" if classification_result.get("isContract", False) else "TAI_LIEU_CHUNG"
                 contract_metadata = None
@@ -278,7 +278,7 @@ async def upload_document_api(
                 await websocket_manager.send_error(doc_id, f"Xử lý thất bại: {str(e)}", "PROCESSING_ERROR")
 
         # Tạo trước bản ghi ở DS với trạng thái PROCESSING
-        ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/v1/documents"
+        ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/documents"
         filename_lower = file.filename.lower()
         extension = filename_lower.split('.')[-1] if '.' in filename_lower else None
         create_payload = {
@@ -326,10 +326,6 @@ async def upload_document_api(
 
 @router.websocket("/documents/progress/{document_id}")
 async def documents_progress_ws(websocket: WebSocket, document_id: str):
-    """
-    WebSocket endpoint for real-time progress tracking
-    Connects to document processing progress stream
-    """
     from services.websocket_manager import websocket_manager
     
     await websocket_manager.connect(websocket, document_id)
@@ -391,115 +387,9 @@ def ask_gemini(api_key: str, content: str, question: str) -> str:
 @router.post("/document/extract", summary="Trích xuất nội dung", tags=["🤖 APIs Xử lý AI"])
 async def extract_api(
     request: Request,
-    file: UploadFile = File(..., description="File tài liệu cần trích xuất (docx, pdf)"),
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+    file: UploadFile = File(...),
+    gemini_api_key: str = Header(None)
 ):
-    """
-    ## 📖 Mô tả
-    **API trích xuất nội dung văn bản từ file tài liệu sử dụng AI**
-    
-    API này sử dụng trí tuệ nhân tạo để trích xuất toàn bộ nội dung văn bản từ các file tài liệu 
-    (DOCX, PDF) một cách chính xác và nhanh chóng. Hỗ trợ xử lý các định dạng phổ biến và trả về 
-    nội dung văn bản thuần túy, sẵn sàng cho các bước xử lý tiếp theo.
-    
-    **🎯 Mục đích sử dụng:**
-    - Trích xuất nội dung từ hợp đồng, báo cáo, tài liệu pháp lý
-    - Chuẩn bị dữ liệu cho các bước xử lý AI tiếp theo (phân loại, tóm tắt)
-    - Chuyển đổi file tài liệu thành văn bản có thể tìm kiếm và xử lý
-    
-    **⚡ Hiệu suất:**
-    - Xử lý file lên đến 10MB
-    - Thời gian xử lý: 2-10 giây tùy kích thước file
-    - Độ chính xác: >95% cho văn bản tiếng Việt và tiếng Anh
-    
-    ## 🔹 Đầu vào
-    
-    ### 📁 **file** (bắt buộc, multipart/form-data)
-    - **Loại dữ liệu**: `UploadFile`
-    - **Định dạng hỗ trợ**: `.docx`, `.pdf`
-    - **Kích thước tối đa**: 10MB
-    - **Mô tả**: File tài liệu cần trích xuất nội dung văn bản
-    - **Ví dụ**: `contract.pdf`, `report.docx`
-    - **Lưu ý**: File phải chứa văn bản có thể đọc được (không phải hình ảnh scan)
-    
-    ### 🔑 **gemini_api_key** (tùy chọn, header)
-    - **Loại dữ liệu**: `string`
-    - **Vị trí**: HTTP Header
-    - **Tên header**: `GEMINI_API_KEY`
-    - **Mô tả**: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
-    - **Ví dụ**: `GEMINI_API_KEY: AIzaSyB...`
-    - **Lưu ý**: Key phải có quyền truy cập Gemini API
-    
-    ## 🔹 Đầu ra
-    
-    ### 📄 **data** (string)
-    - **Mô tả**: Nội dung văn bản thuần túy được trích xuất từ file
-    - **Định dạng**: Văn bản thuần túy (plain text)
-    - **Ví dụ**: 
-    ```
-    "HỢP ĐỒNG CUNG CẤP DỊCH VỤ
-    
-    Điều 1: Đối tượng hợp đồng
-    Bên A cam kết cung cấp dịch vụ...
-    
-    Điều 2: Thời hạn hợp đồng
-    Hợp đồng có hiệu lực từ ngày..."
-    ```
-    
-    ### 📊 **apiVersion** (string)
-    - **Mô tả**: Phiên bản API hiện tại
-    - **Giá trị cố định**: `"v1"`
-    - **Mục đích**: Theo dõi phiên bản API để tương thích
-    
-    ### 🔢 **statusCode** (integer)
-    - **Mô tả**: Mã trạng thái xử lý yêu cầu
-    - **Các giá trị có thể**:
-      - `200`: Thành công - File được xử lý hoàn tất
-      - `400`: Lỗi đầu vào - File không hợp lệ hoặc thiếu thông tin
-      - `500`: Lỗi server - Lỗi hệ thống hoặc AI service
-    - **Ví dụ**: `200`
-    
-    ### 📋 **shortMessage** (string)
-    - **Mô tả**: Thông báo ngắn gọn về kết quả xử lý
-    - **Các giá trị có thể**:
-      - `"Success"`: Xử lý thành công
-      - `"Bad Request"`: Dữ liệu đầu vào không hợp lệ
-      - `"Internal Server Error"`: Lỗi hệ thống
-    - **Ví dụ**: `"Success"`
-    
-    ### 📖 **description** (string)
-    - **Mô tả**: Mô tả chi tiết về kết quả xử lý
-    - **Ví dụ**: `"Đã trích xuất thành công nội dung từ file hợp đồng. Tổng cộng 1,250 từ được xử lý."`
-    
-    ### 🕒 **timestamp** (string, ISO-8601)
-    - **Mô tả**: Thời gian xử lý yêu cầu theo chuẩn ISO-8601
-    - **Định dạng**: `YYYY-MM-DDTHH:mm:ssZ`
-    - **Ví dụ**: `"2024-01-15T10:30:45Z"`
-    - **Múi giờ**: UTC
-    
-    ### 🆔 **requestId** (string, UUID)
-    - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi và debug
-    - **Định dạng**: UUID v4
-    - **Ví dụ**: `"123e4567-e89b-12d3-a456-426614174000"`
-    - **Mục đích**: Tra cứu logs và theo dõi request
-    
-    ### 🛣️ **path** (string)
-    - **Mô tả**: Đường dẫn API được gọi
-    - **Ví dụ**: `"/api/v1/automation-service/document/extract"`
-    - **Mục đích**: Xác định endpoint được sử dụng
-    
-    ## ⚠️ Lưu ý quan trọng
-    
-    - **File size**: Không vượt quá 10MB để đảm bảo hiệu suất
-    - **Định dạng**: Chỉ hỗ trợ .docx và .pdf có văn bản
-    - **Thời gian xử lý**: Có thể mất 2-10 giây tùy kích thước file
-    - **Rate limit**: Tối đa 100 requests/phút per API key
-    
-    ## 🔗 Liên quan
-    
-    - **API tiếp theo**: `/document/classify` - Phân loại tài liệu
-    - **API liên quan**: `/contracts/summarize` - Tóm tắt hợp đồng
-    """
     # Extract API logic
     temp_path = os.path.join(RESULTS_DIR, file.filename)
     with open(temp_path, "wb") as f:
@@ -548,64 +438,8 @@ async def extract_api(
 @router.post("/document/classify", summary="Phân loại tài liệu", tags=["🤖 APIs Xử lý AI"])
 async def classify_api(
     request: Request,
-    gemini_api_key: str = Header(None, description="Gemini API Key (tùy chọn)")
+    gemini_api_key: str = Header(None)
 ):
-    """
-    ## 📖 Mô tả
-    API phân loại loại tài liệu sử dụng AI để nhận diện và phân loại các loại tài liệu khác nhau.
-    Hỗ trợ nhiều định dạng file và có thể phân loại: hợp đồng, đề cương, giáo trình, sách giáo khoa, báo cáo, v.v.
-    
-    ## 🔹 Đầu vào
-    
-    📁 **file** (tùy chọn, multipart/form-data)
-    - **Loại**: UploadFile (txt, md, html, json, csv, xlsx, pptx, rtf, docx, pdf)
-    - **Mô tả**: File tài liệu cần phân loại
-    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
-    
-    📝 **text** (tùy chọn, application/json)
-    - **Loại**: string
-    - **Mô tả**: Nội dung văn bản cần phân loại
-    - **Lưu ý**: Chỉ cung cấp file HOẶC text, không cả hai
-    
-    🔑 **gemini_api_key** (tùy chọn, header)
-    - **Loại**: string
-    - **Mô tả**: API key để gọi Gemini AI. Nếu không cung cấp, sẽ sử dụng key từ biến môi trường
-    - **Ví dụ**: `GEMINI_API_KEY: your-api-key-here`
-    
-    ## 🔹 Đầu ra
-    
-    📄 data
-    Loại: object
-    Mô tả: JSON kết quả phân loại gồm: documentType, isContract, confidence, reasons, contractSubtype (nếu có)
-    
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
-    
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 400: lỗi đầu vào, 204: không có nội dung, 500: lỗi server)
-    
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
-    
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả xử lý
-    
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
-    
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
-    
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
-    """
     # Chuẩn hóa nội dung đầu vào như summarize
     content = None
     file = None
@@ -1146,47 +980,6 @@ async def classify_api(
 # API Test: Lấy cấu hình Gemini
 @router.get("/gemini/get-config", summary="Lấy cấu hình Gemini", tags=["⚙️ APIs Kiểm tra Hệ thống"])
 async def get_gemini_config(request: Request):
-    """
-    Lấy thông tin cấu hình Gemini AI và trạng thái hệ thống
-    
-    🔹 Đầu vào
-    
-    Không có tham số đầu vào
-    
-    🔹 Đầu ra
-    
-    📄 data
-    Loại: object
-    Mô tả: Thông tin cấu hình Gemini AI và trạng thái hệ thống
-    
-    📊 apiVersion
-    Loại: string
-    Mô tả: Phiên bản API (v1)
-    
-    🔢 statusCode
-    Loại: integer
-    Mô tả: Mã trạng thái HTTP (200: thành công, 500: lỗi server)
-    
-    📋 shortMessage
-    Loại: string
-    Mô tả: Thông báo ngắn gọn về kết quả
-    
-    📖 description
-    Loại: string
-    Mô tả: Mô tả chi tiết về kết quả kiểm tra
-    
-    🕒 timestamp
-    Loại: string (ISO-8601)
-    Mô tả: Thời gian xử lý yêu cầu
-    
-    🆔 requestId
-    Loại: string (UUID)
-    Mô tả: Định danh duy nhất của yêu cầu
-    
-    🛣️ path
-    Loại: string
-    Mô tả: Đường dẫn API được gọi
-    """
     try:
         # Lấy cấu hình Gemini
         api_key = os.getenv("GEMINI_API_KEY")
@@ -1285,19 +1078,6 @@ event_service = EventService()
 #     request: Request,
 #     notification_request: NotificationRequest
 # ):
-#     """
-#     🔹 Đầu vào
-#     
-#     📧 notification_request (bắt buộc, body)
-#     Loại: NotificationRequest
-#     Mô tả: Thông tin notification cần gửi (email, SMS, push, websocket)
-#     
-#     🔹 Đầu ra
-#     
-#     📝 data
-#     Loại: NotificationResponse
-#     Mô tả: Kết quả gửi notification với trạng thái và thông tin chi tiết
-#     """
 #     try:
 #         await notification_service.initialize()
 #         result = await notification_service.send_notification(notification_request)
@@ -1333,23 +1113,6 @@ event_service = EventService()
 #     start_date: str = Query(None, description="Ngày bắt đầu (ISO format)"),
 #     end_date: str = Query(None, description="Ngày kết thúc (ISO format)")
 # ):
-#     """
-#     🔹 Đầu vào
-#     
-#     📄 page (tùy chọn, query)
-#     Loại: integer
-#     Mô tả: Số trang (mặc định: 1)
-#     
-#     📄 limit (tùy chọn, query)
-#     Loại: integer
-#     Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
-#     
-#     🔹 Đầu ra
-#     
-#     📝 data
-#     Loại: NotificationHistoryResponse
-#     Mô tả: Danh sách notification với phân trang
-#     """
 #     try:
 #         await notification_service.initialize()
 #         
@@ -1396,19 +1159,6 @@ event_service = EventService()
 #     request: Request,
 #     template: NotificationTemplate
 # ):
-#     """
-#     🔹 Đầu vào
-#     
-#     📧 template (bắt buộc, body)
-#     Loại: NotificationTemplate
-#     Mô tả: Thông tin template notification cần tạo
-#     
-#     🔹 Đầu ra
-#     
-#     📝 data
-#     Loại: NotificationTemplate
-#     Mô tả: Template đã được tạo với ID và timestamp
-#     """
 #     try:
 #         await notification_service.initialize()
 #         result = await notification_service.create_notification_template(template)
@@ -1441,19 +1191,6 @@ async def process_batch_api(
     request: Request,
     batch_request: BatchProcessingRequest
 ):
-    """
-    🔹 Đầu vào
-    
-    📦 batch_request (bắt buộc, body)
-    Loại: BatchProcessingRequest
-    Mô tả: Thông tin batch processing cần thực hiện
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: BatchProcessingResponse
-    Mô tả: Kết quả tạo batch job với ID và thông tin xử lý
-    """
     try:
         await batch_service.initialize()
         
@@ -1508,19 +1245,6 @@ async def get_batch_job_status_api(
     request: Request,
     job_id: str
 ):
-    """
-    🔹 Đầu vào
-    
-    🆔 job_id (bắt buộc, path)
-    Loại: string
-    Mô tả: ID của batch job cần kiểm tra
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: BatchJobResponse
-    Mô tả: Trạng thái chi tiết của batch job
-    """
     try:
         await batch_service.initialize()
         result = await batch_service.get_batch_job_status(job_id)
@@ -1559,113 +1283,13 @@ async def get_batch_job_status_api(
 @router.get("/batch/jobs", summary="Danh sách jobs với projection", tags=["📦 APIs Xử lý Batch"])
 async def get_batch_jobs_api(
     request: Request,
-    view: str = Query("table", description="View type: table, card, detail, full (mặc định: table)"),
-    page: int = Query(1, ge=1, description="Số trang"),
-    limit: int = Query(10, ge=1, le=100, description="Số lượng mỗi trang"),
-    job_type: str = Query(None, description="Loại job"),
-    status: str = Query(None, description="Trạng thái job"),
-    priority: str = Query(None, description="Độ ưu tiên job")
+    view: ViewType = Query(ViewType.TABLE),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    job_type: str = Query(None),
+    status: str = Query(None),
+    priority: str = Query(None)
 ):
-    """
-    🔹 Đầu vào
-    
-    📄 page (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số trang (mặc định: 1)
-    
-    📄 limit (tùy chọn, query)
-    Loại: integer
-    Mô tả: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
-    
-    🔹 Đầu ra
-    
-    📝 data
-    Loại: BatchJobListResponse
-    Mô tả: Danh sách batch jobs với phân trang
-    """
-    try:
-        await batch_service.initialize()
-        # Validate view type
-        try:
-            view_type = ViewType(view.lower())
-        except ValueError:
-            view_type = ViewType.TABLE
-        
-        result = await batch_service.get_batch_jobs(
-            page=page,
-            limit=limit,
-            job_type=job_type,
-            status=status,
-            priority=priority
-        )
-        
-        # Map jobs to view
-        view_items = []
-        for job_data in result.get('jobs', []):
-            # Convert job data to dict if needed
-            if hasattr(job_data, 'dict'):
-                job_dict = job_data.dict()
-            else:
-                job_dict = job_data
-            
-            # Map to view
-            view_item = ViewMapper.map_batch_job_to_view(job_dict, view_type)
-            view_items.append(view_item)
-        
-        # Create paginated view response
-        paginated_response = PaginatedViewResponse(
-            view=view_type.value,
-            items=view_items,
-            pagination={
-                "page": page,
-                "size": limit,
-                "totalElements": result.get('total', 0),
-                "totalPages": result.get('total_pages', 0)
-            }
-        )
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description=f"Lấy danh sách batch jobs thành công với view {view_type.value}",
-            data=paginated_response,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            description=f"Lỗi khi lấy danh sách batch jobs: {str(e)}",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-
-@router.post("/document/retry-ocr/{document_id}", summary="Retry OCR cho document", tags=["🤖 APIs Xử lý AI"])
-async def retry_ocr_api(
-    request: Request,
-    document_id: str
-):
-    """
-    ## 📖 Mô tả
-    API retry OCR cho document đã tồn tại khi OCR lần đầu thất bại.
-    
-    ## 🔹 Đầu vào
-    
-    🆔 **document_id** (bắt buộc, path)
-    - **Loại**: string
-    - **Mô tả**: ID của document cần retry OCR
-    
-    ## 🔹 Đầu ra
-    
-    📄 **data**
-    - **Loại**: object
-    - **Mô tả**: Kết quả retry OCR với trạng thái và thông tin chi tiết
-    """
     try:
         logger.info(f"Retry OCR request for document: {document_id}")
         
@@ -1696,43 +1320,6 @@ async def retry_ocr_api(
 
 @router.get("/health", summary="Health check", tags=["🏥 APIs Kiểm tra Hệ thống"])
 async def health_check():
-    """
-    ## 📖 Mô tả
-    API kiểm tra sức khỏe của Automation Service - health check endpoint.
-    Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
-    
-    ## 🔹 Đầu vào
-    
-    Không có tham số đầu vào.
-    
-    ## 🔹 Đầu ra
-    
-    📄 **data** (object)
-    - **Mô tả**: Thông tin chi tiết về trạng thái service
-    - **Bao gồm**:
-      - `status`: Trạng thái service ("healthy")
-      - `service`: Tên service ("Automation Service")
-      - `version`: Phiên bản service ("2.0.0")
-      - `ai_model`: Mô hình AI được sử dụng ("Gemini 2.0 Flash")
-      - `supported_formats`: Các định dạng file được hỗ trợ
-      - `timestamp`: Thời gian kiểm tra
-    
-    📊 **apiVersion** (string)
-    - **Mô tả**: Phiên bản API hiện tại
-    - **Giá trị**: "v1"
-    
-    🔢 **statusCode** (integer)
-    - **Mô tả**: Mã trạng thái HTTP (200: OK)
-    - **Giá trị**: 200 (thành công)
-    
-    📋 **shortMessage** (string)
-    - **Mô tả**: Thông báo ngắn gọn về kết quả
-    - **Giá trị**: "Success"
-    
-    📖 **description** (string)
-    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
-    - **Ví dụ**: "Service đang hoạt động bình thường"
-    """
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
@@ -1745,7 +1332,7 @@ async def health_check():
             "supported_formats": ["docx", "pdf", "txt"],
             "timestamp": datetime.now().isoformat()
         },
-        path="/api/v1/automation-service/v1/health"
+        path="/api/v1/automation-service/health"
     )
 
 

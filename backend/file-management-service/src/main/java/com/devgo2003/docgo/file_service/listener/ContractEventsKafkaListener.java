@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.listener;
+package com.devgo2003.docgo.file_service.listener;
 
-import com.devgo2003.docgo.document_service.service.IContractService;
+import com.devgo2003.docgo.file_service.service.IContractService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

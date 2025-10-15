@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.entity.AuditLog;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.dto.AuditLogCreateRequest;
-import com.devgo2003.docgo.document_service.repository.AuditLogRepository;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.entity.AuditLog;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.dto.AuditLogCreateRequest;
+import com.devgo2003.docgo.file_service.repository.AuditLogRepository;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.entity;
+package com.devgo2003.docgo.file_service.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
@@ -12,7 +12,7 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
-import com.devgo2003.docgo.document_service.dto.*;
+import com.devgo2003.docgo.file_service.dto.*;
 
 @Document(collection = "documents")
 @Getter
@@ -68,7 +68,7 @@ public class DocumentEntity extends BaseEntity implements Persistable<String> {
     
     // Metadata hợp đồng gom nhóm
     @Field("contract_metadata")
-    private com.devgo2003.docgo.document_service.dto.ContractMetadata contractMetadata;
+    private com.devgo2003.docgo.file_service.dto.ContractMetadata contractMetadata;
     
     @Field("risk_level")
     private String riskLevel;

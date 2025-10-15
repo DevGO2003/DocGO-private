@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.dto;
+package com.devgo2003.docgo.file_service.dto;
 
-import com.devgo2003.docgo.document_service.enums.ContractCategory;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.enums.ContractCategory;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;

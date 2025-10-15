@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.dto;
+package com.devgo2003.docgo.file_service.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;

@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.dto.ContractStatusChangeEvent;
-import com.devgo2003.docgo.document_service.service.IContractStatusEventPublisher;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.dto.ContractStatusChangeEvent;
+import com.devgo2003.docgo.file_service.service.IContractStatusEventPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

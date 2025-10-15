@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import org.bson.Document;

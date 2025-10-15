@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1")
+@RequestMapping("/api/v1/file-management-service")
 @Tag(name = "🏥 APIs Kiểm tra Hệ thống", description = "APIs kiểm tra và cấu hình hệ thống - Health check, cấu hình S3, kiểm tra kết nối")
 public class HealthController {
 
@@ -22,7 +22,7 @@ public class HealthController {
         summary = "Health check",
         description = """
         ## 📖 Mô tả
-        API kiểm tra sức khỏe của Document Management Service - health check endpoint.
+        API kiểm tra sức khỏe của File Management Service - health check endpoint.
         Trả về thông tin chi tiết về trạng thái service, phiên bản, và các thông số kỹ thuật.
         
         ## 🔹 Đầu vào
@@ -35,7 +35,7 @@ public class HealthController {
         - **Mô tả**: Thông tin chi tiết về trạng thái service
         - **Bao gồm**:
           - `status`: Trạng thái service ("UP")
-          - `service`: Tên service ("Document Management Service")
+          - `service`: Tên service ("File Management Service")
           - `version`: Phiên bản service ("1.0.0")
           - `timestamp`: Thời gian kiểm tra
         

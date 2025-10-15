@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.entity.Approval;
-import com.devgo2003.docgo.document_service.service.ApprovalService;
-import com.devgo2003.docgo.document_service.dto.ApprovalCreateRequest;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.Approval;
+import com.devgo2003.docgo.file_service.service.ApprovalService;
+import com.devgo2003.docgo.file_service.dto.ApprovalCreateRequest;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/approvals")
+@RequestMapping("/api/v1/file-management-service/approvals")
 @Tag(name = "✅ APIs Quản lý Phê duyệt", description = "Các API để quản lý quy trình phê duyệt hợp đồng trong hệ thống DocGO")
 public class ApprovalController {
 

@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.dto.ContractSummaryCreateRequest;
-import com.devgo2003.docgo.document_service.dto.ContractSummaryResponseDto;
-import com.devgo2003.docgo.document_service.entity.ContractSummary;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryCreateRequest;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryResponseDto;
+import com.devgo2003.docgo.file_service.entity.ContractSummary;
 
 import java.util.List;
 import java.util.Optional;

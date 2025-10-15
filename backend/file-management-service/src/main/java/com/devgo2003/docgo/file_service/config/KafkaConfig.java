@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;

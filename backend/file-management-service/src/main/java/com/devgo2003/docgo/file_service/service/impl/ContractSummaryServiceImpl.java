@@ -1,11 +1,11 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.client.AutomationServiceClient;
-import com.devgo2003.docgo.document_service.dto.ContractSummaryCreateRequest;
-import com.devgo2003.docgo.document_service.dto.ContractSummaryResponseDto;
-import com.devgo2003.docgo.document_service.entity.ContractSummary;
-import com.devgo2003.docgo.document_service.repository.ContractSummaryRepository;
-import com.devgo2003.docgo.document_service.service.IContractSummaryService;
+import com.devgo2003.docgo.file_service.client.AutomationServiceClient;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryCreateRequest;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryResponseDto;
+import com.devgo2003.docgo.file_service.entity.ContractSummary;
+import com.devgo2003.docgo.file_service.repository.ContractSummaryRepository;
+import com.devgo2003.docgo.file_service.service.IContractSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -326,8 +326,8 @@ public class ContractSummaryServiceImpl implements IContractSummaryService {
     }
 
     // Conversion methods for nested objects
-    private com.devgo2003.docgo.document_service.entity.ContractParty convertPartyDtoToEntity(ContractSummaryCreateRequest.ContractPartyDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractParty entity = new com.devgo2003.docgo.document_service.entity.ContractParty();
+    private com.devgo2003.docgo.file_service.entity.ContractParty convertPartyDtoToEntity(ContractSummaryCreateRequest.ContractPartyDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractParty entity = new com.devgo2003.docgo.file_service.entity.ContractParty();
         entity.setRole(dto.getRole());
         entity.setName(dto.getName());
         entity.setRepresentative(dto.getRepresentative());
@@ -338,8 +338,8 @@ public class ContractSummaryServiceImpl implements IContractSummaryService {
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractPaymentDetails convertPaymentDetailsDtoToEntity(ContractSummaryCreateRequest.ContractPaymentDetailsDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractPaymentDetails entity = new com.devgo2003.docgo.document_service.entity.ContractPaymentDetails();
+    private com.devgo2003.docgo.file_service.entity.ContractPaymentDetails convertPaymentDetailsDtoToEntity(ContractSummaryCreateRequest.ContractPaymentDetailsDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractPaymentDetails entity = new com.devgo2003.docgo.file_service.entity.ContractPaymentDetails();
         entity.setTotalValue(dto.getTotalValue());
         entity.setSchedule(dto.getSchedule());
         entity.setCurrency(dto.getCurrency());
@@ -347,48 +347,48 @@ public class ContractSummaryServiceImpl implements IContractSummaryService {
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractKeyClause convertKeyClauseDtoToEntity(ContractSummaryCreateRequest.ContractKeyClauseDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractKeyClause entity = new com.devgo2003.docgo.document_service.entity.ContractKeyClause();
+    private com.devgo2003.docgo.file_service.entity.ContractKeyClause convertKeyClauseDtoToEntity(ContractSummaryCreateRequest.ContractKeyClauseDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractKeyClause entity = new com.devgo2003.docgo.file_service.entity.ContractKeyClause();
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
         entity.setSource(dto.getSource());
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractFavorableClause convertFavorableClauseDtoToEntity(ContractSummaryCreateRequest.ContractFavorableClauseDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractFavorableClause entity = new com.devgo2003.docgo.document_service.entity.ContractFavorableClause();
+    private com.devgo2003.docgo.file_service.entity.ContractFavorableClause convertFavorableClauseDtoToEntity(ContractSummaryCreateRequest.ContractFavorableClauseDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractFavorableClause entity = new com.devgo2003.docgo.file_service.entity.ContractFavorableClause();
         entity.setClauseName(dto.getClauseName());
         entity.setDescription(dto.getDescription());
         entity.setBenefitTo(dto.getBenefitTo());
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractUnfavorableClause convertUnfavorableClauseDtoToEntity(ContractSummaryCreateRequest.ContractUnfavorableClauseDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractUnfavorableClause entity = new com.devgo2003.docgo.document_service.entity.ContractUnfavorableClause();
+    private com.devgo2003.docgo.file_service.entity.ContractUnfavorableClause convertUnfavorableClauseDtoToEntity(ContractSummaryCreateRequest.ContractUnfavorableClauseDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractUnfavorableClause entity = new com.devgo2003.docgo.file_service.entity.ContractUnfavorableClause();
         entity.setClauseName(dto.getClauseName());
         entity.setDescription(dto.getDescription());
         entity.setRiskTo(dto.getRiskTo());
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractReminder convertReminderDtoToEntity(ContractSummaryCreateRequest.ContractReminderDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractReminder entity = new com.devgo2003.docgo.document_service.entity.ContractReminder();
+    private com.devgo2003.docgo.file_service.entity.ContractReminder convertReminderDtoToEntity(ContractSummaryCreateRequest.ContractReminderDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractReminder entity = new com.devgo2003.docgo.file_service.entity.ContractReminder();
         entity.setType(dto.getType());
         entity.setDate(dto.getDate());
         entity.setContent(dto.getContent());
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractRiskAssessment convertRiskAssessmentDtoToEntity(ContractSummaryCreateRequest.ContractRiskAssessmentDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractRiskAssessment entity = new com.devgo2003.docgo.document_service.entity.ContractRiskAssessment();
+    private com.devgo2003.docgo.file_service.entity.ContractRiskAssessment convertRiskAssessmentDtoToEntity(ContractSummaryCreateRequest.ContractRiskAssessmentDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractRiskAssessment entity = new com.devgo2003.docgo.file_service.entity.ContractRiskAssessment();
         entity.setRiskLevel(dto.getRiskLevel());
         entity.setRiskFactors(dto.getRiskFactors());
         entity.setMitigationMeasures(dto.getMitigationMeasures());
         return entity;
     }
 
-    private com.devgo2003.docgo.document_service.entity.ContractComplianceStatus convertComplianceStatusDtoToEntity(ContractSummaryCreateRequest.ContractComplianceStatusDto dto) {
-        com.devgo2003.docgo.document_service.entity.ContractComplianceStatus entity = new com.devgo2003.docgo.document_service.entity.ContractComplianceStatus();
+    private com.devgo2003.docgo.file_service.entity.ContractComplianceStatus convertComplianceStatusDtoToEntity(ContractSummaryCreateRequest.ContractComplianceStatusDto dto) {
+        com.devgo2003.docgo.file_service.entity.ContractComplianceStatus entity = new com.devgo2003.docgo.file_service.entity.ContractComplianceStatus();
         entity.setStatus(dto.getStatus());
         entity.setIssues(dto.getIssues());
         entity.setRecommendations(dto.getRecommendations());

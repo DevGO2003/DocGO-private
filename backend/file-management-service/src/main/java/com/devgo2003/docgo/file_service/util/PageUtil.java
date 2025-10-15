@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.util;
+package com.devgo2003.docgo.file_service.util;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

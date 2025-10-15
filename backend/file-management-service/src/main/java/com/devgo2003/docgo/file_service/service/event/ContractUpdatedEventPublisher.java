@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.service.event;
+package com.devgo2003.docgo.file_service.service.event;
 
-import com.devgo2003.docgo.document_service.entity.Contract;
+import com.devgo2003.docgo.file_service.entity.Contract;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

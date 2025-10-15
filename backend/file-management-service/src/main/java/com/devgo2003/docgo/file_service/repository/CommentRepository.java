@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.repository;
+package com.devgo2003.docgo.file_service.repository;
 
-import com.devgo2003.docgo.document_service.entity.CommentEntity;
+import com.devgo2003.docgo.file_service.entity.CommentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;

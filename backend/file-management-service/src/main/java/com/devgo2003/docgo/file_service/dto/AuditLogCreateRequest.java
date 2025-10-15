@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.dto;
+package com.devgo2003.docgo.file_service.dto;
 
-import com.devgo2003.docgo.document_service.entity.AuditLog;
+import com.devgo2003.docgo.file_service.entity.AuditLog;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

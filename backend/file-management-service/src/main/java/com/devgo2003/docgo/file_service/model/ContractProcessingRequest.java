@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.model;
+package com.devgo2003.docgo.file_service.model;
 
 import lombok.Getter;
 import lombok.Setter;

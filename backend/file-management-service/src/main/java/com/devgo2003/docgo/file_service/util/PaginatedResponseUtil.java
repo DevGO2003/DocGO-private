@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.util;
+package com.devgo2003.docgo.file_service.util;
 
-import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
-import com.devgo2003.docgo.document_service.common.response.RequestInfo;
-import com.devgo2003.docgo.document_service.common.response.ResultInfo;
+import com.devgo2003.docgo.file_service.common.response.PaginatedResponse;
+import com.devgo2003.docgo.file_service.common.response.RequestInfo;
+import com.devgo2003.docgo.file_service.common.response.ResultInfo;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

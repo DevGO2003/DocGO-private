@@ -80,7 +80,7 @@ export interface PaginationParams {
 }
 
 export class DocumentAPI {
-  private basePath = '/api/v1/document-management-service/v1'
+  private basePath = '/api/v1/document-management-service'
 
   // Contracts
   async getAllContracts(params?: PaginationParams) {

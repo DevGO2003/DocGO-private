@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

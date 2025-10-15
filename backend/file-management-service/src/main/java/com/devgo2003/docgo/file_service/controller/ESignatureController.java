@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 // encoding: utf-8
 
-import com.devgo2003.docgo.document_service.entity.ESignature;
-import com.devgo2003.docgo.document_service.service.ESignatureService;
-import com.devgo2003.docgo.document_service.dto.ESignatureCreateRequest;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.ESignature;
+import com.devgo2003.docgo.file_service.service.ESignatureService;
+import com.devgo2003.docgo.file_service.dto.ESignatureCreateRequest;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/esignatures")
+@RequestMapping("/api/v1/file-management-service/esignatures")
 @Tag(name = "✍️ APIs Quản lý chữ ký điện tử", description = "Các API để quản lý chữ ký điện tử trong hệ thống DocGO")
 public class ESignatureController {
 

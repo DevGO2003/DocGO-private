@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -15,11 +15,11 @@ import java.util.List;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI documentManagementServiceOpenAPI() {
+    public OpenAPI fileManagementServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Document Management Service API")
-                        .description("API quản lý tài liệu - Dịch vụ quản lý tài liệu và hợp đồng của DocGO")
+                        .title("File Management Service API")
+                        .description("API quản lý tệp tin - Dịch vụ quản lý file và hợp đồng của DocGO")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("DevGO2003")
@@ -33,7 +33,7 @@ public class SwaggerConfig {
                                 .url("http://localhost:8002")
                                 .description("Local Development Server"),
                         new Server()
-                                .url("http://localhost:8002/api/v1/document-management-service")
+                                .url("http://localhost:8002/api/v1/file-management-service")
                                 .description("API Base URL")
                 ))
                 .tags(List.of(

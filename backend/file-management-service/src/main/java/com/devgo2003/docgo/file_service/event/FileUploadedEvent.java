@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.event;
+package com.devgo2003.docgo.file_service.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

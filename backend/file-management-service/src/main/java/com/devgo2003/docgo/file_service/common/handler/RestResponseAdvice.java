@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.common.handler;
+package com.devgo2003.docgo.file_service.common.handler;
 
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

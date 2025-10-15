@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.entity.DocumentEntity;
-import com.devgo2003.docgo.document_service.repository.DocumentRepository;
-import com.devgo2003.docgo.document_service.common.exception.ResourceNotFoundException;
+import com.devgo2003.docgo.file_service.entity.DocumentEntity;
+import com.devgo2003.docgo.file_service.repository.DocumentRepository;
+import com.devgo2003.docgo.file_service.common.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

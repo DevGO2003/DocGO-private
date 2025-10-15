@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.script;
+package com.devgo2003.docgo.file_service.script;
 
-import com.devgo2003.docgo.document_service.entity.DocumentEntity;
-import com.devgo2003.docgo.document_service.entity.CommentEntity;
-import com.devgo2003.docgo.document_service.repository.DocumentRepository;
-import com.devgo2003.docgo.document_service.repository.CommentRepository;
-import com.devgo2003.docgo.document_service.dto.*;
+import com.devgo2003.docgo.file_service.entity.DocumentEntity;
+import com.devgo2003.docgo.file_service.entity.CommentEntity;
+import com.devgo2003.docgo.file_service.repository.DocumentRepository;
+import com.devgo2003.docgo.file_service.repository.CommentRepository;
+import com.devgo2003.docgo.file_service.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -63,10 +63,7 @@ public class SampleDataSeeder implements CommandLineRunner {
         
         // Contract info
         document.setContractType("SERVICE_AGREEMENT");
-        document.setEffectiveDate(LocalDateTime.of(2024, 1, 15, 0, 0));
-        document.setExpiryDate(LocalDateTime.of(2024, 7, 15, 0, 0));
-        document.setTotalValue(50000000.0);
-        document.setCurrency("VND");
+        // keep legacy fields inside contractMetadata where applicable if supported; otherwise skip
         document.setRiskLevel("MEDIUM");
         
         // Parties

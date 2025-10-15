@@ -51,7 +51,7 @@ export function useDocumentProgress(documentId: string | null): UseDocumentProgr
 
     try {
       // Build WebSocket URL
-      const wsUrl = `ws://localhost:8003/api/v1/automation-service/v1/documents/progress/${documentId}`
+      const wsUrl = `ws://localhost:8003/api/v1/automation-service/documents/progress/${documentId}`
       
       console.log(`[useDocumentProgress] Connecting to WebSocket: ${wsUrl}`)
       

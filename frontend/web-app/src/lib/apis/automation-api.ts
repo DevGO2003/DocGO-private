@@ -1,5 +1,5 @@
 // Automation Service API
-// Base path: /api/v1/automation-service/v1
+// Base path: /api/v1/automation-service
 
 import { apiClient } from '../http/api-client'
 import { ApiResponse } from '@/types/api'

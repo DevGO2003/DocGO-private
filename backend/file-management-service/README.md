@@ -57,11 +57,7 @@ Frontend → Document Service → Kafka → Automation Service
 6. Document Service tạo tài liệu với thông tin AI
 7. Cập nhật trạng thái xử lý
 
-## API Endpoints
-
-### File Upload
-- `POST /api/v1/document-management-service/files/upload` - Upload file
-- `GET /api/v1/document-management-service/files/{fileId}/status` - Trạng thái xử lý
+## API Endpoints (đã chuẩn hóa URL)
 
 ### Document Management
 - `POST /api/v1/document-management-service/documents` - Tạo tài liệu
@@ -69,6 +65,11 @@ Frontend → Document Service → Kafka → Automation Service
 - `GET /api/v1/document-management-service/documents/{id}` - Chi tiết tài liệu
 - `PUT /api/v1/document-management-service/documents/{id}` - Cập nhật tài liệu
 - `DELETE /api/v1/document-management-service/documents/{id}` - Xóa tài liệu
+
+### Tags, Versions, E-Signature, Comments (ví dụ)
+- `GET /api/v1/document-management-service/versions` - Danh sách versions
+- `GET /api/v1/document-management-service/esignatures` - Danh sách e-signatures
+- `GET /api/v1/document-management-service/documents/{id}/comments` - Bình luận theo tài liệu
 
 ## Cấu hình
 
@@ -145,7 +146,7 @@ Tất cả API đều trả về response theo format chuẩn:
 
 ### Lỗi port đã sử dụng
 - Thay đổi port trong `application.properties`
-- Hoặc dừng service đang chạy trên port 8003
+- Hoặc dừng service đang chạy trên port 8002
 
 ### Lỗi Docker build
 - Đảm bảo Docker đã cài đặt và chạy
@@ -175,24 +176,24 @@ mvn test
 - `SPRING_DATASOURCE_URL` - URL database production
 - `SPRING_DATASOURCE_USERNAME` - Username database
 - `SPRING_DATASOURCE_PASSWORD` - Password database
-- `SERVER_PORT` - Port ứng dụng (mặc định: 8003)
+- `SERVER_PORT` - Port ứng dụng (mặc định: 8002)
 - `SPRING_KAFKA_BOOTSTRAP_SERVERS` - Kafka servers production
 
 ### Health Check
 ```
-GET http://localhost:8003/actuator/health
+GET http://localhost:8002/api/v1/document-management-service/health
 ```
 
 ### Metrics
 ```
-GET http://localhost:8003/actuator/metrics
+GET http://localhost:8002/actuator/metrics
 ```
 
 ## Development
 
 ### Cấu trúc project
 ```
-src/main/java/com/devgo2003/docgo/contract_service/
+src/main/java/com/devgo2003/docgo/document_service/
 ├── controller/          # REST controllers
 ├── service/            # Business logic
 ├── repository/         # Data access
@@ -216,11 +217,11 @@ mvn test
 - `SPRING_PROFILES_ACTIVE=production`
 - `SPRING_DATASOURCE_URL`
 - `SPRING_KAFKA_BOOTSTRAP_SERVERS`
-- `SERVER_PORT=8003`
+- `SERVER_PORT=8002`
 
 ### Health Check
 ```
-GET /actuator/health
+GET /api/v1/document-management-service/health
 ```
 
 ### Monitoring
@@ -250,7 +251,7 @@ GET /actuator/metrics
 
 ## Liên hệ
 
-- **Service**: Contract Management Service
-- **Port**: 8003
+- **Service**: Document Management Service
+- **Port**: 8002
 - **Base URL**: `/api/v1/document-management-service`
 - **Documentation**: `/docs`

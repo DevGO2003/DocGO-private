@@ -22,7 +22,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/users")
+@RequestMapping("/api/v1/user-management-service/users")
 @RequiredArgsConstructor
 @Tag(name = "👤 APIs Quản lý Người dùng", description = "APIs quản lý người dùng")
 public class UserController {

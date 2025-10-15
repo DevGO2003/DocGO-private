@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.config;
+package com.devgo2003.docgo.file_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +10,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.devgo2003.docgo.document_service.event.RedisEventConsumer;
+import com.devgo2003.docgo.file_service.event.RedisEventConsumer;
 
 @Configuration
 @ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")

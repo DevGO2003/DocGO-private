@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/sessions")
+@RequestMapping("/api/v1/user-management-service/sessions")
 @RequiredArgsConstructor
 @Tag(name = "🕐 APIs Quản lý Phiên đăng nhập", description = "APIs quản lý phiên đăng nhập")
 public class SessionController {

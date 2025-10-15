@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.entity;
+package com.devgo2003.docgo.file_service.entity;
 
-import com.devgo2003.docgo.document_service.enums.ContractCategory;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.enums.ContractCategory;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;

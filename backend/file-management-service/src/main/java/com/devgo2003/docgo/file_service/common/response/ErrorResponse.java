@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.common.response;
+package com.devgo2003.docgo.file_service.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

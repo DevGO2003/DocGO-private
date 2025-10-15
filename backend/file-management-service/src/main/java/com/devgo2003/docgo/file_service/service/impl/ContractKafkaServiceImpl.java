@@ -1,11 +1,11 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.enums.ContractType;
-import com.devgo2003.docgo.document_service.entity.ContractAttachment;
-import com.devgo2003.docgo.document_service.service.IContractKafkaService;
-import com.devgo2003.docgo.document_service.service.IContractService;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.entity.ContractAttachment;
+import com.devgo2003.docgo.file_service.service.IContractKafkaService;
+import com.devgo2003.docgo.file_service.service.IContractService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     private IContractService contractService;
 
     @Autowired
-    private com.devgo2003.docgo.document_service.repository.AuditEventRepository auditEventRepository;
+    private com.devgo2003.docgo.file_service.repository.AuditEventRepository auditEventRepository;
 
     /**
      * Consume SummaryCreated events từ AI Processing Service
@@ -729,7 +729,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     }
 
     @Override
-    public void sendContractStatusChangedEvent(com.devgo2003.docgo.document_service.dto.AiEventDto eventDto) {
+    public void sendContractStatusChangedEvent(com.devgo2003.docgo.file_service.dto.AiEventDto eventDto) {
         try {
             Map<String, Object> event = new HashMap<>();
             event.put("eventType", "ContractStatusChanged");

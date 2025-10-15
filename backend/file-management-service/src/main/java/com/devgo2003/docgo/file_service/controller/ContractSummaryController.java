@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.dto.ContractSummaryCreateRequest;
-import com.devgo2003.docgo.document_service.dto.ContractSummaryResponseDto;
-import com.devgo2003.docgo.document_service.service.IContractSummaryService;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryCreateRequest;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryResponseDto;
+import com.devgo2003.docgo.file_service.service.IContractSummaryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import java.util.Optional;
  * Cung cấp các API quản lý contract summary
  */
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/contracts")
+@RequestMapping("/api/v1/file-management-service/contracts")
 @Tag(name = "Contract Summary Management", description = "API quản lý tóm tắt hợp đồng")
 @RequiredArgsConstructor
 @Slf4j

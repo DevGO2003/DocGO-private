@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.listener;
+package com.devgo2003.docgo.file_service.listener;
 
-import com.devgo2003.docgo.document_service.dto.AiEventDto;
-import com.devgo2003.docgo.document_service.service.IAiEventProcessingService;
+import com.devgo2003.docgo.file_service.dto.AiEventDto;
+import com.devgo2003.docgo.file_service.service.IAiEventProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

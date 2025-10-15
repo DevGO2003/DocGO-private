@@ -12,7 +12,7 @@ import time
 
 # Hot reload test
 print(f"🔥 HOT RELOAD TEST: {time.time()}")
-from s3_router import router as s3_router
+from config_router import router as config_router
 import os
 import asyncio
 from datetime import datetime
@@ -72,7 +72,7 @@ app.add_middleware(
 app.include_router(routers.router)
 app.include_router(contract_router)
 app.include_router(file_router)
-app.include_router(s3_router)
+app.include_router(config_router)
 
 # Initialize services
 # notification_service = NotificationService()

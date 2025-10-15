@@ -61,7 +61,7 @@ class FileStorageService:
             with open(local_path, "wb") as f:
                 f.write(file_content)
 
-            file_url = f"{self.base_url}/api/v1/automation-service/v1/files/{file_id}/download"
+            file_url = f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
             status = "uploaded_local"
             message = "File đã được upload local thành công"
 
@@ -394,7 +394,7 @@ class FileStorageService:
                 "uploaded_by": "system",
                 "s3_key": f"mock/s3/key/{file_id}",
                 "bucket": self.s3_bucket,
-                "file_url": f"{self.base_url}/api/v1/automation-service/v1/files/{file_id}/download",
+                "file_url": f"{self.base_url}/api/v1/automation-service/files/{file_id}/download",
                 "checksum": hashlib.md5(file_id.encode()).hexdigest(),
                 "access_count": 0,
                 "metadata": {

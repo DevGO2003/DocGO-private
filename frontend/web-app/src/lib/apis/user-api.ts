@@ -46,7 +46,7 @@ export interface PasswordChangeData {
 }
 
 export class UserAPI {
-  private basePath = '/api/v1/user-management-service/v1'
+  private basePath = '/api/v1/user-management-service'
 
   // Authentication
   async login(credentials: LoginCredentials) {

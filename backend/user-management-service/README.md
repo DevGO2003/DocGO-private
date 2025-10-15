@@ -77,7 +77,7 @@ java -jar target/auth-service-*.jar
 - **Account Lockout**: Khóa tài khoản
 - **Password Reset**: Đặt lại mật khẩu
 
-## API Endpoints
+## API Endpoints (đã chuẩn hóa URL)
 
 ### 🔹 Authentication
 - `POST /api/v1/user-management-service/auth/login` - Đăng nhập

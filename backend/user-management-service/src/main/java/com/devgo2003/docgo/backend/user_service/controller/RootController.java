@@ -70,7 +70,7 @@ public class RootController {
         response.sendRedirect("/docs");
     }
 
-    @GetMapping({"/health", "/api/v1/user-management-service/v1/health"})
+    @GetMapping({"/health", "/api/v1/user-management-service/health"})
     @Operation(
         summary = "Health check",
         description = """
@@ -135,7 +135,7 @@ public class RootController {
                 .data(healthData)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/health")
+                .path("/api/v1/user-management-service/health")
                 .build());
     }
 

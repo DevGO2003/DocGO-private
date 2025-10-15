@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.dto.TagDto;
-import com.devgo2003.docgo.document_service.service.ITagService;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.dto.TagDto;
+import com.devgo2003.docgo.file_service.service.ITagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/tags")
+@RequestMapping("/api/v1/file-management-service/tags")
 @Tag(name = "🏷️ APIs Quản lý Tags", description = "Các API để quản lý tags của hợp đồng trong hệ thống DocGO")
 public class TagController {
 

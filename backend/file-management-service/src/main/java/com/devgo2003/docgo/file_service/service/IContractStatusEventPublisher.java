@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.dto.ContractStatusChangeEvent;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.dto.ContractStatusChangeEvent;
 
 public interface IContractStatusEventPublisher {
     

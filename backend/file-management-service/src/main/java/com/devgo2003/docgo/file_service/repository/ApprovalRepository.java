@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.repository;
+package com.devgo2003.docgo.file_service.repository;
 
-import com.devgo2003.docgo.document_service.entity.Approval;
-import com.devgo2003.docgo.document_service.entity.Contract;
+import com.devgo2003.docgo.file_service.entity.Approval;
+import com.devgo2003.docgo.file_service.entity.Contract;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

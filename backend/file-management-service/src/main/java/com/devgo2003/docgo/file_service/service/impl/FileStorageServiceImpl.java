@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.dto.FileDownloadResponse;
-import com.devgo2003.docgo.document_service.dto.FileUploadResponse;
-import com.devgo2003.docgo.document_service.entity.DocumentEntity;
-import com.devgo2003.docgo.document_service.repository.DocumentRepository;
-import com.devgo2003.docgo.document_service.service.FileStorageService;
+import com.devgo2003.docgo.file_service.dto.FileDownloadResponse;
+import com.devgo2003.docgo.file_service.dto.FileUploadResponse;
+import com.devgo2003.docgo.file_service.entity.DocumentEntity;
+import com.devgo2003.docgo.file_service.repository.DocumentRepository;
+import com.devgo2003.docgo.file_service.service.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;

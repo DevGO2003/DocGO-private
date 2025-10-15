@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.entity.AuditLog;
-import com.devgo2003.docgo.document_service.service.AuditService;
-import com.devgo2003.docgo.document_service.dto.AuditLogCreateRequest;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.AuditLog;
+import com.devgo2003.docgo.file_service.service.AuditService;
+import com.devgo2003.docgo.file_service.dto.AuditLogCreateRequest;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/audit-logs")
+@RequestMapping("/api/v1/file-management-service/audit-logs")
 @Tag(name = "🔍 APIs Quản lý Audit Log", description = "Các API để quản lý nhật ký kiểm toán trong hệ thống DocGO")
 public class AuditController {
 

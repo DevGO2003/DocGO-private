@@ -1,12 +1,12 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
-import com.devgo2003.docgo.document_service.dto.ContractDetailResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractWithSummaryDto;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
-import com.devgo2003.docgo.document_service.service.IContractQueryService;
+import com.devgo2003.docgo.file_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.file_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.service.IContractQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

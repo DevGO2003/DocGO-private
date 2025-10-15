@@ -1,18 +1,18 @@
-package com.devgo2003.docgo.document_service.service;
+package com.devgo2003.docgo.file_service.service;
 
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.enums.ContractStatus;
-import com.devgo2003.docgo.document_service.entity.ContractAttachment;
-import com.devgo2003.docgo.document_service.entity.ContractEvent;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
-import com.devgo2003.docgo.document_service.repository.ContractAttachmentRepository;
-import com.devgo2003.docgo.document_service.repository.ContractEventRepository;
-import com.devgo2003.docgo.document_service.service.event.ContractEventPublisher;
-import com.devgo2003.docgo.document_service.service.event.ContractEventPayload;
-import com.devgo2003.docgo.document_service.common.exception.ConflictException;
-import com.devgo2003.docgo.document_service.common.exception.InvalidInputException;
-import com.devgo2003.docgo.document_service.common.exception.NoContentException;
-import com.devgo2003.docgo.document_service.common.exception.ResourceNotFoundException;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.enums.ContractStatus;
+import com.devgo2003.docgo.file_service.entity.ContractAttachment;
+import com.devgo2003.docgo.file_service.entity.ContractEvent;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.repository.ContractAttachmentRepository;
+import com.devgo2003.docgo.file_service.repository.ContractEventRepository;
+import com.devgo2003.docgo.file_service.service.event.ContractEventPublisher;
+import com.devgo2003.docgo.file_service.service.event.ContractEventPayload;
+import com.devgo2003.docgo.file_service.common.exception.ConflictException;
+import com.devgo2003.docgo.file_service.common.exception.InvalidInputException;
+import com.devgo2003.docgo.file_service.common.exception.NoContentException;
+import com.devgo2003.docgo.file_service.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

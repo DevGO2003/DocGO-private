@@ -110,7 +110,7 @@ docker run -p 8003:8000 --env-file env/.env automation-service
 
 ### 4. Truy cập
 - **API Documentation**: http://localhost:8003/docs#/
-- **Health Check**: http://localhost:8003/health
+- **Health Check**: http://localhost:8003/api/v1/automation-service/health
 - **Root**: http://localhost:8003/
 
 ## 📚 API Documentation

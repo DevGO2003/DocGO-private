@@ -1,7 +1,4 @@
-"""
-File Storage Router for Automation Service
-Converted from Document Management Service Controller
-"""
+"""Automation Service - File Router"""
 
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, Response
 from fastapi.responses import StreamingResponse
@@ -16,7 +13,7 @@ from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 from services.file_service import FileStorageService
 
 # Create router
-router = APIRouter(prefix="/api/v1/automation-service/v1/files", tags=["📁 APIs Quản lý File"])
+router = APIRouter(prefix="/api/v1/automation-service/files", tags=["APIs Quản lý File"])
 
 # Initialize file service
 file_service = FileStorageService()
@@ -24,38 +21,10 @@ file_service = FileStorageService()
 
 @router.post("", summary="Upload file", response_model=RestResponse[FileUploadResponse])
 async def upload_file(
-    file: UploadFile = File(..., description="File cần upload lên hệ thống"),
-    folder: Optional[str] = Query(None, description="Thư mục con tùy chọn trong bucket"),
-    user_id: Optional[str] = Query(None, description="ID của user upload file (mặc định: public)")
+    file: UploadFile = File(...),
+    folder: Optional[str] = Query(None),
+    user_id: Optional[str] = Query(None)
 ):
-    """
-    ## 📖 Mô tả
-    API upload file lên hệ thống với khả năng lưu trữ trên S3 hoặc local storage.
-    Hỗ trợ scan malware, versioning và quản lý metadata file.
-    
-    ## 🔹 Đầu vào
-    
-    📁 **file** (bắt buộc, multipart/form-data)
-    - **Loại**: UploadFile
-    - **Mô tả**: File cần upload lên hệ thống
-    - **Giới hạn**: Tối đa 10MB, hỗ trợ tất cả định dạng file
-    
-    📂 **folder** (tùy chọn, query)
-    - **Loại**: string
-    - **Mô tả**: Thư mục con tùy chọn trong bucket để tổ chức file
-    - **Ví dụ**: "documents", "contracts", "reports"
-    
-    👤 **user_id** (tùy chọn, query)
-    - **Loại**: string
-    - **Mô tả**: ID của user upload file để phân quyền truy cập
-    - **Mặc định**: "public" (truy cập công khai)
-    
-    ## 🔹 Đầu ra
-    
-    📄 **data** (FileUploadResponse)
-    Loại: FileUploadResponse
-    Mô tả: Thông tin file đã upload bao gồm file_id, filename, file_size, file_type, status, upload_time, s3_key, bucket, file_url
-    """
     try:
         response = file_service.upload_file(file, folder, user_id)
         return RestResponse(
@@ -66,7 +35,7 @@ async def upload_file(
             data=response,
             timestamp=response.upload_time.isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files"
+            path="/api/v1/automation-service/files"
         )
     except HTTPException as e:
         return RestResponse(
@@ -77,43 +46,17 @@ async def upload_file(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files"
+            path="/api/v1/automation-service/files"
         )
 
 
 @router.get("/{file_id}/download", summary="Download file")
 async def download_file(
     file_id: str,
-    user_id: Optional[str] = Query(None, description="ID của user download file (mặc định: public)"),
-    version: Optional[int] = Query(None, description="Phiên bản file cụ thể (nếu không có, tải bản mới nhất)")
+    user_id: Optional[str] = Query(None),
+    version: Optional[int] = Query(None)
 ):
-    """
-    ## 📖 Mô tả
-    API download file từ hệ thống lưu trữ (S3 hoặc local storage).
-    Hỗ trợ download theo file_id và có thể chỉ định phiên bản cụ thể.
-    
-    ## 🔹 Đầu vào
-    
-    🆔 **file_id** (bắt buộc, path)
-    - **Loại**: string
-    - **Mô tả**: ID duy nhất của file cần download
-    - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
-    
-    👤 **user_id** (tùy chọn, query)
-    - **Loại**: string
-    - **Mô tả**: ID của user download file để kiểm tra quyền truy cập
-    - **Mặc định**: "public" (truy cập công khai)
-    
-    🔢 **version** (tùy chọn, query)
-    Loại: integer
-    Mô tả: Phiên bản file cụ thể (nếu không có, tải bản mới nhất)
-    
-    🔹 Đầu ra
-    
-    📄 Response
-    Loại: File content (application/octet-stream)
-    Mô tả: Nội dung file với header Content-Disposition để download
-    """
+    """Download file từ storage theo file_id; hỗ trợ chỉ định version."""
     try:
         response = file_service.download_file(file_id, user_id, version)
         
@@ -134,56 +77,14 @@ async def download_file(
 
 @router.get("", summary="Danh sách files với projection", response_model=RestResponse[PaginatedViewResponse])
 async def get_all_files(
-    view: str = Query("table", description="View type: table, card, detail, full (mặc định: table)"),
-    page_number: int = Query(0, description="Số trang (mặc định: 0)"),
-    page_size: int = Query(10, description="Kích thước trang (mặc định: 10)"),
-    sort_by: Optional[List[str]] = Query(None, description="Danh sách các trường để sắp xếp"),
-    sort_direction: Optional[List[str]] = Query(None, description="Hướng sắp xếp (ASC/DESC)"),
-    include_deleted: bool = Query(False, description="Có bao gồm files đã xóa không (mặc định: false)")
+    view: str = Query("table"),
+    page_number: int = Query(0),
+    page_size: int = Query(10),
+    sort_by: Optional[List[str]] = Query(None),
+    sort_direction: Optional[List[str]] = Query(None),
+    include_deleted: bool = Query(False)
 ):
-    """
-    ## 📖 Mô tả
-    API lấy danh sách tất cả files trong hệ thống với phân trang và sắp xếp.
-    Hỗ trợ tìm kiếm, lọc và sắp xếp theo nhiều tiêu chí khác nhau.
-    
-    ## 🔹 Đầu vào
-    
-    📄 **page_number** (tùy chọn, query)
-    - **Loại**: integer
-    - **Mô tả**: Số trang cần lấy (bắt đầu từ 0)
-    - **Mặc định**: 0
-    - **Ví dụ**: 0, 1, 2...
-    
-    📊 **page_size** (tùy chọn, query)
-    - **Loại**: integer
-    - **Mô tả**: Số lượng files trên mỗi trang
-    - **Mặc định**: 10
-    - **Ví dụ**: 10, 20, 50...
-    
-    🔄 **sort_by** (tùy chọn, query)
-    - **Loại**: List[string]
-    - **Mô tả**: Danh sách các trường để sắp xếp
-    - **Các giá trị**: "filename", "upload_time", "file_size", "file_type"
-    - **Ví dụ**: ["upload_time", "filename"]
-    
-    📈 **sort_direction** (tùy chọn, query)
-    - **Loại**: List[string]
-    - **Mô tả**: Hướng sắp xếp cho từng trường
-    - **Các giá trị**: "ASC", "DESC"
-    - **Ví dụ**: ["DESC", "ASC"]
-    
-    🗑️ **include_deleted** (tùy chọn, query)
-    - **Loại**: boolean
-    - **Mô tả**: Có bao gồm files đã bị xóa không
-    - **Mặc định**: false
-    - **Ví dụ**: true, false
-    
-    ## 🔹 Đầu ra
-    
-    📄 **data** (FileListResponse)
-    - **Mô tả**: Danh sách files với thông tin phân trang
-    - **Bao gồm**: files[], total_elements, total_pages, current_page, page_size
-    """
+    """Lấy danh sách files với phân trang và sắp xếp."""
     try:
         # Validate view type
         try:
@@ -227,7 +128,7 @@ async def get_all_files(
             data=paginated_response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files"
+            path="/api/v1/automation-service/files"
         )
     except HTTPException as e:
         return RestResponse(
@@ -238,7 +139,7 @@ async def get_all_files(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files"
+            path="/api/v1/automation-service/files"
         )
 
 
@@ -246,21 +147,7 @@ async def get_all_files(
 async def get_file_details(
     file_id: str
 ):
-    """
-    Lấy thông tin chi tiết file
-    
-    🔹 Đầu vào
-    
-    🆔 file_id (bắt buộc, path)
-    Loại: string
-    Mô tả: ID của file cần lấy thông tin
-    
-    🔹 Đầu ra
-    
-    📄 data
-    Loại: dict
-    Mô tả: Thông tin chi tiết của file bao gồm metadata, checksum, access count
-    """
+    """Lấy thông tin chi tiết file theo file_id."""
     try:
         response = file_service.get_file_details(file_id)
         return RestResponse(
@@ -271,7 +158,7 @@ async def get_file_details(
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/v1/files/{file_id}"
+            path=f"/api/v1/automation-service/files/{file_id}"
         )
     except HTTPException as e:
         return RestResponse(
@@ -282,45 +169,31 @@ async def get_file_details(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/v1/files/{file_id}"
+            path=f"/api/v1/automation-service/files/{file_id}"
         )
 
 
 @router.delete("/{file_id}", summary="Xóa file", response_model=RestResponse[dict])
 async def delete_file(
     file_id: str,
-    user_id: Optional[str] = Query(None, description="ID của user xóa file (mặc định: public)"),
-    version: Optional[int] = Query(None, description="Phiên bản cụ thể cần xóa (nếu không có thì xóa tất cả)")
+    user_id: Optional[str] = Query(None),
+    version: Optional[int] = Query(None)
 ):
     """
-    Xóa file hoặc phiên bản cụ thể
-    
-    🔹 Đầu vào
-    
-    🆔 file_id (bắt buộc, path)
-    Loại: string
-    Mô tả: ID của file cần xóa
-    
-    👤 user_id (tùy chọn, query)
-    Loại: string
-    Mô tả: ID của user xóa file (mặc định: public)
-    
-    🔢 version (tùy chọn, query)
-    Loại: integer
-    Mô tả: Phiên bản cụ thể cần xóa (nếu không có thì xóa tất cả)
-    
-    🔹 Đầu ra
-    
-    📄 data
-    Loại: object
-    Mô tả: Kết quả xóa file với thông tin xác nhận
+    Xoa file hoac phien ban cu the
+
+    Dau vao:
+    - file_id (bat buoc, path): ID file
+    - user_id (tuy chon, query)
+    - version (tuy chon, query)
+
+    Dau ra:
+    - data: ket qua xoa
     """
     try:
         result = file_service.delete_file(file_id, user_id, version)
         response = {"success": result}
-        
-        description = f"Đã xóa phiên bản {version} của file thành công" if version else "Đã xóa toàn bộ file thành công"
-        
+        description = f"Da xoa phien ban {version} cua file thanh cong" if version else "Da xoa toan bo file thanh cong"
         return RestResponse(
             apiVersion="v1",
             statusCode=200,
@@ -329,7 +202,7 @@ async def delete_file(
             data=response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/v1/files/{file_id}"
+            path=f"/api/v1/automation-service/files/{file_id}"
         )
     except HTTPException as e:
         return RestResponse(
@@ -340,103 +213,34 @@ async def delete_file(
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/v1/files/{file_id}"
+            path=f"/api/v1/automation-service/files/{file_id}"
         )
 
 
 @router.get("/check-version", summary="Kiểm tra version conflict", response_model=RestResponse[dict])
 async def check_file_version(
-    filename: str = Query(..., description="Tên file cần kiểm tra version"),
-    file_size: int = Query(..., description="Kích thước file (bytes)"),
-    last_modified: Optional[str] = Query(None, description="Thời gian sửa đổi cuối cùng (ISO format)")
+    filename: str = Query(...),
+    file_size: int = Query(...),
+    last_modified: Optional[str] = Query(None)
 ):
     """
-    ## 📖 Mô tả
-    API kiểm tra version conflict khi upload file. So sánh file hiện tại với file đã tồn tại
-    để phát hiện xung đột version và đưa ra cảnh báo cho người dùng.
-    
-    ## 🔹 Đầu vào
-    
-    📄 **filename** (bắt buộc, query)
-    - **Loại**: string
-    - **Mô tả**: Tên file cần kiểm tra version conflict
-    - **Ví dụ**: "contract_2024.pdf", "report.docx"
-    
-    📊 **file_size** (bắt buộc, query)
-    - **Loại**: integer
-    - **Mô tả**: Kích thước file hiện tại (bytes)
-    - **Ví dụ**: 1024000, 2048000
-    
-    🕒 **last_modified** (tùy chọn, query)
-    - **Loại**: string (ISO format)
-    - **Mô tả**: Thời gian sửa đổi cuối cùng của file hiện tại
-    - **Ví dụ**: "2024-01-15T10:30:00Z"
-    
-    ## 🔹 Đầu ra
-    
-    📝 **data**
-    - **Loại**: object
-    - **Mô tả**: Thông tin version conflict check
-    - **Cấu trúc**:
-      ```json
-      {
-        "hasConflict": boolean,
-        "existingFile": {
-          "id": string,
-          "filename": string,
-          "size": integer,
-          "lastModified": string,
-          "version": string
-        },
-        "currentFile": {
-          "filename": string,
-          "size": integer,
-          "lastModified": string
-        },
-        "conflictType": "size" | "timestamp" | "none",
-        "message": string
-      }
-      ```
-    
-    📊 **apiVersion**
-    - **Loại**: string
-    - **Mô tả**: Phiên bản API (v1)
-    
-    🔢 **statusCode**
-    - **Loại**: integer
-    - **Mô tả**: Mã trạng thái HTTP (200: OK)
-    
-    📋 **shortMessage**
-    - **Loại**: string
-    - **Mô tả**: Thông báo ngắn gọn về kết quả
-    
-    📖 **description**
-    - **Loại**: string
-    - **Mô tả**: Mô tả chi tiết về kết quả kiểm tra
-    
-    🕒 **timestamp**
-    - **Loại**: string (ISO-8601)
-    - **Mô tả**: Thời gian xử lý yêu cầu
-    
-    🆔 **requestId**
-    - **Loại**: string (UUID)
-    - **Mô tả**: Định danh duy nhất của yêu cầu
-    
-    🛣️ **path**
-    - **Loại**: string
-    - **Mô tả**: Đường dẫn API được gọi
+    Kiem tra version conflict khi upload file.
+
+    Dau vao:
+    - filename (bat buoc, query)
+    - file_size (bat buoc, query)
+    - last_modified (tuy chon, query, ISO format)
+
+    Dau ra: JSON thong tin conflict
     """
     try:
-        # Kiểm tra file có tồn tại không
         existing_files = await file_service.get_files_by_name(filename)
-        
         if not existing_files:
-            # Không có file nào trùng tên
             return RestResponse[dict](
                 apiVersion="v1",
                 statusCode=200,
                 shortMessage="Success",
-                description="Không có file trùng tên, có thể upload an toàn",
+                description="Khong co file trung ten, co the upload an toan",
                 data={
                     "hasConflict": False,
                     "existingFile": None,
@@ -446,31 +250,23 @@ async def check_file_version(
                         "lastModified": last_modified
                     },
                     "conflictType": "none",
-                    "message": "File mới, không có xung đột version"
+                    "message": "File moi, khong co xung dot version"
                 },
                 timestamp=datetime.now().isoformat(),
                 requestId=str(uuid.uuid4()),
-                path="/api/v1/automation-service/v1/files/check-version"
+                path="/api/v1/automation-service/files/check-version"
             )
-        
-        # Lấy file mới nhất (theo thời gian tạo)
         latest_file = max(existing_files, key=lambda x: x.get('created_at', ''))
-        
-        # So sánh kích thước file
         size_conflict = latest_file.get('size', 0) != file_size
-        
-        # So sánh thời gian sửa đổi (nếu có)
         timestamp_conflict = False
         if last_modified and latest_file.get('last_modified'):
             try:
-                from datetime import datetime
-                current_time = datetime.fromisoformat(last_modified.replace('Z', '+00:00'))
-                existing_time = datetime.fromisoformat(latest_file['last_modified'].replace('Z', '+00:00'))
+                from datetime import datetime as _dt
+                current_time = _dt.fromisoformat(last_modified.replace('Z', '+00:00'))
+                existing_time = _dt.fromisoformat(latest_file['last_modified'].replace('Z', '+00:00'))
                 timestamp_conflict = current_time < existing_time
             except:
                 timestamp_conflict = False
-        
-        # Xác định loại xung đột
         conflict_type = "none"
         if size_conflict and timestamp_conflict:
             conflict_type = "both"
@@ -478,25 +274,21 @@ async def check_file_version(
             conflict_type = "size"
         elif timestamp_conflict:
             conflict_type = "timestamp"
-        
         has_conflict = conflict_type != "none"
-        
-        # Tạo thông báo
         if has_conflict:
             if conflict_type == "size":
-                message = f"File '{filename}' đã tồn tại với kích thước khác ({latest_file.get('size', 0)} bytes vs {file_size} bytes)"
+                message = f"File '{filename}' da ton tai voi kich thuoc khac ({latest_file.get('size', 0)} bytes vs {file_size} bytes)"
             elif conflict_type == "timestamp":
-                message = f"File '{filename}' đã tồn tại với thời gian sửa đổi mới hơn"
+                message = f"File '{filename}' da ton tai voi thoi gian sua doi moi hon"
             else:
-                message = f"File '{filename}' đã tồn tại với cả kích thước và thời gian sửa đổi khác"
+                message = f"File '{filename}' da ton tai voi ca kich thuoc va thoi gian sua doi khac"
         else:
-            message = f"File '{filename}' đã tồn tại nhưng không có xung đột version"
-        
+            message = f"File '{filename}' da ton tai nhung khong co xung dot version"
         return RestResponse[dict](
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
-            description="Đã kiểm tra version conflict thành công",
+            description="Da kiem tra version conflict thanh cong",
             data={
                 "hasConflict": has_conflict,
                 "existingFile": {
@@ -516,19 +308,18 @@ async def check_file_version(
             },
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files/check-version"
+            path="/api/v1/automation-service/files/check-version"
         )
-        
     except Exception as e:
         return RestResponse[dict](
             apiVersion="v1",
             statusCode=500,
             shortMessage="Internal Server Error",
-            description=f"Lỗi khi kiểm tra version conflict: {str(e)}",
+            description=f"Loi khi kiem tra version conflict: {str(e)}",
             data=None,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/v1/files/check-version"
+            path="/api/v1/automation-service/files/check-version"
         )
 
 

@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service;
+package com.devgo2003.docgo.file_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
  * Need to investigate why Spring is not finding the RestTemplate bean
  */
 @SpringBootApplication
-@ComponentScan(basePackages = "com.devgo2003.docgo.document_service")
+@ComponentScan(basePackages = "com.devgo2003.docgo.file_service")
 public class DocumentManagementApplication {
     public static void main(String[] args) {
         SpringApplication.run(DocumentManagementApplication.class, args);

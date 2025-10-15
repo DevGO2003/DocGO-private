@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.document_service.script;
+package com.devgo2003.docgo.file_service.script;
 
-import com.devgo2003.docgo.document_service.entity.Tag;
-import com.devgo2003.docgo.document_service.repository.TagRepository;
+import com.devgo2003.docgo.file_service.entity.Tag;
+import com.devgo2003.docgo.file_service.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

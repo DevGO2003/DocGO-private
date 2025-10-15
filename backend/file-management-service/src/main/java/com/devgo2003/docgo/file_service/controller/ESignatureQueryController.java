@@ -1,10 +1,10 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.entity.ESignature;
-import com.devgo2003.docgo.document_service.service.ESignatureService;
-import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
+import com.devgo2003.docgo.file_service.common.response.PaginatedResponse;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.ESignature;
+import com.devgo2003.docgo.file_service.service.ESignatureService;
+import com.devgo2003.docgo.file_service.util.PaginatedResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,7 +22,7 @@ import java.util.List;
  * Cung cấp các API query và search cho e-signatures
  */
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/esignatures/query")
+@RequestMapping("/api/v1/file-management-service/esignatures/query")
 @Tag(name = "ESignature Query Management", description = "API tìm kiếm và truy vấn chữ ký điện tử")
 @RequiredArgsConstructor
 @Slf4j

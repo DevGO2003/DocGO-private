@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.document_service.entity;
+package com.devgo2003.docgo.file_service.entity;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.CreatedBy;

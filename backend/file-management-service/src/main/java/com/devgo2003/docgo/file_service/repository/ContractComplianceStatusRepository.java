@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.repository;
+package com.devgo2003.docgo.file_service.repository;
 
-import com.devgo2003.docgo.document_service.entity.ContractComplianceStatus;
+import com.devgo2003.docgo.file_service.entity.ContractComplianceStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 

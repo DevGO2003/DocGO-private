@@ -254,7 +254,7 @@ class ApiClient {
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
-          const refreshResponse = await this.client.post(`${this.baseURL}/api/v1/user-management-service/v1/auth/refresh`, { refreshToken })
+          const refreshResponse = await this.client.post(`${this.baseURL}/api/v1/user-management-service/auth/refresh`, { refreshToken })
           const refreshData = refreshResponse.data?.data
           if (refreshData?.accessToken) {
             const authData = localStorage.getItem('docgo_auth_v1')

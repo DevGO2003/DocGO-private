@@ -1,9 +1,9 @@
-package com.devgo2003.docgo.document_service.common.util;
+package com.devgo2003.docgo.file_service.common.util;
 
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.common.response.ValidationErrorResponse;
-import com.devgo2003.docgo.document_service.common.response.ErrorDetail;
-import com.devgo2003.docgo.document_service.common.response.ErrorResponse;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.common.response.ValidationErrorResponse;
+import com.devgo2003.docgo.file_service.common.response.ErrorDetail;
+import com.devgo2003.docgo.file_service.common.response.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

@@ -1,6 +1,6 @@
-package com.devgo2003.docgo.document_service.client;
+package com.devgo2003.docgo.file_service.client;
 
-import com.devgo2003.docgo.document_service.dto.ContractSummaryCreateRequest;
+import com.devgo2003.docgo.file_service.dto.ContractSummaryCreateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -51,7 +51,7 @@ public class AutomationServiceClient {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestPayload, headers);
 
             // Call automation-service API
-            String apiUrl = automationServiceUrl + "/api/v1/automation-service/v1/contracts/analyze";
+            String apiUrl = automationServiceUrl + "/api/v1/automation-service/contracts/analyze";
             
             ResponseEntity<Map> response = restTemplate.exchange(
                 apiUrl,

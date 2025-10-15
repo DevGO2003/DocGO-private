@@ -78,42 +78,41 @@ services:
   # MICROSERVICES
   # ==========================================
 
-  # User Management Service (Spring Boot) - TEMPORARILY DISABLED DUE TO COMPILATION ERRORS
-  # user-management-service:
-  #   container_name: user-management-service
-  #   build:
-  #     context: ./backend/user-management-service
-  #     dockerfile: Dockerfile
-  #   
-  #   ports:
-  #     - "${USER_MANAGEMENT_PORT:-8001}:8001"
-  #   env_file:
-  #     - .env
-  #     - ./backend/user-management-service/.env
-  #   environment:
-  #     - SPRING_PROFILES_ACTIVE=docker
-  #     - ENVIRONMENT=docker
-  #   depends_on:
-  #     - kafka
-  #     - redis
-  #   networks:
-  #     - docgo-network
-  #   volumes:
-  #     - ./logs/user-management:/app/logs
-  #   restart: unless-stopped
-
-  # Document Management Service (Spring Boot)
-  document-management-service:
-    container_name: document-management-service
+  # User Management Service (Spring Boot)
+  user-management-service:
+    container_name: user-management-service
     build:
-      context: ./backend/document-management-service
-      dockerfile: Dockerfile.dev
+      context: ./backend/user-management-service
+      dockerfile: Dockerfile
     
+    ports:
+      - "${USER_MANAGEMENT_PORT:-8001}:8001"
+    env_file:
+      - .env
+      - ./backend/user-management-service/.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - ENVIRONMENT=docker
+    depends_on:
+      - kafka
+      - redis
+    networks:
+      - docgo-network
+    volumes:
+      - ./logs/user-management:/app/logs
+    restart: unless-stopped
+
+  # File Management Service (Spring Boot)
+  file-management-service:
+    container_name: file-management-service
+    build:
+      context: ./backend/file-management-service
+      dockerfile: Dockerfile.dev
+
     ports:
       - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8002"
     env_file:
       - .env
-      - ./backend/document-management-service/.env
     environment:
       - ENVIRONMENT=docker
     depends_on:
@@ -122,10 +121,10 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/document-management-service:/app
+      - ./backend/file-management-service:/app
       - maven-repo:/root/.m2
-      - ./backend/document-management-service/uploads:/app/uploads
-      - ./logs/document-management:/app/logs
+      - ./backend/file-management-service/uploads:/app/uploads
+      - ./logs/file-management:/app/logs
     restart: unless-stopped
 
   # Automation Service (FastAPI)
@@ -172,7 +171,7 @@ services:
       - kafka
       - redis
       # - user-management-service  # TEMPORARILY DISABLED
-      - document-management-service
+      - file-management-service
       - automation-service
     networks:
       - docgo-network

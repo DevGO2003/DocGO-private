@@ -1,14 +1,14 @@
-package com.devgo2003.docgo.document_service.service.impl;
+package com.devgo2003.docgo.file_service.service.impl;
 
-import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
-import com.devgo2003.docgo.document_service.dto.ContractPartyDto;
-import com.devgo2003.docgo.document_service.dto.ContractValidationResult;
-import com.devgo2003.docgo.document_service.service.IContractValidationService;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.enums.ContractType;
-import com.devgo2003.docgo.document_service.common.exception.InvalidInputException;
-import com.devgo2003.docgo.document_service.common.exception.ConflictException;
-import com.devgo2003.docgo.document_service.repository.ContractRepository;
+import com.devgo2003.docgo.file_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.file_service.dto.ContractPartyDto;
+import com.devgo2003.docgo.file_service.dto.ContractValidationResult;
+import com.devgo2003.docgo.file_service.service.IContractValidationService;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.enums.ContractType;
+import com.devgo2003.docgo.file_service.common.exception.InvalidInputException;
+import com.devgo2003.docgo.file_service.common.exception.ConflictException;
+import com.devgo2003.docgo.file_service.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

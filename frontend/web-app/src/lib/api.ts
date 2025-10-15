@@ -27,7 +27,7 @@ export interface PaginatedResponse<T> {
 
 // Contract Management API - Sử dụng API Gateway với pattern mới
 export class ContractAPI {
-  private basePath = '/api/v1/document-management-service/v1'
+  private basePath = '/api/v1/document-management-service'
 
   async getContracts(params?: {
     pageNumber?: number
@@ -131,7 +131,7 @@ export class ContractAPI {
 
 // User Management API - Sử dụng API Gateway với pattern mới
 export class UserAPI {
-  private basePath = '/api/v1/user-management-service/v1'
+  private basePath = '/api/v1/user-management-service'
 
   async getUsers(params?: {
     pageNumber?: number
@@ -172,7 +172,7 @@ export class UserAPI {
 
 // Automation API - Sử dụng API Gateway với pattern mới
 export class AutomationAPI {
-  private basePath = '/api/v1/automation-service/v1'
+  private basePath = '/api/v1/automation-service'
 
   async extractText(file: File, apiKey?: string, view?: string) {
     const formData = new FormData()
@@ -255,7 +255,7 @@ export class AutomationAPI {
 // File Storage API - Sử dụng API Gateway với pattern mới
 export class FileStorageAPI {
   // Chuyển upload/lưu trữ file sang automation-service
-  private basePath = '/api/v1/automation-service/v1/files'
+  private basePath = '/api/v1/automation-service/files'
 
   async uploadFile(file: File, metadata?: any, view?: string, onProgress?: (progress: number) => void) {
     const formData = new FormData()
@@ -352,7 +352,7 @@ export class TagAPI {
 
 // Authentication API - Updated to use API Gateway proxy
 export class AuthAPI {
-  private basePath = '/api/v1/user-management-service/v1/auth'
+  private basePath = '/api/v1/user-management-service/auth'
 
   async login(credentials: { username: string; password: string }) {
     return apiClient.post<ApiResponse<any>>(`${this.basePath}/login`, credentials)

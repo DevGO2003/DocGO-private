@@ -1,8 +1,8 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.entity.CommentEntity;
-import com.devgo2003.docgo.document_service.service.CommentService;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.entity.CommentEntity;
+import com.devgo2003.docgo.file_service.service.CommentService;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/documents/{documentId}/comments")
+@RequestMapping("/api/v1/file-management-service/v1/files/{documentId}/comments")
 @Tag(name = "💬 Comment Management", description = "API quản lý bình luận cho tài liệu")
 public class CommentController {
 

@@ -1,14 +1,14 @@
-package com.devgo2003.docgo.document_service.controller;
+package com.devgo2003.docgo.file_service.controller;
 
-import com.devgo2003.docgo.document_service.common.response.PaginatedResponse;
-import com.devgo2003.docgo.document_service.util.PaginatedResponseUtil;
-import com.devgo2003.docgo.document_service.common.response.RestResponse;
-import com.devgo2003.docgo.document_service.dto.ContractDetailDto;
-import com.devgo2003.docgo.document_service.dto.ContractDetailResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractResponseDto;
-import com.devgo2003.docgo.document_service.dto.ContractWithSummaryDto;
-import com.devgo2003.docgo.document_service.entity.Contract;
-import com.devgo2003.docgo.document_service.service.IContractQueryService;
+import com.devgo2003.docgo.file_service.common.response.PaginatedResponse;
+import com.devgo2003.docgo.file_service.util.PaginatedResponseUtil;
+import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.file_service.dto.ContractDetailDto;
+import com.devgo2003.docgo.file_service.dto.ContractDetailResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractResponseDto;
+import com.devgo2003.docgo.file_service.dto.ContractWithSummaryDto;
+import com.devgo2003.docgo.file_service.entity.Contract;
+import com.devgo2003.docgo.file_service.service.IContractQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,7 +29,7 @@ import java.util.List;
  * Cung cấp các API query và search cho contracts
  */
 @RestController
-@RequestMapping("/api/v1/document-management-service/v1/contracts/query")
+@RequestMapping("/api/v1/file-management-service/contracts/query")
 @Tag(name = "Contract Query Management", description = "API tìm kiếm và truy vấn hợp đồng")
 @RequiredArgsConstructor
 @Slf4j

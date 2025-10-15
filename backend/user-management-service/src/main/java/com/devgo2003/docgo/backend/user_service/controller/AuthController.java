@@ -21,9 +21,9 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/auth")
+@RequestMapping("/api/v1/user-management-service/auth")
 @RequiredArgsConstructor
-@Tag(name = "🔐 APIs Xác thực người dùng", description = "APIs xác thực: đăng nhập, đăng xuất, refresh token, OAuth2 Google")
+@Tag(name = "🔐 APIs Xác thực người dùng")
 public class AuthController {
 
     private final AuthService authService;
@@ -40,55 +40,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(
-        summary = "Đăng nhập",
-        description = """
-        ## 📖 Mô tả
-        API đăng nhập người dùng vào hệ thống bằng username và password.
-        Trả về accessToken và refreshToken để xác thực các request tiếp theo.
-        
-        ## 🔹 Đầu vào
-        
-        📝 **request** (bắt buộc, body)
-        - **Loại**: LoginRequest
-        - **Mô tả**: Thông tin đăng nhập của người dùng
-        - **Bao gồm**: username, password
-        - **Ví dụ**: {"username": "john_doe", "password": "123456"}
-        
-        ## 🔹 Đầu ra
-        
-        📄 **data** (AuthResponse)
-        - **Mô tả**: Thông tin xác thực và người dùng
-        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
-        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
-        
-        📊 **apiVersion** (string)
-        - **Mô tả**: Phiên bản API hiện tại
-        - **Giá trị**: "v1"
-        
-        🔢 **statusCode** (integer)
-        - **Mô tả**: Mã trạng thái xử lý
-        - **Các giá trị**: 200 (thành công), 400 (thông tin đăng nhập sai), 500 (lỗi server)
-        
-        📋 **shortMessage** (string)
-        - **Mô tả**: Thông báo ngắn gọn về kết quả
-        - **Ví dụ**: "Success", "Bad Request", "Internal Server Error"
-        
-        📖 **description** (string)
-        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
-        - **Ví dụ**: "Đăng nhập thành công"
-        
-        🕒 **timestamp** (string, ISO-8601)
-        - **Mô tả**: Thời gian xử lý yêu cầu
-        - **Ví dụ**: "2024-01-15T10:30:00Z"
-        
-        🆔 **requestId** (string, UUID)
-        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
-        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
-        
-        🛣️ **path** (string)
-        - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/login"
-        """
+        summary = "Đăng nhập"
     )
     public ResponseEntity<RestResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         String requestId = UUID.randomUUID().toString();
@@ -104,7 +56,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/login")
+                    .path("/api/v1/user-management-service/auth/login")
                     .build());
         }
 
@@ -118,7 +70,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/login")
+                    .path("/api/v1/user-management-service/auth/login")
                     .build());
         }
 
@@ -130,61 +82,13 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/login")
+                .path("/api/v1/user-management-service/auth/login")
                 .build());
     }
 
     @PostMapping("/register")
     @Operation(
-        summary = "Đăng ký",
-        description = """
-        ## 📖 Mô tả
-        API đăng ký tài khoản người dùng mới trong hệ thống.
-        Tạo tài khoản với thông tin cơ bản và trả về thông tin xác thực.
-        
-        ## 🔹 Đầu vào
-        
-        📝 **request** (bắt buộc, body)
-        - **Loại**: RegisterRequest
-        - **Mô tả**: Thông tin đăng ký tài khoản mới
-        - **Bao gồm**: username, email, password, fullName, phone
-        - **Ví dụ**: {"username": "john_doe", "email": "john@example.com", "password": "123456"}
-        
-        ## 🔹 Đầu ra
-        
-        📄 **data** (AuthResponse)
-        - **Mô tả**: Thông tin xác thực và người dùng đã tạo
-        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
-        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
-        
-        📊 **apiVersion** (string)
-        - **Mô tả**: Phiên bản API hiện tại
-        - **Giá trị**: "v1"
-        
-        🔢 **statusCode** (integer)
-        - **Mô tả**: Mã trạng thái xử lý
-        - **Các giá trị**: 201 (tạo thành công), 400 (dữ liệu không hợp lệ), 409 (tài khoản đã tồn tại)
-        
-        📋 **shortMessage** (string)
-        - **Mô tả**: Thông báo ngắn gọn về kết quả
-        - **Ví dụ**: "Success", "Bad Request", "Conflict"
-        
-        📖 **description** (string)
-        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
-        - **Ví dụ**: "Đăng ký tài khoản thành công"
-        
-        🕒 **timestamp** (string, ISO-8601)
-        - **Mô tả**: Thời gian xử lý yêu cầu
-        - **Ví dụ**: "2024-01-15T10:30:00Z"
-        
-        🆔 **requestId** (string, UUID)
-        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
-        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
-        
-        🛣️ **path** (string)
-        - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/register"
-        """
+        summary = "Đăng ký"
     )
     public ResponseEntity<RestResponse<AuthResponse>> register(@RequestBody RegisterRequest request) {
         String requestId = UUID.randomUUID().toString();
@@ -201,7 +105,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/register")
+                    .path("/api/v1/user-management-service/auth/register")
                     .build());
         }
 
@@ -215,61 +119,13 @@ public class AuthController {
                 .data(result.isSuccess() ? result : null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/register")
+                .path("/api/v1/user-management-service/auth/register")
                 .build());
     }
 
     @PostMapping("/refresh")
     @Operation(
-        summary = "Refresh token",
-        description = """
-        ## 📖 Mô tả
-        API tạo access token mới từ refresh token hiện có.
-        Sử dụng khi access token hết hạn để tiếp tục xác thực.
-        
-        ## 🔹 Đầu vào
-        
-        📝 **body** (bắt buộc, body)
-        - **Loại**: Map<String, String>
-        - **Mô tả**: Chứa refresh token để tạo access token mới
-        - **Bao gồm**: refreshToken
-        - **Ví dụ**: {"refreshToken": "eyJ..."}
-        
-        ## 🔹 Đầu ra
-        
-        📄 **data** (AuthResponse)
-        - **Mô tả**: Thông tin xác thực mới
-        - **Bao gồm**: accessToken, refreshToken, userInfo, expiresIn
-        - **Ví dụ**: {"accessToken": "eyJ...", "refreshToken": "eyJ...", "userInfo": {...}}
-        
-        📊 **apiVersion** (string)
-        - **Mô tả**: Phiên bản API hiện tại
-        - **Giá trị**: "v1"
-        
-        🔢 **statusCode** (integer)
-        - **Mô tả**: Mã trạng thái xử lý
-        - **Các giá trị**: 200 (thành công), 400 (refresh token không hợp lệ), 401 (refresh token hết hạn)
-        
-        📋 **shortMessage** (string)
-        - **Mô tả**: Thông báo ngắn gọn về kết quả
-        - **Ví dụ**: "Success", "Bad Request", "Unauthorized"
-        
-        📖 **description** (string)
-        - **Mô tả**: Mô tả chi tiết về kết quả xử lý
-        - **Ví dụ**: "Tạo access token mới thành công"
-        
-        🕒 **timestamp** (string, ISO-8601)
-        - **Mô tả**: Thời gian xử lý yêu cầu
-        - **Ví dụ**: "2024-01-15T10:30:00Z"
-        
-        🆔 **requestId** (string, UUID)
-        - **Mô tả**: Định danh duy nhất của yêu cầu để theo dõi
-        - **Ví dụ**: "123e4567-e89b-12d3-a456-426614174000"
-        
-        🛣️ **path** (string)
-        - **Mô tả**: Đường dẫn API được gọi
-        - **Ví dụ**: "/api/v1/user-management-service/v1/auth/refresh"
-        """
+        summary = "Refresh token"
     )
     public ResponseEntity<RestResponse<AuthResponse>> refresh(@RequestBody Map<String, String> body) {
         String requestId = UUID.randomUUID().toString();
@@ -283,7 +139,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/refresh")
+                    .path("/api/v1/user-management-service/auth/refresh")
                     .build());
         }
 
@@ -297,7 +153,7 @@ public class AuthController {
                     .data(result)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/refresh")
+                    .path("/api/v1/user-management-service/auth/refresh")
                     .build());
         }
 
@@ -309,12 +165,12 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/refresh")
+                .path("/api/v1/user-management-service/auth/refresh")
                 .build());
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Đăng xuất", description = "Đăng xuất và vô hiệu hoá token hiện tại")
+    @Operation(summary = "Đăng xuất")
     public ResponseEntity<RestResponse<Void>> logout(@RequestHeader(name = "Authorization", required = false) String authorization) {
         String requestId = UUID.randomUUID().toString();
         String token = (authorization != null && authorization.startsWith("Bearer ")) ? authorization.substring(7) : null;
@@ -327,7 +183,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/logout")
+                    .path("/api/v1/user-management-service/auth/logout")
                     .build());
         }
 
@@ -340,12 +196,12 @@ public class AuthController {
                 .data(null)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/logout")
+                .path("/api/v1/user-management-service/auth/logout")
                 .build());
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Thông tin người dùng hiện tại", description = "Lấy thông tin user từ access token hiện tại")
+    @Operation(summary = "Thông tin người dùng hiện tại")
     public ResponseEntity<RestResponse<AuthResponse>> me(@RequestHeader(name = "Authorization", required = false) String authorization) {
         String requestId = UUID.randomUUID().toString();
         if (authorization == null || !authorization.startsWith("Bearer ")) {
@@ -357,7 +213,7 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/me")
+                    .path("/api/v1/user-management-service/auth/me")
                     .build());
         }
 
@@ -394,7 +250,7 @@ public class AuthController {
                                 .data(data)
                                 .timestamp(ZonedDateTime.now())
                                 .requestId(requestId)
-                                .path("/api/v1/user-management-service/v1/auth/me")
+                                .path("/api/v1/user-management-service/auth/me")
                                 .build());
                     })
                     .orElseGet(() -> ResponseEntity.status(404).body(RestResponse.<AuthResponse>builder()
@@ -405,7 +261,7 @@ public class AuthController {
                             .data(null)
                             .timestamp(ZonedDateTime.now())
                             .requestId(requestId)
-                            .path("/api/v1/user-management-service/v1/auth/me")
+                            .path("/api/v1/user-management-service/auth/me")
                             .build()));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(RestResponse.<AuthResponse>builder()
@@ -416,13 +272,13 @@ public class AuthController {
                     .data(null)
                     .timestamp(ZonedDateTime.now())
                     .requestId(requestId)
-                    .path("/api/v1/user-management-service/v1/auth/me")
+                    .path("/api/v1/user-management-service/auth/me")
                     .build());
         }
     }
 
     @GetMapping("/health")
-    @Operation(summary = "Health check", description = "Kiểm tra tình trạng service")
+    @Operation(summary = "Health check")
     public ResponseEntity<RestResponse<Map<String, String>>> health() {
         String requestId = UUID.randomUUID().toString();
         return ResponseEntity.ok(RestResponse.<Map<String, String>>builder()
@@ -433,12 +289,12 @@ public class AuthController {
                 .data(Map.of("status", "UP"))
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/health")
+                .path("/api/v1/user-management-service/auth/health")
                 .build());
     }
 
     @GetMapping("/test-auth")
-    @Operation(summary = "Test authentication", description = "Test endpoint để kiểm tra JWT authentication")
+    @Operation(summary = "Test authentication")
     public ResponseEntity<RestResponse<Map<String, Object>>> testAuth(@RequestHeader(name = "Authorization", required = false) String authorization) {
         String requestId = UUID.randomUUID().toString();
         log.info("[AuthController] Test auth endpoint called with Authorization: {}", authorization);
@@ -456,7 +312,7 @@ public class AuthController {
                 .data(data)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/auth/test-auth")
+                .path("/api/v1/user-management-service/auth/test-auth")
                 .build());
     }
 
@@ -464,46 +320,7 @@ public class AuthController {
 
     @GetMapping("/oauth2/get-config")
     @Operation(
-        summary = "Lấy cấu hình OAuth2", 
-        description = """
-        🔹 Đầu vào
-        
-        📄 Không có tham số đầu vào
-        
-        🔹 Đầu ra
-        
-        📝 data
-        Loại: Map<String, Object>
-        Mô tả: Thông tin cấu hình OAuth2 và trạng thái hoạt động
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
-        """
+        summary = "Lấy cấu hình OAuth2"
     )
     public ResponseEntity<RestResponse<Map<String, Object>>> getOAuth2Config() {
         String requestId = UUID.randomUUID().toString();
@@ -523,7 +340,7 @@ public class AuthController {
         config.put("endpoints", Map.of(
             "authorization", "/oauth2/authorization/google (handled by Spring Security)",
             "callback", "/login/oauth2/code/google (handled by Spring Security)",
-            "config", "/api/v1/user-management-service/v1/oauth2/get-config"
+            "config", "/api/v1/user-management-service/oauth2/get-config"
         ));
         
         config.put("note", "OAuth2 authorization endpoints are handled by Spring Security");
@@ -536,7 +353,7 @@ public class AuthController {
                 .data(config)
                 .timestamp(ZonedDateTime.now())
                 .requestId(requestId)
-                .path("/api/v1/user-management-service/v1/oauth2/get-config")
+                .path("/api/v1/user-management-service/oauth2/get-config")
                 .build());
     }
 }
