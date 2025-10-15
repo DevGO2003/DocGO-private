@@ -17,13 +17,14 @@ const publicRoutes = [
   '/test-api',
   '/privacy',
   '/terms',
-  '/help-support'
+  '/help-support',
+  '/documents' // Added for testing
 ]
 
 // Protected routes that require authentication
 const protectedRoutes = [
   '/dashboard',
-  // '/documents', // Temporarily removed to test
+  '/documents', // Re-enabled for testing
   '/analytics',
   '/profile',
   '/settings',
