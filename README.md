@@ -21,7 +21,7 @@ Bảng dịch vụ đang chạy theo `docker-compose.yml` (kiến trúc mới 4 
 | Kafka (PLAINTEXT) | 9092 | 9092 | PLAINTEXT://localhost:9092 | Message queue |
 | MongoDB Atlas | - | - | Cloud | Database chính (Cloud) |
 
-Số lượng service ứng dụng: 4 microservices chính (api-gateway, user-management-service, document-management-service, automation-service) + frontend (web-app) + hạ tầng (Redis, Kafka) + MongoDB Atlas (Cloud).
+Số lượng service ứng dụng: 4 microservices chính (api-gateway, user-management-service, file-management-service, automation-service) + frontend (web-app) + hạ tầng (Redis, Kafka) + MongoDB Atlas (Cloud).
 
 ### Auto-Redirect & Docs
 - Các backend service đều phục vụ tài liệu tại `/docs#/` (SpringDoc/FastAPI).
@@ -63,7 +63,7 @@ cp .env.example .env
 ```bash
 # Mỗi service có file .env riêng
 backend/user-management-service/.env
-backend/document-management-service/.env
+backend/file-management-service/.env
 backend/automation-service/.env
 backend/api-gateway/.env
 ```
@@ -83,7 +83,7 @@ docker-compose up -d
 # Hoặc chạy từng service
 docker-compose up -d kafka redis
 docker-compose up -d user-management-service
-docker-compose up -d document-management-service
+docker-compose up -d file-management-service
 docker-compose up -d automation-service
 docker-compose up -d api-gateway
 docker-compose up -d web-app
@@ -135,7 +135,7 @@ cd backend/user-management-service
 
 #### Document Management Service
 ```bash
-cd backend/document-management-service
+cd backend/file-management-service
 ./mvnw spring-boot:run
 # Truy cập: http://localhost:8002/docs#/
 ```
@@ -302,7 +302,7 @@ DocGO/
 ├── backend/                      # Backend microservices
 │   ├── api-gateway/             # API Gateway (Next.js)
 │   ├── user-management-service/ # User Management (Spring Boot)
-│   ├── document-management-service/ # Document Management (Spring Boot)
+│   ├── file-management-service/ # File Management (Spring Boot)
 │   └── automation-service/      # Automation & AI Processing (FastAPI)
 ├── frontend/                     # Frontend applications
 │   └── web_nextjs/              # Web App (Next.js)

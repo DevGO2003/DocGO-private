@@ -10,9 +10,9 @@ const services: Record<string, { url: string; timeout: number }> = {
     url: config.services['user-management'].url,
     timeout: config.services['user-management'].timeout
   },
-  'document-management': {
-    url: config.services['document-management'].url,
-    timeout: config.services['document-management'].timeout
+  'file-management': {
+    url: config.services['file-management'].url,
+    timeout: config.services['file-management'].timeout
   },
   'automation': {
     url: config.services['automation'].url,
@@ -33,7 +33,7 @@ const services: Record<string, { url: string; timeout: number }> = {
  *       ### 🔹 Đầu vào
  *       🛣️ **service-name** (bắt buộc, path)
  *       Loại: string
- *       Mô tả: Tên của microservice (user-management, document-management, automation)
+ *       Mô tả: Tên của microservice (user-management, file-management, automation)
  *       
  *       🛣️ **path** (bắt buộc, path)
  *       Loại: string

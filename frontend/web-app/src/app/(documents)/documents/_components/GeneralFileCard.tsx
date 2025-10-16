@@ -73,16 +73,23 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
   }
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return 'N/A'
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    if (!bytes) return t('documents.notAvailable')
+    const sizes = [
+      t('documents.fileSizeUnits.bytes'),
+      t('documents.fileSizeUnits.kb'),
+      t('documents.fileSizeUnits.mb'),
+      t('documents.fileSizeUnits.gb')
+    ]
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
   }
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
+    if (!dateString) return t('documents.notAvailable')
     try {
-      return new Date(dateString).toLocaleDateString('vi-VN')
+      // Sử dụng locale phù hợp với ngôn ngữ hiện tại
+      const locale = t('documents.notAvailable') === 'N/A' ? 'en-US' : 'vi-VN'
+      return new Date(dateString).toLocaleDateString(locale)
     } catch {
       return dateString
     }
@@ -105,7 +112,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition text-sm">{document.title}</h3>
               {document.category && (
-                <div className="mt-1 text-xs text-gray-500">Loại: {document.category}</div>
+                <div className="mt-1 text-xs text-gray-500">{t('documents.categoryLabel')}: {document.category}</div>
               )}
             </div>
             <div className="flex flex-col gap-1">
@@ -115,7 +122,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             </div>
           </div>
           
-          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{document.description || 'Không có mô tả'}</p>
+          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{document.description || t('documents.noDescription')}</p>
           
           <div className="mt-2 flex flex-wrap gap-1">
             {document.tags?.slice(0,2).map(tag => (
@@ -134,15 +141,15 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
           
           <div className="mt-2 text-xs text-gray-500 space-y-1">
             <div className="flex justify-between">
-              <span>Kích thước</span>
+              <span>{t('documents.fileSize')}</span>
               <span>{formatFileSize(document.fileSize)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Loại file</span>
-              <span>{document.fileType?.split('/')[1]?.toUpperCase() || 'N/A'}</span>
+              <span>{t('documents.fileType')}</span>
+              <span>{document.fileType?.split('/')[1]?.toUpperCase() || t('documents.notAvailable')}</span>
             </div>
             <div className="flex justify-between">
-              <span>Ngày tạo</span>
+              <span>{t('documents.createdAt')}</span>
               <span>{formatDate(document.createdAt)}</span>
             </div>
           </div>
@@ -154,7 +161,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             <button 
               onClick={() => window.location.href = `/documents/${document.id}`}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Mở tệp"
+              title={t('documents.openFile')}
             >
               <DocumentTextIcon className="w-5 h-5" />
             </button>
@@ -163,7 +170,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
               onMouseEnter={handlePreviewEnter}
               onMouseLeave={handlePreviewLeave}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Xem thử"
+              title={t('documents.preview')}
             >
               <EyeIcon className="w-5 h-5" />
             </button>
@@ -171,7 +178,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             <button 
               onClick={handleDownload}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Tải về"
+              title={t('documents.download')}
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
             </button>
@@ -190,9 +197,9 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
           }}
         >
           <div className="text-sm">
-            <div className="font-medium mb-2">Xem trước (Demo)</div>
-            <p className="text-gray-600">Nội dung file sẽ được hiển thị ở đây...</p>
-            <p className="text-xs text-gray-500 mt-2">API chưa sẵn sàng</p>
+            <div className="font-medium mb-2">{t('documents.previewTitle')}</div>
+            <p className="text-gray-600">{t('documents.previewContent')}</p>
+            <p className="text-xs text-gray-500 mt-2">{t('documents.apiNotReady')}</p>
           </div>
         </div>
       )}
@@ -208,7 +215,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
           }}
         >
           <div className="text-sm">
-            <div className="font-medium mb-2 text-gray-900">Tất cả tags</div>
+            <div className="font-medium mb-2 text-gray-900">{t('documents.allTags')}</div>
             <div className="flex flex-wrap gap-1">
               {previewTags.tags.map(tag => (
                 <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">

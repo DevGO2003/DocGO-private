@@ -38,7 +38,7 @@ cd backend/automation-service
 python main.py
 
 # Terminal 3: Document Service
-cd backend/document-management-service
+cd backend/file-management-service
 ./mvnw spring-boot:run
 
 # Terminal 4: Frontend
@@ -227,7 +227,7 @@ curl http://localhost:8002/health
 
 # Monitor logs
 tail -f backend/automation-service/logs/app.log
-tail -f backend/document-management-service/logs/application.log
+tail -f backend/file-management-service/logs/application.log
 
 # Test WebSocket manually
 wscat -c ws://localhost:8003/api/v1/automation-service/v1/documents/progress/DOCUMENT_ID

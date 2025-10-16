@@ -31,7 +31,7 @@ class BatchJobRequest(BaseModel):
     priority: BatchJobPriority = Field(default=BatchJobPriority.NORMAL)
     scheduled_at: Optional[datetime] = Field(None)
     max_retries: int = Field(default=3, ge=0, le=10)
-    timeout: Optional[int] = Field(None, ge=1)")
+    timeout: Optional[int] = Field(None, ge=1)
     metadata: Optional[Dict[str, Any]] = Field(None)
 
 class BatchJobResponse(BaseModel):
@@ -41,7 +41,7 @@ class BatchJobResponse(BaseModel):
     description: Optional[str] = None
     status: BatchJobStatus
     priority: BatchJobPriority
-    progress: int = Field(0, ge=0, le=100)")
+    progress: int = Field(0, ge=0, le=100)
     data: Dict[str, Any]
     result: Optional[Dict[str, Any]] = None
     error_message: Optional[str] = None
@@ -81,14 +81,14 @@ class BatchJobRetryRequest(BaseModel):
 
 class BatchProcessingRequest(BaseModel):
     files: List[Dict[str, Any]] = Field(...)
-    processing_type: str = Field(..., summarize, classify)")
+    processing_type: Literal["extract", "summarize", "classify"] = Field(...)
     options: Optional[Dict[str, Any]] = Field(None)
     callback_url: Optional[str] = Field(None)
 
 class BatchProcessingResponse(BaseModel):
     job_id: str = Field(...)
     total_files: int = Field(...)
-    estimated_time: Optional[int] = Field(None)")
+    estimated_time: Optional[int] = Field(None)
     status_url: str = Field(...)
 
 class BatchJobProgress(BaseModel):

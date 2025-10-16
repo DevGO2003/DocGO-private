@@ -235,7 +235,7 @@ test_document_service() {
     echo -e "${BLUE}📄 Testing Document Service integration...${NC}"
     
     # Get documents list
-    local response=$(curl -s "$DOCUMENT_SERVICE_URL/api/v1/document-management-service/v1/documents?page=0&size=10")
+    local response=$(curl -s "$DOCUMENT_SERVICE_URL/api/v1/file-management-service/v1/documents?page=0&size=10")
     
     echo "Documents response: $response"
     

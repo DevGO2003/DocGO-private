@@ -84,7 +84,7 @@ class BatchJobCardView(BaseModel):
     job_name: str = Field(...)
     status: str = Field(...)
     created_at: datetime = Field(...)
-    progress: int = Field(...)")
+    progress: int = Field(...)
 
     class Config:
         json_encoders = {
@@ -99,7 +99,7 @@ class BatchJobTableView(BaseModel):
     status: str = Field(...)
     created_at: datetime = Field(...)
     updated_at: datetime = Field(...)
-    progress: int = Field(...)")
+    progress: int = Field(...)
     total_files: int = Field(...)
     processed_files: int = Field(...)
 
@@ -114,7 +114,7 @@ class BatchJobSummaryView(BaseModel):
     job_id: str = Field(...)
     job_name: str = Field(...)
     status: str = Field(...)
-    progress: int = Field(...)")
+    progress: int = Field(...)
 
     class Config:
         json_encoders = {

@@ -43,7 +43,7 @@ timeout 20s curl -sf http://localhost:8003/health || true
 timeout 20s curl -sf http://localhost:8002/docs || true
 ```
 
-Nếu lỗi: `docker compose logs --since=30s web-app automation-service document-management-service`
+Nếu lỗi: `docker compose logs --since=30s web-app automation-service file-management-service`
 
 ## Test upload nhỏ (≤2MB) — 201 + COMPLETED
 
@@ -63,7 +63,7 @@ echo "documentId=$doc"
 timeout 20s curl -s http://localhost:3000/api/documents/${doc} | jq .
 ```
 
-Nếu fail: `docker compose logs --since=30s automation-service document-management-service`
+Nếu fail: `docker compose logs --since=30s automation-service file-management-service`
 
 ## Test upload lớn (>2MB) — 202 + PROCESSING + WS progress
 
@@ -89,7 +89,7 @@ for i in {1..10}; do
 done
 ```
 
-Nếu không COMPLETED trong ~20s: `docker compose logs --since=60s automation-service document-management-service`
+Nếu không COMPLETED trong ~20s: `docker compose logs --since=60s automation-service file-management-service`
 
 ## Test trực tiếp endpoints documents (qua Gateway)
 

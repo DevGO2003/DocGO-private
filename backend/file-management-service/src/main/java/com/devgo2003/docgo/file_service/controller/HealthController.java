@@ -59,7 +59,7 @@ public class HealthController {
     public ResponseEntity<RestResponse<Map<String, Object>>> healthCheck() {
         Map<String, Object> healthData = new HashMap<>();
         healthData.put("status", "UP");
-        healthData.put("service", "Document Management Service");
+        healthData.put("service", "File Management Service");
         healthData.put("version", "1.0.0");
         healthData.put("timestamp", LocalDateTime.now().toString());
         

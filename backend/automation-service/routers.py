@@ -133,8 +133,8 @@ async def upload_document_api(
                     "currency": curr
                 }
 
-            # Gọi Document Service tạo record với đầy đủ AI results
-            ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/documents"
+            # Gọi File Management Service để persist document
+            ds_url = "http://172.20.0.10:8002" + "/api/v1/file-management-service/v1/files"
             payload = {
                 "fileName": file.filename,
                 "fileSize": size,
@@ -160,6 +160,7 @@ async def upload_document_api(
             return RestResponse(
                 statusCode=201,
                 shortMessage="Created",
+                description="Document uploaded and processed successfully",
                 data={
                     "documentId": ds_resp.get("data", {}).get("id") or ds_resp.get("data", {}).get("_id"),
                     "fileUrl": upload_result.file_url,
@@ -232,7 +233,7 @@ async def upload_document_api(
                 await websocket_manager.broadcast_progress(doc_id, 100, "processing_complete", "Xử lý hoàn tất")
                 
                 # Update Document Service với kết quả cuối cùng
-                ds_put_url = Config.get_document_service_url() + f"/api/v1/document-management-service/documents/{doc_id}/processing-result"
+                ds_put_url = Config.get_document_service_url() + f"/api/v1/file-management-service/documents/{doc_id}/processing-result"
                 # Cập nhật thêm category và contractMetadata sau khi có kết quả AI
                 category = "HOP_DONG_CHUNG" if classification_result.get("isContract", False) else "TAI_LIEU_CHUNG"
                 contract_metadata = None
@@ -251,16 +252,16 @@ async def upload_document_api(
                         "totalValue": total_num,
                         "currency": curr
                     }
-            update_payload = {
-                "processingStatus": "COMPLETED",
+                update_payload = {
+                    "processingStatus": "COMPLETED",
                     "ocrText": ocr_text,
                     "classificationResult": classification_result,
                     "summaryResult": summary_result,
                     "category": category,
                     "contractMetadata": contract_metadata,
                     "documentType": file.content_type
-            }
-            async with aiohttp.ClientSession() as session:
+                }
+                async with aiohttp.ClientSession() as session:
                     async with session.put(ds_put_url, json=update_payload) as resp:
                         if resp.status != 200:
                             logger.error(f"Failed to update document service for {doc_id}: {resp.status}")
@@ -277,7 +278,7 @@ async def upload_document_api(
                 await websocket_manager.send_error(doc_id, f"Xử lý thất bại: {str(e)}", "PROCESSING_ERROR")
 
         # Tạo trước bản ghi ở DS với trạng thái PROCESSING
-        ds_url = Config.get_document_service_url() + "/api/v1/document-management-service/documents"
+        ds_url = "http://172.20.0.10:8002" + "/api/v1/file-management-service/documents"
         filename_lower = file.filename.lower()
         extension = filename_lower.split('.')[-1] if '.' in filename_lower else None
         create_payload = {
@@ -299,7 +300,7 @@ async def upload_document_api(
 
         return RestResponse(
             statusCode=202,
-            shortMessage="Accepted", đã nhận và đang xử lý nền",
+            shortMessage="Accepted",
             data={
                 "documentId": created_id,
                 "fileUrl": upload_result.file_url,
@@ -338,14 +339,12 @@ async def documents_progress_ws(websocket: WebSocket, document_id: str):
                 # Handle ping/pong or other client messages
                 if message == "ping":
                     await websocket.send_text("pong")
-                    
-    except WebSocketDisconnect:
+            except WebSocketDisconnect:
                 logger.info(f"WebSocket disconnected for {document_id}")
                 break
             except Exception as e:
                 logger.error(f"Error in WebSocket for {document_id}: {e}")
                 break
-                
     except Exception as e:
         logger.error(f"WebSocket error for {document_id}: {e}")
     finally:
@@ -818,7 +817,7 @@ async def classify_api(
             # Bổ sung chi tiết lỗi từ exception vào description
             return RestResponse(
                 statusCode=422,
-                shortMessage="Unprocessable Entity")}",
+                shortMessage="Unprocessable Entity",
                 data=None,
                 path=request.url.path,
                 timestamp=datetime.now(),
@@ -1042,7 +1041,7 @@ async def get_gemini_config(request: Request):
         return RestResponse(
             apiVersion="v1",
             statusCode=500,
-            shortMessage="Internal Server Error")}",
+            shortMessage="Internal Server Error",
             data=None,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),
@@ -1179,7 +1178,7 @@ async def process_batch_api(
         # Tạo batch job
         job_request = BatchJobRequest(
             type="ai_processing",
-            name=f"Batch processing {len(batch_request.files)} files")} files",
+            name=f"Batch processing {len(batch_request.files)} files",
             data={
                 "files": batch_request.files,
                 "processing_type": batch_request.processing_type,
@@ -1212,7 +1211,7 @@ async def process_batch_api(
     except Exception as e:
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error")}",
+            shortMessage="Internal Server Error",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1240,7 +1239,7 @@ async def get_batch_job_status_api(
     except ValueError as e:
         return RestResponse(
             statusCode=404,
-            shortMessage="Not Found"),
+            shortMessage="Not Found",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1249,7 +1248,7 @@ async def get_batch_job_status_api(
     except Exception as e:
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error")}",
+            shortMessage="Internal Server Error",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(timezone.utc),
@@ -1284,7 +1283,7 @@ async def get_batch_jobs_api(
         logger.error(f"Retry OCR failed: {str(e)}")
         return RestResponse(
             statusCode=500,
-            shortMessage="Internal Server Error")}",
+            shortMessage="Internal Server Error",
             data=None,
             path=request.url.path,
             timestamp=datetime.now(),

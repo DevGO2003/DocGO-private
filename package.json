@@ -15,7 +15,7 @@
     "build:all": "docker compose -f docker-compose.yml build",
     "logs:api-gateway": "docker compose -f docker-compose.yml logs -f api-gateway",
     "logs:user-management": "docker compose -f docker-compose.yml logs -f user-management-service",
-    "logs:document-management": "docker compose -f docker-compose.yml logs -f document-management-service",
+    "logs:file-management": "docker compose -f docker-compose.yml logs -f file-management-service",
     "logs:automation": "docker compose -f docker-compose.yml logs -f automation-service",
     "logs:web-app": "docker compose -f docker-compose.yml logs -f web-app"
   },
@@ -36,7 +36,7 @@
   },
   "keywords": [
     "microservices",
-    "document-management",
+    "file-management",
     "ai",
     "automation",
     "spring-boot",

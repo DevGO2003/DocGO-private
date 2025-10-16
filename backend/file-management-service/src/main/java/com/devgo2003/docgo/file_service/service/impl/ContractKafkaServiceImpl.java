@@ -49,7 +49,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     /**
      * Consume SummaryCreated events từ AI Processing Service
      */
-    // @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.updated}", groupId = "document-management-service-group")
+    // @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.updated}", groupId = "file-management-service-group")
     public void handleSummaryCreated(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
@@ -67,7 +67,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
     /**
      * Consume ContractSummaryPublished events theo schema mới (document/architecture/contract-summary-published.*.json)
      */
-    @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.published}", groupId = "document-management-service-group")
+    @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.published}", groupId = "file-management-service-group")
     public void handleContractSummaryPublished(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
@@ -620,7 +620,7 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
             contractUpdatedEvent.put("eventType", "ContractUpdated");
             contractUpdatedEvent.put("eventId", UUID.randomUUID().toString());
             contractUpdatedEvent.put("timestamp", ZonedDateTime.now().toString());
-            contractUpdatedEvent.put("source", "document-management-service");
+            contractUpdatedEvent.put("source", "file-management-service");
             contractUpdatedEvent.put("correlationId", correlationId);
             contractUpdatedEvent.put("actor", actor);
             

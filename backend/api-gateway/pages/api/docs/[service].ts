@@ -8,7 +8,7 @@ import { withApiHandler } from '@/lib/http/withApiHandler';
 
 const SPRING_SERVICES = new Set<string>([
   'user-management',
-  'document-management', // Đã có SpringDoc OpenAPI
+  'file-management', // Đã có SpringDoc OpenAPI
 ]);
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

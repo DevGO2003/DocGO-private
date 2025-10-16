@@ -5,7 +5,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Cấu hình CORS cho document-management-service
+ * Cấu hình CORS cho file-management-service
  * Cho phép frontend (localhost:3000) gọi API
  * 
  * FIXME: Removed corsConfigurationSource bean to avoid conflict with SecurityConfig

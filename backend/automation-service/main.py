@@ -8,6 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import routers
 from contract_router import router as contract_router
 from file_router import router as file_router
+from simple_test_route import router as simple_test_router
 import time
 
 # Hot reload test
@@ -21,6 +22,7 @@ from kafka_worker import worker
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from services.event_service import EventService
+from services.audit_service import audit_service
 from config import Config
 
 app = FastAPI(
@@ -71,6 +73,7 @@ app.add_middleware(
 app.include_router(routers.router)
 app.include_router(contract_router)
 app.include_router(file_router)
+app.include_router(simple_test_router)
 app.include_router(config_router)
 
 # Initialize services
@@ -139,6 +142,7 @@ async def health_check():
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
+        description="Automation Service is running and healthy",
         data={
             "status": "healthy",
             "service": "Automation Service",
@@ -247,6 +251,7 @@ async def general_exception_handler(request, exc):
     error_response = ErrorResponse(
         statusCode=500,
         shortMessage="Internal Server Error",
+        description=f"An unexpected error occurred: {str(exc)}",
         error=str(exc),
         path=str(request.url),
         timestamp=datetime.now(),

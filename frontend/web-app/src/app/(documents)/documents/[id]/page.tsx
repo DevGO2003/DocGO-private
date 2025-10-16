@@ -115,7 +115,7 @@ export default function DocumentDetailPage() {
             archivedDcCreator: (resp.data as any)?.metadata?.archivedDocument?.archivedDcCreator || 'DocGO System'
           }
         }
-
+        
         setData(mappedData)
         
         // TODO: Fetch ContractSummary from backend API if available

@@ -3,7 +3,7 @@ Write-Host "=== TEST API DOCUMENT MANAGEMENT SERVICE (NEW ID) ===" -ForegroundCo
 
 # Test 1: GET Document by ID (NEW)
 Write-Host "`n1. Testing GET Document by ID (NEW)..." -ForegroundColor Yellow
-$documentUrl = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004-NEW"
+$documentUrl = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004-NEW"
 
 try {
     $response = Invoke-WebRequest -Uri $documentUrl -Method GET -Headers @{"Content-Type"="application/json"} -ErrorAction Stop
@@ -35,7 +35,7 @@ try {
 
 # Test 2: GET Comments
 Write-Host "`n2. Testing GET Comments..." -ForegroundColor Yellow
-$commentsUrl = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004-NEW/comments"
+$commentsUrl = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004-NEW/comments"
 
 try {
     $response = Invoke-WebRequest -Uri $commentsUrl -Method GET -Headers @{"Content-Type"="application/json"} -ErrorAction Stop
@@ -98,7 +98,7 @@ Write-Host "✅ Swagger documentation available"
 
 Write-Host "`n🚀 Next steps:"
 Write-Host "1. Frontend can now access: http://localhost:3000/documents/DOC-2024-004-NEW"
-Write-Host "2. Backend API: http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004-NEW"
+Write-Host "2. Backend API: http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004-NEW"
 Write-Host "3. Swagger Docs: http://localhost:8002/docs"
-Write-Host "4. Comments API: http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004-NEW/comments"
+Write-Host "4. Comments API: http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004-NEW/comments"
 

@@ -66,7 +66,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-700 transition text-sm">{document.title}</h3>
               {document.contractNumber && (
-                <div className="mt-1 text-xs text-gray-500">Mã HĐ: {document.contractNumber}</div>
+                <div className="mt-1 text-xs text-gray-500">{t('documents.contractNumber')}: {document.contractNumber}</div>
               )}
             </div>
             <div className="flex flex-col gap-1">
@@ -81,7 +81,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
             </div>
           </div>
           
-          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{document.description || 'Không có mô tả'}</p>
+          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{document.description || t('documents.noDescription')}</p>
           
           <div className="mt-2 flex flex-wrap gap-1">
             <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">{translateContractType(document.contractType, t)}</span>
@@ -122,9 +122,9 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
 
               return (
                 <>
-                  <div className="flex justify-between"><span>Hiệu lực</span><span>{meta.effectiveDate ? new Date(meta.effectiveDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
-                  <div className="flex justify-between"><span>Hết hạn</span><span>{meta.expiryDate ? new Date(meta.expiryDate).toLocaleDateString('vi-VN') : 'N/A'}</span></div>
-                  <div className="flex justify-between"><span>Giá trị</span><span>{meta.totalValue ? meta.totalValue.toLocaleString('vi-VN') + ' ' + (meta.currency || 'VND') : 'N/A'}</span></div>
+                  <div className="flex justify-between"><span>{t('documents.effectiveDate')}</span><span>{meta.effectiveDate ? new Date(meta.effectiveDate).toLocaleDateString(t('documents.notAvailable') === 'N/A' ? 'en-US' : 'vi-VN') : t('documents.notAvailable')}</span></div>
+                  <div className="flex justify-between"><span>{t('documents.expiryDate')}</span><span>{meta.expiryDate ? new Date(meta.expiryDate).toLocaleDateString(t('documents.notAvailable') === 'N/A' ? 'en-US' : 'vi-VN') : t('documents.notAvailable')}</span></div>
+                  <div className="flex justify-between"><span>{t('documents.value')}</span><span>{meta.totalValue ? meta.totalValue.toLocaleString(t('documents.notAvailable') === 'N/A' ? 'en-US' : 'vi-VN') + ' ' + (meta.currency || 'VND') : t('documents.notAvailable')}</span></div>
                 </>
               );
             })()}
@@ -137,7 +137,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
             <button 
               onClick={() => window.location.href = `/documents/${document.id}`}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Mở tệp"
+              title={t('documents.openFile')}
             >
               <DocumentTextIcon className="w-5 h-5" />
             </button>
@@ -146,7 +146,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
               onMouseEnter={handlePreviewEnter}
               onMouseLeave={handlePreviewLeave}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Xem thử"
+              title={t('documents.preview')}
             >
               <EyeIcon className="w-5 h-5" />
             </button>
@@ -154,7 +154,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
             <button 
               onClick={handleDownload}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
-              title="Tải về"
+              title={t('documents.download')}
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
             </button>
@@ -173,9 +173,9 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
           }}
         >
           <div className="text-sm">
-            <div className="font-medium mb-2">Xem trước (Demo)</div>
-            <p className="text-gray-600">Nội dung file sẽ được hiển thị ở đây...</p>
-            <p className="text-xs text-gray-500 mt-2">API chưa sẵn sàng</p>
+            <div className="font-medium mb-2">{t('documents.previewTitle')}</div>
+            <p className="text-gray-600">{t('documents.previewContent')}</p>
+            <p className="text-xs text-gray-500 mt-2">{t('documents.apiNotReady')}</p>
           </div>
         </div>
       )}
@@ -191,7 +191,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
           }}
         >
           <div className="text-sm">
-            <div className="font-medium mb-2 text-gray-900">Tất cả tags</div>
+            <div className="font-medium mb-2 text-gray-900">{t('documents.allTags')}</div>
             <div className="flex flex-wrap gap-1">
               {previewTags.tags.map(tag => (
                 <span key={tag} className="text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200">

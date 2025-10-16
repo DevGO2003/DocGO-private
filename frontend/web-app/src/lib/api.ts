@@ -27,7 +27,7 @@ export interface PaginatedResponse<T> {
 
 // Contract Management API - Sử dụng API Gateway với pattern mới
 export class ContractAPI {
-  private basePath = '/api/v1/document-management-service'
+  private basePath = '/api/v1/file-management-service'
 
   async getContracts(params?: {
     pageNumber?: number
@@ -329,7 +329,7 @@ export class FileStorageAPI {
 
 // Tag Management API - Sử dụng API Gateway với pattern mới
 export class TagAPI {
-  private basePath = '/api/v1/document-management-service'
+  private basePath = '/api/v1/file-management-service'
 
   async getPopularTags(view?: string) {
     const params = view ? { view } : {}

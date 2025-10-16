@@ -108,7 +108,7 @@ class EventService:
             print(f"Error subscribing to events: {e}")
             raise
 
-    async def _listen_for_events(self, handler_type: str, auto_ack: bool = True):
+    async def _listen_for_events(self, handler_type: Optional[str] = None, auto_ack: bool = True):
         
         try:
             async for message in self.pubsub.listen():
@@ -118,8 +118,9 @@ class EventService:
                         event_data = json.loads(message["data"])
                         event = EventPayload(**event_data)
                         
-                        # Handle event
-                        await self._handle_event(event, handler_type, auto_ack)
+                        # Determine handler type from event or fallback
+                        effective_handler_type = getattr(event, "eventType", None) or handler_type or "default"
+                        await self._handle_event(event, effective_handler_type, auto_ack)
                         
                     except Exception as e:
                         print(f"Error processing event: {e}")
@@ -159,16 +160,8 @@ class EventService:
         print(f"Handler registered for type: {handler_type}")
 
     async def _save_event(self, event: EventPayload):
-        
-        try:
-            event_dict = event.model_dump()
-            event_dict["_id"] = event.eventId
-            event_dict["status"] = EventStatus.PENDING
-            
-            await self.mongodb_db_instance[self.collections["events"]].insert_one(event_dict)
-            
-        except Exception as e:
-            print(f"Error saving event: {e}")
+        # MongoDB persistence disabled in Automation Service
+        return
 
     async def get_event_history(
         self,
@@ -181,48 +174,8 @@ class EventService:
         end_date: Optional[datetime] = None
     ) -> EventHistoryResponse:
         
-        try:
-            # Build filter
-            filter_dict = {}
-            if event_type:
-                filter_dict["eventType"] = event_type
-            if source:
-                filter_dict["source"] = source
-            if status:
-                filter_dict["status"] = status
-            if start_date or end_date:
-                filter_dict["timestamp"] = {}
-                if start_date:
-                    filter_dict["timestamp"]["$gte"] = start_date
-                if end_date:
-                    filter_dict["timestamp"]["$lte"] = end_date
-            
-            # Count total
-            total = await self.mongodb_db_instance[self.collections["events"]].count_documents(filter_dict)
-            
-            # Get events with pagination
-            skip = (page - 1) * limit
-            cursor = self.mongodb_db_instance[self.collections["events"]].find(
-                filter_dict
-            ).sort("timestamp", -1).skip(skip).limit(limit)
-            
-            events = []
-            async for doc in cursor:
-                # Remove MongoDB _id field
-                doc.pop("_id", None)
-                events.append(EventPayload(**doc))
-            
-            return EventHistoryResponse(
-                events=events,
-                total=total,
-                page=page,
-                limit=limit,
-                total_pages=(total + limit - 1) // limit
-            )
-            
-        except Exception as e:
-            print(f"Error getting event history: {e}")
-            raise
+        # MongoDB removed - return empty history
+        return EventHistoryResponse(events=[], total=0, page=page, limit=limit, total_pages=0)
 
     async def create_event(
         self,
@@ -367,7 +320,7 @@ class EventService:
             
             # Subscribe to channels
             subscription_request = EventSubscriptionRequest(
-                channels=list(self.event_config["channels"].values()),
+                channels=list(self.event_config.get("channels", {}).values()),
                 handler_type="default",
                 auto_ack=True
             )

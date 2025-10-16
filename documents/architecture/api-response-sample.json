@@ -5,7 +5,7 @@
   "description": "Document retrieved successfully",
   "timestamp": "2025-10-16T10:20:00Z",
   "requestId": "3f9c4f7e-2b1b-4b0a-8c31-5a7e9b1caa10",
-  "path": "/api/v1/document-management-service/v1/documents/DOC-2024-004-NEW",
+  "path": "/api/v1/file-management-service/v1/documents/DOC-2024-004-NEW",
   "data": {
     "id": "DOC-2024-004-NEW",
     "overview": {

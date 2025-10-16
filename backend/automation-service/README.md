@@ -11,20 +11,44 @@ Automation Service là một microservice xử lý tài liệu thông minh sử 
 - **python-docx** - Đọc file DOCX
 - **PyPDF2** - Đọc file PDF
 - **Pydantic** - Data validation
+- **MongoDB Atlas** - Audit logging và event tracking
+- **Motor** - Async MongoDB driver
+- **Redis** - Event pub/sub và caching
+- **WebSocket** - Real-time progress updates
+- **Kafka** - Message queuing cho async processing
 
 ## 📋 Tính năng
 
-### 1. Process API
+### 1. Unified Upload API
+- **Endpoint**: `POST /api/v1/automation-service/documents/upload`
+- **Chức năng**: Upload và xử lý tài liệu với full audit logging
+- **Input**: File tài liệu (docx, pdf, txt, jpg, png)
+- **Output**: Kết quả xử lý với correlation ID cho tracking
+- **Features**: 
+  - Sync processing cho files < 2MB
+  - Async processing cho files >= 2MB
+  - Full audit logging với MongoDB
+  - Event publishing với Kafka
+  - WebSocket progress updates
+  - Retry mechanism với exponential backoff
+
+### 2. Process API (Legacy)
 - **Endpoint**: `POST /api/v1/automation-service/process`
 - **Chức năng**: Xử lý và trích xuất thông tin từ file DOCX/PDF/TXT
 - **Input**: File tài liệu (docx, pdf, txt)
 - **Output**: Kết quả xử lý từ AI
 
-### 2. Validate API
+### 3. Validate API (Legacy)
 - **Endpoint**: `POST /api/v1/automation-service/validate`
 - **Chức năng**: Kiểm tra và xác thực tài liệu
 - **Input**: File TXT hoặc chuỗi văn bản
 - **Output**: Kết quả validation
+
+### 4. Audit & Event System
+- **MongoDB Audit Logs**: 3 collections cho audit, processing sessions, errors
+- **Event Publishing**: Kafka events cho inter-service communication
+- **WebSocket**: Real-time progress updates
+- **Retry Logic**: Exponential backoff cho S3, OCR, AI, File Management
 
 ## 🚀 Cách chạy
 
@@ -40,14 +64,32 @@ Automation Service là một microservice xử lý tài liệu thông minh sử 
 # AI Processing
 GEMINI_API_KEY=YOUR_GEMINI_KEY
 
-# MongoDB Atlas
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
-MONGODB_DATABASE=ai_processing_db
+# S3 Configuration (Filebase)
+S3_ENABLED=true
+S3_ENDPOINT=https://s3.filebase.com
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=YOUR_ACCESS_KEY
+S3_SECRET_ACCESS_KEY=YOUR_SECRET_KEY
+S3_BUCKET=your-bucket-name
+
+# MongoDB Atlas (Audit Logging)
+MONGODB_ENABLED=true
+MONGODB_ATLAS_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_AUDIT_DATABASE=docgo_automation_audit
+
+# MongoDB Collections
+MONGODB_AUDIT_LOGS_COLLECTION=automation_audit_logs
+MONGODB_PROCESSING_SESSIONS_COLLECTION=automation_processing_sessions
+MONGODB_ERROR_LOGS_COLLECTION=automation_error_logs
 
 # Redis Cloud
 REDIS_URL=redis://username:password@host:port
 REDIS_PASSWORD=your_redis_password
 REDIS_DB=0
+
+# Kafka Configuration
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_FILE_UPLOADED_TOPIC=file.uploaded
 
 # SMTP Configuration (cho email notifications)
 SMTP_HOST=smtp.gmail.com
@@ -115,7 +157,45 @@ docker run -p 8003:8000 --env-file env/.env automation-service
 
 ## 📚 API Documentation
 
-### Process API
+### Unified Upload API (Recommended)
+```bash
+# Upload document với full audit logging
+curl -X POST "http://localhost:8003/api/v1/automation-service/documents/upload" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@document.pdf" \
+  -H "X-Correlation-Id: your-correlation-id"
+
+# Response includes correlation ID for tracking
+{
+  "apiVersion": "v1",
+  "statusCode": 201,
+  "shortMessage": "Created",
+  "description": "Document created and processed (sync)",
+  "data": {
+    "documentId": "doc-123",
+    "fileUrl": "https://s3.example.com/files/doc-123",
+    "classificationResult": {...},
+    "summaryResult": {...},
+    "processingStatus": "COMPLETED",
+    "correlationId": "corr-456"
+  },
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "corr-456",
+  "path": "/api/v1/automation-service/documents/upload"
+}
+```
+
+### WebSocket Progress Updates
+```javascript
+// Connect to WebSocket for real-time progress
+const ws = new WebSocket('ws://localhost:8003/ws/document/doc-123');
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Progress:', data);
+};
+```
+
+### Process API (Legacy)
 ```bash
 curl -X POST "http://localhost:8003/api/v1/automation-service/process" \
   -H "Content-Type: multipart/form-data" \
@@ -123,7 +203,7 @@ curl -X POST "http://localhost:8003/api/v1/automation-service/process" \
   -H "API_KEY: your_api_key"
 ```
 
-### Validate API
+### Validate API (Legacy)
 ```bash
 # Với file TXT
 curl -X POST "http://localhost:8003/api/v1/automation-service/validate" \
@@ -190,21 +270,34 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
 ```
 
 ## Features:
-- **AI Processing**: Extract, Summarize, Classify documents
+- **AI Processing**: Extract, Summarize, Classify documents với Gemini AI
+- **Unified Upload**: Single endpoint với sync/async processing
+- **Audit Logging**: Full MongoDB audit trail với 3 collections
+- **Event System**: Kafka events cho inter-service communication
+- **WebSocket**: Real-time progress updates
+- **Retry Logic**: Exponential backoff cho tất cả external services
+- **S3 Integration**: File storage với Filebase
 - **Notification Service**: Email, SMS, Push, WebSocket notifications
 - **Batch Processing**: Xử lý hàng loạt files với job queue
 - **Event Handling**: Redis Pub/Sub cho real-time events
-- **MongoDB Integration**: Lưu trữ notifications, batch jobs, events
+- **MongoDB Integration**: Lưu trữ audit logs, processing sessions, errors
 - **Redis Integration**: Message queue và caching
 
 ## API Endpoints:
-- `POST /api/v1/automation-service/process` - Xử lý và trích xuất nội dung file
-- `POST /api/v1/automation-service/validate` - Kiểm tra và xác thực tài liệu
+- `POST /api/v1/automation-service/documents/upload` - **Unified upload với full audit**
+- `WS /ws/document/{document_id}` - WebSocket progress updates
+- `POST /api/v1/automation-service/process` - Xử lý và trích xuất nội dung file (legacy)
+- `POST /api/v1/automation-service/validate` - Kiểm tra và xác thực tài liệu (legacy)
 - `POST /api/v1/automation-service/notifications/send` - Gửi notification
 - `GET /api/v1/automation-service/notifications/history` - Lịch sử notification
 - `POST /api/v1/automation-service/batch/process` - Xử lý hàng loạt
 - `GET /api/v1/automation-service/batch/status/{job_id}` - Trạng thái batch job
 - `POST /api/v1/automation-service/events/handle` - Xử lý events
+
+## MongoDB Audit Collections:
+- `automation_audit_logs` - Event logs với correlation ID
+- `automation_processing_sessions` - Processing session tracking
+- `automation_error_logs` - Error logs với retry information
 
 Docs: `http://localhost:8003/docs#/`
 

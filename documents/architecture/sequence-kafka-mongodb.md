@@ -4,7 +4,7 @@ sequenceDiagram
     participant GW as API Gateway (/api/*)
     participant AS as Automation Service (FastAPI 8003)
     participant S3 as S3/File Storage
-    participant DS as Document Service (Spring 8002)
+    participant DS as File Management Service (Spring 8002)
     participant MDB as MongoDB Atlas
     participant KAF as Kafka (Broker/Topics)
     participant AI as Gemini AI
@@ -28,7 +28,7 @@ sequenceDiagram
             AI-->>AS: 8) summaryResult
         end
 
-        AS->>DS: 9) POST /api/v1/document-management-service/v1/documents<br/>(metadata + fileUrl + AI results)
+        AS->>DS: 9) POST /api/v1/file-management-service/v1/documents<br/>(metadata + fileUrl + AI results)
         DS->>MDB: 10) Save document (COMPLETED)
         MDB-->>DS: 11) documentId
         DS-->>AS: 12) 201 Created {documentId}
@@ -43,7 +43,7 @@ sequenceDiagram
         AS->>S3: 2) Upload file
         S3-->>AS: 3) {fileUrl, s3Key}
 
-        AS->>DS: 4) POST /api/v1/document-management-service/v1/documents<br/>(metadata + fileUrl, status: PENDING)
+        AS->>DS: 4) POST /api/v1/file-management-service/v1/documents<br/>(metadata + fileUrl, status: PENDING)
         DS->>MDB: 5) Save document (PENDING)
         MDB-->>DS: 6) documentId
         DS-->>AS: 7) 201 Created {documentId}
@@ -76,7 +76,7 @@ sequenceDiagram
                 WS-->>FE: 90%
             end
 
-            AS->>DS: PUT /api/v1/document-management-service/v1/documents/{documentId}<br/>(ocrText?, classificationResult, summaryResult?, processingStatus: COMPLETED)
+            AS->>DS: PUT /api/v1/file-management-service/v1/documents/{documentId}<br/>(ocrText?, classificationResult, summaryResult?, processingStatus: COMPLETED)
             DS->>MDB: Update document (COMPLETED)
             MDB-->>DS: OK
             DS-->>AS: 200 OK

@@ -50,7 +50,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractCreated");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -92,7 +92,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractUpdated");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -135,7 +135,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractDeleted");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -177,7 +177,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractStatusChanged");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -221,7 +221,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractAttachmentAdded");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -266,7 +266,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractAttachmentRemoved");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -310,7 +310,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractExpiring");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -355,7 +355,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractExpired");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();
@@ -398,7 +398,7 @@ public class ContractEventPublisherServiceImpl {
             eventData.put("eventType", "ContractRestored");
             eventData.put("eventId", UUID.randomUUID().toString());
             eventData.put("timestamp", ZonedDateTime.now().toString());
-            eventData.put("source", "document-management-service");
+            eventData.put("source", "file-management-service");
             eventData.put("correlationId", UUID.randomUUID().toString());
             
             Map<String, Object> actor = new HashMap<>();

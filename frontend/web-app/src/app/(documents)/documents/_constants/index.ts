@@ -10,8 +10,8 @@ export const QUERY_KEYS = {
 }
 
 export const API_ENDPOINTS = {
-  list: '/api/v1/document-management-service/v1/documents',
-  detail: (id: string) => `/api/v1/document-management-service/v1/documents/${id}`,
+  list: '/api/v1/file-management-service/v1/documents',
+  detail: (id: string) => `/api/v1/file-management-service/v1/documents/${id}`,
 }
 
 

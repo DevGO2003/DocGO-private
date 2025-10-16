@@ -2,7 +2,7 @@
 Write-Host "Testing API endpoints..."
 
 # Test API endpoint
-$url = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004"
+$url = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004"
 
 try {
     Write-Host "Testing GET $url"
@@ -16,14 +16,14 @@ try {
     # Nếu service chưa chạy, hãy thử khởi động
     Write-Host "Service có thể chưa chạy. Hãy khởi động service trước:"
     Write-Host "1. Mở terminal mới"
-    Write-Host "2. cd backend\document-management-service"  
+    Write-Host "2. cd backend\file-management-service"  
     Write-Host "3. mvn spring-boot:run"
     Write-Host "4. Đợi service khởi động xong (thấy 'Started DocumentManagementServiceApplication')"
     Write-Host "5. Chạy lại script này"
 }
 
 # Test comments API
-$commentsUrl = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004/comments"
+$commentsUrl = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004/comments"
 
 try {
     Write-Host "`nTesting GET $commentsUrl"

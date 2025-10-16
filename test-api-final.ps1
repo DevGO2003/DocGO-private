@@ -3,7 +3,7 @@ Write-Host "=== TEST API DOCUMENT MANAGEMENT SERVICE ===" -ForegroundColor Green
 
 # Test 1: GET Document by ID
 Write-Host "`n1. Testing GET Document by ID..." -ForegroundColor Yellow
-$documentUrl = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004"
+$documentUrl = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004"
 
 try {
     $response = Invoke-WebRequest -Uri $documentUrl -Method GET -Headers @{"Content-Type"="application/json"} -ErrorAction Stop
@@ -31,7 +31,7 @@ try {
 
 # Test 2: GET Comments
 Write-Host "`n2. Testing GET Comments..." -ForegroundColor Yellow
-$commentsUrl = "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004/comments"
+$commentsUrl = "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004/comments"
 
 try {
     $response = Invoke-WebRequest -Uri $commentsUrl -Method GET -Headers @{"Content-Type"="application/json"} -ErrorAction Stop
@@ -99,7 +99,7 @@ Write-Host "✅ Swagger documentation available"
 Write-Host "`n🚀 Next steps:"
 Write-Host "1. Install Java 17 JDK if not already installed"
 Write-Host "2. Set JAVA_HOME environment variable"
-Write-Host "3. Run: cd backend\document-management-service && .\mvnw.cmd spring-boot:run"
+Write-Host "3. Run: cd backend\file-management-service && .\mvnw.cmd spring-boot:run"
 Write-Host "4. Wait for service to start (30-60 seconds)"
 Write-Host "5. Run this script again to test APIs"
 Write-Host "6. Access frontend: http://localhost:3000/documents/DOC-2024-004"

@@ -17,7 +17,7 @@ export const config = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
   const method = req.method || 'GET';
-  const fullPath = `/api/v1/document-management-service/v1/documents/${id}`;
+  const fullPath = `/api/v1/file-management-service/v1/documents/${id}`;
   
   logger.info(`🔄 Documents Detail API Proxy: ${method} ${fullPath}`);
 

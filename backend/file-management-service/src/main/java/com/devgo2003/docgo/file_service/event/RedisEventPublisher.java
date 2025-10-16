@@ -37,7 +37,7 @@ public class RedisEventPublisher {
                 event.setTimestamp(LocalDateTime.now());
             }
             if (event.getSource() == null) {
-                event.setSource("document-management-service");
+                event.setSource("file-management-service");
             }
             if (event.getCorrelationId() == null) {
                 event.setCorrelationId(UUID.randomUUID().toString());

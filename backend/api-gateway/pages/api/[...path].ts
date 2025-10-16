@@ -53,7 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     'files': 'document-management',
     'assets': 'document-management',
     'document-management': 'document-management',
-    'document-management-service': 'document-management',
+    'file-management-service': 'file-management',
     // automation
     'automation': 'automation',
     'ai': 'automation',

@@ -81,14 +81,14 @@ export class Config {
            (this.isDocker() ? 'http://user-management-service:8001' : 'http://localhost:8001');
   }
 
-  static getDocumentManagementServiceUrl(): string {
-    return process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 
-           (this.isDocker() ? 'http://document-management-service:8002' : 'http://localhost:8002');
-  }
-
   static getAutomationServiceUrl(): string {
     return process.env.AUTOMATION_SERVICE_URL || 
            (this.isDocker() ? 'http://automation-service:8003' : 'http://localhost:8003');
+  }
+
+  static getFileManagementServiceUrl(): string {
+    return process.env.FILE_MANAGEMENT_SERVICE_URL || 
+           (this.isDocker() ? 'http://file-management-service:8002' : 'http://localhost:8002');
   }
 
   static getFileServiceUrl(): string {
@@ -132,15 +132,15 @@ export class Config {
       name: 'user-management-service',
         url: this.getUserManagementServiceUrl(),
       port: 8001,
-      healthCheck: '/api/v1/user-management-service/v1/health',
+      healthCheck: '/health',
       timeout: 15000
     },
     
-    'document-management': {
-      name: 'document-management-service',
-        url: this.getDocumentManagementServiceUrl(),
+    'file-management': {
+      name: 'file-management-service',
+        url: this.getFileManagementServiceUrl(),
       port: 8002,
-      healthCheck: '/api/v1/document-management-service/v1/health',
+      healthCheck: '/health',
       timeout: 10000
     },
     
@@ -148,7 +148,7 @@ export class Config {
       name: 'automation-service',
         url: this.getAutomationServiceUrl(),
       port: 8003,
-      healthCheck: '/api/v1/automation-service/v1/health',
+      healthCheck: '/health',
       timeout: 15000
     }
     };

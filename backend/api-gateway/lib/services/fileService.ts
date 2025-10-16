@@ -180,7 +180,7 @@ class FileService {
       }
 
       const response: AxiosResponse<FileUploadResponse> = await this.client.post(
-        '/api/v1/document-management-service/documents/upload',
+        '/api/v1/file-management-service/documents/upload',
         formData,
         {
           headers: {
@@ -198,7 +198,7 @@ class FileService {
   async getFile(fileId: string, token?: string): Promise<FileResponse> {
     try {
       const response: AxiosResponse<FileResponse> = await this.client.get(
-        `/api/v1/document-management-service/documents/${fileId}/download`,
+        `/api/v1/file-management-service/documents/${fileId}/download`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -212,7 +212,7 @@ class FileService {
   async deleteFile(fileId: string, token?: string): Promise<FileResponse> {
     try {
       const response: AxiosResponse<FileResponse> = await this.client.delete(
-        `/api/v1/document-management-service/files/${fileId}`,
+        `/api/v1/file-management-service/files/${fileId}`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -226,7 +226,7 @@ class FileService {
   async getFiles(params: FileQueryParams = {}, token?: string): Promise<FileListResponse> {
     try {
       const response: AxiosResponse<FileListResponse> = await this.client.get(
-        '/api/v1/document-management-service/documents',
+        '/api/v1/file-management-service/documents',
         {
           params,
           headers: this.getAuthHeaders(token),
@@ -241,7 +241,7 @@ class FileService {
   async getSignedUrl(fileId: string, expiresIn: number = 3600, token?: string): Promise<string> {
     try {
       const response = await this.client.get(
-        `/api/v1/document-management-service/files/${fileId}/signed-url`,
+        `/api/v1/file-management-service/files/${fileId}/signed-url`,
         {
           params: { expiresIn },
           headers: this.getAuthHeaders(token),
@@ -256,7 +256,7 @@ class FileService {
   async createAsset(request: AssetRequest, token?: string): Promise<AssetResponse> {
     try {
       const response: AxiosResponse<AssetResponse> = await this.client.post(
-        '/api/v1/document-management-service/assets',
+        '/api/v1/file-management-service/assets',
         request,
         {
           headers: this.getAuthHeaders(token),
@@ -271,7 +271,7 @@ class FileService {
   async getAsset(assetId: string, token?: string): Promise<AssetResponse> {
     try {
       const response: AxiosResponse<AssetResponse> = await this.client.get(
-        `/api/v1/document-management-service/assets/${assetId}`,
+        `/api/v1/file-management-service/assets/${assetId}`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -285,7 +285,7 @@ class FileService {
   async getAssets(params: FileQueryParams = {}, token?: string): Promise<AssetListResponse> {
     try {
       const response: AxiosResponse<AssetListResponse> = await this.client.get(
-        '/api/v1/document-management-service/assets',
+        '/api/v1/file-management-service/assets',
         {
           params,
           headers: this.getAuthHeaders(token),
@@ -300,7 +300,7 @@ class FileService {
   async updateAsset(assetId: string, updates: Partial<AssetRequest>, token?: string): Promise<AssetResponse> {
     try {
       const response: AxiosResponse<AssetResponse> = await this.client.put(
-        `/api/v1/document-management-service/assets/${assetId}`,
+        `/api/v1/file-management-service/assets/${assetId}`,
         updates,
         {
           headers: this.getAuthHeaders(token),
@@ -315,7 +315,7 @@ class FileService {
   async deleteAsset(assetId: string, token?: string): Promise<AssetResponse> {
     try {
       const response: AxiosResponse<AssetResponse> = await this.client.delete(
-        `/api/v1/document-management-service/assets/${assetId}`,
+        `/api/v1/file-management-service/assets/${assetId}`,
         {
           headers: this.getAuthHeaders(token),
         }

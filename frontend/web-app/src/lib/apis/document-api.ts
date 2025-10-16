@@ -1,5 +1,5 @@
 // Document Management Service API
-// Base path: /api/v1/document-management-service/v1
+// Base path: /api/v1/file-management-service/v1
 
 import { apiClient } from '../http/api-client'
 import { ApiResponse } from '@/types/api'
@@ -80,7 +80,7 @@ export interface PaginationParams {
 }
 
 export class DocumentAPI {
-  private basePath = '/api/v1/document-management-service'
+  private basePath = '/api/v1/file-management-service'
 
   // Contracts
   async getAllContracts(params?: PaginationParams) {

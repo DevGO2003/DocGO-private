@@ -52,6 +52,26 @@ class Config:
     REDIS_DATABASE: int = int(os.getenv("REDIS_DATABASE", "0"))
     
     # ==========================================
+    # MONGODB CONFIGURATION - ENABLED for audit
+    # ==========================================
+    MONGODB_ENABLED: bool = os.getenv("MONGODB_ENABLED", "true").lower() == "true"
+    MONGODB_ATLAS_URI: str = os.getenv("MONGODB_ATLAS_URI", "")
+    MONGODB_AUDIT_DATABASE: str = os.getenv("MONGODB_AUDIT_DATABASE", "docgo_automation_audit")
+
+    # Collections
+    MONGODB_AUDIT_LOGS_COLLECTION: str = "automation_audit_logs"
+    MONGODB_PROCESSING_SESSIONS_COLLECTION: str = "automation_processing_sessions"
+    MONGODB_ERROR_LOGS_COLLECTION: str = "automation_error_logs"
+
+    @classmethod
+    def get_mongodb_uri(cls) -> str:
+        """Get MongoDB Atlas URI"""
+        uri = cls.MONGODB_ATLAS_URI
+        if not uri and cls.MONGODB_ENABLED:
+            raise ValueError("MONGODB_ATLAS_URI is required when MONGODB_ENABLED=true")
+        return uri
+    
+    # ==========================================
     # EXTERNAL APIS (Required - No fallback)
     # ==========================================
     @classmethod
@@ -111,9 +131,7 @@ class Config:
     @classmethod
     def get_document_service_url(cls) -> str:
         
-        return os.getenv("DOCUMENT_MANAGEMENT_SERVICE_URL", 
-                        "http://document-management-service:8002" if cls.is_docker() 
-                        else "http://localhost:8002")
+        return os.getenv("DOCUMENT_MANAGEMENT_SERVICE_URL", "http://localhost:8002")
     
     @classmethod
     def get_base_url(cls) -> str:
@@ -238,7 +256,12 @@ class Config:
             "max_retries": int(os.getenv("EVENT_MAX_RETRIES", "3")),
             "retry_delay": int(os.getenv("EVENT_RETRY_DELAY", "5")),  # seconds
             "batch_size": int(os.getenv("EVENT_BATCH_SIZE", "100")),
-            "timeout": int(os.getenv("EVENT_TIMEOUT", "30"))  # seconds
+            "timeout": int(os.getenv("EVENT_TIMEOUT", "30")),  # seconds
+            "channels": {
+                "file_uploaded": os.getenv("EVENT_CHANNEL_FILE_UPLOADED", "file_uploaded"),
+                "ai_processing_completed": os.getenv("EVENT_CHANNEL_AI_COMPLETED", "ai_processing_completed"),
+                "notification_sent": os.getenv("EVENT_CHANNEL_NOTIFICATION_SENT", "notification_sent"),
+            },
         }
 
 

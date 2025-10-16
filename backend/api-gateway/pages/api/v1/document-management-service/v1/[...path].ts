@@ -21,8 +21,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const resourcePath = pathArray.join('/');
   const method = req.method || 'GET';
   
-  // Construct full path for document-management-service
-  const fullPath = `/api/v1/document-management-service/v1/${resourcePath}`;
+  // Construct full path for file-management-service
+  const fullPath = `/api/v1/file-management-service/v1/${resourcePath}`;
   
   logger.info(`🔄 Document Management Service Proxy: ${method} ${fullPath}`);
 

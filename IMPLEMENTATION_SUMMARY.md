@@ -64,11 +64,11 @@
 - Tất cả nested objects được map đúng với frontend
 
 ### API Endpoints hoàn chỉnh
-- `GET /api/v1/document-management-service/v1/documents/{id}` ✅
-- `GET /api/v1/document-management-service/v1/documents/{documentId}/comments` ✅
-- `POST /api/v1/document-management-service/v1/documents/{documentId}/comments` ✅
-- `PUT /api/v1/document-management-service/v1/documents/{documentId}/comments/{commentId}` ✅
-- `DELETE /api/v1/document-management-service/v1/documents/{documentId}/comments/{commentId}` ✅
+- `GET /api/v1/file-management-service/v1/documents/{id}` ✅
+- `GET /api/v1/file-management-service/v1/documents/{documentId}/comments` ✅
+- `POST /api/v1/file-management-service/v1/documents/{documentId}/comments` ✅
+- `PUT /api/v1/file-management-service/v1/documents/{documentId}/comments/{commentId}` ✅
+- `DELETE /api/v1/file-management-service/v1/documents/{documentId}/comments/{commentId}` ✅
 
 ### CORS Configuration
 - Không còn lỗi OPTIONS 500
@@ -83,7 +83,7 @@
 
 ### 1. Khởi động service
 ```bash
-cd backend/document-management-service
+cd backend/file-management-service
 mvn spring-boot:run
 ```
 

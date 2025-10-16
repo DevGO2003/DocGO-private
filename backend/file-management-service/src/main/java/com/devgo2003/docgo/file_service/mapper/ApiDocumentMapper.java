@@ -23,79 +23,87 @@ public class ApiDocumentMapper {
     o.isNew = false;
     d.overview = o;
 
-    // contract
-    ApiDocument.Contract c = new ApiDocument.Contract();
-    if (e.getContractMetadata() != null) {
-      c.effectiveDate = e.getContractMetadata().getEffectiveDate() == null ? null : e.getContractMetadata().getEffectiveDate().atOffset(java.time.ZoneOffset.UTC);
-      c.expiryDate = e.getContractMetadata().getExpiryDate() == null ? null : e.getContractMetadata().getExpiryDate().atOffset(java.time.ZoneOffset.UTC);
-      c.totalValue = e.getContractMetadata().getTotalValue() == null ? null : java.math.BigDecimal.valueOf(e.getContractMetadata().getTotalValue());
-      c.currency = e.getContractMetadata().getCurrency();
-      c.summary = e.getDescription();
+    // contract - only for CONTRACT documents
+    String docType = o.documentType;
+    boolean isContract = docType != null && docType.equalsIgnoreCase("CONTRACT");
+    
+    if (isContract) {
+      ApiDocument.Contract c = new ApiDocument.Contract();
+      if (e.getContractMetadata() != null) {
+        c.effectiveDate = e.getContractMetadata().getEffectiveDate() == null ? null : e.getContractMetadata().getEffectiveDate().atOffset(java.time.ZoneOffset.UTC);
+        c.expiryDate = e.getContractMetadata().getExpiryDate() == null ? null : e.getContractMetadata().getExpiryDate().atOffset(java.time.ZoneOffset.UTC);
+        c.totalValue = e.getContractMetadata().getTotalValue() == null ? null : java.math.BigDecimal.valueOf(e.getContractMetadata().getTotalValue());
+        c.currency = e.getContractMetadata().getCurrency();
+        c.summary = e.getDescription();
+      } else {
+        c.summary = e.getDescription();
+      }
+      // map parties list
+      if (e.getParties() != null) {
+        c.parties = new ArrayList<>();
+        e.getParties().forEach(p -> {
+          ApiDocument.Party ap = new ApiDocument.Party();
+          ap.name = p.getName();
+          ap.role = p.getRole();
+          ap.representative = p.getRepresentative();
+          ap.taxCode = p.getTaxCode();
+          ap.contact = p.getContact();
+          ap.address = p.getAddress();
+          c.parties.add(ap);
+        });
+      }
+      if (e.getPaymentDetails() != null) {
+        ApiDocument.Payment p = new ApiDocument.Payment();
+        p.totalValue = e.getPaymentDetails().getTotalValue() == null ? null : java.math.BigDecimal.valueOf(e.getPaymentDetails().getTotalValue());
+        p.currency = e.getPaymentDetails().getCurrency();
+        p.schedule = e.getPaymentDetails().getSchedule();
+        p.method = e.getPaymentDetails().getPaymentMethod();
+        c.payment = p;
+      }
+      ApiDocument.Clauses clauses = new ApiDocument.Clauses();
+      clauses.unfavorable = e.getUnfavorableClauses();
+      // key clauses mapping if present
+      if (e.getKeyClauses() != null) {
+        clauses.key = new ArrayList<>();
+        e.getKeyClauses().forEach(k -> {
+          ApiDocument.ClauseKey ck = new ApiDocument.ClauseKey();
+          ck.name = k.getName();
+          ck.description = k.getDescription();
+          ck.importance = k.getImportance();
+          ck.risk = k.getRisk();
+          clauses.key.add(ck);
+        });
+      }
+      c.clauses = clauses;
+      if (e.getReminders() != null) {
+        c.reminders = new ArrayList<>();
+        e.getReminders().forEach(rm -> {
+          ApiDocument.Reminder ar = new ApiDocument.Reminder();
+          ar.date = rm.getDate() == null ? null : rm.getDate().atOffset(java.time.ZoneOffset.UTC);
+          ar.title = rm.getTitle();
+          ar.description = rm.getDescription();
+          c.reminders.add(ar);
+        });
+      }
+      if (e.getRiskAssessment() != null) {
+        ApiDocument.Risk r = new ApiDocument.Risk();
+        r.level = e.getRiskAssessment().getRiskLevel();
+        r.factors = e.getRiskAssessment().getRiskFactors();
+        r.mitigations = e.getRiskAssessment().getMitigationMeasures();
+        c.risk = r;
+      }
+      if (e.getComplianceStatus() != null) {
+        ApiDocument.Compliance cp = new ApiDocument.Compliance();
+        cp.status = e.getComplianceStatus().getStatus();
+        cp.issues = e.getComplianceStatus().getIssues();
+        cp.recommendations = e.getComplianceStatus().getRecommendations();
+        c.compliance = cp;
+      }
+      d.contract = c;
     } else {
-      c.summary = e.getDescription();
+      // Non-contract documents must have contract=null
+      d.contract = null;
     }
-    // map parties list
-    if (e.getParties() != null) {
-      c.parties = new ArrayList<>();
-      e.getParties().forEach(p -> {
-        ApiDocument.Party ap = new ApiDocument.Party();
-        ap.name = p.getName();
-        ap.role = p.getRole();
-        ap.representative = p.getRepresentative();
-        ap.taxCode = p.getTaxCode();
-        ap.contact = p.getContact();
-        ap.address = p.getAddress();
-        c.parties.add(ap);
-      });
-    }
-    if (e.getPaymentDetails() != null) {
-      ApiDocument.Payment p = new ApiDocument.Payment();
-      p.totalValue = e.getPaymentDetails().getTotalValue() == null ? null : java.math.BigDecimal.valueOf(e.getPaymentDetails().getTotalValue());
-      p.currency = e.getPaymentDetails().getCurrency();
-      p.schedule = e.getPaymentDetails().getSchedule();
-      p.method = e.getPaymentDetails().getPaymentMethod();
-      c.payment = p;
-    }
-    ApiDocument.Clauses clauses = new ApiDocument.Clauses();
-    clauses.unfavorable = e.getUnfavorableClauses();
-    // key clauses mapping if present
-    if (e.getKeyClauses() != null) {
-      clauses.key = new ArrayList<>();
-      e.getKeyClauses().forEach(k -> {
-        ApiDocument.ClauseKey ck = new ApiDocument.ClauseKey();
-        ck.name = k.getName();
-        ck.description = k.getDescription();
-        ck.importance = k.getImportance();
-        ck.risk = k.getRisk();
-        clauses.key.add(ck);
-      });
-    }
-    c.clauses = clauses;
-    if (e.getReminders() != null) {
-      c.reminders = new ArrayList<>();
-      e.getReminders().forEach(rm -> {
-        ApiDocument.Reminder ar = new ApiDocument.Reminder();
-        ar.date = rm.getDate() == null ? null : rm.getDate().atOffset(java.time.ZoneOffset.UTC);
-        ar.title = rm.getTitle();
-        ar.description = rm.getDescription();
-        c.reminders.add(ar);
-      });
-    }
-    if (e.getRiskAssessment() != null) {
-      ApiDocument.Risk r = new ApiDocument.Risk();
-      r.level = e.getRiskAssessment().getRiskLevel();
-      r.factors = e.getRiskAssessment().getRiskFactors();
-      r.mitigations = e.getRiskAssessment().getMitigationMeasures();
-      c.risk = r;
-    }
-    if (e.getComplianceStatus() != null) {
-      ApiDocument.Compliance cp = new ApiDocument.Compliance();
-      cp.status = e.getComplianceStatus().getStatus();
-      cp.issues = e.getComplianceStatus().getIssues();
-      cp.recommendations = e.getComplianceStatus().getRecommendations();
-      c.compliance = cp;
-    }
-    d.contract = c;
 
     // content
     ApiDocument.Content content = new ApiDocument.Content();

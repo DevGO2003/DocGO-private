@@ -85,28 +85,28 @@ export default function DocumentsFilters(props: Props) {
             onChange={() => onToggleSortDirection()}
           className="h-[28px] px-2 pr-6 py-0 leading-[1.1] min-w-[110px] rounded-lg border border-indigo-300 text-xs text-indigo-700 bg-white hover:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="asc">Tăng dần</option>
-            <option value="desc">Giảm dần</option>
+            <option value="asc">{t('documents.sortAsc')}</option>
+            <option value="desc">{t('documents.sortDesc')}</option>
           </select>
-          <button onClick={props.onRefresh} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"><ArrowPathIcon className="w-3 h-3"/>Làm mới</button>
+          <button onClick={props.onRefresh} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"><ArrowPathIcon className="w-3 h-3"/>{t('documents.refresh')}</button>
         </div>
       </div>
 
       {/* Row 2: Advanced toggle + triggers + Reset + View toggle */}
       <div className="flex items-center gap-[5px] w-full mt-[5px]">
-        <button onClick={onToggleAdvanced} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap">{showAdvanced ? 'Ẩn tùy chọn nâng cao' : 'Hiện tùy chọn nâng cao'}</button>
+        <button onClick={onToggleAdvanced} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap">{showAdvanced ? t('documents.hideAdvanced') : t('documents.showAdvanced')}</button>
         {showAdvanced && (
           <>
             <div className="ml-auto flex items-center gap-[5px]">
-          <button onClick={(e)=>{ setOpenTags(true); (e.currentTarget as HTMLElement).dataset.anchor='tags'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="tags"><TagIcon className="w-3 h-3"/>Phân loại</button>
-          <button onClick={(e)=>{ setOpenTypes(true); (e.currentTarget as HTMLElement).dataset.anchor='types'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="types"><FunnelIcon className="w-3 h-3"/>Loại file</button>
-          <button onClick={(e)=>{ setOpenTime(true); (e.currentTarget as HTMLElement).dataset.anchor='time'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="time"><CalendarIcon className="w-3 h-3"/>Thời gian</button>
-              <button onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"><ArrowUturnLeftIcon className="w-3 h-3"/>Đặt lại</button>
+          <button onClick={(e)=>{ setOpenTags(true); (e.currentTarget as HTMLElement).dataset.anchor='tags'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="tags"><TagIcon className="w-3 h-3"/>{t('documents.category')}</button>
+          <button onClick={(e)=>{ setOpenTypes(true); (e.currentTarget as HTMLElement).dataset.anchor='types'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="types"><FunnelIcon className="w-3 h-3"/>{t('documents.fileType')}</button>
+          <button onClick={(e)=>{ setOpenTime(true); (e.currentTarget as HTMLElement).dataset.anchor='time'; }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50" data-anchor-id="time"><CalendarIcon className="w-3 h-3"/>{t('documents.time')}</button>
+              <button onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"><ArrowUturnLeftIcon className="w-3 h-3"/>{t('documents.reset')}</button>
               <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-              <button onClick={() => onViewModeChange?.('grid')} className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Xem dạng card">
+              <button onClick={() => onViewModeChange?.('grid')} className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title={t('documents.viewCard')}>
                 <Squares2X2Icon className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => onViewModeChange?.('list')} className={`p-1.5 transition-colors border-l border-gray-300 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title="Xem dạng bảng">
+              <button onClick={() => onViewModeChange?.('list')} className={`p-1.5 transition-colors border-l border-gray-300 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title={t('documents.viewTable')}>
                 <ListBulletIcon className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -146,7 +146,7 @@ export default function DocumentsFilters(props: Props) {
       />
       <IncludeExcludeModal
         open={openTypes}
-        title="Loại file"
+        title={t('documents.fileType')}
         availableItems={getContractTypes(t).map(x=>x.label)}
         include={type && type !== 'ALL' ? [type] : []}
         exclude={[]}

@@ -12,7 +12,7 @@ class Party(BaseModel):
     businessLicense: str = Field(...)
 
 class PaymentDetails(BaseModel):
-    totalValue: Union[int, float] = Field(...)")
+    totalValue: Union[int, float] = Field(...)
     schedule: str = Field(...)
     currency: str = Field(...)
     paymentMethod: str = Field(...)
@@ -20,7 +20,7 @@ class PaymentDetails(BaseModel):
 class KeyClause(BaseModel):
     name: str = Field(...)
     description: str = Field(...)
-    source: str = Field(...)")
+    source: str = Field(...)
 
 class FavorableClause(BaseModel):
     clauseName: str = Field(...)
@@ -33,18 +33,18 @@ class UnfavorableClause(BaseModel):
     riskTo: str = Field(...)
 
 class Reminder(BaseModel):
-    type: str = Field(..., xem xét, hết hạn)")
-    date: Optional[str] = Field(None)")
+    type: str = Field(..., description="xem xét, hết hạn")
+    date: Optional[str] = Field(None)
     content: str = Field(...)
 
 class RiskAssessment(BaseModel):
-    riskLevel: str = Field(..., MEDIUM, HIGH)")
+    riskLevel: str = Field(..., description="LOW, MEDIUM, HIGH")
     riskFactors: List[str] = Field(...)
     mitigationMeasures: List[str] = Field(...)
     # riskDetails removed to simplify riskAssessment structure
 
 class ComplianceStatus(BaseModel):
-    status: str = Field(..., NON_COMPLIANT, REVIEW_REQUIRED)")
+    status: str = Field(..., description="COMPLIANT, NON_COMPLIANT, REVIEW_REQUIRED")
     issues: List[str] = Field(...)
     recommendations: List[str] = Field(...)
 
@@ -57,7 +57,7 @@ class ContractSummary(BaseModel):
     tag: List[str] = Field(...)
     parties: List[Party] = Field(...)
     object: str = Field(...)
-    effectiveDate: str = Field(...)")
+    effectiveDate: str = Field(...)
     term: str = Field(...)
     paymentDetails: PaymentDetails = Field(...)
     keyClauses: List[KeyClause] = Field(...)

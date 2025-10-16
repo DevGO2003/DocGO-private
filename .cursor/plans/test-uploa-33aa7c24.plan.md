@@ -1,127 +1,255 @@
-<!-- 33aa7c24-f656-47f9-a5b2-37df5b9a6db0 b9963e00-dcba-4e6c-95e3-c96b3cdf2ee5 -->
-# FE render documents list from File Management Service
+<!-- 33aa7c24-f656-47f9-a5b2-37df5b9a6db0 12f3397d-dd9f-4c72-ad40-0ff5b018022b -->
+# Plan: Full Automation Service Schema Alignment & Audit Logging
 
-## Scope
-Render `/documents` using `GET /api/v1/file-management-service/v1/files` with pagination/sort. Keep existing cards (`ContractCard`/`GeneralFileCard`).
+## Phase 1: MongoDB Setup & Audit Service
 
-## Changes
+### 1.1 Cập nhật dependencies
+**File**: `backend/automation-service/requirements.txt`
+- Uncomment MongoDB dependencies:
+  ```python
+  motor==3.3.2
+  pymongo==4.6.0
+  ```
 
-### 1) Types (reuse)
-- Reuse `FileApiData` and `RestResponse` from `/_types/file-api.ts`.
-- Add a lightweight `FileApiPage<T>` type for list pagination if needed.
+### 1.2 Cập nhật Config
+**File**: `backend/automation-service/config.py`
+- Thêm MongoDB configuration:
+  ```python
+  # MongoDB Configuration - ENABLED for audit
+  MONGODB_ENABLED: bool = os.getenv("MONGODB_ENABLED", "true").lower() == "true"
+  MONGODB_ATLAS_URI: str = os.getenv("MONGODB_ATLAS_URI", "mongodb+srv://...")
+  MONGODB_AUDIT_DATABASE: str = os.getenv("MONGODB_AUDIT_DATABASE", "docgo_automation_audit")
+  
+  # Collections
+  MONGODB_AUDIT_LOGS_COLLECTION: str = "automation_audit_logs"
+  MONGODB_PROCESSING_SESSIONS_COLLECTION: str = "automation_processing_sessions"
+  MONGODB_ERROR_LOGS_COLLECTION: str = "automation_error_logs"
+  ```
 
-### 2) Service (Data access)
-- Add `frontend/web-app/src/app/(documents)/documents/_services/file-list-api.ts` with:
-  - `fetchFiles(params)` → calls list endpoint with `page,size,sortBy,sortDirection,includeDeleted=false,view=full`.
-  - Returns parsed JSON `RestResponse<Page<FileApiData>>`.
+### 1.3 Tạo Audit Service
+**File**: `backend/automation-service/services/audit_service.py` (NEW)
+- Implement `AuditService` class với methods:
+  - `initialize()`: Setup MongoDB connection
+  - `log_event(event_data: dict)`: Log event to audit_logs
+  - `log_processing_session(session_data: dict)`: Log processing session
+  - `log_error(error_data: dict)`: Log error
+  - `update_processing_session(correlation_id: str, updates: dict)`: Update session
+  - `get_processing_session(correlation_id: str)`: Get session by correlation ID
+  - `close()`: Close MongoDB connection
 
-### 3) Mapper (API → UI list)
-- Add `frontend/web-app/src/app/(documents)/documents/_services/file-list-mapper.ts`:
-  - `mapFileApiToUiDocument` (reuse from detail) for each item.
-  - `mapFileApiPageToPaginatedDocuments(resp)` → `{ content, totalElements, totalPages }` for UI.
-  - Ensure `documentType` is passed through (`CONTRACT` vs GENERAL/null) and `contractMetadata` populated.
+### 1.4 Cập nhật main.py
+**File**: `backend/automation-service/main.py`
+- Import `AuditService`
+- Initialize audit service trong startup event
+- Close audit service trong shutdown event
 
-### 4) Controller (List page loader)
-- Update `frontend/web-app/src/app/(documents)/documents/page.tsx`:
-  - Server component preferred: read searchParams (`page`, `size`, `sortBy`, `sortDirection`), default `page=0,size=10,sortBy=createdAt,sortDirection=DESC`.
-  - Call `fetchFiles`, map via `mapFileApiPageToPaginatedDocuments`.
-  - Render existing `DocumentsTable` with mapped `Paginated<Document>`.
-  - Ensure link to detail: `/documents/${doc.id}`.
+## Phase 2: Update Gemini Prompt & Contract Schema
 
-### 5) DocumentsTable compatibility
-- Verify `DocumentsTable.tsx` expects `Paginated<Document>` and decides card: `doc.documentType === 'CONTRACT' ? <ContractCard/> : <GeneralFileCard/>`.
-- If it needs props rename/shape, adapt minimal shim in page.tsx before passing.
+### 2.1 Cập nhật Gemini Prompt
+**File**: `backend/automation-service/services/ai_processing_service.py`
+- Method: `get_contract_summary_prompt()`
+- Thay đổi prompt để trả về schema khớp với File Management Service:
+  ```python
+  # Thay đổi từ:
+  "contractNumber", "status", "contractType", "title", "tags", "parties", "object", 
+  "effectiveDate", "term", "paymentDetails", "keyClauses", "favorableClauses", 
+  "unfavorableClauses", "reminders", "terminationConditions", "riskAssessment", 
+  "complianceStatus"
+  
+  # Sang:
+  "effectiveDate", "expiryDate", "totalValue" (số), "currency", "summary", 
+  "parties", "payment", "clauses" (key, unfavorable), "reminders", "risk", "compliance"
+  ```
+- Đảm bảo:
+  - `totalValue` là số (int/float), không phải string
+  - `effectiveDate`, `expiryDate` là ISO 8601 format
+  - `clauses.key` có `importance` và `risk` level
+  - `reminders` có `date`, `title`, `description`
 
-### 6) Query/pagination controls
-- Preserve current UI controls (if any). If none, simple pager:
-  - `Next`/`Prev` `Link` using `page`/`size` out of `searchParams`.
+### 2.2 Cập nhật Contract Summary Processing
+**File**: `backend/automation-service/services/ai_processing_service.py`
+- Method: `generate_contract_summary()`
+- Xử lý response từ Gemini:
+  - Parse `totalValue` thành số
+  - Validate và format dates thành ISO 8601
+  - Map `clauses` structure: `key` array + `unfavorable` array
+  - Đổi tên `riskAssessment` → `risk`
+  - Đổi tên `complianceStatus` → `compliance`
 
-### 7) Env/config
-- Reuse `NEXT_PUBLIC_FILE_MGMT_BASE_URL`.
+## Phase 3: Update Event Schema
 
-### 8) Tests
-- Unit: list mapper maps `CONTRACT` and GENERAL items correctly.
-- Integration: list page renders both card types; pagination total displayed correctly.
+### 3.1 Cập nhật Event Types
+**File**: `backend/automation-service/schemas/event_schemas.py`
+- Thêm event types mới:
+  ```python
+  AUTOMATION_STARTED = "AutomationStarted"
+  AUTOMATION_COMPLETED = "AutomationCompleted"
+  AUTOMATION_FAILED = "AutomationFailed"
+  FILE_UPLOADED = "FileUploaded"
+  FILE_PROCESSED = "FileProcessed"
+  DOCUMENT_CLASSIFIED = "DocumentClassified"
+  CONTRACT_SUMMARY_UPDATED = "ContractSummaryUpdated"
+  DOCUMENT_CREATED = "DocumentCreated"
+  ```
 
-## Snippets
+### 3.2 Tạo Event Payload Models
+**File**: `backend/automation-service/schemas/event_schemas.py`
+- Tạo Pydantic models cho từng event type:
+  - `AutomationStartedEvent`
+  - `FileUploadedEvent`
+  - `FileProcessedEvent`
+  - `DocumentClassifiedEvent`
+  - `ContractSummaryUpdatedEvent`
+  - `DocumentCreatedEvent`
+  - `AutomationCompletedEvent`
+  - `AutomationFailedEvent`
 
-### file-list-api.ts
-```ts
-import type { FileApiResponse } from '../_types/file-api'
-const BASE_URL = process.env.NEXT_PUBLIC_FILE_MGMT_BASE_URL || 'http://localhost:8002'
-export async function fetchFiles(params: { page?: number; size?: number; sortBy?: string; sortDirection?: 'ASC'|'DESC'; includeDeleted?: boolean; view?: 'full'|'card'|'table' }): Promise<any> {
-  const q = new URLSearchParams({
-    page: String(params.page ?? 0),
-    size: String(params.size ?? 10),
-    sortBy: params.sortBy ?? 'createdAt',
-    sortDirection: params.sortDirection ?? 'DESC',
-    includeDeleted: String(params.includeDeleted ?? false),
-    view: params.view ?? 'full',
-  })
-  const url = `${BASE_URL}/api/v1/file-management-service/v1/files?${q.toString()}`
-  const res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
-  if (!res.ok) throw new Error(`Fetch files failed: ${res.status} ${res.statusText}`)
-  return res.json()
-}
-```
+## Phase 4: Implement Error Handling & Retry
 
-### file-list-mapper.ts
-```ts
-import type { Paginated, Document } from '../_types'
-import type { FileApiData } from '../_types/file-api'
-import { mapFileApiToUiDocument } from './file-mapper'
+### 4.1 Tạo Retry Utilities
+**File**: `backend/automation-service/utils/retry_helper.py` (NEW)
+- Implement retry decorator:
+  ```python
+  async def retry_async(func, max_retries=3, backoff_factor=2, exceptions=(Exception,))
+  ```
 
-export function mapFileApiPageToPaginatedDocuments(payload: any): Paginated<Document> {
-  const data = payload?.data
-  if (Array.isArray(data?.content)) {
-    return {
-      content: data.content.map((x: FileApiData) => mapFileApiToUiDocument(x)),
-      totalElements: Number(data.totalElements ?? 0),
-      totalPages: Number(data.totalPages ?? 1),
-    }
+### 4.2 Cập nhật File Storage Service
+**File**: `backend/automation-service/services/file_service.py`
+- Method: `upload_file()`
+- Wrap với retry logic (3 retries với exponential backoff)
+- Publish `FileUploaded` event on success
+- Publish `AutomationFailed` event on final failure
+- Log to audit service
+
+### 4.3 Cập nhật OCR Service
+**File**: `backend/automation-service/services/ocr_service.py`
+- Method: `extract_text_from_file()`
+- Add error handling với fallback
+- Publish `FileProcessed` event on success
+- Publish `AutomationFailed` event on failure
+- Log to audit service
+
+### 4.4 Cập nhật AI Processing Service
+**File**: `backend/automation-service/services/ai_processing_service.py`
+- Method: `classify_document()`
+  - Add error handling với fallback classification
+  - Publish `DocumentClassified` event on success
+  - Log to audit service
+- Method: `generate_contract_summary()`
+  - Add error handling với fallback summary
+  - Publish `ContractSummaryUpdated` event on success
+  - Log to audit service
+
+## Phase 5: Update File API Builder
+
+### 5.1 Cập nhật build_file_api_payload
+**File**: `backend/automation-service/services/file_api_builder.py`
+- Method: `build_file_api_payload()`
+- Thay đổi contract mapping:
+  ```python
+  # Thay vì sử dụng contract_metadata (flat structure)
+  # Sử dụng summary_result (nested structure từ Gemini)
+  
+  contract_data = {
+      "effectiveDate": summary_result.get("effectiveDate"),
+      "expiryDate": summary_result.get("expiryDate"),
+      "totalValue": summary_result.get("totalValue"),  # số
+      "currency": summary_result.get("currency"),
+      "summary": summary_result.get("summary"),
+      "parties": summary_result.get("parties", []),
+      "payment": summary_result.get("payment", {}),
+      "clauses": summary_result.get("clauses", {"key": [], "unfavorable": []}),
+      "reminders": summary_result.get("reminders", []),
+      "risk": summary_result.get("risk", {}),
+      "compliance": summary_result.get("compliance", {})
   }
-  return { content: [], totalElements: 0, totalPages: 0 }
-}
-```
+  ```
 
-### documents/page.tsx
-```ts
-import { fetchFiles } from './_services/file-list-api'
-import { mapFileApiPageToPaginatedDocuments } from './_services/file-list-mapper'
-import DocumentsTable from './_components/DocumentsTable'
+## Phase 6: Update Main Upload Route
 
-export default async function DocumentsPage({ searchParams }: { searchParams: Record<string, string|undefined> }) {
-  const page = Number(searchParams.page ?? 0)
-  const size = Number(searchParams.size ?? 10)
-  const sortBy = String(searchParams.sortBy ?? 'createdAt')
-  const sortDirection = (searchParams.sortDirection === 'ASC' ? 'ASC' : 'DESC') as 'ASC'|'DESC'
-  let payload
-  try { payload = await fetchFiles({ page, size, sortBy, sortDirection, includeDeleted: false, view: 'full' }) } catch (e:any) {
-    return <div className="p-6 text-red-600">Lỗi tải danh sách: {e?.message}</div>
-  }
-  const paginated = mapFileApiPageToPaginatedDocuments(payload)
-  return (
-    <div className="p-4">
-      <DocumentsTable paginatedDocuments={paginated} />
-    </div>
-  )
-}
-```
+### 6.1 Refactor Upload Route
+**File**: `backend/automation-service/routers.py`
+- Route: `POST /api/v1/automation-service/documents/upload`
+- Restructure với:
+  1. Get correlation ID từ header hoặc generate mới
+  2. Publish `AutomationStarted` event
+  3. Log processing session start
+  4. S3 Upload với retry + event publishing
+  5. OCR Processing với error handling + event publishing
+  6. AI Classification với error handling + event publishing
+  7. Contract Summary (nếu là contract) với error handling + event publishing
+  8. Save to File Management Service với retry + event publishing
+  9. Publish `AutomationCompleted` event
+  10. Log processing session complete
+  11. Return RestResponse với correlation ID
 
-## Edge cases
-- `overview.documentType` null → mapper sets `documentType` undefined → `GeneralFileCard`.
-- Missing `file.type/size` → undefined; cards already handle fallback.
-- Non-200 → hiển thị lỗi gọn.
+### 6.2 Add Error Handling Wrapper
+**File**: `backend/automation-service/routers.py`
+- Wrap toàn bộ route trong try-except
+- On error:
+  - Publish `AutomationFailed` event
+  - Log error to audit service
+  - Update processing session status
+  - Return structured error response với correlation ID
 
-## Acceptance
-- `/documents` hiển thị danh sách từ File API, phân trang hoạt động, card CONTRACT hiện trường hợp hợp đồng, GENERAL hiện thông tin file.
+## Phase 7: Update Environment & Documentation
+
+### 7.1 Cập nhật .env.template
+**File**: `backend/automation-service/.env.template`
+- Thêm MongoDB configuration:
+  ```
+  MONGODB_ENABLED=true
+  MONGODB_ATLAS_URI=mongodb+srv://...
+  MONGODB_AUDIT_DATABASE=docgo_automation_audit
+  ```
+
+### 7.2 Cập nhật README
+**File**: `backend/automation-service/README.md`
+- Document MongoDB audit logging
+- Document event types và schema
+- Document error handling và retry mechanism
+- Document correlation ID tracking
+
+## Phase 8: Testing & Validation
+
+### 8.1 Test Upload Flow
+- Test với file nhỏ (<2MB) - sync mode
+- Test với file lớn (≥2MB) - async mode
+- Verify events được publish đúng
+- Verify audit logs được lưu vào MongoDB
+- Verify contract data khớp với schema File Management Service
+
+### 8.2 Test Error Scenarios
+- Test S3 upload failure → verify retry + error event
+- Test OCR failure → verify fallback + error event
+- Test AI failure → verify fallback + error event
+- Test File Management failure → verify retry + error event
+
+### 8.3 Verify Schema Alignment
+- Compare contract data với `documents/architecture/api-response-sample.json`
+- Verify tất cả fields khớp
+- Verify data types đúng (totalValue là số, dates là ISO 8601)
+
+## Implementation Order
+
+1. Phase 1: MongoDB Setup (30 mins)
+2. Phase 2: Gemini Prompt Update (45 mins)
+3. Phase 3: Event Schema (30 mins)
+4. Phase 4: Error Handling (60 mins)
+5. Phase 5: File API Builder (30 mins)
+6. Phase 6: Upload Route Refactor (60 mins)
+7. Phase 7: Documentation (20 mins)
+8. Phase 8: Testing (40 mins)
+
+**Total estimated time**: 5-6 hours
 
 ### To-dos
 
-- [ ] Confirm list API types reuse or add FileApiPage<T>
-- [ ] Create fetchFiles service for list endpoint
-- [ ] Map list response to Paginated<Document>
-- [ ] Update /documents/page.tsx to load list from File API
-- [ ] Verify DocumentsTable props/conditional render for cards
-- [ ] Unit test list mapper for CONTRACT/GENERAL items
-- [ ] Integration test list page loader renders cards correctly
+- [ ] Setup MongoDB configuration, dependencies, and AuditService implementation
+- [ ] Update Gemini prompt and contract summary processing to match File Management schema
+- [ ] Update event types and create Pydantic models for all event payloads
+- [ ] Implement error handling and retry mechanism for S3, OCR, AI, File Management
+- [ ] Update file_api_builder.py to map contract data correctly
+- [ ] Refactor main upload route with event publishing, audit logging, and error handling
+- [ ] Update .env.template and README with MongoDB and event documentation
+- [ ] Test upload flow, error scenarios, and verify schema alignment

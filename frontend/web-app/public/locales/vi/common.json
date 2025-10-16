@@ -291,6 +291,42 @@
         "settingsError": "Có lỗi xảy ra khi cập nhật cài đặt"
       }
     },
+    "documents": {
+      "title": "Tài liệu",
+      "fileSize": "Kích thước",
+      "fileType": "Loại file",
+      "createdAt": "Ngày tạo",
+      "notAvailable": "N/A",
+      "category": "Phân loại",
+      "time": "Thời gian",
+      "reset": "Đặt lại",
+      "viewCard": "Xem dạng card",
+      "viewTable": "Xem dạng bảng",
+      "effectiveDate": "Hiệu lực",
+      "expiryDate": "Hết hạn",
+      "value": "Giá trị",
+      "hideAdvanced": "Ẩn tùy chọn nâng cao",
+      "showAdvanced": "Hiện tùy chọn nâng cao",
+      "refresh": "Làm mới",
+      "sortAsc": "Tăng dần",
+      "sortDesc": "Giảm dần",
+      "noDescription": "Không có mô tả",
+      "categoryLabel": "Loại",
+      "openFile": "Mở tệp",
+      "preview": "Xem thử",
+      "download": "Tải về",
+      "previewTitle": "Xem trước (Demo)",
+      "previewContent": "Nội dung file sẽ được hiển thị ở đây...",
+      "apiNotReady": "API chưa sẵn sàng",
+      "allTags": "Tất cả tags",
+      "contractNumber": "Mã HĐ",
+      "fileSizeUnits": {
+        "bytes": "Bytes",
+        "kb": "KB", 
+        "mb": "MB",
+        "gb": "GB"
+      }
+    },
     "userManagement": {
       "title": "Quản lý người dùng",
       "subtitle": "Tạo, chỉnh sửa, tạm dừng và quản lý quyền người dùng",

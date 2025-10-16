@@ -291,6 +291,42 @@
     "settingsError": "An error occurred while updating settings"
     }
     },
+    "documents": {
+      "title": "Documents",
+      "fileSize": "Size",
+      "fileType": "File Type",
+      "createdAt": "Created At",
+      "notAvailable": "N/A",
+      "category": "Category",
+      "time": "Time",
+      "reset": "Reset",
+      "viewCard": "View as cards",
+      "viewTable": "View as table",
+      "effectiveDate": "Effective Date",
+      "expiryDate": "Expiry Date",
+      "value": "Value",
+      "hideAdvanced": "Hide advanced options",
+      "showAdvanced": "Show advanced options",
+      "refresh": "Refresh",
+      "sortAsc": "Ascending",
+      "sortDesc": "Descending",
+      "noDescription": "No description",
+      "categoryLabel": "Type",
+      "openFile": "Open file",
+      "preview": "Preview",
+      "download": "Download",
+      "previewTitle": "Preview (Demo)",
+      "previewContent": "File content will be displayed here...",
+      "apiNotReady": "API not ready",
+      "allTags": "All tags",
+      "contractNumber": "Contract No.",
+      "fileSizeUnits": {
+        "bytes": "Bytes",
+        "kb": "KB",
+        "mb": "MB", 
+        "gb": "GB"
+      }
+    },
     "userManagement": {
     "title": "User Management",
     "subtitle": "Create, edit, suspend, and manage user permissions",

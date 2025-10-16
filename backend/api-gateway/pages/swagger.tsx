@@ -61,18 +61,18 @@ export default function SwaggerPage() {
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },
-    'Document Management Service': {
+    'File Management Service': {
       port: 8002,
-      container: 'document-management-service',
+      container: 'file-management-service',
       description: 'Quản lý tài liệu, workflow, approval processes',
       technology: 'Spring Boot',
       icon: '📄',
       color: '#4facfe',
       endpoints: [
-        { method: 'GET', path: '/api/v1/document-management-service/documents', description: 'List documents' },
-        { method: 'POST', path: '/api/v1/document-management-service/documents', description: 'Create document' },
-        { method: 'GET', path: '/api/v1/document-management-service/documents/{id}', description: 'Get document' },
-        { method: 'PUT', path: '/api/v1/document-management-service/documents/{id}', description: 'Update document' },
+        { method: 'GET', path: '/api/v1/file-management-service/documents', description: 'List documents' },
+        { method: 'POST', path: '/api/v1/file-management-service/documents', description: 'Create document' },
+        { method: 'GET', path: '/api/v1/file-management-service/documents/{id}', description: 'Get document' },
+        { method: 'PUT', path: '/api/v1/file-management-service/documents/{id}', description: 'Update document' },
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },
@@ -150,8 +150,8 @@ export default function SwaggerPage() {
       specUrl = '/api/swagger.json';
     } else if (selectedService === 'User Management Service') {
       specUrl = '/api/docs/user-management';
-    } else if (selectedService === 'Document Management Service') {
-      specUrl = '/api/docs/document-management';
+    } else if (selectedService === 'File Management Service') {
+      specUrl = '/api/docs/file-management';
     } else if (selectedService === 'Automation Service') {
       specUrl = '/api/docs/automation';
     } else {

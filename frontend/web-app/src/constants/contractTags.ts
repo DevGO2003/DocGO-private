@@ -1,6 +1,6 @@
 /**
  * Contract Tags Constants
- * Đồng bộ với ContractCategory enum từ backend document-management-service
+ * Đồng bộ với ContractCategory enum từ backend file-management-service
  * Tạo từ enum ContractCategory để đảm bảo consistency
  */
 

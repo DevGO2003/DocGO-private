@@ -122,7 +122,7 @@ async def get_system_config(request: Request):
         return RestResponse(
             apiVersion="v1",
             statusCode=500,
-            shortMessage="Internal Server Error")}",
+            shortMessage="Internal Server Error",
             data=None,
             timestamp=datetime.now(timezone.utc).isoformat(),
             requestId=str(uuid.uuid4()),

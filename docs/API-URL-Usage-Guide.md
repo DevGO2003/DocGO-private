@@ -15,7 +15,7 @@ http://localhost:8000
 # User Management Service  
 http://localhost:8001
 
-# Document Management Service
+# File Management Service
 http://localhost:8002
 
 # Automation Service
@@ -38,8 +38,8 @@ http://api-gateway:8000
 # User Management Service
 http://user-management-service:8001
 
-# Document Management Service
-http://document-management-service:8002
+# File Management Service
+http://file-management-service:8002
 
 # Automation Service
 http://automation-service:8003
@@ -65,10 +65,10 @@ http://zookeeper:2181
 ### Test từ máy host:
 ```bash
 # Test API Gateway
-curl http://localhost:8000/api/v1/document-management-service/v1/documents
+curl http://localhost:8000/api/v1/file-management-service/v1/documents
 
 # Test Document Management Service trực tiếp
-curl http://localhost:8002/api/v1/document-management-service/v1/documents
+curl http://localhost:8002/api/v1/file-management-service/v1/documents
 ```
 
 ### Test từ bên trong container:
@@ -77,8 +77,8 @@ curl http://localhost:8002/api/v1/document-management-service/v1/documents
 docker exec -it api-gateway /bin/bash
 
 # Test internal communication
-wget -O- http://api-gateway:8000/api/v1/document-management-service/v1/documents
-wget -O- http://document-management-service:8002/api/v1/document-management-service/v1/documents
+wget -O- http://api-gateway:8000/api/v1/file-management-service/v1/documents
+wget -O- http://file-management-service:8002/api/v1/file-management-service/v1/documents
 ```
 
 ## 🐳 **Docker Network Configuration**
@@ -89,7 +89,7 @@ wget -O- http://document-management-service:8002/api/v1/document-management-serv
 
 ### Container IPs:
 - `api-gateway`: 172.20.0.10
-- `document-management-service`: 172.20.0.7
+- `file-management-service`: 172.20.0.7
 - `user-management-service`: 172.20.0.6
 - `automation-service`: 172.20.0.8
 - `web-app`: 172.20.0.9
@@ -106,16 +106,16 @@ wget -O- http://document-management-service:8002/api/v1/document-management-serv
 const API_BASE_URL = 'http://localhost:8000';
 
 // Test từ Postman/curl
-curl http://localhost:8000/api/v1/document-management-service/v1/documents
+curl http://localhost:8000/api/v1/file-management-service/v1/documents
 ```
 
 ### ✅ **Đúng - Internal communication:**
 ```javascript
 // API Gateway service configuration
-const DOCUMENT_SERVICE_URL = 'http://document-management-service:8002';
+const DOCUMENT_SERVICE_URL = 'http://file-management-service:8002';
 
 // Service-to-service communication
-const response = await fetch('http://document-management-service:8002/api/v1/documents');
+const response = await fetch('http://file-management-service:8002/api/v1/documents');
 ```
 
 ### ❌ **Sai - External access với service name:**

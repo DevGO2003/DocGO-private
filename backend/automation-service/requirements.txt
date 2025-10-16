@@ -12,9 +12,9 @@ openpyxl
 striprtf
 httpx
 aiohttp
-# MongoDB integration - REMOVED (Automation Service không cần database)
-# motor==3.3.2
-# pymongo==4.6.0
+# MongoDB integration - ENABLED for audit logging
+motor==3.3.2
+pymongo==4.6.0
 # Redis integration
 redis==5.0.1
 aioredis==2.0.1
