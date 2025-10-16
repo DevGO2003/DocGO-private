@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'image/png'
     ]
     
-    const allowedExtensions = ['.pdf', '.docx', '.txt', '.jpg', '.jpeg', '.png']
+    const allowedExtensions = ['.pdf', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.json']
     const fileExtension = path.extname(file.originalFilename || '').toLowerCase()
     
     if (!allowedTypes.includes(file.mimetype) && !allowedExtensions.includes(fileExtension)) {

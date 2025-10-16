@@ -299,6 +299,59 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
 - `automation_processing_sessions` - Processing session tracking
 - `automation_error_logs` - Error logs với retry information
 
+## Event Types & Schema:
+Automation Service publishes events theo chuẩn Event Payload Standard:
+- **AutomationStarted** - Khi bắt đầu xử lý tài liệu
+- **FileUploaded** - Sau khi upload file lên S3 thành công
+- **FileProcessed** - Sau khi hoàn thành OCR processing
+- **DocumentClassified** - Sau khi AI phân loại tài liệu
+- **ContractSummaryUpdated** - Sau khi tạo contract summary
+- **DocumentCreated** - Sau khi lưu document vào File Management Service
+- **AutomationCompleted** - Khi hoàn thành toàn bộ quy trình
+- **AutomationFailed** - Khi có lỗi trong quá trình xử lý
+
+Event Schema:
+```json
+{
+  "eventVersion": "v1",
+  "eventType": "AutomationStarted",
+  "eventId": "uuid",
+  "timestamp": "ISO-8601",
+  "source": "automation-service",
+  "correlationId": "uuid",
+  "actor": {
+    "userId": "system",
+    "userRole": "system",
+    "ip": "client-ip"
+  },
+  "data": {},
+  "metadata": {
+    "region": "local",
+    "serviceVersion": "1.0.0"
+  }
+}
+```
+
+## Error Handling & Retry:
+- **S3 Upload**: 3 retries với exponential backoff (2^n)
+- **OCR Processing**: 2 retries với backoff factor 1.5
+- **AI Classification**: 2 retries với backoff factor 1.5
+- **AI Summarization**: 2 retries với backoff factor 1.5
+- **File Management API**: 3 retries với exponential backoff
+
+Tất cả errors được log vào MongoDB với:
+- correlationId để tracking
+- errorType để phân loại
+- retryable flag để xác định có thể retry không
+- retryCount để theo dõi số lần retry
+
+## Correlation ID Tracking:
+Mọi request đều có correlation ID xuyên suốt pipeline:
+- Tự động generate nếu không có trong header `X-Correlation-Id`
+- Truyền qua tất cả service calls
+- Lưu trong audit logs, processing sessions, events
+- Dùng để trace toàn bộ luồng xử lý từ đầu đến cuối
+
 Docs: `http://localhost:8003/docs#/`
 
 ## 🤝 Đóng góp

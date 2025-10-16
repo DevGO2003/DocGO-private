@@ -159,6 +159,7 @@ async def on_startup():
     try:
         # Initialize all services
         # await notification_service.initialize()
+        await audit_service.initialize()
         await batch_service.initialize()
         await event_service.initialize()
         
@@ -179,6 +180,7 @@ async def on_shutdown():
     try:
         # Stop all services
         # await notification_service.close()
+        await audit_service.close()
         await batch_service.close()
         await event_service.close()
         await worker.stop()
