@@ -331,11 +331,6 @@ export class FileStorageAPI {
 export class TagAPI {
   private basePath = '/api/v1/file-management-service'
 
-  async getPopularTags(view?: string) {
-    const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/tags/popular`, { params })
-  }
-
   async getAllTags(view?: string) {
     const params = view ? { view } : {}
     return apiClient.get<any[]>(`${this.basePath}/tags/all`, { params })

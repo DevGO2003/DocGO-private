@@ -9,12 +9,6 @@ import java.util.List;
 
 public interface ITagService {
     /**
-     * Lấy danh sách 10 tags phổ biến nhất
-     * @return List<TagDto> danh sách tags phổ biến
-     */
-    List<TagDto> getPopularTags();
-    
-    /**
      * Lấy tất cả tags được sắp xếp theo tên
      * @return List<TagDto> danh sách tất cả tags
      */

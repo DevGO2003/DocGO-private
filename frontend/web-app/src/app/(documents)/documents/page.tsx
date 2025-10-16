@@ -119,7 +119,7 @@ export default function DocumentsPage() {
       setTagsError(false)
       
       try {
-        const res = await tagAPI.getPopularTags()
+        const res = await tagAPI.getAllTags()
         const payload: any = res.data?.data
         // Extract tag names from TagDto objects
         const tagsFromApi: string[] = Array.isArray(payload) 
@@ -257,7 +257,7 @@ export default function DocumentsPage() {
       setTagsError(false)
       
       try {
-        const res = await tagAPI.getPopularTags()
+        const res = await tagAPI.getAllTags()
         const payload: any = res.data?.data
         const tagsFromApi: string[] = Array.isArray(payload) 
           ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)

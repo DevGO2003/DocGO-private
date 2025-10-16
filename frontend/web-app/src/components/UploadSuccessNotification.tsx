@@ -8,6 +8,7 @@ interface UploadSuccessNotificationProps {
   onDownloadFile?: () => void;
   onUploadMore?: () => void;
   onViewDetails?: () => void;
+  onViewList?: () => void;
   onClose?: () => void;
   showActions?: boolean;
 }
@@ -20,6 +21,7 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
   onDownloadFile,
   onUploadMore,
   onViewDetails,
+  onViewList,
   onClose,
   showActions = true
 }) => {
@@ -111,6 +113,15 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
                   >
                     <div className="w-4 h-4 mr-2">📄</div>
                     Chi tiết
+                  </button>
+                )}
+                {onViewList && (
+                  <button
+                    onClick={onViewList}
+                    className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                  >
+                    <div className="w-4 h-4 mr-2">📚</div>
+                    Xem danh sách
                   </button>
                 )}
               </div>

@@ -112,7 +112,7 @@ class AsyncDocumentProcessor:
                 file_mgmt_url = "http://localhost:8002"
                 async with httpx.AsyncClient(timeout=60) as client:
                     resp = await client.put(
-                        f"{file_mgmt_url}/api/v1/file-management-service/v1/files/{document_id}",
+                        f"{file_mgmt_url}/api/v1/file-storage-asset-service/files/{document_id}",
                         json=api_doc_payload
                     )
                     if resp.status_code >= 400:

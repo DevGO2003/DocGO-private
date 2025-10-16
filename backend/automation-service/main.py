@@ -200,6 +200,7 @@ async def validation_exception_handler(request, exc):
     error_response = ErrorResponse(
         statusCode=400,
         shortMessage="Bad Request",
+        description="Validation failed",
         error="; ".join(error_details),
         path=str(request.url),
         timestamp=datetime.now(),
@@ -232,6 +233,7 @@ async def http_exception_handler(request, exc):
     error_response = ErrorResponse(
         statusCode=mapped_status_code,
         shortMessage="Error",
+        description=str(exc.detail) if exc and getattr(exc, "detail", None) else "HTTP error",
         error=exc.detail,
         path=str(request.url),
         timestamp=datetime.now(),

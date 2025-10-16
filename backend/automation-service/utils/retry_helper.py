@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import inspect
 from typing import Callable, Any, Tuple, Type
 from datetime import datetime
 
@@ -33,9 +34,14 @@ async def retry_async(
     """
     last_exception = None
     
+    async def _run_maybe_async(fn: Callable, *a, **kw):
+        if inspect.iscoroutinefunction(fn):
+            return await fn(*a, **kw)
+        return await asyncio.to_thread(fn, *a, **kw)
+
     for retry_count in range(max_retries + 1):
         try:
-            return await func(*args, **kwargs)
+            return await _run_maybe_async(func, *args, **kwargs)
         except exceptions as e:
             last_exception = e
             

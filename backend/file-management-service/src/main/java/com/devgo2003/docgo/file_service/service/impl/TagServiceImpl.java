@@ -27,41 +27,7 @@ public class TagServiceImpl implements ITagService {
     @Autowired
     private TagRepository tagRepository;
 
-    @Override
-    public List<TagDto> getPopularTags() {
-        // Aggregation pipeline để đếm số lần xuất hiện của mỗi tag
-        Aggregation aggregation = Aggregation.newAggregation(
-            Aggregation.match(Criteria.where("isDeleted").is(false)), // Chỉ lấy contracts chưa xóa
-            Aggregation.unwind("tags"), // Tách tags thành các document riêng biệt
-            Aggregation.group("tags").count().as("count"), // Nhóm theo tag và đếm
-            Aggregation.sort(org.springframework.data.domain.Sort.Direction.DESC, "count"), // Sắp xếp theo số lần xuất hiện
-            Aggregation.limit(10) // Chỉ lấy 10 tags đầu
-        );
-
-        @SuppressWarnings("unchecked")
-        AggregationResults<Map<String, Object>> results = mongoTemplate.aggregate(
-            aggregation, 
-            "contracts", 
-            (Class<Map<String, Object>>) (Class<?>) Map.class
-        );
-
-        List<TagDto> popularTags = new ArrayList<>();
-        for (Map<String, Object> result : results.getMappedResults()) {
-            String tagName = (String) result.get("_id");
-            Long count = ((Number) result.get("count")).longValue();
-            
-            TagDto tagDto = TagDto.builder()
-                .name(tagName)
-                .displayName(formatTagDisplayName(tagName))
-                .count(count)
-                .isPopular(true)
-                .build();
-            
-            popularTags.add(tagDto);
-        }
-
-        return popularTags;
-    }
+    // Removed getPopularTags(): endpoint no longer used
 
     @Override
     public List<TagDto> getAllTags() {

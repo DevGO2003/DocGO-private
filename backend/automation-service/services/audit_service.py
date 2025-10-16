@@ -56,7 +56,7 @@ class AuditService:
     
     async def log_event(self, event_data: Dict[str, Any]) -> str:
         """
-        Log event to audit_logs collection
+        Log event to audit_logs collection and publish to Kafka
         
         Args:
             event_data: Event data containing eventType, correlationId, actor, data, etc.
@@ -64,30 +64,71 @@ class AuditService:
         Returns:
             Event ID
         """
-        if not self.enabled or not self.audit_logs:
-            return str(uuid.uuid4())
-            
+        event_id = str(uuid.uuid4())
+        
+        # Save to MongoDB if enabled
+        if self.enabled and self.audit_logs:
+            try:
+                document = {
+                    "_id": event_id,
+                    "eventId": event_id,
+                    "eventVersion": event_data.get("eventVersion", "v1"),
+                    "eventType": event_data.get("eventType"),
+                    "timestamp": datetime.now(timezone.utc),
+                    "source": "automation-service",
+                    "correlationId": event_data.get("correlationId"),
+                    "actor": event_data.get("actor", {"userId": "system", "userRole": "system", "ip": None}),
+                    "data": event_data.get("data", {}),
+                    "metadata": event_data.get("metadata", {})
+                }
+                
+                await self.audit_logs.insert_one(document)
+                
+            except Exception as e:
+                print(f"Failed to log event to MongoDB: {e}")
+        
+        # Publish to Kafka nếu có Kafka client
         try:
-            event_id = str(uuid.uuid4())
-            document = {
-                "_id": event_id,
-                "eventId": event_id,
-                "eventVersion": event_data.get("eventVersion", "v1"),
-                "eventType": event_data.get("eventType"),
-                "timestamp": datetime.now(timezone.utc),
-                "source": "automation-service",
-                "correlationId": event_data.get("correlationId"),
-                "actor": event_data.get("actor", {"userId": "system", "userRole": "system", "ip": None}),
-                "data": event_data.get("data", {}),
-                "metadata": event_data.get("metadata", {})
-            }
-            
-            await self.audit_logs.insert_one(document)
-            return event_id
-            
+            from services.event_service import event_service_instance
+            if event_service_instance and event_service_instance.redis_client:
+                import json
+                kafka_event = {
+                    "eventVersion": "v1",
+                    "eventType": event_data.get("eventType"),
+                    "eventId": event_id,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "source": "automation-service",
+                    "correlationId": event_data.get("correlationId"),
+                    "actor": event_data.get("actor", {
+                        "userId": "system",
+                        "userRole": "system",
+                        "ip": None
+                    }),
+                    "data": event_data.get("data", {}),
+                    "metadata": event_data.get("metadata", {
+                        "region": "local",
+                        "serviceVersion": "1.0.0"
+                    })
+                }
+                
+                # Determine Kafka topic based on event type
+                topic = "file.uploaded"  # default
+                if "Classified" in event_data.get("eventType", ""):
+                    topic = "ai.document.classified"
+                elif "Summary" in event_data.get("eventType", ""):
+                    topic = "contract.summary.updated"
+                elif "Created" in event_data.get("eventType", ""):
+                    topic = "file.uploaded"
+                
+                await event_service_instance.redis_client.publish(
+                    topic,
+                    json.dumps(kafka_event, default=str)
+                )
+                print(f"Published Kafka event: {event_data.get('eventType')} to topic: {topic}")
         except Exception as e:
-            print(f"Failed to log event: {e}")
-            return str(uuid.uuid4())
+            print(f"Failed to publish Kafka event: {e}")
+        
+        return event_id
     
     async def log_processing_session(self, session_data: Dict[str, Any]) -> str:
         """

@@ -34,7 +34,7 @@ export default function TagFilter({ selectedTags, onTagToggle, className = '' }:
       try {
         setLoading(true)
         setError(null)
-        const response = await tagAPI.getPopularTags()
+        const response = await tagAPI.getAllTags()
         const tags = response.data?.data || []
         setPopularTags(tags)
       } catch (err) {

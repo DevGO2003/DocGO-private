@@ -233,7 +233,7 @@ class DocumentProcessor:
             # Gọi API update document
             async with httpx.AsyncClient() as client:
                 response = await client.put(
-                    f"{Config.DOCUMENT_SERVICE_URL}/api/v1/file-management-service/v1/documents/{document_id}/processing-result",
+                    f"{Config.get_document_service_url()}/api/v1/file-storage-asset-service/documents/{document_id}/processing-result",
                     json=update_data,
                     timeout=30.0
                 )

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { automationAPI } from '@/lib/apis'
 import UploadProgress from '@/components/UploadProgress'
+import UploadSuccessNotification from '@/components/UploadSuccessNotification'
 
 // Import components
 import {
@@ -17,6 +18,7 @@ import {
 } from './_components'
 
 export default function UploadDocumentPage() {
+  const SHOW_SUCCESS_MODAL = false
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
@@ -24,6 +26,8 @@ export default function UploadDocumentPage() {
   const [newVersionName, setNewVersionName] = useState('')
   const [uploadingDocumentId, setUploadingDocumentId] = useState<string | null>(null)
   const [showProgress, setShowProgress] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [successFileInfo, setSuccessFileInfo] = useState<{ name: string; size?: string; type?: string } | null>(null)
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -129,16 +133,15 @@ export default function UploadDocumentPage() {
       if (response.data.statusCode === 201 || response.status === 201) {
         // Sync upload - completed immediately
         toast.success('Upload thành công!')
-        
-        // Show success modal with navigation options
-        setTimeout(() => {
-          const shouldViewList = confirm('Upload thành công! Bạn muốn xem danh sách tài liệu?')
-          if (shouldViewList) {
-            router.push('/documents')
-          } else {
-            router.push('/documents')
-          }
-        }, 500)
+        // Success UI modal disabled by flag
+        if (SHOW_SUCCESS_MODAL) {
+          setSuccessFileInfo({
+            name: selectedFile.name,
+            size: `${Math.round(selectedFile.size / 1024)} KB`,
+            type: selectedFile.type
+          })
+          setShowSuccessModal(true)
+        }
       } else if (response.data.statusCode === 202 || response.status === 202) {
         // Async upload - show progress tracking
         const documentId = (response.data.data as any)?.documentId
@@ -167,15 +170,15 @@ export default function UploadDocumentPage() {
   const handleProgressComplete = (result: any) => {
     console.log('[Upload Page] Processing completed:', result)
     toast.success('Xử lý hoàn tất!')
-    
-    setTimeout(() => {
-      const shouldViewList = confirm('Xử lý hoàn tất! Bạn muốn xem danh sách tài liệu?')
-      if (shouldViewList) {
-        router.push('/documents')
-      } else {
-        router.push('/documents')
-      }
-    }, 500)
+    // Success UI modal disabled by flag
+    if (SHOW_SUCCESS_MODAL && selectedFile) {
+      setSuccessFileInfo({
+        name: selectedFile.name,
+        size: `${Math.round(selectedFile.size / 1024)} KB`,
+        type: selectedFile.type
+      })
+      setShowSuccessModal(true)
+    }
     
     // Reset progress state
     setShowProgress(false)
@@ -253,6 +256,23 @@ export default function UploadDocumentPage() {
         </div>
 
       </div>
+    {/* Success Modal */}
+    {SHOW_SUCCESS_MODAL && showSuccessModal && successFileInfo && (
+      <UploadSuccessNotification
+        fileName={successFileInfo.name}
+        fileSize={successFileInfo.size}
+        fileType={successFileInfo.type}
+        onViewList={() => {
+          setShowSuccessModal(false)
+          router.push('/documents')
+        }}
+        onUploadMore={() => {
+          setSelectedFile(null)
+          setShowSuccessModal(false)
+        }}
+        onClose={() => setShowSuccessModal(false)}
+      />
+    )}
     </DashboardLayout>
   )
 }

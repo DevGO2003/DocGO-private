@@ -6,6 +6,7 @@ from typing import List, Optional
 import io
 import uuid
 from datetime import datetime, timezone
+import asyncio
 import httpx
 
 from schemas.file_schemas import FileUploadResponse, FileDownloadResponse, FileListResponse, FileDetailsResponse
@@ -32,33 +33,13 @@ websocket_manager = WebSocketManager()
 event_service = EventService()
 
 
-@router.post("", summary="Upload file", response_model=RestResponse[FileUploadResponse])
+@router.post("", summary="Upload document", tags=["📁 APIs Quản lý File"])
 async def upload_file(
+    request: Request,
     file: UploadFile = File(...),
-    folder: Optional[str] = Query(None),
-    user_id: Optional[str] = Query(None)
+    metadata: str | None = Form(None),
 ):
-    try:
-        response = file_service.upload_file(file, folder, user_id)
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=201,
-            shortMessage="Created",
-            data=response,
-            timestamp=response.upload_time.isoformat(),
-            requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
-        )
-    except HTTPException as e:
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=e.status_code,
-            shortMessage="Error",
-            data=None,
-            timestamp=datetime.now().isoformat(),
-            requestId=str(uuid.uuid4()),
-            path="/api/v1/automation-service/files"
-        )
+    return await upload_document(request=request, file=file, metadata=metadata)
 
 
 @router.get("/{file_id}/download", summary="Download file")
@@ -305,8 +286,7 @@ async def check_file_version(
         )
 
 
-# New unified upload route (no prefix to avoid duplicate /v1)
-@router.post("/api/v1/automation-service/documents/upload", summary="Upload document (unified)", tags=["📁 APIs Quản lý File"])
+# Unified upload implementation (helper used by upload_file)
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
@@ -621,7 +601,7 @@ async def upload_document(
                 file_mgmt_url = Config.get_document_service_url()
                 async with httpx.AsyncClient(timeout=10) as client:
                     resp = await client.post(
-                        f"{file_mgmt_url}/api/v1/file-management-service/v1/files", 
+                        f"{file_mgmt_url}/api/v1/file-storage-asset-service/files", 
                         json=api_doc_payload
                     )
                     if resp.status_code >= 400:
@@ -814,6 +794,9 @@ async def upload_document(
         })
         
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+# Alias removed as requested; single POST at files root is the canonical endpoint
 
 
 @router.websocket("/ws/document/{document_id}")
