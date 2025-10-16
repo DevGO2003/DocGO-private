@@ -117,6 +117,9 @@ class Config:
     KAFKA_TEXT_EXTRACTED_TOPIC: str = os.getenv("KAFKA_TEXT_EXTRACTED_TOPIC", "ai.text.extracted")
     KAFKA_DOCUMENT_CLASSIFIED_TOPIC: str = os.getenv("KAFKA_DOCUMENT_CLASSIFIED_TOPIC", "ai.document.classified")
     KAFKA_CONTRACT_SUMMARY_TOPIC: str = os.getenv("KAFKA_CONTRACT_SUMMARY_TOPIC", "contract.summary.updated")
+    # New JSON analysis topics
+    JSON_ANALYZE_TOPIC: str = os.getenv("JSON_ANALYZE_TOPIC", "json.analyze")
+    JSON_ANALYSIS_COMPLETED_TOPIC: str = os.getenv("JSON_ANALYSIS_COMPLETED_TOPIC", "json.analysis.completed")
     
     # ==========================================
     # SERVICE URLS (Smart URL building)

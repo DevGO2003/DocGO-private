@@ -17,13 +17,7 @@ export class AutomationController {
 
     try {
       // Route based on path
-      if (path.includes('/ai/extract') || path.includes('/document/extract')) {
-        return await this.handleExtract()
-      } else if (path.includes('/ai/summarize') || path.includes('/contracts/summarize')) {
-        return await this.handleSummarize()
-      } else if (path.includes('/ai/ocr') || path.includes('/ocr')) {
-        return await this.handleOCR()
-      } else if (path.includes('/ai/notifications')) {
+      if (path.includes('/ai/notifications')) {
         return await this.handleNotifications()
       } else if (path.includes('/process')) {
         return await this.handleProcess()
@@ -43,128 +37,7 @@ export class AutomationController {
   }
 
   // Document Processing Methods
-  private async handleExtract() {
-    if (!this.validateMethod(['POST'])) return
-
-    try {
-      const file = this.req.body.file || (this.req as any).file
-
-      if (!file) {
-        const requestId = generateRequestId()
-        throw new ValidationError(
-          'File is required',
-          requestId,
-          this.req.url || '/api/ai/extract'
-        )
-      }
-
-      // Get optional Gemini API key
-      const geminiApiKey = this.req.headers['gemini-api-key'] as string
-
-      // Call automation service directly
-      const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/document/extract`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-token': this.getToken() || '',
-          'gemini-api-key': geminiApiKey || ''
-        },
-        body: JSON.stringify({ file, geminiApiKey })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Automation service error: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-      return this.success(result.data, 200, 'Text extracted successfully')
-    } catch (error: any) {
-      return this.error(error)
-    }
-  }
-
-  private async handleSummarize() {
-    if (!this.validateMethod(['POST'])) return
-
-    try {
-      const { text, file } = this.req.body
-
-      if (!text && !file) {
-        const requestId = generateRequestId()
-        throw new ValidationError(
-          'Text or file is required',
-          requestId,
-          this.req.url || '/api/ai/summarize'
-        )
-      }
-
-      // Get optional Gemini API key
-      const geminiApiKey = this.req.headers['gemini-api-key'] as string
-
-      // Call automation service directly
-      const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/contracts/summarize`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-token': this.getToken() || '',
-          'gemini-api-key': geminiApiKey || ''
-        },
-        body: JSON.stringify({ text, file, geminiApiKey })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Automation service error: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-      return this.success(result.data, 200, 'Text summarized successfully')
-    } catch (error: any) {
-      return this.error(error)
-    }
-  }
-
-  private async handleOCR() {
-    if (!this.validateMethod(['POST'])) return
-
-    try {
-      const file = this.req.body.file || (this.req as any).file
-
-      if (!file) {
-        const requestId = generateRequestId()
-        throw new ValidationError(
-          'File is required',
-          requestId,
-          this.req.url || '/api/ai/ocr'
-        )
-      }
-
-      // Get optional Gemini API key
-      const geminiApiKey = this.req.headers['gemini-api-key'] as string
-
-      // Call automation service directly
-      const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/document/extract`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-token': this.getToken() || '',
-          'gemini-api-key': geminiApiKey || ''
-        },
-        body: JSON.stringify({ file, geminiApiKey })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Automation service error: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-      return this.success(result.data, 200, 'OCR completed successfully')
-    } catch (error: any) {
-      return this.error(error)
-    }
-  }
+  // Removed AI handlers (extract/summarize/ocr)
 
   // Contract Processing Methods
   private async handleProcess() {

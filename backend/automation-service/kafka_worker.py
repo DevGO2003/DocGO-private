@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 from config import Config
 from services.ai_processing_service import AutomationService
+from services.progress_service import ProgressService
 from schemas.contract_summary import ContractSummary
 import google.generativeai as genai
 # from config import get_gemini_api_key  # Already imported Config above
@@ -20,30 +21,35 @@ import google.generativeai as genai
 class AIKafkaWorker:
 	def __init__(self):
 		self.bootstrap_servers: str = Config.KAFKA_BOOTSTRAP_SERVERS
+		# Legacy topics retained for backward compatibility
 		self.consumer_topic: str = Config.KAFKA_FILE_UPLOADED_TOPIC
 		self.text_extracted_topic: str = Config.KAFKA_TEXT_EXTRACTED_TOPIC
 		self.document_classified_topic: str = Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC
 		self.contract_summary_topic: str = Config.KAFKA_CONTRACT_SUMMARY_TOPIC
+		# New JSON analysis topics
+		self.json_analyze_topic: str = getattr(Config, 'JSON_ANALYZE_TOPIC', 'json.analyze')
+		self.json_completed_topic: str = getattr(Config, 'JSON_ANALYSIS_COMPLETED_TOPIC', 'json.analysis.completed')
 		self.client_id: str = Config.KAFKA_CLIENT_ID  # "automation-service"
 		self.consumer: Optional[AIOKafkaConsumer] = None
 		self.producer: Optional[AIOKafkaProducer] = None
 		self._task: Optional[asyncio.Task] = None
 		self._stopping: bool = False
 		self._file_cache = {}  # In-memory cache for file content
+		self.progress = ProgressService()
 		
 		# Initialize shared AI service to avoid multiple Gemini API configurations
 		self.ai_service = AutomationService()
 
 	async def start(self) -> None:
 		if self.consumer is None:
-			# Subscribe to multiple topics for the full AI pipeline
+			# Subscribe to legacy topics + new json.analyze
 			topics = [
 				self.consumer_topic,  # file.uploaded
 				"ai.text.extraction.requested",
 				"ai.text.extracted", 
-				"ai.summary.creation.requested"
+				"ai.summary.creation.requested",
+				self.json_analyze_topic,
 			]
-			
 			self.consumer = AIOKafkaConsumer(
 				*topics,
 				bootstrap_servers=self.bootstrap_servers,
@@ -54,7 +60,7 @@ class AIKafkaWorker:
 				value_deserializer=lambda v: json.loads(v.decode("utf-8")),
 			)
 			await self.consumer.start()
-			logging.info(f"[AI_CONSUMER_STARTED] topics={topics} bootstrap={self.bootstrap_servers}")
+			logging.info(f"[CONSUMER_STARTED] topics={topics} bootstrap={self.bootstrap_servers}")
 
 		if self.producer is None:
 			self.producer = AIOKafkaProducer(
@@ -64,7 +70,7 @@ class AIKafkaWorker:
 				acks="all",
 			)
 			await self.producer.start()
-			logging.info(f"[AI_PRODUCER_STARTED] bootstrap={self.bootstrap_servers}")
+			logging.info(f"[PRODUCER_STARTED] bootstrap={self.bootstrap_servers}")
 
 		self._stopping = False
 		self._task = asyncio.create_task(self._consume_loop())
@@ -93,15 +99,14 @@ class AIKafkaWorker:
 
 	async def _consume_loop(self) -> None:
 		assert self.consumer is not None
+		await self.progress.initialize()
 		async for msg in self.consumer:
 			try:
 				event = msg.value
 				if not isinstance(event, dict):
 					continue
-				
 				event_type = event.get("eventType")
-				logging.info(f"[AI_CONSUME_EVENT] topic={self.consumer_topic} eventType={event_type} payload={json.dumps(event, ensure_ascii=False)}")
-				
+				logging.info(f"[CONSUME_EVENT] topic={msg.topic} eventType={event_type}")
 				if event_type == "FileUploaded":
 					await self._handle_file_uploaded(event)
 				elif event_type == "ai.text.extraction.requested":
@@ -110,11 +115,12 @@ class AIKafkaWorker:
 					await self._handle_text_extracted(event)
 				elif event_type == "ai.summary.creation.requested":
 					await self._handle_summary_creation_requested(event)
+				elif event_type == "JsonAnalysisRequested":
+					await self._handle_json_analysis_requested(event)
 				else:
-					logging.info(f"[AI_CONSUME_SKIP] Unhandled event type: {event_type}")
-					
+					logging.info(f"[CONSUME_SKIP] Unhandled event type: {event_type}")
 			except Exception:
-				logging.exception("[AI_CONSUME_ERROR] error while consuming event")
+				logging.exception("[CONSUME_ERROR] error while consuming event")
 				continue
 
 	async def _handle_file_uploaded(self, event: dict) -> None:
@@ -286,6 +292,55 @@ class AIKafkaWorker:
 		except Exception as e:
 			logging.error(f"[AI_SUMMARY_ERROR] Error in summary creation: {e}", exc_info=True)
 			await self._publish_error_event(event, data, str(e))
+
+	async def _handle_json_analysis_requested(self, event: dict) -> None:
+		try:
+			data = event.get("data", {})
+			job_id = data.get("jobId")
+			index = int(data.get("index", 0))
+			payload = data.get("payload", {})
+			# Update progress to processing
+			await self.progress.update_progress(job_id, step="processing", percent=10)
+			# Simulate analysis steps
+			await asyncio.sleep(0.05)
+			await self.progress.update_progress(job_id, percent=30)
+			# Normalize analysis result (placeholder mapping)
+			analysis = {
+				"overview": {
+					"title": payload.get("title") or payload.get("name") or "Document",
+					"status": "ACTIVE",
+					"documentType": payload.get("documentType") or "GENERAL",
+					"contractType": payload.get("contractType"),
+					"category": payload.get("category") or "Tài liệu",
+					"tags": payload.get("tags") or [],
+					"ownerUserId": payload.get("ownerUserId") or "system",
+					"isNew": False
+				},
+				"contract": payload.get("contract") or {},
+				"content": payload.get("content") or {"plaintext": payload.get("text")},
+				"file": payload.get("file") or {},
+				"storage": payload.get("storage") or {},
+				"metadata": payload.get("metadata") or {},
+				"audit": payload.get("audit") or {}
+			}
+			await self.progress.update_progress(job_id, percent=60)
+			# Publish completion event
+			message = {
+				"eventVersion": "v1",
+				"eventType": "JsonAnalysisCompleted",
+				"eventId": str(uuid.uuid4()),
+				"timestamp": datetime.now(timezone.utc).isoformat(),
+				"source": "automation-service",
+				"correlationId": event.get("correlationId"),
+				"actor": event.get("actor"),
+				"data": {"jobId": job_id, "index": index, "analysis": analysis},
+				"metadata": {"serviceVersion": "1.0.0"}
+			}
+			await self.producer.send_and_wait(self.json_completed_topic, message)
+			# Mark item completed
+			await self.progress.update_progress(job_id, completed_delta=1, percent=90)
+		except Exception:
+			logging.exception("[JSON_ANALYZE_ERROR]")
 
 	async def _download_file_from_url(self, file_url: str) -> Optional[bytes]:
 		

@@ -26,6 +26,7 @@ class EventService:
         # MongoDB client removed
         self.redis_client = None
         self.pubsub = None
+        self.kafka_producer = None
         
         # Event handlers
         self.handlers: Dict[str, Callable] = {}
@@ -57,6 +58,12 @@ class EventService:
         # MongoDB client removed
         if self.redis_client:
             await self.redis_client.close()
+        # Close Kafka producer
+        if self.kafka_producer:
+            try:
+                await self.kafka_producer.stop()
+            except Exception:
+                pass
 
     async def publish_event(self, request: EventPublishRequest) -> EventPublishResponse:
         
@@ -83,6 +90,23 @@ class EventService:
                 message=f"Failed to publish event: {str(e)}",
                 published_at=datetime.now(timezone.utc)
             )
+
+    async def publish_kafka(self, topic: str, message: Dict[str, Any]) -> None:
+        """Publish a message to Kafka using a shared AIOKafkaProducer.
+        Fallback to print if Kafka not configured.
+        """
+        try:
+            from aiokafka import AIOKafkaProducer  # local import to avoid hard dep at import time
+            if self.kafka_producer is None:
+                self.kafka_producer = AIOKafkaProducer(
+                    bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
+                    client_id=getattr(Config, 'KAFKA_CLIENT_ID', 'automation-service'),
+                    value_serializer=lambda v: json.dumps(v, default=str).encode('utf-8'),
+                )
+                await self.kafka_producer.start()
+            await self.kafka_producer.send_and_wait(topic, message)
+        except Exception as e:
+            print(f"[WARN] Kafka publish failed ({topic}): {e}. Message: {json.dumps(message)[:500]}")
 
     async def subscribe_to_events(self, request: EventSubscriptionRequest) -> EventSubscriptionResponse:
         

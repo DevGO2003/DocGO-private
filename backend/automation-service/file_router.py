@@ -21,6 +21,7 @@ from services.file_service import FileStorageService
 from services.websocket_manager import WebSocketManager
 from services.event_service import EventService
 from services.async_processor import async_processor
+from services.progress_service import ProgressService
 
 # Create router
 router = APIRouter(prefix="/api/v1/automation-service/files", tags=["APIs Quản lý File"])
@@ -31,6 +32,7 @@ ocr_service = OCRService()
 ai_service = AutomationService()
 websocket_manager = WebSocketManager()
 event_service = EventService()
+progress_service = ProgressService()
 
 
 @router.post("", summary="Upload document", tags=["📁 APIs Quản lý File"])
@@ -797,6 +799,109 @@ async def upload_document(
 
 
 # Alias removed as requested; single POST at files root is the canonical endpoint
+
+
+@router.post("/events/analyze-json", summary="Phân tích 1 JSON qua Kafka", tags=["📁 APIs Quản lý File"])
+async def analyze_json_event(request: Request, payload: dict):
+    await progress_service.initialize()
+    job_id = str(uuid.uuid4())
+    corr_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
+    client_ip = request.client.host if request.client else None
+    await progress_service.init_job(job_id, total=1)
+    now_iso = datetime.now(timezone.utc).isoformat()
+    message = {
+        "eventVersion": "v1",
+        "eventType": "JsonAnalysisRequested",
+        "eventId": str(uuid.uuid4()),
+        "timestamp": now_iso,
+        "source": "automation-service",
+        "correlationId": corr_id,
+        "actor": {"userId": "system", "userRole": "system", "ip": client_ip},
+        "data": {"jobId": job_id, "index": 0, "payload": payload},
+        "metadata": {"serviceVersion": "1.0.0"}
+    }
+    await event_service.publish_kafka(Config.JSON_ANALYZE_TOPIC if hasattr(Config, 'JSON_ANALYZE_TOPIC') else "json.analyze", message)
+    return RestResponse(
+        apiVersion="v1",
+        statusCode=202,
+        shortMessage="Accepted",
+        description="JSON accepted for analysis",
+        data={"jobId": job_id},
+        timestamp=now_iso,
+        requestId=corr_id,
+        path=str(request.url)
+    )
+
+
+@router.post("/events/analyze-batch", summary="Phân tích nhiều JSON qua Kafka", tags=["📁 APIs Quản lý File"])
+async def analyze_batch_event(request: Request, payloads: list[dict]):
+    if not isinstance(payloads, list) or len(payloads) == 0:
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=400,
+            shortMessage="Bad Request",
+            description="Payload phải là mảng JSON và không rỗng",
+            data=None,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=str(request.url)
+        )
+    await progress_service.initialize()
+    job_id = str(uuid.uuid4())
+    corr_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
+    client_ip = request.client.host if request.client else None
+    await progress_service.init_job(job_id, total=len(payloads))
+    now_iso = datetime.now(timezone.utc).isoformat()
+    for idx, item in enumerate(payloads):
+        message = {
+            "eventVersion": "v1",
+            "eventType": "JsonAnalysisRequested",
+            "eventId": str(uuid.uuid4()),
+            "timestamp": now_iso,
+            "source": "automation-service",
+            "correlationId": corr_id,
+            "actor": {"userId": "system", "userRole": "system", "ip": client_ip},
+            "data": {"jobId": job_id, "index": idx, "payload": item},
+            "metadata": {"serviceVersion": "1.0.0"}
+        }
+        await event_service.publish_kafka(Config.JSON_ANALYZE_TOPIC if hasattr(Config, 'JSON_ANALYZE_TOPIC') else "json.analyze", message)
+    return RestResponse(
+        apiVersion="v1",
+        statusCode=202,
+        shortMessage="Accepted",
+        description="Batch JSON accepted for analysis",
+        data={"jobId": job_id, "total": len(payloads)},
+        timestamp=now_iso,
+        requestId=corr_id,
+        path=str(request.url)
+    )
+
+
+@router.get("/events/{job_id}/status", summary="Trạng thái xử lý JSON", tags=["📁 APIs Quản lý File"])
+async def get_event_status(job_id: str):
+    await progress_service.initialize()
+    status = await progress_service.get_status(job_id)
+    if not status:
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=404,
+            shortMessage="Not Found",
+            description="Job không tồn tại hoặc đã hết hạn",
+            data=None,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=f"/api/v1/automation-service/files/events/{job_id}/status"
+        )
+    return RestResponse(
+        apiVersion="v1",
+        statusCode=200,
+        shortMessage="Success",
+        description="Lấy trạng thái job thành công",
+        data=status,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        requestId=str(uuid.uuid4()),
+        path=f"/api/v1/automation-service/files/events/{job_id}/status"
+    )
 
 
 @router.websocket("/ws/document/{document_id}")
