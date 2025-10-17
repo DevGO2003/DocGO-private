@@ -181,7 +181,7 @@ Mỗi request được gán unique ID để trace qua các services:
   "level": "info",
   "stage": "incoming",
   "method": "GET",
-  "originalUrl": "/api/v1/file-management-service/v1/contracts",
+  "originalUrl": "/api/v1/file-management-service/contracts",
   "query": { "pageNumber": 0, "pageSize": 9 },
   "clientIp": "::1"
 }

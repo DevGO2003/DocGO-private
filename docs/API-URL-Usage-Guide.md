@@ -65,10 +65,10 @@ http://zookeeper:2181
 ### Test từ máy host:
 ```bash
 # Test API Gateway
-curl http://localhost:8000/api/v1/file-management-service/v1/documents
+curl http://localhost:8000/api/v1/file-management-service/documents
 
 # Test Document Management Service trực tiếp
-curl http://localhost:8002/api/v1/file-management-service/v1/documents
+curl http://localhost:8002/api/v1/file-management-service/documents
 ```
 
 ### Test từ bên trong container:
@@ -77,8 +77,8 @@ curl http://localhost:8002/api/v1/file-management-service/v1/documents
 docker exec -it api-gateway /bin/bash
 
 # Test internal communication
-wget -O- http://api-gateway:8000/api/v1/file-management-service/v1/documents
-wget -O- http://file-management-service:8002/api/v1/file-management-service/v1/documents
+wget -O- http://api-gateway:8000/api/v1/file-management-service/documents
+wget -O- http://file-management-service:8002/api/v1/file-management-service/documents
 ```
 
 ## 🐳 **Docker Network Configuration**
@@ -106,7 +106,7 @@ wget -O- http://file-management-service:8002/api/v1/file-management-service/v1/d
 const API_BASE_URL = 'http://localhost:8000';
 
 // Test từ Postman/curl
-curl http://localhost:8000/api/v1/file-management-service/v1/documents
+curl http://localhost:8000/api/v1/file-management-service/documents
 ```
 
 ### ✅ **Đúng - Internal communication:**

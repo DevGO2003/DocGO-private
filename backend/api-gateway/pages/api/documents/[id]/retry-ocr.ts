@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Forward to Automation Service
-    const response = await fetch(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/v1/document/retry-ocr/${documentId}`, {
+    const response = await fetch(`${process.env.AUTOMATION_SERVICE_URL}/api/v1/automation-service/document/retry-ocr/${documentId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

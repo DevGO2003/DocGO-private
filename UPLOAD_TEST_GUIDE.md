@@ -116,7 +116,7 @@ curl -X POST \
 
 ### Test 3: WebSocket Progress Tracking
 
-**WebSocket URL**: `ws://localhost:8003/api/v1/automation-service/v1/documents/progress/{documentId}`
+**WebSocket URL**: `ws://localhost:8003/api/v1/automation-service/documents/progress/{documentId}`
 
 **Progress Stages**:
 1. **20%**: `saving_document` - "Đang lưu tài liệu..."
@@ -169,7 +169,7 @@ curl -X POST \
 
 ```javascript
 // Browser console
-const ws = new WebSocket('ws://localhost:8003/api/v1/automation-service/v1/documents/progress/DOCUMENT_ID');
+const ws = new WebSocket('ws://localhost:8003/api/v1/automation-service/documents/progress/DOCUMENT_ID');
 ws.onmessage = (event) => {
   console.log('Progress:', JSON.parse(event.data));
 };
@@ -202,7 +202,7 @@ AUTOMATION_SERVICE_URL=http://localhost:8003
 
 1. **WebSocket Connection Failed**
    - Check Automation Service is running on port 8003
-   - Verify WebSocket endpoint: `/api/v1/automation-service/v1/documents/progress/{id}`
+   - Verify WebSocket endpoint: `/api/v1/automation-service/documents/progress/{id}`
 
 2. **AI Processing Failed**
    - Check GEMINI_API_KEY is set
@@ -230,7 +230,7 @@ tail -f backend/automation-service/logs/app.log
 tail -f backend/file-management-service/logs/application.log
 
 # Test WebSocket manually
-wscat -c ws://localhost:8003/api/v1/automation-service/v1/documents/progress/DOCUMENT_ID
+wscat -c ws://localhost:8003/api/v1/automation-service/documents/progress/DOCUMENT_ID
 ```
 
 ## 📊 Success Criteria

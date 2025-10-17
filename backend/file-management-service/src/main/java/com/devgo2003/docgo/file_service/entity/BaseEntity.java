@@ -70,48 +70,56 @@ public abstract class BaseEntity {
     private Long version;
 
     // Getters / Setters
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public String getCreatedBy() {
         return createdBy;
     }
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public String getUpdatedBy() {
         return updatedBy;
     }
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public LocalDateTime getDeletedAt() {
         return deletedAt;
     }
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public String getDeletedBy() {
         return deletedBy;
     }
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Boolean getIsDeleted() {
         return isDeleted;
     }
     public void setIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;
     }
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Long getVersion() {
         return version;
     }
@@ -142,6 +150,7 @@ public abstract class BaseEntity {
      * Spring Data MongoDB sử dụng method này để xác định entity mới hay cũ
      * Các class con cần override method này để trả về true nếu id == null
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public abstract boolean isNew();
     
     /**

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/organizations")
+@RequestMapping("/api/v1/user-management-service/organizations")
 @Tag(name = "Organization Management", description = "API quản lý tổ chức")
 @RequiredArgsConstructor
 @Slf4j

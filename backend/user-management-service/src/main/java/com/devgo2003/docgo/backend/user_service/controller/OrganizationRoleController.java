@@ -18,7 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/user-management-service/v1/organizations/{organizationId}/roles")
+@RequestMapping("/api/v1/user-management-service/organizations/{organizationId}/roles")
 @Tag(name = "Organization Management", description = "API quản lý tổ chức")
 @RequiredArgsConstructor
 @Slf4j

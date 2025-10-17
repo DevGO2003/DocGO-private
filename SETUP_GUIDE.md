@@ -57,7 +57,7 @@ cd backend\file-management-service
 # Khi thấy dòng: "Started DocumentManagementServiceApplication"
 
 # Test API
-Invoke-WebRequest -Uri "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004" -Method GET
+Invoke-WebRequest -Uri "http://localhost:8002/api/v1/file-management-service/documents/DOC-2024-004" -Method GET
 ```
 
 ### Bước 4: Test Frontend
@@ -67,11 +67,11 @@ Invoke-WebRequest -Uri "http://localhost:8002/api/v1/file-management-service/v1/
 ## 🎯 Kết quả mong đợi
 
 ### API Endpoints hoạt động:
-- ✅ `GET /api/v1/file-management-service/v1/documents/DOC-2024-004`
-- ✅ `GET /api/v1/file-management-service/v1/documents/DOC-2024-004/comments`
-- ✅ `POST /api/v1/file-management-service/v1/documents/DOC-2024-004/comments`
-- ✅ `PUT /api/v1/file-management-service/v1/documents/DOC-2024-004/comments/{id}`
-- ✅ `DELETE /api/v1/file-management-service/v1/documents/DOC-2024-004/comments/{id}`
+- ✅ `GET /api/v1/file-management-service/documents/DOC-2024-004`
+- ✅ `GET /api/v1/file-management-service/documents/DOC-2024-004/comments`
+- ✅ `POST /api/v1/file-management-service/documents/DOC-2024-004/comments`
+- ✅ `PUT /api/v1/file-management-service/documents/DOC-2024-004/comments/{id}`
+- ✅ `DELETE /api/v1/file-management-service/documents/DOC-2024-004/comments/{id}`
 
 ### Frontend rendering:
 - ✅ Tab "Hợp đồng" - Tất cả thông tin cơ bản, doanh nghiệp, phân loại

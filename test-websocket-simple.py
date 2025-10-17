@@ -18,7 +18,7 @@ def test_websocket(doc_id):
         # WebSocket handshake
         key = base64.b64encode(b'test-key').decode()
         handshake = (
-            f"GET /api/v1/automation-service/v1/documents/progress/{doc_id} HTTP/1.1\r\n"
+            f"GET /api/v1/automation-service/documents/progress/{doc_id} HTTP/1.1\r\n"
             f"Host: localhost:8003\r\n"
             f"Upgrade: websocket\r\n"
             f"Connection: Upgrade\r\n"

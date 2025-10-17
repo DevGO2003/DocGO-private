@@ -265,7 +265,7 @@ export class FileStorageAPI {
     }
     
     const params = view ? { view } : {}
-    // POST /api/v1/automation-service/v1/files
+    // POST /api/v1/automation-service/files
     return apiClient.postWithProgress<any>(`${this.basePath}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -281,7 +281,7 @@ export class FileStorageAPI {
   }
 
   async getAllFiles(view: string = 'table', page: number = 0, size: number = 10) {
-    // GET /api/v1/automation-service/v1/files
+    // GET /api/v1/automation-service/files
     return apiClient.get<any>(`${this.basePath}`, {
       params: {
         view,
@@ -292,12 +292,12 @@ export class FileStorageAPI {
   }
 
   async getFileDetails(fileId: string) {
-    // GET /api/v1/automation-service/v1/files/{fileId}
+    // GET /api/v1/automation-service/files/{fileId}
     return apiClient.get<any>(`${this.basePath}/${fileId}`)
   }
 
   async downloadFile(fileId: string) {
-    // GET /api/v1/automation-service/v1/files/{fileId}/download
+    // GET /api/v1/automation-service/files/{fileId}/download
     return apiClient.get(`${this.basePath}/${fileId}/download`, {
       responseType: 'blob'
     })
@@ -305,13 +305,13 @@ export class FileStorageAPI {
 
   async getFile(id: string, view?: string) {
     const params = view ? { view } : {}
-    // GET /api/v1/automation-service/v1/files/{id}
+    // GET /api/v1/automation-service/files/{id}
     return apiClient.get<any>(`${this.basePath}/${id}`, { params })
   }
 
   async deleteFile(id: string, view?: string) {
     const params = view ? { view } : {}
-    // DELETE /api/v1/automation-service/v1/files/{id}
+    // DELETE /api/v1/automation-service/files/{id}
     return apiClient.delete<any>(`${this.basePath}/${id}`, { params })
   }
 
@@ -322,7 +322,7 @@ export class FileStorageAPI {
     category?: string
     view?: string
   }) {
-    // GET /api/v1/automation-service/v1/files
+    // GET /api/v1/automation-service/files
     return apiClient.get<PaginatedResponse<any>>(`${this.basePath}`, { params })
   }
 }

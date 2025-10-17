@@ -147,7 +147,7 @@ class ServiceManager {
     });
 
     try {
-      const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/user-management-service/v1/auth/login', loginRequest);
+      const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/user-management-service/auth/login', loginRequest);
       return response.data;
     } catch (error: any) {
       logger.error('❌ Authentication failed:', {
@@ -168,7 +168,7 @@ class ServiceManager {
     }
 
     try {
-      const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/user-management-service/v1/auth/register', authRequest);
+      const response: AxiosResponse<RestResponse<any>> = await service.post('/api/v1/user-management-service/auth/register', authRequest);
       return response.data;
     } catch (error: any) {
       logger.error('❌ User registration failed:', error.response?.data || error.message);

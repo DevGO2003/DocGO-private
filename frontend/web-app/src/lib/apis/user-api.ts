@@ -1,5 +1,5 @@
 // User Management Service API
-// Base path: /api/v1/user-management-service/v1
+// Base path: /api/v1/user-management-service
 
 import { apiClient } from '../http/api-client'
 import { ApiResponse } from '@/types/api'

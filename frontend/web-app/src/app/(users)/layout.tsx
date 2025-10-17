@@ -11,3 +11,4 @@ export default function UsersLayout({ children }: UsersLayoutProps) {
     </div>
   )
 }
+

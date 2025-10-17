@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from typing import List, Dict, Any
+from botocore.config import Config as BotoConfig
+import boto3
 
 # Load .env file
 _service_dir = Path(__file__).resolve().parent
@@ -214,10 +216,45 @@ def get_redis_client():
 # ==========================================
 # S3 CLIENT HELPERS
 # ==========================================
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "https://s3.filebase.com")
+S3_REGION = os.getenv("S3_REGION", "us-east-1")
+S3_ACCESS_KEY_ID = os.getenv("S3_ACCESS_KEY_ID", "")
+S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY", "")
+S3_BUCKET = os.getenv("S3_BUCKET", "")
+S3_PUBLIC_BUCKET = os.getenv("S3_PUBLIC_BUCKET", "false").lower() == "true"
+
+def get_bucket_name() -> str:
+    return S3_BUCKET
+
+def get_s3_endpoint() -> str:
+    return S3_ENDPOINT
+
+def is_s3_enabled() -> bool:
+    return bool(S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY and S3_BUCKET)
+
 def get_s3_client():
-    """Get S3 client instance"""
-    import boto3
-    return boto3.client('s3')
+    """Get S3 client instance (Filebase-compatible)"""
+    return boto3.client(
+        's3',
+        endpoint_url=S3_ENDPOINT,
+        region_name=S3_REGION,
+        aws_access_key_id=S3_ACCESS_KEY_ID,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+        config=BotoConfig(signature_version='s3v4', s3={'addressing_style': 'path'})
+    )
+
+def build_public_url(key: str) -> str:
+    """Build public URL when bucket is public (no signature)."""
+    return f"{S3_ENDPOINT.rstrip('/')}/{S3_BUCKET}/{key}"
+
+def get_presigned_get_url(key: str, expires_in_seconds: int = 3600) -> str:
+    """Generate presigned GET URL using SigV4."""
+    client = get_s3_client()
+    return client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': S3_BUCKET, 'Key': key},
+        ExpiresIn=expires_in_seconds,
+    )
 
 # Legacy function wrappers for backward compatibility
 def get_redis_url():

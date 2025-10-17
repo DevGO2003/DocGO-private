@@ -138,7 +138,7 @@ export default function LoginPage() {
       try {
         // Check OAuth config against the same auth service base URL
         const authServiceBase = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8001'
-        const url = `${authServiceBase}/api/v1/user-management-service/v1/auth/oauth2/get-config`
+        const url = `${authServiceBase}/api/v1/user-management-service/auth/oauth2/get-config`
         const res = await fetch(url, {
           method: 'GET',
           headers: {

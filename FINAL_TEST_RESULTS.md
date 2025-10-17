@@ -42,7 +42,7 @@ curl -X POST -F "file=@test-contract.txt" -F "folder=documents" -F "user_id=test
   "description": "Upload và xử lý đồng bộ thành công",
   "data": {
     "documentId": "0199e5c5-f188-71af-a298-2a1a1956ffd1",
-    "fileUrl": "http://automation-service:8003/api/v1/automation-service/v1/files/...",
+    "fileUrl": "http://automation-service:8003/api/v1/automation-service/files/...",
     "ocrText": "HỢP ĐỒNG LAO ĐỘNG\n\nĐiều 1: Thông tin các bên...",
     "classificationResult": {
       "classification": "CONTRACT",
@@ -68,7 +68,7 @@ curl -X POST -F "file=@test-large.txt" -F "folder=documents" -F "user_id=test-us
   "description": "Tệp lớn, đã nhận và đang xử lý nền", 
   "data": {
     "documentId": "0199e5c8-d8c8-7a4c-9eac-2d7417dd73e3",
-    "fileUrl": "http://automation-service:8003/api/v1/automation-service/v1/files/...",
+    "fileUrl": "http://automation-service:8003/api/v1/automation-service/files/...",
     "processingStatus": "PROCESSING"
   }
 }

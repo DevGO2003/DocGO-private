@@ -17,7 +17,7 @@
 
 ### 3. **API Gateway Proxy** - ✅ PASSED
 - **Endpoint**: `POST /api/files/upload`
-- **Proxy to**: `/api/v1/automation-service/v1/documents/upload`
+- **Proxy to**: `/api/v1/automation-service/documents/upload`
 - **Response Format**: Consistent RestResponse format
 
 ### 4. **AI Processing** - ✅ PASSED

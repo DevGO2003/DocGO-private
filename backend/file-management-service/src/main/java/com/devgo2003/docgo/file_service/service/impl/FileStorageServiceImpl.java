@@ -55,6 +55,39 @@ public class FileStorageServiceImpl implements FileStorageService {
             
             System.out.println("🔍 FileStorageServiceImpl: File saved to: " + filePath.toString());
             
+            // Persist basic metadata to Mongo so GET one can find it by fileId
+            try {
+                FileEntity entity = new FileEntity();
+                entity.setId(fileId);
+                // Minimal metadata blocks; nested DTOs can be null-safe
+                com.devgo2003.docgo.file_service.dto.FileInfo info = new com.devgo2003.docgo.file_service.dto.FileInfo();
+                info.setId(fileId);
+                info.setName(file.getOriginalFilename());
+                info.setType(file.getContentType());
+                info.setSize(file.getSize());
+                entity.setFile(info);
+                
+                com.devgo2003.docgo.file_service.dto.Overview overview = new com.devgo2003.docgo.file_service.dto.Overview();
+                overview.setTitle(file.getOriginalFilename());
+                overview.setStatus("UPLOADED");
+                overview.setOwnerUserId(userId);
+                entity.setOverview(overview);
+                
+                com.devgo2003.docgo.file_service.dto.Storage storage = new com.devgo2003.docgo.file_service.dto.Storage();
+                com.devgo2003.docgo.file_service.dto.LocalInfo localInfo = new com.devgo2003.docgo.file_service.dto.LocalInfo();
+                localInfo.setPath(filePath.toString());
+                storage.setLocal(localInfo);
+                entity.setStorage(storage);
+                
+                // Initialize audit fields via BaseEntity helper if available
+                entity.initializeNewEntity();
+                
+                fileRepository.save(entity);
+            } catch (Exception persistEx) {
+                System.err.println("🔍 FileStorageServiceImpl: Warning - failed to persist metadata: " + persistEx.getMessage());
+                persistEx.printStackTrace();
+            }
+            
             return FileUploadResponse.builder()
                     .fileId(fileId)
                     .filename(file.getOriginalFilename())

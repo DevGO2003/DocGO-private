@@ -9,7 +9,7 @@ import json
 import sys
 
 async def test_websocket(doc_id):
-    uri = f"ws://localhost:8003/api/v1/automation-service/v1/documents/progress/{doc_id}"
+    uri = f"ws://localhost:8003/api/v1/automation-service/documents/progress/{doc_id}"
     
     print(f"🔌 Connecting to WebSocket: {uri}")
     

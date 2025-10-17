@@ -58,12 +58,17 @@ class FileStorageService:
                 # Use S3 only
                 try:
                     import boto3
+                    from botocore.config import Config as BotoConfig
                     s3_client = boto3.client(
                         's3',
                         endpoint_url=self.s3_endpoint,
                         region_name=self.s3_region,
                         aws_access_key_id=self.s3_access_key,
-                        aws_secret_access_key=self.s3_secret_key
+                        aws_secret_access_key=self.s3_secret_key,
+                        config=BotoConfig(
+                            signature_version='s3v4',
+                            s3={'addressing_style': 'path'}
+                        )
                     )
 
                     s3_client.put_object(
@@ -118,12 +123,17 @@ class FileStorageService:
                 # Download from S3 (Filebase)
                 try:
                     import boto3
+                    from botocore.config import Config as BotoConfig
                     s3_client = boto3.client(
                         's3',
                         endpoint_url=self.s3_endpoint,
                         region_name=self.s3_region,
                         aws_access_key_id=self.s3_access_key,
-                        aws_secret_access_key=self.s3_secret_key
+                        aws_secret_access_key=self.s3_secret_key,
+                        config=BotoConfig(
+                            signature_version='s3v4',
+                            s3={'addressing_style': 'path'}
+                        )
                     )
                     
                     # Try to find the file by listing objects with file_id prefix

@@ -12,7 +12,7 @@ sequenceDiagram
 
     Note over FE,GW: Client luôn gọi qua API Gateway
     FE->>GW: POST /api/files/upload (multipart: file + metadata + headers)
-    GW->>AS: Proxy → POST /api/v1/automation-service/v1/documents/upload
+    GW->>AS: Proxy → POST /api/v1/automation-service/documents/upload
 
     alt File < 2MB (Synchronous)
         Note over AS: 1) Validate + chọn sync mode
@@ -28,7 +28,7 @@ sequenceDiagram
             AI-->>AS: 8) summaryResult
         end
 
-        AS->>DS: 9) POST /api/v1/file-management-service/v1/documents<br/>(metadata + fileUrl + AI results)
+        AS->>DS: 9) POST /api/v1/file-management-service/documents<br/>(metadata + fileUrl + AI results)
         DS->>MDB: 10) Save document (COMPLETED)
         MDB-->>DS: 11) documentId
         DS-->>AS: 12) 201 Created {documentId}
@@ -43,7 +43,7 @@ sequenceDiagram
         AS->>S3: 2) Upload file
         S3-->>AS: 3) {fileUrl, s3Key}
 
-        AS->>DS: 4) POST /api/v1/file-management-service/v1/documents<br/>(metadata + fileUrl, status: PENDING)
+        AS->>DS: 4) POST /api/v1/file-management-service/documents<br/>(metadata + fileUrl, status: PENDING)
         DS->>MDB: 5) Save document (PENDING)
         MDB-->>DS: 6) documentId
         DS-->>AS: 7) 201 Created {documentId}
@@ -76,7 +76,7 @@ sequenceDiagram
                 WS-->>FE: 90%
             end
 
-            AS->>DS: PUT /api/v1/file-management-service/v1/documents/{documentId}<br/>(ocrText?, classificationResult, summaryResult?, processingStatus: COMPLETED)
+            AS->>DS: PUT /api/v1/file-management-service/documents/{documentId}<br/>(ocrText?, classificationResult, summaryResult?, processingStatus: COMPLETED)
             DS->>MDB: Update document (COMPLETED)
             MDB-->>DS: OK
             DS-->>AS: 200 OK

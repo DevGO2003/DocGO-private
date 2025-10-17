@@ -204,9 +204,9 @@ export default function TestAPIPage() {
                     <h3 className="font-semibold mb-2">API Endpoints</h3>
                     <ul className="text-sm text-gray-600 space-y-1">
                       <li>• GET /api/health - Health check</li>
-                      <li>• POST /api/v1/user-management-service/v1/auth/login - Login</li>
-                      <li>• POST /api/v1/user-management-service/v1/auth/register - Register</li>
-                      <li>• GET /api/v1/file-management-service/v1/documents - Get documents</li>
+                      <li>• POST /api/v1/user-management-service/auth/login - Login</li>
+                      <li>• POST /api/v1/user-management-service/auth/register - Register</li>
+                      <li>• GET /api/v1/file-management-service/documents - Get documents</li>
                     </ul>
                   </div>
                 </div>

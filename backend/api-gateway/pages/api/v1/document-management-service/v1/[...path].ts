@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method || 'GET';
   
   // Construct full path for file-management-service
-  const fullPath = `/api/v1/file-management-service/v1/${resourcePath}`;
+  const fullPath = `/api/v1/file-management-service/${resourcePath}`;
   
   logger.info(`🔄 Document Management Service Proxy: ${method} ${fullPath}`);
 

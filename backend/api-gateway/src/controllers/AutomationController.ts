@@ -60,7 +60,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/contracts/process`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/contracts/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/contracts/validate`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/contracts/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/files?${new URLSearchParams(params as any)}`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/files?${new URLSearchParams(params as any)}`, {
         method: 'GET',
         headers: {
           'x-user-token': this.getToken() || ''
@@ -209,7 +209,7 @@ export class AutomationController {
         formData.append('metadata', JSON.stringify(metadata))
       }
 
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/files`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/files`, {
         method: 'POST',
         headers: {
           'x-user-token': this.getToken() || ''
@@ -236,7 +236,7 @@ export class AutomationController {
       switch (method) {
         case 'GET':
           const automationServiceUrl = appConfig.automationServiceUrl
-          const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/files/${fileId}`, {
+          const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/files/${fileId}`, {
             method: 'GET',
             headers: {
               'x-user-token': this.getToken() || ''
@@ -250,7 +250,7 @@ export class AutomationController {
           const result = await response.json()
           return this.success(result.data, 200, 'File retrieved successfully')
         case 'DELETE':
-          const deleteResponse = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/files/${fileId}`, {
+          const deleteResponse = await fetch(`${automationServiceUrl}/api/v1/automation-service/files/${fileId}`, {
             method: 'DELETE',
             headers: {
               'x-user-token': this.getToken() || ''
@@ -310,7 +310,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/batch/process`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/batch/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -348,7 +348,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/batch/status/${batchId}`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/batch/status/${batchId}`, {
         method: 'GET',
         headers: {
           'x-user-token': this.getToken() || ''
@@ -383,7 +383,7 @@ export class AutomationController {
 
       // Call automation service directly
       const automationServiceUrl = appConfig.automationServiceUrl
-      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/v1/batch/results/${batchId}`, {
+      const response = await fetch(`${automationServiceUrl}/api/v1/automation-service/batch/results/${batchId}`, {
         method: 'GET',
         headers: {
           'x-user-token': this.getToken() || ''

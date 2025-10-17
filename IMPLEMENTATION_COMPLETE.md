@@ -201,7 +201,7 @@ curl http://localhost:8000/api/v1/automation-service/files/events/{jobId}/status
 
 ### 4. Verify File Service
 ```bash
-curl http://localhost:8000/api/v1/file-management-service/v1/files?page=0&size=10
+curl http://localhost:8000/api/v1/file-management-service/files?page=0&size=10
 ```
 
 ### 5. WebSocket (Optional)

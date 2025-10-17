@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from schemas.response import RestResponse
 from services.ai_processing_service import AutomationService
 
-router = APIRouter(prefix="/api/v1/automation-service/v1")
+router = APIRouter(prefix="/api/v1/automation-service")
 
 
 @router.post("/contracts/summarize", summary="Tóm tắt hợp đồng", tags=["🤖 APIs Xử lý AI"])

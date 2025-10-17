@@ -11,7 +11,7 @@ import time
 
 async def test_websocket_progress(doc_id):
     """Test WebSocket progress tracking"""
-    uri = f"ws://localhost:8003/api/v1/automation-service/v1/documents/progress/{doc_id}"
+    uri = f"ws://localhost:8003/api/v1/automation-service/documents/progress/{doc_id}"
     
     print(f"🔌 Connecting to WebSocket: {uri}")
     print(f"📄 Document ID: {doc_id}")

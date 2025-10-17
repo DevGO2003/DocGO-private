@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import com.devgo2003.docgo.file_service.controller.ContractController;
+import com.devgo2003.docgo.file_service.controller.FileController;
 import com.devgo2003.docgo.file_service.script.ContractTypeMigrationScript;
 import com.devgo2003.docgo.file_service.script.SampleDataSeeder;
 import com.devgo2003.docgo.file_service.script.TagMigrationScript;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @WebMvcTest(
-        controllers = DocumentController.class,
+        controllers = FileController.class,
         excludeFilters = {
                 
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ContractController.class),
@@ -41,8 +42,8 @@ public class DocumentControllerTest {
     private MockMvc mockMvc;
 
     @MockBean private com.devgo2003.docgo.file_service.service.FileStorageService fileStorageService;
-    @MockBean private com.devgo2003.docgo.file_service.service.DocumentService documentService;
-    @MockBean private com.devgo2003.docgo.file_service.repository.DocumentRepository documentRepository;
+    @MockBean private com.devgo2003.docgo.file_service.service.FileService documentService;
+    @MockBean private com.devgo2003.docgo.file_service.repository.FileRepository documentRepository;
     @MockBean private com.devgo2003.docgo.file_service.service.ApprovalService approvalService;
     @MockBean private com.devgo2003.docgo.file_service.service.ContractService contractService;
     @MockBean private ContractController contractController;
@@ -55,7 +56,7 @@ public class DocumentControllerTest {
         String samplePath = "/home/thaigo/DocGO-Private/documents/architecture/api-response-sample.json";
         String expected = Files.readString(Paths.get(samplePath));
 
-        mockMvc.perform(get("/api/v1/file-management-service/v1/files/DOC-2024-004-NEW"))
+        mockMvc.perform(get("/api/v1/file-management-service/files/DOC-2024-004-NEW"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expected, true));
     }

@@ -50,7 +50,7 @@ response=$(curl -s -X POST \
     -F "file=@test-document.txt" \
     -F "folder=documents" \
     -F "user_id=test-user" \
-    "$AUTOMATION_SERVICE_URL/api/v1/automation-service/v1/documents/upload")
+    "$AUTOMATION_SERVICE_URL/api/v1/automation-service/documents/upload")
 
 echo "Response:"
 echo "$response" | jq . 2>/dev/null || echo "$response"
@@ -68,7 +68,7 @@ elif echo "$response" | grep -q '"statusCode":202'; then
     # Test WebSocket connection
     echo ""
     echo -e "${BLUE}Testing WebSocket connection...${NC}"
-    echo "WebSocket URL: ws://localhost:8003/api/v1/automation-service/v1/documents/progress/$doc_id"
+    echo "WebSocket URL: ws://localhost:8003/api/v1/automation-service/documents/progress/$doc_id"
     echo "You can test this manually with a WebSocket client"
     
 else

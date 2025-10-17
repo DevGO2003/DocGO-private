@@ -103,7 +103,7 @@ export interface FileSearchParams {
 }
 
 export class AutomationAPI {
-  private basePath = '/api/v1/automation-service/v1'
+  private basePath = '/api/v1/automation-service'
 
   // Document Processing
   async extractText(file: File, apiKey?: string, view?: string) {

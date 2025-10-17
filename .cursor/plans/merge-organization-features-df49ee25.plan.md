@@ -49,7 +49,7 @@
 - Ưu tiên nội dung file từ `vibe-coding` (mới hơn) nhưng vẫn tuân thủ API Standards dự án hiện tại.
 - Nếu compile báo thiếu DTO/exception/service, bổ sung đúng file tương ứng từ `vibe-coding` (không tự chế).
 - Frontend: nếu thiếu API client, thêm `lib/apis/organization-api.ts` từ `vibe-coding` (hoặc bật mock sẵn trong components).
-- Giữ nguyên cấu trúc RestResponse và URL base `/api/v1/user-management-service/v1/...`.
+- Giữ nguyên cấu trúc RestResponse và URL base `/api/v1/user-management-service/...`.
 
 ### A) Backend - User Management Service
 
