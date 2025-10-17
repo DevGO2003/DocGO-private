@@ -1,6 +1,8 @@
 package com.devgo2003.docgo.file_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.devgo2003.docgo.file_service.entity.FileEntity;
+import com.devgo2003.docgo.file_service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,12 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Optional;
 
 @Service
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = false)
@@ -31,22 +35,215 @@ public class ContractKafkaService {
 
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    private FileService fileService;
 
     /**
-     * Consume SummaryCreated events từ AI Processing Service
+     * Consume File Events từ Automation Service
      */
-    @KafkaListener(topics = "${kafka.ai-events-topic:ai.events}", groupId = "file-management-service-group")
-    public void handleSummaryCreated(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    @KafkaListener(topics = {
+        "${app.kafka.topic.file-uploaded:file.uploaded}",
+        "${app.kafka.topic.file-processed:file.processed}",
+        "${app.kafka.topic.file-updated:file.updated}",
+        "${app.kafka.topic.file-classified:file.classified}",
+        "${app.kafka.topic.file-analyzed:file.analyzed}",
+        "${app.kafka.topic.file-deleted:file.deleted}"
+    }, groupId = "file-management-service-group")
+    public void handleFileEvents(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
             String eventType = (String) event.get("eventType");
             
-            if ("SummaryCreated".equals(eventType)) {
-                logger.info("Received SummaryCreated event: {}", event);
-                processSummaryCreated(event);
+            logger.info("Received file event type: {} from topic: {}", eventType, topic);
+            
+            if ("FileUploaded".equals(eventType)) {
+                processFileUploaded(event);
+            } else if ("FileProcessed".equals(eventType)) {
+                processFileProcessed(event);
+            } else if ("FileUpdated".equals(eventType)) {
+                processFileUpdated(event);
+            } else if ("FileClassified".equals(eventType)) {
+                processFileClassified(event);
+            } else if ("FileAnalyzed".equals(eventType)) {
+                processFileAnalyzed(event);
+            } else if ("FileDeleted".equals(eventType)) {
+                processFileDeleted(event);
+            } else {
+                logger.info("Unhandled file event type: {}", eventType);
             }
         } catch (Exception e) {
-            logger.error("Error processing SummaryCreated event: {}", e.getMessage(), e);
+            logger.error("Error processing file event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileUploaded(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            
+            logger.info("Processing FileUploaded event for file: {}", fileId);
+            
+            // Tạo FileEntity từ Kafka event
+            FileEntity fileEntity = new FileEntity();
+            fileEntity.setId(fileId);
+            
+            // Tạo Overview
+            Overview overview = new Overview();
+            overview.setTitle((String) data.get("filename"));
+            overview.setStatus("UPLOADED");
+            overview.setDocumentType("GENERAL_FILE");
+            overview.setOwnerUserId("system");
+            overview.setIsNew(true);
+            fileEntity.setOverview(overview);
+            
+            // Tạo FileInfo
+            FileInfo fileInfo = new FileInfo();
+            fileInfo.setId(fileId);
+            fileInfo.setName((String) data.get("filename"));
+            fileInfo.setType((String) data.get("contentType"));
+            fileInfo.setSize(((Number) data.get("size")).longValue());
+            fileInfo.setVersion(1);
+            fileEntity.setFile(fileInfo);
+            
+            // Tạo Storage
+            Storage storage = new Storage();
+            Map<String, Object> storageData = (Map<String, Object>) data.get("storage");
+            if (storageData != null) {
+                S3Info s3Info = new S3Info();
+                s3Info.setUrl((String) storageData.get("url"));
+                s3Info.setType((String) storageData.get("type"));
+                storage.setS3(s3Info);
+            }
+            fileEntity.setStorage(storage);
+            
+            // Tạo Audit
+            Audit audit = new Audit();
+            audit.setCreatedAt(Instant.now().toString());
+            audit.setCreatedBy("system");
+            audit.setUpdatedAt(Instant.now().toString());
+            audit.setUpdatedBy("system");
+            audit.setIsDeleted(false);
+            audit.setVersion(1);
+            fileEntity.setAudit(audit);
+            
+            // Lưu vào MongoDB
+            fileService.saveFile(fileEntity);
+            
+            logger.info("File entity saved to MongoDB for file: {}", fileId);
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileUploaded event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileProcessed(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            
+            logger.info("Processing FileProcessed event for file: {}", fileId);
+            
+            // Tìm file entity hiện tại
+            Optional<FileEntity> existingFile = fileService.getFileById(fileId);
+            if (existingFile.isPresent()) {
+                FileEntity fileEntity = existingFile.get();
+                
+                // Cập nhật Content block
+                Content content = new Content();
+                Map<String, Object> processing = (Map<String, Object>) data.get("processing");
+                if (processing != null) {
+                    Map<String, Object> ocr = (Map<String, Object>) processing.get("ocr");
+                    if (ocr != null) {
+                        OcrInfo ocrInfo = new OcrInfo();
+                        ocrInfo.setText((String) ocr.get("text"));
+                        ocrInfo.setStatus((String) ocr.get("status"));
+                        content.setOcr(ocrInfo);
+                    }
+                    
+                    Map<String, Object> classification = (Map<String, Object>) processing.get("classification");
+                    content.setClassification(classification);
+                    
+                    ProcessingInfo processingInfo = new ProcessingInfo();
+                    processingInfo.setStatus((String) processing.get("status"));
+                    content.setProcessing(processingInfo);
+                }
+                fileEntity.setContent(content);
+                
+                // Cập nhật Audit
+                if (fileEntity.getAudit() != null) {
+                    fileEntity.getAudit().setUpdatedAt(Instant.now().toString());
+                    fileEntity.getAudit().setUpdatedBy("system");
+                }
+                
+                // Lưu lại
+                fileService.saveFile(fileEntity);
+                
+                logger.info("File entity updated with processing data for file: {}", fileId);
+            } else {
+                logger.warn("File entity not found for processing update: {}", fileId);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileProcessed event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileUpdated(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            String updateType = (String) data.get("updateType");
+            
+            logger.info("Processing FileUpdated event for file: {} with updateType: {}", fileId, updateType);
+            
+            if ("contract_analysis".equals(updateType)) {
+                Map<String, Object> contract = (Map<String, Object>) data.get("contract");
+                logger.info("Contract analysis received: {}", objectMapper.writeValueAsString(contract));
+                // TODO: Store contract analysis data
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileUpdated event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileClassified(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            
+            logger.info("Processing FileClassified event for file: {}", fileId);
+            // TODO: Update file classification
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileClassified event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileAnalyzed(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            
+            logger.info("Processing FileAnalyzed event for file: {}", fileId);
+            // TODO: Store analysis results
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileAnalyzed event: {}", e.getMessage(), e);
+        }
+    }
+
+    private void processFileDeleted(Map<String, Object> event) {
+        try {
+            Map<String, Object> data = (Map<String, Object>) event.get("data");
+            String fileId = (String) data.get("id");
+            
+            logger.info("Processing FileDeleted event for file: {}", fileId);
+            // TODO: Mark file as deleted
+            
+        } catch (Exception e) {
+            logger.error("Error processing FileDeleted event: {}", e.getMessage(), e);
         }
     }
 

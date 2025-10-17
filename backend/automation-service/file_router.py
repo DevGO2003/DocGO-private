@@ -4,6 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Query, HTTPException, Response,
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
 import io
+import json
 import uuid
 from datetime import datetime, timezone
 import asyncio
@@ -31,7 +32,8 @@ file_service = FileStorageService()
 ocr_service = OCRService()
 ai_service = AutomationService()
 websocket_manager = WebSocketManager()
-event_service = EventService()
+# Import global event_service instance
+from global_instances import event_service
 progress_service = ProgressService()
 
 
@@ -400,7 +402,7 @@ async def upload_document(
             })
             raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
         
-        # 2) Run OCR with retry
+        # 2) Run OCR with retry (skip for JSON)
         try:
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -408,18 +410,20 @@ async def upload_document(
                 "startedAt": datetime.now(timezone.utc)
             })
             
-            # Read file content for OCR
-            file_content = await file.read()
-            await file.seek(0)  # Reset file pointer
-            
-            ocr_text = await retry_async(
-                ocr_service.extract_text_from_file,
-                file_content, file.content_type,
-                max_retries=2,
-                backoff_factor=1.5,
-                exceptions=(Exception,),
-                on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
-            )
+            content_type_lower = (file.content_type or "").lower()
+            if content_type_lower == "application/json":
+                ocr_text = ""
+            else:
+                file_content = await file.read()
+                await file.seek(0)
+                ocr_text = await retry_async(
+                    ocr_service.extract_text_from_file,
+                    file_content, file.content_type,
+                    max_retries=2,
+                    backoff_factor=1.5,
+                    exceptions=(Exception,),
+                    on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
+                )
             
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -445,6 +449,188 @@ async def upload_document(
             })
             print(f"OCR failed, using filename: {e}")
             ocr_text = f"OCR failed for {file.filename}"
+
+        # Helper builders for sample.json-compatible document
+        def _now_iso():
+            return datetime.now(timezone.utc).isoformat()
+
+        def build_file_processed_payload(
+            file_id: str,
+            file_url: str,
+            filename: str,
+            content_type: str,
+            size: int,
+            ocr_text_val: str | None,
+            classification_result_val: dict,
+        ):
+            """Build FileProcessed event payload"""
+            return {
+                "id": file_id,
+                "filename": filename,
+                "contentType": content_type,
+                "size": size,
+                "storage": {
+                    "url": file_url,
+                    "type": "s3" if Config.S3_ENABLED else "local"
+                },
+                "processing": {
+                    "status": "COMPLETED",
+                    "ocr": {"text": ocr_text_val, "status": "SUCCESS" if ocr_text_val else "SKIPPED"},
+                    "classification": classification_result_val,
+                    "processedAt": _now_iso()
+                },
+                "metadata": {
+                    "fileSystem": {
+                        "dateModified": _now_iso(),
+                        "dateAdded": _now_iso(),
+                        "mediaFilename": filename,
+                        "originalFilename": filename,
+                        "originalFileSize": size,
+                        "originalMimeType": content_type
+                    }
+                },
+                "audit": {
+                    "createdAt": _now_iso(),
+                    "createdBy": "system",
+                    "updatedAt": _now_iso(),
+                    "updatedBy": "system",
+                    "isDeleted": False,
+                    "version": 1
+                }
+            }
+
+        def build_sample_document_payload(
+            document_id: str,
+            file_url: str,
+            filename: str,
+            content_type: str,
+            size: int,
+            ocr_text_val: str | None,
+            classification_result_val: dict,
+            summary_result_val: dict | None,
+        ):
+            is_contract_local = bool(classification_result_val.get("isContract"))
+            category_local = classification_result_val.get("category", "Tài liệu thông thường")
+            now_local = _now_iso()
+
+            overview = {
+                "title": filename,
+                "status": "ACTIVE",
+                "documentType": "CONTRACT" if is_contract_local else "GENERAL",
+                "contractType": (summary_result_val or {}).get("contractType"),
+                "category": category_local,
+                "tags": [],
+                "ownerUserId": "system",
+                "new": True
+            }
+
+            contract = None
+            if is_contract_local:
+                contract = {
+                    "effectiveDate": (summary_result_val or {}).get("effectiveDate"),
+                    "expiryDate": (summary_result_val or {}).get("expiryDate"),
+                    "totalValue": (summary_result_val or {}).get("totalValue"),
+                    "currency": (summary_result_val or {}).get("currency"),
+                    "summary": (summary_result_val or {}).get("summary"),
+                    "parties": (summary_result_val or {}).get("parties", []),
+                    "payment": (summary_result_val or {}).get("payment"),
+                    "clauses": (summary_result_val or {}).get("clauses", {"key": [], "unfavorable": []}),
+                    "reminders": (summary_result_val or {}).get("reminders", []),
+                    "risk": (summary_result_val or {}).get("risk"),
+                    "compliance": (summary_result_val or {}).get("compliance")
+                }
+
+            content = {
+                "plaintext": ocr_text_val or None,
+                "ocr": {"text": None, "status": None},
+                "classification": classification_result_val,
+                "processing": {"status": "COMPLETED", "error": None}
+            }
+
+            file_block = {
+                "id": document_id,
+                "name": filename,
+                "type": content_type,
+                "size": size,
+                "version": 1
+            }
+
+            storage = {
+                "s3": {
+                    "url": file_url,
+                    "bucket": None,
+                    "objectKey": None,
+                    "region": None,
+                    "contentType": content_type,
+                    "size": size,
+                    "versionId": None,
+                    "checksum": {"originalMD5": None, "archiveMD5": None}
+                },
+                "local": {
+                    "path": None,
+                    "filename": filename,
+                    "mimeType": content_type,
+                    "size": size,
+                    "mtime": None,
+                    "revision": None
+                }
+            }
+
+            versioning = {
+                "currentVersion": 1,
+                "versionTag": "1.0.0",
+                "previousVersion": None,
+                "changeSummary": None,
+                "changedFields": [],
+                "diff": {},
+                "history": [
+                    {
+                        "version": 1,
+                        "versionTag": "1.0.0",
+                        "changedAt": now_local,
+                        "changedBy": "system",
+                        "changeType": "CREATE",
+                        "storage": {"s3": {"versionId": None}, "local": {"revision": None}}
+                    }
+                ]
+            }
+
+            metadata_block = {
+                "fileSystem": {
+                    "dateModified": None,
+                    "dateAdded": now_local,
+                    "mediaFilename": filename,
+                    "originalFilename": filename,
+                    "originalMD5": None,
+                    "originalFileSize": size,
+                    "originalMimeType": content_type,
+                    "archiveMD5": None,
+                    "archiveFileSize": size
+                }
+            }
+
+            audit_block = {
+                "createdAt": now_local,
+                "createdBy": "system",
+                "updatedAt": now_local,
+                "updatedBy": "system",
+                "deletedAt": None,
+                "deletedBy": None,
+                "isDeleted": False,
+                "version": 1
+            }
+
+            return {
+                "id": document_id,
+                "overview": overview,
+                "contract": contract,
+                "content": content,
+                "file": file_block,
+                "storage": storage,
+                "versioning": versioning,
+                "metadata": metadata_block,
+                "audit": audit_block
+            }
         
         # 3) Run classification with retry
         try:
@@ -591,73 +777,132 @@ async def upload_document(
             now_iso=now_iso,
         )
         
-        # 6) Persist to File Management Service with retry
+        # 6) Publish metadata event to File Management Service (Kafka best-effort)
         try:
             await audit_service.add_session_step(correlation_id, {
-                "stepName": "FILE_MGMT_SAVE",
+                "stepName": "METADATA_PUBLISH",
                 "status": "STARTED",
                 "startedAt": datetime.now(timezone.utc)
             })
             
-            async def save_to_file_mgmt():
-                file_mgmt_url = Config.get_document_service_url()
-                async with httpx.AsyncClient(timeout=10) as client:
-                    resp = await client.post(
-                        f"{file_mgmt_url}/api/v1/file-storage-asset-service/files", 
-                        json=api_doc_payload
+            # Only publish if Kafka is enabled
+            if getattr(Config, 'KAFKA_ENABLED', False):
+                try:
+                    # 1. Publish FileUploaded event first
+                    file_uploaded_payload = {
+                        "eventVersion": "v1",
+                        "eventType": "FileUploaded",
+                        "eventId": str(uuid.uuid4()),
+                        "timestamp": now_iso,
+                        "source": "automation-service",
+                        "correlationId": correlation_id,
+                        "actor": {"userId": "system"},
+                        "data": {
+                            "id": file_id,
+                            "filename": file.filename,
+                            "contentType": file.content_type,
+                            "size": size,
+                            "storage": {
+                                "url": file_url,
+                                "type": "s3" if Config.S3_ENABLED else "local"
+                            },
+                            "uploadedAt": now_iso
+                        },
+                        "metadata": {"serviceVersion": "1.0.0"}
+                    }
+
+                    print(f"[DEBUG] Publishing FileUploaded event to topic: {Config.KAFKA_FILE_UPLOADED_TOPIC}")
+                    await event_service.publish_kafka(Config.KAFKA_FILE_UPLOADED_TOPIC, file_uploaded_payload)
+                    print(f"[DEBUG] FileUploaded event published successfully")
+
+                    # 2. Publish FileProcessed event after processing
+                    file_processed_data = build_file_processed_payload(
+                        file_id=file_id,
+                        file_url=file_url,
+                        filename=file.filename,
+                        content_type=file.content_type,
+                        size=size,
+                        ocr_text_val=ocr_text,
+                        classification_result_val=classification_result
                     )
-                    if resp.status_code >= 400:
-                        raise Exception(f"File Management Service error: {resp.status_code} - {resp.text}")
-                    return resp.json()
-            
-            saved = await retry_async(
-                save_to_file_mgmt,
-                max_retries=3,
-                backoff_factor=2.0,
-                exceptions=(Exception,),
-                on_retry=lambda retry_count, e: print(f"File Management save retry {retry_count}: {e}")
-            )
-            
+
+                    file_processed_payload = {
+                        "eventVersion": "v1",
+                        "eventType": "FileProcessed",
+                        "eventId": str(uuid.uuid4()),
+                        "timestamp": now_iso,
+                        "source": "automation-service",
+                        "correlationId": correlation_id,
+                        "actor": {"userId": "system"},
+                        "data": file_processed_data,
+                        "metadata": {"serviceVersion": "1.0.0"}
+                    }
+
+                    print(f"[DEBUG] Publishing FileProcessed event to topic: {Config.KAFKA_FILE_PROCESSED_TOPIC}")
+                    print(f"[DEBUG] Event payload: {json.dumps(file_processed_payload, indent=2)[:500]}...")
+                    await event_service.publish_kafka(Config.KAFKA_FILE_PROCESSED_TOPIC, file_processed_payload)
+                    print(f"[DEBUG] FileProcessed event published successfully")
+
+                    # 3. If contract analysis completed, publish FileUpdated event
+                    if bool(classification_result.get("isContract")) and summary_result:
+                        contract_updated_payload = {
+                "eventVersion": "v1",
+                            "eventType": "FileUpdated",
+                            "eventId": str(uuid.uuid4()),
+                            "timestamp": now_iso,
+                            "source": "automation-service",
+                "correlationId": correlation_id,
+                            "actor": {"userId": "system"},
+                "data": {
+                                "id": file_id,
+                                "updateType": "contract_analysis",
+                                "contract": {
+                                    "effectiveDate": summary_result.get("effectiveDate"),
+                                    "expiryDate": summary_result.get("expiryDate"),
+                                    "totalValue": summary_result.get("totalValue"),
+                                    "currency": summary_result.get("currency"),
+                                    "summary": summary_result.get("summary"),
+                                    "parties": summary_result.get("parties", []),
+                                    "payment": summary_result.get("payment"),
+                                    "clauses": summary_result.get("clauses", {"key": [], "unfavorable": []}),
+                                    "reminders": summary_result.get("reminders", []),
+                                    "risk": summary_result.get("risk"),
+                                    "compliance": summary_result.get("compliance")
+                                }
+                            },
+                            "metadata": {"serviceVersion": "1.0.0"}
+                        }
+
+                        print(f"[DEBUG] Publishing FileUpdated event to topic: {Config.KAFKA_FILE_UPDATED_TOPIC}")
+                        await event_service.publish_kafka(Config.KAFKA_FILE_UPDATED_TOPIC, contract_updated_payload)
+                        print(f"[DEBUG] FileUpdated event published successfully")
+                except Exception as pub_err:
+                    print(f"Kafka publish failed (non-blocking): {pub_err}")
+
             await audit_service.add_session_step(correlation_id, {
-                "stepName": "FILE_MGMT_SAVE",
+                "stepName": "METADATA_PUBLISH",
                 "status": "COMPLETED",
                 "completedAt": datetime.now(timezone.utc),
-                "result": {"documentId": saved.get("data", {}).get("id")}
-            })
-            
-            # Log document created event
-            await audit_service.log_event({
-                "eventVersion": "v1",
-                "eventType": "DocumentCreated",
-                "correlationId": correlation_id,
-                "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
-                "data": {
-                    "documentId": file_id,
-                    "fileName": file.filename,
-                    "documentType": overview_document_type,
-                    "category": classification_result.get("category", "Unknown"),
-                    "fileUrl": file_url
-                },
-                "metadata": {"source": "automation-service", "serviceVersion": "1.0.0"}
+                "result": {"documentId": file_id}
             })
             
         except Exception as e:
             await audit_service.add_session_step(correlation_id, {
-                "stepName": "FILE_MGMT_SAVE",
+                "stepName": "METADATA_PUBLISH",
                 "status": "FAILED",
                 "completedAt": datetime.now(timezone.utc),
                 "error": str(e)
             })
             await audit_service.log_error({
                 "correlationId": correlation_id,
-                "errorType": "FILE_MGMT_SAVE_FAILED",
+                "errorType": "METADATA_PUBLISH_FAILED",
                 "errorMessage": str(e),
-                "step": "FILE_MGMT_SAVE",
+                "step": "METADATA_PUBLISH",
                 "retryable": True,
                 "retryCount": 3
             })
-            print(f"Warning: File Management Service not available: {e}")
-            saved = {"data": {"id": file_id}}  # Fallback to mock response
+            print(f"Warning: Metadata publish failed: {e}")
+            # Fallback: no blocking
         
         # 7) Return appropriate response
         body = {
@@ -695,7 +940,7 @@ async def upload_document(
                 "shortMessage": "Created",
                 "description": "Document created and processed (sync)",
                 "data": {
-                    "documentId": saved.get("data", {}).get("id"),
+                    "documentId": file_id,
                     "fileUrl": file_url,
                     "classificationResult": classification_result,
                     "summaryResult": summary_result,

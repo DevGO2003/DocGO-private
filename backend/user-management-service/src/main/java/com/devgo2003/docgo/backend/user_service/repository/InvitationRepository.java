@@ -12,6 +12,7 @@ public interface InvitationRepository extends MongoRepository<Invitation, String
     Optional<Invitation> findByToken(String token);
     List<Invitation> findByOrganizationId(String organizationId);
     List<Invitation> findByOrganizationIdAndEmail(String organizationId, String email);
+    List<Invitation> findByEmailAndStatus(String email, Invitation.InvitationStatus status);
 }
 
 

@@ -77,7 +77,7 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 |---------|------|----------|-------------|-------------------|------|------|
 | **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` |
 | **User Management** | Spring Boot | `com.devgo2003.docgo.backend` | `user-service` | `com.devgo2003.docgo.backend.user_service` | 8001 | `/docs` |
-| **Document Management** | Spring Boot | `com.devgo2003.docgo.document-management-service` | `document-service` | `com.devgo2003.docgo.document_service` | 8002 | `/docs` |
+| **Document Management** | Spring Boot | `com.devgo2003.docgo.file-management-service` | `document-service` | `com.devgo2003.docgo.document_service` | 8002 | `/docs` |
 | **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` |
 
 ### Quy tắc đặt tên

@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDownloadResponse {
+    private String fileId;
     private String filename;
     private String contentType;
     private Resource resource;

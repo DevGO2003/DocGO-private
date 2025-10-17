@@ -1,6 +1,8 @@
 package com.devgo2003.docgo.backend.user_service.repository;
 
 import com.devgo2003.docgo.backend.user_service.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -33,4 +35,12 @@ public interface UserRepository extends MongoRepository<User, String> {
     
     @Query("{'lastLogin': {$gte: ?0, $lte: ?1}}")
     List<User> findByLastLoginBetween(LocalDateTime start, LocalDateTime end);
+    
+    @Query("{$or: ["
+        + "{'firstName': {$regex: ?0, $options: 'i'}},"
+        + "{'lastName': {$regex: ?0, $options: 'i'}},"
+        + "{'username': {$regex: ?0, $options: 'i'}},"
+        + "{'email': {$regex: ?1, $options: 'i'}}"
+        + "]}")
+    Page<User> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email, Pageable pageable);
 }

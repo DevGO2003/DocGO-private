@@ -21,12 +21,14 @@ import google.generativeai as genai
 class AIKafkaWorker:
 	def __init__(self):
 		self.bootstrap_servers: str = Config.KAFKA_BOOTSTRAP_SERVERS
-		# Legacy topics retained for backward compatibility
-		self.consumer_topic: str = Config.KAFKA_FILE_UPLOADED_TOPIC
-		self.text_extracted_topic: str = Config.KAFKA_TEXT_EXTRACTED_TOPIC
-		self.document_classified_topic: str = Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC
-		self.contract_summary_topic: str = Config.KAFKA_CONTRACT_SUMMARY_TOPIC
-		# New JSON analysis topics
+		# File Events topics
+		self.file_uploaded_topic: str = Config.KAFKA_FILE_UPLOADED_TOPIC
+		self.file_processed_topic: str = Config.KAFKA_FILE_PROCESSED_TOPIC
+		self.file_updated_topic: str = Config.KAFKA_FILE_UPDATED_TOPIC
+		self.file_classified_topic: str = Config.KAFKA_FILE_CLASSIFIED_TOPIC
+		self.file_analyzed_topic: str = Config.KAFKA_FILE_ANALYZED_TOPIC
+		self.file_deleted_topic: str = Config.KAFKA_FILE_DELETED_TOPIC
+		# Legacy JSON analysis topics
 		self.json_analyze_topic: str = getattr(Config, 'JSON_ANALYZE_TOPIC', 'json.analyze')
 		self.json_completed_topic: str = getattr(Config, 'JSON_ANALYSIS_COMPLETED_TOPIC', 'json.analysis.completed')
 		self.client_id: str = Config.KAFKA_CLIENT_ID  # "automation-service"
@@ -42,13 +44,15 @@ class AIKafkaWorker:
 
 	async def start(self) -> None:
 		if self.consumer is None:
-			# Subscribe to legacy topics + new json.analyze
+			# Subscribe to File Events topics + legacy JSON analysis
 			topics = [
-				self.consumer_topic,  # file.uploaded
-				"ai.text.extraction.requested",
-				"ai.text.extracted", 
-				"ai.summary.creation.requested",
-				self.json_analyze_topic,
+				self.file_uploaded_topic,    # file.uploaded
+				self.file_processed_topic,   # file.processed
+				self.file_updated_topic,     # file.updated
+				self.file_classified_topic,  # file.classified
+				self.file_analyzed_topic,    # file.analyzed
+				self.file_deleted_topic,     # file.deleted
+				self.json_analyze_topic,     # json.analyze (legacy)
 			]
 			self.consumer = AIOKafkaConsumer(
 				*topics,

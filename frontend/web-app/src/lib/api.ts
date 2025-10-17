@@ -327,23 +327,7 @@ export class FileStorageAPI {
   }
 }
 
-// Tag Management API - Sử dụng API Gateway với pattern mới
-export class TagAPI {
-  private basePath = '/api/v1/file-management-service'
-
-  async getAllTags(view?: string) {
-    const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/tags/all`, { params })
-  }
-
-  async searchTags(searchTerm?: string, view?: string) {
-    const params: any = {}
-    if (searchTerm) params.searchTerm = searchTerm
-    if (view) params.view = view
-    
-    return apiClient.get<any[]>(`${this.basePath}/tags/search`, { params })
-  }
-}
+// Tag Management API - Removed completely
 
 // Authentication API - Updated to use API Gateway proxy
 export class AuthAPI {
@@ -425,7 +409,7 @@ export const contractAPI = new ContractAPI()
 export const userAPI = new UserAPI()
 export const automationAPI = new AutomationAPI()
 export const fileStorageAPI = new FileStorageAPI()
-export const tagAPI = new TagAPI()
+// export const tagAPI = new TagAPI() // Removed - tags API disabled
 export const authAPI = new AuthAPI()
 
 // Note: Avoid re-exporting from './apis' here to prevent circular dependencies

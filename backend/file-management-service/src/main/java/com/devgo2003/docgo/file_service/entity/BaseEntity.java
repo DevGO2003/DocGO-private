@@ -1,5 +1,6 @@
 package com.devgo2003.docgo.file_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
  * Base entity chứa các trường audit cơ bản (created_at, created_by),
  * soft-delete và version. Các thay đổi/updates sẽ được lưu vào collection audit riêng (contract_events).
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BaseEntity {
 
     /**

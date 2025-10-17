@@ -34,7 +34,7 @@ REDIS_PASSWORD=
 # SERVICE URLS (Shared - for Docker internal communication)
 # ==========================================
 USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8001
-DOCUMENT_MANAGEMENT_SERVICE_URL=http://document-management-service:8002
+FILE_MANAGEMENT_SERVICE_URL=http://file-management-service:8002
 AUTOMATION_SERVICE_URL=http://automation-service:8003
 ```
 
@@ -181,7 +181,7 @@ Mỗi request được gán unique ID để trace qua các services:
   "level": "info",
   "stage": "incoming",
   "method": "GET",
-  "originalUrl": "/api/v1/document-management-service/v1/contracts",
+  "originalUrl": "/api/v1/file-management-service/v1/contracts",
   "query": { "pageNumber": 0, "pageSize": 9 },
   "clientIp": "::1"
 }

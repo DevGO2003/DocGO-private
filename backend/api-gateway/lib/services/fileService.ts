@@ -131,7 +131,7 @@ class FileService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002';
+    this.baseURL = process.env.FILE_MANAGEMENT_SERVICE_URL || 'http://localhost:8002';
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 20000,

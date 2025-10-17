@@ -69,6 +69,12 @@ public class JsonAnalysisEventDto {
         @JsonProperty("jobId")
         private String jobId;
         
+        @JsonProperty("fileId")
+        private String fileId;
+        
+        @JsonProperty("jsonContent")
+        private String jsonContent;
+        
         @JsonProperty("index")
         private Integer index;
         

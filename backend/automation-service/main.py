@@ -21,9 +21,8 @@ import uuid
 from kafka_worker import worker
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
-from services.event_service import EventService
-from services.audit_service import audit_service
 from config import Config
+from global_instances import event_service, audit_service, batch_service
 
 app = FastAPI(
     title="Automation Service API",
@@ -76,10 +75,7 @@ app.include_router(file_router)
 app.include_router(simple_test_router)
 app.include_router(config_router)
 
-# Initialize services
-# notification_service = NotificationService()
-batch_service = BatchService()
-event_service = EventService()
+# Services are now imported from global_instances to avoid circular imports
 
 # Custom OpenAPI schema để đảm bảo tương thích với Swagger UI
 def custom_openapi():

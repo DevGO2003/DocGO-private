@@ -61,7 +61,7 @@ class EnhancedServiceManager {
     loadBalancer.addService('document-management', [
       {
         id: 'doc-mgmt-1',
-        url: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://document-management-service:8002',
+        url: process.env.FILE_MANAGEMENT_SERVICE_URL || 'http://file-management-service:8002',
         weight: 1
       }
     ]);
@@ -103,8 +103,8 @@ class EnhancedServiceManager {
 
     // Document Management Service với Load Balancing
     this.addService('document-management', {
-      name: 'document-management-service',
-      url: selectUrl(process.env.DOCUMENT_MANAGEMENT_SERVICE_URL, 'http://document-management-service:8002', 'http://localhost:8002'),
+      name: 'file-management-service',
+      url: selectUrl(process.env.FILE_MANAGEMENT_SERVICE_URL, 'http://file-management-service:8002', 'http://localhost:8002'),
       healthCheck: '/actuator/health',
       timeout: 10000,
       enableCaching: true,

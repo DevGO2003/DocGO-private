@@ -5,6 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from routers import router
+from services.event_consumer import FileEventsConsumer
 import os
 from datetime import datetime
 import uuid
@@ -171,6 +172,15 @@ async def startup_event():
 	except Exception as e:
 		print(f"❌ Lỗi khởi động service: {e}")
 		print("⚠️  Service vẫn sẽ chạy nhưng có thể gặp lỗi khi sử dụng các dịch vụ")
+
+	# Start Kafka consumer (best-effort)
+	try:
+		from services.event_consumer import FileEventsConsumer
+		consumer = FileEventsConsumer()
+		await consumer.start()
+		print("✅ Kafka consumer started")
+	except Exception as e:
+		print(f"⚠️  Kafka consumer not started: {e}")
 
 
 @app.get("/", tags=["Root"])

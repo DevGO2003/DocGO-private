@@ -45,7 +45,7 @@ Tất cả code đã được implement đầy đủ:
 ### Bước 2: Khởi động Service
 ```powershell
 # Chuyển đến thư mục service
-cd backend\document-management-service
+cd backend\file-management-service
 
 # Khởi động Spring Boot
 .\mvnw.cmd spring-boot:run
@@ -57,7 +57,7 @@ cd backend\document-management-service
 # Khi thấy dòng: "Started DocumentManagementServiceApplication"
 
 # Test API
-Invoke-WebRequest -Uri "http://localhost:8002/api/v1/document-management-service/v1/documents/DOC-2024-004" -Method GET
+Invoke-WebRequest -Uri "http://localhost:8002/api/v1/file-management-service/v1/documents/DOC-2024-004" -Method GET
 ```
 
 ### Bước 4: Test Frontend
@@ -67,11 +67,11 @@ Invoke-WebRequest -Uri "http://localhost:8002/api/v1/document-management-service
 ## 🎯 Kết quả mong đợi
 
 ### API Endpoints hoạt động:
-- ✅ `GET /api/v1/document-management-service/v1/documents/DOC-2024-004`
-- ✅ `GET /api/v1/document-management-service/v1/documents/DOC-2024-004/comments`
-- ✅ `POST /api/v1/document-management-service/v1/documents/DOC-2024-004/comments`
-- ✅ `PUT /api/v1/document-management-service/v1/documents/DOC-2024-004/comments/{id}`
-- ✅ `DELETE /api/v1/document-management-service/v1/documents/DOC-2024-004/comments/{id}`
+- ✅ `GET /api/v1/file-management-service/v1/documents/DOC-2024-004`
+- ✅ `GET /api/v1/file-management-service/v1/documents/DOC-2024-004/comments`
+- ✅ `POST /api/v1/file-management-service/v1/documents/DOC-2024-004/comments`
+- ✅ `PUT /api/v1/file-management-service/v1/documents/DOC-2024-004/comments/{id}`
+- ✅ `DELETE /api/v1/file-management-service/v1/documents/DOC-2024-004/comments/{id}`
 
 ### Frontend rendering:
 - ✅ Tab "Hợp đồng" - Tất cả thông tin cơ bản, doanh nghiệp, phân loại
@@ -88,9 +88,9 @@ Nếu không muốn cài Java, có thể sử dụng Docker:
 
 ```powershell
 # Build và chạy với Docker
-cd backend\document-management-service
-docker build -t document-management-service .
-docker run -p 8002:8002 document-management-service
+cd backend\file-management-service
+docker build -t file-management-service .
+docker run -p 8002:8002 file-management-service
 ```
 
 ## 📋 Troubleshooting

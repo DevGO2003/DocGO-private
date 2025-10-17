@@ -13,7 +13,7 @@ const nextConfig = {
   // output: 'standalone', // Comment out để tránh conflict trong development mode
   env: {
     USER_SERVICE_URL: process.env.USER_MANAGEMENT_SERVICE_URL,
-    DOCUMENT_SERVICE_URL: process.env.DOCUMENT_MANAGEMENT_SERVICE_URL,
+    DOCUMENT_SERVICE_URL: process.env.FILE_MANAGEMENT_SERVICE_URL,
     AUTOMATION_SERVICE_URL: process.env.AUTOMATION_SERVICE_URL,
   },
   // Rewrites are disabled - API routes handle all proxying

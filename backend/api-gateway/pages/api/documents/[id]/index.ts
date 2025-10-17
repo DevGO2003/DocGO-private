@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).end()
   }
 
-  const baseUrl = process.env.DS_BASE_URL || process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002'
+  const baseUrl = process.env.DS_BASE_URL || process.env.FILE_MANAGEMENT_SERVICE_URL || 'http://localhost:8002'
   const { id } = req.query
 
   try {

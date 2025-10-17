@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const baseUrl = process.env.DS_BASE_URL || process.env.DOCUMENT_MANAGEMENT_SERVICE_URL || 'http://localhost:8002'
+    const baseUrl = process.env.DS_BASE_URL || process.env.FILE_MANAGEMENT_SERVICE_URL || 'http://localhost:8002'
     const url = `${baseUrl}/api/v1/file-management-service/documents`
 
     const response = await fetch(url, {

@@ -29,7 +29,7 @@ class HealthMonitoringService {
     // Service URLs - only existing services
     this.services.set('api-gateway', Config.getApiGatewayUrl());
     this.services.set('user-management-service', Config.getUserManagementServiceUrl());
-    this.services.set('document-management-service', Config.getDocumentManagementServiceUrl());
+    this.services.set('file-management-service', Config.getDocumentManagementServiceUrl());
     this.services.set('automation-service', Config.getAutomationServiceUrl());
   }
 

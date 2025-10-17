@@ -13,7 +13,7 @@ class JsonFormatter(logging.Formatter):
         log_entry = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "level": record.levelname,
-            "service": "document-management-service",
+            "service": "file-management-service",
             "message": record.getMessage(),
             "module": record.module,
             "function": record.funcName,
@@ -57,7 +57,7 @@ class Logger:
     
     def _setup_logger(self):
         """Setup logger with JSON formatting"""
-        self._logger = logging.getLogger('document-management-service')
+        self._logger = logging.getLogger('file-management-service')
         self._logger.setLevel(getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper()))
         
         # Remove existing handlers
@@ -73,7 +73,7 @@ class Logger:
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
         
-        file_handler = logging.FileHandler(log_dir / "document-management-service.log")
+        file_handler = logging.FileHandler(log_dir / "file-management-service.log")
         file_handler.setFormatter(JsonFormatter())
         self._logger.addHandler(file_handler)
         

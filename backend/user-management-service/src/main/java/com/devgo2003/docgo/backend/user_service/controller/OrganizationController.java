@@ -5,7 +5,7 @@ import com.devgo2003.docgo.backend.user_service.entity.Invitation;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
-import com.devgo2003.docgo.backend.user_service.common.exception.OrganizationNotFoundException;
+import com.devgo2003.docgo.backend.user_service.common.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -163,7 +163,7 @@ public class OrganizationController {
         log.info("[OrganizationController] Getting organization with id: {}", id);
         
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new OrganizationNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)
@@ -303,7 +303,7 @@ public class OrganizationController {
         log.info("[OrganizationController] Updating organization with id: {}", id);
         
         OrganizationResponse organization = organizationService.updateOrganization(id, request).orElseThrow(() -> 
-            new OrganizationNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)
@@ -437,7 +437,7 @@ public class OrganizationController {
         
         // Lấy owner user ID từ organization để có quyền mời thành viên
         OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new OrganizationNotFoundException("Không tìm thấy tổ chức"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
         String currentUserId = organizationResponse.getOwnerUserId();
         
         OrganizationMembershipResponse membership = organizationService.inviteMember(id, request, currentUserId);
@@ -671,7 +671,7 @@ public class OrganizationController {
         
         // Lấy owner user ID từ organization để có quyền xóa thành viên
         OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new OrganizationNotFoundException("Không tìm thấy tổ chức"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
         String currentUserId = organizationResponse.getOwnerUserId();
         
         organizationService.removeMember(id, userId, currentUserId);
@@ -744,7 +744,7 @@ public class OrganizationController {
         organizationService.addAdmin(id, request.getUserId(), "system");
         // TODO: Implement proper current user context
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new OrganizationNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)
@@ -815,7 +815,7 @@ public class OrganizationController {
         organizationService.removeAdmin(id, userId, "system");
         // TODO: Implement proper current user context
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new OrganizationNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)
@@ -885,7 +885,7 @@ public class OrganizationController {
         organizationService.transferOwnership(id, request.getNewOwnerId(), "system");
         // TODO: Implement proper current user context
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new OrganizationNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)

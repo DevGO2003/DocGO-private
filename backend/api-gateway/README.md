@@ -215,7 +215,7 @@ api-gateway/
 ```env
 # Service URLs
 USER_MANAGEMENT_SERVICE_URL=http://localhost:8001
-DOCUMENT_MANAGEMENT_SERVICE_URL=http://localhost:8002
+FILE_MANAGEMENT_SERVICE_URL=http://localhost:8002
 AUTOMATION_SERVICE_URL=http://localhost:8003
 
 # Kafka

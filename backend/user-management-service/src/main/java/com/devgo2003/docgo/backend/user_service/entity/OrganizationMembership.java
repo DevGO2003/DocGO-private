@@ -1,11 +1,11 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -13,26 +13,19 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Document(collection = "organization_memberships")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@CompoundIndexes({
-        @CompoundIndex(name = "org_user_unique", def = "{ 'organization_id': 1, 'user_id': 1 }", unique = true),
-        @CompoundIndex(name = "org_status_idx", def = "{ 'organization_id': 1, 'status': 1 }")
-})
 public class OrganizationMembership {
 
     @org.springframework.data.annotation.Id
     private String id;
 
     @Field("organization_id")
-    @Indexed
     private String organizationId;
 
     @Field("user_id")
-    @Indexed
     private String userId;
 
     @Field("role_ids")
@@ -40,10 +33,23 @@ public class OrganizationMembership {
 
     @Field("status")
     @Builder.Default
-    private MembershipStatus status = MembershipStatus.ACTIVE;
+    private MembershipStatus status = MembershipStatus.PENDING;
+
+    @Field("is_admin")
+    @Builder.Default
+    private Boolean isAdmin = false;
+
+    @Field("invited_by")
+    private String invitedBy;
+
+    @Field("invited_at")
+    private LocalDateTime invitedAt;
 
     @Field("joined_at")
     private LocalDateTime joinedAt;
+
+    @Field("left_at")
+    private LocalDateTime leftAt;
 
     @Field("created_at")
     @CreatedDate
@@ -54,12 +60,10 @@ public class OrganizationMembership {
     private LocalDateTime updatedAt;
 
     public enum MembershipStatus {
-        INVITED,
+        PENDING,
         ACTIVE,
+        INACTIVE,
         SUSPENDED,
         LEFT
     }
 }
-
-
-

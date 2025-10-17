@@ -168,28 +168,28 @@ export class DocumentAPI {
     })
   }
 
-  // Tags
-  async getAllTags() {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/tags`)
-  }
+  // Tags - Disabled tags API
+  // async getAllTags() {
+  //   return apiClient.get<ApiResponse<any>>(`${this.basePath}/tags`)
+  // }
 
-  async createTag(name: string, color?: string) {
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/tags`, { name, color })
-  }
+  // async createTag(name: string, color?: string) {
+  //   return apiClient.post<ApiResponse<any>>(`${this.basePath}/tags`, { name, color })
+  // }
 
-  async updateTag(id: string, data: { name?: string; color?: string }) {
-    return apiClient.put<ApiResponse<any>>(`${this.basePath}/tags/${id}`, data)
-  }
+  // async updateTag(id: string, data: { name?: string; color?: string }) {
+  //   return apiClient.put<ApiResponse<any>>(`${this.basePath}/tags/${id}`, data)
+  // }
 
-  async deleteTag(id: string) {
-    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/tags/${id}`)
-  }
+  // async deleteTag(id: string) {
+  //   return apiClient.delete<ApiResponse<any>>(`${this.basePath}/tags/${id}`)
+  // }
 
-  async searchTags(query: string) {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/tags/search`, { 
-      params: { q: query } 
-    })
-  }
+  // async searchTags(query: string) {
+  //   return apiClient.get<ApiResponse<any>>(`${this.basePath}/tags/search`, { 
+  //     params: { q: query } 
+  //   })
+  // }
 }
 
 // Export instance

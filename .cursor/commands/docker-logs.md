@@ -9,7 +9,7 @@ Xem logs Docker cho toàn bộ services hoặc theo từng service trong môi tr
 ## Services kiến trúc mới
 - `api-gateway` - Port 8000
 - `user-management-service` - Port 8001
-- `document-management-service` - Port 8002
+- `file-management-service` - Port 8002
 - `automation-service` - Port 8003
 
 ## Lệnh thực thi (PowerShell)

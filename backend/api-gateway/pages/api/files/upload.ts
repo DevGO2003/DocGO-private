@@ -9,6 +9,9 @@ export const config = {
   },
 }
 
+// IMPORTANT: Frontend must call this API Gateway route only.
+// Do NOT call microservices directly from the browser without explicit approval.
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Always set CORS for this route
   const origin = req.headers.origin || 'http://localhost:3000'

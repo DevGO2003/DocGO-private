@@ -28,6 +28,9 @@ public class OrganizationCreateRequest {
 
     @Size(max = 200, message = "Website không được vượt quá 200 ký tự")
     private String website;
+
+    @NotBlank(message = "Owner User ID không được để trống")
+    private String ownerUserId;
 }
 
 

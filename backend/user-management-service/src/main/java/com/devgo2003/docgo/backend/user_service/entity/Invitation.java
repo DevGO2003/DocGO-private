@@ -1,9 +1,11 @@
 package com.devgo2003.docgo.backend.user_service.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -11,34 +13,23 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Document(collection = "invitations")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Invitation {
 
     @org.springframework.data.annotation.Id
     private String id;
 
     @Field("organization_id")
-    @Indexed
     private String organizationId;
 
     @Field("email")
-    @Indexed
     private String email;
 
-    @Field("role_names")
-    private Set<String> roleNames;
-
-    @Field("token")
-    @Indexed(unique = true)
-    private String token;
-
-    @Field("expires_at")
-    @Indexed(expireAfterSeconds = 0) // TTL index created in DB; value from document time
-    private LocalDateTime expiresAt;
+    @Field("role_ids")
+    private Set<String> roleIds;
 
     @Field("status")
     @Builder.Default
@@ -46,6 +37,18 @@ public class Invitation {
 
     @Field("invited_by")
     private String invitedBy;
+
+    @Field("expires_at")
+    private LocalDateTime expiresAt;
+
+    @Field("accepted_at")
+    private LocalDateTime acceptedAt;
+
+    @Field("declined_at")
+    private LocalDateTime declinedAt;
+
+    @Field("token")
+    private String token;
 
     @Field("created_at")
     @CreatedDate
@@ -58,10 +61,8 @@ public class Invitation {
     public enum InvitationStatus {
         PENDING,
         ACCEPTED,
+        DECLINED,
         EXPIRED,
-        REVOKED
+        CANCELLED
     }
 }
-
-
-

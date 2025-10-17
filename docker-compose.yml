@@ -107,7 +107,7 @@ services:
     container_name: file-management-service
     build:
       context: ./backend/file-management-service
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
 
     ports:
       - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8002"
@@ -121,8 +121,6 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/file-management-service:/app
-      - maven-repo:/root/.m2
       - ./backend/file-management-service/uploads:/app/uploads
       - ./logs/file-management:/app/logs
     restart: unless-stopped
@@ -132,7 +130,7 @@ services:
     container_name: automation-service
     build:
       context: ./backend/automation-service
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     
     ports:
       - "${AUTOMATION_PORT:-8003}:8003"
@@ -147,7 +145,6 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/automation-service:/app
       - ./backend/automation-service/uploads:/app/uploads
       - ./backend/automation-service/results:/app/results
       - ./logs/automation:/app/logs
@@ -176,17 +173,14 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/api-gateway:/app
       - ./logs/api-gateway:/app/logs
-      - /app/node_modules
-      - /app/.next
     restart: unless-stopped
 
   # ==========================================
   # FRONTEND
   # ==========================================
 
-  # Web App Frontend (Next.js) - Development Mode
+  # Web App Frontend (Next.js)
   web-app:
     container_name: web-app
     build:
@@ -204,11 +198,6 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./frontend/web-app:/app
-      # Use node_modules baked into the image to avoid empty anonymous volume hiding installed deps
-      - /app/node_modules
-      # Remove .next cache mount to avoid stale build artifacts inside container
-      # - /app/.next
       - ./logs/web-app:/app/logs
     restart: unless-stopped
 

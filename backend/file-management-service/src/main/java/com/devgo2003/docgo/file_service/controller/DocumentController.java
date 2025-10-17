@@ -2,10 +2,10 @@ package com.devgo2003.docgo.file_service.controller;
 
 import com.devgo2003.docgo.file_service.common.response.RestResponse;
 import com.devgo2003.docgo.file_service.dto.ProcessingResultRequest;
-import com.devgo2003.docgo.file_service.entity.DocumentEntity;
+import com.devgo2003.docgo.file_service.entity.FileEntity;
 import com.devgo2003.docgo.file_service.service.FileStorageService;
-import com.devgo2003.docgo.file_service.service.DocumentService;
-import com.devgo2003.docgo.file_service.repository.DocumentRepository;
+import com.devgo2003.docgo.file_service.service.FileService;
+import com.devgo2003.docgo.file_service.repository.FileRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
  
@@ -18,10 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
+import com.devgo2003.docgo.file_service.dto.FileUploadResponse;
+import com.devgo2003.docgo.file_service.dto.FileDownloadResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.devgo2003.docgo.file_service.api.ApiDocument;
-import com.devgo2003.docgo.file_service.mapper.ApiDocumentMapper;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -31,43 +32,97 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/v1/file-management-service/v1/files")
+@RequestMapping("/api/v1/file-management-service/files")
 @Tag(name = "📄 APIs Quản lý Tài liệu", description = "APIs quản lý tài liệu và tệp tin trong hệ thống DocGO")
 @Slf4j
 public class DocumentController {
 
     private final FileStorageService fileStorageService;
-    private final DocumentRepository documentRepository;
-    private final DocumentService documentService;
+    private final FileRepository fileRepository;
+    private final FileService fileService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DocumentController(FileStorageService fileStorageService, DocumentService documentService, DocumentRepository documentRepository, ObjectMapper objectMapper) {
+    public DocumentController(FileStorageService fileStorageService, FileService fileService, FileRepository fileRepository, ObjectMapper objectMapper) {
         this.fileStorageService = fileStorageService;
-        this.documentService = documentService;
-        this.documentRepository = documentRepository;
+        this.fileService = fileService;
+        this.fileRepository = fileRepository;
         this.objectMapper = objectMapper;
         System.out.println("🔍 DocumentController: Constructor called - FileStorageService is " + (fileStorageService != null ? "injected" : "NULL"));
     }
 
     @Operation(
-            summary = "Tạo mới tài liệu",
-            description = "Tạo bản ghi Document theo chuẩn RestResponse, luôn trả HTTP 200 và statusCode 201"
+            summary = "Upload file",
+            description = """
+            ## 📖 Mô tả
+            Upload file và lưu trữ metadata vào MongoDB.
+            
+            ## 🔹 Đầu vào
+            
+            📄 file (bắt buộc, form-data)
+            Loại: MultipartFile
+            Mô tả: File cần upload
+            
+            📄 userId (bắt buộc, form-data)
+            Loại: string
+            Mô tả: ID của người dùng
+            
+            📄 folder (tùy chọn, form-data)
+            Loại: string
+            Mô tả: Thư mục lưu trữ (mặc định: default)
+            
+            ## 🔹 Đầu ra
+            
+            📝 data
+            Loại: FileUploadResponse
+            Mô tả: Thông tin file đã upload
+            """
     )
     @PostMapping
-    public ResponseEntity<RestResponse<DocumentEntity>> createDocument(@RequestBody DocumentEntity payload) {
+    public ResponseEntity<RestResponse<FileUploadResponse>> uploadFile(
+            @Parameter(description = "File cần upload") @RequestParam("file") MultipartFile file,
+            @Parameter(description = "ID của người dùng") @RequestParam("userId") String userId,
+            @Parameter(description = "Thư mục lưu trữ") @RequestParam(value = "folder", required = false) String folder
+    ) {
         try {
-            if (payload.getStatus() == null) payload.setStatus("ACTIVE");
-            if (payload.getProcessingStatus() == null) payload.setProcessingStatus("PENDING");
-            DocumentEntity saved = documentRepository.save(payload);
-            return ResponseEntity.ok(RestResponse.<DocumentEntity>builder()
+            System.out.println("🔍 DocumentController: uploadFile method called! - filename: " + file.getOriginalFilename() + ", userId: " + userId + ", folder: " + folder);
+            
+            FileUploadResponse response = fileStorageService.uploadFile(file, userId, folder);
+            
+            return ResponseEntity.ok(RestResponse.<FileUploadResponse>builder()
+                    .statusCode(201)
+                    .shortMessage("Created")
+                    .description("File uploaded successfully")
+                    .data(response)
+                    .build());
+        } catch (Exception e) {
+            System.err.println("🔍 DocumentController: Error uploading file: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(RestResponse.<FileUploadResponse>builder()
+                    .statusCode(500)
+                    .shortMessage("Internal Server Error")
+                    .description("Lỗi khi upload file: " + e.getMessage())
+                    .data(null)
+                    .build());
+        }
+    }
+    
+    @Operation(
+            summary = "Tạo mới tài liệu (JSON)",
+            description = "Tạo bản ghi Document theo chuẩn RestResponse, luôn trả HTTP 200 và statusCode 201"
+    )
+    @PostMapping("/create")
+    public ResponseEntity<RestResponse<FileEntity>> createDocument(@RequestBody FileEntity payload) {
+        try {
+            FileEntity saved = fileService.saveFile(payload);
+            return ResponseEntity.ok(RestResponse.<FileEntity>builder()
                     .statusCode(201)
                     .shortMessage("Created")
                     .description("Tạo tài liệu thành công")
                     .data(saved)
                     .build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(RestResponse.<DocumentEntity>builder()
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(RestResponse.<FileEntity>builder()
                     .statusCode(500)
                     .shortMessage("Internal Server Error")
                     .description("Lỗi khi tạo tài liệu: " + e.getMessage())
@@ -157,7 +212,7 @@ public class DocumentController {
             """
     )
     @GetMapping
-    public ResponseEntity<RestResponse<Page<ApiDocument>>> getAllDocuments(
+    public ResponseEntity<RestResponse<Page<FileEntity>>> getAllDocuments(
             @Parameter(description = "Số trang (mặc định: 0)") @RequestParam(value = "page", defaultValue = "0") int page,
             @Parameter(description = "Số trang (alias cho pageNumber)") @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
             @Parameter(description = "Kích thước trang (mặc định: 10)") @RequestParam(value = "size", defaultValue = "10") int size,
@@ -181,7 +236,7 @@ public class DocumentController {
                              ", pageSize=" + pageSize + ", finalPage=" + finalPage + ", finalSize=" + finalSize);
             
             // Complex document retrieval with multiple filtering options
-            Page<DocumentEntity> documents;
+            Page<FileEntity> documents;
             
             // Strategy 1: Filter by document type if specified
             if (documentType != null && !documentType.isEmpty()) {
@@ -190,7 +245,7 @@ public class DocumentController {
             // Strategy 2: Search by term if provided (fallback to getAllDocuments with post-filtering)
             else if (searchTerm != null && !searchTerm.trim().isEmpty()) {
                 // Complex search logic: get all documents first, then filter by search term
-                Page<DocumentEntity> allDocs = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
+                Page<FileEntity> allDocs = fileStorageService.getAllDocuments(finalPage, finalSize, userId);
                 documents = filterDocumentsBySearchTerm(allDocs, searchTerm, includeDeleted);
             }
             // Strategy 3: Get all documents with advanced filtering (fallback to getAllDocuments)
@@ -212,7 +267,7 @@ public class DocumentController {
             
             // Complex response handling
             if (documents == null || documents.getContent().isEmpty()) {
-                return ResponseEntity.ok(RestResponse.<Page<ApiDocument>>builder()
+                return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
                         .apiVersion("v1")
                         .statusCode(204)
                         .shortMessage("No Content")
@@ -220,31 +275,29 @@ public class DocumentController {
                         .data(null)
                         .timestamp(java.time.ZonedDateTime.now())
                         .requestId(java.util.UUID.randomUUID().toString())
-                        .path("/api/v1/file-management-service/v1/files")
+                        .path("/api/v1/file-management-service/files")
                         .build());
             }
             
             // Success response with complex metadata
-        java.util.List<ApiDocument> apiList = documents.getContent().stream().map(ApiDocumentMapper::toApi).collect(java.util.stream.Collectors.toList());
-        Page<ApiDocument> apiPage = new PageImpl<>(apiList, documents.getPageable(), documents.getTotalElements());
-        return ResponseEntity.ok(RestResponse.<Page<ApiDocument>>builder()
+        return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
                 .apiVersion("v1")
                 .statusCode(200)
                 .shortMessage("Success")
                 .description(String.format("Đã lấy danh sách %d tài liệu thành công (trang %d/%d)", 
-                    apiList.size(), 
-                    apiPage.getNumber() + 1, 
-                    apiPage.getTotalPages()))
-                .data(apiPage)
+                    documents.getContent().size(), 
+                    documents.getNumber() + 1, 
+                    documents.getTotalPages()))
+                .data(documents)
                 .timestamp(java.time.ZonedDateTime.now())
                 .requestId(java.util.UUID.randomUUID().toString())
-                .path("/api/v1/file-management-service/v1/files")
+                .path("/api/v1/file-management-service/files")
                 .build());
                     
         } catch (Exception e) {
             // Complex error handling
             return ResponseEntity.status(500)
-                    .body(RestResponse.<Page<ApiDocument>>builder()
+                    .body(RestResponse.<Page<FileEntity>>builder()
                             .statusCode(500)
                             .shortMessage("Internal Server Error")
                             .description("Lỗi hệ thống khi lấy danh sách tài liệu: " + e.getMessage())
@@ -254,7 +307,57 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Lấy chi tiết tài liệu",
+            summary = "Lấy metadata file từ MongoDB",
+            description = """
+            ## 📖 Mô tả
+            Lấy metadata chi tiết của file từ MongoDB (được lưu bởi Kafka events).
+            
+            ## 🔹 Đầu vào
+            
+            📄 id (bắt buộc, path)
+            Loại: string
+            Mô tả: ID của file
+            
+            ## 🔹 Đầu ra
+            
+            📝 data
+            Loại: Object
+            Mô tả: Metadata chi tiết từ MongoDB files collection
+            """
+    )
+    @GetMapping("/{id}/metadata")
+    public ResponseEntity<RestResponse<Object>> getFileMetadata(
+            @Parameter(description = "ID của file", required = true) @PathVariable String id
+    ) {
+        try {
+            java.util.Optional<FileEntity> fileEntity = fileService.getFileById(id);
+            
+            if (fileEntity.isPresent()) {
+                return ResponseEntity.ok(RestResponse.<Object>builder()
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Metadata retrieved from MongoDB files collection")
+                        .data(fileEntity.get())
+                        .build());
+            } else {
+                return ResponseEntity.ok(RestResponse.<Object>builder()
+                        .statusCode(204)
+                        .shortMessage("No Content")
+                        .description("No metadata found for file ID: " + id)
+                        .data(null)
+                        .build());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(RestResponse.<Object>builder()
+                    .statusCode(500)
+                    .shortMessage("Internal Server Error")
+                    .description("Error retrieving metadata: " + e.getMessage())
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @Operation(
             description = """
             ## 📖 Mô tả
             Lấy thông tin chi tiết của một tài liệu theo ID.
@@ -287,9 +390,17 @@ public class DocumentController {
         } catch (Exception e) {
             // fall through to default behavior
         }
-        DocumentEntity entity = documentService.getDocumentById(id);
-        ApiDocument doc = ApiDocumentMapper.toApi(entity);
-        return ResponseEntity.ok(RestResponse.success(doc, "Document retrieved successfully"));
+        java.util.Optional<FileEntity> fileEntity = fileService.getFileById(id);
+        if (fileEntity.isPresent()) {
+            return ResponseEntity.ok(RestResponse.success(fileEntity.get(), "File retrieved successfully"));
+        } else {
+            return ResponseEntity.ok(RestResponse.<Object>builder()
+                .statusCode(204)
+                .shortMessage("No Content")
+                .description("File not found")
+                .data(null)
+                .build());
+        }
     }
 
     // Complex helper methods for advanced document filtering
@@ -298,29 +409,22 @@ public class DocumentController {
      * Complex search filtering by search term
      * Supports searching in title, description, and tags
      */
-    private Page<DocumentEntity> filterDocumentsBySearchTerm(Page<DocumentEntity> allDocs, String searchTerm, boolean includeDeleted) {
-        List<DocumentEntity> filteredContent = allDocs.getContent().stream()
+    private Page<FileEntity> filterDocumentsBySearchTerm(Page<FileEntity> allDocs, String searchTerm, boolean includeDeleted) {
+        List<FileEntity> filteredContent = allDocs.getContent().stream()
                 .filter(doc -> {
                     // Complex search logic: check multiple fields
                     String lowerSearchTerm = searchTerm.toLowerCase().trim();
                     
-                    boolean matchesTitle = doc.getTitle() != null && 
-                            doc.getTitle().toLowerCase().contains(lowerSearchTerm);
+                    boolean matchesTitle = doc.getOverview() != null && doc.getOverview().getTitle() != null && 
+                            doc.getOverview().getTitle().toLowerCase().contains(lowerSearchTerm);
                     
-                    boolean matchesDescription = doc.getDescription() != null && 
-                            doc.getDescription().toLowerCase().contains(lowerSearchTerm);
-                    
-                    boolean matchesTags = doc.getTags() != null && 
-                            doc.getTags().stream().anyMatch(tag -> 
-                                tag.toLowerCase().contains(lowerSearchTerm));
-                    
-                    boolean matchesCategory = doc.getCategory() != null && 
-                            doc.getCategory().toLowerCase().contains(lowerSearchTerm);
+                    boolean matchesCategory = doc.getOverview() != null && doc.getOverview().getCategory() != null && 
+                            doc.getOverview().getCategory().toLowerCase().contains(lowerSearchTerm);
                     
                     // Include deleted filter
-                    boolean includeDoc = includeDeleted || !Boolean.TRUE.equals(doc.getIsDeleted());
+                    boolean includeDoc = includeDeleted || (doc.getAudit() == null || !Boolean.TRUE.equals(doc.getAudit().getIsDeleted()));
                     
-                    return (matchesTitle || matchesDescription || matchesTags || matchesCategory) && includeDoc;
+                    return (matchesTitle || matchesCategory) && includeDoc;
                 })
                 .collect(Collectors.toList());
         
@@ -330,9 +434,9 @@ public class DocumentController {
     /**
      * Complex filtering to exclude deleted documents
      */
-    private Page<DocumentEntity> filterDeletedDocuments(Page<DocumentEntity> documents) {
-        List<DocumentEntity> filteredContent = documents.getContent().stream()
-                .filter(doc -> !Boolean.TRUE.equals(doc.getIsDeleted()))
+    private Page<FileEntity> filterDeletedDocuments(Page<FileEntity> documents) {
+        List<FileEntity> filteredContent = documents.getContent().stream()
+                .filter(doc -> doc.getAudit() == null || !Boolean.TRUE.equals(doc.getAudit().getIsDeleted()))
                 .collect(Collectors.toList());
         
         return new PageImpl<>(filteredContent, documents.getPageable(), filteredContent.size());
@@ -362,51 +466,53 @@ public class DocumentController {
             """
     )
     @PutMapping("/{id}/processing-result")
-    public ResponseEntity<RestResponse<DocumentEntity>> updateProcessingResult(
+    public ResponseEntity<RestResponse<FileEntity>> updateProcessingResult(
             @Parameter(description = "ID của document cần cập nhật") @PathVariable String id,
             @Parameter(description = "Kết quả xử lý từ Automation Service") @RequestBody ProcessingResultRequest processingResult
     ) {
         try {
             log.info("Updating processing result for document: {}", id);
             
-            DocumentEntity document = documentService.findDocumentById(id).orElse(null);
-            if (document == null) {
+            java.util.Optional<FileEntity> documentOpt = fileService.getFileById(id);
+            if (documentOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
             
-            // Update processing fields
-            document.setOcrText(processingResult.getOcrText());
-            document.setOcrStatus(processingResult.getOcrStatus());
-            document.setClassificationResult(processingResult.getClassificationResult());
-            document.setProcessingStatus(processingResult.getProcessingStatus());
-            document.setProcessingError(processingResult.getProcessingError());
-            document.setUpdatedAt(LocalDateTime.now());
+            FileEntity document = documentOpt.get();
             
-            // Update document type based on classification
-            if (processingResult.getClassificationResult() != null) {
-                Map<String, Object> classification = (Map<String, Object>) processingResult.getClassificationResult();
-                String documentType = (String) classification.get("document_type");
-                if (documentType != null) {
-                    document.setDocumentType(documentType);
-                }
+            // Update processing fields in Content block
+            if (document.getContent() == null) {
+                document.setContent(new com.devgo2003.docgo.file_service.dto.Content());
             }
             
-            // Áp dụng schema mới nếu có
-            if (processingResult.getCategory() != null) {
-                document.setCategory(processingResult.getCategory());
+            // Update OCR info
+            if (document.getContent().getOcr() == null) {
+                document.getContent().setOcr(new com.devgo2003.docgo.file_service.dto.OcrInfo());
             }
-            if (processingResult.getDocumentType() != null) {
-                document.setDocumentType(processingResult.getDocumentType());
+            document.getContent().getOcr().setText(processingResult.getOcrText());
+            document.getContent().getOcr().setStatus(processingResult.getOcrStatus());
+            
+            // Update classification
+            document.getContent().setClassification(processingResult.getClassificationResult());
+            
+            // Update processing info
+            if (document.getContent().getProcessing() == null) {
+                document.getContent().setProcessing(new com.devgo2003.docgo.file_service.dto.ProcessingInfo());
             }
-            if (processingResult.getContractMetadata() != null) {
-                document.setContractMetadata(processingResult.getContractMetadata());
+            document.getContent().getProcessing().setStatus(processingResult.getProcessingStatus());
+            
+            // Update audit
+            if (document.getAudit() == null) {
+                document.setAudit(new com.devgo2003.docgo.file_service.dto.Audit());
             }
+            document.getAudit().setUpdatedAt(java.time.Instant.now().toString());
+            document.getAudit().setUpdatedBy("system");
 
-            DocumentEntity updatedDocument = documentRepository.save(document);
+            FileEntity updatedDocument = fileService.saveFile(document);
             
             log.info("Processing result updated successfully for document: {}", id);
             
-            return ResponseEntity.ok(RestResponse.<DocumentEntity>builder()
+            return ResponseEntity.ok(RestResponse.<FileEntity>builder()
                     .statusCode(200)
                     .shortMessage("Success")
                     .description("Đã cập nhật kết quả xử lý tài liệu thành công")
@@ -415,7 +521,7 @@ public class DocumentController {
                     
         } catch (Exception e) {
             log.error("Failed to update processing result for document {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(500).body(RestResponse.<DocumentEntity>builder()
+            return ResponseEntity.status(500).body(RestResponse.<FileEntity>builder()
                     .statusCode(500)
                     .shortMessage("Internal Server Error")
                     .description("Lỗi hệ thống khi cập nhật kết quả xử lý: " + e.getMessage())
@@ -427,7 +533,7 @@ public class DocumentController {
     /**
      * Complex sorting logic for documents
      */
-    private Page<DocumentEntity> sortDocuments(Page<DocumentEntity> documents, String sortBy, String sortDirection) {
+    private Page<FileEntity> sortDocuments(Page<FileEntity> documents, String sortBy, String sortDirection) {
         // This would implement complex sorting logic
         // For now, return as-is since the service should handle sorting
         return documents;

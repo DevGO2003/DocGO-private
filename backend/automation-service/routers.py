@@ -193,7 +193,8 @@ async def get_gemini_config(request: Request):
 # Initialize services (will be initialized in main.py)
 # notification_service = NotificationService()
 batch_service = BatchService()
-event_service = EventService()
+# Import global event_service instance
+from global_instances import event_service
 
 @router.post("/batch/process", summary="Xử lý batch", tags=["📦 APIs Xử lý Batch"])
 async def process_batch_api(

@@ -10,8 +10,8 @@ from aiokafka import AIOKafkaProducer
 
 from config import (
     S3_BUCKET, get_presigned_get_url, KAFKA_BOOTSTRAP_SERVERS, KAFKA_FILE_UPLOADED_TOPIC,
-    KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD, MAX_FILE_SIZE, ALLOWED_FILE_TYPES,
-    is_s3_enabled, S3_PUBLIC_BUCKET, build_public_url
+    KAFKA_CLIENT_ID, KAFKA_MESSAGE_KEY_FIELD, is_s3_enabled, S3_PUBLIC_BUCKET, build_public_url,
+    Config as FMConfig,
 )
 from services.file_service import FileStorageService
 from services.general_file_service import GeneralFileService
@@ -116,11 +116,11 @@ async def upload_file_with_scan(
     user_id_effective = user_id or "public"
     
     try:
-        if file.size and file.size > MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail=f"File quá lớn (> {MAX_FILE_SIZE} bytes)")
+        if file.size and file.size > FMConfig.MAX_FILE_SIZE_BYTES:
+            raise HTTPException(status_code=400, detail=f"File quá lớn (> {FMConfig.MAX_FILE_SIZE_BYTES} bytes)")
 
         ext = (file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else '')
-        allowed = [x.strip().lower() for x in ALLOWED_FILE_TYPES]
+        allowed = FMConfig.ALLOWED_FILE_TYPES
         if ext and allowed and ext not in allowed:
             raise HTTPException(status_code=400, detail=f"Loại file không được phép: .{ext}")
 
@@ -784,15 +784,33 @@ async def get_file_metadata(
     """
     try:
         user_id_effective = user_id or "public"
-        metadata = await general_file_service.get_file_metadata(file_id, user_id_effective)
         
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            description=f"Đã lấy metadata file '{file_id}'",
-            data=metadata,
-            path=request.url.path
-        )
+        # First try to get rich metadata from Kafka events (stored in files collection)
+        from services.event_consumer import FileEventsConsumer
+        consumer = FileEventsConsumer()
+        rich_metadata = await consumer.get_file_metadata(file_id)
+        
+        if rich_metadata:
+            # Return rich metadata from Kafka events (follows api-response-sample.json format)
+            return RestResponse(
+                statusCode=200,
+                shortMessage="Success",
+                description=f"Đã lấy metadata chi tiết file '{file_id}' từ Kafka events",
+                data=rich_metadata,
+                path=request.url.path
+            )
+        else:
+            # Fallback to basic file metadata if no Kafka event data
+            basic_metadata = await general_file_service.get_file_metadata(file_id, user_id_effective)
+            
+            return RestResponse(
+                statusCode=200,
+                shortMessage="Success",
+                description=f"Đã lấy metadata cơ bản file '{file_id}' (chưa có dữ liệu từ Kafka events)",
+                data=basic_metadata,
+                path=request.url.path
+            )
+            
     except Exception as e:
         logger.error(f"[METADATA_FAILED] Error getting metadata for file {file_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error getting metadata: {str(e)}")

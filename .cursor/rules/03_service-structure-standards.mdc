@@ -36,7 +36,7 @@ language: vi
 - Dùng `pydantic` schema nếu cần validate input/output ở lớp router/service; đặt trong thư mục `schemas/`.
 - Module nghiệp vụ đặt trong `services/` (ví dụ: thao tác S3, parse tài liệu…), các hàm đặt tên theo động từ rõ ràng, snake_case.
 
-### Java (Spring Boot) – áp dụng cho `user-management-service` và `document-management-service`:
+### Java (Spring Boot) – áp dụng cho `user-management-service` và `file-management-service`:
 - Cấu trúc gói chuẩn: `controller/`, `service/`, `repository/`, `entity/`, `common/exception`, `common/handler`, `common/response`, `config/`.
 - `GlobalExceptionHandler` gom map các exception → `RestResponse` và HTTP status tương ứng.
 - Controller dùng `@RequestMapping("/api/v1/...")`, `@Tag`, `@Operation` và trả `ResponseEntity<RestResponse<...>>`.
@@ -57,13 +57,13 @@ language: vi
 **QUY TẮC GROUP ID VÀ ARTIFACT ID**:
 - **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case cho service-name)
   - Ví dụ: `com.devgo2003.docgo.user-management-service`
-  - Ví dụ: `com.devgo2003.docgo.document-management-service`
+  - Ví dụ: `com.devgo2003.docgo.file-management-service`
 - **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
   - Ví dụ: `user-management-service` → `user-service`
-  - Ví dụ: `document-management-service` → `document-service`
+  - Ví dụ: `file-management-service` → `document-service`
 - **Tên folder**: Đổi dấu `-` thành `_` trong package structure
   - Ví dụ: `user-management-service` → `src/main/java/com/devgo2003/docgo/user_service`
-  - Ví dụ: `document-management-service` → `src/main/java/com/devgo2003/docgo/document_service`
+  - Ví dụ: `file-management-service` → `src/main/java/com/devgo2003/docgo/document_service`
 - **Package declaration**: Sử dụng tên folder (với dấu `_`)
   - Ví dụ: `package com.devgo2003.docgo.user_service;`
   - Ví dụ: `package com.devgo2003.docgo.document_service;`
@@ -89,7 +89,7 @@ language: vi
 ### Port cố định cho toàn bộ microservice của DocGO (kiến trúc mới 4 services):
 - `api-gateway` (Next.js): 8000 → Docs: `http://localhost:8000/docs#/`
 - `user-management-service` (Spring Boot): 8001 → Docs: `http://localhost:8001/docs#/`
-- `document-management-service` (Spring Boot): 8002 → Docs: `http://localhost:8002/docs#/`
+- `file-management-service` (Spring Boot): 8002 → Docs: `http://localhost:8002/docs#/`
 - `automation-service` (FastAPI): 8003 → Docs: `http://localhost:8003/docs#/`
 
 **Khi thêm microservice mới**, phải chọn cổng trống theo dãy 80xx, cập nhật mục này và README/How-to-run tương ứng.

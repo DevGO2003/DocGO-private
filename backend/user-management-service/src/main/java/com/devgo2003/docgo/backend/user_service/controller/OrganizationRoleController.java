@@ -4,7 +4,7 @@ import com.devgo2003.docgo.backend.user_service.dto.*;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationRoleService;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
-import com.devgo2003.docgo.backend.user_service.common.exception.OrganizationNotFoundException;
+import com.devgo2003.docgo.backend.user_service.common.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -260,7 +260,7 @@ public class OrganizationRoleController {
         
         // Lấy owner user ID từ organization để có quyền tạo role
         OrganizationResponse organizationResponse = organizationService.getOrganizationById(organizationId)
-                .orElseThrow(() -> new OrganizationNotFoundException("Không tìm thấy tổ chức"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
         String currentUserId = organizationResponse.getOwnerUserId();
         
         OrganizationRoleResponse role = organizationRoleService.createRole(organizationId, request, currentUserId);

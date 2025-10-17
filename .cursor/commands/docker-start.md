@@ -10,7 +10,7 @@ docker compose -f docker-compose.yml up -d --no-recreate --no-build
 ## Services được khởi động
 - `api-gateway` (Next.js) - Port 8000
 - `user-management-service` (Spring Boot) - Port 8001  
-- `document-management-service` (Spring Boot) - Port 8002
+- `file-management-service` (Spring Boot) - Port 8002
 - `automation-service` (FastAPI) - Port 8003
 
 ## Ghi chú

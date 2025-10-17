@@ -87,44 +87,40 @@ class AuditService:
             except Exception as e:
                 print(f"Failed to log event to MongoDB: {e}")
         
-        # Publish to Kafka nếu có Kafka client
+        # Publish to Kafka (best-effort) using EventService when enabled
         try:
-            from services.event_service import event_service_instance
-            if event_service_instance and event_service_instance.redis_client:
-                import json
-                kafka_event = {
+            if Config.KAFKA_ENABLED:
+                from global_instances import event_service
+                # Map event type to topic - CHỈ FILE EVENTS
+                evt_type = (event_data.get("eventType") or "").lower()
+                if "uploaded" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
+                elif "processed" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_PROCESSED_TOPIC", "file.processed")
+                elif "updated" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_UPDATED_TOPIC", "file.updated")
+                elif "classified" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_CLASSIFIED_TOPIC", "file.classified")
+                elif "analyzed" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_ANALYZED_TOPIC", "file.analyzed")
+                elif "deleted" in evt_type:
+                    topic = getattr(Config, "KAFKA_FILE_DELETED_TOPIC", "file.deleted")
+                else:
+                    topic = getattr(Config, "KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")  # default
+
+                payload = {
                     "eventVersion": "v1",
                     "eventType": event_data.get("eventType"),
                     "eventId": event_id,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "source": "automation-service",
                     "correlationId": event_data.get("correlationId"),
-                    "actor": event_data.get("actor", {
-                        "userId": "system",
-                        "userRole": "system",
-                        "ip": None
-                    }),
+                    "actor": event_data.get("actor", {"userId": "system", "userRole": "system", "ip": None}),
                     "data": event_data.get("data", {}),
-                    "metadata": event_data.get("metadata", {
-                        "region": "local",
-                        "serviceVersion": "1.0.0"
-                    })
+                    "metadata": event_data.get("metadata", {"region": "local", "serviceVersion": "1.0.0"})
                 }
-                
-                # Determine Kafka topic based on event type
-                topic = "file.uploaded"  # default
-                if "Classified" in event_data.get("eventType", ""):
-                    topic = "ai.document.classified"
-                elif "Summary" in event_data.get("eventType", ""):
-                    topic = "contract.summary.updated"
-                elif "Created" in event_data.get("eventType", ""):
-                    topic = "file.uploaded"
-                
-                await event_service_instance.redis_client.publish(
-                    topic,
-                    json.dumps(kafka_event, default=str)
-                )
-                print(f"Published Kafka event: {event_data.get('eventType')} to topic: {topic}")
+
+                await event_service.publish_kafka(topic, payload)
         except Exception as e:
             print(f"Failed to publish Kafka event: {e}")
         

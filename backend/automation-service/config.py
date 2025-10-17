@@ -7,9 +7,10 @@ from typing import List, Dict, Any
 _service_dir = Path(__file__).resolve().parent
 _env_file = _service_dir / ".env"
 
-# Load .env if exists
+# Load .env if exists (service-specific should override root-level env)
 if _env_file.exists():
-    load_dotenv(dotenv_path=_env_file, override=False)
+    # Ensure service-scoped variables take precedence over inherited/root ones
+    load_dotenv(dotenv_path=_env_file, override=True)
     print(f"Loaded .env from {_env_file}")
 # Finally fallback to default lookup (CWD)
 else:
@@ -111,13 +112,16 @@ class Config:
     ALLOWED_FILE_TYPES: List[str] = os.getenv("ALLOWED_FILE_TYPES", "pdf,docx,txt,jpg,jpeg,png,gif").split(",")
     
     # ==========================================
-    # KAFKA TOPICS (Service-specific)
+    # KAFKA TOPICS (Service-specific) - CHỈ FILE EVENTS
     # ==========================================
     KAFKA_FILE_UPLOADED_TOPIC: str = os.getenv("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
-    KAFKA_TEXT_EXTRACTED_TOPIC: str = os.getenv("KAFKA_TEXT_EXTRACTED_TOPIC", "ai.text.extracted")
-    KAFKA_DOCUMENT_CLASSIFIED_TOPIC: str = os.getenv("KAFKA_DOCUMENT_CLASSIFIED_TOPIC", "ai.document.classified")
-    KAFKA_CONTRACT_SUMMARY_TOPIC: str = os.getenv("KAFKA_CONTRACT_SUMMARY_TOPIC", "contract.summary.updated")
-    # New JSON analysis topics
+    KAFKA_FILE_PROCESSED_TOPIC: str = os.getenv("KAFKA_FILE_PROCESSED_TOPIC", "file.processed")
+    KAFKA_FILE_UPDATED_TOPIC: str = os.getenv("KAFKA_FILE_UPDATED_TOPIC", "file.updated")
+    KAFKA_FILE_CLASSIFIED_TOPIC: str = os.getenv("KAFKA_FILE_CLASSIFIED_TOPIC", "file.classified")
+    KAFKA_FILE_ANALYZED_TOPIC: str = os.getenv("KAFKA_FILE_ANALYZED_TOPIC", "file.analyzed")
+    KAFKA_FILE_DELETED_TOPIC: str = os.getenv("KAFKA_FILE_DELETED_TOPIC", "file.deleted")
+    
+    # Legacy topics for backward compatibility (sẽ được xóa sau)
     JSON_ANALYZE_TOPIC: str = os.getenv("JSON_ANALYZE_TOPIC", "json.analyze")
     JSON_ANALYSIS_COMPLETED_TOPIC: str = os.getenv("JSON_ANALYSIS_COMPLETED_TOPIC", "json.analysis.completed")
     
@@ -134,7 +138,7 @@ class Config:
     @classmethod
     def get_document_service_url(cls) -> str:
         
-        return os.getenv("DOCUMENT_MANAGEMENT_SERVICE_URL", "http://localhost:8002")
+        return os.getenv("FILE_MANAGEMENT_SERVICE_URL", "http://localhost:8002")
     
     @classmethod
     def get_base_url(cls) -> str:
@@ -293,17 +297,27 @@ def get_kafka_file_uploaded_topic():
     
     return Config.KAFKA_FILE_UPLOADED_TOPIC
 
-def get_kafka_text_extracted_topic():
+def get_kafka_file_processed_topic():
     
-    return Config.KAFKA_TEXT_EXTRACTED_TOPIC
+    return Config.KAFKA_FILE_PROCESSED_TOPIC
 
-def get_kafka_document_classified_topic():
+def get_kafka_file_updated_topic():
     
-    return Config.KAFKA_DOCUMENT_CLASSIFIED_TOPIC
+    return Config.KAFKA_FILE_UPDATED_TOPIC
 
-def get_kafka_contract_summary_topic():
+def get_kafka_file_classified_topic():
     
-    return Config.KAFKA_CONTRACT_SUMMARY_TOPIC
+    return Config.KAFKA_FILE_CLASSIFIED_TOPIC
+
+def get_kafka_file_analyzed_topic():
+    
+    return Config.KAFKA_FILE_ANALYZED_TOPIC
+
+def get_kafka_file_deleted_topic():
+    
+    return Config.KAFKA_FILE_DELETED_TOPIC
+
+# Legacy functions for backward compatibility - sẽ được xóa sau
 
 def get_kafka_client_id():
     

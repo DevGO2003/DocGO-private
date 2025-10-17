@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { TagIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
-import { tagAPI } from '@/lib/api'
+// import { tagAPI } from '@/lib/api' // Removed - tags API disabled
 import { NoDataEmptyState } from '@/components/ui/EmptyState'
 import { useTagTranslation } from '@/hooks/useTagTranslation'
 
@@ -28,15 +28,15 @@ export default function TagFilter({ selectedTags, onTagToggle, className = '' }:
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Load popular tags on mount
+  // Load popular tags on mount - Disabled tags API
   useEffect(() => {
     const loadPopularTags = async () => {
       try {
         setLoading(true)
         setError(null)
-        const response = await tagAPI.getAllTags()
-        const tags = response.data?.data || []
-        setPopularTags(tags)
+        // const response = await tagAPI.getAllTags()
+        // const tags = response.data?.data || []
+        setPopularTags([]) // Empty - tags API disabled
       } catch (err) {
         console.error('Error loading popular tags:', err)
         setError('Không thể tải danh sách tags phổ biến')
@@ -48,16 +48,16 @@ export default function TagFilter({ selectedTags, onTagToggle, className = '' }:
     loadPopularTags()
   }, [])
 
-  // Load all tags when expanding
+  // Load all tags when expanding - Disabled tags API
   const loadAllTags = async () => {
     if (allTags.length > 0) return // Already loaded
 
     try {
       setLoading(true)
       setError(null)
-      const response = await tagAPI.getAllTags()
-      const tags = response.data?.data || []
-      setAllTags(tags)
+      // const response = await tagAPI.getAllTags()
+      // const tags = response.data?.data || []
+      setAllTags([]) // Empty - tags API disabled
     } catch (err) {
       console.error('Error loading all tags:', err)
       setError('Không thể tải danh sách tags đầy đủ')

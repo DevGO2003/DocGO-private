@@ -7,14 +7,25 @@ from typing import List, Dict, Any
 _service_dir = Path(__file__).resolve().parent
 _env_file = _service_dir / ".env"
 
-# Load .env if exists
+# Load .env if exists (fix indent to avoid runtime errors)
 if _env_file.exists():
-	load_dotenv(dotenv_path=_env_file, override=False)
+    load_dotenv(dotenv_path=_env_file, override=False)
     print(f"Loaded .env from {_env_file}")
-# Finally fallback to default lookup (CWD)
 else:
-	load_dotenv()  # fallback to default lookup (CWD)
+    # Finally fallback to default lookup (CWD)
+    load_dotenv()
     print("Loaded .env from CWD")
+
+# Helpers
+def _parse_size_bytes(val: str, default: int) -> int:
+    try:
+        s = (val or "").strip().lower()
+        if s.endswith("kb"): return int(float(s[:-2]) * 1024)
+        if s.endswith("mb"): return int(float(s[:-2]) * 1024 * 1024)
+        if s.endswith("gb"): return int(float(s[:-2]) * 1024 * 1024 * 1024)
+        return int(s)
+    except Exception:
+        return default
 
 
 class Config:
@@ -57,6 +68,16 @@ class Config:
     KAFKA_CLIENT_ID: str = os.getenv("KAFKA_CLIENT_ID", f"{os.getenv('KAFKA_CLIENT_ID_PREFIX', 'docgo')}-document-management")
     KAFKA_GROUP_ID: str = os.getenv("KAFKA_GROUP_ID", f"{os.getenv('KAFKA_GROUP_ID_PREFIX', 'docgo-group')}-document-management")
     SPRING_KAFKA_ENABLED: bool = os.getenv("SPRING_KAFKA_ENABLED", "true").lower() == "true"
+    KAFKA_ENABLED: bool = os.getenv("KAFKA_ENABLED", "false").lower() == "true"
+    # ==========================================
+    # KAFKA TOPICS - CHỈ FILE EVENTS
+    # ==========================================
+    KAFKA_FILE_UPLOADED_TOPIC: str = os.getenv("KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
+    KAFKA_FILE_PROCESSED_TOPIC: str = os.getenv("KAFKA_FILE_PROCESSED_TOPIC", "file.processed")
+    KAFKA_FILE_UPDATED_TOPIC: str = os.getenv("KAFKA_FILE_UPDATED_TOPIC", "file.updated")
+    KAFKA_FILE_CLASSIFIED_TOPIC: str = os.getenv("KAFKA_FILE_CLASSIFIED_TOPIC", "file.classified")
+    KAFKA_FILE_ANALYZED_TOPIC: str = os.getenv("KAFKA_FILE_ANALYZED_TOPIC", "file.analyzed")
+    KAFKA_FILE_DELETED_TOPIC: str = os.getenv("KAFKA_FILE_DELETED_TOPIC", "file.deleted")
     
     # ==========================================
     # SERVICE URLS (Smart URL building)
@@ -92,8 +113,10 @@ class Config:
     # ==========================================
     # FILE UPLOAD CONFIGURATION
     # ==========================================
-    MAX_FILE_SIZE: str = os.getenv("MAX_FILE_SIZE", "50MB")
+    # Use numeric bytes to avoid type errors; default 2GB
+    MAX_FILE_SIZE_BYTES: int = _parse_size_bytes(os.getenv("MAX_FILE_SIZE", "2GB"), 2 * 1024 * 1024 * 1024)
     UPLOAD_DIRECTORY: str = os.getenv("UPLOAD_DIRECTORY", "uploads")
+    ALLOWED_FILE_TYPES: List[str] = [x.strip().lower() for x in os.getenv("ALLOWED_FILE_TYPES", "pdf,docx,txt,jpg,jpeg,png,gif").split(",")]
     
     # ==========================================
     # REDIS TOPICS (Service-specific)
@@ -166,6 +189,35 @@ class Config:
         if required_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(required_vars)}")
 
+
+# ==========================================
+# MONGODB CLIENT HELPERS
+# ==========================================
+def get_mongodb_client():
+    """Get MongoDB client instance"""
+    from motor.motor_asyncio import AsyncIOMotorClient
+    return AsyncIOMotorClient(Config.get_mongodb_uri())
+
+def get_mongodb_database():
+    """Get MongoDB database instance"""
+    client = get_mongodb_client()
+    return client[Config.MONGODB_DATABASE]
+
+# ==========================================
+# REDIS CLIENT HELPERS
+# ==========================================
+def get_redis_client():
+    """Get Redis client instance"""
+    import redis.asyncio as redis
+    return redis.from_url(Config.get_redis_url(), db=Config.REDIS_DATABASE)
+
+# ==========================================
+# S3 CLIENT HELPERS
+# ==========================================
+def get_s3_client():
+    """Get S3 client instance"""
+    import boto3
+    return boto3.client('s3')
 
 # Legacy function wrappers for backward compatibility
 def get_redis_url():

@@ -25,7 +25,7 @@ docker compose -f docker-compose.yml logs -f <service-name>
 ## Services kiến trúc mới
 - `api-gateway` - Port 8000
 - `user-management-service` - Port 8001
-- `document-management-service` - Port 8002
+- `file-management-service` - Port 8002
 - `automation-service` - Port 8003
 
 ## Ghi chú

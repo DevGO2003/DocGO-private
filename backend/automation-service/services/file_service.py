@@ -53,17 +53,9 @@ class FileStorageService:
             # Generate S3 key
             s3_key = self._generate_s3_key(file_id, file.filename, folder, user_id)
             
-            # 1) Always write local first
-            local_path = os.path.join(self.upload_directory, file.filename)
-            with open(local_path, "wb") as f:
-                f.write(file_content)
-
-            file_url = f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
-            status = "uploaded_local"
-            message = "File đã được upload local thành công"
-
-            # 2) Optionally write to S3
+            # Choose storage method based on S3_ENABLED
             if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
+                # Use S3 only
                 try:
                     import boto3
                     s3_client = boto3.client(
@@ -81,12 +73,25 @@ class FileStorageService:
                         ContentType=file.content_type or "application/octet-stream"
                     )
 
-                    status = "uploaded_local_and_s3"
-                    message = "File đã được upload local và S3 thành công"
+                    # Generate presigned URL for download (valid for 1 hour)
+                    file_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': self.s3_bucket, 'Key': s3_key},
+                        ExpiresIn=3600  # 1 hour
+                    )
+                    status = "uploaded_s3"
+                    message = "File đã được upload S3 thành công"
                 except Exception as s3_error:
-                    # Keep local; annotate message
-                    status = "uploaded_local_s3_failed"
-                    message = f"Đã lưu local; upload S3 thất bại: {str(s3_error)}"
+                    raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(s3_error)}")
+            else:
+                # Fallback to local storage
+                local_path = os.path.join(self.upload_directory, file.filename)
+                with open(local_path, "wb") as f:
+                    f.write(file_content)
+
+                file_url = f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
+                status = "uploaded_local"
+                message = "File đã được upload local thành công"
             
             return FileUploadResponse(
                 file_id=file_id,

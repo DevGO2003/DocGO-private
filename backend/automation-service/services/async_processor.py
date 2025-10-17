@@ -22,7 +22,9 @@ class AsyncDocumentProcessor:
         self.ai_service = AutomationService()
         self.file_service = FileStorageService()
         self.websocket_manager = WebSocketManager()
-        self.event_service = EventService()
+        # Import global event_service instance
+        from global_instances import event_service
+        self.event_service = event_service
     
     async def process_document_async(self, document_data: Dict[str, Any]):
         """Process document asynchronously"""

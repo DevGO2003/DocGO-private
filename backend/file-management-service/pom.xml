@@ -161,6 +161,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<mainClass>com.devgo2003.docgo.file_service.DocumentManagementApplication</mainClass>
 					<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
 					<fork>true</fork>
 					<executable>true</executable>

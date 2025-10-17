@@ -21,6 +21,10 @@ public class OrganizationResponse {
     private String phone;
     private String email;
     private String website;
+    private String ownerUserId;
+    private List<String> adminUserIds;
+    private Integer memberCount;
+    private Organization.OrganizationSettings settings;
     private Organization.OrganizationStatus status;
     private String createdBy;
     private String updatedBy;
@@ -43,6 +47,10 @@ public class OrganizationResponse {
         response.setPhone(organization.getPhone());
         response.setEmail(organization.getEmail());
         response.setWebsite(organization.getWebsite());
+        response.setOwnerUserId(organization.getOwnerUserId());
+        response.setAdminUserIds(organization.getAdminUserIds());
+        response.setMemberCount(organization.getMemberCount());
+        response.setSettings(organization.getSettings());
         response.setStatus(organization.getStatus());
         response.setCreatedBy(organization.getCreatedBy());
         response.setUpdatedBy(organization.getUpdatedBy());

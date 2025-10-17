@@ -183,7 +183,7 @@ ws.onmessage = (event) => {
 ```bash
 MAX_SYNC_SIZE=2097152  # 2MB
 GEMINI_API_KEY=your-key-here
-DOCUMENT_MANAGEMENT_SERVICE_URL=http://localhost:8002
+FILE_MANAGEMENT_SERVICE_URL=http://localhost:8002
 ```
 
 **API Gateway**:
@@ -210,7 +210,7 @@ AUTOMATION_SERVICE_URL=http://localhost:8003
 
 3. **Document Service Integration Failed**
    - Verify Document Service is running on port 8002
-   - Check DOCUMENT_MANAGEMENT_SERVICE_URL in Automation Service
+   - Check FILE_MANAGEMENT_SERVICE_URL in Automation Service
 
 4. **Progress Not Updating**
    - Check WebSocket connection in browser dev tools

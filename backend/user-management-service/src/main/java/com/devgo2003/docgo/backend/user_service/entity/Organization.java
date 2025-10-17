@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "organizations")
 @Data
@@ -67,10 +68,43 @@ public class Organization {
     @Field("user_ids")
     private List<String> userIds;
 
+    @Field("owner_user_id")
+    private String ownerUserId;
+
+    @Field("admin_user_ids")
+    private List<String> adminUserIds;
+
+    @Field("member_count")
+    @Builder.Default
+    private Integer memberCount = 0;
+
+    @Field("settings")
+    private OrganizationSettings settings;
+
     public enum OrganizationStatus {
         ACTIVE,
         INACTIVE,
         SUSPENDED,
         DELETED
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrganizationSettings {
+        @Field("allow_member_invite")
+        @Builder.Default
+        private Boolean allowMemberInvite = true;
+
+        @Field("require_admin_approval")
+        @Builder.Default
+        private Boolean requireAdminApproval = false;
+
+        @Field("max_members")
+        private Integer maxMembers;
+
+        @Field("custom_settings")
+        private Map<String, Object> customSettings;
     }
 }
