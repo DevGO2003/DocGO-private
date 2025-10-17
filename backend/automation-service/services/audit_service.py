@@ -88,43 +88,8 @@ class AuditService:
             except Exception as e:
                 print(f"Failed to log event to MongoDB: {e}")
         
-        # Publish to Kafka (best-effort) using EventService when enabled
-        try:
-            # Only allow audit -> Kafka when explicitly enabled to avoid publishing legacy topics
-            if Config.KAFKA_ENABLED and os.getenv("AUDIT_KAFKA_ENABLED", "false").lower() == "true":
-                from global_instances import event_service
-                # Map event type to topic - CHỈ FILE EVENTS
-                evt_type = (event_data.get("eventType") or "").lower()
-                if "uploaded" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")
-                elif "processed" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_PROCESSED_TOPIC", "file.processed")
-                elif "updated" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_UPDATED_TOPIC", "file.updated")
-                elif "classified" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_CLASSIFIED_TOPIC", "file.classified")
-                elif "analyzed" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_ANALYZED_TOPIC", "file.analyzed")
-                elif "deleted" in evt_type:
-                    topic = getattr(Config, "KAFKA_FILE_DELETED_TOPIC", "file.deleted")
-                else:
-                    topic = getattr(Config, "KAFKA_FILE_UPLOADED_TOPIC", "file.uploaded")  # default
-
-                payload = {
-                    "eventVersion": "v1",
-                    "eventType": event_data.get("eventType"),
-                    "eventId": event_id,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "source": "automation-service",
-                    "correlationId": event_data.get("correlationId"),
-                    "actor": event_data.get("actor", {"userId": "system", "userRole": "system", "ip": None}),
-                    "data": event_data.get("data", {}),
-                    "metadata": event_data.get("metadata", {"region": "local", "serviceVersion": "1.0.0"})
-                }
-
-                await event_service.publish_kafka(topic, payload)
-        except Exception as e:
-            print(f"Failed to publish Kafka event: {e}")
+        # Removed legacy Kafka publishing from AuditService to avoid duplicate/legacy topics
+        # All uploads publish only via file_router to the 3 standardized topics
         
         return event_id
     

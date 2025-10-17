@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -246,6 +247,39 @@ public class FileController {
 				.description("File not found")
 				.data(null)
 				.build());
+		}
+	}
+
+	@Operation(summary = "Open file by redirecting to a generated or stored URL")
+	@GetMapping("/{id}/open")
+	public ResponseEntity<Void> openFile(@PathVariable String id) {
+		try {
+			java.util.Optional<FileEntity> fileEntity = fileService.getFileById(id);
+			if (fileEntity.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
+			FileEntity entity = fileEntity.get();
+			// For now, if s3 url exists in storage, redirect to it. In future, replace with presigned generation
+			String s3Url = null;
+			try {
+				Object storage = entity.getStorage();
+				if (storage instanceof com.devgo2003.docgo.file_service.dto.Storage s) {
+					if (s.getS3() != null && s.getS3().getUrl() != null && !s.getS3().getUrl().isEmpty()) {
+						s3Url = s.getS3().getUrl();
+					}
+				}
+			} catch (Exception ignore) {}
+
+			if (s3Url != null) {
+				return ResponseEntity.status(HttpStatus.FOUND)
+					.header(HttpHeaders.LOCATION, s3Url)
+					.build();
+			}
+
+			// No URL available
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 	
