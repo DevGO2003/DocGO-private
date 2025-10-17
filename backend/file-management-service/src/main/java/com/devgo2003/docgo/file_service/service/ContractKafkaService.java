@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.Optional;
 
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = false)
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "docgo.legacy.kafka.enabled", havingValue = "true", matchIfMissing = false)
 public class ContractKafkaService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractKafkaService.class);

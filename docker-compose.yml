@@ -139,6 +139,8 @@ services:
       - ./backend/automation-service/.env
     environment:
       - ENVIRONMENT=docker
+      - KAFKA_ENABLED=true
+      - KAFKA_WORKER_ENABLED=false
     depends_on:
       - kafka
       - redis

@@ -175,7 +175,13 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             <button 
               onMouseEnter={handlePreviewEnter}
               onMouseLeave={handlePreviewLeave}
-              onClick={() => setShowModalPreview(true)}
+              onClick={() => {
+                if (fileUrl) {
+                  window.open(fileUrl as string, '_blank', 'noopener,noreferrer')
+                } else {
+                  setShowModalPreview(true)
+                }
+              }}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
               title={t('documents.preview')}
             >

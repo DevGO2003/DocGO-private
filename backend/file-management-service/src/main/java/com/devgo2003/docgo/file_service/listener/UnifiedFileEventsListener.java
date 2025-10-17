@@ -181,8 +181,11 @@ public class UnifiedFileEventsListener {
                 return f;
             });
 
-            // Contract block
-            Contract contract = entity.getContract() == null ? new Contract() : entity.getContract();
+            // Contract block (use entity.Contract type explicitly to avoid DTO/entity confusion)
+            com.devgo2003.docgo.file_service.entity.Contract contract = entity.getContract();
+            if (contract == null) {
+                contract = new com.devgo2003.docgo.file_service.entity.Contract();
+            }
             if (evt.getData().getSummary() != null) contract.setSummary(evt.getData().getSummary());
             if (evt.getData().getKeyClauses() != null) {
                 // map to existing KeyClause DTOs if available, else store as generic

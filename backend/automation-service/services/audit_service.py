@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 import uuid
 from config import Config
+import os
 
 
 class AuditService:
@@ -89,7 +90,8 @@ class AuditService:
         
         # Publish to Kafka (best-effort) using EventService when enabled
         try:
-            if Config.KAFKA_ENABLED:
+            # Only allow audit -> Kafka when explicitly enabled to avoid publishing legacy topics
+            if Config.KAFKA_ENABLED and os.getenv("AUDIT_KAFKA_ENABLED", "false").lower() == "true":
                 from global_instances import event_service
                 # Map event type to topic - CHỈ FILE EVENTS
                 evt_type = (event_data.get("eventType") or "").lower()
