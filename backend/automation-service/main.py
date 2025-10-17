@@ -18,7 +18,7 @@ import os
 import asyncio
 from datetime import datetime
 import uuid
-from kafka_worker import worker
+# Legacy Kafka worker disabled by default; guarded at runtime
 # from services.notification_service import NotificationService
 from services.batch_service import BatchService
 from config import Config
@@ -162,8 +162,10 @@ async def on_startup():
         # Start event processing
         await event_service.start_event_processing()
         
-        # Start Kafka worker
-        await worker.start()
+        # Start Kafka worker (legacy) if explicitly enabled
+        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true":
+            from kafka_worker import worker
+            await worker.start()
         
         print("Automation Service started successfully with all integrations")
     except Exception as e:
@@ -179,7 +181,12 @@ async def on_shutdown():
         await audit_service.close()
         await batch_service.close()
         await event_service.close()
-        await worker.stop()
+        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true":
+            try:
+                from kafka_worker import worker
+                await worker.stop()
+            except Exception:
+                pass
         
         print("Automation Service shutdown completed")
     except Exception as e:

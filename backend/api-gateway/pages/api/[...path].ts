@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const method = req.method || 'GET';
 
   // Reconstruct full API path
-  const fullApiPath = `/api/${fullPath}`;
+  const fullApiPath = fullPath.startsWith('api/') ? `/${fullPath}` : `/api/${fullPath}`;
   
   logger.info(`🔄 Proxy request: ${method} ${fullApiPath}`);
 
@@ -123,8 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Prepare headers
     const headers: Record<string, string> = {
-      'User-Agent': 'API-Gateway/1.0.0',
-      'Content-Type': 'application/json; charset=utf-8'
+      'User-Agent': 'API-Gateway/1.0.0'
     };
 
     // Forward critical headers
@@ -173,10 +172,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       contentType: headers['Content-Type']
     });
     
-    // Ensure proper JSON serialization
-    if (req.body && typeof req.body === 'object') {
-      requestData = JSON.stringify(req.body);
-      headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
+    // Ensure proper JSON serialization for non-GET/DELETE only
+    const methodUpper = method.toUpperCase();
+    if (methodUpper !== 'GET' && methodUpper !== 'DELETE') {
+      headers['Content-Type'] = 'application/json; charset=utf-8';
+      if (req.body && typeof req.body === 'object') {
+        requestData = JSON.stringify(req.body);
+        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
+      }
+    } else {
+      // Do not send body or content headers for GET/DELETE
+      requestData = undefined;
+      if ('Content-Type' in headers) delete headers['Content-Type'];
+      if ('Content-Length' in headers) delete headers['Content-Length'];
     }
 
     // Make request to microservice
