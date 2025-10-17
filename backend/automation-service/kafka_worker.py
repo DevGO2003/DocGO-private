@@ -44,15 +44,11 @@ class AIKafkaWorker:
 
 	async def start(self) -> None:
 		if self.consumer is None:
-			# Subscribe to File Events topics + legacy JSON analysis
+			# Subscribe only to standardized upload topics for this usecase
 			topics = [
-				self.file_uploaded_topic,    # file.uploaded
-				self.file_processed_topic,   # file.processed
-				self.file_updated_topic,     # file.updated
-				self.file_classified_topic,  # file.classified
-				self.file_analyzed_topic,    # file.analyzed
-				self.file_deleted_topic,     # file.deleted
-				self.json_analyze_topic,     # json.analyze (legacy)
+				"file.metadata.recorded",
+				"file.plaintext.extracted",
+				"contract.summary.generated",
 			]
 			self.consumer = AIOKafkaConsumer(
 				*topics,

@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { DocumentTextIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import type { Document } from '../_types'
+import SharedFilePreview from '@/components/shared/SharedFilePreview'
 
 type Props = {
   document: Document
@@ -18,6 +19,11 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
   const [previewPos, setPreviewPos] = useState<{x: number, y: number} | null>(null)
   const [previewTags, setPreviewTags] = useState<{docId: string, tags: string[]} | null>(null)
   const [tagsPos, setTagsPos] = useState<{x: number, y: number} | null>(null)
+  const [showModalPreview, setShowModalPreview] = useState<boolean>(false)
+
+  const fileUrl = document.storage && (document.storage as any).s3?.url
+  const fileType = document.fileType || (document.file?.type ?? (document.storage as any)?.s3?.contentType)
+  const fileSize = document.fileSize || (document.file?.size ?? (document.storage as any)?.s3?.size)
 
   const handlePreviewEnter = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -96,7 +102,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
   }
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-200 p-[10px] shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative" style={{aspectRatio: '5/6'}}>
+    <div className="group bg-white rounded-2xl border border-gray-200 p-[10px] shadow-sm hover:shadow-md hover:-translate-y-[1px] transition relative" style={{aspectRatio: '5/4'}}>
       <div className={`absolute top-2 left-2 z-30 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
         <input
           type="checkbox"
@@ -169,6 +175,7 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
             <button 
               onMouseEnter={handlePreviewEnter}
               onMouseLeave={handlePreviewLeave}
+              onClick={() => setShowModalPreview(true)}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
               title={t('documents.preview')}
             >
@@ -199,7 +206,9 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
           <div className="text-sm">
             <div className="font-medium mb-2">{t('documents.previewTitle')}</div>
             <p className="text-gray-600">{t('documents.previewContent')}</p>
-            <p className="text-xs text-gray-500 mt-2">{t('documents.apiNotReady')}</p>
+            {!fileUrl && (
+              <p className="text-xs text-gray-500 mt-2">{t('documents.apiNotReady')}</p>
+            )}
           </div>
         </div>
       )}
@@ -223,6 +232,15 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
                 </span>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Preview using shared component */}
+      {showModalPreview && fileUrl && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowModalPreview(false)}>
+          <div className="bg-white w-full max-w-5xl h-[80vh] rounded-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <SharedFilePreview fileUrl={fileUrl} fileName={document.title} fileType={fileType} fileSize={fileSize as number} className="h-full" />
           </div>
         </div>
       )}

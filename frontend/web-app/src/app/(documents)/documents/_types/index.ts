@@ -45,6 +45,28 @@ export type Document = {
     totalValue?: number
     currency?: string
   }
+  // File info & storage for preview via URL
+  file?: {
+    id?: string | null
+    name?: string | null
+    type?: string | null
+    size?: number | null
+    version?: string | null
+  }
+  storage?: {
+    s3?: {
+      url: string
+      bucket?: string | null
+      objectKey?: string | null
+      region?: string | null
+      contentType?: string | null
+      size?: number | null
+      versionId?: string | null
+      checksum?: string | null
+      type: string
+    }
+    local?: unknown
+  }
 }
 
 export type Paginated<T> = {
