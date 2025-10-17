@@ -162,8 +162,8 @@ async def on_startup():
         # Start event processing
         await event_service.start_event_processing()
         
-        # Start Kafka worker (legacy) if explicitly enabled
-        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true":
+        # Start Kafka worker (legacy) ONLY when both flags are enabled
+        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true" and os.getenv("ALLOW_LEGACY_WORKER", "false").lower() == "true":
             from kafka_worker import worker
             await worker.start()
         
@@ -181,7 +181,7 @@ async def on_shutdown():
         await audit_service.close()
         await batch_service.close()
         await event_service.close()
-        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true":
+        if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true" and os.getenv("ALLOW_LEGACY_WORKER", "false").lower() == "true":
             try:
                 from kafka_worker import worker
                 await worker.stop()
