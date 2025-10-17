@@ -402,7 +402,7 @@ async def upload_document(
             })
             raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
         
-        # 2) Run OCR with retry (skip for JSON)
+        # 2) Run OCR / extract plaintext (JSON parse treated as plaintext/jsonContent)
         try:
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -411,8 +411,20 @@ async def upload_document(
             })
             
             content_type_lower = (file.content_type or "").lower()
+            plaintext_text = None
+            json_content_text = None
             if content_type_lower == "application/json":
-                ocr_text = ""
+                raw_bytes = await file.read()
+                await file.seek(0)
+                try:
+                    parsed = json.loads(raw_bytes.decode("utf-8", errors="ignore"))
+                    json_content_text = json.dumps(parsed, ensure_ascii=False)
+                    # treat pretty text as plaintext for unified pipeline
+                    plaintext_text = json.dumps(parsed, ensure_ascii=False, indent=2)
+                except Exception as je:
+                    json_content_text = raw_bytes.decode("utf-8", errors="ignore")
+                    plaintext_text = json_content_text
+                ocr_text = plaintext_text
             else:
                 file_content = await file.read()
                 await file.seek(0)
@@ -424,6 +436,7 @@ async def upload_document(
                     exceptions=(Exception,),
                     on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
                 )
+                plaintext_text = ocr_text
             
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -448,7 +461,9 @@ async def upload_document(
                 "retryCount": 2
             })
             print(f"OCR failed, using filename: {e}")
-            ocr_text = f"OCR failed for {file.filename}"
+                ocr_text = f"OCR failed for {file.filename}"
+                if plaintext_text is None:
+                    plaintext_text = ocr_text
 
         # Helper builders for sample.json-compatible document
         def _now_iso():
@@ -642,7 +657,7 @@ async def upload_document(
             
             classification_result = await retry_async(
                 ai_service.classify_document,
-                ocr_text, file.filename,
+                plaintext_text, file.filename,
                 max_retries=2,
                 backoff_factor=1.5,
                 exceptions=(Exception,),
@@ -760,7 +775,7 @@ async def upload_document(
                 print(f"Contract processing failed: {e}")
                 summary_result = {"summary": f"Tóm tắt hợp đồng {file.filename}"}
         
-        overview_document_type = "CONTRACT" if is_contract else "GENERAL"
+            overview_document_type = "CONTRACT" if is_contract else "GENERAL"
         
         # 5) Build payload matching sample schema
         api_doc_payload = build_file_api_payload(
@@ -777,7 +792,7 @@ async def upload_document(
             now_iso=now_iso,
         )
         
-        # 6) Publish metadata event to File Management Service (Kafka best-effort)
+        # 6) Publish 3 Kafka events (best-effort) for metadata, plaintext, and contract summary
         try:
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "METADATA_PUBLISH",
@@ -788,94 +803,74 @@ async def upload_document(
             # Only publish if Kafka is enabled
             if getattr(Config, 'KAFKA_ENABLED', False):
                 try:
-                    # 1. Publish FileUploaded event first
-                    file_uploaded_payload = {
-                        "eventVersion": "v1",
-                        "eventType": "FileUploaded",
+                    # 1) file.metadata.recorded
+                    storage_block = ({
+                        "type": "s3" if Config.S3_ENABLED else "local",
+                        "s3": {"url": file_url} if Config.S3_ENABLED else None,
+                        "local": {"path": file_url} if not Config.S3_ENABLED else None
+                    })
+                    metadata_evt = {
+                        "eventVersion": "1.0",
+                        "eventType": "file.metadata.recorded",
                         "eventId": str(uuid.uuid4()),
                         "timestamp": now_iso,
                         "source": "automation-service",
                         "correlationId": correlation_id,
-                        "actor": {"userId": "system"},
+                        "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
-                            "id": file_id,
-                            "filename": file.filename,
+                            "fileId": file_id,
+                            "name": file.filename,
                             "contentType": file.content_type,
                             "size": size,
-                            "storage": {
-                                "url": file_url,
-                                "type": "s3" if Config.S3_ENABLED else "local"
-                            },
-                            "uploadedAt": now_iso
+                            "ownerUserId": "system",
+                            "storage": storage_block,
+                            "version": 1
                         },
                         "metadata": {"serviceVersion": "1.0.0"}
                     }
+                    await event_service.publish_kafka("file.metadata.recorded", metadata_evt)
 
-                    print(f"[DEBUG] Publishing FileUploaded event to topic: {Config.KAFKA_FILE_UPLOADED_TOPIC}")
-                    await event_service.publish_kafka(Config.KAFKA_FILE_UPLOADED_TOPIC, file_uploaded_payload)
-                    print(f"[DEBUG] FileUploaded event published successfully")
-
-                    # 2. Publish FileProcessed event after processing
-                    file_processed_data = build_file_processed_payload(
-                        file_id=file_id,
-                        file_url=file_url,
-                        filename=file.filename,
-                        content_type=file.content_type,
-                        size=size,
-                        ocr_text_val=ocr_text,
-                        classification_result_val=classification_result
-                    )
-
-                    file_processed_payload = {
-                        "eventVersion": "v1",
-                        "eventType": "FileProcessed",
+                    # 2) file.plaintext.extracted
+                    plaintext_evt = {
+                        "eventVersion": "1.0",
+                        "eventType": "file.plaintext.extracted",
                         "eventId": str(uuid.uuid4()),
                         "timestamp": now_iso,
                         "source": "automation-service",
                         "correlationId": correlation_id,
-                        "actor": {"userId": "system"},
-                        "data": file_processed_data,
+                        "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                        "data": {
+                            "fileId": file_id,
+                            "plaintext": plaintext_text,
+                            "ocr": {"text": plaintext_text if content_type_lower != "application/json" else None, "status": "COMPLETED" if plaintext_text else "SKIPPED"},
+                            "jsonContent": json_content_text,
+                            "classification": classification_result,
+                            "processing": {"status": "COMPLETED", "error": None}
+                        },
                         "metadata": {"serviceVersion": "1.0.0"}
                     }
+                    await event_service.publish_kafka("file.plaintext.extracted", plaintext_evt)
 
-                    print(f"[DEBUG] Publishing FileProcessed event to topic: {Config.KAFKA_FILE_PROCESSED_TOPIC}")
-                    print(f"[DEBUG] Event payload: {json.dumps(file_processed_payload, indent=2)[:500]}...")
-                    await event_service.publish_kafka(Config.KAFKA_FILE_PROCESSED_TOPIC, file_processed_payload)
-                    print(f"[DEBUG] FileProcessed event published successfully")
-
-                    # 3. If contract analysis completed, publish FileUpdated event
+                    # 3) contract.summary.generated (if contract)
                     if bool(classification_result.get("isContract")) and summary_result:
-                        contract_updated_payload = {
-                "eventVersion": "v1",
-                            "eventType": "FileUpdated",
+                        contract_evt = {
+                            "eventVersion": "1.0",
+                            "eventType": "contract.summary.generated",
                             "eventId": str(uuid.uuid4()),
                             "timestamp": now_iso,
                             "source": "automation-service",
-                "correlationId": correlation_id,
-                            "actor": {"userId": "system"},
-                "data": {
-                                "id": file_id,
-                                "updateType": "contract_analysis",
-                                "contract": {
-                                    "effectiveDate": summary_result.get("effectiveDate"),
-                                    "expiryDate": summary_result.get("expiryDate"),
-                                    "totalValue": summary_result.get("totalValue"),
-                                    "currency": summary_result.get("currency"),
-                                    "summary": summary_result.get("summary"),
-                                    "parties": summary_result.get("parties", []),
-                                    "payment": summary_result.get("payment"),
-                                    "clauses": summary_result.get("clauses", {"key": [], "unfavorable": []}),
-                                    "reminders": summary_result.get("reminders", []),
-                                    "risk": summary_result.get("risk"),
-                                    "compliance": summary_result.get("compliance")
-                                }
+                            "correlationId": correlation_id,
+                            "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                            "data": {
+                                "fileId": file_id,
+                                "summary": summary_result.get("summary"),
+                                "keyClauses": summary_result.get("clauses", {}).get("key", []),
+                                "paymentDetails": summary_result.get("payment", []),
+                                "riskAssessment": summary_result.get("risk", None)
                             },
                             "metadata": {"serviceVersion": "1.0.0"}
                         }
-
-                        print(f"[DEBUG] Publishing FileUpdated event to topic: {Config.KAFKA_FILE_UPDATED_TOPIC}")
-                        await event_service.publish_kafka(Config.KAFKA_FILE_UPDATED_TOPIC, contract_updated_payload)
-                        print(f"[DEBUG] FileUpdated event published successfully")
+                        await event_service.publish_kafka("contract.summary.generated", contract_evt)
                 except Exception as pub_err:
                     print(f"Kafka publish failed (non-blocking): {pub_err}")
 
