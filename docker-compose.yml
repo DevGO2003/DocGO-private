@@ -193,6 +193,7 @@ services:
       - .env
     environment:
       - ENVIRONMENT=docker
+      - NEXT_PUBLIC_API_GATEWAY_URL=http://api-gateway:8000
     depends_on:
       - api-gateway
     networks:

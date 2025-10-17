@@ -125,6 +125,9 @@ class Config:
     JSON_ANALYZE_TOPIC: str = os.getenv("JSON_ANALYZE_TOPIC", "json.analyze")
     JSON_ANALYSIS_COMPLETED_TOPIC: str = os.getenv("JSON_ANALYSIS_COMPLETED_TOPIC", "json.analysis.completed")
     
+    # Enable/disable legacy Kafka worker
+    KAFKA_WORKER_ENABLED: bool = os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true"
+    
     # ==========================================
     # SERVICE URLS (Smart URL building)
     # ==========================================

@@ -104,7 +104,10 @@ class EventService:
                     value_serializer=lambda v: json.dumps(v, default=str).encode('utf-8'),
                 )
                 await self.kafka_producer.start()
+            preview = json.dumps(message, default=str)
+            print(f"[DEBUG] Kafka publish start topic={topic} bootstrap={Config.KAFKA_BOOTSTRAP_SERVERS} size={len(preview)} preview={preview[:200]}")
             await self.kafka_producer.send_and_wait(topic, message)
+            print(f"[DEBUG] Kafka publish done topic={topic}")
         except Exception as e:
             print(f"[WARN] Kafka publish failed ({topic}): {e}. Message: {json.dumps(message)[:500]}")
 

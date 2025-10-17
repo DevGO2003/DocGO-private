@@ -5,14 +5,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '@/lib/services';
 import logger from '@/lib/logger';
 import { withApiHandler } from '@/lib/http/withApiHandler';
-import { Buffer } from 'buffer';
+// Note: Use global Buffer if needed; avoid importing 'buffer' to prevent build issues
 
 export const config = {
   api: {
-    // Enable bodyParser for JSON requests, disable only for multipart
-    bodyParser: {
-      sizeLimit: '10mb',
-    }
+    // Disable bodyParser to handle multipart requests properly
+    bodyParser: false
   }
 };
 
@@ -133,6 +131,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.headers['content-length']) {
       headers['Content-Length'] = req.headers['content-length'] as string;
     }
+    if (req.headers['content-type']) {
+      headers['Content-Type'] = req.headers['content-type'] as string;
+    }
 
     // Forward correlation headers
     if (req.headers['x-correlation-id']) {
@@ -162,33 +163,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     });
 
-    // Simple body handling for JSON requests
-    let requestData = req.body;
+    // Handle raw body for multipart and JSON requests
+    let requestData: any;
     
     // Debug logging for request body processing
     logger.debug('🔍 [DEBUG] Request body processing:', {
       bodyType: typeof req.body,
-      bodyStringified: JSON.stringify(req.body),
+      bodyStringified: req.body ? JSON.stringify(req.body) : 'null',
       contentType: headers['Content-Type']
     });
     
-    // Ensure proper JSON serialization for non-GET/DELETE only
+    // Ensure we don't send a body for GET/DELETE; let axios handle JSON for others
     const methodUpper = method.toUpperCase();
-    if (methodUpper !== 'GET' && methodUpper !== 'DELETE') {
-      headers['Content-Type'] = 'application/json; charset=utf-8';
-      if (req.body && typeof req.body === 'object') {
-        requestData = JSON.stringify(req.body);
-        headers['Content-Length'] = Buffer.byteLength(requestData, 'utf8').toString();
-      }
-    } else {
+    if (methodUpper === 'GET' || methodUpper === 'DELETE') {
       // Do not send body or content headers for GET/DELETE
       requestData = undefined;
       if ('Content-Type' in headers) delete headers['Content-Type'];
       if ('Content-Length' in headers) delete headers['Content-Length'];
+    } else {
+      // For POST/PUT/PATCH, forward the raw body stream
+      // Since bodyParser is disabled, req.body will be a Buffer
+      if (req.body) {
+        requestData = req.body;
+      }
+      
+      // For multipart requests, don't let axios modify Content-Type
+      if (headers['Content-Type'] && headers['Content-Type'].includes('multipart/form-data')) {
+        // Keep original Content-Type for multipart
+        // Don't let axios serialize the body
+      }
     }
 
     // Make request to microservice
-    const response = await service.request({
+    const requestConfig: any = {
       method: method as any,
       url: endpoint,
       data: requestData,
@@ -197,12 +204,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
       validateStatus: () => true // Don't throw on non-2xx status codes
-    });
+    };
+
+    // For multipart requests, prevent axios from serializing the body
+    if (headers['Content-Type'] && headers['Content-Type'].includes('multipart/form-data')) {
+      requestConfig.transformRequest = [(data: any) => data];
+    }
+
+    const response = await service.request(requestConfig);
 
     // CORS headers are handled centrally in middleware
 
     logger.info(`✅ Proxy response: ${response.status}`);
-      return res.status(response.status).json(response.data);
+      // Send through raw response body to support both JSON and text
+      return res.status(response.status).send(response.data as any);
 
   } catch (error: any) {
     logger.error('❌ Proxy error:', error);

@@ -23,6 +23,7 @@ public class UnifiedFileEventsListener {
     @KafkaListener(topics = "file.metadata.recorded", groupId = "file-management-service-group")
     public void onFileMetadataRecorded(String message) {
         try {
+            log.debug("[EVENT-IN] topic=file.metadata.recorded size={} preview={}", message != null ? message.length() : 0, message != null ? message.substring(0, Math.min(200, message.length())) : null);
             FileMetadataRecordedEventDto evt = objectMapper.readValue(message, FileMetadataRecordedEventDto.class);
             if (evt.getData() == null || evt.getData().getFileId() == null) {
                 log.warn("file.metadata.recorded missing data/fileId");
@@ -79,7 +80,13 @@ public class UnifiedFileEventsListener {
             }
 
             fileRepository.save(entity);
-            log.info("Upserted file by metadata: {}", fileId);
+            log.info("Upserted file by metadata: {} name={} type={} size={} storageLocal={} storageS3Url={}",
+                    fileId,
+                    evt.getData().getName(),
+                    evt.getData().getContentType(),
+                    evt.getData().getSize(),
+                    entity.getStorage() != null && entity.getStorage().getLocal() != null ? entity.getStorage().getLocal().getPath() : null,
+                    entity.getStorage() != null && entity.getStorage().getS3() != null ? entity.getStorage().getS3().getUrl() : null);
         } catch (Exception e) {
             log.error("Failed to handle file.metadata.recorded", e);
         }
@@ -88,6 +95,7 @@ public class UnifiedFileEventsListener {
     @KafkaListener(topics = "file.plaintext.extracted", groupId = "file-management-service-group")
     public void onFilePlaintextExtracted(String message) {
         try {
+            log.debug("[EVENT-IN] topic=file.plaintext.extracted size={} preview={}", message != null ? message.length() : 0, message != null ? message.substring(0, Math.min(200, message.length())) : null);
             FilePlaintextExtractedEventDto evt = objectMapper.readValue(message, FilePlaintextExtractedEventDto.class);
             if (evt.getData() == null || evt.getData().getFileId() == null) {
                 log.warn("file.plaintext.extracted missing data/fileId");
@@ -145,7 +153,11 @@ public class UnifiedFileEventsListener {
             entity.setUpdatedBy("system");
 
             fileRepository.save(entity);
-            log.info("Upserted file by plaintext extracted: {}", fileId);
+            log.info("Upserted file by plaintext extracted: {} hasPlaintext={} hasJson={} procStatus={}",
+                    fileId,
+                    evt.getData().getPlaintext() != null,
+                    evt.getData().getJsonContent() != null,
+                    evt.getData().getProcessing() != null ? evt.getData().getProcessing().getStatus() : null);
         } catch (Exception e) {
             log.error("Failed to handle file.plaintext.extracted", e);
         }
@@ -154,6 +166,7 @@ public class UnifiedFileEventsListener {
     @KafkaListener(topics = "contract.summary.generated", groupId = "file-management-service-group")
     public void onContractSummaryGenerated(String message) {
         try {
+            log.debug("[EVENT-IN] topic=contract.summary.generated size={} preview={}", message != null ? message.length() : 0, message != null ? message.substring(0, Math.min(200, message.length())) : null);
             ContractSummaryGeneratedEventDto evt = objectMapper.readValue(message, ContractSummaryGeneratedEventDto.class);
             if (evt.getData() == null || evt.getData().getFileId() == null) {
                 log.warn("contract.summary.generated missing data/fileId");
@@ -190,7 +203,7 @@ public class UnifiedFileEventsListener {
             entity.setUpdatedBy("system");
 
             fileRepository.save(entity);
-            log.info("Upserted file by contract summary: {}", fileId);
+            log.info("Upserted file by contract summary: {} hasSummary={} docType=CONTRACT", fileId, evt.getData().getSummary() != null);
         } catch (Exception e) {
             log.error("Failed to handle contract.summary.generated", e);
         }

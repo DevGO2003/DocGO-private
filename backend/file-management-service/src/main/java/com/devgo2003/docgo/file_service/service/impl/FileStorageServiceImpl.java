@@ -5,6 +5,8 @@ import com.devgo2003.docgo.file_service.dto.FileUploadResponse;
 import com.devgo2003.docgo.file_service.entity.FileEntity;
 import com.devgo2003.docgo.file_service.repository.FileRepository;
 import com.devgo2003.docgo.file_service.service.FileStorageService;
+import com.devgo2003.docgo.file_service.event.FileUploadedEvent;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -32,6 +34,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Autowired
     private FileRepository fileRepository;
 
+    @Autowired(required = false)
+    private KafkaTemplate<String, Object> kafkaTemplate;
+    
+    @Value("${app.kafka.topic.file-uploaded:file.uploaded}")
+    private String fileUploadedTopic;
+
     // Debug: Constructor để kiểm tra service được tạo
     public FileStorageServiceImpl() {
         System.out.println("🔍 FileStorageServiceImpl: Constructor called - Service is being created!");
@@ -56,6 +64,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             System.out.println("🔍 FileStorageServiceImpl: File saved to: " + filePath.toString());
             
             // Persist basic metadata to Mongo so GET one can find it by fileId
+            System.out.println("🔍 FileStorageServiceImpl: About to persist metadata to MongoDB for fileId: " + fileId);
             try {
                 FileEntity entity = new FileEntity();
                 entity.setId(fileId);
@@ -83,9 +92,41 @@ public class FileStorageServiceImpl implements FileStorageService {
                 entity.initializeNewEntity();
                 
                 fileRepository.save(entity);
+                System.out.println("🔍 FileStorageServiceImpl: Metadata persisted successfully to MongoDB for fileId: " + fileId);
             } catch (Exception persistEx) {
                 System.err.println("🔍 FileStorageServiceImpl: Warning - failed to persist metadata: " + persistEx.getMessage());
                 persistEx.printStackTrace();
+            }
+            
+            // Publish FileUploaded event to Kafka
+            System.out.println("🔍 FileStorageServiceImpl: Checking KafkaTemplate - kafkaTemplate: " + (kafkaTemplate != null ? "AVAILABLE" : "NULL"));
+            System.out.println("🔍 FileStorageServiceImpl: Topic name: " + fileUploadedTopic);
+            
+            if (kafkaTemplate != null) {
+                try {
+                    FileUploadedEvent event = FileUploadedEvent.builder()
+                            .documentId(fileId)
+                            .fileId(fileId)
+                            .fileName(file.getOriginalFilename())
+                            .fileType(file.getContentType())
+                            .fileSize(file.getSize())
+                            .fileUrl(filePath.toString())
+                            .userId(userId)
+                            .s3Bucket(s3Bucket)
+                            .actor("system")
+                            .actorUserId(userId)
+                            .build();
+                    
+                    System.out.println("🔍 FileStorageServiceImpl: About to send event to Kafka topic: " + fileUploadedTopic);
+                    kafkaTemplate.send(fileUploadedTopic, fileId, event);
+                    System.out.println("🔍 FileStorageServiceImpl: FileUploaded event published to Kafka topic '" + fileUploadedTopic + "' for fileId: " + fileId);
+                } catch (Exception eventEx) {
+                    System.err.println("🔍 FileStorageServiceImpl: Warning - failed to publish FileUploaded event to Kafka: " + eventEx.getMessage());
+                    eventEx.printStackTrace();
+                    // Don't fail upload if event publishing fails
+                }
+            } else {
+                System.out.println("🔍 FileStorageServiceImpl: KafkaTemplate not available, skipping event publishing");
             }
             
             return FileUploadResponse.builder()

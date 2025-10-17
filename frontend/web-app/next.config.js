@@ -68,10 +68,10 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Proxy API calls to backend, but exclude health endpoint, mock API, and static files
+      // Proxy API calls to backend
       {
-        source: '/api/((?!health|mock).*)',
-        destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8000'}/api/$1`,
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://api-gateway:8000'}/api/:path*`,
       },
     ]
   },

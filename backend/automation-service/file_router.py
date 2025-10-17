@@ -809,6 +809,7 @@ async def upload_document(
                         "s3": {"url": file_url} if Config.S3_ENABLED else None,
                         "local": {"path": file_url} if not Config.S3_ENABLED else None
                     })
+                    print(f"[DEBUG] Preparing publish -> topic=file.metadata.recorded fileId={file_id} size={size} contentType={file.content_type}")
                     metadata_evt = {
                         "eventVersion": "1.0",
                         "eventType": "file.metadata.recorded",
@@ -829,8 +830,10 @@ async def upload_document(
                         "metadata": {"serviceVersion": "1.0.0"}
                     }
                     await event_service.publish_kafka("file.metadata.recorded", metadata_evt)
+                    print(f"[DEBUG] Published -> topic=file.metadata.recorded fileId={file_id}")
 
                     # 2) file.plaintext.extracted
+                    print(f"[DEBUG] Preparing publish -> topic=file.plaintext.extracted fileId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
                     plaintext_evt = {
                         "eventVersion": "1.0",
                         "eventType": "file.plaintext.extracted",
@@ -850,9 +853,11 @@ async def upload_document(
                         "metadata": {"serviceVersion": "1.0.0"}
                     }
                     await event_service.publish_kafka("file.plaintext.extracted", plaintext_evt)
+                    print(f"[DEBUG] Published -> topic=file.plaintext.extracted fileId={file_id}")
 
                     # 3) contract.summary.generated (if contract)
                     if bool(classification_result.get("isContract")) and summary_result:
+                        print(f"[DEBUG] Preparing publish -> topic=contract.summary.generated fileId={file_id}")
                         contract_evt = {
                             "eventVersion": "1.0",
                             "eventType": "contract.summary.generated",
@@ -871,8 +876,9 @@ async def upload_document(
                             "metadata": {"serviceVersion": "1.0.0"}
                         }
                         await event_service.publish_kafka("contract.summary.generated", contract_evt)
+                        print(f"[DEBUG] Published -> topic=contract.summary.generated fileId={file_id}")
                 except Exception as pub_err:
-                    print(f"Kafka publish failed (non-blocking): {pub_err}")
+                    print(f"[WARN] Kafka publish failed (non-blocking): {pub_err}")
 
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "METADATA_PUBLISH",
