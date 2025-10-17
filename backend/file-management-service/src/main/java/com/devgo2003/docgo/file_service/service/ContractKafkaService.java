@@ -42,14 +42,15 @@ public class ContractKafkaService {
     /**
      * Consume File Events từ Automation Service
      */
-    @KafkaListener(topics = {
-        "${app.kafka.topic.file-uploaded:file.uploaded}",
-        "${app.kafka.topic.file-processed:file.processed}",
-        "${app.kafka.topic.file-updated:file.updated}",
-        "${app.kafka.topic.file-classified:file.classified}",
-        "${app.kafka.topic.file-analyzed:file.analyzed}",
-        "${app.kafka.topic.file-deleted:file.deleted}"
-    }, groupId = "file-management-service-group")
+    // Deprecated legacy listeners disabled in favor of UnifiedFileEventsListener
+    // @KafkaListener(topics = {
+    //     "${app.kafka.topic.file-uploaded:file.uploaded}",
+    //     "${app.kafka.topic.file-processed:file.processed}",
+    //     "${app.kafka.topic.file-updated:file.updated}",
+    //     "${app.kafka.topic.file-classified:file.classified}",
+    //     "${app.kafka.topic.file-analyzed:file.analyzed}",
+    //     "${app.kafka.topic.file-deleted:file.deleted}"
+    // }, groupId = "file-management-service-group")
     public void handleFileEvents(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);
