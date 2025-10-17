@@ -180,6 +180,10 @@ export default function DocumentsPage() {
           riskLevel: c.riskLevel,
           reminders: [],
           documentType: (c as any).documentType,
+          // Preserve preview-related fields for GeneralFileCard
+          fileType: (c as any).fileType,
+          fileSize: (c as any).fileSize,
+          storage: (c as any).storage,
         }))
         setItems(mapped)
         setDisplayedItems(mapped)

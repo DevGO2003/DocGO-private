@@ -43,6 +43,10 @@ class AIKafkaWorker:
 		self.ai_service = AutomationService()
 
 	async def start(self) -> None:
+		import os
+		if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() != "true" or os.getenv("ALLOW_LEGACY_WORKER", "false").lower() != "true":
+			logging.info("[WORKER_SKIPPED] Legacy AIKafkaWorker disabled by env flags")
+			return
 		if self.consumer is None:
 			# Subscribe only to standardized upload topics for this usecase
 			topics = [
