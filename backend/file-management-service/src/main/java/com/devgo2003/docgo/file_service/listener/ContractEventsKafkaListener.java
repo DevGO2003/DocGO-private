@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 // @Component
+// DISABLED: Removed as part of Kafka cleanup - only keeping file.metadata.recorded, file.plaintext.extracted, contract.summary.generated consumers
 public class ContractEventsKafkaListener {
     private static final Logger logger = LoggerFactory.getLogger(ContractEventsKafkaListener.class);
 
@@ -22,11 +23,11 @@ public class ContractEventsKafkaListener {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(
-        topics = "${app.kafka.topic.contract-summary-updated}",
-        groupId = "${spring.kafka.consumer.group-id}",
-        containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //     topics = "${app.kafka.topic.contract-summary-updated}",
+    //     groupId = "${spring.kafka.consumer.group-id}",
+    //     containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void handleContractSummaryUpdated(String eventJson) {
         try {
             logger.info("📨 [CONTRACT_SUMMARY_RECEIVED] Received contract.summary.updated event: {}", eventJson);

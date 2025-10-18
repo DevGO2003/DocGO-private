@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-@Component
+// @Component
+// DISABLED: Removed as part of Kafka cleanup - only keeping file.metadata.recorded, file.plaintext.extracted, contract.summary.generated consumers
 public class JsonAnalysisKafkaListener {
     private static final Logger logger = LoggerFactory.getLogger(JsonAnalysisKafkaListener.class);
     
@@ -22,11 +23,11 @@ public class JsonAnalysisKafkaListener {
         this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(
-        topics = "${app.kafka.topic.json-analysis-completed:json.analysis.completed}",
-        groupId = "${app.kafka.group-id:file-service-group}",
-        containerFactory = "kafkaListenerContainerFactory"
-    )
+    // @KafkaListener(
+    //     topics = "${app.kafka.topic.json-analysis-completed:json.analysis.completed}",
+    //     groupId = "${app.kafka.group-id:file-service-group}",
+    //     containerFactory = "kafkaListenerContainerFactory"
+    // )
     public void handleJsonAnalysisCompleted(String eventJson) {
         try {
             logger.info("[JSON_ANALYSIS_COMPLETED] Received event: {}", eventJson);

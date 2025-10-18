@@ -5,7 +5,7 @@ import com.devgo2003.docgo.file_service.dto.FileUploadResponse;
 import com.devgo2003.docgo.file_service.entity.FileEntity;
 import com.devgo2003.docgo.file_service.repository.FileRepository;
 import com.devgo2003.docgo.file_service.service.FileStorageService;
-import com.devgo2003.docgo.file_service.event.FileUploadedEvent;
+// import com.devgo2003.docgo.file_service.event.FileUploadedEvent; // Removed
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,22 +104,22 @@ public class FileStorageServiceImpl implements FileStorageService {
             
             if (kafkaTemplate != null) {
                 try {
-                    FileUploadedEvent event = FileUploadedEvent.builder()
-                            .documentId(fileId)
-                            .fileId(fileId)
-                            .fileName(file.getOriginalFilename())
-                            .fileType(file.getContentType())
-                            .fileSize(file.getSize())
-                            .fileUrl(filePath.toString())
-                            .userId(userId)
-                            .s3Bucket(s3Bucket)
-                            .actor("system")
-                            .actorUserId(userId)
-                            .build();
+                    // FileUploadedEvent event = FileUploadedEvent.builder()
+                    //         .documentId(fileId)
+                    //         .fileId(fileId)
+                    //         .fileName(file.getOriginalFilename())
+                    //         .fileType(file.getContentType())
+                    //         .fileSize(file.getSize())
+                    //         .fileUrl(filePath.toString())
+                    //         .userId(userId)
+                    //         .s3Bucket(s3Bucket)
+                    //         .actor("system")
+                    //         .actorUserId(userId)
+                    //         .build();
                     
-                    System.out.println("🔍 FileStorageServiceImpl: About to send event to Kafka topic: " + fileUploadedTopic);
-                    kafkaTemplate.send(fileUploadedTopic, fileId, event);
-                    System.out.println("🔍 FileStorageServiceImpl: FileUploaded event published to Kafka topic '" + fileUploadedTopic + "' for fileId: " + fileId);
+                    // System.out.println("🔍 FileStorageServiceImpl: About to send event to Kafka topic: " + fileUploadedTopic);
+                    // kafkaTemplate.send(fileUploadedTopic, fileId, event);
+                    // System.out.println("🔍 FileStorageServiceImpl: FileUploaded event published to Kafka topic '" + fileUploadedTopic + "' for fileId: " + fileId);
                 } catch (Exception eventEx) {
                     System.err.println("🔍 FileStorageServiceImpl: Warning - failed to publish FileUploaded event to Kafka: " + eventEx.getMessage());
                     eventEx.printStackTrace();

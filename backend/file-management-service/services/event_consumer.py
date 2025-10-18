@@ -62,16 +62,12 @@ class FileEventsConsumer:
         try:
             event_type = payload.get("eventType")
             
-            if event_type == "FileUploaded":
+            if event_type == "file.metadata.recorded":
                 await self._save_file_basic_metadata(payload.get("data"))
-            elif event_type == "FileProcessed":
+            elif event_type == "file.plaintext.extracted":
                 await self._save_file_processed_metadata(payload.get("data"))
-            elif event_type == "FileUpdated":
-                await self._update_file_metadata(payload.get("data"))
-            elif event_type in ["FileClassified", "FileAnalyzed"]:
+            elif event_type == "contract.summary.generated":
                 await self._update_file_analysis(payload.get("data"))
-            elif event_type == "FileDeleted":
-                await self._delete_file_metadata(payload.get("data"))
             else:
                 logger.info("[FILE_EVENT_IGNORED] eventType=%s", event_type)
                 

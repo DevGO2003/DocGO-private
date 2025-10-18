@@ -75,15 +75,16 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 
 | Service | Type | Group ID | Artifact ID | Package Structure | Port | Docs |
 |---------|------|----------|-------------|-------------------|------|------|
+| **Frontend** | Next.js | N/A | `web-app` | N/A (Node.js) | 3000 | N/A |
 | **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` |
-| **User Management** | Spring Boot | `com.devgo2003.docgo.backend` | `user-service` | `com.devgo2003.docgo.backend.user_service` | 8001 | `/docs` |
-| **Document Management** | Spring Boot | `com.devgo2003.docgo.file-management-service` | `document-service` | `com.devgo2003.docgo.document_service` | 8002 | `/docs` |
+| **User Management** | Spring Boot | `com.devgo2003.docgo` | `user-service` | `com.devgo2003.docgo.user_service` | 8001 | `/docs` |
+| **File Management** | Spring Boot | `com.devgo2003.docgo` | `document-service` | `com.devgo2003.docgo.file_service` | 8002 | `/docs` |
 | **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` |
 
 ### Quy tắc đặt tên
 
 #### Java (Spring Boot)
-- **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case)
+- **Group ID**: `com.devgo2003.docgo` (dùng kebab-case)
 - **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
 - **Package Structure**: Đổi dấu `-` thành `_` trong package structure
 - **Version**: `1.0.0` (khởi đầu), tăng theo semantic versioning

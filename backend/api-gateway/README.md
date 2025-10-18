@@ -1,6 +1,6 @@
 # 🚀 API Gateway - DocGO
 
-API Gateway sử dụng Next.js để kết nối và quản lý 4 microservices chính của hệ thống DocGO.
+API Gateway sử dụng Next.js để kết nối và quản lý 3 microservices chính của hệ thống DocGO.
 
 ## ✨ Tính năng chính
 
@@ -52,10 +52,12 @@ npm run dev
 ## 📚 Tài liệu chi tiết
 
 ## Mô tả
-API Gateway sử dụng Next.js để kết nối và quản lý 4 microservices chính của DocGO (kiến trúc mới):
+API Gateway sử dụng Next.js để kết nối và quản lý 3 microservices chính của DocGO (kiến trúc mới):
 - `user-management-service` → 8001 → 8000
 - `file-management-service` → 8002 → 8000  
 - `automation-service` → 8003 → 8000
+
+**Frontend**: `web-app` (Next.js) chạy trên port 3000, giao tiếp với API Gateway qua port 8000
 
 ## Yêu cầu hệ thống
 - Node.js 18.0.0 trở lên
@@ -64,6 +66,7 @@ API Gateway sử dụng Next.js để kết nối và quản lý 4 microservices
   - User Management Service: http://localhost:8001
   - Document Management Service: http://localhost:8002
   - Automation Service: http://localhost:8003
+- Frontend web-app: http://localhost:3000 (tùy chọn, có thể chạy riêng)
 
 ## Cài đặt
 

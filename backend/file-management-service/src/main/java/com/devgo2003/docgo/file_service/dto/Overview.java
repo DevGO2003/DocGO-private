@@ -19,4 +19,13 @@ public class Overview {
     private List<String> tags;
     private String ownerUserId;
     private Boolean isNew;
+    
+    // 🆕 NEW FIELDS
+    private String priority;           // LOW|MEDIUM|HIGH|URGENT
+    private String confidentiality;   // PUBLIC|INTERNAL|CONFIDENTIAL|RESTRICTED
+    private String language;          // vi|en|zh|ja|ko
+    private String region;            // VN|US|EU|APAC
+    private String department;        // ✅ Chuyển từ metadata
+    private String project;           // ✅ Chuyển từ metadata
+    private Workflow workflow;        // 🆕 NEW NESTED OBJECT
 }

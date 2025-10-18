@@ -17,4 +17,9 @@ public class S3Info {
     private String versionId;
     private ChecksumInfo checksum;
     private String type;
+    
+    // 🆕 NEW FIELDS
+    private S3Encryption encryption;      // 🆕 NEW NESTED OBJECT
+    private S3Lifecycle lifecycle;        // 🆕 NEW NESTED OBJECT
+    private S3Replication replication;   // 🆕 NEW NESTED OBJECT
 }

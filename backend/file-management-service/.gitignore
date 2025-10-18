@@ -157,6 +157,9 @@ Thumbs.db
 temp/
 tmp/
 
+# Error files
+*.err
+
 # File Storage specific
 uploads/
 assets/
@@ -176,6 +179,10 @@ cache/
 uploads/
 temp/
 tmp/
+results/
+
+# Service specific directories
+uploads/
 results/
 
 # Jupyter Notebook

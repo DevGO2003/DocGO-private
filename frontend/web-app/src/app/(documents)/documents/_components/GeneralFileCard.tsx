@@ -176,8 +176,8 @@ export default function GeneralFileCard({ document, isSelected, onToggleSelect, 
               onMouseEnter={handlePreviewEnter}
               onMouseLeave={handlePreviewLeave}
               onClick={() => {
-                // Always go through backend /open endpoint so URL is fresh and access-controlled
-                window.open(`/api/v1/file-management-service/files/${document.id}/open`, '_blank', 'noopener,noreferrer')
+                // Always go through backend /view endpoint so URL is fresh and access-controlled
+                window.open(`/api/v1/file-management-service/files/${document.id}/view`, '_blank', 'noopener,noreferrer')
               }}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
               title={t('documents.preview')}

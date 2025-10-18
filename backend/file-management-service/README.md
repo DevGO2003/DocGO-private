@@ -74,8 +74,9 @@ Frontend → Document Service → Kafka → Automation Service
 ## Cấu hình
 
 ### Database
-- MongoDB Atlas
+- MongoDB Atlas (primary database)
 - Collections tự động tạo khi cần
+- Không sử dụng MariaDB (đã chuyển sang MongoDB)
 
 ### Kafka
 - Bootstrap servers: localhost:9092
@@ -135,9 +136,9 @@ Tất cả API đều trả về response theo format chuẩn:
 ## Troubleshooting
 
 ### Lỗi kết nối database
-- Kiểm tra MariaDB đã chạy chưa
+- Kiểm tra MongoDB Atlas connection string
 - Kiểm tra thông tin kết nối trong `.env`
-- Đảm bảo database `docgo_contract_service` đã được tạo
+- Đảm bảo database MongoDB đã được tạo và accessible
 
 ### Lỗi kết nối Kafka
 - Kiểm tra Kafka đã chạy chưa: `docker ps | grep kafka`
@@ -232,7 +233,7 @@ GET /actuator/metrics
 ## Troubleshooting
 
 ### Lỗi thường gặp
-1. **Database connection**: Kiểm tra MariaDB và thông tin kết nối
+1. **Database connection**: Kiểm tra MongoDB Atlas và thông tin kết nối
 2. **Kafka connection**: Kiểm tra Kafka server và topics
 3. **File upload**: Kiểm tra quyền ghi thư mục upload
 4. **Port conflict**: Thay đổi port trong application.properties
@@ -246,7 +247,7 @@ GET /actuator/metrics
 
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Spring Kafka Documentation](https://spring.io/projects/spring-kafka)
-- [MariaDB Documentation](https://mariadb.org/documentation/)
+- [MongoDB Documentation](https://docs.mongodb.com/)
 - [Kafka Documentation](https://kafka.apache.org/documentation/)
 
 ## Liên hệ

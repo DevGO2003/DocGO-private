@@ -19,14 +19,23 @@ class DocumentProcessor:
         self.ai_service = AutomationService()
         self.settings = Config
         
-        # S3 client để download file
-        self.s3_client = boto3.client(
-            's3',
-            endpoint_url=Config.S3_ENDPOINT,
-            aws_access_key_id=Config.S3_ACCESS_KEY_ID,
-            aws_secret_access_key=Config.S3_SECRET_ACCESS_KEY,
-            region_name=Config.S3_REGION
-        )
+        # S3 client để download file với error handling
+        try:
+            # Validate S3 configuration trước khi tạo client
+            if not Config.S3_ENDPOINT:
+                raise ValueError("S3_ENDPOINT is required but not set")
+            
+            self.s3_client = boto3.client(
+                's3',
+                endpoint_url=Config.S3_ENDPOINT,
+                aws_access_key_id=Config.S3_ACCESS_KEY_ID,
+                aws_secret_access_key=Config.S3_SECRET_ACCESS_KEY,
+                region_name=Config.S3_REGION
+            )
+            logger.info(f"Document Processor initialized with S3 endpoint: {Config.S3_ENDPOINT}")
+        except Exception as e:
+            logger.error(f"Failed to initialize S3 client: {str(e)}")
+            raise ValueError(f"S3 client initialization failed: {str(e)}")
         
         logger.info("Document Processor initialized")
     

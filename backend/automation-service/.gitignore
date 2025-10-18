@@ -90,6 +90,10 @@ models/
 *.h5
 *.onnx
 
+# Service specific directories
+uploads/
+results/
+
 # Database
 *.db
 *.sqlite

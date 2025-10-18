@@ -44,4 +44,9 @@ public class FileService {
     public FileEntity save(FileEntity file) {
         return fileRepository.save(file);
     }
+    
+    public FileEntity getDocumentById(String id) {
+        Optional<FileEntity> document = fileRepository.findById(id);
+        return document.orElse(null);
+    }
 }

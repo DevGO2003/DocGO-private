@@ -55,18 +55,17 @@ language: vi
 - Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
 
 **QUY TẮC GROUP ID VÀ ARTIFACT ID**:
-- **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case cho service-name)
-  - Ví dụ: `com.devgo2003.docgo.user-management-service`
-  - Ví dụ: `com.devgo2003.docgo.file-management-service`
+- **Group ID**: `com.devgo2003.docgo` (dùng kebab-case)
+  - Ví dụ: `com.devgo2003.docgo` (cho tất cả services)
 - **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
   - Ví dụ: `user-management-service` → `user-service`
   - Ví dụ: `file-management-service` → `document-service`
 - **Tên folder**: Đổi dấu `-` thành `_` trong package structure
   - Ví dụ: `user-management-service` → `src/main/java/com/devgo2003/docgo/user_service`
-  - Ví dụ: `file-management-service` → `src/main/java/com/devgo2003/docgo/document_service`
+  - Ví dụ: `file-management-service` → `src/main/java/com/devgo2003/docgo/file_service`
 - **Package declaration**: Sử dụng tên folder (với dấu `_`)
   - Ví dụ: `package com.devgo2003.docgo.user_service;`
-  - Ví dụ: `package com.devgo2003.docgo.document_service;`
+  - Ví dụ: `package com.devgo2003.docgo.file_service;`
 - Version: `1.0.0` (khởi đầu), tăng theo semantic versioning
 - Parent POM: sử dụng `spring-boot-starter-parent` với version mới nhất stable
 - Packaging: `jar` cho microservice, `pom` cho parent project
@@ -86,7 +85,8 @@ language: vi
 - Ví dụ: `origin/backend-01/api-gateway-bff` → folder phải là `api-gateway-bff`
 - Điều này đảm bảo tính nhất quán giữa tên nhánh Git và cấu trúc thư mục workspace.
 
-### Port cố định cho toàn bộ microservice của DocGO (kiến trúc mới 4 services):
+### Port cố định cho toàn bộ microservice của DocGO (kiến trúc mới 5 services):
+- `frontend` (Next.js): 3000 → N/A (Frontend)
 - `api-gateway` (Next.js): 8000 → Docs: `http://localhost:8000/docs#/`
 - `user-management-service` (Spring Boot): 8001 → Docs: `http://localhost:8001/docs#/`
 - `file-management-service` (Spring Boot): 8002 → Docs: `http://localhost:8002/docs#/`

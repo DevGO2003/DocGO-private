@@ -66,8 +66,9 @@ public class ContractKafkaServiceImpl implements IContractKafkaService {
 
     /**
      * Consume ContractSummaryPublished events theo schema mới (document/architecture/contract-summary-published.*.json)
+     * DISABLED: Removed as part of Kafka cleanup - only keeping file.metadata.recorded, file.plaintext.extracted, contract.summary.generated consumers
      */
-    @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.published}", groupId = "file-management-service-group")
+    // @KafkaListener(topics = "${kafka.contract-summary-topic:contract.summary.published}", groupId = "file-management-service-group")
     public void handleContractSummaryPublished(@Payload String message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             Map<String, Object> event = objectMapper.readValue(message, Map.class);

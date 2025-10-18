@@ -1,0 +1,453 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Document Management Schema",
+  "description": "Schema cho tài liệu trong hệ thống DocGO - File Management Service",
+  "type": "object",
+  "required": ["id", "overview", "contract", "content", "file", "storage", "versioning", "metadata", "audit"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Định danh duy nhất của tài liệu",
+      "pattern": "^DOC-\\d{4}-\\d{3}-\\w+$"
+    },
+    "overview": {
+      "type": "object",
+      "required": ["title", "status", "documentType", "contractType", "ownerUserId"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Tiêu đề tài liệu"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED", "DELETED"],
+          "description": "Trạng thái tài liệu"
+        },
+        "documentType": {
+          "type": "string",
+          "enum": ["CONTRACT", "AGREEMENT", "POLICY", "PROCEDURE", "REPORT", "OTHER"],
+          "description": "Loại tài liệu"
+        },
+        "contractType": {
+          "type": "string",
+          "enum": ["SERVICE_AGREEMENT", "EMPLOYMENT_CONTRACT", "NDA", "PURCHASE_ORDER", "OTHER"],
+          "description": "Loại hợp đồng"
+        },
+        "category": {
+          "type": "string",
+          "description": "Danh mục tài liệu"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Thẻ phân loại"
+        },
+        "ownerUserId": {
+          "type": "string",
+          "description": "ID người sở hữu tài liệu"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"],
+          "description": "Mức độ ưu tiên"
+        },
+        "confidentiality": {
+          "type": "string",
+          "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"],
+          "description": "Mức độ bảo mật"
+        },
+        "language": {
+          "type": "string",
+          "enum": ["vi", "en", "zh", "ja", "ko"],
+          "description": "Ngôn ngữ tài liệu"
+        },
+        "region": {
+          "type": "string",
+          "enum": ["VN", "US", "EU", "APAC"],
+          "description": "Khu vực"
+        },
+        "department": {
+          "type": "string",
+          "description": "Phòng ban"
+        },
+        "project": {
+          "type": "string",
+          "description": "Dự án"
+        },
+        "workflow": {
+          "type": "object",
+          "properties": {
+            "currentStage": {
+              "type": "string",
+              "description": "Giai đoạn hiện tại"
+            },
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "status": {"type": "string", "enum": ["PENDING", "IN_PROGRESS", "COMPLETED", "REJECTED"]},
+                  "completedAt": {"type": "string", "format": "date-time"},
+                  "startedAt": {"type": "string", "format": "date-time"},
+                  "assignedTo": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "properties": {
+        "effectiveDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Ngày có hiệu lực"
+        },
+        "expiryDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Ngày hết hạn"
+        },
+        "totalValue": {
+          "type": "number",
+          "description": "Tổng giá trị hợp đồng"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Đơn vị tiền tệ"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Tóm tắt hợp đồng"
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "type": {"type": "string", "enum": ["CLIENT", "VENDOR", "PARTNER"]},
+              "role": {"type": "string"},
+              "contact": {
+                "type": "object",
+                "properties": {
+                  "email": {"type": "string", "format": "email"},
+                  "phone": {"type": "string"},
+                  "address": {"type": "string"}
+                }
+              },
+              "representative": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "position": {"type": "string"},
+                  "email": {"type": "string", "format": "email"}
+                }
+              }
+            }
+          }
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "schedule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "milestone": {"type": "string"},
+                  "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+                  "amount": {"type": "number"},
+                  "dueDate": {"type": "string", "format": "date-time"},
+                  "status": {"type": "string", "enum": ["PENDING", "PAID", "OVERDUE"]}
+                }
+              }
+            },
+            "method": {"type": "string"},
+            "currency": {"type": "string"}
+          }
+        },
+        "clauses": {
+          "type": "object",
+          "properties": {
+            "intellectualProperty": {"type": "string"},
+            "confidentiality": {"type": "string"},
+            "warranty": {"type": "string"},
+            "termination": {"type": "string"}
+          }
+        },
+        "reminders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "type": {"type": "string"},
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "dueDate": {"type": "string", "format": "date-time"},
+              "status": {"type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE"]},
+              "priority": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"]}
+            }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "properties": {
+            "level": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+            "factors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {"type": "string"},
+                  "description": {"type": "string"},
+                  "probability": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+                  "impact": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+                  "mitigation": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "regulations": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "certifications": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "auditSchedule": {"type": "string", "format": "date-time"},
+            "complianceStatus": {"type": "string", "enum": ["COMPLIANT", "NON_COMPLIANT", "PENDING"]}
+          }
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "extractedText": {"type": "string"},
+        "summary": {"type": "string"},
+        "keyTerms": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {"type": "string"},
+              "content": {"type": "string"},
+              "pageNumber": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": ["id", "name", "type", "size"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "size": {"type": "integer", "minimum": 0},
+        "hash": {
+          "type": "object",
+          "properties": {
+            "md5": {"type": "string", "pattern": "^[a-f0-9]{32}$"},
+            "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          }
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "read": {"type": "array", "items": {"type": "string"}},
+            "write": {"type": "array", "items": {"type": "string"}},
+            "delete": {"type": "array", "items": {"type": "string"}},
+            "share": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "encryption": {"type": "string"},
+            "watermark": {"type": "boolean"},
+            "digitalSignature": {"type": "boolean"},
+            "accessLogging": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "location": {"type": "string"},
+        "backupLocations": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "retentionPolicy": {
+          "type": "object",
+          "properties": {
+            "duration": {"type": "string"},
+            "autoDelete": {"type": "boolean"},
+            "archiveAfter": {"type": "string"}
+          }
+        },
+        "accessControl": {
+          "type": "object",
+          "properties": {
+            "public": {"type": "boolean"},
+            "restrictedUsers": {"type": "array", "items": {"type": "string"}},
+            "ipWhitelist": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "properties": {
+        "currentVersion": {"type": "string"},
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "version": {"type": "string"},
+              "createdAt": {"type": "string", "format": "date-time"},
+              "createdBy": {"type": "string"},
+              "changes": {"type": "string"},
+              "fileId": {"type": "string"}
+            }
+          }
+        },
+        "changeLog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "version": {"type": "string"},
+              "date": {"type": "string", "format": "date-time"},
+              "author": {"type": "string"},
+              "changes": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "fileSystem": {
+          "type": "object",
+          "properties": {
+            "dateModified": {"type": "string", "format": "date-time"},
+            "dateAdded": {"type": "string", "format": "date-time"},
+            "mediaFilename": {"type": "string"},
+            "originalFilename": {"type": "string"},
+            "originalMD5": {"type": "string"},
+            "originalFileSize": {"type": "integer"},
+            "originalMimeType": {"type": "string"},
+            "archiveMD5": {"type": "string"},
+            "archiveFileSize": {"type": "integer"}
+          }
+        },
+        "originalDocument": {
+          "type": "object",
+          "properties": {
+            "dcFormat": {"type": "string"},
+            "dcTitle": {"type": "string"},
+            "dcCreator": {"type": "string"},
+            "dcDescription": {"type": "string"},
+            "dcSubject": {"type": "string"},
+            "xmpCreateDate": {"type": "string", "format": "date-time"},
+            "xmpCreatorTool": {"type": "string"},
+            "xmpModifyDate": {"type": "string", "format": "date-time"},
+            "xmpMetadataDate": {"type": "string", "format": "date-time"},
+            "pdfKeywords": {"type": "string"},
+            "pdfProducer": {"type": "string"},
+            "xmpDocumentID": {"type": "string"},
+            "xmpInstanceID": {"type": "string"},
+            "pdfaExtensionSchemas": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "archivedDocument": {
+          "type": "object",
+          "properties": {
+            "archivedPdfProducer": {"type": "string"},
+            "archivedMetadataDate": {"type": "string", "format": "date-time"},
+            "archivedModifyDate": {"type": "string", "format": "date-time"},
+            "archivedCreateDate": {"type": "string", "format": "date-time"},
+            "archivedCreatorTool": {"type": "string"},
+            "archivedDocumentID": {"type": "string"},
+            "archivedDcFormat": {"type": "string"},
+            "archivedDcTitle": {"type": "string"},
+            "archivedDcCreator": {"type": "string"}
+          }
+        },
+        "technical": {
+          "type": "object",
+          "properties": {
+            "encoding": {"type": "string"},
+            "lineEnding": {"type": "string", "enum": ["LF", "CRLF", "CR"]},
+            "bom": {"type": "boolean"},
+            "compression": {"type": "string", "enum": ["NONE", "GZIP", "ZIP", "7ZIP"]},
+            "pages": {"type": "integer", "minimum": 0},
+            "wordCount": {"type": "integer", "minimum": 0},
+            "characterCount": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["createdAt", "createdBy", "lastModifiedAt", "lastModifiedBy"],
+      "properties": {
+        "createdAt": {"type": "string", "format": "date-time"},
+        "createdBy": {"type": "string"},
+        "lastModifiedAt": {"type": "string", "format": "date-time"},
+        "lastModifiedBy": {"type": "string"},
+        "version": {"type": "integer", "minimum": 1},
+        "changeHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {"type": "string", "enum": ["CREATE", "UPDATE", "DELETE", "VIEW", "SHARE"]},
+              "timestamp": {"type": "string", "format": "date-time"},
+              "userId": {"type": "string"},
+              "details": {"type": "string"},
+              "ipAddress": {"type": "string"},
+              "userAgent": {"type": "string"}
+            }
+          }
+        },
+        "accessLog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {"type": "string"},
+              "timestamp": {"type": "string", "format": "date-time"},
+              "userId": {"type": "string"},
+              "ipAddress": {"type": "string"},
+              "userAgent": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

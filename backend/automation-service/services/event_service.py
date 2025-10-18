@@ -257,82 +257,74 @@ class EventService:
         except Exception as e:
             print(f"Error publishing WebSocket event: {e}")
 
-    async def handle_file_uploaded_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
+    async def handle_file_metadata_recorded_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
         
         try:
             event = request.event
             
-            # Xử lý file uploaded
-            print(f"Processing file uploaded event: {event.eventId}")
-            
-            # Có thể trigger AI processing ở đây
-            # Ví dụ: gọi AI service để extract, classify, summarize
+            # Xử lý file metadata recorded
+            print(f"Processing file metadata recorded event: {event.eventId}")
             
             return EventHandlerResponse(
                 success=True,
-                message="File uploaded event processed successfully",
+                message="File metadata recorded event processed successfully",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
             
         except Exception as e:
-            print(f"Error handling file uploaded event: {e}")
+            print(f"Error handling file metadata recorded event: {e}")
             return EventHandlerResponse(
                 success=False,
-                message=f"Failed to process file uploaded event: {str(e)}",
+                message=f"Failed to process file metadata recorded event: {str(e)}",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
 
-    async def handle_ai_processing_completed_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
+    async def handle_file_plaintext_extracted_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
         
         try:
             event = request.event
             
-            # Xử lý AI processing completed
-            print(f"Processing AI completed event: {event.eventId}")
-            
-            # Có thể trigger notification ở đây
-            # Ví dụ: gửi email thông báo kết quả AI processing
+            # Xử lý file plaintext extracted
+            print(f"Processing file plaintext extracted event: {event.eventId}")
             
             return EventHandlerResponse(
                 success=True,
-                message="AI processing completed event processed successfully",
+                message="File plaintext extracted event processed successfully",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
             
         except Exception as e:
-            print(f"Error handling AI processing completed event: {e}")
+            print(f"Error handling file plaintext extracted event: {e}")
             return EventHandlerResponse(
                 success=False,
-                message=f"Failed to process AI processing completed event: {str(e)}",
+                message=f"Failed to process file plaintext extracted event: {str(e)}",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
 
-    async def handle_notification_sent_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
+    async def handle_contract_summary_generated_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
         
         try:
             event = request.event
             
-            # Xử lý notification sent
-            print(f"Processing notification sent event: {event.eventId}")
-            
-            # Có thể log notification status hoặc trigger follow-up actions
+            # Xử lý contract summary generated
+            print(f"Processing contract summary generated event: {event.eventId}")
             
             return EventHandlerResponse(
                 success=True,
-                message="Notification sent event processed successfully",
+                message="Contract summary generated event processed successfully",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
             
         except Exception as e:
-            print(f"Error handling notification sent event: {e}")
+            print(f"Error handling contract summary generated event: {e}")
             return EventHandlerResponse(
                 success=False,
-                message=f"Failed to process notification sent event: {str(e)}",
+                message=f"Failed to process contract summary generated event: {str(e)}",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
@@ -340,10 +332,10 @@ class EventService:
     async def start_event_processing(self):
         
         try:
-            # Đăng ký các handlers
-            self.register_handler("file_uploaded", self.handle_file_uploaded_event)
-            self.register_handler("ai_processing_completed", self.handle_ai_processing_completed_event)
-            self.register_handler("notification_sent", self.handle_notification_sent_event)
+            # Đăng ký các handlers cho 3 event cần thiết
+            self.register_handler("file.metadata.recorded", self.handle_file_metadata_recorded_event)
+            self.register_handler("file.plaintext.extracted", self.handle_file_plaintext_extracted_event)
+            self.register_handler("contract.summary.generated", self.handle_contract_summary_generated_event)
             
             # Subscribe to channels
             subscription_request = EventSubscriptionRequest(
@@ -354,7 +346,7 @@ class EventService:
             
             await self.subscribe_to_events(subscription_request)
             
-            print("Event processing started")
+            print("Event processing started with 3 essential events")
             
         except Exception as e:
             print(f"Error starting event processing: {e}")

@@ -10,7 +10,7 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.devgo2003.docgo.file_service.event.RedisEventConsumer;
+// import com.devgo2003.docgo.file_service.event.RedisEventConsumer; // Removed
 
 @Configuration
 @ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
@@ -46,10 +46,10 @@ public class RedisConfig {
         return container;
     }
     
-    @Bean
-    public MessageListenerAdapter listenerAdapter(RedisEventConsumer receiver) {
-        return new MessageListenerAdapter(receiver, "receiveDocumentProcessedEvent");
-    }
+    // @Bean
+    // public MessageListenerAdapter listenerAdapter(RedisEventConsumer receiver) {
+    //     return new MessageListenerAdapter(receiver, "receiveDocumentProcessedEvent");
+    // }
 }
 
 

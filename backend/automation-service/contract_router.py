@@ -4,7 +4,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 from schemas.response import RestResponse
-from services.ai_processing_service import AutomationService
+from services.ocr_service import OCRService
 
 router = APIRouter(prefix="/api/v1/automation-service")
 
@@ -91,14 +91,14 @@ async def contract_summarize_api(
             detail="Không có nội dung hợp đồng để xử lý."
         )
     
-    # Sử dụng AI Processing Service để tóm tắt hợp đồng
+    # Sử dụng OCR Service để tóm tắt hợp đồng
     result = None
     try:
-        ai_service = AutomationService()
+        ocr_service = OCRService()
         
-        # Gọi AI để tạo tóm tắt hợp đồng
+        # Gọi OCR service để tạo tóm tắt hợp đồng
         filename = file.filename if file else "text_input"
-        result = ai_service.generate_contract_summary(content, filename)
+        result = ocr_service.generate_contract_summary(content, filename)
         
     except Exception as ai_error:
         logging.warning(f"AI service error: {ai_error}")
@@ -144,6 +144,7 @@ async def contract_summarize_api(
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
+        description="Hợp đồng đã được tóm tắt thành công",
         data=result,
         timestamp=datetime.now(timezone.utc).isoformat(),
         requestId=str(uuid.uuid4()),

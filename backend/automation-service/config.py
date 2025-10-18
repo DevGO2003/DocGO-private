@@ -87,7 +87,7 @@ class Config:
     # S3 CONFIGURATION (Required - No fallback)
     # ==========================================
     S3_ENABLED: bool = os.getenv("S3_ENABLED", "true").lower() == "true"
-    S3_ENDPOINT: str = os.getenv("S3_ENDPOINT", "")
+    S3_ENDPOINT: str = os.getenv("S3_ENDPOINT", "https://s3.filebase.com")
     S3_REGION: str = os.getenv("S3_REGION", "")
     S3_ACCESS_KEY_ID: str = os.getenv("S3_ACCESS_KEY_ID", "")
     S3_SECRET_ACCESS_KEY: str = os.getenv("S3_SECRET_ACCESS_KEY", "")
@@ -121,9 +121,7 @@ class Config:
     KAFKA_FILE_ANALYZED_TOPIC: str = os.getenv("KAFKA_FILE_ANALYZED_TOPIC", "file.analyzed")
     KAFKA_FILE_DELETED_TOPIC: str = os.getenv("KAFKA_FILE_DELETED_TOPIC", "file.deleted")
     
-    # Legacy topics for backward compatibility (sẽ được xóa sau)
-    JSON_ANALYZE_TOPIC: str = os.getenv("JSON_ANALYZE_TOPIC", "json.analyze")
-    JSON_ANALYSIS_COMPLETED_TOPIC: str = os.getenv("JSON_ANALYSIS_COMPLETED_TOPIC", "json.analysis.completed")
+    # Legacy topics removed as part of Kafka cleanup
     
     # Enable/disable legacy Kafka worker
     KAFKA_WORKER_ENABLED: bool = os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true"
@@ -212,6 +210,10 @@ class Config:
                 ("S3_SECRET_ACCESS_KEY", lambda: cls.S3_SECRET_ACCESS_KEY),
                 ("S3_BUCKET", lambda: cls.S3_BUCKET),
             ])
+            
+            # Validate S3_ENDPOINT format
+            if cls.S3_ENDPOINT and not cls.S3_ENDPOINT.startswith(('http://', 'https://')):
+                raise ValueError(f"Invalid S3_ENDPOINT format: {cls.S3_ENDPOINT}. Must start with http:// or https://")
         
         missing_vars = []
         for var_name, getter in required_vars:
@@ -268,9 +270,9 @@ class Config:
             "batch_size": int(os.getenv("EVENT_BATCH_SIZE", "100")),
             "timeout": int(os.getenv("EVENT_TIMEOUT", "30")),  # seconds
             "channels": {
-                "file_uploaded": os.getenv("EVENT_CHANNEL_FILE_UPLOADED", "file_uploaded"),
-                "ai_processing_completed": os.getenv("EVENT_CHANNEL_AI_COMPLETED", "ai_processing_completed"),
-                "notification_sent": os.getenv("EVENT_CHANNEL_NOTIFICATION_SENT", "notification_sent"),
+                "file_metadata_recorded": os.getenv("EVENT_CHANNEL_FILE_METADATA_RECORDED", "file.metadata.recorded"),
+                "file_plaintext_extracted": os.getenv("EVENT_CHANNEL_FILE_PLAINTEXT_EXTRACTED", "file.plaintext.extracted"),
+                "contract_summary_generated": os.getenv("EVENT_CHANNEL_CONTRACT_SUMMARY_GENERATED", "contract.summary.generated"),
             },
         }
 

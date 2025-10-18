@@ -142,3 +142,6 @@ ENV/
 # Docker
 docker-compose.override.yml
 *.pid
+
+# Error files
+*.err

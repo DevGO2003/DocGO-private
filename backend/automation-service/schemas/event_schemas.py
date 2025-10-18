@@ -4,29 +4,10 @@ from datetime import datetime
 from enum import Enum
 
 class EventType(str, Enum):
-    # Legacy event types
-    FILE_UPLOADED = "file.uploaded"
-    AI_PROCESSING_STARTED = "ai.processing.started"
-    AI_PROCESSING_COMPLETED = "ai.processing.completed"
-    AI_PROCESSING_FAILED = "ai.processing.failed"
-    NOTIFICATION_SENT = "notification.sent"
-    NOTIFICATION_FAILED = "notification.failed"
-    BATCH_JOB_STARTED = "batch.job.started"
-    BATCH_JOB_COMPLETED = "batch.job.completed"
-    BATCH_JOB_FAILED = "batch.job.failed"
-    CONTRACT_CREATED = "contract.created"
-    CONTRACT_UPDATED = "contract.updated"
-    CONTRACT_DELETED = "contract.deleted"
-    
-    # New event types matching Cursor rules
-    AUTOMATION_STARTED = "AutomationStarted"
-    AUTOMATION_COMPLETED = "AutomationCompleted"
-    AUTOMATION_FAILED = "AutomationFailed"
-    FILE_UPLOADED_NEW = "FileUploaded"
-    FILE_PROCESSED = "FileProcessed"
-    DOCUMENT_CLASSIFIED = "DocumentClassified"
-    CONTRACT_SUMMARY_UPDATED = "ContractSummaryUpdated"
-    DOCUMENT_CREATED = "DocumentCreated"
+    # Chỉ giữ lại 3 event cần thiết
+    FILE_METADATA_RECORDED = "file.metadata.recorded"
+    FILE_PLAINTEXT_EXTRACTED = "file.plaintext.extracted"
+    CONTRACT_SUMMARY_GENERATED = "contract.summary.generated"
 
 class EventStatus(str, Enum):
     PENDING = "pending"
@@ -102,89 +83,35 @@ class WebSocketEvent(BaseModel):
     timestamp: datetime = Field(...)
     user_id: Optional[str] = Field(None)
 
-# New event models matching Cursor rules
-class AutomationStartedEvent(BaseModel):
-    """Event published when automation processing starts"""
+# Event models cho 3 event cần thiết
+class FileMetadataRecordedEvent(BaseModel):
+    """Event published when file metadata is recorded"""
     correlationId: str = Field(...)
+    fileId: str = Field(...)
     fileName: str = Field(...)
     fileSize: int = Field(...)
     contentType: str = Field(...)
-    userId: str = Field(default="system")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
-
-class FileUploadedEvent(BaseModel):
-    """Event published when file is uploaded to S3"""
-    correlationId: str = Field(...)
-    documentId: str = Field(...)
     fileUrl: str = Field(...)
-    fileName: str = Field(...)
-    fileSize: int = Field(...)
-    contentType: str = Field(...)
     userId: str = Field(default="system")
     timestamp: datetime = Field(default_factory=lambda: datetime.now())
 
-class FileProcessedEvent(BaseModel):
-    """Event published when file processing is completed"""
+class FilePlaintextExtractedEvent(BaseModel):
+    """Event published when plaintext is extracted from file"""
     correlationId: str = Field(...)
-    documentId: str = Field(...)
+    fileId: str = Field(...)
     fileName: str = Field(...)
-    processingStatus: str = Field(...)
-    ocrText: Optional[str] = Field(None)
-    classificationResult: Optional[Dict[str, Any]] = Field(None)
-    summaryResult: Optional[Dict[str, Any]] = Field(None)
+    plaintext: str = Field(...)
+    hasPlaintext: bool = Field(...)
+    hasJson: bool = Field(...)
     userId: str = Field(default="system")
     timestamp: datetime = Field(default_factory=lambda: datetime.now())
 
-class DocumentClassifiedEvent(BaseModel):
-    """Event published when document classification is completed"""
+class ContractSummaryGeneratedEvent(BaseModel):
+    """Event published when contract summary is generated"""
     correlationId: str = Field(...)
-    documentId: str = Field(...)
-    fileName: str = Field(...)
-    isContract: bool = Field(...)
-    category: str = Field(...)
-    confidence: float = Field(...)
-    userId: str = Field(default="system")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
-
-class ContractSummaryUpdatedEvent(BaseModel):
-    """Event published when contract summary is updated"""
-    correlationId: str = Field(...)
-    documentId: str = Field(...)
+    fileId: str = Field(...)
     fileName: str = Field(...)
     summaryResult: Dict[str, Any] = Field(...)
     contractMetadata: Optional[Dict[str, Any]] = Field(None)
-    userId: str = Field(default="system")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
-
-class DocumentCreatedEvent(BaseModel):
-    """Event published when document is created in File Management Service"""
-    correlationId: str = Field(...)
-    documentId: str = Field(...)
-    fileName: str = Field(...)
-    documentType: str = Field(...)
-    category: str = Field(...)
-    fileUrl: str = Field(...)
-    userId: str = Field(default="system")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
-
-class AutomationCompletedEvent(BaseModel):
-    """Event published when automation processing is completed"""
-    correlationId: str = Field(...)
-    documentId: str = Field(...)
-    fileName: str = Field(...)
-    processingStatus: str = Field(...)
-    duration: Optional[float] = Field(None)
-    userId: str = Field(default="system")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
-
-class AutomationFailedEvent(BaseModel):
-    """Event published when automation processing fails"""
-    correlationId: str = Field(...)
-    documentId: str = Field(...)
-    fileName: str = Field(...)
-    errorMessage: str = Field(...)
-    errorType: str = Field(...)
-    retryable: bool = Field(default=True)
-    retryCount: int = Field(default=0)
     userId: str = Field(default="system")
     timestamp: datetime = Field(default_factory=lambda: datetime.now())

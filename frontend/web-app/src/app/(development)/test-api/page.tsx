@@ -191,13 +191,9 @@ export default function TestAPIPage() {
                   
                   <div>
                     <h3 className="font-semibold mb-2">Available Services</h3>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• authentication-identity-service (Port 8001)</li>
-                      <li>• user-management-service (Port 8002)</li>
-                      <li>• file-management-service (Port 8002)</li>
-                      <li>• ai-processing-service (Port 8017)</li>
-                      <li>• file-storage-asset-service (Port 8012)</li>
-                    </ul>
+                    <p className="text-sm text-gray-600">
+                      Tất cả dịch vụ được truy cập thông qua API Gateway.
+                    </p>
                   </div>
                   
                   <div>

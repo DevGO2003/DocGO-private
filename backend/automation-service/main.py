@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import routers
 from contract_router import router as contract_router
 from file_router import router as file_router
-from simple_test_route import router as simple_test_router
+from ocr_router import router as ocr_router
 import time
 
 # Hot reload test
@@ -72,8 +72,8 @@ app.add_middleware(
 app.include_router(routers.router)
 app.include_router(contract_router)
 app.include_router(file_router)
-app.include_router(simple_test_router)
 app.include_router(config_router)
+app.include_router(ocr_router)
 
 # Services are now imported from global_instances to avoid circular imports
 
@@ -93,6 +93,10 @@ def custom_openapi():
         {
             "name": "🤖 APIs Xử lý AI",
             "description": "APIs xử lý trí tuệ nhân tạo - Trích xuất nội dung, phân loại tài liệu, tóm tắt hợp đồng, xử lý ngôn ngữ tự nhiên"
+        },
+        {
+            "name": "🔍 APIs OCR",
+            "description": "APIs OCR (Optical Character Recognition) - Trích xuất text từ hình ảnh, nhận diện văn bản, xử lý ảnh scan"
         },
         {
             "name": "📁 APIs Quản lý File",
@@ -168,6 +172,7 @@ async def on_startup():
             await worker.start()
         
         print("Automation Service started successfully with all integrations")
+        print("🔥 HOT RELOAD: Volume mount is working!")
     except Exception as e:
         print(f"Error during startup: {e}")
         # Không chặn service nếu một số service không sẵn sàng

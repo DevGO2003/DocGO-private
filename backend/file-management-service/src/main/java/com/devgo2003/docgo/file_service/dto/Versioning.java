@@ -19,4 +19,8 @@ public class Versioning {
     private List<String> changedFields;
     private Map<String, Object> diff;
     private List<VersionHistory> history;
+    
+    // 🆕 NEW FIELDS
+    private VersionBranching branching;  // 🆕 NEW NESTED OBJECT
+    private VersionRollback rollback;     // 🆕 NEW NESTED OBJECT
 }

@@ -29,15 +29,15 @@ language: vi
 
 ## 📋 Environment File Management
 
-### 1. **File .env.local cho từng Microservice**
+### 1. **File .env cho từng Microservice**
 
-Mỗi microservice đều có file `env.local` riêng để quản lý environment variables cho local development:
+Mỗi microservice đều có file `.env` riêng để quản lý environment variables cho local development:
 
-#### **AI Processing Service** (`backend/ai-processing-service/env.local`)
+#### **Automation Service** (`backend/automation-service/.env`)
 ```bash
 # Service Configuration
 HOST=0.0.0.0
-PORT=8017
+PORT=8003
 PYTHONPATH=/app
 
 # Gemini AI Configuration
@@ -49,10 +49,10 @@ KAFKA_FILE_EVENTS_TOPIC=file.events
 KAFKA_AI_EVENTS_TOPIC=ai.events
 ```
 
-#### **Contract Management Service** (`backend/contract-management-service/env.local`)
+#### **File Management Service** (`backend/file-management-service/.env`)
 ```bash
 # Database Configuration
-DATABASE_URL=jdbc:mariadb://localhost:3306/docgo_contract_service
+DATABASE_URL=jdbc:mariadb://localhost:3306/docgo_file_service
 DATABASE_HOST=localhost
 DATABASE_PORT=3306
 DATABASE_USER=root
@@ -60,25 +60,10 @@ DATABASE_PASSWORD=sapassword
 
 # Kafka Configuration
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-KAFKA_CONSUMER_GROUP_ID=contract-service-group
+KAFKA_CONSUMER_GROUP_ID=file-service-group
 ```
 
-#### **General File Management Service** (`backend/general-file-management-service/env.local`)
-```bash
-# Database Configuration
-DATABASE_URL=mysql+pymysql://root:password@localhost:3306/docgo_general_file_service
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-
-# Redis Configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Elasticsearch Configuration
-ELASTICSEARCH_URL=http://localhost:9200
-```
-
-#### **User Management Service** (`backend/user-management-service/env.local`)
+#### **User Management Service** (`backend/user-management-service/.env`)
 ```bash
 # Database Configuration
 DATABASE_URL=mysql+pymysql://root:sapassword@127.0.0.1:3306/docgo_user_management_service
@@ -89,102 +74,116 @@ AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=ap-southeast-1
 ```
 
-#### **API Gateway BFF** (`backend/api-gateway-bff/env.local`)
+#### **API Gateway** (`backend/api-gateway/.env`)
 ```bash
 # Service URLs
-USER_MANAGEMENT_SERVICE_URL=http://localhost:8002
-AUTHENTICATION_SERVICE_URL=http://localhost:8001
+USER_MANAGEMENT_SERVICE_URL=http://localhost:8001
+FILE_MANAGEMENT_SERVICE_URL=http://localhost:8002
+AUTOMATION_SERVICE_URL=http://localhost:8003
 
 # Kafka Configuration
 KAFKA_BROKERS=localhost:9092
-KAFKA_CLIENT_ID=api-gateway-bff
+KAFKA_CLIENT_ID=api-gateway
 ```
 
-#### **File Storage Asset Service** (`backend/file-storage-asset-service/env.local`)
+#### **Frontend Web App** (`frontend/web-app/.env`)
 ```bash
-# Database Configuration
-DATABASE_URL=mysql+pymysql://root:password@localhost:3306/docgo_file_storage
+# API Gateway URL
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_GATEWAY_URL=http://localhost:8000
 
-# MinIO Configuration
-MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
+# Authentication
+NEXTAUTH_SECRET=your-nextauth-secret-here
+NEXTAUTH_URL=http://localhost:3000
 ```
 
-#### **Authentication Identity Service** (`backend/authentication-identity-service/env.local`)
-```bash
-# Database Configuration
-DATABASE_URL=mysql+pymysql://root:sapassword@localhost:3306/docgo_auth_service
+### 2. **Cách sử dụng .env với Docker Compose**
 
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-here-change-in-production
-JWT_EXPIRES_IN=24h
-```
+Khi muốn thay đổi environment trong `docker-compose.yml`, hãy:
 
-### 2. **Cách sử dụng .env.local với Docker Compose**
-
-Khi muốn thay đổi environment trong `docker-compose.local.yml`, hãy:
-
-1. **Chỉnh sửa file `env.local` của service tương ứng**
+1. **Chỉnh sửa file `.env` của service tương ứng**
 2. **Mapping đường dẫn trong docker-compose để sử dụng file đó**
 
-#### **Ví dụ mapping trong docker-compose.local.yml:**
+#### **Ví dụ mapping trong docker-compose.yml:**
 ```yaml
 services:
-  ai-processing-service:
+  automation-service:
     environment:
       - HOST=${HOST:-0.0.0.0}
-      - PORT=${PORT:-8017}
+      - PORT=${PORT:-8003}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
     env_file:
-      - ./backend/ai-processing-service/env.local
+      - ./backend/automation-service/.env
 
-  contract-management-service:
+  file-management-service:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
     env_file:
-      - ./backend/contract-management-service/env.local
+      - ./backend/file-management-service/.env
 
-  general-file-management-service:
+  user-management-service:
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - REDIS_HOST=${REDIS_HOST}
-      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     env_file:
-      - ./backend/general-file-management-service/env.local
+      - ./backend/user-management-service/.env
+
+  api-gateway:
+    environment:
+      - USER_MANAGEMENT_SERVICE_URL=${USER_MANAGEMENT_SERVICE_URL}
+      - FILE_MANAGEMENT_SERVICE_URL=${FILE_MANAGEMENT_SERVICE_URL}
+      - AUTOMATION_SERVICE_URL=${AUTOMATION_SERVICE_URL}
+    env_file:
+      - ./backend/api-gateway/.env
+
+  frontend-web-app:
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    env_file:
+      - ./frontend/web-app/.env
 ```
 
 ### 3. **Quy tắc đặt tên và cấu trúc**
 
 #### **Naming Convention:**
-- File chính: `env_exmaple.txt` (template cho team)
-- File local: `env.local` (cho development)
-- File production: `.env` (không commit lên git)
+- File chính: `.env.example` (template cho team)
+- File local: `.env` (cho development)
+- File production: `.env.production` (không commit lên git)
 
 #### **Cấu trúc thư mục:**
 ```
 backend/
-├── ai-processing-service/
-│   ├── env_exmaple.txt
-│   └── env.local
-├── contract-management-service/
-│   ├── env_exmaple.txt
-│   └── env.local
-├── general-file-management-service/
-│   ├── env_exmaple.txt
-│   └── env.local
-└── ...
+├── automation-service/
+│   ├── .env.example
+│   └── .env
+├── file-management-service/
+│   ├── .env.example
+│   └── .env
+├── user-management-service/
+│   ├── .env.example
+│   └── .env
+└── api-gateway/
+    ├── .env.example
+    └── .env
+
+frontend/
+└── web-app/
+    ├── .env.example
+    └── .env
 ```
 
 ### 4. **Workflow khi thay đổi Environment**
 
-1. **Không chỉnh sửa trực tiếp `docker-compose.local.yml`**
-2. **Chỉnh sửa file `env.local` của service tương ứng**
+1. **Không chỉnh sửa trực tiếp `docker-compose.yml`**
+2. **Chỉnh sửa file `.env` của service tương ứng**
 3. **Docker Compose sẽ tự động load environment từ file đó**
-4. **Commit file `env.local` vào git (nếu cần)**
+4. **Commit file `.env.example` vào git (nếu cần)**
 5. **Không bao giờ commit file `.env` chứa secrets thật**
 
 ### 5. **Lợi ích của cách tiếp cận này**

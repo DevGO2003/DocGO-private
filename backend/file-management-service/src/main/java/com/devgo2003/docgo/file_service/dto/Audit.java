@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,4 +19,9 @@ public class Audit {
     private String deletedBy;
     private Boolean isDeleted;
     private Integer version;
+    
+    // 🆕 NEW FIELDS
+    private List<AccessLog> accessLog;    // 🆕 NEW NESTED OBJECT
+    private ApprovalInfo approval;       // 🆕 NEW NESTED OBJECT
+    private ComplianceInfo compliance;   // 🆕 NEW NESTED OBJECT
 }

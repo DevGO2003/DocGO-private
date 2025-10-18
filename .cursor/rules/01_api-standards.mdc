@@ -10,7 +10,7 @@ tags: ["api", "rest", "standards"]
 globs: []
 excludeGlobs: []
 scope: "project"
-services: ["ai-processing-service", "contract-management-service", "*"]
+services: ["user-management-service", "file-management-service", "automation-service", "*"]
 appliesTo: ["code", "chat"]
 match: ""
 variables: {}

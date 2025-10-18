@@ -122,3 +122,6 @@ coverage/
 # Spring Boot
 spring.log
 spring.log.*
+
+# Error files
+*.err

@@ -15,4 +15,9 @@ public class FileInfo {
     private String type;
     private Long size;
     private Integer version;
+    
+    // 🆕 NEW FIELDS
+    private FileHash hash;            // 🆕 NEW NESTED OBJECT
+    private FilePermissions permissions; // 🆕 NEW NESTED OBJECT
+    private FileSecurity security;     // 🆕 NEW NESTED OBJECT
 }

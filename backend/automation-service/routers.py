@@ -325,6 +325,7 @@ async def health_check():
     return RestResponse(
         statusCode=200,
         shortMessage="Success",
+        description="Automation Service is running and healthy",
         data={
             "status": "healthy",
             "service": "Automation Service",

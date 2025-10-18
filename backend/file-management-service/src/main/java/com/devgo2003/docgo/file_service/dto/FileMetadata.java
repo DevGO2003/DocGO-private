@@ -11,4 +11,9 @@ import lombok.AllArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FileMetadata {
     private FileSystemInfo fileSystem;
+    
+    // 🆕 NEW FIELDS
+    private OriginalDocument originalDocument;  // 🆕 NEW NESTED OBJECT
+    private ArchivedDocument archivedDocument; // 🆕 NEW NESTED OBJECT
+    private TechnicalInfo technical;           // 🆕 NEW NESTED OBJECT
 }

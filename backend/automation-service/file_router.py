@@ -120,6 +120,7 @@ async def get_all_files(
             apiVersion="v1",
             statusCode=200,
             shortMessage="Success",
+            description="Lấy danh sách file thành công",
             data=paginated_response,
             timestamp=datetime.now().isoformat(),
             requestId=str(uuid.uuid4()),
@@ -306,8 +307,7 @@ async def upload_document(
     from services.audit_service import audit_service
     from utils.retry_helper import retry_async
     from schemas.event_schemas import (
-        AutomationStartedEvent, FileUploadedEvent, DocumentClassifiedEvent, 
-        ContractSummaryUpdatedEvent, DocumentCreatedEvent, AutomationCompletedEvent, AutomationFailedEvent
+        FileMetadataRecordedEvent, FilePlaintextExtractedEvent, ContractSummaryGeneratedEvent
     )
     
     correlation_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
@@ -328,10 +328,10 @@ async def upload_document(
             "metadata": {"syncMode": sync_mode, "userAgent": request.headers.get("user-agent")}
         })
         
-        # Log automation started event
+        # Log file metadata recorded event
         await audit_service.log_event({
             "eventVersion": "v1",
-            "eventType": "AutomationStarted",
+            "eventType": "file.metadata.recorded",
             "correlationId": correlation_id,
             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
             "data": {
@@ -369,14 +369,14 @@ async def upload_document(
                 "result": {"fileUrl": file_url, "fileId": file_id}
             })
             
-            # Log file uploaded event
+            # Log file metadata recorded event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "FileUploaded",
+                "eventType": "file.metadata.recorded",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
-                    "documentId": file_id,
+                    "fileId": file_id,
                     "fileUrl": file_url,
                     "fileName": file.filename,
                     "fileSize": size,
@@ -402,7 +402,7 @@ async def upload_document(
             })
             raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")
         
-        # 2) Run OCR / extract plaintext (JSON parse treated as plaintext/jsonContent)
+        # 2) Run OCR / extract plaintext using unified OCR service
         try:
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -410,33 +410,32 @@ async def upload_document(
                 "startedAt": datetime.now(timezone.utc)
             })
             
-            content_type_lower = (file.content_type or "").lower()
-            plaintext_text = None
-            json_content_text = None
-            if content_type_lower == "application/json":
-                raw_bytes = await file.read()
-                await file.seek(0)
-                try:
-                    parsed = json.loads(raw_bytes.decode("utf-8", errors="ignore"))
-                    json_content_text = json.dumps(parsed, ensure_ascii=False)
-                    # treat pretty text as plaintext for unified pipeline
-                    plaintext_text = json.dumps(parsed, ensure_ascii=False, indent=2)
-                except Exception as je:
-                    json_content_text = raw_bytes.decode("utf-8", errors="ignore")
-                    plaintext_text = json_content_text
-                ocr_text = plaintext_text
-            else:
-                file_content = await file.read()
-                await file.seek(0)
-                ocr_text = await retry_async(
-                    ocr_service.extract_text_from_file,
-                    file_content, file.content_type,
-                    max_retries=2,
-                    backoff_factor=1.5,
-                    exceptions=(Exception,),
-                    on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
-                )
+            file_content = await file.read()
+            await file.seek(0)
+            
+            # Sử dụng OCR service thống nhất để trích xuất text và metadata
+            extraction_result = await retry_async(
+                ocr_service.extract_text_and_metadata,
+                file_content, file.filename, file.content_type,
+                max_retries=2,
+                backoff_factor=1.5,
+                exceptions=(Exception,),
+                on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
+            )
+            
+            if extraction_result["success"]:
+                ocr_text = extraction_result["text"]
                 plaintext_text = ocr_text
+                json_content_text = None
+                
+                # Xử lý JSON content riêng biệt
+                if file.content_type and file.content_type.lower() == "application/json":
+                    json_content_text = extraction_result["text"]
+            else:
+                # Fallback nếu OCR thất bại
+                ocr_text = f"OCR failed for {file.filename}"
+                plaintext_text = ocr_text
+                json_content_text = None
             
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "OCR_PROCESSING",
@@ -461,9 +460,9 @@ async def upload_document(
                 "retryCount": 2
             })
             print(f"OCR failed, using filename: {e}")
-                ocr_text = f"OCR failed for {file.filename}"
-                if plaintext_text is None:
-                    plaintext_text = ocr_text
+            ocr_text = f"OCR failed for {file.filename}"
+            if plaintext_text is None:
+                plaintext_text = ocr_text
 
         # Helper builders for sample.json-compatible document
         def _now_iso():
@@ -648,6 +647,8 @@ async def upload_document(
             }
         
         # 3) Run classification with retry
+        # Khai báo biến is_contract trước khối try để tránh lỗi scope
+        is_contract = False
         try:
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "AI_CLASSIFICATION",
@@ -656,7 +657,7 @@ async def upload_document(
             })
             
             classification_result = await retry_async(
-                ai_service.classify_document,
+                ocr_service.classify_document,
                 plaintext_text, file.filename,
                 max_retries=2,
                 backoff_factor=1.5,
@@ -675,7 +676,7 @@ async def upload_document(
             # Log document classified event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "DocumentClassified",
+                "eventType": "file.plaintext.extracted",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
@@ -722,7 +723,7 @@ async def upload_document(
                 })
                 
                 summary_result = await retry_async(
-                    ai_service.generate_contract_summary,
+                    ocr_service.generate_contract_summary,
                     ocr_text, file.filename,
                     max_retries=2,
                     backoff_factor=1.5,
@@ -740,7 +741,7 @@ async def upload_document(
                 # Log contract summary updated event
                 await audit_service.log_event({
                     "eventVersion": "v1",
-                    "eventType": "ContractSummaryUpdated",
+                    "eventType": "contract.summary.generated",
                     "correlationId": correlation_id,
                     "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                     "data": {
@@ -775,7 +776,8 @@ async def upload_document(
                 print(f"Contract processing failed: {e}")
                 summary_result = {"summary": f"Tóm tắt hợp đồng {file.filename}"}
         
-            overview_document_type = "CONTRACT" if is_contract else "GENERAL"
+        # Di chuyển khai báo overview_document_type ra ngoài khối if để tránh lỗi scope
+        overview_document_type = "CONTRACT" if is_contract else "GENERAL"
         
         # 5) Build payload matching sample schema
         api_doc_payload = build_file_api_payload(
@@ -858,6 +860,17 @@ async def upload_document(
                     # 3) contract.summary.generated (if contract)
                     if bool(classification_result.get("isContract")) and summary_result:
                         print(f"[DEBUG] Preparing publish -> topic=contract.summary.generated fileId={file_id}")
+                        # Prepare paymentDetails as list (Java DTO expects List<PaymentDetailDto>)
+                        payment_obj = summary_result.get("payment")
+                        payment_details_list = []
+                        if payment_obj and isinstance(payment_obj, dict):
+                            # Convert single payment object to list with one item
+                            payment_details_list = [{
+                                "term": payment_obj.get("schedule"),
+                                "amount": payment_obj.get("totalValue"),
+                                "currency": payment_obj.get("currency")
+                            }]
+                        
                         contract_evt = {
                             "eventVersion": "1.0",
                             "eventType": "contract.summary.generated",
@@ -870,7 +883,7 @@ async def upload_document(
                                 "fileId": file_id,
                                 "summary": summary_result.get("summary"),
                                 "keyClauses": summary_result.get("clauses", {}).get("key", []),
-                                "paymentDetails": summary_result.get("payment", []),
+                                "paymentDetails": payment_details_list,
                                 "riskAssessment": summary_result.get("risk", None)
                             },
                             "metadata": {"serviceVersion": "1.0.0"}
@@ -924,7 +937,7 @@ async def upload_document(
             # Log automation completed event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "AutomationCompleted",
+                "eventType": "file.plaintext.extracted",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
@@ -965,7 +978,7 @@ async def upload_document(
                 
                 # Publish initial event
                 await event_service.publish_event({
-                    "eventType": "DocumentUploaded",
+                    "eventType": "file.metadata.recorded",
                     "documentId": file_id,
                     "fileUrl": file_url,
                     "filename": file.filename,
@@ -1011,7 +1024,7 @@ async def upload_document(
         # Log automation failed event
         await audit_service.log_event({
             "eventVersion": "v1",
-            "eventType": "AutomationFailed",
+            "eventType": "file.metadata.recorded",
             "correlationId": correlation_id,
             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
             "data": {
@@ -1047,80 +1060,6 @@ async def upload_document(
 # Alias removed as requested; single POST at files root is the canonical endpoint
 
 
-@router.post("/events/analyze-json", summary="Phân tích 1 JSON qua Kafka", tags=["📁 APIs Quản lý File"])
-async def analyze_json_event(request: Request, payload: dict):
-    await progress_service.initialize()
-    job_id = str(uuid.uuid4())
-    corr_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
-    client_ip = request.client.host if request.client else None
-    await progress_service.init_job(job_id, total=1)
-    now_iso = datetime.now(timezone.utc).isoformat()
-    message = {
-        "eventVersion": "v1",
-        "eventType": "JsonAnalysisRequested",
-        "eventId": str(uuid.uuid4()),
-        "timestamp": now_iso,
-        "source": "automation-service",
-        "correlationId": corr_id,
-        "actor": {"userId": "system", "userRole": "system", "ip": client_ip},
-        "data": {"jobId": job_id, "index": 0, "payload": payload},
-        "metadata": {"serviceVersion": "1.0.0"}
-    }
-    await event_service.publish_kafka(Config.JSON_ANALYZE_TOPIC if hasattr(Config, 'JSON_ANALYZE_TOPIC') else "json.analyze", message)
-    return RestResponse(
-        apiVersion="v1",
-        statusCode=202,
-        shortMessage="Accepted",
-        description="JSON accepted for analysis",
-        data={"jobId": job_id},
-        timestamp=now_iso,
-        requestId=corr_id,
-        path=str(request.url)
-    )
-
-
-@router.post("/events/analyze-batch", summary="Phân tích nhiều JSON qua Kafka", tags=["📁 APIs Quản lý File"])
-async def analyze_batch_event(request: Request, payloads: list[dict]):
-    if not isinstance(payloads, list) or len(payloads) == 0:
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=400,
-            shortMessage="Bad Request",
-            description="Payload phải là mảng JSON và không rỗng",
-            data=None,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            requestId=str(uuid.uuid4()),
-            path=str(request.url)
-        )
-    await progress_service.initialize()
-    job_id = str(uuid.uuid4())
-    corr_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
-    client_ip = request.client.host if request.client else None
-    await progress_service.init_job(job_id, total=len(payloads))
-    now_iso = datetime.now(timezone.utc).isoformat()
-    for idx, item in enumerate(payloads):
-        message = {
-            "eventVersion": "v1",
-            "eventType": "JsonAnalysisRequested",
-            "eventId": str(uuid.uuid4()),
-            "timestamp": now_iso,
-            "source": "automation-service",
-            "correlationId": corr_id,
-            "actor": {"userId": "system", "userRole": "system", "ip": client_ip},
-            "data": {"jobId": job_id, "index": idx, "payload": item},
-            "metadata": {"serviceVersion": "1.0.0"}
-        }
-        await event_service.publish_kafka(Config.JSON_ANALYZE_TOPIC if hasattr(Config, 'JSON_ANALYZE_TOPIC') else "json.analyze", message)
-    return RestResponse(
-        apiVersion="v1",
-        statusCode=202,
-        shortMessage="Accepted",
-        description="Batch JSON accepted for analysis",
-        data={"jobId": job_id, "total": len(payloads)},
-        timestamp=now_iso,
-        requestId=corr_id,
-        path=str(request.url)
-    )
 
 
 @router.get("/events/{job_id}/status", summary="Trạng thái xử lý JSON", tags=["📁 APIs Quản lý File"])

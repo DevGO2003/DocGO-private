@@ -43,86 +43,70 @@ export function useDocumentProgress(documentId: string | null): UseDocumentProgr
   const reconnectAttempts = useRef(0)
   const maxReconnectAttempts = 5
   const reconnectDelay = 1000 // 1 second
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const POLLING_MS = 1500
 
   const connect = useCallback(() => {
     if (!documentId || wsRef.current?.readyState === WebSocket.OPEN) {
       return
     }
 
-    try {
-      // Build WebSocket URL
-      const wsUrl = `ws://localhost:8003/api/v1/automation-service/documents/progress/${documentId}`
-      
-      console.log(`[useDocumentProgress] Connecting to WebSocket: ${wsUrl}`)
-      
-      const ws = new WebSocket(wsUrl)
-      wsRef.current = ws
+    // Switch to HTTP polling via API Gateway
+    if (!documentId) return
+    if (pollingIntervalRef.current) return
+    setIsConnected(true)
+    setError(null)
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_GATEWAY_URL || ''
+    const endpoint = `/api/v1/automation-service/documents/${documentId}/progress`
+    const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
 
-      ws.onopen = () => {
-        console.log(`[useDocumentProgress] WebSocket connected for document ${documentId}`)
-        setIsConnected(true)
-        setError(null)
-        reconnectAttempts.current = 0
-      }
-
-      ws.onmessage = (event) => {
-        try {
-          const data: ProgressData = JSON.parse(event.data)
-          console.log(`[useDocumentProgress] Received progress update:`, data)
-          
-          setProgressData(data)
-          setProgress(data.progress)
-          setStage(data.stage)
-          setMessage(data.message)
-          
-          if (data.completed) {
-            setIsComplete(true)
-            console.log(`[useDocumentProgress] Processing completed for document ${documentId}`)
-          }
-          
-          if (data.error) {
-            setError(data.errorMessage || 'Unknown error occurred')
-            console.error(`[useDocumentProgress] Processing error:`, data.errorMessage)
-          }
-          
-        } catch (err) {
-          console.error(`[useDocumentProgress] Failed to parse WebSocket message:`, err)
-          setError('Failed to parse progress update')
+    const poll = async () => {
+      try {
+        const res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+        if (!res.ok) {
+          throw new Error(`Progress fetch failed: ${res.status}`)
         }
-      }
+        const body = await res.json()
+        const data: ProgressData = body?.data ?? body
+        if (!data) return
 
-      ws.onclose = (event) => {
-        console.log(`[useDocumentProgress] WebSocket closed for document ${documentId}:`, event.code, event.reason)
-        setIsConnected(false)
-        
-        // Auto-reconnect if not manually closed and not complete
-        if (!isComplete && event.code !== 1000) {
-          scheduleReconnect()
+        setProgressData(data)
+        if (typeof data.progress === 'number') setProgress(data.progress)
+        if (typeof data.stage === 'string') setStage(data.stage)
+        if (typeof data.message === 'string') setMessage(data.message)
+
+        if (data.completed) {
+          setIsComplete(true)
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current)
+            pollingIntervalRef.current = null
+          }
         }
+        if (data.error) {
+          setError(data.errorMessage || 'Unknown error occurred')
+        }
+      } catch (e: any) {
+        setError(e?.message || 'Failed to fetch progress')
       }
-
-      ws.onerror = (err) => {
-        console.error(`[useDocumentProgress] WebSocket error for document ${documentId}:`, err)
-        setError('WebSocket connection error')
-        setIsConnected(false)
-      }
-
-    } catch (err) {
-      console.error(`[useDocumentProgress] Failed to create WebSocket connection:`, err)
-      setError('Failed to connect to progress stream')
     }
+
+    // initial and interval
+    poll()
+    pollingIntervalRef.current = setInterval(poll, POLLING_MS)
   }, [documentId, isComplete])
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
-      console.log(`[useDocumentProgress] Disconnecting WebSocket for document ${documentId}`)
       wsRef.current.close(1000, 'Manual disconnect')
       wsRef.current = null
     }
-    
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
+    }
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = null
     }
     
     setIsConnected(false)
@@ -175,20 +159,7 @@ export function useDocumentProgress(documentId: string | null): UseDocumentProgr
     }
   }, [disconnect])
 
-  // Ping/pong to keep connection alive
-  useEffect(() => {
-    if (!isConnected || !wsRef.current) return
-
-    const pingInterval = setInterval(() => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send('ping')
-      }
-    }, 30000) // Ping every 30 seconds
-
-    return () => {
-      clearInterval(pingInterval)
-    }
-  }, [isConnected])
+  // No ping required for HTTP polling
 
   return {
     progress,

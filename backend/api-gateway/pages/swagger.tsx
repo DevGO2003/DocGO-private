@@ -26,6 +26,34 @@ const SwaggerUI = dynamic(() => import('swagger-ui-react'), {
 // Import Swagger CSS cho phiên bản mới
 import 'swagger-ui-react/swagger-ui.css';
 
+// Fallback component cho trường hợp Swagger UI không load được
+const SwaggerUIFallback = () => (
+  <div className="flex items-center justify-center p-12 bg-white rounded-lg shadow-sm border">
+    <div className="text-center">
+      <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+        <span className="text-2xl">⚠️</span>
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">Không thể tải Swagger UI</h3>
+      <p className="text-gray-600 mb-4">Có vấn đề khi tải Swagger UI component</p>
+      <div className="space-y-2">
+        <a 
+          href="/test-swagger" 
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mr-2"
+        >
+          🧪 Test API Data
+        </a>
+        <a 
+          href="/api/swagger.json" 
+          target="_blank"
+          className="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        >
+          📄 View Raw JSON
+        </a>
+      </div>
+    </div>
+  </div>
+);
+
 export default function SwaggerPage() {
   const router = useRouter();
   
@@ -97,6 +125,7 @@ export default function SwaggerPage() {
   const [spec, setSpec] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingSpec, setIsLoadingSpec] = useState<boolean>(false);
+  const [swaggerUIError, setSwaggerUIError] = useState<boolean>(false);
 
   // Hàm xử lý click vào service card
   const handleServiceClick = (serviceName: string) => {
@@ -159,6 +188,17 @@ export default function SwaggerPage() {
     }
 
     setIsLoadingSpec(true);
+    setSwaggerUIError(false);
+    
+    // Timeout để fallback nếu Swagger UI không load được trong 10 giây
+    const timeout = setTimeout(() => {
+      if (isLoadingSpec) {
+        setSwaggerUIError(true);
+        setIsLoadingSpec(false);
+        console.warn('Swagger UI loading timeout - falling back to error state');
+      }
+    }, 10000);
+
     fetch(specUrl)
       .then(async r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -167,12 +207,17 @@ export default function SwaggerPage() {
       .then(json => {
         setSpec(json);
         setIsLoadingSpec(false);
+        clearTimeout(timeout);
       })
       .catch(e => {
         setError(`Không tải được spec từ ${selectedService}: ${e.message}`);
         setIsLoadingSpec(false);
+        setSwaggerUIError(true);
+        clearTimeout(timeout);
       });
-  }, [selectedService, serviceConnectionMapping]);
+
+    return () => clearTimeout(timeout);
+  }, [selectedService, serviceConnectionMapping, isLoadingSpec]);
 
   return (
     <>
@@ -195,17 +240,17 @@ export default function SwaggerPage() {
                 key={serviceName}
                 className={`service-card ${selectedService === serviceName ? 'active' : ''}`}
                 onClick={() => handleServiceClick(serviceName)}
-                style={{ '--card-color': serviceInfo.color } as React.CSSProperties}
+                style={{ '--card-color': (serviceInfo as any).color } as React.CSSProperties}
               >
                 <div className="service-card-header">
-                  <span className="service-icon">{serviceInfo.icon}</span>
+                  <span className="service-icon">{(serviceInfo as any).icon}</span>
                   <h3>{serviceName}</h3>
                     </div>
                 <div className="service-card-body">
-                  <p className="service-description">{serviceInfo.description}</p>
+                  <p className="service-description">{(serviceInfo as any).description}</p>
                   <div className="service-meta">
-                    <span className="service-tech">{serviceInfo.technology}</span>
-                    <span className="service-port">Port {serviceInfo.port}</span>
+                    <span className="service-tech">{(serviceInfo as any).technology}</span>
+                    <span className="service-port">Port {(serviceInfo as any).port}</span>
                   </div>
                 </div>
                 <div className="service-card-footer">
@@ -265,6 +310,8 @@ export default function SwaggerPage() {
                   </div>
                 </div>
               </div>
+            ) : swaggerUIError ? (
+              <SwaggerUIFallback />
             ) : (
               <SwaggerUI 
                 spec={spec || { openapi: '3.0.3', info: { title: 'Loading...', version: '1.0.0' } }}
@@ -277,6 +324,14 @@ export default function SwaggerPage() {
                 showExtensions={true}
                 showCommonExtensions={true}
                 tryItOutEnabled={true}
+                onComplete={() => {
+                  console.log('Swagger UI loaded successfully');
+                  setSwaggerUIError(false);
+                }}
+                onFailure={(error: any) => {
+                  console.error('Swagger UI failed to load:', error);
+                  setSwaggerUIError(true);
+                }}
                 requestInterceptor={(request: any) => {
                   return request;
                 }}
