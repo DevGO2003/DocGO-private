@@ -45,13 +45,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     'users': 'user-management',
     'user-management': 'user-management',
     'user-management-service': 'user-management',
-    // document
-    'documents': 'document-management',
-    'contracts': 'document-management',
-    'files': 'document-management',
-    'assets': 'document-management',
-    'document-management': 'document-management',
-    'file-management-service': 'file-management',
+    // repository
+    'documents': 'repository-management',
+    'contracts': 'repository-management',
+    'files': 'repository-management',
+    'assets': 'repository-management',
+    'repository-management': 'repository-management',
+    'repository-management-service': 'repository-management',
+    'file-management-service': 'repository-management',
+    'document-management': 'repository-management',
     // automation
     'automation': 'automation',
     'ai': 'automation',

@@ -40,10 +40,10 @@ import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 // Grouped navigation to mimic category structure from the screenshot
 const navigationGroups = [
   {
-    titleKey: 'category.documents',
+    titleKey: 'category.repositories',
     items: [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
-      { nameKey: 'navigation.documents', href: '/documents', icon: DocumentTextIcon },
+      { nameKey: 'navigation.repositories', href: '/repositories', icon: DocumentTextIcon },
       { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
       { nameKey: 'navigation.uploadDocument', href: '/upload-document', icon: ArrowUpTrayIcon },
       { nameKey: 'navigation.analytics', href: '/analytics', icon: ChartBarIcon },
@@ -111,18 +111,18 @@ export default function Sidebar({ collapsed = false, onCollapseToggle }: Sidebar
 
       // Đưa Tài liệu ngay sau Bảng điều khiển nếu có trong menu
       const dashboardKey = 'navigation.dashboard'
-      const documentsKey = 'navigation.documents'
-      if (mergedOrder.includes(documentsKey)) {
-        mergedOrder = mergedOrder.filter(k => k !== documentsKey)
+      const repositoriesKey = 'navigation.repositories'
+      if (mergedOrder.includes(repositoriesKey)) {
+        mergedOrder = mergedOrder.filter(k => k !== repositoriesKey)
         const dashIdx = Math.max(0, mergedOrder.indexOf(dashboardKey))
-        mergedOrder.splice(dashIdx + 1, 0, documentsKey)
+        mergedOrder.splice(dashIdx + 1, 0, repositoriesKey)
       }
 
       setMenuOrder(mergedOrder)
 
       // Ghim Tài liệu mặc định (vẫn tôn trọng pins đã lưu)
       const nextPins = new Set((savedPins || []).filter((k) => defaultOrder.includes(k)))
-      nextPins.add(documentsKey)
+      nextPins.add(repositoriesKey)
       const pinsArr = Array.from(nextPins)
       setPinnedKeys(pinsArr)
       localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pinsArr))
@@ -132,11 +132,11 @@ export default function Sidebar({ collapsed = false, onCollapseToggle }: Sidebar
       // Fallback mặc định
       const fallbackOrder = [...defaultOrder]
       const dashboardKey = 'navigation.dashboard'
-      const documentsKey = 'navigation.documents'
-      if (fallbackOrder.includes(documentsKey)) {
-        const filtered = fallbackOrder.filter(k => k !== documentsKey)
+      const repositoriesKey = 'navigation.repositories'
+      if (fallbackOrder.includes(repositoriesKey)) {
+        const filtered = fallbackOrder.filter(k => k !== repositoriesKey)
         const dashIdx = Math.max(0, filtered.indexOf(dashboardKey))
-        filtered.splice(dashIdx + 1, 0, documentsKey)
+        filtered.splice(dashIdx + 1, 0, repositoriesKey)
         setMenuOrder(filtered)
       } else {
         setMenuOrder(defaultOrder)

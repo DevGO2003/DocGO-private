@@ -20,7 +20,7 @@ references: []
 commands: []
 owners: ["devgo2003"]
 createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-10-18T00:00:00Z"
 notes: "Luôn bật vì ảnh hưởng quy trình dev local"
 language: vi
 ---
@@ -44,8 +44,8 @@ volumes:
 - **Chạy toàn bộ service backend**: Khi cần chạy nhiều service, sử dụng docker-compose để khởi động đồng thời
 - **Hot reload**: Code thay đổi trên máy host sẽ được reflect ngay trong container (không cần rebuild image)
 - **Ưu điểm**: Phát triển nhanh, không cần rebuild image mỗi khi sửa code, dễ debug
-- **File cấu hình**: Sử dụng `script/docker-compose.dev.yml` cho development mode với volume mount
-- **Script hỗ trợ**: Có sẵn `script/docker-dev.bat` và `script/docker-dev.ps1` để chạy nhanh
+- **File cấu hình**: Sử dụng `docker-compose.yml` cho development mode với volume mount
+- **Script hỗ trợ**: Sử dụng `docker-compose` commands trực tiếp
 - **Port mapping**: Tuân thủ quy tắc port cố định theo tên nhánh (8000-8017)
 
 ### Quy tắc lệnh Docker Local:
@@ -55,14 +55,45 @@ volumes:
 - **`docker local --logs`**: Xem logs tất cả services
 - **`docker local --status`**: Xem trạng thái services
 
+### Quy tắc Docker Compose Restart:
+- **Khi đã build image rồi**: Chỉ cần restart service, KHÔNG cần build lại
+- **Lệnh restart nhanh**: `docker-compose restart <service-name>` hoặc `docker-compose restart`
+- **Lệnh restart tất cả**: `docker-compose restart` (restart tất cả services)
+- **Lệnh restart service cụ thể**: `docker-compose restart api-gateway user-management-service`
+- **Khi nào cần build lại**: Chỉ khi thay đổi Dockerfile, requirements.txt, hoặc dependencies
+- **Khi nào chỉ cần restart**: Khi thay đổi code source, config files, environment variables
+
+**Ví dụ restart workflow**:
+```bash
+# Restart tất cả services (nhanh nhất)
+docker-compose restart
+
+# Restart service cụ thể
+docker-compose restart automation-service
+
+# Restart nhiều services
+docker-compose restart api-gateway file-management-service
+
+# Chỉ khi cần build lại (khi thay đổi Dockerfile/dependencies)
+docker-compose up --build automation-service
+```
+
 ### Local workflow:
 1. **Lần đầu hoặc khi cần restart toàn bộ**: Chạy `docker local --new`
 2. **Khi chỉnh sửa code**: Chạy `docker local` để khởi động local environment
 3. Sửa code trực tiếp trên máy host
 4. Code thay đổi được sync ngay vào container
 5. Service tự động reload (nếu có hot reload)
-6. Xem logs: `docker-compose -f script/docker-compose.local.yml logs -f`
-7. Dừng: `docker-compose -f script/docker-compose.local.yml down`
+6. **Khi cần restart service**: Dùng `docker-compose restart <service-name>` (nhanh hơn rebuild)
+7. Xem logs: `docker-compose logs -f`
+8. Dừng: `docker-compose down`
+
+### Workflow tối ưu cho development:
+- **Lần đầu**: `docker-compose up --build` (build tất cả images)
+- **Thay đổi code**: Code tự động sync qua volume mount
+- **Thay đổi config/env**: `docker-compose restart <service-name>`
+- **Thay đổi Dockerfile/dependencies**: `docker-compose up --build <service-name>`
+- **Restart nhanh**: `docker-compose restart` (tất cả services)
 
 ## Quy tắc cấu trúc Docker
 

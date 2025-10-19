@@ -88,7 +88,7 @@ export class DocumentAPI {
   }
 
   async getContractById(id: string) {
-    return apiClient.get<ApiResponse<Contract>>(`${this.basePath}/documents/${id}`)
+    return apiClient.get<ApiResponse<Contract>>(`${this.basePath}/repositories/${id}`)
   }
 
   async createContract(contractData: ContractCreateData) {
@@ -96,15 +96,15 @@ export class DocumentAPI {
   }
 
   async updateContract(id: string, contractData: ContractUpdateData) {
-    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/documents/${id}`, contractData)
+    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/repositories/${id}`, contractData)
   }
 
   async deleteContract(id: string) {
-    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/documents/${id}`)
+    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/repositories/${id}`)
   }
 
   async restoreContract(id: string) {
-    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/documents/${id}/restore`)
+    return apiClient.put<ApiResponse<Contract>>(`${this.basePath}/repositories/${id}/restore`)
   }
 
   // Documents
@@ -113,7 +113,7 @@ export class DocumentAPI {
   }
 
   async getDocumentById(id: string) {
-    return apiClient.get<ApiResponse<Document>>(`${this.basePath}/documents/${id}`)
+    return apiClient.get<ApiResponse<Document>>(`${this.basePath}/repositories/${id}`)
   }
 
   async createDocument(documentData: DocumentCreateData) {
@@ -121,15 +121,15 @@ export class DocumentAPI {
   }
 
   async updateDocument(id: string, documentData: Partial<DocumentCreateData>) {
-    return apiClient.put<ApiResponse<Document>>(`${this.basePath}/documents/${id}`, documentData)
+    return apiClient.put<ApiResponse<Document>>(`${this.basePath}/repositories/${id}`, documentData)
   }
 
   async deleteDocument(id: string) {
-    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/documents/${id}`)
+    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/repositories/${id}`)
   }
 
   async restoreDocument(id: string) {
-    return apiClient.put<ApiResponse<Document>>(`${this.basePath}/documents/${id}/restore`)
+    return apiClient.put<ApiResponse<Document>>(`${this.basePath}/repositories/${id}/restore`)
   }
 
   // File Management - DEPRECATED: Use automationAPI.uploadFile() instead
@@ -155,13 +155,13 @@ export class DocumentAPI {
 
   // Attachments
   async getContractAttachments(contractId: string) {
-    return apiClient.get<ApiResponse<any>>(`${this.basePath}/documents/${contractId}/attachments`)
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/repositories/${contractId}/attachments`)
   }
 
   async uploadContractAttachment(contractId: string, file: File) {
     const formData = new FormData()
     formData.append('file', file)
-    return apiClient.post<ApiResponse<any>>(`${this.basePath}/documents/${contractId}/attachments`, formData, {
+    return apiClient.post<ApiResponse<any>>(`${this.basePath}/repositories/${contractId}/attachments`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

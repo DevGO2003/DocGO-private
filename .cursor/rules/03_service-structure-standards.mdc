@@ -28,7 +28,7 @@ language: vi
 ## Quy tắc cấu trúc dịch vụ (structure)
 
 ### Python (FastAPI) – áp dụng cho `automation-service` và các service Python khác:
-- Thư mục gốc service gồm: `main.py`, `routers.py` (hoặc thư mục `routers/`), `config.py`, `requirements.txt`, `README.md`, `How to run this microservice.md`, `__init__.py`, các thư mục dữ liệu phụ (`results/`, `models/`, `schemas/`, `services/` nếu phát sinh).
+- Thư mục gốc service gồm: `main.py`, `routers.py` (hoặc thư mục `routers/`), `config.py`, `requirements.txt`, `README.md`, `__init__.py`, các thư mục dữ liệu phụ (`results/`, `models/`, `schemas/`, `services/` nếu phát sinh).
 - `main.py`: khởi tạo `FastAPI(...)`, include router(s), khai báo route root `/`.
 - `routers.py`: định nghĩa `APIRouter` với `tags`, `summary`, `description` và tuân thủ URL ở mục 1; các handler trả về `RestResponse` tương đồng.
 - `config.py`: load biến môi trường (dùng `python-dotenv`), cấu hình SDK/clients (ví dụ: Gemini, S3/Filebase) và helper (ví dụ: `get_presigned_get_url`).
@@ -47,12 +47,12 @@ language: vi
 
 ### Python:
 - Mọi thư viện mới phải được thêm vào `requirements.txt` với phiên bản cố định (pinned). Ví dụ: `python-dotenv==1.0.1`.
-- Khi dùng SDK/dịch vụ bên ngoài (S3, AI, DB…), thêm ngay dependency tương ứng và cập nhật hướng dẫn cài đặt trong `How to run this microservice.md`.
+- Khi dùng SDK/dịch vụ bên ngoài (S3, AI, DB…), thêm ngay dependency tương ứng và cập nhật hướng dẫn cài đặt trong `README.md`.
 - Nếu tách phụ thuộc cho dev/test, dùng thêm `requirements-dev.txt` (không bắt buộc).
 
 ### Java:
 - Thêm dependency vào `pom.xml` với version rõ ràng; tránh sử dụng snapshot nếu không cần thiết.
-- Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `How to run this microservice.md`.
+- Khi thay đổi phụ thuộc ảnh hưởng runtime, cập nhật `README.md`.
 
 **QUY TẮC GROUP ID VÀ ARTIFACT ID**:
 - **Group ID**: `com.devgo2003.docgo` (dùng kebab-case)

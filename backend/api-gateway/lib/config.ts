@@ -86,9 +86,9 @@ export class Config {
            (this.isDocker() ? 'http://automation-service:8003' : 'http://localhost:8003');
   }
 
-  static getFileManagementServiceUrl(): string {
-    return process.env.FILE_MANAGEMENT_SERVICE_URL || 
-           (this.isDocker() ? 'http://file-management-service:8002' : 'http://localhost:8002');
+  static getRepositoryManagementServiceUrl(): string {
+    return process.env.REPOSITORY_MANAGEMENT_SERVICE_URL || 
+           (this.isDocker() ? 'http://repository-management-service:8002' : 'http://localhost:8002');
   }
 
   static getFileServiceUrl(): string {
@@ -136,11 +136,11 @@ export class Config {
       timeout: 15000
     },
     
-    'file-management': {
-      name: 'file-management-service',
-        url: this.getFileManagementServiceUrl(),
+    'repository-management': {
+      name: 'repository-management-service',
+        url: this.getRepositoryManagementServiceUrl(),
       port: 8002,
-      healthCheck: '/health',
+      healthCheck: '/actuator/health',
       timeout: 10000
     },
     

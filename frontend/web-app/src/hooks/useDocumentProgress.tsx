@@ -57,7 +57,7 @@ export function useDocumentProgress(documentId: string | null): UseDocumentProgr
     setIsConnected(true)
     setError(null)
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_GATEWAY_URL || ''
-    const endpoint = `/api/v1/automation-service/documents/${documentId}/progress`
+    const endpoint = `/api/v1/automation-service/repositories/${documentId}/progress`
     const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
 
     const poll = async () => {

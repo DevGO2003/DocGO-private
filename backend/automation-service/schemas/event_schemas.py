@@ -4,9 +4,9 @@ from datetime import datetime
 from enum import Enum
 
 class EventType(str, Enum):
-    # Chỉ giữ lại 3 event cần thiết
-    FILE_METADATA_RECORDED = "file.metadata.recorded"
-    FILE_PLAINTEXT_EXTRACTED = "file.plaintext.extracted"
+    # Repository events (renamed from file.* to repository.*)
+    REPOSITORY_METADATA_RECORDED = "repository.metadata.recorded"
+    REPOSITORY_PLAINTEXT_EXTRACTED = "repository.plaintext.extracted"
     CONTRACT_SUMMARY_GENERATED = "contract.summary.generated"
 
 class EventStatus(str, Enum):
@@ -83,9 +83,9 @@ class WebSocketEvent(BaseModel):
     timestamp: datetime = Field(...)
     user_id: Optional[str] = Field(None)
 
-# Event models cho 3 event cần thiết
-class FileMetadataRecordedEvent(BaseModel):
-    """Event published when file metadata is recorded"""
+# Event models cho repository events (renamed from File* to Repository*)
+class RepositoryMetadataRecordedEvent(BaseModel):
+    """Event published when repository item metadata is recorded"""
     correlationId: str = Field(...)
     fileId: str = Field(...)
     fileName: str = Field(...)
@@ -95,8 +95,8 @@ class FileMetadataRecordedEvent(BaseModel):
     userId: str = Field(default="system")
     timestamp: datetime = Field(default_factory=lambda: datetime.now())
 
-class FilePlaintextExtractedEvent(BaseModel):
-    """Event published when plaintext is extracted from file"""
+class RepositoryPlaintextExtractedEvent(BaseModel):
+    """Event published when plaintext is extracted from repository item"""
     correlationId: str = Field(...)
     fileId: str = Field(...)
     fileName: str = Field(...)

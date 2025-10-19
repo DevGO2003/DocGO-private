@@ -46,7 +46,7 @@ export class ContractAPI {
 
   async getContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    // Temporarily use mock API until backend implements /documents/{id} endpoint
+    // Temporarily use mock API until backend implements /repositories/{id} endpoint
     return apiClient.get<any>(`/api/mock/contracts/${id}`, { params })
   }
 
@@ -85,47 +85,47 @@ export class ContractAPI {
 
   async updateContract(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/documents/${id}`, data, { params })
+    return apiClient.put<any>(`${this.basePath}/repositories/${id}`, data, { params })
   }
 
   async deleteContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.delete<any>(`${this.basePath}/documents/${id}`, { params })
+    return apiClient.delete<any>(`${this.basePath}/repositories/${id}`, { params })
   }
 
   async restoreContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/documents/${id}/restore`, undefined, { params })
+    return apiClient.put<any>(`${this.basePath}/repositories/${id}/restore`, undefined, { params })
   }
 
   async getContractEvents(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/documents/${id}/events`, { params })
+    return apiClient.get<any[]>(`${this.basePath}/repositories/${id}/events`, { params })
   }
 
   async getContractAttachments(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.get<any[]>(`${this.basePath}/documents/${id}/attachments`, { params })
+    return apiClient.get<any[]>(`${this.basePath}/repositories/${id}/attachments`, { params })
   }
 
   async approveContract(id: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.put<any>(`${this.basePath}/documents/${id}/approve`, undefined, { params })
+    return apiClient.put<any>(`${this.basePath}/repositories/${id}/approve`, undefined, { params })
   }
 
   async createVersion(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/documents/${id}/versions`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/repositories/${id}/versions`, data, { params })
   }
 
   async requestESignature(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/documents/${id}/esignature`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/repositories/${id}/esignature`, data, { params })
   }
 
   async addComment(id: string, data: any, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/documents/${id}/comments`, data, { params })
+    return apiClient.post<any>(`${this.basePath}/repositories/${id}/comments`, data, { params })
   }
 }
 
@@ -214,7 +214,7 @@ export class AutomationAPI {
 
   async summarizeText(text: string, apiKey?: string, view?: string) {
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/documents/summarize`, { text }, {
+    return apiClient.post<any>(`${this.basePath}/repositories/summarize`, { text }, {
       headers: {
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
       },
@@ -227,7 +227,7 @@ export class AutomationAPI {
     formData.append('file', file)
     
     const params = view ? { view } : {}
-    return apiClient.post<any>(`${this.basePath}/documents/summarize`, formData, {
+    return apiClient.post<any>(`${this.basePath}/repositories/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),

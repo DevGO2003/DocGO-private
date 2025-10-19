@@ -121,7 +121,7 @@ export class AutomationAPI {
   }
 
   async summarizeText(text: string, apiKey?: string) {
-    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/documents/summarize`, 
+    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/repositories/summarize`, 
       { text }, 
       {
         headers: {
@@ -136,7 +136,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/documents/summarize`, formData, {
+    return apiClient.post<ApiResponse<SummarizeResult>>(`${this.basePath}/repositories/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -149,7 +149,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<ProcessResult>>(`${this.basePath}/documents/process`, formData, {
+    return apiClient.post<ApiResponse<ProcessResult>>(`${this.basePath}/repositories/process`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),
@@ -161,7 +161,7 @@ export class AutomationAPI {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiClient.post<ApiResponse<ValidationResult>>(`${this.basePath}/documents/validate`, formData, {
+    return apiClient.post<ApiResponse<ValidationResult>>(`${this.basePath}/repositories/validate`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...(apiKey && { 'GEMINI_API_KEY': apiKey }),

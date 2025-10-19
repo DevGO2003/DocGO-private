@@ -25,7 +25,7 @@ export function OCRTab({ documentData }: OCRTabProps) {
     
     setIsRetrying(true)
     try {
-      const response = await fetch(`/api/documents/${documentData.id}/retry-ocr`, {
+      const response = await fetch(`/api/repositories/${documentData.id}/retry-ocr`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

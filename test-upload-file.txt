@@ -1,0 +1,40 @@
+This is a test contract file for upload testing.
+
+Contract Title: Test Contract 2025
+Parties: Company A and Company B
+Date: 2025-10-19
+
+Section 1: Scope
+This contract covers the development of a document management system.
+
+Section 2: Payment
+Total amount: 100,000 USD
+Payment terms: 50% upfront, 50% upon completion
+
+Section 3: Timeline
+Start date: 2025-11-01
+End date: 2025-12-31
+
+Signed,
+Company A
+Company B
+
+
+Contract Title: Test Contract 2025
+Parties: Company A and Company B
+Date: 2025-10-19
+
+Section 1: Scope
+This contract covers the development of a document management system.
+
+Section 2: Payment
+Total amount: 100,000 USD
+Payment terms: 50% upfront, 50% upon completion
+
+Section 3: Timeline
+Start date: 2025-11-01
+End date: 2025-12-31
+
+Signed,
+Company A
+Company B

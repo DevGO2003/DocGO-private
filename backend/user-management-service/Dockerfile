@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy pom.xml first for better layer caching
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Skip dependency download to avoid network issues
+# RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
@@ -34,8 +35,8 @@ RUN chmod +r app.jar
 # Debug: List files
 RUN ls -la /app/
 
-# Expose port 8000 (internal port)
-EXPOSE 8000
+# Expose port 8001 (internal port)
+EXPOSE 8001
 
 # Command khởi chạy service
 CMD ["java", "-jar", "/app/app.jar"]

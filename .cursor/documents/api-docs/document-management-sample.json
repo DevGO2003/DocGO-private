@@ -1,27 +1,47 @@
+// Updated Document Management Schema - Complete version after merges and fixes
+// This is a sample JSON for DocGO API response. Fields are described below.
+// Overall Structure: Root is RestResponse with 'data' containing document details.
+// Conditions: PDF-specific fields (xmp*, pdf*) only for mimeType 'application/pdf'; else null.
+// Non-PDF (e.g., JSON import): Skip OCR/PDF metadata; focus on basic fileSystem and content.plaintext.
+// Enums: All enum fields have explicit value lists in comments.
+
 {
-  "id": "DOC-2024-004-NEW",
-  "overview": {
-    "title": "Hợp đồng dịch vụ phát triển phần mềm DocGO",
-    "status": "ACTIVE",
-    "documentType": "CONTRACT",
-    "contractType": "SERVICE_AGREEMENT",
-    "category": "IT Services",
-    "tags": ["phần mềm", "phát triển", "dịch vụ IT", "DocGO"],
-    "ownerUserId": "user-001",
-    "priority": "HIGH",
-    "confidentiality": "CONFIDENTIAL",
-    "language": "vi",
-    "region": "VN",
-    "department": "IT Department",
-    "project": "DocGO Platform Development",
-    "workflow": {
-      "currentStage": "APPROVAL",
-      "stages": [
-        {
-          "name": "DRAFT",
-          "status": "COMPLETED",
-          "completedAt": "2024-01-15T09:00:00Z",
-          "assignedTo": "user-001"
+  "apiVersion": "v1", // Phiên bản API (luôn 'v1' cho current).
+  "statusCode": 200, // Mã trạng thái HTTP nội bộ (Enum: 200 Success, 204 No Content, 400 Bad Request, 404 Not Found, 409 Conflict, 500 Internal Server Error).
+  "shortMessage": "Success", // Thông báo ngắn gọn (Enum: Success, Not Found, Bad Request, Conflict, No Content, Internal Server Error).
+  "description": "Đã lấy thông tin file thành công", // Mô tả chi tiết kết quả.
+  "data": {
+    "id": "FILE-2025-001-TEST", // ID duy nhất của document/file (format: FILE-YYYY-NNN-TYPE).
+    "overview": { // Tổng quan document (cơ bản, không chứa workflow/contract-specific).
+      "title": "test-upload-file.txt", // Tiêu đề document (từ filename hoặc extracted).
+      "status": "ACTIVE", // Trạng thái (Enum: ACTIVE, DRAFT, DELETED, ARCHIVED, INACTIVE).
+      "documentType": "CONTRACT", // Loại document (Enum: CONTRACT, INVOICE, MEMO, REPORT, AGREEMENT).
+      "contractType": "Phát triển phần mềm", // Sub-type nếu là contract (Enum: SERVICE_AGREEMENT, PURCHASE_AGREEMENT, PARTNERSHIP_AGREEMENT, etc.; string free nếu custom).
+      "category": "Hợp đồng", // Danh mục (Enum: Hợp đồng, Tài liệu, Hóa đơn, Báo cáo, Khác).
+      "tags": [], // Array tags (keywords, searchable).
+      "ownerUserId": "system", // ID chủ sở hữu (user hoặc system).
+      "language": "vi", // Ngôn ngữ (Enum: vi, en, fr, zh; ISO 639-1).
+      "region": "VN", // Khu vực (Enum: VN, US, EU, APAC; ISO 3166-1 alpha-2).
+      "new": true // Flag cho document mới tạo (true nếu vừa upload; bool).
+    },
+    "contract": { // Chi tiết hợp đồng (chỉ nếu documentType == 'CONTRACT'; else null).
+      "effectiveDate": "2025-11-01", // Ngày hiệu lực (ISO date; required).
+      "expiryDate": "2025-12-31", // Ngày hết hạn (ISO date; required).
+      "totalValue": 100000, // Tổng giá trị (number, in currency unit; required).
+      "currency": "USD", // Đơn vị tiền tệ (Enum: USD, VND, EUR, JPY; ISO 4217).
+      "summary": "Hợp đồng phát triển phần mềm giữa Company A và Company B với tổng giá trị 100,000 USD...", // Tóm tắt ngắn gọn (string, max 500 chars).
+      "project": "DocGO Platform Development", // Dự án liên quan (string).
+      "department": "IT Department", // Bộ phận quản lý (string).
+      "priority": "HIGH", // Ưu tiên (Enum: HIGH, MEDIUM, LOW).
+      "confidentiality": "CONFIDENTIAL", // Mức bảo mật (Enum: CONFIDENTIAL, INTERNAL, PUBLIC, RESTRICTED).
+      "workflow": { // Workflow quy trình hợp đồng.
+        "currentStage": "APPROVAL", // Giai đoạn hiện tại (Enum: DRAFT, REVIEW, APPROVAL, SIGNED, EXECUTED, TERMINATED).
+        "stages": [ // Array các giai đoạn (ít nhất 3 items).
+          {
+            "name": "DRAFT", // Tên giai đoạn (Enum: DRAFT, REVIEW, APPROVAL, SIGNED).
+            "status": "COMPLETED", // Trạng thái (Enum: COMPLETED, IN_PROGRESS, PENDING, FAILED).
+            "completedAt": "2024-01-15T09:00:00Z", // Thời gian hoàn thành (ISO; null nếu pending).
+            "assignedTo": "user-001" // ID user được assign (string).
         },
         {
           "name": "REVIEW",
@@ -32,292 +52,517 @@
         {
           "name": "APPROVAL",
           "status": "IN_PROGRESS",
-          "startedAt": "2024-01-21T08:00:00Z",
+            "startedAt": "2024-01-21T08:00:00Z", // Thời gian bắt đầu (ISO; if in_progress).
           "assignedTo": "user-003"
         }
       ]
-    }
-  },
-  
-  "contract": {
-    "effectiveDate": "2024-02-01T00:00:00Z",
-    "expiryDate": "2024-12-31T23:59:59Z",
-    "totalValue": 52000000,
-    "currency": "VND",
-    "summary": "Hợp đồng phát triển và triển khai hệ thống quản lý tài liệu DocGO với các tính năng AI và tự động hóa",
-    "parties": [
-      {
-        "id": "party-001",
-        "name": "Công ty TNHH DocGO",
-        "type": "CLIENT",
-        "role": "Bên A",
-        "contact": {
-          "email": "contact@docgo.vn",
-          "phone": "+84-28-1234-5678",
-          "address": "123 Nguyễn Huệ, Q1, TP.HCM"
-        },
-        "representative": {
-          "name": "Nguyễn Văn A",
-          "position": "Giám đốc",
-          "email": "nguyenvana@docgo.vn"
-        }
+      },
+      "parties": [ // Array các bên tham gia (ít nhất 3 items nếu multi-party).
+        {
+          "id": "party-001", // ID duy nhất (reference cho riskToParties; required).
+          "name": "Company A", // Tên bên (required).
+          "type": "CLIENT", // Loại (Enum: CLIENT, VENDOR, PARTNER, GUARANTOR).
+          "role": "Bên A", // Vai trò (string, e.g., Bên A/B).
+          "contact": { // Thông tin liên hệ (required).
+            "email": "contact@companya.com", // Email (required).
+            "phone": "+84-28-1234-5678", // SĐT (optional).
+            "address": "123 Nguyễn Huệ, Q1, TP.HCM" // Địa chỉ (optional).
+          },
+          "representative": { // Đại diện (required).
+            "name": "Nguyễn Văn A", // Tên (required).
+            "position": "Giám đốc", // Chức vụ (optional).
+            "email": "nguyenvana@companya.com" // Email (optional).
+          },
+          "taxCode": "ABC123" // Mã số thuế (optional, string).
       },
       {
         "id": "party-002", 
-        "name": "Công ty TNHH Phát triển Phần mềm ABC",
+          "name": "Company B",
         "type": "VENDOR",
         "role": "Bên B",
         "contact": {
-          "email": "info@abc-software.com",
+            "email": "info@companyb.com",
           "phone": "+84-28-8765-4321",
           "address": "456 Lê Lợi, Q1, TP.HCM"
         },
         "representative": {
           "name": "Trần Thị B",
           "position": "Giám đốc Kỹ thuật",
-          "email": "tranthib@abc-software.com"
-        }
-      }
-    ],
-    "payment": {
-      "schedule": [
+            "email": "tranthib@companyb.com"
+          },
+          "taxCode": "DEF456"
+        },
         {
-          "milestone": "Ký hợp đồng",
-          "percentage": 30,
-          "amount": 15600000,
-          "dueDate": "2024-02-01T00:00:00Z",
-          "status": "PENDING"
+          "id": "party-003",
+          "name": "Company C",
+          "type": "PARTNER",
+          "role": "Bên C (Đối tác)",
+          "contact": {
+            "email": "partner@companyc.com",
+            "phone": "+84-28-9999-8888",
+            "address": "789 Hai Bà Trưng, Q3, TP.HCM"
+          },
+          "representative": {
+            "name": "Lê Văn C",
+            "position": "Quản lý Dự án",
+            "email": "levanc@companyc.com"
+          },
+          "taxCode": "GHI789"
+        }
+      ],
+      "payment": { // Chi tiết thanh toán (inherit totalValue/currency từ root contract).
+        "schedule": [ // Lịch thanh toán (ít nhất 3 items nếu multi-milestone).
+          {
+            "milestone": "Ký hợp đồng", // Tên mốc (string, required).
+            "percentage": 50, // Phần trăm (%) (number, 0-100).
+            "amount": 50000, // Số tiền (calculated from totalValue; number).
+            "dueDate": "2025-11-01T00:00:00Z", // Hạn chót (ISO date, required).
+            "status": "PENDING" // Trạng thái (Enum: PENDING, PAID, OVERDUE, CANCELLED).
         },
         {
           "milestone": "Hoàn thành giai đoạn 1",
-          "percentage": 40,
-          "amount": 20800000,
-          "dueDate": "2024-06-30T23:59:59Z",
+            "percentage": 30,
+            "amount": 30000,
+            "dueDate": "2025-12-01T00:00:00Z",
           "status": "PENDING"
         },
         {
-          "milestone": "Hoàn thành toàn bộ dự án",
-          "percentage": 30,
-          "amount": 15600000,
-          "dueDate": "2024-12-31T23:59:59Z",
+            "milestone": "Hoàn thành toàn bộ",
+            "percentage": 20,
+            "amount": 20000,
+            "dueDate": "2025-12-31T00:00:00Z",
           "status": "PENDING"
         }
       ],
-      "method": "BANK_TRANSFER",
-      "currency": "VND"
-    },
-    "clauses": {
-      "intellectualProperty": "Tất cả quyền sở hữu trí tuệ thuộc về bên A",
-      "confidentiality": "Bên B cam kết bảo mật thông tin dự án",
-      "warranty": "Bảo hành 12 tháng sau khi nghiệm thu",
-      "termination": "Có thể chấm dứt hợp đồng với thông báo trước 30 ngày"
-    },
-    "reminders": [
-      {
-        "id": "reminder-001",
-        "type": "PAYMENT_DUE",
-        "title": "Thanh toán đợt 1",
-        "description": "Nhắc nhở thanh toán 30% giá trị hợp đồng",
-        "dueDate": "2024-02-01T00:00:00Z",
-        "status": "PENDING",
-        "priority": "HIGH"
+        "method": "BANK_TRANSFER", // Phương thức (Enum: BANK_TRANSFER, CREDIT_CARD, WIRE, CHECK).
+        "paymentMethod": "Bank transfer" // Mô tả chi tiết (string, optional).
+      },
+      "clauses": { // Các điều khoản (key: positive; unfavorable: negative).
+        "key": [ // Điều khoản chính (ít nhất 3 items).
+          {
+            "name": "Phạm vi công việc", // Tên điều khoản (required).
+            "description": "Mô tả chi tiết phạm vi phát triển hệ thống quản lý tài liệu DocGO.", // Giải thích mô tả (required).
+            "content": "\"Bên B cam kết phát triển hệ thống DocGO với đầy đủ tính năng AI và bảo mật.\"", // Trích dẫn trực tiếp từ hợp đồng (required).
+            "importance": "high", // Mức quan trọng (Enum: high, medium, low).
+            "risk": "low", // Rủi ro (Enum: low, medium, high).
+            "advice": "Khuyến nghị làm rõ chi tiết kỹ thuật (từ AI Claude)" // Lời khuyên (string, optional).
+          },
+          {
+            "name": "Thanh toán",
+            "description": "Quy định lịch thanh toán 50% trước, 50% sau.",
+            "content": "\"Thanh toán đợt 1: 50% giá trị hợp đồng trong vòng 7 ngày sau ký kết.\"",
+            "importance": "high",
+            "risk": "medium",
+            "advice": "Thêm điều khoản phạt chậm thanh toán"
+          },
+          {
+            "name": "Bảo hành",
+            "description": "Cam kết bảo hành hệ thống sau nghiệm thu.",
+            "content": "\"Bảo hành 12 tháng, Bên B chịu trách nhiệm sửa lỗi miễn phí.\"",
+            "importance": "medium",
+            "risk": "low",
+            "advice": "Mở rộng bảo hành lên 24 tháng cho phần AI"
+          }
+        ],
+        "unfavorable": [ // Điều khoản bất lợi (ít nhất 3 items).
+          {
+            "name": "Thời gian thực hiện", // Tên (required).
+            "description": "Thời hạn hợp đồng ngắn, có thể dẫn đến áp lực tiến độ.", // Giải thích (required).
+            "content": "\"Dự án phải hoàn thành trước ngày 31/12/2025, không gia hạn.\"", // Trích dẫn (required).
+            "risk": "medium", // Rủi ro (Enum: low, medium, high).
+            "advice": "Xem xét gia hạn nếu cần" // Lời khuyên (optional).
+          },
+          {
+            "name": "Phạt vi phạm",
+            "description": "Phạt nặng nếu Bên B chậm trễ.",
+            "content": "\"Phạt 0.5% giá trị hợp đồng mỗi ngày chậm trễ.\"",
+            "risk": "high",
+            "advice": "Đàm phán giảm mức phạt"
+          },
+          {
+            "name": "Chấm dứt hợp đồng",
+            "description": "Điều khoản chấm dứt một chiều từ Bên A.",
+            "content": "\"Bên A có quyền chấm dứt hợp đồng với thông báo 30 ngày mà không bồi thường.\"",
+            "risk": "high",
+            "advice": "Yêu cầu điều khoản đối xứng"
+          }
+        ],
+        "intellectualProperty": "Tất cả quyền sở hữu trí tuệ thuộc về bên A", // Điều khoản IP (string).
+        "confidentiality": "Bên B cam kết bảo mật thông tin dự án", // Bảo mật (string).
+        "warranty": "Bảo hành 12 tháng sau khi nghiệm thu", // Bảo hành (string).
+        "termination": "Có thể chấm dứt hợp đồng với thông báo trước 30 ngày" // Chấm dứt (string).
+      },
+      "reminders": [ // Nhắc nhở (ít nhất 3 items).
+        {
+          "id": "reminder-001", // ID duy nhất (required).
+          "type": "PAYMENT_DUE", // Loại (Enum: PAYMENT_DUE, MILESTONE_REVIEW, EXPIRY_WARNING, CONTRACT_RENEWAL).
+          "title": "Thanh toán đợt 1", // Tiêu đề (required).
+          "description": "Nhắc nhở thanh toán 50% giá trị hợp đồng.", // Giải thích (required).
+          "content": "\"Thanh toán đợt 1 phải thực hiện trước ngày 01/11/2025.\"", // Trích dẫn (required).
+          "dueDate": "2025-11-01T00:00:00Z", // Hạn chót (ISO, required).
+          "status": "PENDING", // Trạng thái (Enum: PENDING, SENT, RESOLVED, OVERDUE).
+          "priority": "HIGH" // Ưu tiên (Enum: HIGH, MEDIUM, LOW).
       },
       {
         "id": "reminder-002",
         "type": "MILESTONE_REVIEW",
         "title": "Đánh giá giai đoạn 1",
-        "description": "Kiểm tra tiến độ và chất lượng giai đoạn 1",
-        "dueDate": "2024-06-15T00:00:00Z",
+          "description": "Kiểm tra tiến độ giai đoạn 1.",
+          "content": "\"Giai đoạn 1 phải được review trước 30/06/2025.\"",
+          "dueDate": "2025-06-30T00:00:00Z",
         "status": "PENDING",
         "priority": "MEDIUM"
-      }
-    ],
-    "risk": {
-      "level": "MEDIUM",
-      "factors": [
+        },
         {
-          "type": "TECHNICAL",
-          "description": "Rủi ro về công nghệ AI mới",
-          "probability": "MEDIUM",
-          "impact": "HIGH",
-          "mitigation": "Đào tạo team và thử nghiệm kỹ thuật"
+          "id": "reminder-003",
+          "type": "EXPIRY_WARNING",
+          "title": "Cảnh báo hết hạn",
+          "description": "Nhắc nhở trước hết hạn để gia hạn.",
+          "content": "\"Hợp đồng kết thúc 31/12/2025, thông báo gia hạn trước 30 ngày.\"",
+          "dueDate": "2025-12-01T00:00:00Z",
+          "status": "PENDING",
+          "priority": "HIGH"
+        }
+      ],
+      "risk": { // Phân tích rủi ro.
+        "riskLevel": "MEDIUM", // Mức rủi ro tổng (Enum: LOW, MEDIUM, HIGH).
+        "factors": [ // Các yếu tố rủi ro (ít nhất 3 items).
+          {
+            "type": "TECHNICAL", // Loại rủi ro (Enum: TECHNICAL, SCHEDULE, FINANCIAL, LEGAL, OPERATIONAL).
+            "description": "Rủi ro về công nghệ AI mới có thể gây lỗi tích hợp.", // Mô tả (required).
+            "content": "\"Hệ thống phải sử dụng AI mới nhất, nhưng chưa test đầy đủ.\"", // Trích dẫn từ hợp đồng (required).
+            "probability": "MEDIUM", // Xác suất (Enum: LOW, MEDIUM, HIGH).
+            "impact": "HIGH", // Tác động (Enum: LOW, MEDIUM, HIGH).
+            "riskToParties": [ // Rủi ro ảnh hưởng đến ai (reference parties.id; array objects).
+              {
+                "id": "party-002", // ID từ parties (null nếu không match).
+                "name": "Company B" // Tên bên (required).
+              }
+            ],
+            "beneficiaries": [ // Ai lợi từ rủi ro (null nếu không ai; reference parties; array objects or empty []).
+              {
+                "id": null, // Không có ID cụ thể.
+                "name": "Không ai" // Hoặc empty array [].
+              }
+            ]
         },
         {
           "type": "SCHEDULE",
-          "description": "Rủi ro về tiến độ dự án",
+            "description": "Rủi ro về tiến độ do thời hạn ngắn.",
+            "content": "\"Dự án phải hoàn thành trong 2 tháng, không gia hạn.\"",
           "probability": "LOW",
           "impact": "MEDIUM", 
-          "mitigation": "Lập kế hoạch chi tiết và theo dõi hàng tuần"
-        }
-      ]
+            "riskToParties": [
+              {
+                "id": "party-001",
+                "name": "Company A"
+              }
+            ],
+            "beneficiaries": [
+              {
+                "id": "party-002",
+                "name": "Company B"
+              }
+            ]
+          },
+          {
+            "type": "FINANCIAL",
+            "description": "Rủi ro thanh toán chậm ảnh hưởng dòng tiền.",
+            "content": "\"Thanh toán đợt 2 chỉ sau nghiệm thu đầy đủ.\"",
+            "probability": "MEDIUM",
+            "impact": "HIGH",
+            "riskToParties": [
+              {
+                "id": "party-002",
+                "name": "Company B"
+              },
+              {
+                "id": "party-001",
+                "name": "Company A"
+              }
+            ],
+            "beneficiaries": []  // Empty array nếu không ai lợi.
+          }
+        ],
+        "mitigationProposals": [ // Đề xuất giảm thiểu (ít nhất 3 items).
+          {
+            "description": "Đào tạo team và thử nghiệm kỹ thuật AI.", // Mô tả phương án (required).
+            "content": "\"Bên B phải cung cấp báo cáo test hàng tuần.\"", // Trích dẫn hỗ trợ (required).
+            "cost": "LOW", // Chi phí (Enum: LOW, MEDIUM, HIGH).
+            "timeline": "2 tuần", // Thời gian thực hiện (string).
+            "assignedTo": "Bên B" // Bên chịu trách nhiệm (string hoặc party reference).
+          },
+          {
+            "description": "Lập kế hoạch chi tiết và theo dõi tiến độ hàng tuần.",
+            "content": "\"Meeting review hàng tuần bắt buộc giữa hai bên.\"",
+            "cost": "MEDIUM",
+            "timeline": "1 tháng",
+            "assignedTo": "Bên A"
+          },
+          {
+            "description": "Thêm escrow cho thanh toán lớn và phạt chậm.",
+            "content": "\"Sử dụng escrow service cho thanh toán lớn.\"",
+            "cost": "HIGH",
+            "timeline": "1 tuần",
+            "assignedTo": "Cả hai bên"
+          }
+        ],
+        "advice": "Tư vấn pháp lý để phân bổ rủi ro rõ ràng; theo dõi hàng tuần (từ AI Claude)" // Lời khuyên tổng quát (string).
+      },
+      "compliance": { // Tuân thủ pháp lý.
+        "regulations": ["Luật An toàn thông tin", "Nghị định 13/2023/NĐ-CP"], // Danh sách quy định (array strings).
+        "certifications": ["ISO 27001", "SOC 2"], // Chứng nhận (array strings, e.g., ISO 27001, GDPR Compliant).
+        "auditSchedule": "2024-06-01T00:00:00Z", // Lịch audit (ISO date).
+        "complianceStatus": "COMPLIANT", // Trạng thái (Enum: COMPLIANT, NON_COMPLIANT, PENDING_REVIEW, IN_AUDIT).
+        "status": "compliant", // Duplicate semantic - kept for legacy; prefer complianceStatus (Enum: compliant, non_compliant).
+        "issues": [], // Vấn đề (array strings).
+        "recommendations": ["Kiểm tra pháp lý hợp đồng"] // Khuyến nghị (array strings).
+      }
     },
-    "compliance": {
-      "regulations": ["Luật An toàn thông tin", "Nghị định 13/2023/NĐ-CP"],
-      "certifications": ["ISO 27001", "SOC 2"],
-      "auditSchedule": "2024-06-01T00:00:00Z",
-      "complianceStatus": "COMPLIANT"
-    }
-  },
-  
-  "content": {
-    "extractedText": "Hợp đồng dịch vụ phát triển phần mềm...",
-    "summary": "Hợp đồng phát triển hệ thống DocGO với giá trị 52 triệu VND",
-    "keyTerms": [
+    "content": { // Nội dung extracted/processed.
+      "extractedText": "Hợp đồng dịch vụ phát triển phần mềm...", // Text đầy đủ extracted (từ OCR nếu PDF; required).
+      "summary": "Hợp đồng phát triển hệ thống DocGO với giá trị 52 triệu VND", // Tóm tắt AI-generated (string, max 200 chars).
+      "keyTerms": [ // Keywords chính (ít nhất 4 items).
       "phát triển phần mềm",
       "hệ thống quản lý tài liệu", 
       "tính năng AI",
       "tự động hóa"
     ],
-    "sections": [
-      {
-        "title": "Điều 1: Đối tượng hợp đồng",
-        "content": "Bên A thuê bên B phát triển hệ thống quản lý tài liệu DocGO...",
-        "pageNumber": 1
+      "sections": [ // Các phần/section (ít nhất 3 items).
+        {
+          "title": "Điều 1: Đối tượng hợp đồng", // Tiêu đề section (required).
+          "description": "Mô tả đối tượng và phạm vi chính của hợp đồng.", // Giải thích (required).
+          "content": "Bên A thuê bên B phát triển hệ thống quản lý tài liệu DocGO với đầy đủ tính năng AI và bảo mật.", // Trích dẫn nội dung section (required).
+          "pageNumber": 1 // Số trang (nếu PDF; int/null cho non-PDF).
       },
       {
         "title": "Điều 2: Thời gian thực hiện",
-        "content": "Dự án được thực hiện trong 11 tháng từ 01/02/2024...",
+          "description": "Quy định thời gian bắt đầu, kết thúc và các mốc quan trọng.",
+          "content": "Dự án được thực hiện trong 2 tháng từ 01/11/2025 đến 31/12/2025, với review hàng tháng.",
         "pageNumber": 2
-      }
-    ]
-  },
-  
-  "file": {
-    "id": "file-001",
-    "name": "hop-dong-phat-trien-docgo-v1.0.pdf",
-    "type": "application/pdf",
-    "size": 1032000,
-    "hash": {
-      "md5": "a1b2c3d4e5f6789012345678901234567",
-      "sha256": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        },
+        {
+          "title": "Điều 3: Thanh toán và bảo hành",
+          "description": "Chi tiết lịch thanh toán và điều khoản bảo hành sau nghiệm thu.",
+          "content": "Thanh toán 50% trước, 50% sau; bảo hành 12 tháng với hỗ trợ miễn phí.",
+          "pageNumber": 3
+        }
+      ],
+      "plaintext": "This is a test contract file for upload testing...\n\nContract Title: Test Contract 2025...", // Nội dung plain text (cho non-PDF; string).
+      "ocr": { // OCR results (nếu file là image/PDF; else null).
+        "text": "This is a test contract file for upload testing...\nSigned,\nCompany A\nCompany B", // Text từ OCR (string).
+        "status": "COMPLETED" // Trạng thái OCR (Enum: COMPLETED, FAILED, PROCESSING).
+      },
+      "classification": { // Phân loại AI (luôn có nếu processed).
+        "isContract": true, // Flag là hợp đồng (bool).
+        "confidence": 0.85, // Độ tin cậy (number 0-1).
+        "category": "Hợp đồng", // Danh mục (Enum: Hợp đồng, Tài liệu, Hóa đơn, etc.).
+        "language": "vi" // Ngôn ngữ detected (Enum: vi, en, etc.).
+      },
+      "processing": { // Trạng thái xử lý (nếu ongoing; else null).
+        "status": "COMPLETED", // (Enum: COMPLETED, PROCESSING, FAILED).
+        "error": null // Lỗi nếu có (string/null).
+      },
+      "jsonContent": null, // Nội dung JSON nếu file là JSON (object/null cho PDF).
+      "jsonAnalysisStatus": null // Trạng thái phân tích JSON (Enum: PARSED, INVALID, PENDING; null cho non-JSON).
     },
-    "permissions": {
-      "read": ["user-001", "user-002", "user-003"],
-      "write": ["user-001"],
-      "delete": ["user-001"],
-      "share": ["user-001", "user-002"]
+    "file": { // Thông tin file cơ bản (luôn có).
+      "id": "FILE-2025-001-TEST", // ID file (string, required).
+      "name": "test-upload-file.txt", // Tên file (string, required).
+      "type": "text/plain", // MIME type (string, e.g., application/pdf cho PDF; required).
+      "size": 312, // Kích thước (bytes; number, required).
+      "hash": { // Hashes cho integrity (luôn có).
+        "md5": "a1b2c3d4e5f6789012345678901234567", // MD5 hash (string, required).
+        "sha256": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" // SHA256 hash (string, required).
+      },
+      "permissions": { // Quyền truy cập (luôn có).
+        "read": ["user-001", "user-002"], // Array user IDs có quyền đọc (array strings).
+        "write": ["user-001"], // Array có quyền viết (array strings).
+        "delete": ["user-001"], // Array có quyền xóa (array strings).
+        "share": ["user-001"] // Array có quyền share (array strings).
+      },
+      "security": { // Bảo mật file (luôn có).
+        "encryption": "AES-256", // Phương thức mã hóa (Enum: AES-256, AES-128, NONE).
+        "watermark": true, // Có watermark (bool).
+        "digitalSignature": true, // Có chữ ký số (bool).
+        "accessLogging": true // Log truy cập (bool).
+      },
+      "version": 1 // Phiên bản file hiện tại (int, required).
     },
-    "security": {
-      "encryption": "AES-256",
-      "watermark": true,
-      "digitalSignature": true,
-      "accessLogging": true
-    }
-  },
-  
-  "storage": {
-    "location": "s3://docgo-contracts/2024/01/",
-    "backupLocations": [
+    "storage": { // Lưu trữ (luôn có).
+      "location": "s3://docgo-contracts/2024/01/", // Vị trí chính (S3 path; string).
+      "backupLocations": [ // Backup locations (ít nhất 2 items).
       "s3://docgo-backup/contracts/2024/01/",
       "gs://docgo-archive/contracts/2024/01/"
     ],
-    "retentionPolicy": {
-      "duration": "7 years",
-      "autoDelete": false,
-      "archiveAfter": "2 years"
+      "retentionPolicy": { // Chính sách lưu trữ (luôn có).
+        "duration": "7 years", // Thời gian lưu (string, e.g., "7 years", "indefinite").
+        "autoDelete": false, // Tự xóa (bool).
+        "archiveAfter": "2 years" // Archive sau (string, e.g., "2 years").
+      },
+      "accessControl": { // Kiểm soát truy cập (luôn có).
+        "public": false, // Public access (bool).
+        "restrictedUsers": ["user-001", "user-002"], // User bị hạn chế (array strings).
+        "ipWhitelist": ["192.168.1.0/24"] // IP cho phép (array CIDR strings).
+      },
+      "s3": { // Chi tiết S3 (nếu storage là S3; else null).
+        "url": "https://docgo-storage.s3.amazonaws.com/documents/FILE-2025-001-TEST.txt", // URL presigned (string).
+        "bucket": "docgo-storage", // Tên bucket (string).
+        "objectKey": "documents/FILE-2025-001-TEST.txt", // Key object (string).
+        "region": "us-east-1", // Region (Enum: us-east-1, us-west-2, eu-west-1).
+        "contentType": "text/plain", // MIME type (string).
+        "size": 312, // Size (bytes).
+        "versionId": "s3-version-xyz789", // S3 version ID (string/null).
+        "checksum": { // Checksums (luôn có nếu S3).
+          "originalMD5": "md5-hash-abc123", // Original MD5 (string).
+          "archiveMD5": "md5-hash-def456" // Archive MD5 (string/null nếu chưa archive).
+        }
+      },
+      "local": { // Local storage (nếu local; else null).
+        "path": null, // Đường dẫn local (string/null).
+        "filename": "test-upload-file.txt", // Tên file local (string).
+        "mimeType": "text/plain", // MIME (string).
+        "size": 312, // Size (bytes).
+        "mtime": null, // Modified time (ISO/null).
+        "revision": null // Revision number (string/null).
+      }
     },
-    "accessControl": {
-      "public": false,
-      "restrictedUsers": ["user-001", "user-002"],
-      "ipWhitelist": ["192.168.1.0/24", "10.0.0.0/8"]
-    }
+    "versioning": { // Versioning document (luôn có).
+      "currentVersionInfo": { // Info version hiện tại (merged tag + number).
+        "tag": "1.0", // Version tag (string, semantic versioning, e.g., "1.0.0", "v2.1").
+        "number": 1 // Version number (int, incremental, e.g., 1, 2).
+      },
+      "versions": [ // Lịch sử versions (ít nhất 1 item).
+        {
+          "version": "1.0", // Version string (required).
+          "createdAt": "2024-01-15T09:00:00Z", // Thời gian tạo (ISO, required).
+          "createdBy": "user-001", // ID user tạo (string, required).
+          "changes": "Phiên bản đầu tiên", // Tóm tắt thay đổi (string).
+          "fileId": "file-001" // ID file version (string).
+        }
+      ],
+      "changeLog": [ // Log thay đổi (ít nhất 1 item).
+        {
+          "version": "1.0", // Version (string).
+          "date": "2024-01-15T09:00:00Z", // Ngày (ISO).
+          "author": "user-001", // Tác giả (string).
+          "changes": "Tạo hợp đồng ban đầu" // Thay đổi (string).
+        }
+      ],
+      "previousVersion": null, // Version trước (string/null).
+      "changeSummary": null, // Tóm tắt thay đổi tổng (string/null).
+      "changedFields": [], // Fields thay đổi (array strings, e.g., ["title", "totalValue"]).
+      "diff": {}, // Diff chi tiết (object, e.g., { "title": { old: "...", new: "..." } }).
+      "history": [ // Lịch sử đầy đủ (ít nhất 1 item).
+        {
+          "version": 1, // Số version (int).
+          "versionTag": "1.0.0", // Tag (string).
+          "changedAt": "2025-10-19T08:45:00Z", // Thời gian (ISO).
+          "changedBy": "system", // Bằng ai (string).
+          "changeType": "CREATE", // Loại (Enum: CREATE, UPDATE, DELETE, ARCHIVE).
+          "storage": { // Storage info cho version.
+            "s3": { "versionId": null }, // S3 version (object/null).
+            "local": { "revision": null } // Local revision (object/null).
+          }
+        }
+      ]
+    },
+    "metadata": { // Metadata chi tiết (file + PDF if applicable; luôn có).
+      "fileSystem": { // Basic file info (luôn có cho mọi file type).
+        "dateModified": "2025-10-19T08:45:00Z", // Ngày sửa đổi (ISO, luôn có).
+        "dateAdded": "2025-10-19T08:45:00Z", // Ngày thêm (ISO, luôn có).
+        "mediaFilename": "test-upload-file.txt", // Tên trong hệ thống (string, luôn có).
+        "originalFilename": "test-upload-file.txt", // Tên gốc (string, luôn có).
+        "originalMD5": "md5-hash-abc123", // MD5 gốc (string, luôn có).
+        "originalFileSize": 312, // Size gốc (bytes, int, luôn có).
+        "originalMimeType": "text/plain", // MIME type (string, luôn có, quyết định conditions dưới).
+        "archiveMD5": "md5-hash-def456", // MD5 archived (string; null nếu chưa archive).
+        "archiveFileSize": 312 // Size archived (int; null nếu chưa archive).
+      },
+      "originalDocument": { // Metadata gốc (luôn có basic; PDF-specific nếu mimeType == 'application/pdf').
+        // Condition: If originalMimeType == 'application/pdf' then populate PDF/XMP fields; else set to null/empty. For non-PDF (JSON/TXT), basic dc* fields only; xmp/pdf* = null.
+        "dcFormat": "application/pdf", // Định dạng (Enum: application/pdf, text/plain, application/json; null cho unknown).
+        "dcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO", // Tiêu đề (string; null cho non-PDF).
+        "dcCreator": "Microsoft Word 2019", // Người tạo (string; null cho non-PDF).
+        "dcDescription": "Hợp đồng phát triển hệ thống quản lý tài liệu", // Mô tả (string; null cho non-PDF).
+        "dcSubject": "Hợp đồng, Phát triển phần mềm, DocGO", // Chủ đề (string; null cho non-PDF).
+        "xmpCreateDate": "2024-01-15T08:30:00Z", // Ngày tạo XMP (ISO; null cho non-PDF).
+        "xmpCreatorTool": "Microsoft Word 2019", // Công cụ XMP (string; null cho non-PDF).
+        "xmpModifyDate": "2024-01-15T09:00:00Z", // Ngày sửa XMP (ISO; null cho non-PDF).
+        "xmpMetadataDate": "2024-01-15T09:00:00Z", // Ngày metadata XMP (ISO; null cho non-PDF).
+        "pdfKeywords": "hợp đồng, phát triển, phần mềm, DocGO", // Keywords PDF (string; null cho non-PDF).
+        "pdfProducer": "Microsoft Word 2019", // Producer PDF (string; null cho non-PDF, e.g., pikepdf 9.5.2).
+        "xmpDocumentID": "doc-2024-004-new", // ID XMP document (string; null cho non-PDF).
+        "xmpInstanceID": "doc-2024-004-new-v1.0", // Instance ID XMP (string; null cho non-PDF).
+        "pdfaid:part": 3, // Phiên bản PDF/A part (int; null cho non-PDF; Enum: 1, 2, 3).
+        "pdfaid:conformance": "B", // Conformance PDF/A (string; null cho non-PDF; Enum: A, B, U).
+        "dc:creator": "Nguyễn Văn A" // Creator DC (string; null cho non-PDF).
+      },
+      "archivedDocument": { // Metadata archived (nếu file archived && PDF; else empty/null).
+        // Condition: If originalMimeType == 'application/pdf' && archiveMD5 exists then populate; else {} or null. For JSON import, this is empty (no archived PDF metadata).
+        "archivedPdfProducer": "DocGO Archive System v1.0", // Producer archived PDF (string; null/non-PDF; e.g., pikepdf 9.5.2).
+        "archivedMetadataDate": "2024-01-15T09:00:00Z", // Metadata date archived (ISO; null/non-PDF).
+        "archivedModifyDate": "2024-01-15T09:00:00Z", // Modify date archived (ISO; null/non-PDF).
+        "archivedCreateDate": "2024-01-15T08:30:00Z", // Create date archived (ISO; null/non-PDF).
+        "archivedCreatorTool": "Microsoft Word 2019", // Creator tool archived (string; null/non-PDF, e.g., OCRmyPDF 16.10.4 / Tesseract OCR).
+        "archivedDocumentID": "doc-2024-004-new-archived", // ID archived (string; null/non-PDF).
+        "archivedDcFormat": "application/pdf", // Format archived (Enum: application/pdf, etc.; null/non-PDF).
+        "archivedDcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO (Archived)", // Title archived (string; null/non-PDF).
+        "archivedDcCreator": "Microsoft Word 2019", // Creator archived (string; null/non-PDF).
+        "archivedXmpMetadataDate": "2024-01-15T09:00:00Z", // XMP metadata archived (ISO; null/non-PDF).
+        "archivedXmpModifyDate": "2024-01-15T09:00:00Z", // XMP modify archived (ISO; null/non-PDF).
+        "archivedXmpCreateDate": "2024-01-15T08:30:00Z", // XMP create archived (ISO; null/non-PDF).
+        "archivedXmpCreatorTool": "OCRmyPDF 16.10.4 / Tesseract OCR", // XMP creator archived (string; null/non-PDF).
+        "archivedXmpMMDocumentID": "archived-doc-id-123", // XMP MM ID archived (string; null/non-PDF).
+        "archivedDcFormat": "application/pdf", // DC format archived (Enum; null/non-PDF).
+        "archivedPdfaidPart": 3, // PDF/A part archived (int; null/non-PDF; Enum: 1, 2, 3).
+        "archivedPdfaidConformance": "A", // Conformance archived (string; null/non-PDF; Enum: A, B, U).
+        "archivedDcCreator": "Archive System" // DC creator archived (string; null/non-PDF).
+      },
+      "technical": { // Tech specs (luôn có, nhưng pages/wordCount null cho non-PDF).
+        "encoding": "UTF-8", // Encoding (Enum: UTF-8, UTF-16, ASCII; luôn có).
+        "lineEnding": "LF", // Line ending (Enum: LF, CRLF; luôn có).
+        "bom": false, // BOM presence (bool; luôn có).
+        "compression": "NONE", // Compression (Enum: NONE, GZIP, DEFLATE; luôn có).
+        "pages": 15, // Số trang (int; null cho non-PDF như JSON).
+        "wordCount": 2500, // Số từ (int; null cho non-text/binary).
+        "characterCount": 15000 // Số ký tự (int; null cho binary).
+      }
+    },
+    "audit": { // Audit trail (luôn có).
+      "createdAt": "2025-10-19T08:45:00Z", // Tạo lúc (ISO, required).
+      "createdBy": "system", // Tạo bởi (user ID, string, required).
+      "lastModifiedAt": "2025-10-19T08:45:00Z", // Sửa cuối (ISO, required).
+      "lastModifiedBy": "system", // Sửa bởi (user ID, string, required).
+      "version": 1, // Phiên bản audit (int, incremental).
+      "changeHistory": [ // Lịch sử thay đổi (ít nhất 1 item).
+        {
+          "action": "CREATE", // Hành động (Enum: CREATE, UPDATE, DELETE, VIEW, SHARE).
+          "timestamp": "2025-10-19T08:45:00Z", // Thời gian (ISO, required).
+          "userId": "system", // User ID (string, required).
+          "details": "Tạo file mới", // Chi tiết (string).
+          "ipAddress": "192.168.1.100", // IP (string, optional).
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" // User agent (string, optional).
+        }
+      ],
+      "accessLog": [ // Log truy cập (ít nhất 1 item).
+        {
+          "action": "VIEW", // Hành động (Enum: VIEW, EDIT, DOWNLOAD, SHARE, DELETE).
+          "timestamp": "2025-10-19T08:45:00Z", // Thời gian (ISO, required).
+          "userId": "system", // User ID (string, required).
+          "ipAddress": "192.168.1.100", // IP (string, optional).
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" // User agent (string, optional).
+        }
+      ],
+      "updatedAt": "2025-10-19T08:45:00Z", // Update lúc (ISO; duplicate semantic với lastModifiedAt; kept for legacy).
+      "updatedBy": "system", // Update bởi (string; duplicate với lastModifiedBy).
+      "deletedAt": null, // Xóa lúc (ISO/null).
+      "deletedBy": null, // Xóa bởi (user ID/null).
+      "isDeleted": false // Flag deleted (soft delete; bool).
+    },
+    "processing": null // Trạng thái xử lý tổng (null nếu completed; object nếu ongoing, e.g., { "status": "PROCESSING", "progress": 50 }).
   },
-  
-  "versioning": {
-    "currentVersion": "1.0",
-    "versions": [
-      {
-        "version": "1.0",
-        "createdAt": "2024-01-15T09:00:00Z",
-        "createdBy": "user-001",
-        "changes": "Phiên bản đầu tiên",
-        "fileId": "file-001"
-      }
-    ],
-    "changeLog": [
-      {
-        "version": "1.0",
-        "date": "2024-01-15T09:00:00Z",
-        "author": "user-001",
-        "changes": "Tạo hợp đồng ban đầu"
-      }
-    ]
-  },
-  
-  "metadata": {
-    "fileSystem": {
-      "dateModified": "2024-01-15T09:00:00Z",
-      "dateAdded": "2024-01-15T09:00:00Z",
-      "mediaFilename": "hop-dong-phat-trien-docgo-v1.0.pdf",
-      "originalFilename": "hop-dong-phat-trien-docgo-v1.0.pdf",
-      "originalMD5": "a1b2c3d4e5f6789012345678901234567",
-      "originalFileSize": 2048000,
-      "originalMimeType": "application/pdf",
-      "archiveMD5": "b2c3d4e5f6789012345678901234567a1",
-      "archiveFileSize": 1032000
-    },
-    "originalDocument": {
-      "dcFormat": "application/pdf",
-      "dcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO",
-      "dcCreator": "Microsoft Word 2019",
-      "dcDescription": "Hợp đồng phát triển hệ thống quản lý tài liệu",
-      "dcSubject": "Hợp đồng, Phát triển phần mềm, DocGO",
-      "xmpCreateDate": "2024-01-15T08:30:00Z",
-      "xmpCreatorTool": "Microsoft Word 2019",
-      "xmpModifyDate": "2024-01-15T09:00:00Z",
-      "xmpMetadataDate": "2024-01-15T09:00:00Z",
-      "pdfKeywords": "hợp đồng, phát triển, phần mềm, DocGO",
-      "pdfProducer": "Microsoft Word 2019",
-      "xmpDocumentID": "doc-2024-004-new",
-      "xmpInstanceID": "doc-2024-004-new-v1.0",
-      "pdfaExtensionSchemas": []
-    },
-    "archivedDocument": {
-      "archivedPdfProducer": "DocGO Archive System v1.0",
-      "archivedMetadataDate": "2024-01-15T09:00:00Z",
-      "archivedModifyDate": "2024-01-15T09:00:00Z",
-      "archivedCreateDate": "2024-01-15T08:30:00Z",
-      "archivedCreatorTool": "Microsoft Word 2019",
-      "archivedDocumentID": "doc-2024-004-new-archived",
-      "archivedDcFormat": "application/pdf",
-      "archivedDcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO (Archived)",
-      "archivedDcCreator": "Microsoft Word 2019"
-    },
-    "technical": {
-      "encoding": "UTF-8",
-      "lineEnding": "LF",
-      "bom": false,
-      "compression": "NONE",
-      "pages": 15,
-      "wordCount": 2500,
-      "characterCount": 15000
-    }
-  },
-  
-  "audit": {
-    "createdAt": "2024-01-15T09:00:00Z",
-    "createdBy": "user-001",
-    "lastModifiedAt": "2024-01-15T09:00:00Z",
-    "lastModifiedBy": "user-001",
-    "version": 1,
-    "changeHistory": [
-      {
-        "action": "CREATE",
-        "timestamp": "2024-01-15T09:00:00Z",
-        "userId": "user-001",
-        "details": "Tạo hợp đồng mới",
-        "ipAddress": "192.168.1.100",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      }
-    ],
-    "accessLog": [
-      {
-        "action": "VIEW",
-        "timestamp": "2024-01-15T09:00:00Z",
-        "userId": "user-001",
-        "ipAddress": "192.168.1.100",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      }
-    ]
-  }
+  "timestamp": "2025-10-19T08:45:10Z", // Thời gian response (ISO, required).
+  "requestId": "req-xyz789-123abc", // ID request (UUID, required).
+  "path": "/api/v1/file-management-service/file-details/FILE-2025-001-TEST" // Path API (string, required).
 }

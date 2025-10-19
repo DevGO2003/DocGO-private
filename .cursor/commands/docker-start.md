@@ -1,13 +1,14 @@
 # Docker Local
 
-Khởi động toàn Docker Compose cho kiến trúc 4 microservices.
+Khởi động toàn Docker Compose cho kiến trúc 5 services.
 
 ## Lệnh chính
 ```bash
 docker compose -f docker-compose.yml up -d --no-recreate --no-build
 ```
 
-## Services được khởi động
+## Services được khởi động (5 services)
+- `frontend` (Next.js) - Port 3000
 - `api-gateway` (Next.js) - Port 8000
 - `user-management-service` (Spring Boot) - Port 8001  
 - `file-management-service` (Spring Boot) - Port 8002
@@ -16,7 +17,7 @@ docker compose -f docker-compose.yml up -d --no-recreate --no-build
 ## Ghi chú
 - Yêu cầu Docker Desktop đang chạy.
 - Dùng /docker-logs để xem log, /docker-status để xem trạng thái, và /docker-down để tắt.
-- Kiến trúc mới: 4 microservices thay vì 6 services cũ.
+- Kiến trúc mới: 5 services (1 frontend + 4 microservices).
 
 
 

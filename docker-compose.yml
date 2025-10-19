@@ -74,6 +74,7 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
+
   # ==========================================
   # MICROSERVICES
   # ==========================================
@@ -99,21 +100,22 @@ services:
     networks:
       - docgo-network
     volumes:
+      - ./backend/user-management-service:/app  # Volume mount cho hot reload
       - ./logs/user-management:/app/logs
     restart: unless-stopped
 
-  # File Management Service (Spring Boot)
-  file-management-service:
-    container_name: file-management-service
+  # Repository Management Service (Spring Boot) - formerly file-management-service
+  repository-management-service:
+    container_name: repository-management-service
     build:
-      context: ./backend/file-management-service
+      context: ./backend/repository-management-service
       dockerfile: Dockerfile
 
     ports:
-      - "${DOCUMENT_MANAGEMENT_PORT:-8002}:8002"
+      - "${REPOSITORY_MANAGEMENT_PORT:-8002}:8002"
     env_file:
       - .env
-      - ./backend/file-management-service/.env
+      - ./backend/repository-management-service/.env
     environment:
       - ENVIRONMENT=docker
     depends_on:
@@ -122,8 +124,8 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/file-management-service/uploads:/app/uploads
-      - ./logs/file-management:/app/logs
+      - ./backend/repository-management-service/uploads:/app/uploads
+      - ./logs/repository-management:/app/logs
     restart: unless-stopped
 
   # Automation Service (FastAPI)
@@ -172,11 +174,14 @@ services:
       - kafka
       - redis
       # - user-management-service  # TEMPORARILY DISABLED
-      - file-management-service
+      - repository-management-service
       - automation-service
     networks:
       - docgo-network
     volumes:
+      - ./backend/api-gateway:/app  # Volume mount cho hot reload
+      - /app/node_modules  # Exclude node_modules từ mount
+      - /app/.next  # Exclude .next build folder
       - ./logs/api-gateway:/app/logs
     restart: unless-stopped
 
@@ -203,6 +208,9 @@ services:
     networks:
       - docgo-network
     volumes:
+      - ./frontend/web-app:/app  # Volume mount cho hot reload
+      - /app/node_modules  # Exclude node_modules từ mount
+      - /app/.next  # Exclude .next build folder
       - ./logs/web-app:/app/logs
     restart: unless-stopped
 

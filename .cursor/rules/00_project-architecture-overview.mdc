@@ -20,7 +20,7 @@ references: []
 commands: []
 owners: ["devgo2003"]
 createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-28T00:00:00Z"
+updatedAt: "2025-10-18T00:00:00Z"
 notes: "Luôn nạp để định hướng tổng thể cho agent"
 language: vi
 ---
@@ -62,6 +62,12 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - Docker Compose Development
 - Port và Networking
 
+### 6. MCP Usage Standards (`mcp-usage-standards.mdc`)
+- Quy tắc sử dụng MCP tools
+- Database operations với MCP
+- GitHub, Browser, Discord operations
+- Error handling và performance optimization
+
 ## 🎯 Mục tiêu chung
 - Chuẩn hóa URL, payload, error handling giữa các service
 - Chuẩn hóa response envelope và event payload
@@ -78,7 +84,7 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 | **Frontend** | Next.js | N/A | `web-app` | N/A (Node.js) | 3000 | N/A |
 | **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` |
 | **User Management** | Spring Boot | `com.devgo2003.docgo` | `user-service` | `com.devgo2003.docgo.user_service` | 8001 | `/docs` |
-| **File Management** | Spring Boot | `com.devgo2003.docgo` | `document-service` | `com.devgo2003.docgo.file_service` | 8002 | `/docs` |
+| **Repository Management** | Spring Boot | `com.devgo2003.docgo` | `repository-service` | `com.devgo2003.docgo.repository_service` | 8002 | `/docs` |
 | **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` |
 
 ### Quy tắc đặt tên

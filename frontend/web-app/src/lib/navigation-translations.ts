@@ -2,7 +2,7 @@
 export const navigationTranslations = {
   // Category titles
   'category.opened': 'Đang mở',
-  'category.documents': 'Tài liệu',
+  'category.repositories': 'Kho tài liệu',
   'category.management': 'Quản lý',
   'category.administration': 'Quản trị',
 
@@ -11,7 +11,7 @@ export const navigationTranslations = {
   'navigation.createDocument': 'Tạo mới',
   'navigation.uploadDocument': 'Upload',
   'navigation.analytics': 'Phân tích',
-  'navigation.documents': 'Tài liệu',
+  'navigation.repositories': 'Kho tài liệu',
   'navigation.contracts': 'Hợp đồng',
   'navigation.importDocument': 'Import',
   'navigation.eSignature': 'Ký số',

@@ -21,12 +21,24 @@ Lập Curosr TODO, lưu ý Phần nào trước thì phải thực thiện xong 
         ```json
         [
             {
-            "BackupName": "backend_authentication-identity-service_env_.env",
-            "OriginalPath": "backend/authentication-identity-service/env/.env"
+            "BackupName": "backend_user-management-service_.env",
+            "OriginalPath": "backend/user-management-service/.env"
             },
             {
-            "BackupName": "frontend_env_.env.local",
-            "OriginalPath": "frontend/env/.env.local"
+            "BackupName": "backend_file-management-service_.env",
+            "OriginalPath": "backend/file-management-service/.env"
+            },
+            {
+            "BackupName": "backend_automation-service_.env",
+            "OriginalPath": "backend/automation-service/.env"
+            },
+            {
+            "BackupName": "backend_api-gateway_.env",
+            "OriginalPath": "backend/api-gateway/.env"
+            },
+            {
+            "BackupName": "frontend_web-app_.env.local",
+            "OriginalPath": "frontend/web-app/.env.local"
             },
             {
             "BackupName": "cursor_mcp.json",
@@ -34,6 +46,9 @@ Lập Curosr TODO, lưu ý Phần nào trước thì phải thực thiện xong 
             }
         ]
         ```
-        - File gốc `backend/authentication-identity-service/env/.env` → được lưu thành `backend_authentication-identity-service_env_.env` trong backup.
-        - File gốc `frontend/env/.env.local` → được lưu thành `frontend_env_.env.local` trong backup.
+        - File gốc `backend/user-management-service/.env` → được lưu thành `backend_user-management-service_.env` trong backup.
+        - File gốc `backend/file-management-service/.env` → được lưu thành `backend_file-management-service_.env` trong backup.
+        - File gốc `backend/automation-service/.env` → được lưu thành `backend_automation-service_.env` trong backup.
+        - File gốc `backend/api-gateway/.env` → được lưu thành `backend_api-gateway_.env` trong backup.
+        - File gốc `frontend/web-app/.env.local` → được lưu thành `frontend_web-app_.env.local` trong backup.
         - File gốc `.cursor/mcp.json` → được lưu thành `cursor_mcp.json` trong backup.
