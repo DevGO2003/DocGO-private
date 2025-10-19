@@ -73,6 +73,10 @@ export class Config {
   // SERVICE URLS (Smart URL building)
   // ==========================================
   static getApiGatewayUrl(): string {
+    if (this.isDocker()) {
+      // Khi chạy trong Docker, dùng hostname service để tránh tự gọi localhost/::1 từ container
+      return process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
+    }
     return process.env.API_GATEWAY_URL || 'http://localhost:8000';
   }
 

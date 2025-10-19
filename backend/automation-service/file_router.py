@@ -1189,17 +1189,6 @@ async def websocket_endpoint(websocket: WebSocket, document_id: str):
             pass
 
 
-
-        })
-        
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-
-# Alias removed as requested; single POST at files root is the canonical endpoint
-
-
-
-
 @router.get("/events/{job_id}/status", summary="Trạng thái xử lý JSON", tags=["📁 APIs Quản lý File"])
 async def get_event_status(job_id: str):
     await progress_service.initialize()
@@ -1225,36 +1214,3 @@ async def get_event_status(job_id: str):
         requestId=str(uuid.uuid4()),
         path=f"/api/v1/automation-service/files/events/{job_id}/status"
     )
-
-
-@router.websocket("/ws/document/{document_id}")
-async def websocket_endpoint(websocket: WebSocket, document_id: str):
-    """WebSocket endpoint for real-time document processing progress"""
-    try:
-        await websocket_manager.connect(websocket, document_id)
-        
-        # Send initial connection confirmation
-        await websocket.send_json({
-            "type": "connected",
-            "documentId": document_id,
-            "message": "Connected to document processing updates"
-        })
-        
-        # Keep connection alive and handle messages
-        while True:
-            try:
-                # Wait for client messages (ping/pong)
-                data = await websocket.receive_text()
-                if data == "ping":
-                    await websocket.send_text("pong")
-            except WebSocketDisconnect:
-                break
-                
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-        try:
-            await websocket.close()
-        except:
-            pass
-
-

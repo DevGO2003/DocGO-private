@@ -3,6 +3,7 @@ package com.devgo2003.docgo.repository_service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.kafka.annotation.EnableKafka;
 
 /**
@@ -14,7 +15,8 @@ import org.springframework.kafka.annotation.EnableKafka;
  */
 @SpringBootApplication
 @EnableKafka
-@ComponentScan(basePackages = {"com.devgo2003.docgo.repository_service", "com.devgo2003.docgo.file_service"})
+@ComponentScan(basePackages = {"com.devgo2003.docgo.repository_service"})
+@EnableMongoRepositories(basePackages = {"com.devgo2003.docgo.repository_service.repository"})
 public class RepositoryManagementApplication {
     public static void main(String[] args) {
         SpringApplication.run(RepositoryManagementApplication.class, args);

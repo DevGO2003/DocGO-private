@@ -1,8 +1,8 @@
 package com.devgo2003.docgo.repository_service.controller;
 
-import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
-import com.devgo2003.docgo.file_service.service.FileService;
+import com.devgo2003.docgo.repository_service.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

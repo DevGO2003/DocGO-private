@@ -2,11 +2,11 @@
 
 import React from 'react'
 import { notFound } from 'next/navigation'
-import { Repository, getRepositoryById, isRealRepository } from '../../../_services/repositoryConfig'
-import { useRepositoryData } from '../../../_hooks/useRepositoryData'
-import { RepositoryHeader } from '../../../_components/headers/RepositoryHeader'
-import { RepositoryLayout } from '../../../_components/layout/RepositoryLayout'
-import { FilesTable } from '../../../_components/tables/FilesTable'
+import { Repository, getRepositoryById, isRealRepository } from '../_services/repositoryConfig'
+import { useRepositoryData } from '../_hooks/useRepositoryData'
+import { RepositoryHeader } from '../_components/headers/RepositoryHeader'
+import { RepositoryLayout } from '../_components/layout/RepositoryLayout'
+import { FilesTable } from '../_components/tables/FilesTable'
 
 interface RepositoryPageProps {
   params: {

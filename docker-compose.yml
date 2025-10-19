@@ -101,6 +101,7 @@ services:
       - docgo-network
     volumes:
       - ./backend/user-management-service:/app  # Volume mount cho hot reload
+      - maven-repo:/root/.m2  # Maven cache volume để tăng tốc build
       - ./logs/user-management:/app/logs
     restart: unless-stopped
 
@@ -124,6 +125,8 @@ services:
     networks:
       - docgo-network
     volumes:
+      - ./backend/repository-management-service:/app  # Volume mount cho hot reload
+      - maven-repo:/root/.m2  # Maven cache volume để tăng tốc build
       - ./backend/repository-management-service/uploads:/app/uploads
       - ./logs/repository-management:/app/logs
     restart: unless-stopped

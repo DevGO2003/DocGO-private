@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import logger from '../logger';
+import { Config } from '../config';
 
 export interface HealthStatus {
   service: string;
@@ -27,9 +28,9 @@ class HealthMonitoringService {
 
   private initializeServices(): void {
     // Service URLs - only existing services
-    this.services.set('api-gateway', Config.getApiGatewayUrl());
+    // Không tự check api-gateway để tránh tự gọi localhost/::1 trong container
     this.services.set('user-management-service', Config.getUserManagementServiceUrl());
-    this.services.set('file-management-service', Config.getDocumentManagementServiceUrl());
+    this.services.set('repository-management-service', Config.getRepositoryManagementServiceUrl());
     this.services.set('automation-service', Config.getAutomationServiceUrl());
   }
 

@@ -15,12 +15,19 @@
 **/build/
 **/dist/
 # removed documents folder ignore (no longer used)
-**/logs/
+
+# Logs - chỉ ignore file log lớn, giữ lại file log quan trọng để debug
+**/logs/*.log
+**/logs/debug/
+**/logs/temp/
+**/logs/old/
+**/*.log
+
+# Node modules và build artifacts
 **/node_modules/
 **/target/
 **/temp/
 **/tmp/
-**/*.log
 
 # ===== Ignore các thư mục VCS =====
 
@@ -41,3 +48,37 @@ document/**/*.drawio
 
 # Đảm bảo track cả env trong .cursor/tools
 !/.cursor/tools/**/env/.env
+
+# ===== KHÔNG ignore file quan trọng cho debug =====
+
+# Giữ lại file config và setup
+!**/config.*
+!**/setup.*
+!**/*.config.*
+
+# Giữ lại file test và example
+!**/test*
+!**/*test*
+!**/example*
+!**/*example*
+
+# Giữ lại file documentation quan trọng
+!**/README*
+!**/CHANGELOG*
+!**/TODO*
+!**/NOTES*
+
+# Giữ lại file script và utility
+!**/*.sh
+!**/*.bat
+!**/*.ps1
+!**/scripts/**
+!**/utils/**
+
+# Giữ lại file log quan trọng cho debug (không ignore toàn bộ logs/)
+!**/logs/important/
+!**/logs/audit/
+!**/logs/error/
+!**/logs/app.log
+!**/logs/application.log
+!**/logs/service.log

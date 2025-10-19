@@ -45,6 +45,8 @@ next-env.d.ts
 # OS
 Thumbs.db
 desktop.ini
+System Volume Information/
+**/System Volume Information/**
 
 # Logs
 *.log

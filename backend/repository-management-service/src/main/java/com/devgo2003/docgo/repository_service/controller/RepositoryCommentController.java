@@ -1,6 +1,6 @@
 package com.devgo2003.docgo.repository_service.controller;
 
-import com.devgo2003.docgo.file_service.common.response.RestResponse;
+import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

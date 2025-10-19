@@ -1,4 +1,4 @@
-package com.devgo2003.docgo.file_service.entity;
+package com.devgo2003.docgo.repository_service.entity;
 
 import lombok.Data;
 import lombok.Builder;
@@ -105,3 +105,5 @@ public class FileEntity {
     // Processing status
     private Map<String, Object> processingStatus;
 }
+
+

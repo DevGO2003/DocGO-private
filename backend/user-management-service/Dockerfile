@@ -1,5 +1,5 @@
-# Multi-stage build for Spring Boot application
-FROM eclipse-temurin:17-jdk AS builder
+# Development Dockerfile for Spring Boot application with volume mount support
+FROM eclipse-temurin:17-jdk
 
 # Thiết lập thư mục làm việc
 WORKDIR /app
@@ -11,32 +11,15 @@ RUN apt-get update && apt-get install -y \
 
 # Copy pom.xml first for better layer caching
 COPY pom.xml .
-# Skip dependency download to avoid network issues
-# RUN mvn dependency:go-offline -B
+
+# Install dependencies only (no build yet)
+RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
-# Build ứng dụng
-RUN mvn clean package -DskipTests
-
-# Production stage
-FROM eclipse-temurin:17-jre AS runner
-
-# Thiết lập thư mục làm việc
-WORKDIR /app
-
-# Copy built JAR from builder stage
-COPY --from=builder /app/target/*.jar app.jar
-
-# Set proper permissions
-RUN chmod +r app.jar
-
-# Debug: List files
-RUN ls -la /app/
-
 # Expose port 8001 (internal port)
 EXPOSE 8001
 
-# Command khởi chạy service
-CMD ["java", "-jar", "/app/app.jar"]
+# Command khởi chạy service với Maven spring-boot:run để hỗ trợ hot reload
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments='-Dspring.profiles.active=docker'"]

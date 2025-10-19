@@ -1,7 +1,7 @@
-package com.devgo2003.docgo.file_service.service;
+package com.devgo2003.docgo.repository_service.service;
 
-import com.devgo2003.docgo.file_service.entity.FileEntity;
-import com.devgo2003.docgo.file_service.repository.FileRepository;
+import com.devgo2003.docgo.repository_service.entity.FileEntity;
+import com.devgo2003.docgo.repository_service.repository.FileRepository;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +35,15 @@ public class FileService {
     }
     
     public List<FileEntity> getFilesByStatus(String status) {
-        return fileRepository.findByOverviewStatus(status);
+        return fileRepository.findByStatus(status);
     }
     
     public List<FileEntity> getFilesByDocumentType(String documentType) {
-        return fileRepository.findByOverviewDocumentType(documentType);
+        return fileRepository.findByDocumentType(documentType);
     }
     
     public List<FileEntity> getFilesByOwner(String ownerUserId) {
-        return fileRepository.findByOverviewOwnerUserId(ownerUserId);
+        return fileRepository.findByOwnerUserId(ownerUserId);
     }
     
     public List<FileEntity> getAllFiles() {
@@ -243,13 +243,5 @@ public class FileService {
         return null;
     }
 }
-
-
-
-
-
-
-
-
 
 

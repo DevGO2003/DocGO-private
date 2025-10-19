@@ -88,3 +88,44 @@ docker-compose logs --tail=20 automation-service
 Write-Host "\n--- Logs File Management Service ---"
 
 docker-compose logs --tail=20 file-management-service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,199 +1,145 @@
 ---
-id: "rule-powershell-standards"
-name: "Chuẩn hóa PowerShell Terminal"
-description: "Quy tắc chạy lệnh PowerShell ổn định trong Cursor trên Windows"
-version: "1.0.0"
-alwaysApply: false
-enabled: true
-priority: 85
-tags: ["powershell", "windows", "terminal"]
-globs: []
-excludeGlobs: []
-scope: "project"
-services: ["*"]
-appliesTo: ["terminal", "chat"]
-match: ""
-variables: {}
-rules: []
-examples: []
-references: []
-commands: []
-owners: ["devgo2003"]
-createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-23T00:00:00Z"
-notes: "Tải theo yêu cầu để tiết kiệm context"
-language: vi
+id: "rule-environment-git"
+alwaysApply: true
+tags:
+  - env
+  - environment
+  - secrets
+  - git
+  - gitignore
+  - workflow
+  - remotes
+  - origin
+  - private-remote
+  - ci
+  - cd
+  - .env
+  - .env.example
+  - docker-compose
+  - sleep-delay
+  - powershell
+  - windows
+  - branching
+  - commit
+  - push
+  - security
+  - config
+  - variables
+  - production
+  - development
+  - staging
+  - version-control
+description: "Quy ước .env theo service, bảo mật secrets, chuẩn .gitignore, quản lý remotes public/private, và workflow đẩy code an toàn."
+---
+# Environment & Git Standards for DocGO
+
+## Environment File Management
+- Mỗi microservice có file `.env` riêng
+- Automation Service: HOST, PORT, GEMINI_API_KEY, KAFKA_*
+- File Management Service: DATABASE_URL, KAFKA_*
+- User Management Service: DATABASE_URL, KAFKA_*
+
+- API Gateway: USER_MANAGEMENT_SERVICE_URL, FILE_MANAGEMENT_SERVICE_URL, AUTOMATION_SERVICE_URL
+- Frontend: NEXT_PUBLIC_API_URL, NEXTAUTH_SECRET, NEXTAUTH_URL
+
+## Docker Compose với .env
+- Chỉnh sửa file `.env` của service tương ứng
+- Mapping trong docker-compose: environment, env_file
+
+
+## Quy tắc đặt tên
+- `.env.example` (template cho team)
+- `.env` (cho development, không commit)
+- `.env.production` (không commit lên git)
+
+## Workflow
+1. Chỉnh sửa file `.env` của service tương ứng
+2. Docker Compose tự động load environment
+3. Commit `.env.example`, không commit `.env` chứa secrets  
+
+## .env Files
+- Mỗi microservice có `.env.example` (template, commit vào git)
+- Developer tạo `.env` từ `.env.example`: `Copy-Item .env.example .env -Force`
+- Python: dùng python-dotenv, Java: env override properties
+
+## .gitignore
+- KHÔNG commit: `.env`, `__pycache__/`, `target/`, `node_modules/`, `*.log`, `.DS_Store`
+- Python: `__pycache__/`, `venv/`, `.pytest_cache/`
+- Java: `target/`, `*.class`, `.gradle/`
+- Node.js: `node_modules/`, `.next/`, `.env.local`
+- **KIỂM TRA** `.gitignore` trước mỗi commit để đảm bảo không có file nhạy cảm
+- **SỬ DỤNG** `.gitignore` global cho workspace nếu cần thiết
+
+## Git Remote
+- `origin`: public repo (code nguồn, không chứa secrets)
+- `private`: private repo (API keys, database credentials, file nhạy cảm)
+- Thêm remote: `git remote add private https://github.com/DevGO2003/DocGO-private.git`
+
+## Push Workflow
+- Code công khai: `git push origin main` → `git push private main`
+- Code nhạy cảm: chỉ `git push private main`
+
+- Kiểm tra trạng thái remote trước khi push để tránh conflict
+
 ---
 
-# Chuẩn hóa PowerShell Terminal Commands
-
-## Mục tiêu
-- Chuẩn hóa việc sử dụng PowerShell commands trong Cursor AI agent
-- Tránh các lỗi cú pháp terminal thường gặp trên Windows
-- Đảm bảo tính nhất quán và ổn định khi chạy terminal commands
-- Hạn chế sử dụng PowerShell tối đa có thể; chỉ chạy lệnh khi thực sự cần thiết để hoàn thành tác vụ
+# PowerShell Terminal Commands
 
 ## Quy tắc bắt buộc
+- Sử dụng PowerShell commands thay vì Unix commands
+- Hạn chế sử dụng PowerShell tối đa có thể
+- Chỉ chạy lệnh khi thực sự cần thiết
 
-### 1. Sử dụng PowerShell Commands thay vì Unix Commands
+## Commands
+- Unix: `ls -la` → PowerShell: `Get-ChildItem -Force`
+- Unix: `cat file.txt` → PowerShell: `Get-Content file.txt`
+- Unix: `grep pattern` → PowerShell: `Select-String pattern`
+- Git: luôn thêm `--no-pager` để tránh kẹt
 
-#### ❌ KHÔNG BAO GIỜ sử dụng:
-```bash
-# Unix commands - KHÔNG hoạt động trên Windows PowerShell
-ls -la
-cat file.txt
-grep pattern file.txt
-find . -name "*.js"
-chmod +x script.sh
-```
+## Path và Spaces
+- Escape spaces: `"file with spaces.txt"`
+- Dùng quotes cho path: `"C:\path with spaces"`
 
-#### ✅ LUÔN sử dụng:
-```powershell
-# PowerShell equivalents
-Get-ChildItem -Force
-Get-Content file.txt
-Select-String pattern file.txt
-Get-ChildItem -Recurse -Filter "*.js"
-icacls script.sh /grant Everyone:F
-```
+## Environment Variables
+- Unix: `echo $HOME` → PowerShell: `Write-Host $env:HOME`
+- Unix: `echo $PATH` → PowerShell: `Write-Host $env:PATH`
 
-## Nguyên tắc HẠN CHẾ sử dụng PowerShell (rất quan trọng)
-- Chỉ sử dụng PowerShell khi không thể thực hiện bằng công cụ khác ( Cursor AI, API nội bộ, trình chỉnh sửa code, script ngôn ngữ bậc cao).
-- Chia nhỏ các bước, chạy lần lượt để dễ debug; dừng ngay khi đã đủ dữ liệu, không chạy thêm lệnh thừa.
-- Luôn thêm `--no-pager` cho git để tránh kẹt; tuyệt đối không dùng lệnh interactive.
+## Command Chaining
+- Unix: `&&` → PowerShell: `;` hoặc `|`
+- Ví dụ: `npm run build; npm start`
 
-### 2. Xử lý Path và Spaces
+## Special Characters
+- Escape quotes: `git commit -m "fix: update code with `"quotes`""`
+- Path separators: dùng `\` thay vì `/`
+## File Operations
+- Unix: `cat config.json` → PowerShell: `Get-Content config.json`
+- Unix: `head -n 10` → PowerShell: `Get-Content file.txt -TotalCount 10`
+- Unix: `tail -f` → PowerShell: `Get-Content log.txt -Wait`
 
-#### ❌ SAI - Không escape spaces:
-```powershell
-git add file with spaces.txt
-cd C:\path with spaces
-```
+## Text Processing
+- Unix: `grep "error"` → PowerShell: `Select-String "error"`
+- Unix: `grep -r "pattern"` → PowerShell: `Select-String "pattern" -Recurse`
 
-#### ✅ ĐÚNG - Luôn quote paths có spaces:
-```powershell
-git add "file with spaces.txt"
-cd "C:\path with spaces"
-```
+## Git Commands
+- Escape special characters: `git log --grep="fix: bug `(critical`)"`
+- Handle parentheses: `git add "file with `(parentheses`).txt"`
 
-### 3. Environment Variables
+## Docker Commands
+- Unix: `$(pwd)` → PowerShell: `${PWD}`
+- Ví dụ: `docker run -v ${PWD}:/app -p 8000:8000 service`
 
-#### ❌ SAI - Unix style:
-```powershell
-echo $HOME
-echo $PATH
-```
+## Docker Compose - BẮT BUỘC có Sleep
+- LUÔN có sleep 20s để tránh timeout
+- Ví dụ: `docker-compose up -d; Start-Sleep -Seconds 20`
 
-#### ✅ ĐÚNG - PowerShell style:
-```powershell
-Write-Host $env:HOME
-Write-Host $env:PATH
-```
+## Lý do bắt buộc có sleep
+- Docker Compose mất thời gian khởi động services
+- Tool agent có thể timeout nếu không đợi đủ lâu
+- Sleep 20s đảm bảo services đã khởi động hoàn toàn
 
-### 4. Command Chaining
-
-#### ❌ SAI - Unix style:
-```powershell
-npm run build && npm start
-git add . && git commit -m "message"
-```
-
-#### ✅ ĐÚNG - PowerShell style:
-```powershell
-npm run build; npm start
-git add .; git commit -m "message"
-```
-
-### 5. Special Characters và Quotes
-
-#### ❌ SAI - Không escape quotes:
-```powershell
-git commit -m "fix: update code with "quotes""
-```
-
-#### ✅ ĐÚNG - Escape quotes:
-```powershell
-git commit -m "fix: update code with `"quotes`""
-```
-
-### 6. Path Separators
-
-#### ❌ SAI - Unix separators:
-```powershell
-cd /path/to/directory
-ls /usr/local/bin
-```
-
-#### ✅ ĐÚNG - Windows separators:
-```powershell
-cd C:\path\to\directory
-Get-ChildItem C:\Windows\System32
-```
-
-### 7. File Operations
-
-#### ❌ SAI - Unix commands:
-```powershell
-cat config.json
-head -n 10 file.txt
-tail -f log.txt
-```
-
-#### ✅ ĐÚNG - PowerShell commands:
-```powershell
-Get-Content config.json
-Get-Content file.txt -TotalCount 10
-Get-Content log.txt -Wait
-```
-
-### 8. Text Processing
-
-#### ❌ SAI - Unix grep:
-```powershell
-grep "error" log.txt
-grep -r "pattern" .
-```
-
-#### ✅ ĐÚNG - PowerShell Select-String:
-```powershell
-Select-String "error" log.txt
-Select-String "pattern" -Recurse .
-```
-
-### 9. Git Commands với Special Characters
-
-#### ❌ SAI - Không handle special chars:
-```powershell
-git log --grep="fix: bug (critical)"
-git add "file with (parentheses).txt"
-```
-
-#### ✅ ĐÚNG - Escape special characters:
-```powershell
-git log --grep="fix: bug `(critical`)"
-git add "file with `(parentheses`).txt"
-```
-
-### 10. Docker Commands
-
-#### ❌ SAI - Unix style với $(pwd):
-```powershell
-docker run -v $(pwd):/app -p 8000:8000 service
-```
-
-#### ✅ ĐÚNG - PowerShell style với ${PWD}:
-```powershell
-docker run -v ${PWD}:/app -p 8000:8000 service
-```
-
-### 11. Pipeline Commands trong PowerShell
-
-#### ❌ SAI - Dùng cat (alias Get-Content) để nhận output từ lệnh khác:
-```powershell
-git rev-parse --abbrev-ref HEAD | cat
-```
-
-#### ✅ ĐÚNG - Dùng Write-Output hoặc gán biến trực tiếp:
+## Pipeline Commands
+- Dùng Write-Output hoặc gán biến trực tiếp
+- Tránh dùng cat (alias Get-Content) để nhận output
 
 ##### Cách 1: In thẳng ra
 ```powershell
@@ -271,6 +217,7 @@ Remove-Item "temp.txt" -ErrorAction SilentlyContinue
 ### 8. Sử dụng `Select-String` thay vì `grep`
 ### 9. Sử dụng `Get-Content` thay vì `cat`
 ### 10. Luôn kiểm tra PowerShell execution policy
+### 11. **🚨 QUAN TRỌNG: LUÔN thêm `Start-Sleep -Seconds 20` sau docker-compose commands**
 
 ## Quy tắc Command Execution
 
@@ -459,6 +406,20 @@ git commit -m "message" --no-verify
 Get-Content file.txt
 Select-String pattern file.txt
 Get-ChildItem
+
+# ✅ AN TOÀN - Docker Compose với sleep
+docker-compose up -d; Start-Sleep -Seconds 20
+docker-compose restart; Start-Sleep -Seconds 20
+docker-compose down; docker-compose up -d; Start-Sleep -Seconds 20
+```
+
+### 🚨 **CÁC LỆNH NGUY HIỂM - TUYỆT ĐỐI KHÔNG SỬ DỤNG:**
+```powershell
+# ❌ TUYỆT ĐỐI KHÔNG - Docker Compose không có sleep (gây timeout)
+docker-compose up
+docker-compose up -d
+docker-compose restart
+docker-compose down
 ```
 
 ---

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from 'react-query'
 import { isRealRepository } from '../_services/repositoryConfig'
 import { repositoryApi } from '../_services/repositoryApi'
 import { mockFiles } from '../_mocks/files.mock'
