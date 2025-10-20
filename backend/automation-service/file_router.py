@@ -806,30 +806,8 @@ async def upload_document(
             if getattr(Config, 'KAFKA_ENABLED', False):
                 try:
                     # 1) file.metadata.recorded - Enhanced payload theo sample.json
-                    import hashlib
-                    
-                    # Calculate actual MD5 hash
-                    file_content = await file.read()
-                    await file.seek(0)  # Reset file pointer
-                    md5_hash = hashlib.md5(file_content).hexdigest()
-                    sha256_hash = hashlib.sha256(file_content).hexdigest()
-                    
                     storage_block = {
-                        "location": f"s3://docgo-contracts/2024/01/{file_id}/",
-                        "backupLocations": [
-                            f"s3://docgo-backup/contracts/2024/01/{file_id}/",
-                            f"gs://docgo-archive/contracts/2024/01/{file_id}/"
-                        ],
-                        "retentionPolicy": {
-                            "duration": "7 years",
-                            "autoDelete": False,
-                            "archiveAfter": "2 years"
-                        },
-                        "accessControl": {
-                            "public": False,
-                            "restrictedUsers": ["user-001", "user-002"],
-                            "ipWhitelist": ["192.168.1.0/24"]
-                        },
+                        "type": "s3" if Config.S3_ENABLED else "local",
                         "s3": {
                             "url": file_url,
                             "bucket": getattr(Config, 'S3_BUCKET', 'docgo-storage'),
@@ -839,7 +817,7 @@ async def upload_document(
                             "size": size,
                             "versionId": None,
                             "checksum": {
-                                "originalMD5": md5_hash,
+                                "originalMD5": "md5-hash-abc123",  # TODO: Calculate actual MD5
                                 "archiveMD5": None
                             }
                         } if Config.S3_ENABLED else None,
@@ -868,72 +846,16 @@ async def upload_document(
                             "contentType": file.content_type,
                             "size": size,
                             "ownerUserId": "system",
-                            "status": "ACTIVE",
-                            "version": 1,
-                            "hash": {
-                                "md5": md5_hash,
-                                "sha256": sha256_hash
-                            },
-                            "permissions": {
-                                "read": ["user-001", "user-002"],
-                                "write": ["user-001"],
-                                "delete": ["user-001"],
-                                "share": ["user-001"]
-                            },
-                            "security": {
-                                "encryption": "AES-256",
-                                "watermark": True,
-                                "digitalSignature": True,
-                                "accessLogging": True
-                            },
                             "storage": storage_block,
-                            "fileSystem": {
-                                "dateModified": now_iso,
-                                "dateAdded": now_iso,
-                                "mediaFilename": file.filename,
-                                "originalFilename": file.filename,
-                                "originalMD5": md5_hash,
-                                "originalFileSize": size,
-                                "originalMimeType": file.content_type,
-                                "archiveMD5": None,
-                                "archiveFileSize": None
-                            },
-                            "technical": {
-                                "encoding": "UTF-8",
-                                "lineEnding": "LF",
-                                "bom": False,
-                                "compression": "NONE",
-                                "pages": None,
-                                "wordCount": len(plaintext_text.split()) if plaintext_text else None,
-                                "characterCount": len(plaintext_text) if plaintext_text else None
-                            },
-                            "originalDocument": {
-                                "dcFormat": file.content_type,
-                                "dcTitle": None,
-                                "dcCreator": None,
-                                "dcDescription": None,
-                                "dcSubject": None,
-                                "xmpCreateDate": None,
-                                "xmpCreatorTool": None,
-                                "xmpModifyDate": None,
-                                "xmpMetadataDate": None,
-                                "pdfKeywords": None,
-                                "pdfProducer": None,
-                                "xmpDocumentID": None,
-                                "xmpInstanceID": None,
-                                "pdfaid:part": None,
-                                "pdfaid:conformance": None,
-                                "dc:creator": None
-                            },
-                            "archivedDocument": {}
+                            "version": 1
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
                     await event_service.publish_kafka("file.metadata.recorded", metadata_evt)
                     print(f"[DEBUG] Published -> topic=file.metadata.recorded fileId={file_id}")
 
-                    # 2) file.content.extracted - Enhanced payload theo sample.json
-                    print(f"[DEBUG] Preparing publish -> topic=file.content.extracted fileId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
+                    # 2) file.plaintext.extracted - Enhanced payload theo sample.json
+                    print(f"[DEBUG] Preparing publish -> topic=file.plaintext.extracted fileId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
                     
                     # Enhanced classification result
                     enhanced_classification = {
@@ -943,18 +865,12 @@ async def upload_document(
                         "reasons": classification_result.get("reasons", ["Document processing completed"]),
                         "contractSubtype": classification_result.get("contractSubtype", None),
                         "category": classification_result.get("category", "Tài liệu"),
-                        "language": classification_result.get("language", "vi"),
-                        "region": "VN",
-                        "tags": classification_result.get("tags", [])
+                        "language": classification_result.get("language", "vi")
                     }
-                    
-                    # Extract sections and key terms from plaintext using AI
-                    sections = ai_service.extract_sections(plaintext_text)
-                    key_terms = ai_service.extract_key_terms(plaintext_text)
                     
                     plaintext_evt = {
                         "eventVersion": "1.0",
-                        "eventType": "file.content.extracted",
+                        "eventType": "file.plaintext.extracted",
                         "eventId": str(uuid.uuid4()),
                         "timestamp": now_iso,
                         "source": "automation-service",
@@ -962,31 +878,14 @@ async def upload_document(
                         "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
                             "fileId": file_id,
-                            "extractedText": plaintext_text,
-                            "summary": f"Hợp đồng từ tệp: {file.filename}",
-                            "keyTerms": key_terms,
-                            "sections": sections,
                             "plaintext": plaintext_text,
                             "ocr": {
                                 "text": plaintext_text if file.content_type.lower() != "application/json" else None,
                                 "status": "COMPLETED" if plaintext_text else "SKIPPED"
                             },
-                            "classification": enhanced_classification,
-                            "processing": {"status": "COMPLETED", "error": None},
                             "jsonContent": json_content_text,
-                            "jsonAnalysisStatus": "PARSED" if json_content_text else None,
-                            "overview": {
-                                "title": file.filename,
-                                "status": "ACTIVE",
-                                "documentType": enhanced_classification.get("documentType", "GENERAL"),
-                                "contractType": enhanced_classification.get("contractSubtype"),
-                                "category": enhanced_classification.get("category", "Tài liệu"),
-                                "tags": enhanced_classification.get("tags", []),
-                                "ownerUserId": "system",
-                                "language": enhanced_classification.get("language", "vi"),
-                                "region": enhanced_classification.get("region", "VN"),
-                                "new": True
-                            }
+                            "classification": enhanced_classification,
+                            "processing": {"status": "COMPLETED", "error": None}
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
@@ -997,268 +896,50 @@ async def upload_document(
                     if bool(classification_result.get("isContract")) and summary_result:
                         print(f"[DEBUG] Preparing publish -> topic=contract.summary.generated fileId={file_id}")
                         
-                        parties = ai_service.extract_parties_from_text(plaintext_text)
-                        
                         # Prepare enhanced contract metadata theo sample.json
                         contract_metadata = {
-                            "effectiveDate": summary_result.get("effectiveDate", "2024-02-01T00:00:00"),
-                            "expiryDate": summary_result.get("expiryDate", "2025-01-31T00:00:00"),
-                            "totalValue": summary_result.get("totalValue", 25000000),
-                            "currency": summary_result.get("currency", "VND"),
-                            "project": "DocGO Platform Development",
-                            "department": "IT Department",
-                            "priority": "HIGH",
-                            "confidentiality": "CONFIDENTIAL"
-                        }
-                        
-                        # Generate workflow stages
-                        workflow = {
-                            "currentStage": "DRAFT",
-                            "stages": [
+                            "effectiveDate": summary_result.get("effectiveDate", "2025-11-01"),
+                            "expiryDate": summary_result.get("expiryDate", "2025-12-31"),
+                            "totalValue": summary_result.get("totalValue", 100000),
+                            "currency": summary_result.get("currency", "USD"),
+                            "parties": summary_result.get("parties", [
                                 {
-                                    "name": "DRAFT",
-                                    "status": "COMPLETED",
-                                    "completedAt": now_iso,
-                                    "assignedTo": "user-001"
-                                },
-                                {
-                                    "name": "REVIEW",
-                                    "status": "IN_PROGRESS",
-                                    "startedAt": now_iso,
-                                    "assignedTo": "user-002"
+                                    "id": "party-001",
+                                    "name": "Company A",
+                                    "type": "CLIENT",
+                                    "role": "Bên A",
+                                    "contact": {"email": "contact@companya.com", "phone": "+84-28-1234-5678"},
+                                    "representative": {"name": "Nguyễn Văn A", "position": "Giám đốc"},
+                                    "taxCode": "ABC123"
                                 }
-                            ]
-                        }
-                        
-                        # Generate payment schedule
-                        payment = {
-                            "schedule": [
-                                {
-                                    "milestone": "Ký hợp đồng",
-                                    "percentage": 50,
-                                    "amount": 12500000,
-                                    "dueDate": "2024-02-01T00:00:00Z",
-                                    "status": "PENDING"
-                                },
-                                {
-                                    "milestone": "Hoàn thành giai đoạn 1",
-                                    "percentage": 30,
-                                    "amount": 7500000,
-                                    "dueDate": "2024-06-01T00:00:00Z",
-                                    "status": "PENDING"
-                                },
-                                {
-                                    "milestone": "Hoàn thành toàn bộ",
-                                    "percentage": 20,
-                                    "amount": 5000000,
-                                    "dueDate": "2025-01-31T00:00:00Z",
-                                    "status": "PENDING"
-                                }
-                            ],
-                            "method": "BANK_TRANSFER",
-                            "paymentMethod": "Bank transfer"
-                        }
-                        
-                        # Generate clauses
-                        clauses = {
-                            "key": [
-                                {
-                                    "name": "Phạm vi công việc",
-                                    "description": "Mô tả chi tiết phạm vi phát triển hệ thống",
-                                    "content": "Bên B cam kết phát triển hệ thống DocGO với đầy đủ tính năng AI và bảo mật",
-                                    "importance": "high",
-                                    "risk": "low",
-                                    "advice": "Khuyến nghị làm rõ chi tiết kỹ thuật"
-                                },
-                                {
-                                    "name": "Thanh toán",
-                                    "description": "Quy định lịch thanh toán 50% trước, 50% sau",
-                                    "content": "Thanh toán đợt 1: 50% giá trị hợp đồng trong vòng 7 ngày sau ký kết",
-                                    "importance": "high",
-                                    "risk": "medium",
-                                    "advice": "Thêm điều khoản phạt chậm thanh toán"
-                                }
-                            ],
-                            "unfavorable": [
-                                {
-                                    "name": "Thời gian thực hiện",
-                                    "description": "Thời hạn hợp đồng ngắn, có thể dẫn đến áp lực tiến độ",
-                                    "content": "Dự án phải hoàn thành trước ngày 31/01/2025, không gia hạn",
-                                    "risk": "medium",
-                                    "advice": "Xem xét gia hạn nếu cần"
-                                }
-                            ],
+                            ]),
+                            "payment": {
+                                "schedule": summary_result.get("payment", {}).get("schedule", []),
+                                "method": summary_result.get("payment", {}).get("method", "BANK_TRANSFER"),
+                                "paymentMethod": summary_result.get("payment", {}).get("paymentMethod", "Bank transfer")
+                            },
+                            "clauses": {
+                                "key": summary_result.get("clauses", {}).get("key", []),
+                                "unfavorable": summary_result.get("clauses", {}).get("unfavorable", []),
                                 "intellectualProperty": "Tất cả quyền sở hữu trí tuệ thuộc về bên A",
                                 "confidentiality": "Bên B cam kết bảo mật thông tin dự án",
                                 "warranty": "Bảo hành 12 tháng sau khi nghiệm thu",
                                 "termination": "Có thể chấm dứt hợp đồng với thông báo trước 30 ngày"
-                        }
-                        
-                        # Generate reminders
-                        reminders = [
-                            {
-                                "id": "reminder-001",
-                                "type": "PAYMENT_DUE",
-                                "title": "Thanh toán đợt 1",
-                                "description": "Nhắc nhở thanh toán 50% giá trị hợp đồng",
-                                "content": "Thanh toán đợt 1 phải thực hiện trước ngày 01/02/2024",
-                                "dueDate": "2024-02-01T00:00:00Z",
-                                "status": "PENDING",
-                                "priority": "HIGH"
                             },
-                            {
-                                "id": "reminder-002",
-                                "type": "MILESTONE_REVIEW",
-                                "title": "Đánh giá giai đoạn 1",
-                                "description": "Kiểm tra tiến độ giai đoạn 1",
-                                "content": "Giai đoạn 1 phải được review trước 30/06/2024",
-                                "dueDate": "2024-06-30T00:00:00Z",
-                                "status": "PENDING",
-                                "priority": "MEDIUM"
-                            }
-                        ]
-                        
-                        # Generate risk assessment
-                        risk = {
-                            "riskLevel": "MEDIUM",
-                            "factors": [
-                                {
-                                    "type": "TECHNICAL",
-                                    "description": "Rủi ro về công nghệ AI mới có thể gây lỗi tích hợp",
-                                    "content": "Hệ thống phải sử dụng AI mới nhất, nhưng chưa test đầy đủ",
-                                    "probability": "MEDIUM",
-                                    "impact": "HIGH",
-                                    "riskToParties": [
-                                        {
-                                            "id": "party-002",
-                                            "name": "Trần Thị C"
-                                        }
-                                    ],
-                                    "beneficiaries": []
-                                },
-                                {
-                                    "type": "SCHEDULE",
-                                    "description": "Rủi ro về tiến độ do thời hạn ngắn",
-                                    "content": "Dự án phải hoàn thành trong 12 tháng, không gia hạn",
-                                    "probability": "LOW",
-                                    "impact": "MEDIUM",
-                                    "riskToParties": [
-                                        {
-                                            "id": "party-001",
-                                            "name": "CÔNG TY CỔ PHẦN CÔNG NGHỆ ABC TECH"
-                                        }
-                                    ],
-                                    "beneficiaries": [
-                                        {
-                                            "id": "party-002",
-                                            "name": "Trần Thị C"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "mitigationProposals": [
-                                {
-                                    "description": "Đào tạo team và thử nghiệm kỹ thuật AI",
-                                    "content": "Bên B phải cung cấp báo cáo test hàng tuần",
-                                    "cost": "LOW",
-                                    "timeline": "2 tuần",
-                                    "assignedTo": "Bên B"
-                                },
-                                {
-                                    "description": "Lập kế hoạch chi tiết và theo dõi tiến độ hàng tuần",
-                                    "content": "Meeting review hàng tuần bắt buộc giữa hai bên",
-                                    "cost": "MEDIUM",
-                                    "timeline": "1 tháng",
-                                    "assignedTo": "Bên A"
-                                }
-                            ],
-                            "advice": "Tư vấn pháp lý để phân bổ rủi ro rõ ràng; theo dõi hàng tuần"
-                        }
-                        
-                        # Generate compliance
-                        compliance = {
+                            "reminders": summary_result.get("reminders", []),
+                            "risk": {
+                                "riskLevel": summary_result.get("risk", {}).get("level", "MEDIUM"),
+                                "factors": summary_result.get("risk", {}).get("factors", []),
+                                "mitigationProposals": summary_result.get("risk", {}).get("mitigationProposals", []),
+                                "advice": "Tư vấn pháp lý để phân bổ rủi ro rõ ràng"
+                            },
+                            "compliance": {
                                 "regulations": ["Luật An toàn thông tin", "Nghị định 13/2023/NĐ-CP"],
                                 "certifications": ["ISO 27001", "SOC 2"],
-                            "auditSchedule": "2024-06-01T00:00:00Z",
                                 "complianceStatus": "COMPLIANT",
-                            "status": "compliant",
                                 "issues": [],
                                 "recommendations": ["Kiểm tra pháp lý hợp đồng"]
                             }
-                        
-                        # Generate versioning
-                        versioning = {
-                            "currentVersionInfo": {
-                                "tag": "1.0",
-                                "number": 1
-                            },
-                            "versions": [
-                                {
-                                    "version": "1.0",
-                                    "createdAt": now_iso,
-                                    "createdBy": "system",
-                                    "changes": "Phiên bản đầu tiên",
-                                    "fileId": file_id
-                                }
-                            ],
-                            "changeLog": [
-                                {
-                                    "version": "1.0",
-                                    "date": now_iso,
-                                    "author": "system",
-                                    "changes": "Tạo hợp đồng ban đầu"
-                                }
-                            ],
-                            "previousVersion": None,
-                            "changeSummary": None,
-                            "changedFields": [],
-                            "diff": {},
-                            "history": [
-                                {
-                                    "version": 1,
-                                    "versionTag": "1.0.0",
-                                    "changedAt": now_iso,
-                                    "changedBy": "system",
-                                    "changeType": "CREATE",
-                                    "storage": {
-                                        "s3": {"versionId": None},
-                                        "local": {"revision": None}
-                                    }
-                                }
-                            ]
-                        }
-                        
-                        # Generate audit
-                        audit = {
-                            "createdAt": now_iso,
-                            "createdBy": "system",
-                            "lastModifiedAt": now_iso,
-                            "lastModifiedBy": "system",
-                            "version": 1,
-                            "changeHistory": [
-                                {
-                                    "action": "CREATE",
-                                    "timestamp": now_iso,
-                                    "userId": "system",
-                                    "details": "Tạo file mới",
-                                    "ipAddress": request.client.host if request.client else "192.168.1.100",
-                                    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                                }
-                            ],
-                            "accessLog": [
-                                {
-                                    "action": "VIEW",
-                                    "timestamp": now_iso,
-                                    "userId": "system",
-                                    "ipAddress": request.client.host if request.client else "192.168.1.100",
-                                    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                                }
-                            ],
-                            "updatedAt": now_iso,
-                            "updatedBy": "system",
-                            "deletedAt": None,
-                            "deletedBy": None,
-                            "isDeleted": False
                         }
                         
                         contract_evt = {
@@ -1271,17 +952,8 @@ async def upload_document(
                             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                             "data": {
                                 "fileId": file_id,
-                                "summary": summary_result.get("summary", f"Hợp đồng từ tệp: {file.filename}"),
-                                "contractMetadata": contract_metadata,
-                                "workflow": workflow,
-                                "parties": parties,
-                                "payment": payment,
-                                "clauses": clauses,
-                                "reminders": reminders,
-                                "risk": risk,
-                                "compliance": compliance,
-                                "versioning": versioning,
-                                "audit": audit
+                                "summary": summary_result.get("summary"),
+                                "contractMetadata": contract_metadata
                             },
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }

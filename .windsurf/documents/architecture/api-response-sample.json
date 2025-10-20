@@ -1,0 +1,84 @@
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success",
+  "description": "Document retrieved successfully",
+  "timestamp": "2025-10-16T10:20:00Z",
+  "requestId": "3f9c4f7e-2b1b-4b0a-8c31-5a7e9b1caa10",
+  "path": "/api/v1/file-management-service/documents/DOC-2024-004-NEW",
+  "data": {
+    "id": "DOC-2024-004-NEW",
+    "overview": {
+      "title": "Hợp đồng phát triển phần mềm quản lý tài liệu",
+      "status": "ACTIVE",
+      "documentType": "CONTRACT",
+      "contractType": "SERVICE_AGREEMENT",
+      "category": "Hợp đồng dịch vụ",
+      "tags": ["IT", "Phần mềm", "Hợp đồng", "Phát triển"],
+      "ownerUserId": "user-001",
+      "new": false
+    },
+    "contract": {
+      "effectiveDate": "2024-01-15T00:00:00",
+      "expiryDate": "2024-08-15T00:00:00",
+      "totalValue": 52000000,
+      "currency": "VND",
+      "summary": "Hợp đồng phát triển hệ thống quản lý tài liệu cho công ty ABC; mở rộng phạm vi phân tích và báo cáo.",
+      "parties": [
+        {"name": "Công ty TNHH ABC", "role": "Khách hàng", "representative": "Nguyễn Văn A", "taxCode": "0123456789", "contact": "0123456789", "address": "123 Đường ABC, Quận 1, TP.HCM"},
+        {"name": "Công ty TNHH XYZ", "role": "Nhà cung cấp", "representative": "Trần Thị B", "taxCode": "9876543210", "contact": "0987654321", "address": "456 Đường XYZ, Quận 2, TP.HCM"}
+      ],
+      "payment": {"totalValue": 52000000, "currency": "VND", "schedule": "30% khi ký, 40% giữa kỳ, 30% khi nghiệm thu", "method": "Chuyển khoản"},
+      "clauses": {
+        "key": [
+          {"name": "Phạm vi công việc", "description": "Phát triển + mở rộng phân tích báo cáo nâng cao", "importance": "High", "risk": "LOW"},
+          {"name": "Thời gian thực hiện", "description": "7 tháng kể từ ngày ký", "importance": "High", "risk": "MEDIUM"},
+          {"name": "Bảo hành", "description": "18 tháng sau nghiệm thu", "importance": "Medium", "risk": "LOW"}
+        ],
+        "unfavorable": ["Điều khoản phạt chậm tiến độ 1%/tuần"]
+      },
+      "reminders": [
+        {"date": "2024-06-15T00:00:00", "title": "Nhắc nhở nghiệm thu giai đoạn 1", "description": "Chuẩn bị demo giữa kỳ"},
+        {"date": "2024-08-10T00:00:00", "title": "Nhắc nhở nghiệm thu cuối", "description": "Chuẩn bị hồ sơ nghiệm thu"}
+      ],
+      "risk": {"level": "MEDIUM", "factors": ["Mở rộng phạm vi", "Tăng thời gian thực hiện"], "mitigations": ["Thêm nhân lực", "Chốt scope từng sprint"]},
+      "compliance": {"status": "COMPLIANT", "issues": [], "recommendations": ["Theo dõi milestone giữa kỳ", "Cập nhật báo cáo hàng tháng"]}
+    },
+    "content": {
+      "plaintext": "… nội dung hợp đồng …",
+      "ocr": {"text": null, "status": null},
+      "classification": null,
+      "processing": {"status": null, "error": null}
+    },
+    "file": {"id": "file-123", "name": "hop_dong_it_abc.pdf", "type": "application/pdf", "size": 1032000, "version": 4},
+    "storage": {
+      "s3": {"url": "https://storage.example.com/files/hop_dong_it_abc.pdf", "bucket": "docgo-docs", "objectKey": "contracts/2024/hop_dong_it_abc.pdf", "region": "ap-southeast-1", "contentType": "application/pdf", "size": 1032000, "versionId": "s3-ver-004", "checksum": {"originalMD5": "abc123def456", "archiveMD5": "def456ghi789"}},
+      "local": {"path": "/data/contracts/2024/hop_dong_it_abc.pdf", "filename": "hop_dong_it_abc.pdf", "mimeType": "application/pdf", "size": 1032000, "mtime": "2025-10-16T10:18:20Z", "revision": "loc-ver-004"}
+    },
+    "versioning": {
+      "currentVersion": 4,
+      "versionTag": "4.0.0",
+      "previousVersion": 3,
+      "changeSummary": "Tăng tổng giá trị, gia hạn thời gian, cập nhật lịch thanh toán, thêm điều khoản phạt chậm tiến độ, mở rộng phạm vi.",
+      "changedFields": ["contract.totalValue", "contract.expiryDate", "contract.payment.schedule", "contract.clauses.unfavorable", "contract.clauses.key[0].description", "contract.clauses.key[1].description", "file.size", "storage.s3.versionId", "storage.local.revision"],
+      "diff": {
+        "contract.totalValue": {"from": 50000000, "to": 52000000},
+        "contract.expiryDate": {"from": "2024-07-15T00:00:00", "to": "2024-08-15T00:00:00"},
+        "contract.payment.schedule": {"from": "50% khi ký, 50% khi nghiệm thu", "to": "30% khi ký, 40% giữa kỳ, 30% khi nghiệm thu"},
+        "contract.clauses.unfavorable": {"from": ["Thời gian bảo hành ngắn"], "to": ["Điều khoản phạt chậm tiến độ 1%/tuần"]},
+        "contract.clauses.key[0].description": {"from": "Phát triển hệ thống quản lý tài liệu", "to": "Phát triển + mở rộng phân tích báo cáo nâng cao"},
+        "contract.clauses.key[1].description": {"from": "6 tháng kể từ ngày ký", "to": "7 tháng kể từ ngày ký"}
+      },
+      "history": [
+        {"version": 4, "versionTag": "4.0.0", "changedAt": "2025-10-16T10:18:20Z", "changedBy": "Legal Team", "changeType": "UPDATE", "storage": {"s3": {"versionId": "s3-ver-004"}, "local": {"revision": "loc-ver-004"}}},
+        {"version": 3, "versionTag": "3.0.0", "changedAt": "2025-10-15T04:09:44.083", "changedBy": "Legal Team", "changeType": "UPDATE", "storage": {"s3": {"versionId": "s3-ver-003"}, "local": {"revision": "loc-ver-003"}}},
+        {"version": 2, "versionTag": "2.1.0", "changedAt": "2025-10-14T04:09:43.995", "changedBy": "Admin", "changeType": "UPDATE", "storage": {"s3": {"versionId": "s3-ver-002"}, "local": {"revision": "loc-ver-002"}}},
+        {"version": 1, "versionTag": "1.0.0", "changedAt": "2025-10-10T04:09:43.995", "changedBy": "system", "changeType": "CREATE", "storage": {"s3": {"versionId": "s3-ver-001"}, "local": {"revision": "loc-ver-001"}}}
+      ]
+    },
+    "metadata": {
+      "fileSystem": {"dateModified": "2025-10-16T10:18:20Z", "dateAdded": "2025-10-10T04:09:43.995", "mediaFilename": "hop_dong_it_abc.pdf", "originalFilename": "hop_dong_it_abc.docx", "originalMD5": "abc123def456", "originalFileSize": 2048000, "originalMimeType": "application/pdf", "archiveMD5": "def456ghi789", "archiveFileSize": 1032000}
+    },
+    "audit": {"createdAt": "2025-10-10T04:09:43.995", "createdBy": "system", "updatedAt": "2025-10-16T10:18:20Z", "updatedBy": "Legal Team", "deletedAt": null, "deletedBy": null, "isDeleted": false, "version": 4}
+  }
+}

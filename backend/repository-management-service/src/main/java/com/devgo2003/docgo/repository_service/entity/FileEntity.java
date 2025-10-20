@@ -6,9 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @Data
 @Builder
@@ -104,6 +107,53 @@ public class FileEntity {
     
     // Processing status
     private Map<String, Object> processingStatus;
+
+    // Nested data structures for full response
+    @Field
+    private Map<String, Object> overview = new HashMap<>();
+
+    @Field
+    private Map<String, Object> contract = new HashMap<>();
+
+    @Field
+    private Map<String, Object> content = new HashMap<>();
+
+    @Field
+    private Map<String, Object> file = new HashMap<>();
+
+    @Field
+    private Map<String, Object> storage = new HashMap<>();
+
+    @Field
+    private Map<String, Object> versioning = new HashMap<>();
+
+    @Field
+    private Map<String, Object> metadata = new HashMap<>();
+
+    @Field
+    private Map<String, Object> audit = new HashMap<>();
+
+    // Contract-specific nested fields
+    @Field
+    private Map<String, Object> workflow = new HashMap<>();
+
+    @Field
+    private List<Map<String, Object>> parties = new ArrayList<>();
+
+    @Field
+    private Map<String, Object> payment = new HashMap<>();
+
+    @Field
+    private Map<String, Object> clauses = new HashMap<>();
+
+    @Field
+    private List<Map<String, Object>> reminders = new ArrayList<>();
+
+    @Field
+    private Map<String, Object> risk = new HashMap<>();
+
+    @Field
+    private Map<String, Object> compliance = new HashMap<>();
 }
 
 

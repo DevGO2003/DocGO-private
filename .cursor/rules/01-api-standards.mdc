@@ -1,38 +1,7 @@
 ---
-id: "rule-api-standards"
-alwaysApply: true
-tags:
-  - api
-  - standards
-  - http
-  - rest
-  - url-design
-  - payload
-  - content-type
-  - json
-  - multipart
-  - pagination
-  - sorting
-  - filtering
-  - error-handling
-  - exception
-  - response-envelope
-  - RestResponse
-  - status-code
-  - swagger
-  - openapi
-  - documentation
-  - versioning
-  - security
-  - jwt
-  - gateway
-  - microservices
-  - event
-  - auditing
-  - actor
-description: "Chuẩn hóa URL/payload, error handling, RestResponse, phân trang/lọc/sắp xếp, và tài liệu Swagger/OpenAPI cho toàn bộ services."
+description: hello
+alwaysApply: false
 ---
-
 # Chuẩn hóa API cho DocGO
 
 Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `user-management-service` và `file-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `automation-service` (FastAPI) và hướng tới đồng nhất giữa các service.

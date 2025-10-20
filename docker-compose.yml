@@ -197,25 +197,21 @@ services:
   web-app:
     container_name: web-app
     build:
-      context: ./frontend/web-app
+      context: ./frontend/web-app  # Giới hạn context chỉ thư mục này (tránh scan toàn project)
       dockerfile: Dockerfile
-    
     ports:
-      - "${WEB_APP_PORT:-3000}:3000"
-    env_file:
-      - .env
-    environment:
-      - ENVIRONMENT=docker
-      - NEXT_PUBLIC_API_GATEWAY_URL=http://api-gateway:8000
-    depends_on:
-      - api-gateway
-    networks:
-      - docgo-network
+      - "3000:3000"  # Map port local
     volumes:
-      - ./frontend/web-app:/app  # Volume mount cho hot reload
-      - /app/node_modules  # Exclude node_modules từ mount
-      - /app/.next  # Exclude .next build folder
-      - ./logs/web-app:/app/logs
+      - ./frontend/web-app:/app  # Mount code host vào container (hot reload key!)
+      - /app/node_modules  # Anonymous volume: Giữ node_modules trong container, tránh conflict với host
+    environment:
+      - NODE_ENV=development  # Dev mode cho hot reload
+      - CHOKIDAR_USEPOLLING=true  # Windows: Force polling thay vì fs events (fix sync chậm trên shared drive)
+      - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs
+    stdin_open: true  # Cho phép attach console nếu cần
+    tty: true  # TTY cho dev
+    depends_on:
+      - api-gateway  # Nếu cần backend
     restart: unless-stopped
 
 # ==========================================

@@ -1,5 +1,5 @@
 # Test API getOne với ID có sẵn
-$uri = "http://localhost:8002/api/v1/file-management-service/documents/DOC-2024-004-NEW"
+$uri = "http://localhost:8002/api/v1/file-management-service/files/FILE-2024-004-NEW"
 $headers = @{
     "Accept" = "application/json"
     "Content-Type" = "application/json"

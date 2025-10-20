@@ -2,8 +2,10 @@ package com.devgo2003.docgo.repository_service.controller;
 
 import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
+import com.devgo2003.docgo.repository_service.entity.FileEntity;
 import com.devgo2003.docgo.repository_service.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,18 +24,41 @@ public class RepositoryController {
     private FileService fileService;
 
     @GetMapping
-    @Operation(summary = "Lấy danh sách files (tạm thời)")
-    public ResponseEntity<RestResponse<String>> getAllFiles() {
-        return ResponseEntity.ok(RestResponse.<String>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Test endpoint - chưa implement đầy đủ")
-            .data("Test data for files list")
+    @Operation(summary = "Lấy danh sách files với phân trang và lọc")
+    public ResponseEntity<RestResponse<Page<FileEntity>>> getAllFiles(
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
+            @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId
+    ) {
+        try {
+            Page<FileEntity> files = fileService.getAllFiles(page, size, sortBy, sortDirection, searchTerm);
+            
+            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách files thành công")
+                .data(files)
                 .timestamp(Instant.now())
-            .requestId(UUID.randomUUID().toString())
-            .path("/api/v1/repository-management-service/files")
-            .build());
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/files")
+                .build());
+                
+        } catch (Exception e) {
+            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi lấy danh sách files: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/files")
+                .build());
+        }
     }
 
     @GetMapping("/{id}")

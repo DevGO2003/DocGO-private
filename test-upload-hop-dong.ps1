@@ -10,7 +10,34 @@ Write-Host "URL: $url"
 # Test upload file
 Write-Host "`nUploading file..."
 try {
-    $response = Invoke-RestMethod -Uri $url -Method Post -InFile $filePath -ContentType "text/plain"
+        $boundary = "----$([System.Guid]::NewGuid().ToString())"
+    $fileBytes = [System.IO.File]::ReadAllBytes($filePath)
+    $fileName = Split-Path -Path $filePath -Leaf
+
+    # Use HttpWebRequest for more control over the multipart/form-data request
+    $request = [System.Net.HttpWebRequest]::Create($url)
+    $request.Method = "POST"
+    $request.ContentType = "multipart/form-data; boundary=$boundary"
+
+    $LF = "`r`n"
+    $bodyStart = "--$boundary$LF" +
+                 "Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"$LF" +
+                 "Content-Type: application/octet-stream$LF$LF"
+
+    $bodyEnd = "$LF--$boundary--$LF"
+
+    $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyStart) + $fileBytes + [System.Text.Encoding]::UTF8.GetBytes($bodyEnd)
+    $request.ContentLength = $bodyBytes.Length
+
+    $requestStream = $request.GetRequestStream()
+    $requestStream.Write($bodyBytes, 0, $bodyBytes.Length)
+    $requestStream.Close()
+
+    $webResponse = $request.GetResponse()
+    $responseStream = $webResponse.GetResponseStream()
+    $streamReader = New-Object System.IO.StreamReader($responseStream)
+    $responseJson = $streamReader.ReadToEnd()
+    $response = $responseJson | ConvertFrom-Json
     Write-Host "Upload successful!"
     Write-Host "Response:"
     $response | ConvertTo-Json -Depth 3
