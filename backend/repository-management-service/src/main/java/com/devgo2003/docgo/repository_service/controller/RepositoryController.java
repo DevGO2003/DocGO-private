@@ -21,21 +21,6 @@ public class RepositoryController {
     @Autowired
     private FileService fileService;
 
-    @GetMapping("/test")
-    @Operation(summary = "Test endpoint đơn giản")
-    public ResponseEntity<RestResponse<String>> testEndpoint() {
-        return ResponseEntity.ok(RestResponse.<String>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Test endpoint hoạt động từ RepositoryController!")
-            .data("Hello from RepositoryController!")
-                .timestamp(Instant.now())
-            .requestId(UUID.randomUUID().toString())
-            .path("/api/v1/repository-management-service/files/test")
-            .build());
-    }
-
     @GetMapping
     @Operation(summary = "Lấy danh sách files (tạm thời)")
     public ResponseEntity<RestResponse<String>> getAllFiles() {

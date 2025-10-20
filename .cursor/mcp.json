@@ -7,7 +7,8 @@
         "mongodb-mcp-server@latest"
       ],
       "env": {
-        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0"
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0",
+        "MDB_MCP_DATABASE": "docgo_repository_service"
       }
     },
     "Github": {

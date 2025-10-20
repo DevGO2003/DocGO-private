@@ -49,9 +49,9 @@ class IntegrationService {
       {
         name: 'mongodb',
         type: 'database',
-        endpoint: process.env.MONGODB_ATLAS_URI || 'mongodb://localhost:27017',
+        endpoint: process.env.MONGODB_ATLAS_URI || '',
         authentication: { type: 'none' },
-        enabled: true
+        enabled: Boolean(process.env.MONGODB_ATLAS_URI)
       }
     ];
 

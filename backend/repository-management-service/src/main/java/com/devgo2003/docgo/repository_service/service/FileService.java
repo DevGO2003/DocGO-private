@@ -88,7 +88,7 @@ public class FileService {
                 .build();
 
             Contract contract = null;
-            if ("CONTRACT".equals(file.getDocumentType())) {
+            if ("CONTRACT".equalsIgnoreCase(file.getDocumentType()) || (file.getDocumentType() == null && file.getSummary() != null)) {
                 contract = Contract.builder()
                     .effectiveDate(file.getEffectiveDate())
                     .expiryDate(file.getExpiryDate())

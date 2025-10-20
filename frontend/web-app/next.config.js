@@ -71,6 +71,7 @@ const nextConfig = {
       { source: '/dashboard/tro-giup-ho-tro', destination: '/dashboard/help-support', permanent: false },
       { source: '/dashboard/cai-dat', destination: '/dashboard/settings', permanent: false },
       { source: '/dashboard/huong-dan', destination: '/dashboard/guide', permanent: false },
+      // Remove redirect - let /repositories/:id/files render its own content
     ]
   },
   async rewrites() {
@@ -79,6 +80,11 @@ const nextConfig = {
       {
         source: '/api/:path*',
         destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://api-gateway:8000'}/api/:path*`,
+      },
+      // Alias legacy documents route to repositories/1
+      {
+        source: '/documents',
+        destination: '/repositories/1',
       },
     ]
   },

@@ -57,7 +57,7 @@ class Config:
     # ==========================================
     # MongoDB Configuration
     MONGODB_ATLAS_URI: str = os.getenv("MONGODB_ATLAS_URI", "")
-    MONGODB_DATABASE: str = os.getenv("MONGODB_DOCUMENT_DATABASE", "docgo_document_service")
+    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", os.getenv("MONGODB_DOCUMENT_DATABASE", "docgo"))
     
     # Redis Configuration
     REDIS_HOST: str = os.getenv("REDIS_HOST", "redis")
@@ -167,10 +167,14 @@ class Config:
     # ==========================================
     @classmethod
     def get_mongodb_uri(cls) -> str:
-        """Get MongoDB URI for Spring configuration"""
-        if cls.MONGODB_ATLAS_URI:
-            return f"{cls.MONGODB_ATLAS_URI}/{cls.MONGODB_DATABASE}?retryWrites=true&w=majority&appName=devgo-docgo-cluster0"
-        return f"mongodb://localhost:27017/{cls.MONGODB_DATABASE}"
+        """Get MongoDB URI (Atlas only). Raises if missing."""
+        if not cls.MONGODB_ATLAS_URI:
+            raise ValueError("MONGODB_ATLAS_URI is required; local MongoDB is not supported in this environment.")
+        # Allow full URI with or without database path; if missing db in URI, append it
+        if "/" in cls.MONGODB_ATLAS_URI.rsplit("@", 1)[-1]:
+            # Assume db already present in URI path
+            return cls.MONGODB_ATLAS_URI
+        return f"{cls.MONGODB_ATLAS_URI}/{cls.MONGODB_DATABASE}?retryWrites=true&w=majority"
     
     # ==========================================
     # LOGGING CONFIGURATION

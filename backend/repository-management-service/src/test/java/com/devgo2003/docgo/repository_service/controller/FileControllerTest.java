@@ -22,8 +22,8 @@ public class FileControllerTest {
     private FileService fileService;
 
     @Test
-    void testEndpoint_shouldReturnSuccess() throws Exception {
-        mockMvc.perform(get("/api/v1/repository-management-service/files/test"))
+    void getAll_shouldReturnSuccess() throws Exception {
+        mockMvc.perform(get("/api/v1/repository-management-service/files"))
                 .andExpect(status().isOk());
     }
 }
