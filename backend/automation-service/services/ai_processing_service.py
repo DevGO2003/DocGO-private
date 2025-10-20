@@ -594,3 +594,224 @@ class AutomationService:
         except Exception as e:
             logging.error(f"[AI_EXTRACT_ERROR] Error extracting text: {e}")
             return f"[AI_EXTRACT_ERROR] Could not extract text from {filename}: {str(e)}"
+
+    def extract_sections(self, text: str) -> list:
+        if not text:
+            return []
+        
+        try:
+            prompt = f"""
+            Phân tích văn bản hợp đồng sau và trích xuất các phần/section chính. 
+            Mỗi section cần có:
+            - title: Tiêu đề phần (ngắn gọn)
+            - description: Mô tả nội dung phần (1-2 câu)
+            - content: Nội dung chính của phần (trích dẫn từ văn bản)
+            - pageNumber: Số trang (đặt 1 nếu không biết)
+            
+            Văn bản:
+            {text[:2000]}
+            
+            Trả về JSON array với tối đa 5 sections quan trọng nhất.
+            """
+            
+            response = self.model.generate_content(prompt)
+            if response.text:
+                cleaned = response.text.strip()
+                if cleaned.startswith('```json'):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith('```'):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith('```'):
+                    cleaned = cleaned[:-3]
+                cleaned = cleaned.strip()
+                
+                sections = json.loads(cleaned)
+                return sections[:5] if isinstance(sections, list) else []
+        except Exception as e:
+            logging.warning(f"AI section extraction failed: {e}")
+        
+        # Fallback
+        lines = text.split('\n')
+        sections = []
+        current_section = None
+        for line in lines:
+            line = line.strip()
+            if line and any(keyword in line.upper() for keyword in ['ĐIỀU', 'MỤC', 'CHƯƠNG', 'PHẦN', 'BÊN A', 'BÊN B']):
+                if current_section:
+                    sections.append(current_section)
+                current_section = {
+                    "title": line,
+                    "description": f"Mô tả {line.lower()}",
+                    "content": line,
+                    "pageNumber": 1
+                }
+            elif current_section and line:
+                current_section["content"] += f"\n{line}"
+        if current_section:
+            sections.append(current_section)
+        return sections[:5]
+
+    def extract_key_terms(self, text: str) -> list:
+        if not text:
+            return []
+        
+        try:
+            prompt = f"""
+            Trích xuất các từ khóa chính từ văn bản hợp đồng sau.
+            Tập trung vào:
+            - Loại hợp đồng (lao động, dịch vụ, mua bán...)
+            - Lĩnh vực hoạt động (công nghệ, xây dựng, tài chính...)
+            - Các điều khoản quan trọng
+            - Thời hạn, giá trị, đối tác
+            
+            Văn bản:
+            {text[:1500]}
+            
+            Trả về JSON array với tối đa 8 từ khóa quan trọng nhất.
+            """
+            
+            response = self.model.generate_content(prompt)
+            if response.text:
+                cleaned = response.text.strip()
+                if cleaned.startswith('```json'):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith('```'):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith('```'):
+                    cleaned = cleaned[:-3]
+                cleaned = cleaned.strip()
+                
+                keywords = json.loads(cleaned)
+                return keywords[:8] if isinstance(keywords, list) else []
+        except Exception as e:
+            logging.warning(f"AI key terms extraction failed: {e}")
+        
+        # Fallback
+        keywords = []
+        text_lower = text.lower()
+        if "hợp đồng lao động" in text_lower:
+            keywords.append("hợp đồng lao động")
+        if "phát triển" in text_lower:
+            keywords.append("phát triển phần mềm")
+        if "hệ thống" in text_lower:
+            keywords.append("hệ thống quản lý")
+        if "công nghệ" in text_lower:
+            keywords.append("công nghệ thông tin")
+        if "lương" in text_lower or "thưởng" in text_lower:
+            keywords.append("tiền lương")
+        if "thời gian" in text_lower:
+            keywords.append("thời gian làm việc")
+        return keywords[:8]
+
+    def extract_parties_from_text(self, text: str) -> list:
+        if not text:
+            return []
+        
+        try:
+            prompt = f"""
+            Phân tích văn bản hợp đồng và trích xuất thông tin các bên tham gia.
+            Tìm kiếm:
+            - Tên công ty/cá nhân
+            - Địa chỉ
+            - Email, điện thoại
+            - Mã số thuế
+            - Người đại diện và chức vụ
+            
+            Văn bản:
+            {text[:2500]}
+            
+            Trả về JSON array với format:
+            [
+                {{
+                    "id": "party-001",
+                    "name": "Tên công ty/cá nhân",
+                    "type": "CLIENT/VENDOR/PARTNER",
+                    "role": "Vai trò trong hợp đồng",
+                    "contact": {{
+                        "email": "email@example.com",
+                        "phone": "số điện thoại",
+                        "address": "địa chỉ"
+                    }},
+                    "representative": {{
+                        "name": "Tên người đại diện",
+                        "position": "Chức vụ",
+                        "email": "email đại diện"
+                    }},
+                    "taxCode": "Mã số thuế"
+                }}
+            ]
+            
+            Tối đa 3 bên tham gia.
+            """
+            
+            response = self.model.generate_content(prompt)
+            if response.text:
+                cleaned = response.text.strip()
+                if cleaned.startswith('```json'):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith('```'):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith('```'):
+                    cleaned = cleaned[:-3]
+                cleaned = cleaned.strip()
+                
+                parties = json.loads(cleaned)
+                if isinstance(parties, list):
+                    for i, party in enumerate(parties):
+                        if not party.get("id"):
+                            party["id"] = f"party-{i+1:03d}"
+                        if not party.get("contact"):
+                            party["contact"] = {"email": "", "phone": "", "address": ""}
+                        if not party.get("representative"):
+                            party["representative"] = {"name": "", "position": "", "email": ""}
+                    return parties[:3]
+        except Exception as e:
+            logging.warning(f"AI parties extraction failed: {e}")
+        
+        # Fallback
+        parties = []
+        lines = text.split('\n')
+        current_party = None
+        
+        for line in lines:
+            line = line.strip()
+            if "BÊN A" in line.upper() or "NGƯỜI SỬ DỤNG LAO ĐỘNG" in line.upper():
+                if current_party:
+                    parties.append(current_party)
+                current_party = {
+                    "id": f"party-{len(parties) + 1:03d}",
+                    "name": "",
+                    "type": "CLIENT",
+                    "role": "Người sử dụng lao động",
+                    "contact": {"email": "", "phone": "", "address": ""},
+                    "representative": {"name": "", "position": "", "email": ""},
+                    "taxCode": ""
+                }
+            elif "BÊN B" in line.upper() or "NGƯỜI LAO ĐỘNG" in line.upper():
+                if current_party:
+                    parties.append(current_party)
+                current_party = {
+                    "id": f"party-{len(parties) + 1:03d}",
+                    "name": "",
+                    "type": "VENDOR",
+                    "role": "Người lao động",
+                    "contact": {"email": "", "phone": "", "address": ""},
+                    "representative": {"name": "", "position": "", "email": ""},
+                    "taxCode": ""
+                }
+            elif current_party and line:
+                if "Tên công ty:" in line or "Họ tên:" in line:
+                    current_party["name"] = line.split(":", 1)[1].strip()
+                elif "Email:" in line:
+                    current_party["contact"]["email"] = line.split(":", 1)[1].strip()
+                elif "Điện thoại:" in line:
+                    current_party["contact"]["phone"] = line.split(":", 1)[1].strip()
+                elif "Mã số thuế:" in line:
+                    current_party["taxCode"] = line.split(":", 1)[1].strip()
+                elif "Đại diện:" in line:
+                    current_party["representative"]["name"] = line.split(":", 1)[1].strip()
+        
+        if current_party:
+            parties.append(current_party)
+        
+        return parties[:3]

@@ -14,7 +14,7 @@ import DocumentsTable from './_components/DocumentsTable'
 import { fetchFiles } from './_services/file-list-api'
 import { mapFileApiPageToPaginatedDocuments } from './_services/file-list-mapper'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
-import { tagAPI } from '@/lib/api'
+// import { tagAPI } from '@/lib/api' // Removed - tags API disabled
 import { DEFAULT_PAGE_SIZE } from './_constants'
 
 type ContractItem = {
@@ -123,7 +123,8 @@ export default function DocumentsPage() {
       setTagsError(false)
       
       try {
-        const res = await tagAPI.getAllTags()
+        // const res = await tagAPI.getAllTags() // Removed - tags API disabled
+        const res = { data: { data: [] } } // Mock empty response
         const payload: any = res.data?.data
         // Extract tag names from TagDto objects
         const tagsFromApi: string[] = Array.isArray(payload) 
@@ -263,7 +264,8 @@ export default function DocumentsPage() {
       setTagsError(false)
       
       try {
-        const res = await tagAPI.getAllTags()
+        // const res = await tagAPI.getAllTags() // Removed - tags API disabled
+        const res = { data: { data: [] } } // Mock empty response
         const payload: any = res.data?.data
         const tagsFromApi: string[] = Array.isArray(payload) 
           ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)

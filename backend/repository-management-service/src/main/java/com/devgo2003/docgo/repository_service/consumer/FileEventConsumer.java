@@ -41,23 +41,70 @@ public class FileEventConsumer {
             if (fileId == null) return;
 
             FileEntity entity = getOrCreate(fileId);
-            entity.setName(asString(or(data.get("name"), data.get("fileName"))));
-            entity.setMimeType(asString(or(data.get("contentType"), data.get("mimeType"))));
+            
+            // Basic file info
+            entity.setName(asString(data.get("name")));
+            entity.setMimeType(asString(data.get("contentType")));
             entity.setSize(asLong(data.get("size")));
             entity.setOwnerUserId(asString(data.get("ownerUserId")));
-            entity.setStatus("uploaded");
+            entity.setStatus(asString(data.get("status")));
+            entity.setVersion(asLong(data.get("version")));
 
+            // Hash information
+            Map<?, ?> hash = (Map<?, ?>) data.get("hash");
+            if (hash != null) {
+                entity.setHash((Map) hash);
+            }
+
+            // Permissions
+            Map<?, ?> permissions = (Map<?, ?>) data.get("permissions");
+            if (permissions != null) {
+                entity.setPermissions((Map) permissions);
+            }
+
+            // Security
+            Map<?, ?> security = (Map<?, ?>) data.get("security");
+            if (security != null) {
+                entity.setSecurity((Map) security);
+            }
+
+            // Storage information
             Map<?, ?> storage = (Map<?, ?>) data.get("storage");
             if (storage != null) {
+                entity.setStorage((Map) storage);
                 Map<?, ?> s3 = (Map<?, ?>) storage.get("s3");
                 Map<?, ?> local = (Map<?, ?>) storage.get("local");
                 entity.setS3((Map) s3);
                 entity.setLocal((Map) local);
             }
 
+            // File system metadata
+            Map<?, ?> fileSystem = (Map<?, ?>) data.get("fileSystem");
+            if (fileSystem != null) {
+                entity.setFileSystem((Map) fileSystem);
+            }
+
+            // Technical metadata
+            Map<?, ?> technical = (Map<?, ?>) data.get("technical");
+            if (technical != null) {
+                entity.setTechnical((Map) technical);
+            }
+
+            // Original document metadata
+            Map<?, ?> originalDocument = (Map<?, ?>) data.get("originalDocument");
+            if (originalDocument != null) {
+                entity.setOriginalDocument((Map) originalDocument);
+            }
+
+            // Archived document metadata
+            Map<?, ?> archivedDocument = (Map<?, ?>) data.get("archivedDocument");
+            if (archivedDocument != null) {
+                entity.setArchivedDocument((Map) archivedDocument);
+            }
+
             touchUpdated(entity, payload);
             fileRepository.save(entity);
-            logger.info("Saved metadata fileId={}", fileId);
+            logger.info("Saved metadata fileId={} with enhanced structure", fileId);
         } catch (Exception e) {
             logger.error("Error processing FILE_METADATA_RECORDED: {}", e.getMessage(), e);
         }
@@ -65,7 +112,7 @@ public class FileEventConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.file-plaintext-extracted}", groupId = "${spring.kafka.consumer.group-id}")
     public void handleFilePlaintextExtracted(@Payload String event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        logger.info("[FILE_PLAINTEXT_EXTRACTED] topic={} payloadSize={}", topic, event != null ? event.length() : 0);
+        logger.info("[FILE_CONTENT_EXTRACTED] topic={} payloadSize={}", topic, event != null ? event.length() : 0);
         try {
             Map<?, ?> payload = objectMapper.readValue(event, Map.class);
             Map<?, ?> data = (Map<?, ?>) payload.get("data");
@@ -75,11 +122,27 @@ public class FileEventConsumer {
             if (fileId == null) return;
 
             FileEntity entity = getOrCreate(fileId);
+            
+            // Content information
             entity.setPlaintext(asString(data.get("plaintext")));
+            entity.setExtractedText(asString(data.get("extractedText")));
+            entity.setSummary(asString(data.get("summary")));
 
+            // Key terms and sections
+            entity.setKeyTerms((Map) data.get("keyTerms"));
+            entity.setSections((Map) data.get("sections"));
+
+            // OCR information
             Map<?, ?> ocr = (Map<?, ?>) data.get("ocr");
-            if (ocr != null) entity.setOcr((Map) ocr);
+            if (ocr != null) {
+                entity.setOcr((Map) ocr);
+            }
 
+            // JSON content
+            entity.setJsonContent((Map) data.get("jsonContent"));
+            entity.setJsonAnalysisStatus(asString(data.get("jsonAnalysisStatus")));
+
+            // Classification information
             Map<?, ?> classification = (Map<?, ?>) data.get("classification");
             if (classification != null) {
                 entity.setClassification((Map) classification);
@@ -93,15 +156,33 @@ public class FileEventConsumer {
                 }
             }
 
+            // Processing status
             Map<?, ?> processing = (Map<?, ?>) data.get("processing");
-            if (processing != null) entity.setProcessing((Map) processing);
+            if (processing != null) {
+                entity.setProcessing((Map) processing);
+            }
+
+            // Overview information
+            Map<?, ?> overview = (Map<?, ?>) data.get("overview");
+            if (overview != null) {
+                entity.setOverview((Map) overview);
+                // Update document type from overview
+                String docType = asString(overview.get("documentType"));
+                if (docType != null) {
+                    entity.setDocumentType(docType);
+                }
+                String contractType = asString(overview.get("contractType"));
+                if (contractType != null) {
+                    entity.setContractType(contractType);
+                }
+            }
 
             entity.setStatus("processed");
             touchUpdated(entity, payload);
             fileRepository.save(entity);
-            logger.info("Saved plaintext fileId={}", fileId);
+            logger.info("Saved content fileId={} with enhanced structure", fileId);
         } catch (Exception e) {
-            logger.error("Error processing FILE_PLAINTEXT_EXTRACTED: {}", e.getMessage(), e);
+            logger.error("Error processing FILE_CONTENT_EXTRACTED: {}", e.getMessage(), e);
         }
     }
 
@@ -117,23 +198,73 @@ public class FileEventConsumer {
             if (fileId == null) return;
 
             FileEntity entity = getOrCreate(fileId);
+            
+            // Contract summary
             entity.setSummary(asString(data.get("summary")));
-            // Ensure documentType is CONTRACT for contract summary events
             entity.setDocumentType("CONTRACT");
 
-            Map<?, ?> meta = (Map<?, ?>) data.get("contractMetadata");
-            if (meta != null) {
-                entity.setEffectiveDate(parseDate(asString(meta.get("effectiveDate"))));
-                entity.setExpiryDate(parseDate(asString(meta.get("expiryDate"))));
-                entity.setTotalValue(asDouble(meta.get("totalValue")));
-                entity.setCurrency(asString(meta.get("currency")));
-                entity.setContractType(asString(meta.get("contractType")));
+            // Contract metadata
+            Map<?, ?> contractMetadata = (Map<?, ?>) data.get("contractMetadata");
+            if (contractMetadata != null) {
+                entity.setEffectiveDate(parseDate(asString(contractMetadata.get("effectiveDate"))));
+                entity.setExpiryDate(parseDate(asString(contractMetadata.get("expiryDate"))));
+                entity.setTotalValue(asDouble(contractMetadata.get("totalValue")));
+                entity.setCurrency(asString(contractMetadata.get("currency")));
+                entity.setContractType(asString(contractMetadata.get("contractType")));
+            }
+
+            // Workflow information
+            Map<?, ?> workflow = (Map<?, ?>) data.get("workflow");
+            if (workflow != null) {
+                entity.setWorkflow((Map) workflow);
+            }
+
+            // Parties information
+            entity.setParties((Map) data.get("parties"));
+
+            // Payment information
+            Map<?, ?> payment = (Map<?, ?>) data.get("payment");
+            if (payment != null) {
+                entity.setPayment((Map) payment);
+            }
+
+            // Clauses information
+            Map<?, ?> clauses = (Map<?, ?>) data.get("clauses");
+            if (clauses != null) {
+                entity.setClauses((Map) clauses);
+            }
+
+            // Reminders
+            entity.setReminders((Map) data.get("reminders"));
+
+            // Risk assessment
+            Map<?, ?> risk = (Map<?, ?>) data.get("risk");
+            if (risk != null) {
+                entity.setRisk((Map) risk);
+            }
+
+            // Compliance information
+            Map<?, ?> compliance = (Map<?, ?>) data.get("compliance");
+            if (compliance != null) {
+                entity.setCompliance((Map) compliance);
+            }
+
+            // Versioning information
+            Map<?, ?> versioning = (Map<?, ?>) data.get("versioning");
+            if (versioning != null) {
+                entity.setVersioning((Map) versioning);
+            }
+
+            // Audit information
+            Map<?, ?> audit = (Map<?, ?>) data.get("audit");
+            if (audit != null) {
+                entity.setAudit((Map) audit);
             }
 
             entity.setStatus("completed");
             touchUpdated(entity, payload);
             fileRepository.save(entity);
-            logger.info("Saved summary fileId={}", fileId);
+            logger.info("Saved contract summary fileId={} with enhanced structure", fileId);
         } catch (Exception e) {
             logger.error("Error processing CONTRACT_SUMMARY_GENERATED: {}", e.getMessage(), e);
         }
