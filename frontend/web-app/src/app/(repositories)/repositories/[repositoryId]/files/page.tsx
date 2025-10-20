@@ -115,20 +115,22 @@ export default function DocumentsPage() {
           includeDeleted: false,
           type: activeTab === 'contracts' ? 'CONTRACT' : undefined
         })
-        if (resp?.data) {
+
+        // Use API data only if it has content, otherwise fallback to mock
+        if (resp?.data?.content?.length > 0) {
           apiData = mapFileApiPageToPaginatedDocuments(resp.data)
           console.log('API list success:', apiData)
         } else {
           console.log('API list empty, using mock fallback')
+          apiData = mockPaginatedData
         }
       } catch (e: any) {
         console.error('Error fetching documents list:', e)
         console.log('API list failed, using mock fallback')
+        apiData = mockPaginatedData // Fallback on error
       }
 
-      // Fallback to mock if API empty/fail
-      const finalData = apiData || mockPaginatedData
-      setDocuments(finalData.data)
+      setDocuments(apiData.data)
       setLoading(false)
     }
 

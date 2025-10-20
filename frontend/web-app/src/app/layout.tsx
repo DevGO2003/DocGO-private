@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { AuthProvider } from '@/hooks/useAuth'
+import { I18nProvider } from '@/components/I18nProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'DocGO - Quản lý tài liệu và hợp đồng thông minh',
   description: 'Nền tảng quản lý tài liệu và hợp đồng thông minh, giúp doanh nghiệp tối ưu hóa quy trình làm việc và tăng hiệu quả kinh doanh.',
   authors: [{ name: 'DevGO2003' }],
@@ -67,7 +70,11 @@ export default function RootLayout({
             `,
           }}
         />
-        {children}
+        <AuthProvider>
+          <I18nProvider>
+            {children}
+          </I18nProvider>
+        </AuthProvider>
       </body>
     </html>
   )

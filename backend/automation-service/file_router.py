@@ -805,6 +805,11 @@ async def upload_document(
             # Only publish if Kafka is enabled
             if getattr(Config, 'KAFKA_ENABLED', False):
                 try:
+                    # Calculate hash values for file integrity first
+                    import hashlib
+                    md5_hash = hashlib.md5(file_content).hexdigest()
+                    sha256_hash = hashlib.sha256(file_content).hexdigest()
+                    
                     # 1) file.metadata.recorded - Enhanced payload theo sample.json
                     storage_block = {
                         "type": "s3" if Config.S3_ENABLED else "local",
@@ -817,7 +822,7 @@ async def upload_document(
                             "size": size,
                             "versionId": None,
                             "checksum": {
-                                "originalMD5": "md5-hash-abc123",  # TODO: Calculate actual MD5
+                                "originalMD5": md5_hash,
                                 "archiveMD5": None
                             }
                         } if Config.S3_ENABLED else None,
@@ -832,6 +837,7 @@ async def upload_document(
                     }
                     
                     print(f"[DEBUG] Preparing publish -> topic=file.metadata.recorded fileId={file_id} size={size} contentType={file.content_type}")
+                    
                     metadata_evt = {
                         "eventVersion": "1.0",
                         "eventType": "file.metadata.recorded",
@@ -847,6 +853,51 @@ async def upload_document(
                             "size": size,
                             "ownerUserId": "system",
                             "storage": storage_block,
+                            "file": {
+                                "id": file_id,
+                                "name": file.filename,
+                                "type": file.content_type,
+                                "size": size,
+                                "hash": {
+                                    "md5": md5_hash,
+                                    "sha256": sha256_hash
+                                },
+                                "permissions": {
+                                    "read": ["system", "user-001"],
+                                    "write": ["system"],
+                                    "delete": ["system"],
+                                    "share": ["system"]
+                                },
+                                "security": {
+                                    "encryption": "AES-256",
+                                    "watermark": False,
+                                    "digitalSignature": False,
+                                    "accessLogging": True
+                                },
+                                "version": 1
+                            },
+                            "metadata": {
+                                "fileSystem": {
+                                    "dateModified": now_iso,
+                                    "dateAdded": now_iso,
+                                    "mediaFilename": file.filename,
+                                    "originalFilename": file.filename,
+                                    "originalMD5": md5_hash,
+                                    "originalFileSize": size,
+                                    "originalMimeType": file.content_type,
+                                    "archiveMD5": None,
+                                    "archiveFileSize": None
+                                },
+                                "technical": {
+                                    "encoding": "UTF-8",
+                                    "lineEnding": "LF",
+                                    "bom": False,
+                                    "compression": "NONE",
+                                    "pages": None,
+                                    "wordCount": None,
+                                    "characterCount": len(plaintext_text) if plaintext_text else None
+                                }
+                            },
                             "version": 1
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
@@ -868,6 +919,12 @@ async def upload_document(
                         "language": classification_result.get("language", "vi")
                     }
                     
+                    # Extract key terms from plaintext (simple extraction)
+                    key_terms = []
+                    if plaintext_text:
+                        words = plaintext_text.split()[:50]  # First 50 words
+                        key_terms = [w for w in words if len(w) > 3][:10]  # First 10 meaningful words
+                    
                     plaintext_evt = {
                         "eventVersion": "1.0",
                         "eventType": "file.plaintext.extracted",
@@ -878,12 +935,17 @@ async def upload_document(
                         "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
                             "fileId": file_id,
+                            "title": file.filename,
                             "plaintext": plaintext_text,
+                            "summary": plaintext_text[:200] if plaintext_text else None,  # First 200 chars as summary
+                            "keyTerms": key_terms,
+                            "sections": [],  # Will be populated by AI analysis
                             "ocr": {
                                 "text": plaintext_text if file.content_type.lower() != "application/json" else None,
                                 "status": "COMPLETED" if plaintext_text else "SKIPPED"
                             },
                             "jsonContent": json_content_text,
+                            "jsonAnalysisStatus": "PARSED" if json_content_text else None,
                             "classification": enhanced_classification,
                             "processing": {"status": "COMPLETED", "error": None}
                         },

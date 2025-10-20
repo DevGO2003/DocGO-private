@@ -75,6 +75,13 @@ public class FileService {
 
         FileEntity file = fileOpt.get();
         try {
+            // Debug logging
+            log.debug("FileEntity nested maps - file: {}, storage: {}, metadata: {}, audit: {}", 
+                file.getFile() != null ? file.getFile().size() : "null",
+                file.getStorage() != null ? file.getStorage().size() : "null",
+                file.getMetadata() != null ? file.getMetadata().size() : "null",
+                file.getAudit() != null ? file.getAudit().size() : "null");
+            
             // Build DTO from nested Map fields
             FullFileResponseDto dto = FullFileResponseDto.builder()
                 .id(file.getId())
@@ -298,6 +305,10 @@ public class FileService {
         if (o instanceof Number) return ((Number) o).intValue();
         try { return o != null ? Integer.parseInt(o.toString()) : null; } catch (Exception e) { return null; }
     }
+    private Long asLong(Object o) {
+        if (o instanceof Number) return ((Number) o).longValue();
+        try { return o != null ? Long.parseLong(o.toString()) : null; } catch (Exception e) { return null; }
+    }
     private Boolean asBoolean(Object o) {
         if (o instanceof Boolean) return (Boolean) o;
         if (o != null) return "true".equalsIgnoreCase(o.toString());
@@ -324,8 +335,8 @@ public class FileService {
         if (map == null || map.isEmpty()) return null;
         return WorkflowDto.builder()
             .status(asString(map.get("status")))
-            .currentStep(asString(map.get("currentStep")))
-            .nextStep(asString(map.get("nextStep")))
+            .currentStage(asString(map.get("currentStage")))
+            .nextStage(asString(map.get("nextStage")))
             .build();
     }
     
@@ -372,20 +383,80 @@ public class FileService {
             .build();
     }
     
-    private FileInfoDto.PermissionsDto mapToPermissions(Map<String, Object> map) { return null; }
-    private FileInfoDto.SecurityDto mapToSecurity(Map<String, Object> map) { return null; }
-    private StorageDto.RetentionPolicyDto mapToRetentionPolicy(Map<String, Object> map) { return null; }
-    private StorageDto.AccessControlDto mapToAccessControl(Map<String, Object> map) { return null; }
-    private StorageDto.S3Dto mapToS3(Map<String, Object> map) { return null; }
-    private StorageDto.LocalDto mapToLocal(Map<String, Object> map) { return null; }
+    private FileInfoDto.PermissionsDto mapToPermissions(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return FileInfoDto.PermissionsDto.builder()
+            .read(asList(map.get("read")))
+            .write(asList(map.get("write")))
+            .delete(asList(map.get("delete")))
+            .share(asList(map.get("share")))
+            .build();
+    }
+    private FileInfoDto.SecurityDto mapToSecurity(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return FileInfoDto.SecurityDto.builder()
+            .encryption(asString(map.get("encryption")))
+            .watermark(asBoolean(map.get("watermark")))
+            .digitalSignature(asBoolean(map.get("digitalSignature")))
+            .accessLogging(asBoolean(map.get("accessLogging")))
+            .build();
+    }
+    private StorageDto.RetentionPolicyDto mapToRetentionPolicy(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return StorageDto.RetentionPolicyDto.builder()
+            .retentionPeriod(asInteger(map.get("retentionPeriod")))
+            .unit(asString(map.get("unit")))
+            .deleteAfter(asLocalDateTime(map.get("deleteAfter")))
+            .build();
+    }
+    private StorageDto.AccessControlDto mapToAccessControl(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return StorageDto.AccessControlDto.builder()
+            .allowedUsers(asList(map.get("allowedUsers")))
+            .allowedRoles(asList(map.get("allowedRoles")))
+            .deniedUsers(asList(map.get("deniedUsers")))
+            .build();
+    }
+    private StorageDto.S3Dto mapToS3(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return StorageDto.S3Dto.builder()
+            .bucket(asString(map.get("bucket")))
+            .key(asString(map.get("key")))
+            .region(asString(map.get("region")))
+            .storageClass(asString(map.get("storageClass")))
+            .build();
+    }
+    private StorageDto.LocalDto mapToLocal(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return StorageDto.LocalDto.builder()
+            .path(asString(map.get("path")))
+            .directory(asString(map.get("directory")))
+            .build();
+    }
     private VersioningDto.CurrentVersionInfoDto mapToCurrentVersionInfo(Map<String, Object> map) { return null; }
     private List<VersioningDto.VersionDto> mapToVersions(List<Object> list) { return null; }
     private List<VersioningDto.ChangeLogDto> mapToChangeLog(List<Object> list) { return null; }
     private List<VersioningDto.HistoryDto> mapToHistory(List<Object> list) { return null; }
-    private MetadataDto.FileSystemDto mapToFileSystem(Map<String, Object> map) { return null; }
+    private MetadataDto.FileSystemDto mapToFileSystem(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.FileSystemDto.builder()
+            .createdAt(asLocalDateTime(map.get("createdAt")))
+            .modifiedAt(asLocalDateTime(map.get("modifiedAt")))
+            .owner(asString(map.get("owner")))
+            .permissions(asString(map.get("permissions")))
+            .build();
+    }
     private MetadataDto.OriginalFileDto mapToOriginalFile(Map<String, Object> map) { return null; }
     private MetadataDto.ArchivedFileDto mapToArchivedFile(Map<String, Object> map) { return null; }
-    private MetadataDto.TechnicalDto mapToTechnical(Map<String, Object> map) { return null; }
+    private MetadataDto.TechnicalDto mapToTechnical(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.TechnicalDto.builder()
+            .format(asString(map.get("format")))
+            .mimeType(asString(map.get("mimeType")))
+            .size(asLong(map.get("size")))
+            .encoding(asString(map.get("encoding")))
+            .build();
+    }
     private List<AuditDto.ChangeHistoryDto> mapToChangeHistory(List<Object> list) { return null; }
     private List<AuditDto.AccessLogDto> mapToAccessLog(List<Object> list) { return null; }
 }
