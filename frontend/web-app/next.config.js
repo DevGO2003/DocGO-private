@@ -1,26 +1,11 @@
 /** @type {import('next').NextConfig} */
-// const { i18n } = require('./next-i18next.config')
-
 const nextConfig = {
-  // i18n, // Disabled to prevent 404 with /en/ prefix
-  // Hot reload optimization for Docker + PDF.js support
+  // App Router configuration
+  experimental: {
+    appDir: true,
+  },
+  // Hot reload optimization
   webpack: (config, { dev, isServer }) => {
-    // Dynamic import optimization
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        ...config.optimization.splitChunks,
-        cacheGroups: {
-          ...config.optimization.splitChunks.cacheGroups,
-          preview: {
-            test: /[\/]components[\/]preview[\/]/,
-            name: "preview",
-            chunks: "all",
-            priority: 10,
-          },
-        },
-      },
-    }
     if (dev && !isServer) {
       config.watchOptions = {
         poll: 1000,
@@ -40,8 +25,6 @@ const nextConfig = {
       ...config.resolve.alias,
       canvas: false,
     }
-    
-    // Keep canvas disabled to avoid native deps; allow pdfjs-dist to load normally
     
     return config
   },

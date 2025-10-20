@@ -13,7 +13,7 @@ export default function NotFound() {
         </div>
         
         <div className="space-y-4">
-          <Link
+          <Link 
             href="/"
             className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors mx-auto block w-fit"
           >
@@ -23,7 +23,7 @@ export default function NotFound() {
             Về trang chủ
           </Link>
           
-          <Link
+          <Link 
             href="/documents"
             className="inline-flex items-center px-6 py-3 rounded-lg bg-gray-600 text-white font-medium hover:bg-gray-700 transition-colors mx-auto block w-fit"
           >
@@ -34,10 +34,7 @@ export default function NotFound() {
           </Link>
           
           <div className="text-sm text-gray-500">
-            Hoặc{' '}
-            <Link href="/help-support" className="text-blue-600 hover:text-blue-800 underline">
-              xem hướng dẫn sử dụng
-            </Link>
+            Hoặc <Link href="/help-support" className="text-blue-600 hover:text-blue-800 underline">xem hướng dẫn sử dụng</Link>
           </div>
         </div>
       </div>

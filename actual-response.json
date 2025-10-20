@@ -1,0 +1,21 @@
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success",
+  "description": "Đã lấy thông tin file thành công",
+  "data": {
+    "id": "aaee2fa9-7483-44e1-a75c-b63e00958844",
+    "file": {
+      "id": "aaee2fa9-7483-44e1-a75c-b63e00958844",
+      "name": "test-upload-file.txt",
+      "type": "text/plain",
+      "size": 1154
+    },
+    "storage": {
+      "backupLocations": []
+    }
+  },
+  "timestamp": "2025-10-20T14:13:51.834833920Z",
+  "requestId": "78e7ddd3-d971-4a7b-825c-e2d4f2864ce5",
+  "path": "/api/v1/repository-management-service/files/aaee2fa9-7483-44e1-a75c-b63e00958844"
+}

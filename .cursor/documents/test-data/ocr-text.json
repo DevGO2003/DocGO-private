@@ -1,4 +1,0 @@
-{
-  "text": "Xin chào DocGO. Đây là nội dung kiểm thử cho quy trình OCR/triết xuất nội dung trên automation-service. Hợp đồng dịch vụ giữa Công ty A và Công ty B có ngày hiệu lực 2025-10-16 và tổng giá trị 120000000 VND. Điều khoản thanh toán trong vòng 30 ngày kể từ ngày nhận hóa đơn. Đây là đoạn văn bản mẫu để test endpoint nhận JSON (application/json)."
-}
-

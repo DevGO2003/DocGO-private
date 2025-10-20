@@ -1,17 +1,31 @@
 ---
-description: hello
+id: "rule-api-standards"
+description: "Chuẩn hóa URL patterns, RestResponse envelope, Controller/Router standards, và Exception handling cho DocGO APIs"
 alwaysApply: false
+globs:
+  - "**/*Controller.java"
+  - "**/*Router.py"
+  - "**/routers.py"
+  - "**/pages/api/**/*.ts"
+  - "**/src/controllers/**/*.ts"
+tags:
+  - api
+  - rest
+  - controller
+  - router
+  - response
+  - exception
+  - swagger
+  - documentation
 ---
-# Chuẩn hóa API cho DocGO
 
-Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), và viết tài liệu API. Quy tắc này dựa trên hiện trạng `user-management-service` và `file-management-service` (Spring Boot + GlobalExceptionHandler + RestResponse) và `automation-service` (FastAPI) và hướng tới đồng nhất giữa các service.
+# API Standards cho DocGO
 
-## 🎯 Mục tiêu chung
-- Chuẩn hóa URL, payload, error handling giữa các service
-- Chuẩn hóa response envelope và event payload
-- Đồng nhất cách viết tài liệu API
+## Mục tiêu
+- Chuẩn hóa URL patterns, payload, error handling giữa các service
+- Đồng nhất RestResponse envelope và exception handling
+- Chuẩn hóa cách viết tài liệu API và Swagger
 - Tối ưu workflow phát triển/triển khai
-- Bảo mật thông tin nhạy cảm và quản lý Git
 
 ## 1) Quy tắc URL
 - Base path: `/api/v1/{service-name}/...`
@@ -79,22 +93,59 @@ Mục tiêu: Đồng bộ cách đặt URL, payload, xử lý lỗi (handler), v
 - Response: `RestResponse<T>` với statusCode, shortMessage, description, data
 - Swagger UI: `/docs` cho tất cả services
 
+## 10) Exception Handling
+
+### Java (Spring Boot)
+- **GlobalExceptionHandler** → RestResponse với HTTP status 400/404/409/500
+- **Validation errors** → 400 Bad Request với danh sách lỗi chi tiết
+- **Not found** → 404 Not Found với message rõ ràng
+- **Conflict** → 409 Conflict khi xung đột dữ liệu
+- **Server error** → 500 Internal Server Error với requestId
+
+### Python (FastAPI)
+- **HTTPException** hoặc **RestResponse 500** với requestId, timestamp, path
+- **ValidationError** → 422 Unprocessable Entity
+- **Custom exceptions** → Map sang HTTP status codes phù hợp
+
+## 11) Tài liệu API (Swagger)
+
+### Java (Spring Boot)
+- **Controller**: `@Tag(name = "...", description = "...")`
+- **Method**: `@Operation(summary = "...", description = "...")`
+- **Response**: `RestResponse<T>` với statusCode, shortMessage, description, data
+- **Swagger UI**: `/docs` cho tất cả services
+
+### Python (FastAPI)
+- **Router**: `tags` và `prefix` chung
+- **Endpoint**: `summary`, `description`, `response_model`
+- **Response**: Consistent với RestResponse format
+- **Swagger UI**: `/docs` cho tất cả services
+
+### Frontend (Next.js API Routes)
+- **Route handler**: JSDoc comments với @param, @returns
+- **Response**: Consistent với RestResponse format
+- **Type definitions**: TypeScript interfaces cho request/response
+
+## 12) Best Practices
+
+### API Design
+- **RESTful principles**: Sử dụng HTTP methods đúng mục đích
+- **Consistent naming**: Kebab-case cho URLs, camelCase cho JSON
+- **Versioning**: `/api/v1/` prefix, chuẩn bị cho v2
+- **Pagination**: Standardized query parameters
+
+### Error Handling
+- **Consistent error format**: RestResponse cho tất cả errors
+- **Meaningful error messages**: Mô tả rõ nguyên nhân lỗi
+- **Proper HTTP status codes**: Sử dụng đúng status code
+- **Request tracing**: Luôn có requestId để debug
+
+### Documentation
+- **Complete API docs**: Tất cả endpoints phải có documentation
+- **Examples**: Request/response examples cho mỗi endpoint
+- **Error responses**: Document tất cả possible error responses
+- **Authentication**: Rõ ràng về auth requirements
+
 ---
 
-# Event Payload Standard
-- Schema chuẩn: eventVersion, eventType, eventId, timestamp, source, correlationId, actor, data, metadata
-- Event Types: FileUploaded, UserCreated, DocumentProcessed, AutomationCompleted
-- Implementation: Java dùng @EventListener, Python dùng Redis Pub/Sub
-
----
-
-# Exception Handling
-- Java: GlobalExceptionHandler → RestResponse với HTTP status 400/404/409/500
-- Python: HTTPException hoặc RestResponse 500 với requestId, timestamp, path
-
----
-
-# Tài liệu API
-- Java: @Tag, @Operation, @RequestBody với schema
-- Python: summary, description, tags nhất quán
-- Luôn nêu rõ: URL, headers, payload, RestResponse
+**Lưu ý**: API standards này đảm bảo tính nhất quán và khả năng mở rộng cho tất cả APIs trong DocGO ecosystem.

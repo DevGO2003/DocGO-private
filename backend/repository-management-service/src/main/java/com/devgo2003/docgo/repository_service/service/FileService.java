@@ -319,19 +319,59 @@ public class FileService {
         return new java.util.HashMap<>();
     }
 
-    // Stub implementations for nested mappers - using separate DTO classes
-    private WorkflowDto mapToWorkflow(Map<String, Object> map) { return null; }
+    // Basic implementations for nested mappers
+    private WorkflowDto mapToWorkflow(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return WorkflowDto.builder()
+            .status(asString(map.get("status")))
+            .currentStep(asString(map.get("currentStep")))
+            .nextStep(asString(map.get("nextStep")))
+            .build();
+    }
+    
     private List<PartyDto> mapToParties(List<Object> list) { return null; }
     private PaymentDto mapToPayment(Map<String, Object> map) { return null; }
     private ClausesDto mapToClauses(Map<String, Object> map) { return null; }
     private List<ReminderDto> mapToReminders(List<Object> list) { return null; }
     private RiskDto mapToRisk(Map<String, Object> map) { return null; }
     private ComplianceDto mapToCompliance(Map<String, Object> map) { return null; }
+    
     private List<ContentDto.SectionDto> mapToSections(List<Object> list) { return null; }
-    private ContentDto.OcrDto mapToOcr(Map<String, Object> map) { return null; }
-    private ContentDto.ClassificationDto mapToClassification(Map<String, Object> map) { return null; }
-    private ContentDto.ProcessingDto mapToProcessing(Map<String, Object> map) { return null; }
-    private FileInfoDto.HashDto mapToHash(Map<String, Object> map) { return null; }
+    
+    private ContentDto.OcrDto mapToOcr(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.OcrDto.builder()
+            .text(asString(map.get("text")))
+            .status(asString(map.get("status")))
+            .build();
+    }
+    
+    private ContentDto.ClassificationDto mapToClassification(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.ClassificationDto.builder()
+            .isContract(asBoolean(map.get("isContract")))
+            .confidence(asDouble(map.get("confidence")))
+            .category(asString(map.get("category")))
+            .language(asString(map.get("language")))
+            .build();
+    }
+    
+    private ContentDto.ProcessingDto mapToProcessing(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.ProcessingDto.builder()
+            .status(asString(map.get("status")))
+            .error(asString(map.get("error")))
+            .build();
+    }
+    
+    private FileInfoDto.HashDto mapToHash(Map<String, Object> map) { 
+        if (map == null || map.isEmpty()) return null;
+        return FileInfoDto.HashDto.builder()
+            .md5(asString(map.get("md5")))
+            .sha256(asString(map.get("sha256")))
+            .build();
+    }
+    
     private FileInfoDto.PermissionsDto mapToPermissions(Map<String, Object> map) { return null; }
     private FileInfoDto.SecurityDto mapToSecurity(Map<String, Object> map) { return null; }
     private StorageDto.RetentionPolicyDto mapToRetentionPolicy(Map<String, Object> map) { return null; }
