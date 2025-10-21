@@ -40,10 +40,24 @@ public class StorageDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class S3Dto {
+        private String url;
         private String bucket;
+        private String objectKey;
         private String key;
         private String region;
+        private String contentType;
+        private Long size;
+        private String versionId;
+        private ChecksumDto checksum;
         private String storageClass;
+    }
+
+    @Data
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ChecksumDto {
+        private String originalMD5;
+        private String archiveMD5;
     }
 
     @Data

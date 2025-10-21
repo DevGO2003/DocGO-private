@@ -114,11 +114,54 @@ public class FileEventConsumer {
                 }
                 
                 Map<String, Object> metadataData = asMap(data.get("metadata"));
-                if (metadataData != null) entity.setMetadata(metadataData);
+                if (metadataData == null) metadataData = new java.util.HashMap<>();
+                
+                // Build fileSystem metadata
+                Map<String, Object> fileSystem = new java.util.HashMap<>();
+                fileSystem.put("dateAdded", entity.getCreatedAt());
+                fileSystem.put("dateModified", entity.getCreatedAt());
+                fileSystem.put("mediaFilename", entity.getName());
+                fileSystem.put("originalFilename", asString(data.get("name")));
+                fileSystem.put("originalMD5", asString(fileData != null ? fileData.get("md5") : null));
+                fileSystem.put("originalFileSize", entity.getSize());
+                fileSystem.put("originalMimeType", entity.getMimeType());
+                fileSystem.put("archiveMD5", null);
+                fileSystem.put("archiveFileSize", null);
+                metadataData.put("fileSystem", fileSystem);
+                
+                // Build technical metadata with defaults
+                Map<String, Object> technical = new java.util.HashMap<>();
+                technical.put("encoding", "UTF-8");
+                technical.put("lineEnding", "LF");
+                technical.put("bom", false);
+                technical.put("compression", "NONE");
+                technical.put("pages", null);
+                technical.put("wordCount", null);
+                technical.put("characterCount", null);
+                metadataData.put("technical", technical);
+                
+                entity.setMetadata(metadataData);
+                log.debug("Built fileSystem and technical metadata for fileId={}", fileId);
+                
+                // Create initial overview with basic fields
+                Map<String, Object> overviewMap = new java.util.HashMap<>();
+                overviewMap.put("title", entity.getName());
+                overviewMap.put("status", "uploaded");
+                overviewMap.put("ownerUserId", entity.getOwnerUserId() != null ? entity.getOwnerUserId() : "system");
+                overviewMap.put("region", "VN"); // Default region
+                overviewMap.put("isNew", true); // New file
+                overviewMap.put("language", "vi"); // Default language
+                entity.setOverview(overviewMap);
                 
                 Map<String, Object> auditMap = new java.util.HashMap<>();
                 auditMap.put("createdAt", entity.getCreatedAt());
                 auditMap.put("createdBy", entity.getCreatedBy());
+                auditMap.put("lastModifiedAt", entity.getCreatedAt());
+                auditMap.put("lastModifiedBy", entity.getCreatedBy());
+                auditMap.put("updatedAt", entity.getCreatedAt());
+                auditMap.put("updatedBy", entity.getCreatedBy());
+                auditMap.put("deletedAt", null);
+                auditMap.put("deletedBy", null);
                 auditMap.put("version", 1);
                 auditMap.put("isDeleted", false);
                 entity.setAudit(auditMap);
@@ -207,9 +250,10 @@ public class FileEventConsumer {
             if (fileId == null) return;
 
             // Build content object
+            String plaintext = asString(data.get("plaintext"));
             Map<String, Object> contentMap = new java.util.HashMap<>();
-            contentMap.put("plaintext", asString(data.get("plaintext")));
-            contentMap.put("extractedText", asString(data.get("plaintext")));
+            contentMap.put("plaintext", plaintext);
+            contentMap.put("extractedText", plaintext);
             contentMap.put("summary", asString(data.get("summary")));
             contentMap.put("keyTerms", asList(data.get("keyTerms")));
             contentMap.put("sections", asList(data.get("sections")));
@@ -218,6 +262,21 @@ public class FileEventConsumer {
             contentMap.put("processing", data.get("processing") != null ? data.get("processing") : new java.util.HashMap<>());
             contentMap.put("jsonContent", data.get("jsonContent"));
             contentMap.put("jsonAnalysisStatus", asString(data.get("jsonAnalysisStatus")));
+            
+            // Update technical metadata with computed values from plaintext
+            Map<String, Object> technical = new java.util.HashMap<>();
+            technical.put("encoding", "UTF-8");
+            technical.put("lineEnding", detectLineEnding(plaintext));
+            technical.put("bom", false);
+            technical.put("compression", "NONE");
+            technical.put("pages", null); // null for non-PDF
+            technical.put("wordCount", computeWordCount(plaintext));
+            technical.put("characterCount", plaintext != null ? plaintext.length() : null);
+            
+            Map<String, Object> metadataUpdate = new java.util.HashMap<>();
+            metadataUpdate.put("technical", technical);
+            log.debug("Computed technical metadata: wordCount={}, characterCount={}", 
+                      technical.get("wordCount"), technical.get("characterCount"));
 
             // Build overview object
             Map<String, Object> overviewMap = new java.util.HashMap<>();
@@ -230,8 +289,27 @@ public class FileEventConsumer {
                 overviewMap.put("category", asString(classification.get("category")));
                 overviewMap.put("tags", asList(classification.get("tags")));
                 overviewMap.put("language", asString(classification.get("language")));
-                overviewMap.put("region", asString(classification.get("region")));
-                overviewMap.put("isNew", asBoolean(classification.get("isNew")));
+                
+                // Set region with default "VN" if null
+                String region = asString(classification.get("region"));
+                overviewMap.put("region", region != null ? region : "VN");
+                
+                // Get ownerUserId from existing entity
+                FileEntity existingEntity = fileRepository.findById(fileId).orElse(null);
+                if (existingEntity != null) {
+                    overviewMap.put("ownerUserId", existingEntity.getOwnerUserId());
+                    
+                    // Calculate isNew based on creation time (< 24h)
+                    LocalDateTime createdAt = existingEntity.getCreatedAt();
+                    boolean isNew = createdAt != null && 
+                        createdAt.isAfter(LocalDateTime.now().minusHours(24));
+                    overviewMap.put("isNew", isNew);
+                } else {
+                    // Fallback if entity not found
+                    overviewMap.put("ownerUserId", "system");
+                    overviewMap.put("isNew", true);
+                }
+                
                 overviewMap.put("isContract", asBoolean(classification.get("isContract")));
             }
 
@@ -437,5 +515,18 @@ public class FileEventConsumer {
             return result;
         }
         return null;
+    }
+    
+    private String detectLineEnding(String text) {
+        if (text == null) return "LF";
+        if (text.contains("\r\n")) return "CRLF";
+        if (text.contains("\n")) return "LF";
+        return "LF";
+    }
+    
+    private Integer computeWordCount(String text) {
+        if (text == null || text.isEmpty()) return null;
+        String[] words = text.trim().split("\\s+");
+        return words.length > 0 && !words[0].isEmpty() ? words.length : null;
     }
 }

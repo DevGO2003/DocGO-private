@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'next/navigation'
 import { Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline'
 import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent } from '@/components/ui'
@@ -41,9 +40,6 @@ type ContractItem = {
 // local-only view model to match existing CustomTable props
 
 export default function DocumentsPage() {
-  // Lấy repositoryId từ URL (ví dụ /repositories/1 => id = '1')
-  const params = useParams() as { id: string }
-  const repositoryId = params?.id
   function getBadgeClass(status: string) {
     switch (status) {
       case 'DRAFT':
@@ -116,20 +112,17 @@ export default function DocumentsPage() {
   const [reloadTick, setReloadTick] = useState(0)
   const refreshData = async () => { setRefreshing(true); try { setReloadTick(x => x + 1) } finally { setRefreshing(false) } }
 
-  // Load available tags once
+  // Load available tags once - Disabled tags API
   useEffect(() => {
     const loadTags = async () => {
       setTagsLoading(true)
       setTagsError(false)
       
       try {
-        // const res = await tagAPI.getAllTags() // Removed - tags API disabled
-        const res = { data: { data: [] } } // Mock empty response
-        const payload: any = res.data?.data
+        // const res = await tagAPI.getAllTags()
+        // const payload: any = res.data?.data
         // Extract tag names from TagDto objects
-        const tagsFromApi: string[] = Array.isArray(payload) 
-          ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)
-          : []
+        const tagsFromApi: string[] = [] // Empty - tags API disabled
         
         if (tagsFromApi.length === 0) {
           setTagsError(true)
@@ -165,8 +158,6 @@ export default function DocumentsPage() {
           view: 'full',
           searchTerm: debouncedSearch || undefined,
           documentType: activeTab === 'contract' ? 'CONTRACT' : undefined,
-          // TODO: Nếu backend hỗ trợ lọc theo kho, truyền repositoryId vào API (query param)
-          // repositoryId,
         })
         if (aborted) return
         const paginated = mapFileApiPageToPaginatedDocuments(payload)
@@ -189,6 +180,10 @@ export default function DocumentsPage() {
           riskLevel: c.riskLevel,
           reminders: [],
           documentType: (c as any).documentType,
+          // Preserve preview-related fields for GeneralFileCard
+          fileType: (c as any).fileType,
+          fileSize: (c as any).fileSize,
+          storage: (c as any).storage,
         }))
         setItems(mapped)
         setDisplayedItems(mapped)
@@ -208,7 +203,7 @@ export default function DocumentsPage() {
     }
     load()
     return () => { aborted = true }
-  }, [page, pageSize, sortBy, sortDirection, debouncedSearch, activeTab, reloadTick /*, repositoryId*/])
+  }, [page, pageSize, sortBy, sortDirection, debouncedSearch, activeTab, reloadTick])
 
 
   // Separate effect for search input to update debouncedSearch
@@ -257,19 +252,17 @@ export default function DocumentsPage() {
 
   const handleShowMore = () => {}
 
-  // Retry loading tags
+  // Retry loading tags - Disabled tags API
   const handleRetryTags = () => {
     const loadTags = async () => {
       setTagsLoading(true)
       setTagsError(false)
       
       try {
-        // const res = await tagAPI.getAllTags() // Removed - tags API disabled
-        const res = { data: { data: [] } } // Mock empty response
-        const payload: any = res.data?.data
-        const tagsFromApi: string[] = Array.isArray(payload) 
-          ? payload.map((tag: any) => tag.name || tag.displayName).filter(Boolean)
-          : []
+        // const res = await tagAPI.getAllTags()
+        // const payload: any = res.data?.data
+        // Extract tag names from TagDto objects
+        const tagsFromApi: string[] = [] // Empty - tags API disabled
         
         if (tagsFromApi.length === 0) {
           setTagsError(true)
@@ -296,11 +289,8 @@ export default function DocumentsPage() {
       <div className="space-y-6">
         {/* Page Header */}
         <HeaderPanel
-          title={`Quản lý tài liệu${repositoryId ? ` - Kho ${repositoryId}` : ''}`}
-          breadcrumbs={[
-            { label: 'Tài liệu', href: '/documents' },
-            { label: repositoryId ? `Kho ${repositoryId}` : 'Danh sách', current: true }
-          ]}
+          title="Quản lý tài liệu"
+          breadcrumbs={[{ label: 'Tài liệu', href: '/documents' }, { label: 'Danh sách', current: true }]}
           right={
             <div className="w-full">
               <DocumentsFilters

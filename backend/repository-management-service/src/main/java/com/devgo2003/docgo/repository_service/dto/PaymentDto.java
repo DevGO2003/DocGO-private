@@ -11,6 +11,8 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentDto {
+    private Double totalValue;
+    private String currency;
     private List<ScheduleDto> schedule;
     private String method;
     private String paymentMethod;

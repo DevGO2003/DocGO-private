@@ -1,4 +1,4 @@
-$fileId = "01c4a6e1-e7f2-413f-adad-1c08d3a8c7e3"
+$fileId = "4e6026ed-4295-468f-8c0b-8761abccc6d1"
 $uri = "http://localhost:8002/api/v1/repository-management-service/files/$fileId"
 
 Write-Host "Fetching file details for ID: $fileId" -ForegroundColor Cyan

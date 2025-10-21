@@ -235,6 +235,12 @@ public class FileService {
         Map<String, Object> fileMap = file.getFile();
         if (fileMap == null) fileMap = new java.util.HashMap<>();
 
+        // Get version from audit or default to 1
+        Integer version = 1;
+        if (file.getAudit() != null && file.getAudit().get("version") != null) {
+            version = asInteger(file.getAudit().get("version"));
+        }
+
         return FileInfoDto.builder()
             .id(file.getId())
             .name(file.getName())
@@ -243,7 +249,7 @@ public class FileService {
             .hash(mapToHash(asMap(fileMap.get("hash"))))
             .permissions(mapToPermissions(asMap(fileMap.get("permissions"))))
             .security(mapToSecurity(asMap(fileMap.get("security"))))
-            .version(file.getVersion())
+            .version(version)
             .build();
     }
 
@@ -348,8 +354,79 @@ public class FileService {
             .build();
     }
     
-    private List<PartyDto> mapToParties(List<Object> list) { return null; }
-    private PaymentDto mapToPayment(Map<String, Object> map) { return null; }
+    private List<PartyDto> mapToParties(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<PartyDto> parties = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> partyMap = asMap(item);
+            if (partyMap == null) continue;
+            
+            PartyDto party = PartyDto.builder()
+                .id(asString(partyMap.get("id")))
+                .name(asString(partyMap.get("name")))
+                .type(toUpperEnum(asString(partyMap.get("type"))))
+                .role(asString(partyMap.get("role")))
+                .contact(mapToContact(asMap(partyMap.get("contact"))))
+                .representative(mapToRepresentative(asMap(partyMap.get("representative"))))
+                .taxCode(asString(partyMap.get("taxCode")))
+                .build();
+            parties.add(party);
+        }
+        
+        log.debug("Mapped {} parties", parties.size());
+        return parties;
+    }
+    
+    private PartyDto.ContactDto mapToContact(Map<String, Object> map) {
+        if (map == null) return null;
+        return PartyDto.ContactDto.builder()
+            .email(asString(map.get("email")))
+            .phone(asString(map.get("phone")))
+            .address(asString(map.get("address")))
+            .build();
+    }
+    
+    private PartyDto.RepresentativeDto mapToRepresentative(Map<String, Object> map) {
+        if (map == null) return null;
+        return PartyDto.RepresentativeDto.builder()
+            .name(asString(map.get("name")))
+            .position(asString(map.get("position")))
+            .email(asString(map.get("email")))
+            .build();
+    }
+    private PaymentDto mapToPayment(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        
+        return PaymentDto.builder()
+            .totalValue(asDouble(map.get("totalValue")))
+            .currency(toUpperEnum(asString(map.get("currency"))))
+            .schedule(mapToSchedule(asList(map.get("schedule"))))
+            .method(asString(map.get("method")))
+            .paymentMethod(asString(map.get("paymentMethod")))
+            .build();
+    }
+    
+    private List<PaymentDto.ScheduleDto> mapToSchedule(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<PaymentDto.ScheduleDto> schedules = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> scheduleMap = asMap(item);
+            if (scheduleMap == null) continue;
+            
+            PaymentDto.ScheduleDto schedule = PaymentDto.ScheduleDto.builder()
+                .milestone(asString(scheduleMap.get("milestone")))
+                .percentage(asInteger(scheduleMap.get("percentage")))
+                .amount(asDouble(scheduleMap.get("amount")))
+                .dueDate(asLocalDateTime(scheduleMap.get("dueDate")))
+                .status(toUpperEnum(asString(scheduleMap.get("status"))))
+                .build();
+            schedules.add(schedule);
+        }
+        
+        return schedules;
+    }
     private ClausesDto mapToClauses(Map<String, Object> map) { return null; }
     private List<ReminderDto> mapToReminders(List<Object> list) { return null; }
     private RiskDto mapToRisk(Map<String, Object> map) { return null; }
@@ -428,10 +505,24 @@ public class FileService {
     private StorageDto.S3Dto mapToS3(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return StorageDto.S3Dto.builder()
+            .url(asString(map.get("url")))
             .bucket(asString(map.get("bucket")))
+            .objectKey(asString(map.get("objectKey")))
             .key(asString(map.get("key")))
             .region(asString(map.get("region")))
+            .contentType(asString(map.get("contentType")))
+            .size(asLong(map.get("size")))
+            .versionId(asString(map.get("versionId")))
+            .checksum(mapToChecksum(asMap(map.get("checksum"))))
             .storageClass(asString(map.get("storageClass")))
+            .build();
+    }
+    
+    private StorageDto.ChecksumDto mapToChecksum(Map<String, Object> map) {
+        if (map == null) return null;
+        return StorageDto.ChecksumDto.builder()
+            .originalMD5(asString(map.get("originalMD5")))
+            .archiveMD5(asString(map.get("archiveMD5")))
             .build();
     }
     private StorageDto.LocalDto mapToLocal(Map<String, Object> map) { 

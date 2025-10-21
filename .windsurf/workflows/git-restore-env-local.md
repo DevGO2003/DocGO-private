@@ -1,6 +1,4 @@
----
-description: Git Restore ENV Local
----
+-description: Git Restore ENV Local
 
 # Git Restore ENV Local
 
@@ -22,12 +20,12 @@ Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xon
         ```json
         [
         {
-            "BackupName": "backend_authentication-identity-service_env_.env",
-            "OriginalPath": "backend/authentication-identity-service/env/.env"
+            "BackupName": "backend_user-management-service_.env",
+            "OriginalPath": "backend/user-management-service/.env"
         },
         {
             "BackupName": "frontend_env_.env.local",
-            "OriginalPath": "frontend/env/.env.local"
+            "OriginalPath": "frontend/web-app/.env.local"
         },
         {
             "BackupName": "windsurf_mcp.json",
@@ -35,6 +33,6 @@ Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xon
         }
         ]
         ```
-        - File `backend_authentication-identity-service_env_.env` trong backup sẽ được đặt lại thành `backend/authentication-identity-service/env/.env`.
-        - File `frontend_env_.env.local` trong backup sẽ được đặt lại thành `frontend/env/.env.local`.
+        - File `backend_user-management-service_.env` trong backup sẽ được đặt lại thành `backend/user-management-service/.env`.
+        - File `frontend_env_.env.local` trong backup sẽ được đặt lại thành `frontend/web-app/.env.local`.
         - File `windsurf_mcp.json` trong backup sẽ được đặt lại thành `.windsurf/mcp.json`.

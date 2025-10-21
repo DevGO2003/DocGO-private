@@ -30,7 +30,7 @@ docker compose -f docker-compose.yml logs -f <service-name>
 - `frontend` (Next.js) - Port 3000
 - `api-gateway` (Next.js) - Port 8000
 - `user-management-service` (Spring Boot) - Port 8001
-- `file-management-service` (Spring Boot) - Port 8002
+- `repository-management-service` (Spring Boot) - Port 8002
 - `automation-service` (FastAPI) - Port 8003
 
 ## Ghi chú

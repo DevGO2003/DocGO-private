@@ -1,6 +1,4 @@
----
-description: Git Backup ENV Local
----
+-description: Git Backup ENV Local
 
 # Git Backup ENV Local
 
@@ -29,8 +27,8 @@ Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xon
             "OriginalPath": "backend/user-management-service/.env"
             },
             {
-            "BackupName": "backend_file-management-service_.env",
-            "OriginalPath": "backend/file-management-service/.env"
+            "BackupName": "backend_repository-management-service_.env",
+            "OriginalPath": "backend/repository-management-service/.env"
             },
             {
             "BackupName": "backend_automation-service_.env",
@@ -51,7 +49,7 @@ Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xon
         ]
         ```
         - File gốc `backend/user-management-service/.env` → được lưu thành `backend_user-management-service_.env` trong backup.
-        - File gốc `backend/file-management-service/.env` → được lưu thành `backend_file-management-service_.env` trong backup.
+        - File gốc `backend/repository-management-service/.env` → được lưu thành `backend_repository-management-service_.env` trong backup.
         - File gốc `backend/automation-service/.env` → được lưu thành `backend_automation-service_.env` trong backup.
         - File gốc `backend/api-gateway/.env` → được lưu thành `backend_api-gateway_.env` trong backup.
         - File gốc `frontend/web-app/.env.local` → được lưu thành `frontend_web-app_.env.local` trong backup.
