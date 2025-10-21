@@ -22,45 +22,45 @@ export function ClausesTab({ data }: ClausesTabProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Key Clauses */}
       {clauses.key && clauses.key.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <CheckBadgeIcon className="w-6 h-6 text-green-600" />
-            <h3 className="text-lg font-semibold">Điều khoản chính ({clauses.key.length})</h3>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckBadgeIcon className="w-4 h-4 text-green-600" />
+            <h3 className="text-sm font-semibold text-gray-900">Điều khoản chính ({clauses.key.length})</h3>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {clauses.key.map((clause: any, idx: number) => (
-              <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+              <div key={idx} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow bg-gradient-to-r from-green-50 to-white">
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-base">{clause.name}</h4>
-                  <div className="flex gap-2">
+                  <h4 className="font-semibold text-sm text-gray-900">{clause.name}</h4>
+                  <div className="flex gap-1">
                     {clause.importance && (
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${importanceColors[clause.importance.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${importanceColors[clause.importance.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
                         {clause.importance}
                       </span>
                     )}
                     {clause.risk && (
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${riskColors[clause.risk.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
-                        Risk: {clause.risk}
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${riskColors[clause.risk.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                        {clause.risk}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-700 mb-2">{clause.description}</p>
+                <p className="text-xs text-gray-700 mb-2">{clause.description}</p>
 
                 {clause.content && (
-                  <div className="bg-gray-50 p-3 rounded text-sm italic text-gray-600 mb-2">
+                  <div className="bg-white p-2 rounded text-xs italic text-gray-600 mb-2 border border-gray-200">
                     {clause.content}
                   </div>
                 )}
 
                 {clause.advice && (
-                  <div className="bg-blue-50 p-3 rounded text-sm">
-                    <span className="font-medium text-blue-900">💡 Lời khuyên: </span>
+                  <div className="bg-blue-50 p-2 rounded text-xs border border-blue-200">
+                    <span className="font-medium text-blue-900">💡 </span>
                     <span className="text-blue-800">{clause.advice}</span>
                   </div>
                 )}
@@ -72,17 +72,17 @@ export function ClausesTab({ data }: ClausesTabProps) {
 
       {/* Unfavorable Clauses */}
       {clauses.unfavorable && clauses.unfavorable.length > 0 && (
-        <div className="bg-white rounded-lg border border-red-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
-            <h3 className="text-lg font-semibold text-red-900">Điều khoản bất lợi ({clauses.unfavorable.length})</h3>
+        <div className="bg-white rounded-lg border border-red-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <ExclamationTriangleIcon className="w-4 h-4 text-red-600" />
+            <h3 className="text-sm font-semibold text-red-900">Điều khoản bất lợi ({clauses.unfavorable.length})</h3>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {clauses.unfavorable.map((clause: any, idx: number) => (
-              <div key={idx} className="border border-red-200 rounded-lg p-4 bg-red-50">
+              <div key={idx} className="border border-red-200 rounded-lg p-3 bg-gradient-to-r from-red-50 to-white">
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-base text-red-900">{clause.name}</h4>
+                  <h4 className="font-semibold text-sm text-red-900">{clause.name}</h4>
                   {clause.risk && (
                     <span className={`px-2 py-1 rounded text-xs font-medium ${riskColors[clause.risk.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
                       Risk: {clause.risk}

@@ -40,13 +40,13 @@ export function PaymentSection({ payment, totalValue, currency }: PaymentSection
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Lịch thanh toán</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-900">Lịch thanh toán</h3>
         {totalValue && (
           <div className="text-right">
-            <p className="text-sm text-gray-600">Tổng giá trị</p>
-            <p className="text-xl font-bold text-indigo-600">
+            <p className="text-xs text-gray-500">Tổng giá trị</p>
+            <p className="text-lg font-bold text-green-600">
               {formatCurrency(totalValue, currency)}
             </p>
           </div>
@@ -54,34 +54,34 @@ export function PaymentSection({ payment, totalValue, currency }: PaymentSection
       </div>
 
       {payment.method && (
-        <div className="mb-4 p-3 bg-gray-50 rounded">
-          <span className="text-sm text-gray-600">Phương thức: </span>
-          <span className="font-medium">{payment.paymentMethod || payment.method}</span>
+        <div className="mb-3 p-2 bg-gradient-to-r from-blue-50 to-white rounded border border-blue-100">
+          <span className="text-xs text-gray-600">Phương thức: </span>
+          <span className="text-xs font-medium text-gray-900">{payment.paymentMethod || payment.method}</span>
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto -mx-4 px-4">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-2 px-3 text-sm font-semibold text-gray-700">Mốc</th>
-              <th className="text-right py-2 px-3 text-sm font-semibold text-gray-700">%</th>
-              <th className="text-right py-2 px-3 text-sm font-semibold text-gray-700">Số tiền</th>
-              <th className="text-center py-2 px-3 text-sm font-semibold text-gray-700">Hạn chót</th>
-              <th className="text-center py-2 px-3 text-sm font-semibold text-gray-700">Trạng thái</th>
+            <tr className="border-b border-gray-200 bg-gray-50">
+              <th className="text-left py-2 px-2 font-semibold text-gray-700">Mốc</th>
+              <th className="text-right py-2 px-2 font-semibold text-gray-700">%</th>
+              <th className="text-right py-2 px-2 font-semibold text-gray-700">Số tiền</th>
+              <th className="text-center py-2 px-2 font-semibold text-gray-700">Hạn chót</th>
+              <th className="text-center py-2 px-2 font-semibold text-gray-700">Trạng thái</th>
             </tr>
           </thead>
           <tbody>
             {payment.schedule.map((item, idx) => (
-              <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-3 px-3 text-sm">{item.milestone}</td>
-                <td className="py-3 px-3 text-sm text-right font-medium">{item.percentage}%</td>
-                <td className="py-3 px-3 text-sm text-right font-medium">
+              <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="py-2 px-2 text-gray-900">{item.milestone}</td>
+                <td className="py-2 px-2 text-right font-semibold text-gray-900">{item.percentage}%</td>
+                <td className="py-2 px-2 text-right font-semibold text-gray-900">
                   {formatCurrency(item.amount, currency)}
                 </td>
-                <td className="py-3 px-3 text-sm text-center">{formatDate(item.dueDate)}</td>
-                <td className="py-3 px-3 text-center">
-                  <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${statusColors[item.status] || 'bg-gray-100 text-gray-800'}`}>
+                <td className="py-2 px-2 text-center text-gray-700">{formatDate(item.dueDate)}</td>
+                <td className="py-2 px-2 text-center">
+                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${statusColors[item.status] || 'bg-gray-100 text-gray-800'}`}>
                     {item.status}
                   </span>
                 </td>
