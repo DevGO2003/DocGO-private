@@ -1,0 +1,6 @@
+feat: add MongoDB and fix contract metadata fallback
+
+- Add MongoDB service to docker-compose.yml
+- Add contractMetadata fallback in FileEventConsumer
+- Fix DTO fields (ReminderDto, RiskDto, ComplianceDto)
+- Add test scripts for contract schema validation

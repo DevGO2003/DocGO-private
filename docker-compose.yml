@@ -75,24 +75,6 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
-  # MongoDB (Document database for repository service)
-  mongodb:
-    container_name: mongodb
-    image: mongo:7-jammy
-    
-    ports:
-      - "${MONGODB_PORT:-27017}:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-admin123}
-      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-docgo}
-    volumes:
-      - mongodb-data:/data/db
-      - mongodb-config:/data/configdb
-    networks:
-      - docgo-network
-    restart: unless-stopped
-
 
   # ==========================================
   # MICROSERVICES
@@ -141,7 +123,6 @@ services:
     depends_on:
       - kafka
       - redis
-      - mongodb
     networks:
       - docgo-network
     volumes:
@@ -248,10 +229,6 @@ volumes:
   zookeeper-logs:
     driver: local
   redis-data:
-    driver: local
-  mongodb-data:
-    driver: local
-  mongodb-config:
     driver: local
   maven-repo:
     driver: local
