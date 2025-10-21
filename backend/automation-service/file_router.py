@@ -898,8 +898,8 @@ async def upload_document(
                                     "bom": False,
                                     "compression": "NONE",
                                     "pages": None,
-                                    "wordCount": None,
-                                    "characterCount": len(plaintext_text) if plaintext_text else None
+                                    "wordCount": len(plaintext_text.split()) if plaintext_text else 0,
+                                    "characterCount": len(plaintext_text) if plaintext_text else 0
                                 }
                             },
                             "version": 1
@@ -929,6 +929,9 @@ async def upload_document(
                         words = plaintext_text.split()[:50]  # First 50 words
                         key_terms = [w for w in words if len(w) > 3][:10]  # First 10 meaningful words
                     
+                    # Create extractedText (cleaned version)
+                    extracted_text = " ".join(plaintext_text.split()) if plaintext_text else ""
+                    
                     plaintext_evt = {
                         "eventVersion": "1.0",
                         "eventType": "file.plaintext.extracted",
@@ -940,13 +943,42 @@ async def upload_document(
                         "data": {
                             "fileId": file_id,
                             "title": file.filename,
-                            "plaintext": plaintext_text,
-                            "summary": plaintext_text[:200] if plaintext_text else None,  # First 200 chars as summary
+                            "plaintext": plaintext_text,  # Raw text
+                            "extractedText": extracted_text,  # Cleaned text
+                            "summary": plaintext_text[:200] if plaintext_text else None,
                             "keyTerms": key_terms,
                             "sections": [],  # Will be populated by AI analysis
                             "ocr": {
                                 "text": plaintext_text if file.content_type.lower() != "application/json" else None,
-                                "status": "COMPLETED" if plaintext_text else "SKIPPED"
+                                "status": "COMPLETED" if plaintext_text else "SKIPPED",
+                                "engine": "direct_extraction",  # Enhanced field
+                                "confidence": 1.0 if plaintext_text else 0.0,  # Enhanced field
+                                "processedAt": now_iso,  # Enhanced field
+                                "processingTime": 0.0,  # Enhanced field
+                                "error": None,  # Enhanced field
+                                "metadata": {  # Enhanced field
+                                    "language": "vie+eng",
+                                    "pageCount": 1,
+                                    "boxCount": 0,
+                                    "averageConfidence": 1.0 if plaintext_text else 0.0
+                                } if plaintext_text else None
+                            },
+                            "extraction": {  # NEW: extraction details
+                                "status": "SUCCESS" if plaintext_text else "FAILED",
+                                "method": "direct",
+                                "extractedAt": now_iso,
+                                "characterCount": len(plaintext_text) if plaintext_text else 0,
+                                "wordCount": len(plaintext_text.split()) if plaintext_text else 0,
+                                "error": None
+                            },
+                            "summarization": {  # NEW: summarization details
+                                "status": "SUCCESS" if plaintext_text else "SKIPPED",
+                                "model": "simple_extraction",
+                                "processedAt": now_iso,
+                                "processingTime": 0.0,
+                                "inputTokens": len(plaintext_text.split()) if plaintext_text else 0,
+                                "outputTokens": len(plaintext_text[:200].split()) if plaintext_text else 0,
+                                "error": None
                             },
                             "jsonContent": json_content_text,
                             "jsonAnalysisStatus": "PARSED" if json_content_text else None,
