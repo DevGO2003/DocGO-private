@@ -341,10 +341,13 @@ public class FileEventConsumer {
             String fileId = asString(data.get("fileId"));
             if (fileId == null) return;
 
-            // Build comprehensive contract data from summaryResult or data fields
+            // Build comprehensive contract data from summaryResult, contractMetadata, or data fields
             Map<String, Object> summaryResult = asMap(data.get("summaryResult"));
             if (summaryResult == null) {
-                summaryResult = data; // Fallback to data if no summaryResult
+                summaryResult = asMap(data.get("contractMetadata")); // Try contractMetadata
+            }
+            if (summaryResult == null) {
+                summaryResult = data; // Fallback to data if no summaryResult/contractMetadata
             }
             
             log.debug("Processing contract summary for fileId={}, has summaryResult={}", 

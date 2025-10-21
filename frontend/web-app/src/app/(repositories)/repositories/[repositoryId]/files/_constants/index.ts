@@ -13,3 +13,5 @@ export const API_ENDPOINTS = {
   list: '/api/v1/repository-management-service/files',
   detail: (id: string) => `/api/v1/repository-management-service/files/${id}`,
 }
+
+
