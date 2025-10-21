@@ -20,7 +20,7 @@ export default function DocumentDetailPage() {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>('')
   const [activeMainTab, setActiveMainTab] = useState<string>('contracts')
-  const [activeSubTab, setActiveSubTab] = useState<string>('basic-info')
+  const [activeSubTab, setActiveSubTab] = useState<string>('contract-overview')
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -218,7 +218,7 @@ export default function DocumentDetailPage() {
               activeMainTab={activeMainTab}
               onChange={(tabId) => {
                 setActiveMainTab(tabId)
-                if (tabId === 'contracts') setActiveSubTab('basic-info')
+                if (tabId === 'contracts') setActiveSubTab('contract-overview')
                 else if (tabId === 'overview') setActiveSubTab('details')
                 else if (tabId === 'comments') setActiveSubTab('comments-list')
               }}

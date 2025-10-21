@@ -1,0 +1,16 @@
+feat: full schema compliance for CONTRACT_SUMMARY_GENERATED event
+
+- AI không trả về thì set null thay vì hardcode defaults
+- Parties structure đầy đủ: id, type, contact, representative
+- Payment schedule với full fields: milestone, percentage, amount, dueDate, status
+- Clauses với key/unfavorable arrays (name, description, content, importance, risk, advice)
+- Reminders với đầy đủ fields: date, type, title, description, notifyBefore, status, assignedTo
+- Risk với level, score, factors[], mitigations[], advice
+- Compliance với status, requirements[], regulations[], certifications[], issues[], recommendations[]
+
+feat: add OCR fallback to Tesseract
+
+- Add extract_with_ai_fallback() method to OCRService
+- AI OCR thất bại → tự động dùng Tesseract OCR
+- Log rõ ràng engine nào được sử dụng (ai, tesseract_fallback)
+- Đảm bảo text extraction luôn thành công với fallback mechanism

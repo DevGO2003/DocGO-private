@@ -1,15 +1,23 @@
 'use client'
 
 import React from 'react'
-import { DocumentTextIcon, InformationCircleIcon, BuildingOfficeIcon, TagIcon, CpuChipIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, Cog6ToothIcon, DocumentIcon, FolderIcon, ClockIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { DocumentTextIcon, InformationCircleIcon, BuildingOfficeIcon, TagIcon, CpuChipIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, Cog6ToothIcon, DocumentIcon, FolderIcon, ClockIcon, ShieldCheckIcon, CurrencyDollarIcon, BellIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 // Import all components
 import { CommentsMainTab } from './CommentsMainTab'
-import { BasicInfoTab } from './contract/BasicInfoTab'
-import { BusinessInfoTab } from './contract/BusinessInfoTab'
+// New Contract Tabs
+import { ContractOverviewTab } from './contract/ContractOverviewTab'
+import { PartiesTab } from './contract/PartiesTab'
+import { PaymentTab } from './contract/PaymentTab'
+import { ClausesTab } from './contract/ClausesTab'
+import { RiskTab } from './contract/RiskTab'
+import { RemindersTab } from './contract/RemindersTab'
+import { ComplianceTab } from './contract/ComplianceTab'
+// Old Contract Tabs (keeping for reference)
 import { ClassificationTab } from './contract/ClassificationTab'
 import { AIAnalysisTab } from './contract/AIAnalysisTab'
 import { WorkflowTab } from './contract/WorkflowTab'
+// Overview Tabs
 import { DetailsTab } from './overview/DetailsTab'
 import { ContentTab } from './overview/ContentTab'
 import { OCRTab } from './overview/OCRTab'
@@ -46,19 +54,55 @@ export const mainTabs = [
   }
 ]
 
-// Tab con cho Contracts
+// Tab con cho Contracts (10 tabs)
 export const contractSubTabs = [
   {
-    id: 'basic-info',
-    name: 'Thông tin cơ bản',
+    id: 'contract-overview',
+    name: 'Tổng quan HĐ',
     icon: InformationCircleIcon,
-    description: 'Thông tin chung về tài liệu'
+    description: 'Thông tin cơ bản: ngày hiệu lực, giá trị, dự án'
   },
   {
-    id: 'business',
-    name: 'Thông tin doanh nghiệp',
+    id: 'parties',
+    name: 'Các bên',
     icon: BuildingOfficeIcon,
-    description: 'Thông tin các bên tham gia'
+    description: 'Thông tin các bên tham gia hợp đồng'
+  },
+  {
+    id: 'payment',
+    name: 'Thanh toán',
+    icon: CurrencyDollarIcon,
+    description: 'Lịch thanh toán và phương thức'
+  },
+  {
+    id: 'clauses',
+    name: 'Điều khoản',
+    icon: DocumentTextIcon,
+    description: 'Điều khoản chính và bất lợi'
+  },
+  {
+    id: 'risk',
+    name: 'Rủi ro',
+    icon: ShieldCheckIcon,
+    description: 'Phân tích rủi ro và giảm thiểu'
+  },
+  {
+    id: 'reminders',
+    name: 'Nhắc nhở',
+    icon: ClockIcon,
+    description: 'Nhắc nhở thanh toán và mốc quan trọng'
+  },
+  {
+    id: 'workflow',
+    name: 'Quy trình',
+    icon: ArrowPathIcon,
+    description: 'Workflow và trạng thái phê duyệt'
+  },
+  {
+    id: 'compliance',
+    name: 'Tuân thủ',
+    icon: ShieldCheckIcon,
+    description: 'Trạng thái tuân thủ và khuyến nghị'
   },
   {
     id: 'classification',
@@ -71,12 +115,6 @@ export const contractSubTabs = [
     name: 'Phân tích AI',
     icon: CpuChipIcon,
     description: 'Kết quả phân tích từ AI'
-  },
-  {
-    id: 'workflow',
-    name: 'Quy trình',
-    icon: ArrowPathIcon,
-    description: 'Workflow và trạng thái'
   }
 ]
 
@@ -197,26 +235,36 @@ export function SubTabsNav({ activeMainTab, activeSubTab, onChange }: { activeMa
   )
 }
 
-export function DocumentDetailTabs({ documentData, onTabChange, contractSummary, activeMainTab = 'contracts', activeSubTab = 'basic-info' }: DocumentDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
+export function DocumentDetailTabs({ documentData, onTabChange, contractSummary, activeMainTab = 'contracts', activeSubTab = 'contract-overview' }: DocumentDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
   const renderSubTabContent = () => {
     const subTabs = getSubTabsFor(activeMainTab)
     const currentSubTab = subTabs.find(tab => tab.id === activeSubTab)
     
     if (!currentSubTab) return null
 
-    // Contracts sub tabs
+    // Contracts sub tabs (10 tabs)
     if (activeMainTab === 'contracts') {
       switch (activeSubTab) {
-        case 'basic-info':
-          return <BasicInfoTab documentData={documentData} />
-        case 'business':
-          return <BusinessInfoTab documentData={documentData} />
+        case 'contract-overview':
+          return <ContractOverviewTab data={documentData} />
+        case 'parties':
+          return <PartiesTab data={documentData} />
+        case 'payment':
+          return <PaymentTab data={documentData} />
+        case 'clauses':
+          return <ClausesTab data={documentData} />
+        case 'risk':
+          return <RiskTab data={documentData} />
+        case 'reminders':
+          return <RemindersTab data={documentData} />
+        case 'workflow':
+          return <WorkflowTab documentData={documentData} />
+        case 'compliance':
+          return <ComplianceTab data={documentData} />
         case 'classification':
           return <ClassificationTab documentData={documentData} />
         case 'ai-analysis':
           return <AIAnalysisTab documentData={documentData} />
-        case 'workflow':
-          return <WorkflowTab documentData={documentData} />
         default:
           return null
       }
