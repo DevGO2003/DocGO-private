@@ -29,6 +29,12 @@ public class FileUpdateService {
         Query query = new Query(Criteria.where("_id").is(fileId));
         Update update = new Update();
         
+        // Set defaults for upsert (if entity doesn't exist)
+        update.setOnInsert("_id", fileId);
+        update.setOnInsert("createdAt", LocalDateTime.now());
+        update.setOnInsert("createdBy", "system");
+        update.setOnInsert("isDeleted", false);
+        
         if (file != null && !file.isEmpty()) update.set("file", file);
         if (storage != null && !storage.isEmpty()) update.set("storage", storage);
         if (metadata != null && !metadata.isEmpty()) update.set("metadata", metadata);
@@ -41,8 +47,8 @@ public class FileUpdateService {
         
         update.set("lastModifiedAt", LocalDateTime.now());
         
-        mongoTemplate.updateFirst(query, update, FileEntity.class);
-        log.debug("Updated metadata fields for fileId={}", fileId);
+        mongoTemplate.upsert(query, update, FileEntity.class);
+        log.debug("Upserted metadata fields for fileId={}", fileId);
     }
 
     /**
@@ -53,13 +59,19 @@ public class FileUpdateService {
         Query query = new Query(Criteria.where("_id").is(fileId));
         Update update = new Update();
         
+        // Set defaults for upsert
+        update.setOnInsert("_id", fileId);
+        update.setOnInsert("createdAt", LocalDateTime.now());
+        update.setOnInsert("createdBy", "system");
+        update.setOnInsert("isDeleted", false);
+        
         if (content != null && !content.isEmpty()) update.set("content", content);
         if (overview != null && !overview.isEmpty()) update.set("overview", overview);
         if (status != null) update.set("status", status);
         if (updatedAt != null) update.set("updatedAt", updatedAt);
         
-        mongoTemplate.updateFirst(query, update, FileEntity.class);
-        log.debug("Updated content fields for fileId={}", fileId);
+        mongoTemplate.upsert(query, update, FileEntity.class);
+        log.debug("Upserted content fields for fileId={}", fileId);
     }
 
     /**
@@ -70,12 +82,18 @@ public class FileUpdateService {
         Query query = new Query(Criteria.where("_id").is(fileId));
         Update update = new Update();
         
+        // Set defaults for upsert
+        update.setOnInsert("_id", fileId);
+        update.setOnInsert("createdAt", LocalDateTime.now());
+        update.setOnInsert("createdBy", "system");
+        update.setOnInsert("isDeleted", false);
+        
         if (contract != null && !contract.isEmpty()) update.set("contract", contract);
         if (documentType != null) update.set("documentType", documentType);
         if (status != null) update.set("status", status);
         if (updatedAt != null) update.set("updatedAt", updatedAt);
         
-        mongoTemplate.updateFirst(query, update, FileEntity.class);
-        log.debug("Updated contract fields for fileId={}", fileId);
+        mongoTemplate.upsert(query, update, FileEntity.class);
+        log.debug("Upserted contract fields for fileId={}", fileId);
     }
 }

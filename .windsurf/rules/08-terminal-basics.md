@@ -1,13 +1,27 @@
 ---
 id: "rule-terminal-basics"
-description: "Chuẩn hóa PowerShell commands mapping, file operations, Docker commands với sleep delay, và environment variables cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule standardizes PowerShell command mapping and terminal operations for DocGO development workflow including file operations, Docker commands with sleep delays, and environment variable management.
+  It ensures consistent command usage across Windows PowerShell environment, proper Docker compose execution with timeout prevention, and reliable file system operations.
+  The rule covers Unix to PowerShell command translation, path handling, special character escaping, and comprehensive error handling to maintain robust terminal operations.
 globs:
-  - "**/*.ps1"
-  - "**/*.psm1"
-  - "**/*.bat"
-  - "**/*.sh"
-  - "**/*.bash"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - terminal
   - powershell

@@ -1,15 +1,27 @@
 ---
 id: "rule-event-standards"
-description: "Chuẩn hóa Event payload schema, Event types, và implementation Kafka/Redis cho DocGO microservices"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule standardizes event-driven architecture patterns across DocGO microservices including event payload schemas, event types, and Kafka/Redis implementation.
+  It ensures consistent event publishing, consumption, and processing with proper error handling, retry logic, and monitoring capabilities.
+  The rule covers event versioning, correlation tracking, actor identification, and comprehensive event storage for audit trails and system observability.
 globs:
-  - "**/event_schemas.py"
-  - "**/events.py"
-  - "**/schemas/event*.py"
-  - "**/kafka*.py"
-  - "**/kafka*.ts"
-  - "**/event*.py"
-  - "**/event*.ts"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - event
   - payload

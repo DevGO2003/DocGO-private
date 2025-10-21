@@ -1,16 +1,27 @@
 ---
 id: "rule-service-structure"
-description: "Cấu trúc microservices DocGO, naming conventions (Java/Node.js/Python), package structure, ports, và dependencies"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule defines comprehensive microservice structure standards for DocGO including naming conventions, package organization, port assignments, and dependency management across Java, Node.js, and Python services.
+  It ensures consistent project structure, artifact naming, versioning strategies, and documentation standards to maintain scalable and maintainable microservice architecture.
+  The rule covers service layering, health checks, configuration management, and deployment patterns to support efficient development and operations workflows.
 globs:
-  - "backend/**/*.java"
-  - "backend/**/*.py"
-  - "frontend/**/*.ts"
-  - "frontend/**/*.tsx"
-  - "**/pom.xml"
-  - "**/package.json"
-  - "**/requirements.txt"
-  - "**/pyproject.toml"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - service
   - structure

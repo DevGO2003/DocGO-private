@@ -1,12 +1,27 @@
 ---
 id: "rule-docker-compose"
-description: "Chuẩn hóa Docker Compose configuration, cấm tạo file docker-compose mới (.dev, .local), và quản lý environment variables cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule standardizes Docker Compose configuration patterns for DocGO including service definitions, environment variable management, and container orchestration with strict guidelines against creating additional compose files.
+  It ensures consistent containerization across all microservices with proper volume mounts, networking, health checks, and security configurations.
+  The rule prohibits creation of new docker-compose files (.dev, .local variants) and mandates comprehensive environment variable management to maintain clean, maintainable containerized deployments.
 globs:
-  - "**/docker-compose.yml"
-  - "**/docker-compose.yaml"
-  - "**/Dockerfile"
-  - "**/.dockerignore"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - docker
   - compose

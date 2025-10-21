@@ -1,6 +1,27 @@
 ---
 id: "rule-environment-git"
-alwaysApply: true
+trigger: always_on
+description: |
+  This rule establishes comprehensive environment and Git management standards for DocGO including .env file organization, secrets security, .gitignore patterns, and safe code deployment workflows.
+  It ensures proper separation of public and private repositories, secure handling of sensitive data, and consistent environment configuration across all microservices.
+  The rule covers PowerShell command mapping, Docker compose with sleep delays, Git remotes management, and security best practices for version control and deployment.
+globs:
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - env
   - environment
@@ -29,7 +50,6 @@ tags:
   - development
   - staging
   - version-control
-description: "Quy ước .env theo service, bảo mật secrets, chuẩn .gitignore, quản lý remotes public/private, và workflow đẩy code an toàn."
 ---
 # Environment & Git Standards for DocGO
 

@@ -1,13 +1,27 @@
 ---
 id: "rule-api-standards"
-description: "Chuẩn hóa URL patterns, RestResponse envelope, Controller/Router standards, và Exception handling cho DocGO APIs"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule standardizes API development patterns across all DocGO microservices including URL patterns, RestResponse envelope structure, Controller/Router implementation standards, and comprehensive exception handling.
+  It ensures consistent API design between Spring Boot, FastAPI, and Next.js services with proper error responses, status codes, and documentation.
+  The rule covers authentication, validation, pagination, versioning, and Swagger documentation to maintain high-quality, scalable APIs throughout the DocGO ecosystem.
 globs:
-  - "**/*Controller.java"
-  - "**/*Router.py"
-  - "**/routers.py"
-  - "**/pages/api/**/*.ts"
-  - "**/src/controllers/**/*.ts"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - api
   - rest

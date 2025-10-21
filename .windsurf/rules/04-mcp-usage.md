@@ -1,6 +1,27 @@
 ---
 id: "rule-mcp-usage"
-alwaysApply: true
+trigger: always_on
+description: |
+  This rule establishes Model Context Protocol (MCP) usage standards for DocGO including database operations, external APIs, and browser automation with comprehensive error handling and performance optimization.
+  It prioritizes MCP tools over terminal commands for database queries, GitHub operations, and browser interactions to ensure faster, safer, and more reliable operations.
+  The rule covers retry logic, fallback strategies, security practices, audit logging, and performance monitoring to maintain high-quality external system integrations.
+globs:
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - mcp
   - tools
@@ -27,7 +48,6 @@ tags:
   - count
   - collections
   - metrics
-description: "Ưu tiên MCP cho DB/APIs/browser; hướng dẫn hiệu năng, bảo mật, audit, và fallback khi MCP gặp lỗi."
 ---
 # Quy tắc sử dụng MCP cho Chat và Database
 

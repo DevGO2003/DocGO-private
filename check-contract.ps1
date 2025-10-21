@@ -1,4 +1,4 @@
-$fileId = "d9fb344d-1207-4667-b632-42370a2361dc"
+$fileId = "5db57372-4624-4469-84ce-9af88fd61edf"
 $uri = "http://localhost:8002/api/v1/repository-management-service/files/$fileId"
 
 $response = Invoke-RestMethod -Uri $uri -Method Get

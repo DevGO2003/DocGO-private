@@ -8,13 +8,13 @@ import CustomTable from '@/components/contracts/CustomTable'
 import TableSettings, { TableColumn } from '@/components/contracts/TableSettings'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractStatus, translateContractType, translateContractTag } from '@/utils/tagTranslations'
-import DocumentsFilters from './_components/DocumentsFilters'
-import DocumentsTable from './_components/DocumentsTable'
-import { fetchFiles } from './_services/file-list-api'
-import { mapFileApiPageToPaginatedDocuments } from './_services/file-list-mapper'
+import DocumentsFilters from '../../_components/DocumentsFilters'
+import DocumentsTable from '../../_components/DocumentsTable'
+import { fetchFiles } from '../../_services/file-list-api'
+import { mapFileApiPageToPaginatedDocuments } from '../../_services/file-list-mapper'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 // import { tagAPI } from '@/lib/api' // Removed - tags API disabled
-import { DEFAULT_PAGE_SIZE } from './_constants'
+import { DEFAULT_PAGE_SIZE } from '../../_constants'
 
 type ContractItem = {
   id: string

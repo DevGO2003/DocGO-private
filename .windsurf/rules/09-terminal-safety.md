@@ -1,11 +1,27 @@
 ---
 id: "rule-terminal-safety"
-description: "Quy tắc an toàn terminal: tránh lệnh interactive, hạn chế gộp lệnh, best practices, và error handling cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes comprehensive terminal safety standards for DocGO development workflow including avoidance of interactive commands, command chaining limitations, and robust error handling procedures.
+  It ensures terminal responsiveness by preventing commands that cause hanging (pagers, editors, interactive modes) and promotes safe command execution patterns.
+  The rule covers command priority guidelines, error recovery procedures, security considerations, and best practices to maintain reliable and safe terminal operations.
 globs:
-  - "**/*.ps1"
-  - "**/*.bat"
-  - "**/*.sh"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - terminal
   - safety
