@@ -470,7 +470,25 @@ public class FileService {
             .build();
     }
     
-    private List<ContentDto.SectionDto> mapToSections(List<Object> list) { return null; }
+    private List<ContentDto.SectionDto> mapToSections(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<ContentDto.SectionDto> sections = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> sectionMap = asMap(item);
+            if (sectionMap == null) continue;
+            
+            ContentDto.SectionDto section = ContentDto.SectionDto.builder()
+                .title(asString(sectionMap.get("title")))
+                .description(asString(sectionMap.get("description")))
+                .content(asString(sectionMap.get("content")))
+                .pageNumber(asInteger(sectionMap.get("pageNumber")))
+                .build();
+            sections.add(section);
+        }
+        
+        return sections;
+    }
     
     private ContentDto.OcrDto mapToOcr(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
@@ -570,10 +588,73 @@ public class FileService {
             .directory(asString(map.get("directory")))
             .build();
     }
-    private VersioningDto.CurrentVersionInfoDto mapToCurrentVersionInfo(Map<String, Object> map) { return null; }
-    private List<VersioningDto.VersionDto> mapToVersions(List<Object> list) { return null; }
-    private List<VersioningDto.ChangeLogDto> mapToChangeLog(List<Object> list) { return null; }
-    private List<VersioningDto.HistoryDto> mapToHistory(List<Object> list) { return null; }
+    private VersioningDto.CurrentVersionInfoDto mapToCurrentVersionInfo(Map<String, Object> map) {
+        if (map == null) return null;
+        return VersioningDto.CurrentVersionInfoDto.builder()
+            .tag(asString(map.get("tag")))
+            .number(asInteger(map.get("number")))
+            .build();
+    }
+    private List<VersioningDto.VersionDto> mapToVersions(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<VersioningDto.VersionDto> versions = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> versionMap = asMap(item);
+            if (versionMap == null) continue;
+            
+            VersioningDto.VersionDto version = VersioningDto.VersionDto.builder()
+                .version(asString(versionMap.get("version")))
+                .createdAt(asLocalDateTime(versionMap.get("createdAt")))
+                .createdBy(asString(versionMap.get("createdBy")))
+                .changes(asString(versionMap.get("changes")))
+                .fileId(asString(versionMap.get("fileId")))
+                .build();
+            versions.add(version);
+        }
+        
+        return versions;
+    }
+    private List<VersioningDto.ChangeLogDto> mapToChangeLog(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<VersioningDto.ChangeLogDto> changeLogs = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> changeLogMap = asMap(item);
+            if (changeLogMap == null) continue;
+            
+            VersioningDto.ChangeLogDto changeLog = VersioningDto.ChangeLogDto.builder()
+                .version(asString(changeLogMap.get("version")))
+                .date(asLocalDateTime(changeLogMap.get("date")))
+                .author(asString(changeLogMap.get("author")))
+                .changes(asString(changeLogMap.get("changes")))
+                .build();
+            changeLogs.add(changeLog);
+        }
+        
+        return changeLogs;
+    }
+    private List<VersioningDto.HistoryDto> mapToHistory(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<VersioningDto.HistoryDto> histories = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> historyMap = asMap(item);
+            if (historyMap == null) continue;
+            
+            VersioningDto.HistoryDto history = VersioningDto.HistoryDto.builder()
+                .version(asInteger(historyMap.get("version")))
+                .versionTag(asString(historyMap.get("versionTag")))
+                .changedAt(asLocalDateTime(historyMap.get("changedAt")))
+                .changedBy(asString(historyMap.get("changedBy")))
+                .changeType(toUpperEnum(asString(historyMap.get("changeType"))))
+                .storage(mapToStorage(asMap(historyMap.get("storage"))))
+                .build();
+            histories.add(history);
+        }
+        
+        return histories;
+    }
     private MetadataDto.FileSystemDto mapToFileSystem(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return MetadataDto.FileSystemDto.builder()
@@ -583,8 +664,22 @@ public class FileService {
             .permissions(asString(map.get("permissions")))
             .build();
     }
-    private MetadataDto.OriginalFileDto mapToOriginalFile(Map<String, Object> map) { return null; }
-    private MetadataDto.ArchivedFileDto mapToArchivedFile(Map<String, Object> map) { return null; }
+    private MetadataDto.OriginalFileDto mapToOriginalFile(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.OriginalFileDto.builder()
+            .name(asString(map.get("name")))
+            .path(asString(map.get("path")))
+            .source(asString(map.get("source")))
+            .build();
+    }
+    private MetadataDto.ArchivedFileDto mapToArchivedFile(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.ArchivedFileDto.builder()
+            .name(asString(map.get("name")))
+            .path(asString(map.get("path")))
+            .archivedAt(asLocalDateTime(map.get("archivedAt")))
+            .build();
+    }
     private MetadataDto.TechnicalDto mapToTechnical(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return MetadataDto.TechnicalDto.builder()
