@@ -14,6 +14,7 @@ public class RiskDto {
     private String score;
     private List<RiskFactorDto> factors;
     private List<String> mitigation;
+    private List<String> mitigations;
 
     @Data
     @Builder

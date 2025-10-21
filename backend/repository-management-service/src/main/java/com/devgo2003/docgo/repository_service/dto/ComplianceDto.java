@@ -13,6 +13,8 @@ public class ComplianceDto {
     private String status;
     private List<RequirementDto> requirements;
     private List<String> regulations;
+    private List<String> issues;
+    private List<String> recommendations;
 
     @Data
     @Builder

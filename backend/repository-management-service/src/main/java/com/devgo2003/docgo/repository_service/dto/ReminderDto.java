@@ -13,6 +13,7 @@ public class ReminderDto {
     private String type;
     private LocalDateTime date;
     private String description;
+    private Integer notifyBefore;
     private String status;
     private String assignedTo;
 }
