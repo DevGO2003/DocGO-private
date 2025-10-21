@@ -180,20 +180,32 @@ export function getSubTabsFor(mainTabId: string) {
   return commentsSubTabs
 }
 
-export function MainTabsNav({ activeMainTab, onChange }: { activeMainTab: string; onChange: (tabId: string) => void }) {
+export function MainTabsNav({ activeMainTab, onChange, documentData }: { activeMainTab: string; onChange: (tabId: string) => void; documentData?: any }) {
+  const isContract = documentData?.overview?.documentType === 'CONTRACT'
+  
   return (
     <div>
       <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
         {mainTabs.map((tab, index) => {
           const Icon = tab.icon
           const isActive = activeMainTab === tab.id
+          const isDisabled = tab.id === 'contracts' && !isContract
+          const tooltipText = isDisabled ? 'Đây không phải là file hợp đồng' : tab.name
+          
           return (
             <button
               key={tab.id}
-              onClick={() => onChange(tab.id)}
-              className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} ${index > 0 ? 'border-l border-gray-200' : ''}`}
+              onClick={() => !isDisabled && onChange(tab.id)}
+              disabled={isDisabled}
+              className={`px-2 py-1.5 text-[10px] md:px-2.5 md:py-1.5 md:text-xs ${
+                isDisabled 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : isActive 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+              } ${index > 0 ? 'border-l border-gray-200' : ''}`}
               aria-current={isActive ? 'page' : undefined}
-              title={tab.name}
+              title={tooltipText}
             >
               <span className="md:hidden">
                 <Icon className="w-3.5 h-3.5" />

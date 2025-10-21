@@ -216,6 +216,7 @@ export default function DocumentDetailPage() {
           <div className="mt-2">
             <MainTabsNav
               activeMainTab={activeMainTab}
+              documentData={data}
               onChange={(tabId) => {
                 setActiveMainTab(tabId)
                 if (tabId === 'contracts') setActiveSubTab('contract-overview')
