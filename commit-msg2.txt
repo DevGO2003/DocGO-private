@@ -1,0 +1,6 @@
+chore: remove MongoDB local, use MongoDB Atlas
+
+- Remove mongodb service from docker-compose
+- Remove mongodb dependency from repository service
+- Remove mongodb volumes
+- Using MongoDB Atlas cloud instead
