@@ -51,92 +51,172 @@ class AutomationService:
     
     def get_contract_summary_prompt(self, content: str, filename: str) -> str:
         """
-        Updated prompt to match File Management Service schema
-        Returns: effectiveDate, expiryDate, totalValue (number), currency, summary, parties, payment, clauses, reminders, risk, compliance
+        IMPROVED prompt to match document-management-sample.json schema EXACTLY
+        Returns full structure với: parties (object structure), payment schedule (array), clauses, reminders, risk, compliance
         """
         return (
-            "Bạn là chuyên gia phân tích hợp đồng. Hãy phân tích chi tiết hợp đồng dưới đây và tạo JSON tóm tắt chính xác.\n\n"
-            "YÊU CẦU PHÂN TÍCH:\n"
-            "1. ĐỌC KỸ từng dòng văn bản để trích xuất thông tin CHÍNH XÁC\n"
-            "2. Tìm kiếm và trích xuất thông tin cụ thể từ văn bản thực tế\n"
-            "3. KHÔNG sử dụng dấu \"...\" hoặc \"……\" - phải trích xuất thông tin thực tế\n"
-            "4. Xác định các điều khoản có lợi và bất lợi cho từng bên\n"
-            "5. Đánh giá rủi ro dựa trên nội dung thực tế\n"
-            "6. Đưa ra khuyến nghị tuân thủ pháp luật\n"
-            "7. QUAN TRỌNG: totalValue PHẢI là số (integer hoặc float), KHÔNG PHẢI string\n"
-            "8. effectiveDate và expiryDate PHẢI là ISO 8601 format (yyyy-MM-ddTHH:mm:ss)\n"
-            "9. Với CÁC MẢNG: LIỆT KÊ CÀNG NHIỀU MỤC CÓ THẬT TRONG VĂN BẢN CÀNG TỐT\n\n"
-            "THÔNG TIN CẦN TRÍCH XUẤT:\n"
-            "- Tên công ty/tổ chức tham gia (Bên A, Bên B)\n"
-            "- Tên người đại diện và chức vụ\n"
-            "- Địa chỉ cụ thể của các bên\n"
-            "- Mã số thuế (nếu có)\n"
-            "- Số điện thoại, email (nếu có)\n"
-            "- Ngày có hiệu lực (effectiveDate)\n"
-            "- Ngày hết hạn (expiryDate)\n"
-            "- Giá trị hợp đồng (totalValue - PHẢI là số)\n"
-            "- Đơn vị tiền tệ (currency)\n\n"
-            "TRẢ VỀ JSON VỚI CẤU TRÚC SAU:\n"
+            "Bạn là chuyên gia phân tích hợp đồng với kinh nghiệm pháp lý 15+ năm. "
+            "Hãy phân tích CHI TIẾT từng dòng văn bản hợp đồng và tạo JSON ĐẦY ĐỦ, CHÍNH XÁC.\n\n"
+            
+            "🎯 YÊU CẦU PHÂN TÍCH:\n"
+            "1. ĐỌC KỸ và TRÍCH XUẤT thông tin CHÍNH XÁC từ văn bản (KHÔNG đoán, KHÔNG sáng tạo)\n"
+            "2. TÌM KIẾM mọi chi tiết: tên, chức vụ, email, phone, địa chỉ, mã số thuế, giá trị, ngày tháng\n"
+            "3. XÁC ĐỊNH loại bên (type): CLIENT, VENDOR, PARTNER, GUARANTOR\n"
+            "4. PHÂN TÍCH điều khoản có lợi/bất lợi cho từng bên (phải có content trích dẫn)\n"
+            "5. ĐÁNH GIÁ rủi ro chi tiết với category, severity, impact\n"
+            "6. LIỆT KÊ tuân thủ: regulations, requirements, certifications\n"
+            "7. TẠO reminders cho các milestone/ngày quan trọng\n"
+            "8. QUAN TRỌNG: Dùng null nếu KHÔNG TÌM THẤY thông tin (đừng để string rỗng)\n\n"
+            
+            "📋 JSON SCHEMA - TUÂN THỦ NGHIÊM NGẶT:\n"
             '{\n'
-            '  "effectiveDate": "2024-01-15T00:00:00",\n'
-            '  "expiryDate": "2024-08-15T00:00:00",\n'
-            '  "totalValue": 52000000,\n'
-            '  "currency": "VND",\n'
-            '  "summary": "Tóm tắt ngắn gọn nội dung hợp đồng",\n'
-            '  "parties": [\n'
+            '  "effectiveDate": "2024-02-01T00:00:00",  // ISO 8601, REQUIRED\n'
+            '  "expiryDate": "2026-02-01T00:00:00",     // ISO 8601 hoặc null\n'
+            '  "totalValue": 100000000,                  // NUMBER (không dấu phẩy, không text)\n'
+            '  "currency": "VND",                        // VND, USD, EUR...\n'
+            '  "summary": "Tóm tắt ngắn gọn 50-100 từ", // REQUIRED\n'
+            '  "project": "Dự án DocGO Platform",        // Tên dự án hoặc null\n'
+            '  "department": "IT Department",            // Phòng ban quản lý hoặc null\n'
+            '  "priority": "HIGH",                       // HIGH, MEDIUM, LOW hoặc null\n'
+            '  "confidentiality": "CONFIDENTIAL",        // CONFIDENTIAL, INTERNAL, PUBLIC hoặc null\n'
+            '  \n'
+            '  "parties": [  // MỖI BÊN PHẢI CÓ ĐẦY ĐỦ OBJECT STRUCTURE\n'
             '    {\n'
-            '      "name": "Công ty TNHH ABC",\n'
-            '      "role": "Khách hàng",\n'
-            '      "representative": "Nguyễn Văn A",\n'
-            '      "taxCode": "0123456789",\n'
-            '      "contact": "0123456789",\n'
-            '      "address": "123 Đường ABC, Quận 1, TP.HCM"\n'
+            '      "id": "party-001",                    // unique ID: "party-001", "party-002"...\n'
+            '      "name": "CÔNG TY TNHH ABC",           // REQUIRED - tên đầy đủ\n'
+            '      "type": "CLIENT",                     // CLIENT, VENDOR, PARTNER, GUARANTOR\n'
+            '      "role": "Bên A - Khách hàng",         // Vai trò trong hợp đồng\n'
+            '      "contact": {                          // OBJECT - không flat\n'
+            '        "email": "contact@abc.com",         // Email chính thức\n'
+            '        "phone": "+84-28-1234-5678",        // SĐT\n'
+            '        "address": "123 Nguyễn Huệ, Q1, TP.HCM"  // Địa chỉ đầy đủ\n'
+            '      },\n'
+            '      "representative": {                   // OBJECT - người đại diện\n'
+            '        "name": "Nguyễn Văn A",             // Tên đại diện\n'
+            '        "position": "Giám đốc",             // Chức vụ\n'
+            '        "email": "nguyenvana@abc.com"       // Email cá nhân\n'
+            '      },\n'
+            '      "taxCode": "0123456789"               // Mã số thuế\n'
             '    }\n'
             '  ],\n'
+            '  \n'
             '  "payment": {\n'
-            '    "totalValue": 52000000,\n'
+            '    "totalValue": 100000000,                // Tổng giá trị thanh toán\n'
             '    "currency": "VND",\n'
-            '    "schedule": "30% khi ký, 40% giữa kỳ, 30% khi nghiệm thu",\n'
-            '    "method": "Chuyển khoản"\n'
-            '  },\n'
-            '  "clauses": {\n'
-            '    "key": [\n'
+            '    "schedule": [                           // ARRAY of milestones\n'
             '      {\n'
-            '        "name": "Phạm vi công việc",\n'
-            '        "description": "Mô tả chi tiết",\n'
-            '        "importance": "High",\n'
-            '        "risk": "LOW"\n'
+            '        "milestone": "Ký hợp đồng",\n'
+            '        "percentage": 30,                   // % thanh toán\n'
+            '        "amount": 30000000,                 // Số tiền\n'
+            '        "dueDate": "2024-02-15T00:00:00",   // Hạn thanh toán\n'
+            '        "status": "PENDING"                 // PENDING, COMPLETED, OVERDUE\n'
             '      }\n'
             '    ],\n'
-            '    "unfavorable": ["Điều khoản phạt chậm tiến độ 1%/tuần"]\n'
+            '    "method": "Chuyển khoản ngân hàng"      // Phương thức thanh toán\n'
             '  },\n'
-            '  "reminders": [\n'
+            '  \n'
+            '  "clauses": {\n'
+            '    "key": [                                // Điều khoản QUAN TRỌNG\n'
+            '      {\n'
+            '        "name": "Điều 5: Phạm vi công việc",\n'
+            '        "description": "Mô tả chi tiết điều khoản",\n'
+            '        "content": "Trích dẫn nội dung CHÍNH XÁC từ hợp đồng",  // REQUIRED\n'
+            '        "importance": "HIGH",               // HIGH, MEDIUM, LOW\n'
+            '        "risk": "MEDIUM",                   // HIGH, MEDIUM, LOW\n'
+            '        "advice": "Khuyến nghị từ chuyên gia"  // Lời khuyên cụ thể\n'
+            '      }\n'
+            '    ],\n'
+            '    "unfavorable": [                        // Điều khoản BẤT LỢI\n'
+            '      {\n'
+            '        "name": "Điều 10: Phạt chậm tiến độ",\n'
+            '        "description": "Điều khoản gây bất lợi",\n'
+            '        "content": "Trích dẫn chính xác",\n'
+            '        "impact": "Phạt 1%/tuần nếu chậm",\n'
+            '        "affectedParty": "party-001"        // ID bên bị ảnh hưởng\n'
+            '      }\n'
+            '    ],\n'
+            '    "intellectualProperty": "Mô tả quyền sở hữu trí tuệ",  // Hoặc null\n'
+            '    "confidentiality": "Mô tả bảo mật",     // Hoặc null\n'
+            '    "warranty": "Bảo hành 12 tháng",        // Hoặc null\n'
+            '    "termination": "Điều kiện chấm dứt"     // Hoặc null\n'
+            '  },\n'
+            '  \n'
+            '  "reminders": [                            // Nhắc nhở các milestone\n'
             '    {\n'
-            '      "date": "2024-06-15T00:00:00",\n'
-            '      "title": "Nhắc nhở nghiệm thu giai đoạn 1",\n'
-            '      "description": "Chuẩn bị demo giữa kỳ"\n'
+            '      "date": "2024-03-01T00:00:00",        // Ngày nhắc nhở\n'
+            '      "type": "DEADLINE",                   // DEADLINE, MILESTONE, REVIEW, PAYMENT\n'
+            '      "title": "Nghiệm thu giai đoạn 1",\n'
+            '      "description": "Chi tiết công việc cần làm",\n'
+            '      "notifyBefore": 7,                    // Nhắc trước X ngày\n'
+            '      "status": "PENDING",                  // PENDING, COMPLETED, CANCELLED\n'
+            '      "assignedTo": "user-001"              // ID người phụ trách\n'
             '    }\n'
             '  ],\n'
+            '  \n'
             '  "risk": {\n'
-            '    "level": "MEDIUM",\n'
-            '    "factors": ["Mở rộng phạm vi", "Tăng thời gian thực hiện"],\n'
-            '    "mitigations": ["Thêm nhân lực", "Chốt scope từng sprint"]\n'
+            '    "level": "MEDIUM",                      // HIGH, MEDIUM, LOW\n'
+            '    "score": 6.5,                           // Điểm rủi ro 0-10\n'
+            '    "factors": [                            // ARRAY of risk objects\n'
+            '      {\n'
+            '        "category": "SCHEDULE",             // LEGAL, FINANCIAL, SCHEDULE, TECHNICAL\n'
+            '        "description": "Rủi ro về tiến độ",\n'
+            '        "content": "Trích dẫn điều khoản liên quan",\n'
+            '        "severity": "MEDIUM",               // HIGH, MEDIUM, LOW\n'
+            '        "impact": "Chậm 2 tuần có thể phạt 2%",\n'
+            '        "probability": "MEDIUM"             // HIGH, MEDIUM, LOW\n'
+            '      }\n'
+            '    ],\n'
+            '    "mitigations": [                        // Biện pháp giảm thiểu\n'
+            '      {\n'
+            '        "description": "Thêm nhân lực phát triển",\n'
+            '        "cost": "HIGH",                     // HIGH, MEDIUM, LOW\n'
+            '        "timeline": "1 tuần",\n'
+            '        "assignedTo": "Bên A"\n'
+            '      }\n'
+            '    ],\n'
+            '    "advice": "Tư vấn tổng quát từ chuyên gia pháp lý"\n'
             '  },\n'
+            '  \n'
             '  "compliance": {\n'
-            '    "status": "COMPLIANT",\n'
-            '    "issues": [],\n'
-            '    "recommendations": ["Theo dõi milestone giữa kỳ"]\n'
+            '    "status": "COMPLIANT",                  // COMPLIANT, NON_COMPLIANT, PENDING_REVIEW\n'
+            '    "requirements": [                       // Yêu cầu tuân thủ\n'
+            '      {\n'
+            '        "name": "ISO 27001",\n'
+            '        "description": "Bảo mật thông tin",\n'
+            '        "status": "MET",                    // MET, NOT_MET, IN_PROGRESS\n'
+            '        "deadline": "2024-12-31T00:00:00"\n'
+            '      }\n'
+            '    ],\n'
+            '    "regulations": [                        // Quy định pháp lý\n'
+            '      "Luật An toàn thông tin",\n'
+            '      "Nghị định 13/2023/NĐ-CP"\n'
+            '    ],\n'
+            '    "certifications": [                     // Chứng nhận\n'
+            '      "ISO 27001",\n'
+            '      "SOC 2 Type II"\n'
+            '    ],\n'
+            '    "issues": [],                           // Vấn đề tuân thủ\n'
+            '    "recommendations": [                    // Khuyến nghị\n'
+            '      "Kiểm tra pháp lý định kỳ",\n'
+            '      "Cập nhật điều khoản theo quy định mới"\n'
+            '    ]\n'
             '  }\n'
             '}\n\n'
-            "LƯU Ý QUAN TRỌNG:\n"
-            "- totalValue PHẢI là số nguyên hoặc số thực (không có dấu phân cách, không có text)\n"
-            "- Ví dụ ĐÚNG: \"totalValue\": 52000000 hoặc \"totalValue\": 52000000.00\n"
-            "- Ví dụ SAI: \"totalValue\": \"52.000.000 VNĐ\" hoặc \"totalValue\": \"52 triệu\"\n"
-            "- effectiveDate và expiryDate PHẢI là ISO 8601: yyyy-MM-ddTHH:mm:ss\n"
-            "- Nếu không tìm thấy ngày cụ thể, ước lượng dựa trên ngữ cảnh\n"
-            "- Nếu không có thông tin, dùng null\n"
-            "- Chỉ trả về JSON hợp lệ, không kèm markdown\n\n"
-            f"Hợp đồng:\n{content[:3000]}\n"
+            
+            "⚠️ LƯU Ý CỰC KỲ QUAN TRỌNG:\n"
+            "1. totalValue: PHẢI là NUMBER (52000000), KHÔNG PHẢI string\n"
+            "2. Dates: ISO 8601 format (\"2024-02-01T00:00:00\")\n"
+            "3. Parties: PHẢI có id, type, contact object, representative object\n"
+            "4. Payment.schedule: PHẢI là ARRAY, không phải string\n"
+            "5. Risk.factors: PHẢI là ARRAY of objects với category, severity\n"
+            "6. Compliance: PHẢI có requirements, regulations, certifications arrays\n"
+            "7. Null: Dùng null nếu không tìm thấy (KHÔNG dùng \"\", [], {})\n"
+            "8. KHÔNG dùng \"...\", \"……\" - phải có nội dung cụ thể\n"
+            "9. Trích dẫn: content field PHẢI là text thật từ hợp đồng\n"
+            "10. Chỉ trả về JSON thuần, KHÔNG có ```json hoặc markdown\n\n"
+            
+            f"📄 HỢP ĐỒNG CẦN PHÂN TÍCH (Tên file: {filename}):\n"
+            f"{content[:4000]}\n"
         )
     
     def _transform_gemini_to_file_mgmt_schema(self, gemini_result: Dict[str, Any]) -> Dict[str, Any]:

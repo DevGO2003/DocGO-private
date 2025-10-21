@@ -23,6 +23,8 @@ from services.websocket_manager import WebSocketManager
 from services.event_service import EventService
 from services.async_processor import async_processor
 from services.progress_service import ProgressService
+from services.extract_file_service import ExtractFileService
+from services.contract_summary_service import ContractSummaryService
 
 # Create router
 router = APIRouter(prefix="/api/v1/automation-service/files", tags=["APIs Quản lý File"])
@@ -35,6 +37,8 @@ websocket_manager = WebSocketManager()
 # Import global event_service instance
 from global_instances import event_service
 progress_service = ProgressService()
+extract_file_service = ExtractFileService()
+contract_summary_service = ContractSummaryService()
 
 
 @router.post("", summary="Upload document", tags=["📁 APIs Quản lý File"])
