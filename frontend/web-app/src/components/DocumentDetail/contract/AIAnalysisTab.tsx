@@ -15,42 +15,17 @@ interface AIAnalysisTabProps {
 }
 
 export function AIAnalysisTab({ documentData }: AIAnalysisTabProps) {
-  // Mock AI analysis data with more diverse recommendations
+  // Check if AI analysis data exists
+  if (!documentData?.riskAssessment && !documentData?.keyClauses) {
+    return null
+  }
+
   const aiAnalysisData = {
     riskLevel: documentData?.riskAssessment?.riskLevel || 'MEDIUM',
-    confidence: 87,
-    warnings: 3,
-    recommendations: [
-      {
-        type: 'warning' as const,
-        title: 'Điều khoản thanh toán cần xem xét',
-        description: 'Điều khoản thanh toán có thể gây rủi ro cho doanh nghiệp do tỷ lệ thanh toán trước quá cao',
-        action: 'Xem xét lại điều khoản thanh toán với pháp lý'
-      },
-      {
-        type: 'error' as const,
-        title: 'Thiếu điều khoản bảo mật thông tin',
-        description: 'Hợp đồng chưa có điều khoản rõ ràng về bảo mật và bảo vệ dữ liệu khách hàng',
-        action: 'Bổ sung điều khoản bảo mật thông tin chi tiết'
-      },
-      {
-        type: 'success' as const,
-        title: 'Điều khoản bảo hiểm đầy đủ',
-        description: 'Các điều khoản bảo hiểm và bảo hành đã được thiết lập đầy đủ và rõ ràng',
-        action: 'Tiếp tục duy trì'
-      },
-      {
-        type: 'info' as const,
-        title: 'Thời gian thực hiện hợp lý',
-        description: 'Thời gian 6 tháng cho dự án phát triển phần mềm là phù hợp với phạm vi công việc',
-        action: 'Theo dõi tiến độ định kỳ'
-      }
-    ] as Recommendation[],
-    keyClauses: documentData?.keyClauses || [
-      { name: 'Phạm vi công việc', description: 'Phát triển hệ thống quản lý tài liệu', importance: 'High', risk: 'LOW' },
-      { name: 'Thời gian thực hiện', description: '6 tháng kể từ ngày ký', importance: 'High', risk: 'MEDIUM' },
-      { name: 'Bảo hành', description: '12 tháng sau nghiệm thu', importance: 'Medium', risk: 'LOW' }
-    ]
+    confidence: documentData?.riskAssessment?.confidence || 0,
+    warnings: documentData?.riskAssessment?.warnings || 0,
+    recommendations: documentData?.riskAssessment?.recommendations || [],
+    keyClauses: documentData?.keyClauses || []
   }
 
   return (

@@ -8,7 +8,7 @@ interface RemindersTabProps {
 export function RemindersTab({ data }: RemindersTabProps) {
   const reminders = data?.reminders
   if (!reminders || reminders.length === 0) {
-    return <div className="text-gray-500">Không có nhắc nhở nào</div>
+    return null
   }
 
   const typeColors: Record<string, string> = {

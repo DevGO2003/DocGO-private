@@ -54,7 +54,7 @@ export const mainTabs = [
   }
 ]
 
-// Tab con cho Contracts (10 tabs)
+// Tab con cho Contracts (10 tabs) - Sắp xếp theo độ quan trọng giảm dần
 export const contractSubTabs = [
   {
     id: 'contract-overview',
@@ -83,20 +83,20 @@ export const contractSubTabs = [
   {
     id: 'risk',
     name: 'Rủi ro',
-    icon: ShieldCheckIcon,
+    icon: ExclamationTriangleIcon,
     description: 'Phân tích rủi ro và giảm thiểu'
-  },
-  {
-    id: 'reminders',
-    name: 'Nhắc nhở',
-    icon: ClockIcon,
-    description: 'Nhắc nhở thanh toán và mốc quan trọng'
   },
   {
     id: 'workflow',
     name: 'Quy trình',
     icon: ArrowPathIcon,
     description: 'Workflow và trạng thái phê duyệt'
+  },
+  {
+    id: 'reminders',
+    name: 'Nhắc nhở',
+    icon: BellIcon,
+    description: 'Nhắc nhở thanh toán và mốc quan trọng'
   },
   {
     id: 'compliance',

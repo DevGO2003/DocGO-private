@@ -7,7 +7,7 @@ interface ComplianceTabProps {
 
 export function ComplianceTab({ data }: ComplianceTabProps) {
   const compliance = data?.compliance
-  if (!compliance) return <div className="text-gray-500">Không có dữ liệu tuân thủ</div>
+  if (!compliance) return null
 
   const statusColors: Record<string, string> = {
     COMPLIANT: 'bg-green-100 text-green-800 border-green-300',
