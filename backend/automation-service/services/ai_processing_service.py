@@ -522,76 +522,13 @@ class AutomationService:
                         continue
                     else:
                         logging.error(f"[AI_RATE_LIMIT_EXHAUSTED] All retry attempts exhausted for: {filename}")
-                        return self._create_fallback_summary(content, filename)
+                        return None
                 else:
-                    logging.exception(f"[AI_GEMINI_FALLBACK] Using fallback summary due to exception: {e}")
-                    return self._create_fallback_summary(content, filename)
+                    logging.exception(f"[AI_GEMINI_ERROR] AI failed to generate summary: {e}")
+                    return None
         
-        return self._create_fallback_summary(content, filename)
-    
-    def _create_fallback_summary(self, content: str, filename: str) -> Dict[str, Any]:
-        
-        logging.info(f"[AI_FALLBACK_SUMMARY] Creating fallback summary for: {filename}")
-        
-        # Extract basic information using simple text processing
-        lines = content.split('\n')
-        title = "Hợp đồng không xác định"
-        parties = []
-        
-        # Try to find title
-        for line in lines:
-            if "HỢP ĐỒNG" in line.upper() or "CONTRACT" in line.upper():
-                title = line.strip()
-                break
-        
-        # Try to find parties
-        for i, line in enumerate(lines):
-            if "Bên" in line and ("cho thuê" in line.lower() or "thuê" in line.lower() or "A" in line or "B" in line):
-                party_name = line.strip()
-                if party_name:
-                    parties.append({
-                        "role": party_name,
-                        "name": "Chưa xác định",
-                        "representative": "Chưa xác định",
-                        "taxCode": None,
-                        "contact": None,
-                        "address": None
-                    })
-        
-        return {
-            "title": title,
-            "contractNumber": None,
-            "contractType": "Hợp đồng",
-            "parties": parties if parties else [
-                {"role": "Bên A", "name": "Chưa xác định", "representative": "Chưa xác định", "taxCode": None, "contact": None, "address": None},
-                {"role": "Bên B", "name": "Chưa xác định", "representative": "Chưa xác định", "taxCode": None, "contact": None, "address": None}
-            ],
-            "object": "Chưa xác định",
-            "effectiveDate": None,
-            "term": "Chưa xác định",
-            "paymentDetails": {
-                "totalValue": None,
-                "schedule": None,
-                "currency": None,
-                "paymentMethod": None
-            },
-            "keyClauses": [],
-            "favorableClauses": [],
-            "unfavorableClauses": [],
-            "reminders": [],
-            "terminationConditions": "Chưa xác định",
-            "riskAssessment": {
-                "riskLevel": "MEDIUM",
-                "riskFactors": ["Không thể phân tích chi tiết"],
-                "mitigationMeasures": ["Cần xem xét kỹ hợp đồng"],
-                
-            },
-            "complianceStatus": {
-                "status": "REVIEW_REQUIRED",
-                "issues": ["Cần phân tích chi tiết"],
-                "recommendations": ["Xem xét kỹ các điều khoản"]
-            }
-        }
+        logging.error(f"[AI_GENERATE_FAILED] Failed to generate summary for: {filename}")
+        return None
     
     def classify_document(self, content: str, filename: str) -> Dict[str, Any]:
         
