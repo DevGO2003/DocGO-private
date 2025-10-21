@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import com.devgo2003.docgo.repository_service.service.FileUpdateService;
 
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,10 +34,17 @@ public class FileEventConsumer {
         this.fileUpdateService = fileUpdateService;
         this.objectMapper = new ObjectMapper();
     }
+    
+    @PostConstruct
+    public void init() {
+        log.info("FileEventConsumer initialized - ready to process Kafka events");
+    }
 
-    @KafkaListener(topics = "${app.kafka.topic.file-metadata-recorded}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${app.kafka.topic.file-metadata-recorded}", 
+                   groupId = "${spring.kafka.consumer.group-id}",
+                   errorHandler = "kafkaErrorHandler")
     public void handleFileMetadataRecorded(@Payload String event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.debug("[FILE_METADATA_RECORDED] topic={} payloadSize={}", topic, event != null ? event.length() : 0);
+        log.debug("Processing FILE_METADATA_RECORDED event - size={}", event != null ? event.length() : 0);
         try {
             Map<String, Object> payload = objectMapper.readValue(event, Map.class);
             Map<String, Object> data = asMap(payload.get("data"));
@@ -69,7 +77,41 @@ public class FileEventConsumer {
                 if (fileData != null) entity.setFile(fileData);
                 
                 Map<String, Object> storageData = asMap(data.get("storage"));
-                if (storageData != null) entity.setStorage(storageData);
+                if (storageData != null) {
+                    // Add location field and enrich s3 data
+                    Map<String, Object> s3Data = asMap(storageData.get("s3"));
+                    if (s3Data != null) {
+                        String bucket = asString(s3Data.get("bucket"));
+                        String region = asString(s3Data.get("region"));
+                        String objectKey = asString(s3Data.get("objectKey"));
+                        String url = asString(s3Data.get("url"));
+                        
+                        if (bucket != null) {
+                            storageData.put("location", "s3://" + bucket + "/" + fileId);
+                        }
+                        
+                        // Enrich s3 data with all available fields
+                        Map<String, Object> enrichedS3 = new java.util.HashMap<>();
+                        enrichedS3.put("bucket", bucket);
+                        enrichedS3.put("region", region);
+                        enrichedS3.put("objectKey", objectKey);
+                        enrichedS3.put("url", url);
+                        enrichedS3.put("contentType", asString(s3Data.get("contentType")));
+                        enrichedS3.put("size", asLong(s3Data.get("size")));
+                        enrichedS3.put("versionId", asString(s3Data.get("versionId")));
+                        
+                        // Add checksum if available
+                        Map<String, Object> checksum = asMap(s3Data.get("checksum"));
+                        if (checksum != null) {
+                            enrichedS3.put("checksum", checksum);
+                        }
+                        
+                        storageData.put("s3", enrichedS3);
+                        log.debug("Enriched S3 storage for fileId={} with bucket={}, objectKey={}", 
+                                  fileId, bucket, objectKey);
+                    }
+                    entity.setStorage(storageData);
+                }
                 
                 Map<String, Object> metadataData = asMap(data.get("metadata"));
                 if (metadataData != null) entity.setMetadata(metadataData);
@@ -87,6 +129,40 @@ public class FileEventConsumer {
                 // Entity đã tồn tại - chỉ update metadata fields, KHÔNG touch content/overview
                 Map<String, Object> fileData = asMap(data.get("file"));
                 Map<String, Object> storageData = asMap(data.get("storage"));
+                if (storageData != null) {
+                    // Add location field and enrich s3 data
+                    Map<String, Object> s3Data = asMap(storageData.get("s3"));
+                    if (s3Data != null) {
+                        String bucket = asString(s3Data.get("bucket"));
+                        String region = asString(s3Data.get("region"));
+                        String objectKey = asString(s3Data.get("objectKey"));
+                        String url = asString(s3Data.get("url"));
+                        
+                        if (bucket != null) {
+                            storageData.put("location", "s3://" + bucket + "/" + fileId);
+                        }
+                        
+                        // Enrich s3 data with all available fields
+                        Map<String, Object> enrichedS3 = new java.util.HashMap<>();
+                        enrichedS3.put("bucket", bucket);
+                        enrichedS3.put("region", region);
+                        enrichedS3.put("objectKey", objectKey);
+                        enrichedS3.put("url", url);
+                        enrichedS3.put("contentType", asString(s3Data.get("contentType")));
+                        enrichedS3.put("size", asLong(s3Data.get("size")));
+                        enrichedS3.put("versionId", asString(s3Data.get("versionId")));
+                        
+                        // Add checksum if available
+                        Map<String, Object> checksum = asMap(s3Data.get("checksum"));
+                        if (checksum != null) {
+                            enrichedS3.put("checksum", checksum);
+                        }
+                        
+                        storageData.put("s3", enrichedS3);
+                        log.debug("Enriched S3 storage for update fileId={} with bucket={}, objectKey={}", 
+                                  fileId, bucket, objectKey);
+                    }
+                }
                 Map<String, Object> metadataData = asMap(data.get("metadata"));
                 
                 Map<String, Object> auditMap = new java.util.HashMap<>();
@@ -117,9 +193,11 @@ public class FileEventConsumer {
         }
     }
 
-    @KafkaListener(topics = "${app.kafka.topic.file-content-extracted}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${app.kafka.topic.file-content-extracted}", 
+                   groupId = "${spring.kafka.consumer.group-id}",
+                   errorHandler = "kafkaErrorHandler")
     public void handleFileContentExtracted(@Payload String event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.debug("[FILE_CONTENT_EXTRACTED] topic={} payloadSize={}", topic, event != null ? event.length() : 0);
+        log.debug("Processing FILE_CONTENT_EXTRACTED event - size={}", event != null ? event.length() : 0);
         try {
             Map<String, Object> payload = objectMapper.readValue(event, Map.class);
             Map<String, Object> data = asMap(payload.get("data"));
@@ -172,9 +250,11 @@ public class FileEventConsumer {
         }
     }
 
-    @KafkaListener(topics = "${app.kafka.topic.contract-summary-generated}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(topics = "${app.kafka.topic.contract-summary-generated}", 
+                   groupId = "${spring.kafka.consumer.group-id}",
+                   errorHandler = "kafkaErrorHandler")
     public void handleContractSummaryGenerated(@Payload String event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        log.debug("[CONTRACT_SUMMARY_GENERATED] topic={} payloadSize={}", topic, event != null ? event.length() : 0);
+        log.debug("Processing CONTRACT_SUMMARY_GENERATED event - size={}", event != null ? event.length() : 0);
         try {
             Map<String, Object> payload = objectMapper.readValue(event, Map.class);
             Map<String, Object> data = asMap(payload.get("data"));
@@ -183,24 +263,71 @@ public class FileEventConsumer {
             String fileId = asString(data.get("fileId"));
             if (fileId == null) return;
 
-            // Build comprehensive contract data
+            // Build comprehensive contract data from summaryResult or data fields
+            Map<String, Object> summaryResult = asMap(data.get("summaryResult"));
+            if (summaryResult == null) {
+                summaryResult = data; // Fallback to data if no summaryResult
+            }
+            
+            log.debug("Processing contract summary for fileId={}, has summaryResult={}", 
+                      fileId, summaryResult != data);
+            
             Map<String, Object> contractData = new java.util.HashMap<>();
-            contractData.put("effectiveDate", asString(data.get("effectiveDate")));
-            contractData.put("expiryDate", asString(data.get("expiryDate")));
-            contractData.put("totalValue", asDouble(data.get("totalValue")));
-            contractData.put("currency", asString(data.get("currency")));
-            contractData.put("summary", asString(data.get("summary")));
-            contractData.put("project", asString(data.get("project")));
-            contractData.put("department", asString(data.get("department")));
-            contractData.put("priority", asString(data.get("priority")));
-            contractData.put("confidentiality", asString(data.get("confidentiality")));
-            contractData.put("workflow", data.get("workflow") != null ? data.get("workflow") : new java.util.HashMap<>());
-            contractData.put("parties", data.get("parties") != null ? data.get("parties") : new java.util.ArrayList<>());
-            contractData.put("payment", data.get("payment") != null ? data.get("payment") : new java.util.HashMap<>());
-            contractData.put("clauses", data.get("clauses") != null ? data.get("clauses") : new java.util.HashMap<>());
-            contractData.put("reminders", data.get("reminders") != null ? data.get("reminders") : new java.util.ArrayList<>());
-            contractData.put("risk", data.get("risk") != null ? data.get("risk") : new java.util.HashMap<>());
-            contractData.put("compliance", data.get("compliance") != null ? data.get("compliance") : new java.util.HashMap<>());
+            
+            // Basic contract fields
+            contractData.put("effectiveDate", asString(summaryResult.get("effectiveDate")));
+            contractData.put("expiryDate", asString(summaryResult.get("expiryDate")));
+            contractData.put("totalValue", asDouble(summaryResult.get("totalValue")));
+            contractData.put("currency", asString(summaryResult.get("currency")));
+            contractData.put("summary", asString(summaryResult.get("summary")));
+            contractData.put("project", asString(summaryResult.get("project")));
+            contractData.put("department", asString(summaryResult.get("department")));
+            contractData.put("priority", asString(summaryResult.get("priority")));
+            contractData.put("confidentiality", asString(summaryResult.get("confidentiality")));
+            
+            // Workflow - default empty if not present
+            Map<String, Object> workflow = asMap(summaryResult.get("workflow"));
+            if (workflow == null) workflow = new java.util.HashMap<>();
+            contractData.put("workflow", workflow);
+            
+            // Parties - extract and map properly
+            List<Object> parties = asList(summaryResult.get("parties"));
+            if (parties != null && !parties.isEmpty()) {
+                log.debug("Mapping {} parties for contract", parties.size());
+                contractData.put("parties", parties);
+            } else {
+                contractData.put("parties", new java.util.ArrayList<>());
+            }
+            
+            // Payment - extract payment info
+            Map<String, Object> payment = asMap(summaryResult.get("payment"));
+            if (payment == null) payment = new java.util.HashMap<>();
+            contractData.put("payment", payment);
+            
+            // Clauses - extract clauses
+            Map<String, Object> clauses = asMap(summaryResult.get("clauses"));
+            if (clauses == null) clauses = new java.util.HashMap<>();
+            contractData.put("clauses", clauses);
+            
+            // Reminders - extract reminders
+            List<Object> reminders = asList(summaryResult.get("reminders"));
+            if (reminders == null) reminders = new java.util.ArrayList<>();
+            contractData.put("reminders", reminders);
+            
+            // Risk analysis
+            Map<String, Object> risk = asMap(summaryResult.get("risk"));
+            if (risk == null) risk = new java.util.HashMap<>();
+            contractData.put("risk", risk);
+            
+            // Compliance
+            Map<String, Object> compliance = asMap(summaryResult.get("compliance"));
+            if (compliance == null) compliance = new java.util.HashMap<>();
+            contractData.put("compliance", compliance);
+            
+            log.info("Built contract data with {} parties, {} reminders, has payment={}, has risk={}, has compliance={}", 
+                     parties != null ? parties.size() : 0,
+                     reminders != null ? reminders.size() : 0,
+                     !payment.isEmpty(), !risk.isEmpty(), !compliance.isEmpty());
 
             // Chỉ update contract fields - KHÔNG touch metadata/content
             fileUpdateService.updateContractFields(

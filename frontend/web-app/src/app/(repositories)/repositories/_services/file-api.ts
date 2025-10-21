@@ -1,9 +1,9 @@
 import type { FileApiResponse } from '../_types/file-api'
 
-const BASE_URL = process.env.NEXT_PUBLIC_FILE_MGMT_BASE_URL || 'http://localhost:8002'
+const BASE_URL = '' // Always go through Next.js rewrite to API Gateway
 
 export async function fetchFileById(id: string, init?: RequestInit): Promise<FileApiResponse> {
-  const url = `${BASE_URL}/api/v1/file-management-service/v1/files/${encodeURIComponent(id)}`
+  const url = `${BASE_URL}/api/v1/file-management-service/repositories/${encodeURIComponent(id)}`
   const res = await fetch(url, {
     method: 'GET',
     headers: { Accept: 'application/json' },

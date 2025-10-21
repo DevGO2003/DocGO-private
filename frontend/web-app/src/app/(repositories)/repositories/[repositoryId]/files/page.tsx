@@ -1,203 +1,209 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { HeaderPanel } from '@/components/ui'
-import DocumentsFilters from '../_components/DocumentsFilters'
-import DocumentsTable from '../_components/DocumentsTable'
-import { fetchFiles } from '../_services/file-list-api'
-import { mapFileApiPageToPaginatedDocuments } from '../_services/file-list-mapper'
-// import { tagAPI } from '@/lib/api' // Disabled for now
 import { useTranslation } from '@/hooks/useTranslation'
+import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
+import DocumentsFilters from '../../_components/DocumentsFilters'
+import DocumentsTable from '../../_components/DocumentsTable'
+import SkeletonTable from '../../_components/SkeletonTable'
+import { useDocumentsQuery } from '../../_hooks/useDocumentsQuery'
+import { Document } from '../../_types'
+import { HeaderPanel } from '@/components/ui'
+import { PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-// Mock paginated list data (fallback if API empty, based on sample.json structure)
-const mockPaginatedData = {
-  data: [
-    {
-      id: '1',
-      title: 'Hợp đồng mẫu ID 1 - Dịch vụ phát triển phần mềm',
-      status: 'ACTIVE',
-      contractType: 'Phát triển phần mềm',
-      tags: ['Phần mềm', 'Dịch vụ', 'IT'],
-      createdAt: '2025-10-19T08:45:00Z',
-      updatedAt: '2025-10-19T08:45:00Z',
-      fileType: 'text/plain',
-      fileSize: 312,
-      owner: 'system',
-      // Additional sample fields for table display
-      totalValue: 100000,
-      currency: 'USD',
-      effectiveDate: '2025-11-01',
-      expiryDate: '2025-12-31',
-      category: 'Hợp đồng'
-    },
-    {
-      id: '2',
-      title: 'Hóa đơn thanh toán - Tháng 10/2025',
-      status: 'DRAFT',
-      contractType: 'Hóa đơn',
-      tags: ['Thanh toán', 'Tài chính'],
-      createdAt: '2025-10-20T10:00:00Z',
-      updatedAt: '2025-10-20T10:00:00Z',
-      fileType: 'application/pdf',
-      fileSize: 1024,
-      owner: 'user-001',
-      totalValue: 50000,
-      currency: 'VND',
-      effectiveDate: null,
-      expiryDate: null,
-      category: 'Hóa đơn'
-    },
-    {
-      id: '3',
-      title: 'Báo cáo tiến độ dự án DocGO',
-      status: 'APPROVED',
-      contractType: 'Báo cáo',
-      tags: ['Dự án', 'Tiến độ'],
-      createdAt: '2025-10-18T15:30:00Z',
-      updatedAt: '2025-10-19T09:15:00Z',
-      fileType: 'application/pdf',
-      fileSize: 2048,
-      owner: 'user-002',
-      totalValue: null,
-      currency: null,
-      effectiveDate: null,
-      expiryDate: null,
-      category: 'Báo cáo'
-    }
-  ],
-  totalElements: 3,
-  totalPages: 1,
-  pageNumber: 0,
-  pageSize: 10,
-  sortBy: 'createdAt',
-  sortDirection: 'DESC'
-}
-
-export default function DocumentsPage() {
-  const params = useParams() as { repositoryId: string }
-  const repositoryId = params.repositoryId
+export default function RepositoriesPage() {
   const { t } = useTranslation()
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [type, setType] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [tagsLoading, setTagsLoading] = useState(false)
+  const [tagsError, setTagsError] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [reloadTick, setReloadTick] = useState(0)
 
-  const [documents, setDocuments] = useState<any>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string>('')
-  const [page, setPage] = useState<number>(0)
-  const [pageSize, setPageSize] = useState<number>(10)
-  const [sortBy, setSortBy] = useState<string>('createdAt')
-  const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC')
-  const [searchTerm, setSearchTerm] = useState<string>('')
-  const [activeTab, setActiveTab] = useState<string>('all')
-  const [reloadTick, setReloadTick] = useState<number>(0)
-  const searchRef = useRef<NodeJS.Timeout>()
+  const { data, loading, error, refetch } = useDocumentsQuery({
+    pageNumber: 0,
+    pageSize: 9,
+    sortBy,
+    sortDirection: sortDirection.toUpperCase() as 'ASC' | 'DESC',
+    searchTerm: search,
+    status,
+    type,
+    tags: selectedTags,
+  })
 
-  const debouncedSearch = useMemo(() => {
-    return searchTerm.length > 0 ? searchTerm : ''
-  }, [searchTerm])
+  const items: Document[] = data?.content || []
+  const totalElements = data?.totalElements || 0
+  const totalPages = data?.totalPages || 0
 
+  function getBadgeClass(status: string) {
+    switch (status) {
+      case 'DRAFT':
+        return 'bg-gray-50 text-gray-700 border-gray-200'
+      case 'PENDING_REVIEW':
+        return 'bg-amber-50 text-amber-700 border-amber-200'
+      case 'APPROVED':
+        return 'bg-blue-50 text-blue-700 border-blue-200'
+      case 'ACTIVE':
+        return 'bg-green-50 text-green-700 border-green-200'
+      case 'EXPIRED':
+        return 'bg-rose-50 text-rose-700 border-rose-200'
+      case 'TERMINATED':
+        return 'bg-red-50 text-red-700 border-red-200'
+      case 'ARCHIVED':
+        return 'bg-slate-50 text-slate-700 border-slate-200'
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200'
+    }
+  }
+
+  const refreshData = async () => { 
+    setRefreshing(true)
+    try { 
+      setReloadTick(x => x + 1) 
+    } finally { 
+      setRefreshing(false) 
+    } 
+  }
+
+  // Load available tags once - Disabled tags API
   useEffect(() => {
-    const loadDocuments = async () => {
-      setLoading(true)
-      setError('')
-      let apiData = null
-
+    const loadTags = async () => {
+      setTagsLoading(true)
+      setTagsError(false)
       try {
-        // Fetch from API
-        console.log('Fetching files for repository:', repositoryId, 'page:', page, 'search:', debouncedSearch)
-        const resp = await fetchFiles({
-          pageNumber: page,
-          pageSize,
-          sortBy,
-          sortDirection,
-          searchTerm: debouncedSearch,
-          repositoryId,
-          includeDeleted: false,
-          type: activeTab === 'contracts' ? 'CONTRACT' : undefined
-        })
-
-        // Use API data only if it has content, otherwise fallback to mock
-        if (resp?.data?.content?.length > 0) {
-          apiData = mapFileApiPageToPaginatedDocuments(resp.data)
-          console.log('API list success:', apiData)
-        } else {
-          console.log('API list empty, using mock fallback')
-          apiData = mockPaginatedData
-        }
-      } catch (e: any) {
-        console.error('Error fetching documents list:', e)
-        console.log('API list failed, using mock fallback')
-        apiData = mockPaginatedData // Fallback on error
-      }
-
-      setDocuments(apiData.data)
-      setLoading(false)
-    }
-
-    loadDocuments()
-
-    return () => {
-      if (searchRef.current) {
-        clearTimeout(searchRef.current)
+        // Mock tags for now
+        const mockTags = [
+          'Hợp đồng dịch vụ',
+          'Hợp đồng mua bán',
+          'Hợp đồng lao động',
+          'Hợp đồng thuê',
+          'Hợp đồng bảo hiểm',
+          'Hợp đồng tín dụng',
+          'Hợp đồng đầu tư',
+          'Hợp đồng liên doanh',
+          'Hợp đồng chuyển nhượng',
+          'Hợp đồng ủy quyền'
+        ]
+        setAvailableTags(mockTags)
+      } catch (error) {
+        console.error('Error loading tags:', error)
+        setTagsError(true)
+      } finally {
+        setTagsLoading(false)
       }
     }
-  }, [page, pageSize, sortBy, sortDirection, debouncedSearch, activeTab, reloadTick, repositoryId])
+    loadTags()
+  }, [])
 
-  // Debounce search input
+  const load = async () => {
+    try {
+      await refetch()
+    } catch (error) {
+      console.error('Error loading data:', error)
+    }
+  }
+
   useEffect(() => {
-    if (searchRef.current) {
-      clearTimeout(searchRef.current)
+    load()
+  }, [search, status, type, selectedTags, sortBy, sortDirection, reloadTick])
+
+  const toggleTag = (t: string) => {
+    setSelectedTags(prev => 
+      prev.includes(t) 
+        ? prev.filter(tag => tag !== t)
+        : [...prev, t]
+    )
+  }
+
+  const toggleSelectItem = (id: string) => {
+    setSelectedItems(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    )
+  }
+
+  const selectAll = () => {
+    setSelectedItems(items.map(item => item.id))
+  }
+
+  const clearSelection = () => {
+    setSelectedItems([])
+  }
+
+  const handleTableColumnsChange = (newColumns: any[]) => {
+    // Handle table columns change
+  }
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    // Handle page size change
+  }
+
+  const handleShowMore = () => {}
+
+  // Retry loading tags - Disabled tags API
+  const handleRetryTags = () => {
+    const loadTags = async () => {
+      setTagsLoading(true)
+      setTagsError(false)
+      try {
+        const mockTags = [
+          'Hợp đồng dịch vụ',
+          'Hợp đồng mua bán',
+          'Hợp đồng lao động',
+          'Hợp đồng thuê',
+          'Hợp đồng bảo hiểm',
+          'Hợp đồng tín dụng',
+          'Hợp đồng đầu tư',
+          'Hợp đồng liên doanh',
+          'Hợp đồng chuyển nhượng',
+          'Hợp đồng ủy quyền'
+        ]
+        setAvailableTags(mockTags)
+      } catch (error) {
+        console.error('Error loading tags:', error)
+        setTagsError(true)
+      } finally {
+        setTagsLoading(false)
+      }
     }
-    searchRef.current = setTimeout(() => {
-      setPage(0)
-    }, 500)
-  }, [searchTerm])
+    loadTags()
+  }
 
   if (loading) {
     return (
       <DashboardLayout>
         <div className="space-y-6">
           <HeaderPanel
-            title={`Quản lý tài liệu${repositoryId ? ` - Kho ${repositoryId}` : ''}`}
-            breadcrumbs={[
-              { label: 'Tài liệu', href: '/documents' },
-              { label: repositoryId ? `Kho ${repositoryId}` : 'Danh sách', current: true }
-            ]}
+            title="Kho tài liệu"
+            subtitle="Quản lý và theo dõi tài liệu"
             right={
               <div className="flex items-center gap-2">
-                <button className="btn-primary">Thêm mới</button>
-                <button className="btn-secondary">Upload</button>
+                <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                  <PlusIcon className="w-4 h-4" />
+                  Tạo mới
+                </button>
+                <button 
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                >
+                  <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  Làm mới
+                </button>
               </div>
             }
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-gray-200 h-32 rounded-lg" />
-            ))}
-          </div>
-        </div>
-      </DashboardLayout>
-    )
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="space-y-6">
-          <HeaderPanel
-            title={`Quản lý tài liệu${repositoryId ? ` - Kho ${repositoryId}` : ''}`}
-            breadcrumbs={[
-              { label: 'Tài liệu', href: '/documents' },
-              { label: repositoryId ? `Kho ${repositoryId}` : 'Danh sách', current: true }
-            ]}
-          />
-          <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-            <h3 className="text-red-800 font-medium">Lỗi tải tài liệu</h3>
-            <p className="text-red-600">{error}</p>
-            <button onClick={() => setReloadTick(prev => prev + 1)} className="btn-primary mt-2">
-              Thử lại
-            </button>
-          </div>
+          <SkeletonTable />
         </div>
       </DashboardLayout>
     )
@@ -207,80 +213,60 @@ export default function DocumentsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <HeaderPanel
-          title={`Quản lý tài liệu${repositoryId ? ` - Kho ${repositoryId}` : ''}`}
-          breadcrumbs={[
-            { label: 'Tài liệu', href: '/documents' },
-            { label: repositoryId ? `Kho ${repositoryId}` : 'Danh sách', current: true }
-          ]}
+          title="Kho tài liệu"
+          subtitle="Quản lý và theo dõi tài liệu"
           right={
             <div className="flex items-center gap-2">
-              <DocumentsFilters
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                pageSize={pageSize}
-                onPageSizeChange={setPageSize}
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSortChange={({ sortBy: sb, sortDirection: sd }) => {
-                  setSortBy(sb)
-                  setSortDirection(sd)
-                  setPage(0)
-                }}
-              />
-              <button className="btn-primary">Thêm mới</button>
-              <button className="btn-secondary">Upload</button>
-              <button onClick={() => setReloadTick(prev => prev + 1)} className="btn-outline">
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                <PlusIcon className="w-4 h-4" />
+                Tạo mới
+              </button>
+              <button 
+                onClick={refreshData}
+                disabled={refreshing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                 Làm mới
               </button>
             </div>
           }
-        >
-          {/* Tab navigation if needed */}
-          <div className="flex space-x-4 mt-4">
-            <button
-              className={`px-4 py-2 rounded ${activeTab === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}
-              onClick={() => setActiveTab('all')}
-            >
-              Tất cả ({documents.length})
-            </button>
-            <button
-              className={`px-4 py-2 rounded ${activeTab === 'contracts' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}
-              onClick={() => setActiveTab('contracts')}
-            >
-              Hợp đồng
-            </button>
-            <button
-              className={`px-4 py-2 rounded ${activeTab === 'documents' ? 'bg-primary-600 text-white' : 'bg-gray-200'}`}
-              onClick={() => setActiveTab('documents')}
-            >
-              Tài liệu
-            </button>
-          </div>
-        </HeaderPanel>
+        />
 
-        <div className="bg-white rounded-lg shadow">
-          <DocumentsTable
-            documents={documents}
-            page={page}
-            pageSize={pageSize}
-            totalElements={documents.length} // From mock or API totalElements
-            onPageChange={setPage}
-            loading={loading}
-            repositoryId={repositoryId}
-            onReload={() => setReloadTick(prev => prev + 1)}
-          />
-        </div>
+        <DocumentsFilters
+          search={search}
+          onSearchChange={setSearch}
+          status={status}
+          onStatusChange={setStatus}
+          type={type}
+          onTypeChange={setType}
+          availableTags={availableTags}
+          tagsLoading={tagsLoading}
+          tagsError={tagsError}
+          selectedTags={selectedTags}
+          onToggleTag={toggleTag}
+          onRetryTags={handleRetryTags}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDirection={sortDirection}
+          onToggleSortDirection={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+          onRefresh={refreshData}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
-        {/* Debug section for list data */}
-        <div className="p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-bold mb-2">Debug: List Data (API or Mock)</h3>
-          <pre className="text-xs overflow-auto max-h-96">
-            {JSON.stringify({ documents, total: documents.length }, null, 2)}
-          </pre>
-          <p className="text-sm text-gray-600 mt-2">Console log: Check for 'API list success' or 'using mock fallback'.</p>
-        </div>
+        <DocumentsTable
+          items={items}
+          selectedItems={selectedItems}
+          onToggleSelect={toggleSelectItem}
+          onSelectAll={selectAll}
+          onClearSelection={clearSelection}
+          viewMode={viewMode}
+          badgeClass={getBadgeClass}
+          t={t}
+        />
       </div>
     </DashboardLayout>
   )

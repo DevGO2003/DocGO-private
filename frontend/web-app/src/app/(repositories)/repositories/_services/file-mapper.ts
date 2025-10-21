@@ -56,6 +56,8 @@ export function mapFileApiToUiDocument(data: FileApiData): Document {
     category: ov.category || undefined,
     extension: data.file?.name?.includes('.') ? data.file?.name.split('.').pop() : undefined,
     contractMetadata: { effectiveDate, expiryDate, totalValue, currency },
+    file: data.file,
+    storage: data.storage as any,
   }
 }
 

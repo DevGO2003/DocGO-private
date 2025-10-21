@@ -164,16 +164,19 @@ public class FileService {
     private OverviewDto mapToOverview(Map<String, Object> overviewMap) {
         if (overviewMap == null || overviewMap.isEmpty()) return null;
 
+        log.debug("Mapping overview with status={}, documentType={}", 
+                  overviewMap.get("status"), overviewMap.get("documentType"));
+
         return OverviewDto.builder()
             .title(asString(overviewMap.get("title")))
-            .status(asString(overviewMap.get("status")))
-            .documentType(asString(overviewMap.get("documentType")))
+            .status(normalizeOverviewStatus(asString(overviewMap.get("status"))))
+            .documentType(normalizeDocumentType(asString(overviewMap.get("documentType"))))
             .contractType(asString(overviewMap.get("contractType")))
             .category(asString(overviewMap.get("category")))
             .tags(asList(overviewMap.get("tags")))
             .ownerUserId(asString(overviewMap.get("ownerUserId")))
-            .language(asString(overviewMap.get("language")))
-            .region(asString(overviewMap.get("region")))
+            .language(normalizeLanguage(asString(overviewMap.get("language"))))
+            .region(normalizeRegion(asString(overviewMap.get("region"))))
             .isNew(asBoolean(overviewMap.get("isNew")))
             .build();
     }
@@ -188,16 +191,19 @@ public class FileService {
         Map<String, Object> contractMap = file.getContract();
         if (contractMap == null) contractMap = new java.util.HashMap<>();
 
+        log.debug("Mapping contract with priority={}, confidentiality={}, currency={}", 
+                  contractMap.get("priority"), contractMap.get("confidentiality"), contractMap.get("currency"));
+
         return ContractDto.builder()
             .effectiveDate(asLocalDateTime(contractMap.get("effectiveDate")))
             .expiryDate(asLocalDateTime(contractMap.get("expiryDate")))
             .totalValue(asDouble(contractMap.get("totalValue")))
-            .currency(asString(contractMap.get("currency")))
+            .currency(toUpperEnum(asString(contractMap.get("currency"))))
             .summary(asString(contractMap.get("summary")))
             .project(asString(contractMap.get("project")))
             .department(asString(contractMap.get("department")))
-            .priority(asString(contractMap.get("priority")))
-            .confidentiality(asString(contractMap.get("confidentiality")))
+            .priority(normalizePriority(asString(contractMap.get("priority"))))
+            .confidentiality(normalizeConfidentiality(asString(contractMap.get("confidentiality"))))
             .workflow(mapToWorkflow(asMap(contractMap.get("workflow"))))
             .parties(mapToParties(asList(contractMap.get("parties"))))
             .payment(mapToPayment(asMap(contractMap.get("payment"))))
@@ -333,10 +339,12 @@ public class FileService {
     // Basic implementations for nested mappers
     private WorkflowDto mapToWorkflow(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
+        log.debug("Mapping workflow with status={}, currentStage={}", 
+                  map.get("status"), map.get("currentStage"));
         return WorkflowDto.builder()
-            .status(asString(map.get("status")))
-            .currentStage(asString(map.get("currentStage")))
-            .nextStage(asString(map.get("nextStage")))
+            .status(toUpperEnum(asString(map.get("status"))))
+            .currentStage(toUpperEnum(asString(map.get("currentStage"))))
+            .nextStage(toUpperEnum(asString(map.get("nextStage"))))
             .build();
     }
     
@@ -459,6 +467,100 @@ public class FileService {
     }
     private List<AuditDto.ChangeHistoryDto> mapToChangeHistory(List<Object> list) { return null; }
     private List<AuditDto.AccessLogDto> mapToAccessLog(List<Object> list) { return null; }
+    
+    // =====================
+    // Normalization helpers
+    // =====================
+
+    private String toUpperEnum(String s) {
+        return s != null ? s.trim().toUpperCase() : null;
+    }
+
+    private String normalizeLanguage(String s) {
+        return s != null ? s.trim().toLowerCase() : null; // ISO 639-1
+    }
+
+    private String normalizeRegion(String s) {
+        return toUpperEnum(s); // ISO 3166-1 alpha-2
+    }
+
+    private String normalizeOverviewStatus(String s) {
+        if (s == null) return null;
+        String v = s.trim().toLowerCase();
+        switch (v) {
+            case "processed":
+            case "completed": 
+            case "active":
+            case "uploaded":
+                return "ACTIVE";
+            case "draft":
+                return "DRAFT";
+            case "archived":
+                return "ARCHIVED";
+            case "deleted":
+                return "DELETED";
+            case "inactive":
+            case "processing":
+                return "INACTIVE";
+            default:
+                log.debug("Unknown overview status '{}', using uppercase", s);
+                return toUpperEnum(s);
+        }
+    }
+
+    private String normalizeDocumentType(String s) {
+        if (s == null) return null;
+        String v = s.trim().toLowerCase();
+        switch (v) {
+            case "contract":
+                return "CONTRACT";
+            case "invoice":
+                return "INVOICE";
+            case "memo":
+                return "MEMO";
+            case "report":
+                return "REPORT";
+            case "agreement":
+                return "AGREEMENT";
+            default:
+                log.debug("Unknown document type '{}', using uppercase", s);
+                return toUpperEnum(s);
+        }
+    }
+
+    private String normalizePriority(String s) {
+        if (s == null) return null;
+        String v = s.trim().toLowerCase();
+        switch (v) {
+            case "high":
+                return "HIGH";
+            case "medium":
+                return "MEDIUM";
+            case "low":
+                return "LOW";
+            default:
+                log.debug("Unknown priority '{}', using uppercase", s);
+                return toUpperEnum(s);
+        }
+    }
+
+    private String normalizeConfidentiality(String s) {
+        if (s == null) return null;
+        String v = s.trim().toLowerCase();
+        switch (v) {
+            case "confidential":
+                return "CONFIDENTIAL";
+            case "internal":
+                return "INTERNAL";
+            case "public":
+                return "PUBLIC";
+            case "restricted":
+                return "RESTRICTED";
+            default:
+                log.debug("Unknown confidentiality '{}', using uppercase", s);
+                return toUpperEnum(s);
+        }
+    }
 }
 
 
