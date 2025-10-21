@@ -20,7 +20,7 @@ export async function fetchFiles(params: {
   })
   if (params.searchTerm) q.set('searchTerm', params.searchTerm)
   if (params.documentType) q.set('documentType', params.documentType)
-  const url = `${BASE_URL}/api/v1/file-management-service/files?${q.toString()}`
+  const url = `${BASE_URL}/api/v1/repository-management-service/files?${q.toString()}`
   const res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
   if (!res.ok) throw new Error(`Fetch files failed: ${res.status} ${res.statusText}`)
   return res.json()

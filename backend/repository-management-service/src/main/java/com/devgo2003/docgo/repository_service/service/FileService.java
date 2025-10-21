@@ -427,10 +427,48 @@ public class FileService {
         
         return schedules;
     }
-    private ClausesDto mapToClauses(Map<String, Object> map) { return null; }
-    private List<ReminderDto> mapToReminders(List<Object> list) { return null; }
-    private RiskDto mapToRisk(Map<String, Object> map) { return null; }
-    private ComplianceDto mapToCompliance(Map<String, Object> map) { return null; }
+    private ClausesDto mapToClauses(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return ClausesDto.builder()
+            .key(asList(map.get("key")))
+            .unfavorable(asList(map.get("unfavorable")))
+            .build();
+    }
+    private List<ReminderDto> mapToReminders(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        
+        List<ReminderDto> reminders = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> reminderMap = asMap(item);
+            if (reminderMap == null) continue;
+            
+            ReminderDto reminder = ReminderDto.builder()
+                .type(asString(reminderMap.get("type")))
+                .date(asLocalDateTime(reminderMap.get("date")))
+                .description(asString(reminderMap.get("description")))
+                .notifyBefore(asInteger(reminderMap.get("notifyBefore")))
+                .build();
+            reminders.add(reminder);
+        }
+        
+        return reminders;
+    }
+    private RiskDto mapToRisk(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return RiskDto.builder()
+            .level(toUpperEnum(asString(map.get("level"))))
+            .factors(asList(map.get("factors")))
+            .mitigations(asList(map.get("mitigations")))
+            .build();
+    }
+    private ComplianceDto mapToCompliance(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return ComplianceDto.builder()
+            .status(toUpperEnum(asString(map.get("status"))))
+            .issues(asList(map.get("issues")))
+            .recommendations(asList(map.get("recommendations")))
+            .build();
+    }
     
     private List<ContentDto.SectionDto> mapToSections(List<Object> list) { return null; }
     

@@ -214,6 +214,8 @@ services:
     tty: true  # TTY cho dev
     depends_on:
       - api-gateway  # Nếu cần backend
+    networks:
+      - docgo-network
     restart: unless-stopped
 
 # ==========================================

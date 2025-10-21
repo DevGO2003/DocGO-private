@@ -3,7 +3,7 @@ import type { FileApiResponse } from '../_types/file-api'
 const BASE_URL = '' // Always go through Next.js rewrite to API Gateway
 
 export async function fetchFileById(id: string, init?: RequestInit): Promise<FileApiResponse> {
-  const url = `${BASE_URL}/api/v1/file-management-service/repositories/${encodeURIComponent(id)}`
+  const url = `${BASE_URL}/api/v1/repository-management-service/files/${encodeURIComponent(id)}`
   const res = await fetch(url, {
     method: 'GET',
     headers: { Accept: 'application/json' },

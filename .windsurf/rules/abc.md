@@ -1,5 +1,7 @@
 ---
 trigger: glob
-globs: sadf
+description: ádfsdaf
+globs: *.js
 ---
 
+hello

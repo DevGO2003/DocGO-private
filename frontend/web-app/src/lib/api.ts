@@ -27,7 +27,7 @@ export interface PaginatedResponse<T> {
 
 // Contract Management API - Sử dụng API Gateway với pattern mới
 export class ContractAPI {
-  private basePath = '/api/v1/file-management-service'
+  private basePath = '/api/v1/repository-management-service'
 
   async getContracts(params?: {
     pageNumber?: number
