@@ -1,10 +1,27 @@
 ---
 id: "rule-chat-utilities"
-description: "Tiện ích chat (tạo prompt), hạn chế tạo .md tự động, và quản lý README files cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes comprehensive chat utility standards for DocGO development workflow including prompt generation, markdown file restrictions, and workspace management procedures.
+  It ensures efficient development environment maintenance by preventing unnecessary file creation, managing documentation standards, and automating workspace organization tasks.
+  The rule covers prompt management, documentation restrictions, artifact detection, and systematic workspace organization to maintain clean, productive development environments.
 globs:
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
   - "**/*.md"
-  - "**/prompt/**"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
   - "**/README.md"
 tags:
   - chat

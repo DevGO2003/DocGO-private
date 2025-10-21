@@ -1,9 +1,27 @@
 ---
 id: "rule-cursorignore-auto"
-description: "Tự động thêm artifacts vào .cursorignore, danh mục patterns (node_modules, __pycache__, target), và không áp dụng cho .env files"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes automatic .cursorignore management for DocGO development workflow including artifact detection, log file management, upload directory handling, and temporary file cleanup procedures.
+  It ensures efficient development environment maintenance by automatically detecting and ignoring build artifacts, log files, uploads, and temporary files to maintain clean workspace organization.
+  The rule covers pattern detection, automatic .cursorignore updates, artifact classification, and systematic workspace cleanup to maintain optimal development environment performance.
 globs:
-  - "**/.cursorignore"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - cursorignore
   - artifacts

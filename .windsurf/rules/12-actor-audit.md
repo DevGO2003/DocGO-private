@@ -1,12 +1,27 @@
 ---
 id: "rule-actor-audit"
-description: "Chuẩn hóa Actor standards cho audit log, bảng quy ước theo ngữ cảnh, và implementation (Spring Boot, FastAPI) cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes comprehensive actor identification and audit logging standards for DocGO microservices including user tracking, event correlation, security practices, and comprehensive audit trail management.
+  It ensures proper actor identification across all system operations, consistent audit logging patterns, and robust security measures for sensitive data handling and compliance requirements.
+  The rule covers event correlation, user session tracking, security event logging, and comprehensive audit trail maintenance to support regulatory compliance and system monitoring.
 globs:
-  - "**/AuditConfig.java"
-  - "**/audit*.py"
-  - "**/event*.py"
-  - "**/schemas/event*.py"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
   - "**/audit/**"
   - "**/audit*.java"
 tags:

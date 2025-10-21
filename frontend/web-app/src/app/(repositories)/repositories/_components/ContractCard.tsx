@@ -135,7 +135,7 @@ export default function ContractCard({ document, isSelected, onToggleSelect, bad
         <div className="absolute inset-x-0 bottom-0 z-20">
           <div className="flex rounded-none border-t border-gray-200 overflow-hidden divide-x divide-gray-200 bg-transparent">
             <button 
-              onClick={() => window.location.href = `/documents/${document.id}`}
+              onClick={() => window.location.href = `/repositories/1/files/${document.id}`}
               className="flex-1 h-10 flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-colors"
               title={t('documents.openFile')}
             >

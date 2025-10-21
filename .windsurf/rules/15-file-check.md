@@ -1,7 +1,10 @@
 ---
 id: "rule-file-check"
-description: "Quy tắc kiểm tra file tồn tại, dùng read_file thay vì list_dir, tool priority, và ví dụ thực tế cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes comprehensive file existence validation standards for DocGO development workflow including pre-operation file checks, tool priority guidelines, and robust error handling procedures.
+  It ensures reliable file operations by prioritizing read_file over list_dir, implementing proper file existence validation, and maintaining consistent error handling patterns.
+  The rule covers file validation procedures, tool selection guidelines, error recovery mechanisms, and comprehensive logging to maintain reliable file system operations.
 globs:
   - "**/*.java"
   - "**/*.py"
@@ -9,6 +12,16 @@ globs:
   - "**/*.tsx"
   - "**/*.js"
   - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - file-check
   - read_file

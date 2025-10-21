@@ -1,12 +1,27 @@
 ---
 id: "rule-mcp-database"
-description: "Ưu tiên MCP cho database operations (MongoDB, Redis), error handling, retry logic, và performance optimization cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes Model Context Protocol (MCP) standards for database operations in DocGO including MongoDB and Redis interactions, comprehensive error handling, retry logic, and performance optimization strategies.
+  It prioritizes MCP tools over terminal commands for database queries, ensuring faster, safer, and more reliable database operations with proper error recovery mechanisms.
+  The rule covers batch operations, caching strategies, security practices, monitoring procedures, and fallback mechanisms to maintain robust database integration patterns.
 globs:
-  - "**/mongo*.py"
-  - "**/redis*.py"
-  - "**/database*.py"
-  - "**/db*.py"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - mcp
   - database
