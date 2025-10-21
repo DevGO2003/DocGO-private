@@ -1,0 +1,5 @@
+﻿automation-service  | [DEBUG] Preparing publish -> topic=file.metadata.recorded fileId=75154504-ee37-4582-8d47-5264798c3999 size=3757 contentType=text/plain
+automation-service  | [DEBUG] Published -> topic=file.metadata.recorded fileId=75154504-ee37-4582-8d47-5264798c3999
+automation-service  | [DEBUG] Preparing publish -> topic=file.plaintext.extracted fileId=75154504-ee37-4582-8d47-5264798c3999 hasPlaintext=True hasJson=False
+automation-service  | [DEBUG] Published -> topic=file.plaintext.extracted fileId=75154504-ee37-4582-8d47-5264798c3999
+automation-service  | [DEBUG] Preparing publish -> topic=contract.summary.generated fileId=75154504-ee37-4582-8d47-5264798c3999
