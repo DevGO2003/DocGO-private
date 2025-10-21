@@ -25,7 +25,7 @@ const services: Record<string, { url: string; timeout: number }> = {
  * /api/v2/simple/{service-name}/{path}:
  *   get:
  *     summary: Simple Enhanced Proxy GET request
- *     description: |
+ *     description:
  *       ## 🔄 Simple Enhanced Proxy GET Request
  *       
  *       Định tuyến GET request đến microservice với Load Balancing đơn giản.

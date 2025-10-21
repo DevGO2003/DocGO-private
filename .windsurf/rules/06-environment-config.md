@@ -1,10 +1,7 @@
 ---
 id: "rule-environment-config"
 trigger: model_decision
-description: |
-  This rule standardizes environment configuration management for DocGO including .env file organization, .env.example templates, Docker Compose environment mapping, and comprehensive .gitignore patterns.
-  It ensures secure handling of sensitive configuration data, consistent environment setup across all microservices, and proper separation of development and production configurations.
-  The rule covers environment variable naming conventions, validation procedures, security best practices, and automated configuration management to maintain reliable deployment environments.
+description: Quy tắc chuẩn hóa environment configuration management cho DocGO bao gồm .env file organization, .env.example templates, Docker Compose environment mapping, và comprehensive .gitignore patterns. Đảm bảo secure handling của sensitive configuration data, consistent environment setup across all microservices, và proper separation của development và production configurations. Quy tắc bao gồm environment variable naming conventions, validation procedures, security best practices, và automated configuration management để duy trì reliable deployment environments.
 globs:
   - "**/*.java"
   - "**/*.py"

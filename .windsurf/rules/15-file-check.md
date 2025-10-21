@@ -1,7 +1,7 @@
 ---
 id: "rule-file-check"
 trigger: model_decision
-description: |
+description:
   This rule establishes comprehensive file existence validation standards for DocGO development workflow including pre-operation file checks, tool priority guidelines, and robust error handling procedures.
   It ensures reliable file operations by prioritizing read_file over list_dir, implementing proper file existence validation, and maintaining consistent error handling patterns.
   The rule covers file validation procedures, tool selection guidelines, error recovery mechanisms, and comprehensive logging to maintain reliable file system operations.

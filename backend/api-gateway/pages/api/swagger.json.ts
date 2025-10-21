@@ -6,7 +6,7 @@ import { swaggerSpec } from '@/lib/swagger';
  * /api/swagger.json:
  *   get:
  *     summary: Lấy OpenAPI specification
- *     description: |
+ *     description:
  *       ## 📋 OpenAPI Specification
  *       
  *       Endpoint này trả về OpenAPI 3.0.3 specification cho API Gateway BFF.

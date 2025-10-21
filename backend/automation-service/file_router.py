@@ -958,49 +958,89 @@ async def upload_document(
                     if bool(classification_result.get("isContract")) and summary_result:
                         print(f"[DEBUG] Preparing publish -> topic=contract.summary.generated fileId={file_id}")
                         
-                        # Prepare enhanced contract metadata theo sample.json
+                        # Prepare FULL contract metadata theo sample.json - AI không trả về thì null
                         contract_metadata = {
-                            "effectiveDate": summary_result.get("effectiveDate", "2025-11-01"),
-                            "expiryDate": summary_result.get("expiryDate", "2025-12-31"),
-                            "totalValue": summary_result.get("totalValue", 100000),
-                            "currency": summary_result.get("currency", "USD"),
-                            "parties": summary_result.get("parties", [
+                            # Basic fields - AI không trả về thì null
+                            "effectiveDate": summary_result.get("effectiveDate"),
+                            "expiryDate": summary_result.get("expiryDate"),
+                            "totalValue": summary_result.get("totalValue"),
+                            "currency": summary_result.get("currency"),
+                            "summary": summary_result.get("summary"),
+                            "project": summary_result.get("project"),
+                            "department": summary_result.get("department"),
+                            "priority": summary_result.get("priority"),
+                            "confidentiality": summary_result.get("confidentiality"),
+                            
+                            # Parties - ensure full structure with id, type, contact, representative
+                            "parties": [
                                 {
-                                    "id": "party-001",
-                                    "name": "Company A",
-                                    "type": "CLIENT",
-                                    "role": "Bên A",
-                                    "contact": {"email": "contact@companya.com", "phone": "+84-28-1234-5678"},
-                                    "representative": {"name": "Nguyễn Văn A", "position": "Giám đốc"},
-                                    "taxCode": "ABC123"
+                                    "id": party.get("id") if isinstance(party, dict) else None,
+                                    "name": party.get("name") if isinstance(party, dict) else party,
+                                    "type": party.get("type") if isinstance(party, dict) else None,
+                                    "role": party.get("role") if isinstance(party, dict) else None,
+                                    "contact": {
+                                        "email": party.get("email") or party.get("contact", {}).get("email") if isinstance(party, dict) else None,
+                                        "phone": party.get("contact", {}).get("phone") if isinstance(party, dict) else None,
+                                        "address": party.get("address") or party.get("contact", {}).get("address") if isinstance(party, dict) else None
+                                    },
+                                    "representative": {
+                                        "name": party.get("representative", {}).get("name") if isinstance(party, dict) else None,
+                                        "position": party.get("position") or party.get("representative", {}).get("position") if isinstance(party, dict) else None,
+                                        "email": party.get("representative", {}).get("email") if isinstance(party, dict) else None
+                                    },
+                                    "taxCode": party.get("taxCode") if isinstance(party, dict) else None
                                 }
-                            ]),
+                                for party in (summary_result.get("parties") or [])
+                            ],
+                            
+                            # Payment - full structure with schedule
                             "payment": {
-                                "schedule": summary_result.get("payment", {}).get("schedule", []),
-                                "method": summary_result.get("payment", {}).get("method", "BANK_TRANSFER"),
-                                "paymentMethod": summary_result.get("payment", {}).get("paymentMethod", "Bank transfer")
+                                "schedule": summary_result.get("payment", {}).get("schedule") or [],
+                                "method": summary_result.get("payment", {}).get("method"),
+                                "paymentMethod": summary_result.get("payment", {}).get("paymentMethod")
                             },
+                            
+                            # Clauses - full structure
                             "clauses": {
-                                "key": summary_result.get("clauses", {}).get("key", []),
-                                "unfavorable": summary_result.get("clauses", {}).get("unfavorable", []),
-                                "intellectualProperty": "Tất cả quyền sở hữu trí tuệ thuộc về bên A",
-                                "confidentiality": "Bên B cam kết bảo mật thông tin dự án",
-                                "warranty": "Bảo hành 12 tháng sau khi nghiệm thu",
-                                "termination": "Có thể chấm dứt hợp đồng với thông báo trước 30 ngày"
+                                "key": summary_result.get("clauses", {}).get("key") or [],
+                                "unfavorable": summary_result.get("clauses", {}).get("unfavorable") or [],
+                                "intellectualProperty": summary_result.get("clauses", {}).get("intellectualProperty"),
+                                "confidentiality": summary_result.get("clauses", {}).get("confidentiality"),
+                                "warranty": summary_result.get("clauses", {}).get("warranty"),
+                                "termination": summary_result.get("clauses", {}).get("termination")
                             },
-                            "reminders": summary_result.get("reminders", []),
+                            
+                            # Reminders - full structure
+                            "reminders": [
+                                {
+                                    "date": reminder.get("date") if isinstance(reminder, dict) else None,
+                                    "type": reminder.get("type") if isinstance(reminder, dict) else None,
+                                    "title": reminder.get("title") if isinstance(reminder, dict) else None,
+                                    "description": reminder.get("description", "") if isinstance(reminder, dict) else "",
+                                    "notifyBefore": reminder.get("notifyBefore") if isinstance(reminder, dict) else None,
+                                    "status": reminder.get("status") if isinstance(reminder, dict) else None,
+                                    "assignedTo": reminder.get("assignedTo") if isinstance(reminder, dict) else None
+                                }
+                                for reminder in (summary_result.get("reminders") or [])
+                            ],
+                            
+                            # Risk - full structure
                             "risk": {
-                                "riskLevel": summary_result.get("risk", {}).get("level", "MEDIUM"),
-                                "factors": summary_result.get("risk", {}).get("factors", []),
-                                "mitigationProposals": summary_result.get("risk", {}).get("mitigationProposals", []),
-                                "advice": "Tư vấn pháp lý để phân bổ rủi ro rõ ràng"
+                                "level": summary_result.get("risk", {}).get("level") or summary_result.get("risk", {}).get("riskLevel"),
+                                "score": summary_result.get("risk", {}).get("score"),
+                                "factors": summary_result.get("risk", {}).get("factors") or [],
+                                "mitigations": summary_result.get("risk", {}).get("mitigations") or summary_result.get("risk", {}).get("mitigationProposals") or [],
+                                "advice": summary_result.get("risk", {}).get("advice")
                             },
+                            
+                            # Compliance - full structure
                             "compliance": {
-                                "regulations": ["Luật An toàn thông tin", "Nghị định 13/2023/NĐ-CP"],
-                                "certifications": ["ISO 27001", "SOC 2"],
-                                "complianceStatus": "COMPLIANT",
-                                "issues": [],
-                                "recommendations": ["Kiểm tra pháp lý hợp đồng"]
+                                "status": summary_result.get("compliance", {}).get("status") or summary_result.get("compliance", {}).get("complianceStatus"),
+                                "requirements": summary_result.get("compliance", {}).get("requirements") or [],
+                                "regulations": summary_result.get("compliance", {}).get("regulations") or [],
+                                "certifications": summary_result.get("compliance", {}).get("certifications") or [],
+                                "issues": summary_result.get("compliance", {}).get("issues") or [],
+                                "recommendations": summary_result.get("compliance", {}).get("recommendations") or []
                             }
                         }
                         

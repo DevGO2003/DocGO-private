@@ -1,10 +1,7 @@
 ---
 id: "rule-terminal-safety"
 trigger: model_decision
-description: |
-  This rule establishes comprehensive terminal safety standards for DocGO development workflow including avoidance of interactive commands, command chaining limitations, and robust error handling procedures.
-  It ensures terminal responsiveness by preventing commands that cause hanging (pagers, editors, interactive modes) and promotes safe command execution patterns.
-  The rule covers command priority guidelines, error recovery procedures, security considerations, and best practices to maintain reliable and safe terminal operations.
+description: Quy tắc thiết lập comprehensive terminal safety standards cho DocGO development workflow bao gồm avoidance của interactive commands, command chaining limitations, và robust error handling procedures. Đảm bảo terminal responsiveness bằng cách ngăn chặn commands gây hanging (pagers, editors, interactive modes) và promotes safe command execution patterns. Quy tắc bao gồm command priority guidelines, error recovery procedures, security considerations, và best practices để duy trì reliable và safe terminal operations.
 globs:
   - "**/*.java"
   - "**/*.py"

@@ -1,7 +1,7 @@
 ---
 id: "rule-cursor-cleanup"
 trigger: model_decision
-description: |
+description:
   This rule establishes comprehensive .cursor folder cleanup standards for DocGO development workflow including cache management, log file cleanup, and artifact removal procedures.
   It ensures efficient development environment maintenance by automatically detecting and removing unnecessary .cursor files, cache directories, and temporary artifacts.
   The rule covers cleanup procedures, artifact detection, workspace optimization, and systematic maintenance to maintain optimal development environment performance.

@@ -9,7 +9,7 @@ import { withApiHandler } from '@/lib/http/withApiHandler';
  * /api/loadbalancer/stats:
  *   get:
  *     summary: Lấy thống kê load balancer
- *     description: |
+ *     description:
  *       ## ⚖️ Load Balancer Statistics
  *       
  *       Lấy thông tin chi tiết về trạng thái và hiệu suất của load balancer.

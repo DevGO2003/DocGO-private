@@ -1,10 +1,7 @@
 ---
 id: "rule-event-standards"
 trigger: model_decision
-description: |
-  This rule standardizes event-driven architecture patterns across DocGO microservices including event payload schemas, event types, and Kafka/Redis implementation.
-  It ensures consistent event publishing, consumption, and processing with proper error handling, retry logic, and monitoring capabilities.
-  The rule covers event versioning, correlation tracking, actor identification, and comprehensive event storage for audit trails and system observability.
+description: Quy tắc chuẩn hóa event-driven architecture patterns cho DocGO microservices bao gồm event payload schemas, event types, và Kafka/Redis implementation. Đảm bảo consistent event publishing, consumption, và processing với proper error handling, retry logic, và monitoring capabilities. Quy tắc bao gồm event versioning, correlation tracking, actor identification, và comprehensive event storage cho audit trails và system observability. 
 globs:
   - "**/*.java"
   - "**/*.py"

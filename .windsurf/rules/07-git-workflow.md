@@ -1,10 +1,7 @@
 ---
 id: "rule-git-workflow"
 trigger: model_decision
-description: |
-  This rule establishes comprehensive Git workflow standards for DocGO including remote repository management (origin/private), push workflows, branching strategies, and security best practices.
-  It ensures secure code deployment with proper separation of public and private repositories, consistent branching patterns, and robust security measures for sensitive data handling.
-  The rule covers commit message standards, conflict resolution procedures, repository maintenance, and collaboration workflows to maintain high-quality version control practices.
+description: Quy tắc thiết lập comprehensive Git workflow standards cho DocGO bao gồm remote repository management (origin/private), push workflows, branching strategies, và security best practices. Đảm bảo secure code deployment với proper separation của public và private repositories, consistent branching patterns, và robust security measures cho sensitive data handling. Quy tắc bao gồm commit message standards, conflict resolution procedures, repository maintenance, và collaboration workflows để duy trì high-quality version control practices.
 globs:
   - "**/*.java"
   - "**/*.py"

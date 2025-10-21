@@ -1,10 +1,7 @@
 ---
 id: "rule-terminal-basics"
 trigger: model_decision
-description: |
-  This rule standardizes PowerShell command mapping and terminal operations for DocGO development workflow including file operations, Docker commands with sleep delays, and environment variable management.
-  It ensures consistent command usage across Windows PowerShell environment, proper Docker compose execution with timeout prevention, and reliable file system operations.
-  The rule covers Unix to PowerShell command translation, path handling, special character escaping, and comprehensive error handling to maintain robust terminal operations.
+description: Quy tắc chuẩn hóa PowerShell command mapping và terminal operations cho DocGO development workflow bao gồm file operations, Docker commands với sleep delays, và environment variable management. Đảm bảo consistent command usage across Windows PowerShell environment, proper Docker compose execution với timeout prevention, và reliable file system operations. Quy tắc bao gồm Unix to PowerShell command translation, path handling, special character escaping, và comprehensive error handling để duy trì robust terminal operations.
 globs:
   - "**/*.java"
   - "**/*.py"

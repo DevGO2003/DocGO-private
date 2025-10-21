@@ -159,6 +159,47 @@ class OCRService:
         # Use Tesseract directly
         return self.extract_text_tesseract(image, language)
     
+    async def extract_with_ai_fallback(self, file_content: bytes, filename: str, content_type: str) -> Dict[str, Any]:
+        """
+        Trích xuất text với AI fallback:
+        1. Thử AI OCR trước (Gemini Vision)
+        2. Nếu thất bại, dùng Tesseract OCR
+        """
+        result = {
+            "success": False,
+            "text": "",
+            "confidence": 0.0,
+            "engine": "none",
+            "error": None
+        }
+        
+        # Try AI OCR first (for images)
+        if content_type.lower() in ["image/png", "image/jpeg", "image/jpg", "application/pdf"]:
+            try:
+                ai_service = self._get_ai_service()
+                if ai_service:
+                    logging.info(f"Trying AI OCR for {filename}")
+                    # AI OCR logic here (would need to implement in ai_processing_service)
+                    # For now, skip to Tesseract
+                    raise Exception("AI OCR not implemented yet")
+            except Exception as e:
+                logging.warning(f"AI OCR failed: {e}, falling back to Tesseract")
+        
+        # Fallback to Tesseract OCR
+        if self.tesseract_available and content_type.lower() in ["image/png", "image/jpeg", "image/jpg"]:
+            try:
+                logging.info(f"Using Tesseract OCR for {filename}")
+                tesseract_result = self.extract_text_from_file(file_content, filename, engine="tesseract")
+                if tesseract_result.get("success"):
+                    result = tesseract_result
+                    result["engine"] = "tesseract_fallback"
+                    logging.info(f"Tesseract OCR success: {len(result.get('text', ''))} chars extracted")
+            except Exception as e:
+                logging.error(f"Tesseract OCR failed: {e}")
+                result["error"] = f"Tesseract failed: {str(e)}"
+        
+        return result
+    
     def extract_text_from_file(self, file_content: bytes, filename: str, engine: str = "auto") -> Dict[str, Any]:
         """Trích xuất text từ file ảnh"""
         try:

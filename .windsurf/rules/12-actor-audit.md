@@ -1,7 +1,7 @@
 ---
 id: "rule-actor-audit"
 trigger: model_decision
-description: |
+description:
   This rule establishes comprehensive actor identification and audit logging standards for DocGO microservices including user tracking, event correlation, security practices, and comprehensive audit trail management.
   It ensures proper actor identification across all system operations, consistent audit logging patterns, and robust security measures for sensitive data handling and compliance requirements.
   The rule covers event correlation, user session tracking, security event logging, and comprehensive audit trail maintenance to support regulatory compliance and system monitoring.

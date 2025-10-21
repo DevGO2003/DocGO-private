@@ -1,7 +1,7 @@
 ---
 id: "rule-cursorignore-auto"
 trigger: model_decision
-description: |
+description:
   This rule establishes automatic .cursorignore management for DocGO development workflow including artifact detection, log file management, upload directory handling, and temporary file cleanup procedures.
   It ensures efficient development environment maintenance by automatically detecting and ignoring build artifacts, log files, uploads, and temporary files to maintain clean workspace organization.
   The rule covers pattern detection, automatic .cursorignore updates, artifact classification, and systematic workspace cleanup to maintain optimal development environment performance.

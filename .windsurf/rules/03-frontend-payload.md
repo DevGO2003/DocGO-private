@@ -1,10 +1,7 @@
 ---
 id: "rule-frontend-payload"
 trigger: model_decision
-description: |
-  This rule standardizes frontend API integration patterns for DocGO web application including ApiResponse handling, error management, and TypeScript type definitions.
-  It ensures consistent API client implementation, proper error boundaries, loading states, and user experience across all frontend components.
-  The rule covers Axios configuration, response interceptors, token refresh logic, and comprehensive error handling to maintain robust frontend-backend communication.
+description: Quy tắc chuẩn hóa frontend API integration patterns cho DocGO web application bao gồm ApiResponse handling, error management, và TypeScript type definitions. Đảm bảo consistent API client implementation, proper error boundaries, loading states, và user experience across all frontend components. Quy tắc bao gồm Axios configuration, response interceptors, token refresh logic, và comprehensive error handling để duy trì robust frontend-backend communication.
 globs:
   - "**/*.java"
   - "**/*.py"

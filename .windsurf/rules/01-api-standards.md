@@ -1,10 +1,7 @@
 ---
 id: "rule-api-standards"
 trigger: model_decision
-description: |
-  This rule standardizes API development patterns across all DocGO microservices including URL patterns, RestResponse envelope structure, Controller/Router implementation standards, and comprehensive exception handling.
-  It ensures consistent API design between Spring Boot, FastAPI, and Next.js services with proper error responses, status codes, and documentation.
-  The rule covers authentication, validation, pagination, versioning, and Swagger documentation to maintain high-quality, scalable APIs throughout the DocGO ecosystem.
+description: Quy tắc chuẩn hóa API development patterns cho tất cả DocGO microservices bao gồm URL patterns, RestResponse envelope structure, Controller/Router implementation standards, và comprehensive exception handling. Đảm bảo consistent API design giữa Spring Boot, FastAPI, và Next.js services với proper error responses, status codes, và documentation. Quy tắc bao gồm authentication, validation, pagination, versioning, và Swagger documentation để duy trì high-quality, scalable APIs trong toàn bộ DocGO ecosystem.
 globs:
   - "**/*.java"
   - "**/*.py"

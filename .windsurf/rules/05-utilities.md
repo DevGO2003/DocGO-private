@@ -1,10 +1,7 @@
 ---
 id: "rule-utilities"
 trigger: always_on
-description: |
-  This rule establishes comprehensive utility standards for DocGO development workflow including chat prompt generation, markdown file restrictions, automatic .cursorignore management, and workspace cleanup procedures.
-  It ensures efficient development environment maintenance by preventing unnecessary file creation, managing build artifacts, and automating cleanup of temporary files and unused scripts.
-  The rule covers prompt management, documentation restrictions, artifact detection, and systematic workspace organization to maintain clean, productive development environments.
+description: Quy tắc thiết lập comprehensive utility standards cho DocGO development workflow bao gồm chat prompt generation, markdown file restrictions, automatic .cursorignore management, và workspace cleanup procedures. Đảm bảo efficient development environment maintenance bằng cách ngăn chặn unnecessary file creation, managing build artifacts, và automating cleanup của temporary files và unused scripts. Quy tắc bao gồm prompt management, documentation restrictions, artifact detection, và systematic workspace organization để duy trì clean, productive development environments.
 globs:
   - "**/*.java"
   - "**/*.py"

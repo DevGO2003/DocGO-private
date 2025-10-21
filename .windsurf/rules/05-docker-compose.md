@@ -1,10 +1,7 @@
 ---
 id: "rule-docker-compose"
 trigger: model_decision
-description: |
-  This rule standardizes Docker Compose configuration patterns for DocGO including service definitions, environment variable management, and container orchestration with strict guidelines against creating additional compose files.
-  It ensures consistent containerization across all microservices with proper volume mounts, networking, health checks, and security configurations.
-  The rule prohibits creation of new docker-compose files (.dev, .local variants) and mandates comprehensive environment variable management to maintain clean, maintainable containerized deployments.
+description: Quy tắc chuẩn hóa Docker Compose configuration patterns cho DocGO bao gồm service definitions, environment variable management, và container orchestration với strict guidelines chống lại việc tạo additional compose files. Đảm bảo consistent containerization across all microservices với proper volume mounts, networking, health checks, và security configurations. Quy tắc cấm tạo new docker-compose files (.dev, .local variants) và mandate comprehensive environment variable management để duy trì clean, maintainable containerized deployments.
 globs:
   - "**/*.java"
   - "**/*.py"

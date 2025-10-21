@@ -7,7 +7,7 @@ import logger from '@/lib/logger';
  * /api/v2/{service-name}/{path}:
  *   get:
  *     summary: Enhanced Proxy GET request với Load Balancing và Caching
- *     description: |
+ *     description:
  *       ## 🔄 Enhanced Proxy GET Request
  *       
  *       Định tuyến GET request đến microservice với Load Balancing và Caching.
@@ -85,7 +85,7 @@ import logger from '@/lib/logger';
  *   
  *   post:
  *     summary: Enhanced Proxy POST request với Load Balancing
- *     description: |
+ *     description:
  *       ## 🔄 Enhanced Proxy POST Request
  *       
  *       Định tuyến POST request đến microservice với Load Balancing.
@@ -156,7 +156,7 @@ import logger from '@/lib/logger';
  *   
  *   put:
  *     summary: Enhanced Proxy PUT request với Load Balancing
- *     description: |
+ *     description:
  *       ## 🔄 Enhanced Proxy PUT Request
  *       
  *       Định tuyến PUT request để cập nhật resource với Load Balancing.
@@ -216,7 +216,7 @@ import logger from '@/lib/logger';
  *   
  *   delete:
  *     summary: Enhanced Proxy DELETE request với Load Balancing
- *     description: |
+ *     description:
  *       ## 🔄 Enhanced Proxy DELETE Request
  *       
  *       Định tuyến DELETE request để xóa resource với Load Balancing.

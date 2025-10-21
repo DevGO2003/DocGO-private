@@ -1,10 +1,7 @@
 ---
 id: "rule-mcp-usage"
 trigger: always_on
-description: |
-  This rule establishes Model Context Protocol (MCP) usage standards for DocGO including database operations, external APIs, and browser automation with comprehensive error handling and performance optimization.
-  It prioritizes MCP tools over terminal commands for database queries, GitHub operations, and browser interactions to ensure faster, safer, and more reliable operations.
-  The rule covers retry logic, fallback strategies, security practices, audit logging, and performance monitoring to maintain high-quality external system integrations.
+description: Quy tắc thiết lập Model Context Protocol (MCP) usage standards cho DocGO bao gồm database operations, external APIs, và browser automation với comprehensive error handling và performance optimization. Ưu tiên MCP tools hơn terminal commands cho database queries, GitHub operations, và browser interactions để đảm bảo faster, safer, và more reliable operations. Quy tắc bao gồm retry logic, fallback strategies, security practices, audit logging, và performance monitoring để duy trì high-quality external system integrations.
 globs:
   - "**/*.java"
   - "**/*.py"

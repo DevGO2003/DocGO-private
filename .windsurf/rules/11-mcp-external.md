@@ -1,7 +1,7 @@
 ---
 id: "rule-mcp-external"
 trigger: model_decision
-description: |
+description:
   This rule establishes Model Context Protocol (MCP) standards for external API integrations in DocGO including GitHub, Browser automation, Discord, and other third-party services with comprehensive error handling and security practices.
   It prioritizes MCP tools over terminal commands for external API operations, ensuring faster, safer, and more reliable integrations with proper rate limiting and authentication management.
   The rule covers API key security, request throttling, error recovery procedures, monitoring capabilities, and fallback strategies to maintain robust external system integrations.

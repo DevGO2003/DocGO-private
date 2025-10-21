@@ -1,7 +1,7 @@
 ---
 id: "rule-chat-utilities"
 trigger: model_decision
-description: |
+description:
   This rule establishes comprehensive chat utility standards for DocGO development workflow including prompt generation, markdown file restrictions, and workspace management procedures.
   It ensures efficient development environment maintenance by preventing unnecessary file creation, managing documentation standards, and automating workspace organization tasks.
   The rule covers prompt management, documentation restrictions, artifact detection, and systematic workspace organization to maintain clean, productive development environments.

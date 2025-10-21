@@ -1,10 +1,7 @@
 ---
 id: "rule-service-structure"
 trigger: always_on
-description: |
-  This rule defines the standard microservice architecture patterns for DocGO including project structure, naming conventions, and module organization for Spring Boot, FastAPI, and Next.js services.
-  It ensures consistent package structure, port assignments, dependency management, and documentation standards across all microservices.
-  The rule covers service layering, controller patterns, health checks, Swagger documentation, and deployment configurations to maintain scalable and maintainable service architecture.
+description: Quy tắc định nghĩa standard microservice architecture patterns cho DocGO bao gồm project structure, naming conventions, và module organization cho Spring Boot, FastAPI, và Next.js services. Đảm bảo consistent package structure, port assignments, dependency management, và documentation standards across all microservices. Quy tắc bao gồm service layering, controller patterns, health checks, Swagger documentation, và deployment configurations để duy trì scalable và maintainable service architecture.
 globs:
   - "**/*.java"
   - "**/*.py"
