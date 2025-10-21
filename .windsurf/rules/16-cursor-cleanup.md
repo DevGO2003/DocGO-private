@@ -1,15 +1,27 @@
 ---
 id: "rule-cursor-cleanup"
-description: "Quản lý file rác trong thư mục .cursor, backup files, scripts tạm, và workspace cleanup cho DocGO"
-alwaysApply: false
+trigger: model_decision
+description: |
+  This rule establishes comprehensive .cursor folder cleanup standards for DocGO development workflow including cache management, log file cleanup, and artifact removal procedures.
+  It ensures efficient development environment maintenance by automatically detecting and removing unnecessary .cursor files, cache directories, and temporary artifacts.
+  The rule covers cleanup procedures, artifact detection, workspace optimization, and systematic maintenance to maintain optimal development environment performance.
 globs:
-  - ".cursor/backup/**"
-  - ".cursor/scripts/temp/**"
-  - ".cursor/workflows/*.md"
-  - ".cursor/plans/*.plan.md"
-  - ".cursor/prompts/*.md"
-  - ".cursor/documents/**"
-  - ".cursor/screenshots/**"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/*.xml"
+  - "**/*.md"
+  - "**/*.txt"
+  - "**/*.html"
+  - "**/src/**/*.*"
+  - "**/config/**/*.*"
+  - "**/scripts/**/*.*"
 tags:
   - cursor
   - cleanup

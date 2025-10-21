@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchFileById } from '../_services/file-api'
-import { mapFileApiToUiDocument } from '../_services/file-mapper'
+import { fetchFileById } from '../../../_services/file-api'
+import { mapFileApiToUiDocument } from '../../../_services/file-mapper'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/utils/tagTranslations'
 import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
@@ -12,7 +12,7 @@ import { HeaderPanel } from '@/components/ui'
 import { PencilSquareIcon, ArrowUpTrayIcon, DocumentDuplicateIcon, PencilIcon, DocumentArrowDownIcon, ChatBubbleLeftRightIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 export default function DocumentDetailPage() {
-  const params = useParams() as { id: string }
+  const params = useParams() as { files: string }
   const router = useRouter()
   const { t } = useTranslation()
   const [data, setData] = useState<any>(null)
@@ -29,8 +29,8 @@ export default function DocumentDetailPage() {
         setError('')
         
         // Fetch file detail from File Management Service
-        console.log('Fetching file (detail) with ID:', params.id)
-        const resp = await fetchFileById(params.id)
+        console.log('Fetching file (detail) with ID:', params.files)
+        const resp = await fetchFileById(params.files)
         if (!resp?.data) {
           // Document not found, redirect to 404
           console.log('Document not found, redirecting to /not-found')
@@ -139,7 +139,7 @@ export default function DocumentDetailPage() {
       }
     }
     fetchDetail()
-  }, [params.id, router])
+  }, [params.files, router])
 
   if (loading) {
     return (
