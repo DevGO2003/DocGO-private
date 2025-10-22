@@ -31,7 +31,8 @@ import {
   BellIcon,
   CalendarDaysIcon,
   DocumentChartBarIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline'
 import { BuildingOfficeIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
