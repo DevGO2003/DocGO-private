@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { NotificationDropdown } from '@/components/ui/NotificationDropdown'
@@ -32,7 +31,6 @@ export const Header: React.FC<HeaderProps> = ({
   showUserMenu = true,
 }) => {
   const { user, logout } = useAuth()
-  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = React.useState('')
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false)
@@ -100,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
               <form onSubmit={handleSearch} className="relative">
                 <Input
                   type="text"
-                  placeholder={t('header.search.placeholder')}
+                  placeholder="Tìm kiếm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}
@@ -173,20 +171,20 @@ export const Header: React.FC<HeaderProps> = ({
                           href="/profile"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          {t('header.user.profile')}
+                          Hồ sơ
                         </NavigationLink>
                         <NavigationLink
                           href="/settings"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          {t('header.user.settings')}
+                          Cài đặt
                         </NavigationLink>
                         <hr className="my-1" />
                         <button
                           onClick={handleLogout}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          {t('header.user.logout')}
+                          Đăng xuất
                         </button>
                       </div>
                     </div>
@@ -195,12 +193,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="flex items-center space-x-2">
                     <NavigationLink href="/auth/login">
                       <Button variant="outline" size="sm">
-                        {t('header.user.login')}
+                        Đăng nhập
                       </Button>
                     </NavigationLink>
                     <NavigationLink href="/auth/register">
                       <Button size="sm">
-                        {t('header.user.register')}
+                        Đăng ký
                       </Button>
                     </NavigationLink>
                   </div>
@@ -217,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
           <form onSubmit={handleSearch}>
             <Input
               type="text"
-              placeholder={t('header.search.mobilePlaceholder')}
+              placeholder="Tìm kiếm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}

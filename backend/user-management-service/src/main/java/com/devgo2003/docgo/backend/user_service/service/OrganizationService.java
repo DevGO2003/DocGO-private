@@ -33,6 +33,7 @@ public class OrganizationService {
     private final InvitationRepository invitationRepository;
     private final OrganizationPermissionService permissionService;
     private final OrganizationRoleService roleService;
+    private final WorkflowService workflowService;
 
     public Page<OrganizationResponse> getAllOrganizations(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         log.info("Getting all organizations - page: {}, size: {}, sortBy: {}, sortDirection: {}", 
@@ -467,13 +468,24 @@ public class OrganizationService {
         });
     }
 
-    private void initializeDefaultData(String orgId) {
-        log.info("Initializing default data for organization {}", orgId);
-        
-        // Khởi tạo default permissions
-        permissionService.initializeDefaultPermissions(orgId);
-        
-        // Khởi tạo default roles
-        // TODO: Implement default roles creation
-    }
+private void initializeDefaultData(String orgId) {
+    log.info("Initializing default data for organization {}", orgId);
+    
+    // Khởi tạo default permissions
+    permissionService.initializeDefaultPermissions(orgId);
+    
+    // Khởi tạo default roles (system + custom)
+    roleService.initializeDefaultRoles(orgId);
+    
+    // Khởi tạo default workflow
+    workflowService.createDefaultWorkflow(orgId);
+    
+    log.info("Initialized default data for organization {}", orgId);
+}
+
+/**
+ * Get organization workflow
+ */
+public WorkflowEntity getOrganizationWorkflow(String orgId) {
+    return workflowService.getOrganizationWorkflow(orgId);
 }

@@ -66,15 +66,23 @@ export default function LoginPage() {
     clearErrors()
     
     try {
+      console.log('🔐 Login attempt:', { username: data.username, hasPassword: !!data.password })
+      
       const credentials: LoginCredentials = {
         username: data.username,
         password: data.password
       }
       
+      console.log('🌐 Calling login function...')
       const success = await (login as any)(credentials, data.rememberMe ?? false)
+      
+      console.log('✅ Login result:', success)
+      
       if (success) {
+        console.log('🎉 Login successful, redirecting to dashboard')
         router.push('/dashboard')
       } else {
+        console.log('❌ Login failed - invalid credentials')
         setLoginError('Tên đăng nhập hoặc mật khẩu không đúng')
         setError('username', { 
           type: 'manual', 
@@ -82,7 +90,7 @@ export default function LoginPage() {
         })
       }
     } catch (error: any) {
-      console.error('Login error:', error)
+      console.error('🚨 Login error:', error)
       
       if (error.response?.data?.errors) {
         const validationErrors = error.response.data.errors

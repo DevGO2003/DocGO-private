@@ -12,285 +12,91 @@ import {
   OrganizationPermissionCreateRequest,
   OrganizationPermissionUpdateRequest
 } from '@/types/organization'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+import { apiClient } from '@/lib/http/api-client'
 
 export const organizationAPI = {
   // Organization CRUD
   async getAll(): Promise<Organization[]> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch organizations')
-    }
-    return response.json()
+    const response = await apiClient.get('/api/v1/organizations')
+    return response.data?.data || []
   },
 
   async getById(id: string): Promise<Organization> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${id}`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch organization')
-    }
-    return response.json()
+    const response = await apiClient.get(`/api/v1/organizations/${id}`)
+    return response.data?.data || response.data
   },
 
   async create(data: OrganizationCreateRequest): Promise<Organization> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to create organization')
-    }
-    return response.json()
+    const response = await apiClient.post('/api/v1/organizations', data)
+    return response.data?.data || response.data
   },
 
   async update(id: string, data: OrganizationUpdateRequest): Promise<Organization> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to update organization')
-    }
-    return response.json()
+    const response = await apiClient.put(`/api/v1/organizations/${id}`, data)
+    return response.data?.data || response.data
   },
 
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${id}`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('Failed to delete organization')
-    }
+    await apiClient.delete(`/api/v1/organizations/${id}`)
   },
 
   // Members
   async getMembers(organizationId: string): Promise<OrganizationMember[]> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/members`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch organization members')
-    }
-    return response.json()
+    const response = await apiClient.get(`/api/v1/organizations/${organizationId}/members`)
+    return response.data?.data || []
   },
 
   async inviteMember(organizationId: string, data: OrganizationMemberInviteRequest): Promise<OrganizationMember> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/members/invite`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to invite member')
-    }
-    return response.json()
+    const response = await apiClient.post(`/api/v1/organizations/${organizationId}/members/invite`, data)
+    return response.data?.data || response.data
   },
 
   async updateMember(organizationId: string, memberId: string, data: OrganizationMemberUpdateRequest): Promise<OrganizationMember> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/members/${memberId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to update member')
-    }
-    return response.json()
+    const response = await apiClient.put(`/api/v1/organizations/${organizationId}/members/${memberId}`, data)
+    return response.data?.data || response.data
   },
 
   async removeMember(organizationId: string, memberId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/members/${memberId}`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('Failed to remove member')
-    }
+    await apiClient.delete(`/api/v1/organizations/${organizationId}/members/${memberId}`)
   },
 
   // Roles
   async getRoles(organizationId: string): Promise<OrganizationRole[]> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/roles`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch organization roles')
-    }
-    return response.json()
+    const response = await apiClient.get(`/api/v1/organizations/${organizationId}/roles`)
+    return response.data?.data || []
   },
 
   async createRole(organizationId: string, data: OrganizationRoleCreateRequest): Promise<OrganizationRole> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/roles`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to create role')
-    }
-    return response.json()
+    const response = await apiClient.post(`/api/v1/organizations/${organizationId}/roles`, data)
+    return response.data?.data || response.data
   },
 
   async updateRole(organizationId: string, roleId: string, data: OrganizationRoleUpdateRequest): Promise<OrganizationRole> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/roles/${roleId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to update role')
-    }
-    return response.json()
+    const response = await apiClient.put(`/api/v1/organizations/${organizationId}/roles/${roleId}`, data)
+    return response.data?.data || response.data
   },
 
   async deleteRole(organizationId: string, roleId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/roles/${roleId}`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('Failed to delete role')
-    }
+    await apiClient.delete(`/api/v1/organizations/${organizationId}/roles/${roleId}`)
   },
 
   // Permissions
   async getPermissions(organizationId: string): Promise<OrganizationPermission[]> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/permissions`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch organization permissions')
-    }
-    return response.json()
+    const response = await apiClient.get(`/api/v1/organizations/${organizationId}/permissions`)
+    return response.data?.data || []
   },
 
   async createPermission(organizationId: string, data: OrganizationPermissionCreateRequest): Promise<OrganizationPermission> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/permissions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to create permission')
-    }
-    return response.json()
+    const response = await apiClient.post(`/api/v1/organizations/${organizationId}/permissions`, data)
+    return response.data?.data || response.data
   },
 
   async updatePermission(organizationId: string, permissionId: string, data: OrganizationPermissionUpdateRequest): Promise<OrganizationPermission> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/permissions/${permissionId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to update permission')
-    }
-    return response.json()
+    const response = await apiClient.put(`/api/v1/organizations/${organizationId}/permissions/${permissionId}`, data)
+    return response.data?.data || response.data
   },
 
   async deletePermission(organizationId: string, permissionId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/organizations/${organizationId}/permissions/${permissionId}`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) {
-      throw new Error('Failed to delete permission')
-    }
+    await apiClient.delete(`/api/v1/organizations/${organizationId}/permissions/${permissionId}`)
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

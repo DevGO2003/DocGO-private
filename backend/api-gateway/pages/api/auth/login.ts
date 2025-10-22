@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { authService, LoginRequest } from '../../../lib/services/authService'
 import { createErrorResponse, generateRequestId, ValidationError } from '../../../lib/utils/errorHandler'
+import { Config } from '../../../lib/config'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS preflight
