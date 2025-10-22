@@ -21,13 +21,7 @@ public class MetadataDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FileMetadataDto {
         private String name;
-        
-        /**
-         * File MIME type
-         * Enum: application/pdf, text/plain, application/json
-         */
         private String mimeType;
-        
         private Long size;
         private HashDto hash;
     }
@@ -58,12 +52,7 @@ public class MetadataDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OriginalDocumentDto {
-        /**
-         * Dublin Core format
-         * Enum: application/pdf, text/plain, application/json, unknown
-         */
         private String dcFormat;
-        
         private String dcTitle;
         private String dcCreator;
         private String dcDescription;
@@ -76,17 +65,7 @@ public class MetadataDto {
         private String xmpInstanceID;
         private String pdfKeywords;
         private String pdfProducer;
-        
-        /**
-         * PDF/A standard part
-         * Enum: 1, 2, 3
-         */
         private Integer pdfaidPart;
-        
-        /**
-         * PDF/A conformance level
-         * Enum: A, B, U
-         */
         private String pdfaidConformance;
     }
 
@@ -94,12 +73,7 @@ public class MetadataDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ArchivedDocumentDto {
-        /**
-         * Dublin Core format
-         * Enum: application/pdf, text/plain, application/json, unknown
-         */
         private String dcFormat;
-        
         private String dcTitle;
         private String dcCreator;
         private String pdfProducer;
@@ -108,17 +82,7 @@ public class MetadataDto {
         private String xmpMetadataDate;
         private String xmpCreatorTool;
         private String xmpDocumentID;
-        
-        /**
-         * PDF/A standard part
-         * Enum: 1, 2, 3
-         */
         private Integer pdfaidPart;
-        
-        /**
-         * PDF/A conformance level
-         * Enum: A, B, U
-         */
         private String pdfaidConformance;
     }
 
@@ -126,26 +90,10 @@ public class MetadataDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class TechnicalDto {
-        /**
-         * Text encoding
-         * Enum: UTF-8, UTF-16, ASCII
-         */
         private String encoding;
-        
-        /**
-         * Line ending format
-         * Enum: LF, CRLF
-         */
         private String lineEnding;
-        
         private Boolean bom;
-        
-        /**
-         * File compression method
-         * Enum: NONE, GZIP, DEFLATE
-         */
         private String compression;
-        
         private Integer pages;
         private Integer wordCount;
         private Integer characterCount;

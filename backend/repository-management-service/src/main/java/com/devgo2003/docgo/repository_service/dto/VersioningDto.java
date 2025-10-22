@@ -31,13 +31,7 @@ public class VersioningDto {
         private String tag;
         private String changedAt;
         private String changedBy;
-        
-        /**
-         * Type of change made to the document
-         * Enum: CREATE, UPDATE, DELETE, ARCHIVE
-         */
         private String changeType;
-        
         private String changes;
         private List<String> changedFields;
         private Map<String, Object> diff;

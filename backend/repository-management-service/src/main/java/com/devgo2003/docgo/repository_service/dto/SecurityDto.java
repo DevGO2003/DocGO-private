@@ -10,12 +10,7 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SecurityDto {
-    /**
-     * Encryption algorithm
-     * Enum: AES-256, AES-128, NONE
-     */
     private String encryption;
-    
     private Boolean watermark;
     private Boolean digitalSignature;
     private Boolean accessLogging;

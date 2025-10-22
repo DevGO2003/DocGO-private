@@ -25,12 +25,7 @@ public class AuditDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ChangeHistoryDto {
-        /**
-         * Change action type
-         * Enum: CREATE, UPDATE, DELETE, VIEW, SHARE, DOWNLOAD, UPLOAD, RESTORE
-         */
         private String action;
-        
         private String timestamp;
         private String actor;
         private String details;
@@ -42,12 +37,7 @@ public class AuditDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AccessLogDto {
-        /**
-         * Access action type
-         * Enum: VIEW, EDIT, DOWNLOAD, SHARE, DELETE
-         */
         private String action;
-        
         private String timestamp;
         private String actor;
         private String ipAddress;

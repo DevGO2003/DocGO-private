@@ -14,13 +14,7 @@ public class PaymentDto {
     private Double totalValue;
     private String currency;
     private List<ScheduleDto> schedule;
-    
-    /**
-     * Payment method
-     * Enum: BANK_TRANSFER, CREDIT_CARD, WIRE, CHECK, CASH, DIGITAL_WALLET
-     */
     private String method;
-    
     private String paymentMethod;
 
     @Data
@@ -31,11 +25,6 @@ public class PaymentDto {
         private Integer percentage;
         private Double amount;
         private LocalDateTime dueDate;
-        
-        /**
-         * Payment schedule status
-         * Enum: PENDING, PAID, OVERDUE, CANCELLED
-         */
         private String status;
     }
 }
