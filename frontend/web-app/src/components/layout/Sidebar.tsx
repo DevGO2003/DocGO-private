@@ -43,7 +43,7 @@ const navigationGroups = [
     titleKey: 'category.repositories',
     items: [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
-      { nameKey: 'navigation.repositories', href: '/repositories', icon: DocumentTextIcon },
+      { nameKey: 'navigation.repositories', href: '/repositories', icon: FolderIcon },
       { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
       { nameKey: 'navigation.uploadDocument', href: '/repositories/default/upload-files', icon: ArrowUpTrayIcon },
       { nameKey: 'navigation.analytics', href: '/analytics', icon: ChartBarIcon },

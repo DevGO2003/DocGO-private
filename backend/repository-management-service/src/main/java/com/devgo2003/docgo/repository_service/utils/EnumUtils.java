@@ -48,17 +48,17 @@ public class EnumUtils {
     }
     
     /**
-     * Parse DocumentType - STRICT (throws exception if invalid)
+     * Parse DocumentType - LENIENT (returns UNKNOWN if invalid)
      */
     public static DocumentType parseDocumentType(String value) {
         if (value == null || value.trim().isEmpty()) {
-            return DocumentType.NOT_DOCUMENT;
+            return DocumentType.UNKNOWN;
         }
         try {
             return DocumentType.valueOf(value.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
-            log.error("Invalid document type: {}", value);
-            throw new IllegalArgumentException("Invalid document type: " + value);
+            log.warn("Unknown document type: {}, returning UNKNOWN", value);
+            return DocumentType.UNKNOWN;
         }
     }
     

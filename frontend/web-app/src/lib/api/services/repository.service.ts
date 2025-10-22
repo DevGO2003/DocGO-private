@@ -79,8 +79,62 @@ export interface PaginationParams {
   includeDeleted?: boolean
 }
 
+export interface Repository {
+  id: string
+  name: string
+  description?: string
+  owner: string // userId/username của người tạo
+  ownerName?: string // Tên hiển thị của owner
+  memberCount: number
+  fileCount: number
+  totalSize: number // bytes
+  createdAt: string
+  updatedAt: string
+  isPublic: boolean
+  tags?: string[]
+}
+
+export interface RepositoryCreateData {
+  name: string
+  description?: string
+  isPublic?: boolean
+  tags?: string[]
+}
+
+export interface RepositoryUpdateData {
+  name?: string
+  description?: string
+  isPublic?: boolean
+  tags?: string[]
+}
+
 export class DocumentAPI {
   private basePath = '/api/v1/repository-management-service'
+
+  // Repositories
+  async getAllRepositories(params?: PaginationParams) {
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/repositories`, { params })
+  }
+
+  async getRepositoryById(id: string) {
+    return apiClient.get<ApiResponse<Repository>>(`${this.basePath}/repositories/${id}`)
+  }
+
+  async createRepository(data: RepositoryCreateData) {
+    return apiClient.post<ApiResponse<Repository>>(`${this.basePath}/repositories`, data)
+  }
+
+  async updateRepository(id: string, data: RepositoryUpdateData) {
+    return apiClient.put<ApiResponse<Repository>>(`${this.basePath}/repositories/${id}`, data)
+  }
+
+  async deleteRepository(id: string) {
+    return apiClient.delete<ApiResponse<any>>(`${this.basePath}/repositories/${id}`)
+  }
+
+  async getMyRepositories(params?: PaginationParams) {
+    return apiClient.get<ApiResponse<any>>(`${this.basePath}/repositories/my`, { params })
+  }
 
   // Contracts
   async getAllContracts(params?: PaginationParams) {
