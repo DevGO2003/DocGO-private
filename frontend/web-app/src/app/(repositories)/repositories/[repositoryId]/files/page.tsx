@@ -10,8 +10,8 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractStatus, translateContractType, translateContractTag } from '@/config/tags'
 import DocumentsFilters from '../../_components/DocumentsFilters'
 import DocumentsTable from '../../_components/DocumentsTable'
-import { fetchFiles } from '../../_services/file-list-api'
-import { mapFileApiPageToPaginatedDocuments } from '../../_services/file-list-mapper'
+import { documentAPI } from '@/lib/api'
+import { mapFileApiPageToPaginatedDocuments } from '@/lib/mappers/file-list-mapper'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 // import { tagAPI } from '@/lib/api' // Removed - tags API disabled
 import { DEFAULT_PAGE_SIZE } from '../../_constants'
@@ -149,19 +149,16 @@ export default function DocumentsPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const payload = await fetchFiles({
+        const axiosResp = await documentAPI.getAllFiles({
           page,
           size: pageSize,
           sortBy,
-          sortDirection: (sortDirection.toUpperCase() as 'ASC' | 'DESC'),
-          includeDeleted: false,
-          view: 'full',
+          sortDirection: sortDirection.toUpperCase(),
           searchTerm: debouncedSearch || undefined,
-          documentType: activeTab === 'contract' ? 'CONTRACT' : undefined,
         })
         if (aborted) return
-        const paginated = mapFileApiPageToPaginatedDocuments(payload)
-        const mapped = paginated.content.map(c => ({
+        const paginated = mapFileApiPageToPaginatedDocuments(axiosResp.data)
+        const mapped = (paginated.content as any[]).map((c: any) => ({
           id: String(c.id),
           title: c.title,
           description: c.description,
@@ -185,9 +182,10 @@ export default function DocumentsPage() {
           fileSize: (c as any).fileSize,
           storage: (c as any).storage,
         }))
-        setItems(mapped)
-        setDisplayedItems(mapped)
-        setAllItems(mapped)
+        const filtered = activeTab === 'contract' ? mapped.filter((x: any) => x.documentType === 'CONTRACT') : mapped
+        setItems(filtered)
+        setDisplayedItems(filtered)
+        setAllItems(filtered)
         setTotalPages(paginated.totalPages || 1)
         setHasMoreData(mapped.length < (paginated.totalElements || 0))
       } catch (e:any) {

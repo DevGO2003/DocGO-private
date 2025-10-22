@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams, useRouter } from 'next/navigation'
-import { fetchFileById } from '../../../_services/file-api'
-import { mapFileApiToUiDocument } from '../../../_services/file-mapper'
+import { documentAPI } from '@/lib/api'
+import { mapFileApiToUiDocument } from '@/lib/mappers/file-mapper'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/config/tags'
 import { DocumentDetailTabs, MainTabsNav, SubTabsNav } from '@/components/DocumentDetail/DocumentDetailTabs'
@@ -30,8 +30,9 @@ export default function DocumentDetailPage() {
         
         // Fetch file detail from File Management Service
         console.log('Fetching file (detail) with ID:', params.files)
-        const resp = await fetchFileById(params.files)
-        if (!resp?.data) {
+        const axiosResp = await documentAPI.getFileById(params.files)
+        const apiData = axiosResp?.data?.data
+        if (!apiData) {
           // Document not found, redirect to 404
           console.log('Document not found, redirecting to /not-found')
           router.replace('/not-found')
@@ -39,7 +40,7 @@ export default function DocumentDetailPage() {
         }
         
         // Map API file detail to UI structure expected by tabs
-        const doc = mapFileApiToUiDocument(resp.data)
+        const doc = mapFileApiToUiDocument(apiData)
         const mappedData = {
           id: doc.id,
           title: doc.title,
@@ -53,66 +54,66 @@ export default function DocumentDetailPage() {
           paymentDetails: {
             totalValue: doc.totalValue ?? null,
             currency: doc.currency ?? null,
-            schedule: resp.data.contract?.payment?.schedule ?? '',
-            paymentMethod: resp.data.contract?.payment?.method ?? '',
+            schedule: apiData.contract?.payment?.schedule ?? '',
+            paymentMethod: apiData.contract?.payment?.method ?? '',
           },
-          keyClauses: (resp.data.contract?.clauses?.key || []).map((x: any) => ({
+          keyClauses: (apiData.contract?.clauses?.key || []).map((x: any) => ({
             name: x.name || '',
             description: x.description || '',
             importance: x.importance || '',
             risk: x.risk || '',
           })),
-          unfavorableClauses: resp.data.contract?.clauses?.unfavorable || [],
-          reminders: resp.data.contract?.reminders || [],
+          unfavorableClauses: apiData.contract?.clauses?.unfavorable || [],
+          reminders: apiData.contract?.reminders || [],
           riskAssessment: {
             riskLevel: doc.riskLevel || null,
-            riskFactors: resp.data.contract?.risk?.factors || [],
-            mitigationMeasures: resp.data.contract?.risk?.mitigations || [],
+            riskFactors: apiData.contract?.risk?.factors || [],
+            mitigationMeasures: apiData.contract?.risk?.mitigations || [],
           },
           complianceStatus: {
-            status: resp.data.contract?.compliance?.status ?? null,
-            issues: resp.data.contract?.compliance?.issues || [],
-            recommendations: resp.data.contract?.compliance?.recommendations || [],
+            status: apiData.contract?.compliance?.status ?? null,
+            issues: apiData.contract?.compliance?.issues || [],
+            recommendations: apiData.contract?.compliance?.recommendations || [],
           },
-          content: resp.data.content?.plaintext || doc.description || '',
+          content: apiData.content?.plaintext || doc.description || '',
           authorNotes: [],
           fileSystemMetadata: {
-            dateModified: (resp.data as any)?.metadata?.fileSystem?.dateModified ?? null,
-            dateAdded: (resp.data as any)?.metadata?.fileSystem?.dateAdded ?? null,
-            mediaFilename: (resp.data as any)?.metadata?.fileSystem?.mediaFilename ?? '',
-            originalFilename: (resp.data as any)?.metadata?.fileSystem?.originalFilename ?? '',
-            originalMD5: (resp.data as any)?.metadata?.fileSystem?.originalMD5 ?? '',
-            originalFileSize: (resp.data as any)?.metadata?.fileSystem?.originalFileSize ?? null,
-            originalMimeType: (resp.data as any)?.metadata?.fileSystem?.originalMimeType ?? (doc.fileType ?? null),
-            archiveMD5: (resp.data as any)?.metadata?.fileSystem?.archiveMD5 ?? '',
-            archiveFileSize: (resp.data as any)?.metadata?.fileSystem?.archiveFileSize ?? null
+            dateModified: (apiData as any)?.metadata?.fileSystem?.dateModified ?? null,
+            dateAdded: (apiData as any)?.metadata?.fileSystem?.dateAdded ?? null,
+            mediaFilename: (apiData as any)?.metadata?.fileSystem?.mediaFilename ?? '',
+            originalFilename: (apiData as any)?.metadata?.fileSystem?.originalFilename ?? '',
+            originalMD5: (apiData as any)?.metadata?.fileSystem?.originalMD5 ?? '',
+            originalFileSize: (apiData as any)?.metadata?.fileSystem?.originalFileSize ?? null,
+            originalMimeType: (apiData as any)?.metadata?.fileSystem?.originalMimeType ?? (doc.fileType ?? null),
+            archiveMD5: (apiData as any)?.metadata?.fileSystem?.archiveMD5 ?? '',
+            archiveFileSize: (apiData as any)?.metadata?.fileSystem?.archiveFileSize ?? null
           },
           originalDocumentMetadata: {
-            dcFormat: (resp.data as any)?.metadata?.originalDocument?.dcFormat ?? (doc.fileType ?? null),
-            dcTitle: (resp.data as any)?.metadata?.originalDocument?.dcTitle ?? doc.title,
-            dcCreator: (resp.data as any)?.metadata?.originalDocument?.dcCreator ?? null,
-            dcDescription: (resp.data as any)?.metadata?.originalDocument?.dcDescription ?? (doc.description ?? ''),
+            dcFormat: (apiData as any)?.metadata?.originalDocument?.dcFormat ?? (doc.fileType ?? null),
+            dcTitle: (apiData as any)?.metadata?.originalDocument?.dcTitle ?? doc.title,
+            dcCreator: (apiData as any)?.metadata?.originalDocument?.dcCreator ?? null,
+            dcDescription: (apiData as any)?.metadata?.originalDocument?.dcDescription ?? (doc.description ?? ''),
             dcSubject: (doc.tags || []).join(', '),
-            xmpCreateDate: (resp.data as any)?.metadata?.originalDocument?.xmpCreateDate ?? (doc.createdAt || null),
-            xmpCreatorTool: (resp.data as any)?.metadata?.originalDocument?.xmpCreatorTool ?? null,
-            xmpModifyDate: (resp.data as any)?.metadata?.originalDocument?.xmpModifyDate ?? (doc.updatedAt || null),
-            xmpMetadataDate: (resp.data as any)?.metadata?.originalDocument?.xmpMetadataDate ?? (doc.updatedAt || null),
+            xmpCreateDate: (apiData as any)?.metadata?.originalDocument?.xmpCreateDate ?? (doc.createdAt || null),
+            xmpCreatorTool: (apiData as any)?.metadata?.originalDocument?.xmpCreatorTool ?? null,
+            xmpModifyDate: (apiData as any)?.metadata?.originalDocument?.xmpModifyDate ?? (doc.updatedAt || null),
+            xmpMetadataDate: (apiData as any)?.metadata?.originalDocument?.xmpMetadataDate ?? (doc.updatedAt || null),
             pdfKeywords: (doc.tags || []).join(', '),
-            pdfProducer: (resp.data as any)?.metadata?.originalDocument?.pdfProducer ?? null,
-            xmpDocumentID: (resp.data as any)?.metadata?.originalDocument?.xmpDocumentID ?? null,
-            xmpInstanceID: (resp.data as any)?.metadata?.originalDocument?.xmpInstanceID ?? null,
-            pdfaExtensionSchemas: (resp.data as any)?.metadata?.originalDocument?.pdfaExtensionSchemas ?? []
+            pdfProducer: (apiData as any)?.metadata?.originalDocument?.pdfProducer ?? null,
+            xmpDocumentID: (apiData as any)?.metadata?.originalDocument?.xmpDocumentID ?? null,
+            xmpInstanceID: (apiData as any)?.metadata?.originalDocument?.xmpInstanceID ?? null,
+            pdfaExtensionSchemas: (apiData as any)?.metadata?.originalDocument?.pdfaExtensionSchemas ?? []
           },
           archivedDocumentMetadata: {
-            archivedPdfProducer: (resp.data as any)?.metadata?.archivedDocument?.archivedPdfProducer ?? null,
-            archivedMetadataDate: (resp.data as any)?.metadata?.archivedDocument?.archivedMetadataDate ?? null,
-            archivedModifyDate: (resp.data as any)?.metadata?.archivedDocument?.archivedModifyDate ?? null,
-            archivedCreateDate: (resp.data as any)?.metadata?.archivedDocument?.archivedCreateDate ?? null,
-            archivedCreatorTool: (resp.data as any)?.metadata?.archivedDocument?.archivedCreatorTool ?? null,
-            archivedDocumentID: (resp.data as any)?.metadata?.archivedDocument?.archivedDocumentID ?? null,
-            archivedDcFormat: (resp.data as any)?.metadata?.archivedDocument?.archivedDcFormat ?? (doc.fileType ?? null),
-            archivedDcTitle: (resp.data as any)?.metadata?.archivedDocument?.archivedDcTitle ?? null,
-            archivedDcCreator: (resp.data as any)?.metadata?.archivedDocument?.archivedDcCreator ?? null
+            archivedPdfProducer: (apiData as any)?.metadata?.archivedDocument?.archivedPdfProducer ?? null,
+            archivedMetadataDate: (apiData as any)?.metadata?.archivedDocument?.archivedMetadataDate ?? null,
+            archivedModifyDate: (apiData as any)?.metadata?.archivedDocument?.archivedModifyDate ?? null,
+            archivedCreateDate: (apiData as any)?.metadata?.archivedDocument?.archivedCreateDate ?? null,
+            archivedCreatorTool: (apiData as any)?.metadata?.archivedDocument?.archivedCreatorTool ?? null,
+            archivedDocumentID: (apiData as any)?.metadata?.archivedDocument?.archivedDocumentID ?? null,
+            archivedDcFormat: (apiData as any)?.metadata?.archivedDocument?.archivedDcFormat ?? (doc.fileType ?? null),
+            archivedDcTitle: (apiData as any)?.metadata?.archivedDocument?.archivedDcTitle ?? null,
+            archivedDcCreator: (apiData as any)?.metadata?.archivedDocument?.archivedDcCreator ?? null
           }
         }
         

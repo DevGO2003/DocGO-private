@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import type { Document } from '../_types'
-import { fetchDocument } from '../_services/documentsApi'
+import { automationAPI } from '@/lib/api'
+import { mapFileApiToUiDocument } from '../_services/file-mapper'
 
 export function useDocumentQuery(id: string | undefined) {
   const [data, setData] = useState<Document | null>(null)
@@ -13,8 +14,12 @@ export function useDocumentQuery(id: string | undefined) {
     if (!id) return
     setLoading(true)
     setError('')
-    fetchDocument(id)
-      .then((d) => setData(d))
+    automationAPI.getFileById(id)
+      .then((axiosRes) => {
+        const apiData = axiosRes?.data?.data
+        const mapped = apiData ? mapFileApiToUiDocument(apiData) : null
+        setData(mapped)
+      })
       .catch((e: any) => setError(e?.message || 'Failed to load document'))
       .finally(() => setLoading(false))
   }, [id])

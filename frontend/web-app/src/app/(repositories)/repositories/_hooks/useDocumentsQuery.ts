@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_PAGE_SIZE, DEFAULT_SORT_BY, DEFAULT_SORT_DIRECTION } from '../_constants'
 import type { Document, Paginated } from '../_types'
-import { fetchDocuments } from '../_services/documentsApi'
+import { automationAPI } from '@/lib/api'
+import { mapFileApiPageToPaginatedDocuments } from '@/lib/mappers/file-list-mapper'
 
 export type UseDocumentsParams = {
   pageNumber?: number
@@ -58,8 +59,17 @@ export function useDocumentsQuery(initial?: Partial<UseDocumentsParams>) {
     if (params.tags && params.tags.length > 0) query.tags = params.tags.join(',')
     if (params.documentType) query.documentType = params.documentType
 
-    fetchDocuments(query)
-      .then((res) => setData(res))
+    automationAPI.getAllFiles({
+      page: query.pageNumber,
+      size: query.pageSize,
+      sortBy: query.sortBy,
+      sortDirection: query.sortDirection,
+      searchTerm: query.searchTerm,
+    })
+      .then((axiosRes) => {
+        const paginated: Paginated<Document> = mapFileApiPageToPaginatedDocuments(axiosRes.data)
+        setData(paginated)
+      })
       .catch((e: any) => setError(e?.message || 'Failed to load documents'))
       .finally(() => setLoading(false))
 
