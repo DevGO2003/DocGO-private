@@ -1,9 +1,7 @@
 // MongoDB Script: Insert Sample Data for Testing
-// Run this in MongoDB Compass or mongo shell
-// Database: docgo
+// Run with: mongosh docgo insert-sample-data.js
+// Database: docgo (specified in command)
 // Collection: files
-
-use docgo;
 
 // Insert sample file document
 db.files.insertOne({
