@@ -6,5 +6,6 @@ public enum WorkflowStage {
     APPROVAL,
     SIGNED,
     EXECUTED,
-    TERMINATED
+    TERMINATED,
+    UNKNOWN
 }

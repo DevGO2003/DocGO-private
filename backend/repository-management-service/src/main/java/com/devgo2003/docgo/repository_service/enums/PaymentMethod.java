@@ -6,5 +6,6 @@ public enum PaymentMethod {
     WIRE,
     CHECK,
     CASH,
-    DIGITAL_WALLET
+    DIGITAL_WALLET,
+    UNKNOWN
 }

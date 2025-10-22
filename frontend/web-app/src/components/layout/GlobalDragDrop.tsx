@@ -37,7 +37,7 @@ export default function GlobalDragDrop({ children }: GlobalDragDropProps) {
         const file = files[0]
         
         // Chuyển đến trang upload với file đã được chọn
-        router.push('/upload-document')
+        router.push('/repositories/default/upload-files')
         
         // Lưu file vào sessionStorage để trang upload có thể lấy
         const reader = new FileReader()

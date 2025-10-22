@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
+import { HeaderPanel, PrimaryContent } from '@/components/ui'
 
 interface SupportTicket {
   id: string
@@ -63,18 +64,22 @@ export default function HelpSupportPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
-        <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 opacity-50" />
-          <div className="relative px-6 py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Trợ giúp & Hỗ trợ</h1>
-            <p className="mt-1 text-gray-600">Quản lý và theo dõi các yêu cầu hỗ trợ</p>
-          </div>
-          <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500" />
-        </div>
+      <div className="min-h-screen bg-gray-50 p-5">
+        <div className="max-w-7xl mx-auto space-y-5">
+          <HeaderPanel 
+            title="Trợ giúp & Hỗ trợ"
+            subtitle="Quản lý và theo dõi các yêu cầu hỗ trợ"
+            breadcrumbs={[
+              { label: 'Hỗ trợ', current: true }
+            ]}
+            gradientFrom="orange-500"
+            gradientTo="amber-500"
+          />
 
-        {/* Filters and Actions */}
-        <div className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
+          <PrimaryContent>
+            <div className="space-y-5">
+              {/* Filters and Actions */}
+              <div className="rounded-xl border bg-white shadow-sm">
           <div className="border-b px-5 py-4 flex items-center justify-between bg-gray-50/60">
             <div className="flex items-center gap-4">
               <h2 className="text-base font-semibold text-gray-900">Yêu cầu hỗ trợ</h2>
@@ -112,8 +117,8 @@ export default function HelpSupportPage() {
           </div>
         </div>
 
-        {/* Tickets List */}
-        <div className="space-y-4">
+              {/* Tickets List */}
+              <div className="space-y-4">
           {filteredTickets.map(ticket => (
             <div key={ticket.id} className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100 p-6">
               <div className="flex items-start justify-between">
@@ -159,6 +164,9 @@ export default function HelpSupportPage() {
               </div>
             </div>
           ))}
+              </div>
+            </div>
+          </PrimaryContent>
         </div>
       </div>
     </DashboardLayout>

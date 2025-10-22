@@ -5,5 +5,6 @@ public enum DocumentStatus {
     DRAFT,
     DELETED,
     ARCHIVED,
-    INACTIVE
+    INACTIVE,
+    UNKNOWN
 }

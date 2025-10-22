@@ -6,5 +6,5 @@ public enum DocumentType {
     MEMO,
     REPORT,
     AGREEMENT,
-    NOT_DOCUMENT
+    UNKNOWN
 }

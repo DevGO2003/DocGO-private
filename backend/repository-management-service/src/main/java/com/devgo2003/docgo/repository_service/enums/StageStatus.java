@@ -4,5 +4,6 @@ public enum StageStatus {
     COMPLETED,
     IN_PROGRESS,
     PENDING,
-    FAILED
+    FAILED,
+    UNKNOWN
 }

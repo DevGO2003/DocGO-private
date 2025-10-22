@@ -16,6 +16,8 @@ interface HeaderPanelProps {
   maxHeightDesktop?: number
   maxHeightTablet?: number
   maxHeightMobile?: number
+  gradientFrom?: string
+  gradientTo?: string
 }
 
 function HeaderPanel({
@@ -27,7 +29,9 @@ function HeaderPanel({
   className = '',
   maxHeightDesktop = 300,
   maxHeightTablet = 240,
-  maxHeightMobile = 200
+  maxHeightMobile = 200,
+  gradientFrom = 'indigo-500',
+  gradientTo = 'purple-600'
 }: HeaderPanelProps) {
   const mhDesktop = maxHeightDesktop
   const mhTablet = maxHeightTablet
@@ -35,13 +39,16 @@ function HeaderPanel({
 
   return (
     <div
-      className={`sticky top-0 z-50 bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}
+      className={`relative sticky top-0 z-50 bg-white rounded-2xl border border-gray-200 shadow-sm ring-1 ring-gray-100 overflow-hidden ${className}`}
       style={{
-        maxHeight: '300px',
-        overflow: 'hidden'
+        maxHeight: '300px'
       }}
     >
-      <div className="px-4 py-[5px]">
+      {/* Gradient background overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-r from-${gradientFrom} to-${gradientTo} opacity-5`} />
+      {/* Gradient bottom border */}
+      <div className={`absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-${gradientFrom} to-${gradientTo}`} />
+      <div className="relative px-4 py-[5px]">
         <div className="flex items-start justify-between gap-4">
           {/* Left section - natural width */}
           <div className="shrink-0">

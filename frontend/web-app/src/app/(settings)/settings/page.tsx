@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
+import { HeaderPanel, PrimaryContent } from '@/components/ui'
 
 interface Setting {
   id: string
@@ -45,19 +46,23 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 max-w-6xl mx-auto px-2 sm:px-4">
-        <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 opacity-50" />
-          <div className="relative px-6 py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Cài đặt</h1>
-            <p className="mt-1 text-gray-600">Quản lý cài đặt hệ thống và tùy chỉnh</p>
-          </div>
-          <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-slate-500 via-gray-500 to-zinc-500" />
-        </div>
+      <div className="min-h-screen bg-gray-50 p-5">
+        <div className="max-w-7xl mx-auto space-y-5">
+          <HeaderPanel 
+            title="Cài đặt"
+            subtitle="Quản lý cài đặt hệ thống và tùy chỉnh"
+            breadcrumbs={[
+              { label: 'Cài đặt', current: true }
+            ]}
+            gradientFrom="slate-500"
+            gradientTo="zinc-500"
+          />
 
-        {/* Tabs */}
-        <div className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
-          <div className="border-b px-5 py-4 flex items-center justify-between bg-gray-50/60">
+          <PrimaryContent>
+            <div className="space-y-5">
+              {/* Tabs */}
+              <div className="rounded-xl border bg-white shadow-sm">
+                <div className="border-b px-5 py-4 flex items-center justify-between bg-gray-50/60">
             <div className="flex items-center gap-4">
               <h2 className="text-base font-semibold text-gray-900">Cài đặt</h2>
               <div className="flex items-center gap-1">
@@ -86,13 +91,13 @@ export default function SettingsPage() {
               <button className="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
                 Đặt lại
               </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Settings Content */}
-        <div className="rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100 p-6">
-          <div className="space-y-6">
+            {/* Settings Content */}
+            <div className="rounded-xl border bg-white shadow-sm p-5">
+              <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Cài đặt {activeTab.toLowerCase()}</h3>
             
             {filteredSettings.map(setting => (
@@ -153,7 +158,10 @@ export default function SettingsPage() {
                 </div>
               </div>
             ))}
+              </div>
+            </div>
           </div>
+        </PrimaryContent>
         </div>
       </div>
     </DashboardLayout>

@@ -4,5 +4,6 @@ public enum ComplianceStatus {
     COMPLIANT,
     NON_COMPLIANT,
     PENDING_REVIEW,
-    IN_AUDIT
+    IN_AUDIT,
+    UNKNOWN
 }

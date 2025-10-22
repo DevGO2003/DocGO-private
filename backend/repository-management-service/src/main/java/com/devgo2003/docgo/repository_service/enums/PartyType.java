@@ -4,5 +4,6 @@ public enum PartyType {
     CLIENT,
     VENDOR,
     PARTNER,
-    GUARANTOR
+    GUARANTOR,
+    UNKNOWN
 }

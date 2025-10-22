@@ -8,5 +8,6 @@ public enum AuditAction {
     SHARE,
     DOWNLOAD,
     UPLOAD,
-    RESTORE
+    RESTORE,
+    UNKNOWN
 }

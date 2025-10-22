@@ -45,7 +45,7 @@ const navigationGroups = [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
       { nameKey: 'navigation.repositories', href: '/repositories', icon: DocumentTextIcon },
       { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
-      { nameKey: 'navigation.uploadDocument', href: '/upload-document', icon: ArrowUpTrayIcon },
+      { nameKey: 'navigation.uploadDocument', href: '/repositories/default/upload-files', icon: ArrowUpTrayIcon },
       { nameKey: 'navigation.analytics', href: '/analytics', icon: ChartBarIcon },
     ]
   },

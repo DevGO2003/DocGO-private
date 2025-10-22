@@ -4,5 +4,6 @@ public enum ChangeType {
     CREATE,
     UPDATE,
     DELETE,
-    ARCHIVE
+    ARCHIVE,
+    UNKNOWN
 }

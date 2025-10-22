@@ -5,5 +5,6 @@ public enum AccessAction {
     EDIT,
     DOWNLOAD,
     SHARE,
-    DELETE
+    DELETE,
+    UNKNOWN
 }

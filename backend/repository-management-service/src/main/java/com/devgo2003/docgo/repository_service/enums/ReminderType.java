@@ -4,5 +4,6 @@ public enum ReminderType {
     PAYMENT_DUE,
     MILESTONE_REVIEW,
     EXPIRY_WARNING,
-    CONTRACT_RENEWAL
+    CONTRACT_RENEWAL,
+    UNKNOWN
 }

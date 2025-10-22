@@ -5,5 +5,6 @@ public enum RiskType {
     SCHEDULE,
     FINANCIAL,
     LEGAL,
-    OPERATIONAL
+    OPERATIONAL,
+    UNKNOWN
 }

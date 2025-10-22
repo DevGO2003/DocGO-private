@@ -4,5 +4,6 @@ public enum OcrEngine {
     GEMINI_VISION,
     TESSERACT,
     TESSERACT_FALLBACK,
-    PADDLEOCR
+    PADDLEOCR,
+    UNKNOWN
 }
