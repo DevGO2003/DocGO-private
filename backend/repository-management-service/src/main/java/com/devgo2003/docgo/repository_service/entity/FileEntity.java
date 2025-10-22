@@ -22,95 +22,12 @@ public class FileEntity {
     @Id
     private String id;
     
-    // Basic file info
-    private String name;
-    private String mimeType;
-    private Long size;
-    private String extractedText;
-    private String status;
-    private String documentType;
-    private String ownerUserId;
-    private String language;
-    private String region;
-    private Boolean isNew;
-    
-    // Overview fields
-    private String title;
-    private String contractType;
-    private String category;
-    private List<String> tags;
-    
-    // Contract fields
-    private LocalDateTime effectiveDate;
-    private LocalDateTime expiryDate;
-    private Double totalValue;
-    private String currency;
-    private String summary;
-    private String project;
-    private String department;
-    private String priority;
-    private String confidentiality;
-    
-    // Content fields
-    private String plaintext;
-    private List<String> keyTerms;
-    private List<Map<String, Object>> sections;
-    private Map<String, Object> ocr;
-    private Map<String, Object> classification;
-    private Map<String, Object> processing;
-    private Object jsonContent;
-    private String jsonAnalysisStatus;
-    
-    // File info fields
-    private Map<String, String> hash;
-    private Map<String, List<String>> permissions;
-    private Map<String, Object> security;
-    private Integer version;
-    
-    // Storage fields
-    private String location;
-    private List<String> backupLocations;
-    private Map<String, Object> retentionPolicy;
-    private Map<String, Object> accessControl;
-    private Map<String, Object> s3;
-    private Map<String, Object> local;
-    
-    // Versioning fields
-    private Map<String, Object> currentVersionInfo;
-    private List<Map<String, Object>> versions;
-    private List<Map<String, Object>> changeLog;
-    private String previousVersion;
-    private String changeSummary;
-    private List<String> changedFields;
-    private Map<String, Object> diff;
-    private List<Map<String, Object>> history;
-    
-    // Metadata fields
-    private Map<String, Object> fileSystem;
-    private Map<String, Object> originalDocument;
-    private Map<String, Object> archivedDocument;
-    private Map<String, Object> technical;
-    
-    // Audit fields
-    private LocalDateTime createdAt;
-    private String createdBy;
-    private LocalDateTime lastModifiedAt;
-    private String lastModifiedBy;
-    private Integer auditVersion;
-    private List<Map<String, Object>> changeHistory;
-    private List<Map<String, Object>> accessLog;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
-    private LocalDateTime deletedAt;
-    private String deletedBy;
-    private Boolean isDeleted;
-    
-    // Processing status
-    private Map<String, Object> processingStatus;
-
-    // Nested data structures for full response
+    // Main nested sections - Optimized for MongoDB Atlas (v3 Schema)
     @Field
     private Map<String, Object> overview = new HashMap<>();
+
+    @Field
+    private Map<String, Object> metadata = new HashMap<>();
 
     @Field
     private Map<String, Object> contract = new HashMap<>();
@@ -119,41 +36,89 @@ public class FileEntity {
     private Map<String, Object> content = new HashMap<>();
 
     @Field
-    private Map<String, Object> file = new HashMap<>();
+    private Map<String, Object> storage = new HashMap<>();
 
     @Field
-    private Map<String, Object> storage = new HashMap<>();
+    private Map<String, Object> security = new HashMap<>();
 
     @Field
     private Map<String, Object> versioning = new HashMap<>();
 
     @Field
-    private Map<String, Object> metadata = new HashMap<>();
-
-    @Field
     private Map<String, Object> audit = new HashMap<>();
-
-    // Contract-specific nested fields
-    @Field
-    private Map<String, Object> workflow = new HashMap<>();
-
-    @Field
-    private List<Map<String, Object>> parties = new ArrayList<>();
-
-    @Field
-    private Map<String, Object> payment = new HashMap<>();
-
-    @Field
-    private Map<String, Object> clauses = new HashMap<>();
-
-    @Field
-    private List<Map<String, Object>> reminders = new ArrayList<>();
-
-    @Field
-    private Map<String, Object> risk = new HashMap<>();
-
-    @Field
-    private Map<String, Object> compliance = new HashMap<>();
+    
+    // Helper methods for quick access (backward compatibility)
+    public String getStatus() {
+        return overview != null ? (String) overview.get("status") : null;
+    }
+    
+    public void setStatus(String status) {
+        if (overview == null) overview = new HashMap<>();
+        overview.put("status", status);
+    }
+    
+    public String getDocumentType() {
+        return overview != null ? (String) overview.get("documentType") : null;
+    }
+    
+    public void setDocumentType(String documentType) {
+        if (overview == null) overview = new HashMap<>();
+        overview.put("documentType", documentType);
+    }
+    
+    public String getOwnerUserId() {
+        return overview != null ? (String) overview.get("ownerUserId") : null;
+    }
+    
+    public void setOwnerUserId(String ownerUserId) {
+        if (overview == null) overview = new HashMap<>();
+        overview.put("ownerUserId", ownerUserId);
+    }
+    
+    public String getName() {
+        if (metadata == null || metadata.get("file") == null) return null;
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.get("file");
+        return (String) file.get("name");
+    }
+    
+    public void setName(String name) {
+        if (metadata == null) metadata = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.computeIfAbsent("file", k -> new HashMap<>());
+        file.put("name", name);
+    }
+    
+    public String getMimeType() {
+        if (metadata == null || metadata.get("file") == null) return null;
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.get("file");
+        return (String) file.get("mimeType");
+    }
+    
+    public void setMimeType(String mimeType) {
+        if (metadata == null) metadata = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.computeIfAbsent("file", k -> new HashMap<>());
+        file.put("mimeType", mimeType);
+    }
+    
+    public Long getSize() {
+        if (metadata == null || metadata.get("file") == null) return null;
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.get("file");
+        Object size = file.get("size");
+        if (size instanceof Integer) return ((Integer) size).longValue();
+        if (size instanceof Long) return (Long) size;
+        return null;
+    }
+    
+    public void setSize(Long size) {
+        if (metadata == null) metadata = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> file = (Map<String, Object>) metadata.computeIfAbsent("file", k -> new HashMap<>());
+        file.put("size", size);
+    }
 }
 
 

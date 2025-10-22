@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { DocumentTextIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import type { Document } from '../_types'
-import { translateContractStatus, translateContractType, translateContractTag } from '@/utils/tagTranslations'
+import { translateContractStatus, translateContractType, translateContractTag } from '@/config/tags'
 
 type Props = {
   document: Document

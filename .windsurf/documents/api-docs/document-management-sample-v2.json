@@ -1,0 +1,277 @@
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "Success",
+  "description": "Đã lấy thông tin file thành công",
+  "data": {
+    "id": "FILE-2025-001-TEST",
+    "overview": {
+      "title": "test-upload-file.txt",
+      "status": "ACTIVE",
+      "documentType": "CONTRACT",
+      "tags": [],
+      "ownerUserId": "system",
+      "language": "vi",
+      "region": "VN",
+      "new": true
+    },
+    "metadata": {
+      "file": {
+        "name": "test-upload-file.txt",
+        "mimeType": "text/plain",
+        "size": 312,
+        "hash": {
+          "md5": "a1b2c3d4e5f6789012345678901234567",
+          "sha256": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        }
+      },
+      "fileSystem": {
+        "dateAdded": "2025-10-19T08:45:00Z",
+        "dateModified": "2025-10-19T08:45:00Z",
+        "originalFilename": "test-upload-file.txt",
+        "originalMD5": "md5-hash-abc123",
+        "originalFileSize": 312,
+        "originalMimeType": "text/plain",
+        "archiveMD5": "md5-hash-def456",
+        "archiveFileSize": 312
+      },
+      "originalDocument": {
+        "dcFormat": "application/pdf",
+        "dcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO",
+        "dcCreator": "Microsoft Word 2019",
+        "dcDescription": "Hợp đồng phát triển hệ thống quản lý tài liệu",
+        "dcSubject": "Hợp đồng, Phát triển phần mềm, DocGO",
+        "xmpCreateDate": "2024-01-15T08:30:00Z",
+        "xmpCreatorTool": "Microsoft Word 2019",
+        "xmpModifyDate": "2024-01-15T09:00:00Z",
+        "xmpMetadataDate": "2024-01-15T09:00:00Z",
+        "xmpDocumentID": "doc-2024-004-new",
+        "xmpInstanceID": "doc-2024-004-new-v1.0",
+        "pdfKeywords": "hợp đồng, phát triển, phần mềm, DocGO",
+        "pdfProducer": "Microsoft Word 2019",
+        "pdfaidPart": 3,
+        "pdfaidConformance": "B"
+      },
+      "archivedDocument": {
+        "dcFormat": "application/pdf",
+        "dcTitle": "Hợp đồng dịch vụ phát triển phần mềm DocGO (Archived)",
+        "dcCreator": "Archive System",
+        "pdfProducer": "DocGO Archive System v1.0",
+        "xmpCreateDate": "2024-01-15T08:30:00Z",
+        "xmpModifyDate": "2024-01-15T09:00:00Z",
+        "xmpMetadataDate": "2024-01-15T09:00:00Z",
+        "xmpCreatorTool": "OCRmyPDF 16.10.4 / Tesseract OCR",
+        "xmpDocumentID": "doc-2024-004-new-archived",
+        "pdfaidPart": 3,
+        "pdfaidConformance": "A"
+      },
+      "technical": {
+        "encoding": "UTF-8",
+        "lineEnding": "LF",
+        "bom": false,
+        "compression": "NONE",
+        "pages": 15,
+        "wordCount": 2500,
+        "characterCount": 15000
+      }
+    },
+    "contract": {
+      "type": "Phát triển phần mềm",
+      "effectiveDate": "2025-11-01",
+      "expiryDate": "2025-12-31",
+      "totalValue": 100000,
+      "currency": "USD",
+      "summary": "Hợp đồng phát triển phần mềm giữa Company A và Company B",
+      "project": "DocGO Platform Development",
+      "department": "IT Department",
+      "priority": "HIGH",
+      "confidentiality": "CONFIDENTIAL",
+      "workflow": {
+        "currentStage": "APPROVAL",
+        "stages": [
+          {"name": "DRAFT", "status": "COMPLETED", "completedAt": "2024-01-15T09:00:00Z", "assignedTo": "user-001"},
+          {"name": "REVIEW", "status": "COMPLETED", "completedAt": "2024-01-20T14:30:00Z", "assignedTo": "user-002"},
+          {"name": "APPROVAL", "status": "IN_PROGRESS", "startedAt": "2024-01-21T08:00:00Z", "assignedTo": "user-003"}
+        ]
+      },
+      "parties": [
+        {
+          "id": "party-001",
+          "name": "Company A",
+          "type": "CLIENT",
+          "role": "Bên A",
+          "taxCode": "ABC123",
+          "contact": {"email": "contact@companya.com", "phone": "+84-28-1234-5678", "address": "123 Nguyễn Huệ, Q1, TP.HCM"},
+          "representative": {"name": "Nguyễn Văn A", "position": "Giám đốc", "email": "nguyenvana@companya.com"}
+        },
+        {
+          "id": "party-002",
+          "name": "Company B",
+          "type": "VENDOR",
+          "role": "Bên B",
+          "taxCode": "DEF456",
+          "contact": {"email": "info@companyb.com", "phone": "+84-28-8765-4321", "address": "456 Lê Lợi, Q1, TP.HCM"},
+          "representative": {"name": "Trần Thị B", "position": "Giám đốc Kỹ thuật", "email": "tranthib@companyb.com"}
+        },
+        {
+          "id": "party-003",
+          "name": "Company C",
+          "type": "PARTNER",
+          "role": "Bên C (Đối tác)",
+          "taxCode": "GHI789",
+          "contact": {"email": "partner@companyc.com", "phone": "+84-28-9999-8888", "address": "789 Hai Bà Trưng, Q3, TP.HCM"},
+          "representative": {"name": "Lê Văn C", "position": "Quản lý Dự án", "email": "levanc@companyc.com"}
+        }
+      ],
+      "payment": {
+        "method": "BANK_TRANSFER",
+        "schedule": [
+          {"milestone": "Ký hợp đồng", "percentage": 50, "amount": 50000, "dueDate": "2025-11-01T00:00:00Z", "status": "PENDING"},
+          {"milestone": "Hoàn thành giai đoạn 1", "percentage": 30, "amount": 30000, "dueDate": "2025-12-01T00:00:00Z", "status": "PENDING"},
+          {"milestone": "Hoàn thành toàn bộ", "percentage": 20, "amount": 20000, "dueDate": "2025-12-31T00:00:00Z", "status": "PENDING"}
+        ]
+      },
+      "clauses": {
+        "key": [
+          {"name": "Phạm vi công việc", "description": "Mô tả chi tiết phạm vi phát triển", "content": "Bên B cam kết phát triển hệ thống DocGO", "importance": "HIGH", "risk": "LOW", "advice": "Khuyến nghị làm rõ chi tiết kỹ thuật"},
+          {"name": "Thanh toán", "description": "Quy định lịch thanh toán 50% trước, 50% sau", "content": "Thanh toán đợt 1: 50% giá trị hợp đồng", "importance": "HIGH", "risk": "MEDIUM", "advice": "Thêm điều khoản phạt chậm thanh toán"},
+          {"name": "Bảo hành", "description": "Cam kết bảo hành hệ thống", "content": "Bảo hành 12 tháng", "importance": "MEDIUM", "risk": "LOW", "advice": "Mở rộng bảo hành lên 24 tháng"}
+        ],
+        "unfavorable": [
+          {"name": "Thời gian thực hiện", "description": "Thời hạn hợp đồng ngắn", "content": "Dự án phải hoàn thành trước 31/12/2025", "risk": "MEDIUM", "advice": "Xem xét gia hạn nếu cần"},
+          {"name": "Phạt vi phạm", "description": "Phạt nặng nếu chậm trễ", "content": "Phạt 0.5% giá trị hợp đồng mỗi ngày", "risk": "HIGH", "advice": "Đàm phán giảm mức phạt"},
+          {"name": "Chấm dứt hợp đồng", "description": "Điều khoản chấm dứt một chiều", "content": "Bên A có quyền chấm dứt với thông báo 30 ngày", "risk": "HIGH", "advice": "Yêu cầu điều khoản đối xứng"}
+        ],
+        "intellectualProperty": "Tất cả quyền sở hữu trí tuệ thuộc về bên A",
+        "confidentiality": "Bên B cam kết bảo mật thông tin dự án",
+        "warranty": "Bảo hành 12 tháng sau khi nghiệm thu",
+        "termination": "Có thể chấm dứt hợp đồng với thông báo trước 30 ngày"
+      },
+      "reminders": [
+        {"id": "reminder-001", "type": "PAYMENT_DUE", "title": "Thanh toán đợt 1", "description": "Nhắc nhở thanh toán 50%", "content": "Thanh toán trước 01/11/2025", "dueDate": "2025-11-01T00:00:00Z", "status": "PENDING", "priority": "HIGH"},
+        {"id": "reminder-002", "type": "MILESTONE_REVIEW", "title": "Đánh giá giai đoạn 1", "description": "Kiểm tra tiến độ", "content": "Giai đoạn 1 phải được review trước 30/06/2025", "dueDate": "2025-06-30T00:00:00Z", "status": "PENDING", "priority": "MEDIUM"},
+        {"id": "reminder-003", "type": "EXPIRY_WARNING", "title": "Cảnh báo hết hạn", "description": "Nhắc nhở trước hết hạn", "content": "Hợp đồng kết thúc 31/12/2025", "dueDate": "2025-12-01T00:00:00Z", "status": "PENDING", "priority": "HIGH"}
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "factors": [
+          {"type": "TECHNICAL", "description": "Rủi ro về công nghệ AI", "content": "Hệ thống phải sử dụng AI mới nhất", "probability": "MEDIUM", "impact": "HIGH", "riskToParties": [{"id": "party-002", "name": "Company B"}], "beneficiaries": [{"id": null, "name": "Không ai"}]},
+          {"type": "SCHEDULE", "description": "Rủi ro về tiến độ", "content": "Dự án phải hoàn thành trong 2 tháng", "probability": "LOW", "impact": "MEDIUM", "riskToParties": [{"id": "party-001", "name": "Company A"}], "beneficiaries": [{"id": "party-002", "name": "Company B"}]},
+          {"type": "FINANCIAL", "description": "Rủi ro thanh toán chậm", "content": "Thanh toán đợt 2 chỉ sau nghiệm thu", "probability": "MEDIUM", "impact": "HIGH", "riskToParties": [{"id": "party-002", "name": "Company B"}, {"id": "party-001", "name": "Company A"}], "beneficiaries": []}
+        ],
+        "mitigationProposals": [
+          {"description": "Đào tạo team và thử nghiệm kỹ thuật AI", "content": "Bên B phải cung cấp báo cáo test hàng tuần", "cost": "LOW", "timeline": "2 tuần", "assignedTo": "Bên B"},
+          {"description": "Lập kế hoạch chi tiết và theo dõi tiến độ", "content": "Meeting review hàng tuần bắt buộc", "cost": "MEDIUM", "timeline": "1 tháng", "assignedTo": "Bên A"},
+          {"description": "Thêm escrow cho thanh toán lớn", "content": "Sử dụng escrow service", "cost": "HIGH", "timeline": "1 tuần", "assignedTo": "Cả hai bên"}
+        ],
+        "advice": "Tư vấn pháp lý để phân bổ rủi ro rõ ràng"
+      },
+      "compliance": {
+        "status": "COMPLIANT",
+        "regulations": ["Luật An toàn thông tin", "Nghị định 13/2023/NĐ-CP"],
+        "certifications": ["ISO 27001", "SOC 2"],
+        "auditSchedule": "2024-06-01T00:00:00Z",
+        "issues": [],
+        "recommendations": ["Kiểm tra pháp lý hợp đồng"]
+      }
+    },
+    "content": {
+      "plaintext": "This is a test contract file for upload testing...",
+      "extractedText": "Hợp đồng dịch vụ phát triển phần mềm...",
+      "summary": "Hợp đồng phát triển hệ thống DocGO với giá trị 52 triệu VND",
+      "keyTerms": ["phát triển phần mềm", "hệ thống quản lý tài liệu", "tính năng AI", "tự động hóa"],
+      "sections": [
+        {"title": "Điều 1: Đối tượng hợp đồng", "description": "Mô tả đối tượng và phạm vi", "content": "Bên A thuê bên B phát triển hệ thống DocGO", "pageNumber": 1},
+        {"title": "Điều 2: Thời gian thực hiện", "description": "Quy định thời gian", "content": "Dự án được thực hiện trong 2 tháng", "pageNumber": 2},
+        {"title": "Điều 3: Thanh toán và bảo hành", "description": "Chi tiết thanh toán", "content": "Thanh toán 50% trước, 50% sau", "pageNumber": 3}
+      ],
+      "ocr": {
+        "text": "This is a test contract file...",
+        "status": "COMPLETED",
+        "engine": "TESSERACT",
+        "confidence": 0.92,
+        "processedAt": "2025-10-21T07:38:15.123456Z",
+        "processingTime": 2.5,
+        "error": null,
+        "metadata": {"language": "vie+eng", "pageCount": 1, "boxCount": 42, "averageConfidence": 0.92}
+      },
+      "extraction": {
+        "status": "SUCCESS",
+        "method": "DIRECT",
+        "extractedAt": "2025-10-21T07:38:10.123456Z",
+        "characterCount": 3757,
+        "wordCount": 542,
+        "error": null
+      },
+      "summarization": {
+        "status": "SUCCESS",
+        "model": "gemini-1.5-flash",
+        "processedAt": "2025-10-21T07:38:20.123456Z",
+        "processingTime": 5.2,
+        "inputTokens": 1250,
+        "outputTokens": 180,
+        "error": null
+      },
+      "classification": {"isContract": true, "confidence": 0.85, "language": "vi"},
+      "processing": {"status": "COMPLETED", "error": null},
+      "jsonContent": null,
+      "jsonAnalysisStatus": null
+    },
+    "storage": {
+      "location": "s3://docgo-contracts/2024/01/",
+      "backupLocations": ["s3://docgo-backup/contracts/2024/01/", "gs://docgo-archive/contracts/2024/01/"],
+      "retentionPolicy": {"duration": "7 years", "autoDelete": false, "archiveAfter": "2 years"},
+      "accessControl": {"public": false, "restrictedUsers": ["user-001", "user-002"], "ipWhitelist": ["192.168.1.0/24"]},
+      "s3": {
+        "url": "https://docgo-storage.s3.amazonaws.com/documents/FILE-2025-001-TEST.txt",
+        "bucket": "docgo-storage",
+        "objectKey": "documents/FILE-2025-001-TEST.txt",
+        "region": "us-east-1",
+        "contentType": "text/plain",
+        "size": 312,
+        "versionId": "s3-version-xyz789",
+        "checksum": {"md5": "md5-hash-abc123"}
+      },
+      "local": {"path": null, "filename": "test-upload-file.txt", "mimeType": "text/plain", "size": 312, "mtime": null, "revision": null}
+    },
+    "security": {
+      "encryption": "AES-256",
+      "watermark": true,
+      "digitalSignature": true,
+      "accessLogging": true,
+      "permissions": {
+        "read": ["user-001", "user-002"],
+        "write": ["user-001"],
+        "delete": ["user-001"],
+        "share": ["user-001"]
+      }
+    },
+    "versioning": {
+      "current": {"number": 1, "tag": "1.0"},
+      "versions": [{"version": "1.0", "createdAt": "2024-01-15T09:00:00Z", "createdBy": "user-001", "changes": "Phiên bản đầu tiên", "fileId": "file-001"}],
+      "changeLog": [{"version": "1.0", "date": "2024-01-15T09:00:00Z", "author": "user-001", "changes": "Tạo hợp đồng ban đầu"}],
+      "previousVersion": null,
+      "changeSummary": null,
+      "changedFields": [],
+      "diff": {},
+      "history": [{"version": 1, "versionTag": "1.0.0", "changedAt": "2025-10-19T08:45:00Z", "changedBy": "system", "changeType": "CREATE", "storage": {"s3": {"versionId": null}, "local": {"revision": null}}}]
+    },
+    "audit": {
+      "createdAt": "2025-10-19T08:45:00Z",
+      "createdBy": "system",
+      "lastModifiedAt": "2025-10-19T08:45:00Z",
+      "lastModifiedBy": "system",
+      "version": 1,
+      "changeHistory": [{"action": "CREATE", "timestamp": "2025-10-19T08:45:00Z", "userId": "system", "details": "Tạo file mới", "ipAddress": "192.168.1.100", "userAgent": "Mozilla/5.0"}],
+      "accessLog": [{"action": "VIEW", "timestamp": "2025-10-19T08:45:00Z", "userId": "system", "ipAddress": "192.168.1.100", "userAgent": "Mozilla/5.0"}],
+      "updatedAt": "2025-10-19T08:45:00Z",
+      "updatedBy": "system",
+      "deletedAt": null,
+      "deletedBy": null,
+      "isDeleted": false
+    }
+  },
+  "timestamp": "2025-10-19T08:45:10Z",
+  "requestId": "req-xyz789-123abc",
+  "path": "/api/v1/file-management-service/file-details/FILE-2025-001-TEST"
+}

@@ -1,8 +1,8 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { authAPI } from '../lib/api'
-import TokenManager from '../utils/token-manager'
+import { userAPI as authAPI } from '@/lib/api/services/user.service'
+import TokenManager from '@/lib/utils/token-manager'
 import { 
   User, 
   UserRole, 

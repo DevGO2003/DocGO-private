@@ -1,0 +1,24 @@
+feat: improve AI prompt for contract summary - detailed schema compliance
+
+IMPROVED PROMPT FEATURES:
+- ✅ Detailed schema matching document-management-sample.json
+- ✅ Parties: PHẢI có id, type, contact{email, phone, address}, representative{name, position, email}
+- ✅ Payment.schedule: ARRAY of milestones với percentage, amount, dueDate, status
+- ✅ Clauses.key/unfavorable: ARRAY of objects với name, description, content (trích dẫn), importance, risk
+- ✅ Reminders: ARRAY với date, type, title, notifyBefore, status, assignedTo
+- ✅ Risk.factors: ARRAY of objects với category, severity, impact, probability
+- ✅ Risk.mitigations: ARRAY of objects với description, cost, timeline, assignedTo
+- ✅ Compliance.requirements: ARRAY với name, status, deadline
+- ✅ Compliance: regulations[], certifications[], recommendations[] arrays
+- ✅ Null handling: Rõ ràng khi nào dùng null vs empty array
+- ✅ Data types: totalValue PHẢI là NUMBER, dates PHẢI là ISO 8601
+- ✅ Content extraction: PHẢI trích dẫn nội dung chính xác từ hợp đồng
+
+NEW SERVICES CREATED:
+- contract_summary_service.py: Handle CONTRACT_SUMMARY_GENERATED event
+- extract_file_service.py: Handle FILE_METADATA_RECORDED + FILE_CONTENT_EXTRACTED events
+- Thêm wordCount calculation
+- Phân biệt plaintext vs extractedText
+- Thêm OCR processing details (engine, confidence, timestamps)
+- Thêm extraction details
+- Thêm summarization details

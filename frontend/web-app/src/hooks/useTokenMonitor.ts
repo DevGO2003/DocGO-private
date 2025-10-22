@@ -3,7 +3,7 @@
 
 import { useEffect, useCallback, useRef } from 'react'
 import { useAuth } from './useAuth'
-import TokenManager from '@/utils/token-manager'
+import TokenManager from '@/lib/utils/token-manager'
 
 export const useTokenMonitor = () => {
   const { refreshToken, isAuthenticated } = useAuth()

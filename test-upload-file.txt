@@ -1,2 +1,4 @@
 This is a test file content for DocGO event flow testing after fixes. It contains some sample text to simulate a document upload. The purpose is to verify that the automation service processes it, publishes Kafka events, and the repository service consumes them correctly with full response schema.
 
+
+

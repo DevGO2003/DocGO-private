@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 import { useTokenInfo } from '@/hooks/useTokenMonitor'
-import TokenManager from '@/utils/token-manager'
+import TokenManager from '@/lib/utils/token-manager'
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 export default function TestTokenManagementPage() {

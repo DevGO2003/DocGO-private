@@ -7,14 +7,14 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { NotificationDropdown } from '@/components/ui/NotificationDropdown'
-import { NavigationLink } from '@/components/NavigationLink'
+import { NavigationLink } from './NavigationLink'
 import { 
   MagnifyingGlassIcon, 
   BellIcon, 
   UserCircleIcon,
   Bars3Icon
 } from '@heroicons/react/24/outline'
-import { APP_CONFIG } from '@/lib/constants'
+import { APP_CONFIG } from '@/config/constants'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { Notification, mockNotifications } from '@/types/notification'
 

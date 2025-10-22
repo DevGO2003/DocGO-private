@@ -34,12 +34,30 @@ Document Management Service là microservice Spring Boot quản lý tài liệu 
 ## Kiến trúc hệ thống
 
 ```
-Frontend → Document Service → Kafka → Automation Service
+Frontend → Repository Service → Kafka → Automation Service
                 ↓
-            Database (MongoDB Atlas)
+            MongoDB Atlas (3 collections)
+            ├── files (main documents)
+            ├── file_versions (version history - Bucket Pattern)
+            └── file_full_contents (large content - Subset Pattern)
                 ↓
-            File Storage (Local)
+            File Storage (S3/Local)
 ```
+
+### **MongoDB Pattern - Phase 1 + 2** ✅
+
+**Phase 1: Single Collection Pattern**
+- Main document trong 1 collection `files`
+- Fast query (1 findById)
+- Good for 95% use cases
+
+**Phase 2: Multi-Collection Pattern**
+- Version history tách ra `file_versions` (Bucket Pattern)
+- Large content tách ra `file_full_contents` (Subset Pattern)
+- Scale unlimited: versions, content size
+- Query 1-3 collections, merge data trong service layer
+
+**API Response:** ✅ Vẫn trả về đúng v3 schema (merged data)
 
 ## Luồng xử lý
 

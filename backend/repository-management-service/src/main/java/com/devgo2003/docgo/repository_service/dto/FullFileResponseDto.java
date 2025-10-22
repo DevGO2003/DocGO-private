@@ -10,13 +10,12 @@ import lombok.Data;
 public class FullFileResponseDto {
     private String id;
     private OverviewDto overview;
+    private MetadataDto metadata;
     private ContractDto contract;
     private ContentDto content;
-    private FileInfoDto file;
     private StorageDto storage;
+    private SecurityDto security;
     private VersioningDto versioning;
-    private MetadataDto metadata;
     private AuditDto audit;
-    private Object processing;
 }
 

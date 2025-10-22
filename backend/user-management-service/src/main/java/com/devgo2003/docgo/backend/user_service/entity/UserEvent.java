@@ -23,29 +23,16 @@ public class UserEvent {
     @org.springframework.data.annotation.Id
     private String id;
 
-    @Field("user_id")
     private String userId;
-
-    @Field("event_type")
     private EventType eventType;
-
-    @Field("event_description")
     private String eventDescription;
-
-    @Field("ip_address")
     private String ipAddress;
-
-    @Field("user_agent")
     private String userAgent;
-
-    @Field("event_data")
     private String eventData;
 
-    @Field("created_at")
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @Field("updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
 

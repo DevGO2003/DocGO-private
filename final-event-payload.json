@@ -1,0 +1,121 @@
+﻿{
+    "apiVersion":  "v1",
+    "statusCode":  200,
+    "shortMessage":  "Success",
+    "description":  "ÄÃ£ láº¥y thÃ´ng tin file thÃ nh cÃ´ng",
+    "data":  {
+                 "id":  "db7b6c28-b759-4086-948c-167dad3d08c2",
+                 "overview":  {
+                                  "title":  "hop-dong-day-du.txt",
+                                  "status":  "ACTIVE",
+                                  "documentType":  "CONTRACT",
+                                  "category":  "TÃ i liá»u",
+                                  "tags":  [
+
+                                           ],
+                                  "language":  "vi",
+                                  "region":  "VN",
+                                  "isNew":  true
+                              },
+                 "content":  {
+                                 "extractedText":  "Há»¢P Äá»NG LAO Äá»NG TOÃN THá»I GIAN\r\n\r\nSá» há»£p Äá»ng: HD-2024-001\r\nNgÃ y kÃ½: 15/01/2024\r\nNgÃ y hiá»u lá»±c: 01/02/2024\r\nNgÃ y káº¿t thÃºc: 31/01/2025\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG:\r\nTÃªn cÃ´ng ty: CÃNG TY Cá» PHáº¦N CÃNG NGHá» ABC TECH\r\nÄá»a chá»: Táº§ng 15, TÃ²a nhÃ  Landmark 72, PhÆ°á»ng PhÃº Má»¹, Quáº­n 7, TP.HCM\r\nMÃ£ sá» thuáº¿: 0123456789\r\nÄáº¡i diá»n: Nguyá»\u0085n VÄn B - Tá»ng GiÃ¡m Äá»c\r\nSá» CMND: 123456789\r\nÄá»a chá»: 123 ÄÆ°á»ng ABC, PhÆ°á»ng XYZ, Quáº­n 1, TP.HCM\r\nÄiá»n thoáº¡i: 0901234567\r\nEmail: ceo@abctech.com.vn\r\nWebsite: www.abctech.com.vn\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG:\r\nHá» tÃªn: Tráº§n Thá» C\r\nNgÃ y sinh: 15/05/1990\r\nSá» CMND: 987654321\r\nÄá»a chá» thÆ°á»ng trÃº: 456 ÄÆ°á»ng DEF, PhÆ°á»ng GHI, Quáº­n 3, TP.HCM\r\nÄá»a chá» táº¡m trÃº: 789 ÄÆ°á»ng JKL, PhÆ°á»ng MNO, Quáº­n 2, TP.HCM\r\nÄiá»n thoáº¡i: 0987654321\r\nEmail: tranthic@email.com\r\nTrÃ¬nh Äá» há»c váº¥n: Äáº¡i há»c CÃ´ng nghá» ThÃ´ng tin\r\nKinh nghiá»m: 5 nÄm trong lÄ©nh vá»±c phÃ¡t triá»n pháº§n má»m\r\n\r\nÄIá»U KHOáº¢N CHÃNH:\r\n\r\n1. Vá» TRÃ CÃNG VIá»C:\r\n- Chá»©c danh: Senior Software Developer\r\n- PhÃ²ng ban: PhÃ²ng PhÃ¡t triá»n Sáº£n pháº©m\r\n- Cáº¥p trÃªn trá»±c tiáº¿p: Nguyá»\u0085n VÄn D - TrÆ°á»ng phÃ²ng PhÃ¡t triá»n\r\n- MÃ´ táº£ cÃ´ng viá»c: PhÃ¡t triá»n á»©ng dá»¥ng web, mobile app, quáº£n lÃ½ dá»± Ã¡n\r\n\r\n2. THá»I GIAN LÃM VIá»C:\r\n- Loáº¡i há»£p Äá»ng: Há»£p Äá»ng lao Äá»ng xÃ¡c Äá»nh thá»i háº¡n 12 thÃ¡ng\r\n- Thá»i gian lÃ m viá»c: 8 giá»/ngÃ y, 5 ngÃ y/tuáº§n (Thá»© 2 - Thá»© 6)\r\n- Giá» lÃ m viá»c: 8:00 - 17:00 (nghá» trÆ°a 12:00 - 13:00)\r\n- LÃ m thÃªm giá»: CÃ³ thá» yÃªu cáº§u khi cáº§n thiáº¿t, tráº£ lÆ°Æ¡ng theo quy Äá»nh\r\n\r\n3. TIá»N LÆ¯Æ NG VÃ PHÃC Lá»¢I:\r\n- LÆ°Æ¡ng cÆ¡ báº£n: 25,000,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p Än trÆ°a: 1,500,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p xÄng xe: 2,000,000 VNÄ/thÃ¡ng\r\n- ThÆ°á»ng hiá»u suáº¥t: Tá»i Äa 5,000,000 VNÄ/thÃ¡ng (tÃ¹y theo KPI)\r\n- ThÆ°á»ng dá»± Ã¡n: Theo káº¿t quáº£ hoÃ n thÃ nh dá»± Ã¡n\r\n- Báº£o hiá»m xÃ£ há»i: CÃ´ng ty ÄÃ³ng 17.5%, nhÃ¢n viÃªn ÄÃ³ng 8%\r\n- Báº£o hiá»m y táº¿: CÃ´ng ty ÄÃ³ng 3%, nhÃ¢n viÃªn ÄÃ³ng 1.5%\r\n- Báº£o hiá»m tháº¥t nghiá»p: CÃ´ng ty ÄÃ³ng 1%, nhÃ¢n viÃªn ÄÃ³ng 1%\r\n\r\n4. NGHá» PHÃP VÃ NGHá» Lá»:\r\n- Nghá» phÃ©p nÄm: 12 ngÃ y/nÄm (tÄng 1 ngÃ y má»i 5 nÄm lÃ m viá»c)\r\n- Nghá» lá»\u0085: Theo quy Äá»nh cá»§a NhÃ  nÆ°á»c\r\n- Nghá» á»m: CÃ³ chá»©ng nháº­n y táº¿\r\n- Nghá» thai sáº£n: Theo quy Äá»nh phÃ¡p luáº­t\r\n\r\n5. TRÃCH NHIá»M VÃ NGHÄ¨A Vá»¤:\r\n- HoÃ n thÃ nh cÃ´ng viá»c ÄÆ°á»£c giao ÄÃºng thá»i háº¡n\r\n- TuÃ¢n thá»§ ná»i quy cÃ´ng ty\r\n- Báº£o máº­t thÃ´ng tin cÃ´ng ty vÃ  khÃ¡ch hÃ ng\r\n- Tham gia ÄÃ o táº¡o, há»i tháº£o khi ÄÆ°á»£c yÃªu cáº§u\r\n- BÃ¡o cÃ¡o tiáº¿n Äá» cÃ´ng viá»c Äá»nh ká»³\r\n\r\n6. ÄIá»U KHOáº¢N Äáº¶C BIá»T:\r\n- Thá»i gian thá»­ viá»c: 2 thÃ¡ng vá»i lÆ°Æ¡ng 85% lÆ°Æ¡ng chÃ­nh thá»©c\r\n- Cháº¥m dá»©t há»£p Äá»ng: BÃ¡o trÆ°á»c 30 ngÃ y\r\n- Bá»i thÆ°á»ng: Náº¿u vi pháº¡m há»£p Äá»ng\r\n- Tranh cháº¥p: Giáº£i quyáº¿t táº¡i TÃ²a Ã¡n TP.HCM\r\n\r\n7. ÄIá»U KHOáº¢N KHÃC:\r\n- Há»£p Äá»ng nÃ y cÃ³ hiá»u lá»±c tá»« ngÃ y 01/02/2024\r\n- Má»i sá»­a Äá»i pháº£i cÃ³ sá»± Äá»ng Ã½ cá»§a cáº£ hai bÃªn\r\n- Há»£p Äá»ng ÄÆ°á»£c láº­p thÃ nh 2 báº£n cÃ³ giÃ¡ trá» phÃ¡p lÃ½ nhÆ° nhau\r\n\r\nCHá»® KÃ VÃ ÄÃNG Dáº¤U:\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG\r\nNguyá»\u0085n VÄn B\r\nTá»ng GiÃ¡m Äá»c\r\n[ÄÃ³ng dáº¥u cÃ´ng ty]\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG  \r\nTráº§n Thá» C\r\n[KÃ½ tÃªn]\r\n\r\nNgÃ y kÃ½: 15/01/2024\r\n",
+                                 "summary":  "Há»¢P Äá»NG LAO Äá»NG TOÃN THá»I GIAN\r\n\r\nSá» há»£p Äá»ng: HD-2024-001\r\nNgÃ y kÃ½: 15/01/2024\r\nNgÃ y hiá»u lá»±c: 01/02/2024\r\nNgÃ y káº¿t thÃºc: 31/01/2025\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG:\r\nTÃªn cÃ´ng ty: CÃNG TY Cá» PHáº¦N",
+                                 "keyTerms":  [
+                                                  "Äá»NG",
+                                                  "Äá»NG",
+                                                  "TOÃN",
+                                                  "THá»I",
+                                                  "GIAN",
+                                                  "Äá»ng:",
+                                                  "HD-2024-001",
+                                                  "NgÃ y",
+                                                  "15/01/2024",
+                                                  "NgÃ y"
+                                              ],
+                                 "sections":  [
+
+                                              ],
+                                 "plaintext":  "Há»¢P Äá»NG LAO Äá»NG TOÃN THá»I GIAN\r\n\r\nSá» há»£p Äá»ng: HD-2024-001\r\nNgÃ y kÃ½: 15/01/2024\r\nNgÃ y hiá»u lá»±c: 01/02/2024\r\nNgÃ y káº¿t thÃºc: 31/01/2025\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG:\r\nTÃªn cÃ´ng ty: CÃNG TY Cá» PHáº¦N CÃNG NGHá» ABC TECH\r\nÄá»a chá»: Táº§ng 15, TÃ²a nhÃ  Landmark 72, PhÆ°á»ng PhÃº Má»¹, Quáº­n 7, TP.HCM\r\nMÃ£ sá» thuáº¿: 0123456789\r\nÄáº¡i diá»n: Nguyá»\u0085n VÄn B - Tá»ng GiÃ¡m Äá»c\r\nSá» CMND: 123456789\r\nÄá»a chá»: 123 ÄÆ°á»ng ABC, PhÆ°á»ng XYZ, Quáº­n 1, TP.HCM\r\nÄiá»n thoáº¡i: 0901234567\r\nEmail: ceo@abctech.com.vn\r\nWebsite: www.abctech.com.vn\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG:\r\nHá» tÃªn: Tráº§n Thá» C\r\nNgÃ y sinh: 15/05/1990\r\nSá» CMND: 987654321\r\nÄá»a chá» thÆ°á»ng trÃº: 456 ÄÆ°á»ng DEF, PhÆ°á»ng GHI, Quáº­n 3, TP.HCM\r\nÄá»a chá» táº¡m trÃº: 789 ÄÆ°á»ng JKL, PhÆ°á»ng MNO, Quáº­n 2, TP.HCM\r\nÄiá»n thoáº¡i: 0987654321\r\nEmail: tranthic@email.com\r\nTrÃ¬nh Äá» há»c váº¥n: Äáº¡i há»c CÃ´ng nghá» ThÃ´ng tin\r\nKinh nghiá»m: 5 nÄm trong lÄ©nh vá»±c phÃ¡t triá»n pháº§n má»m\r\n\r\nÄIá»U KHOáº¢N CHÃNH:\r\n\r\n1. Vá» TRÃ CÃNG VIá»C:\r\n- Chá»©c danh: Senior Software Developer\r\n- PhÃ²ng ban: PhÃ²ng PhÃ¡t triá»n Sáº£n pháº©m\r\n- Cáº¥p trÃªn trá»±c tiáº¿p: Nguyá»\u0085n VÄn D - TrÆ°á»ng phÃ²ng PhÃ¡t triá»n\r\n- MÃ´ táº£ cÃ´ng viá»c: PhÃ¡t triá»n á»©ng dá»¥ng web, mobile app, quáº£n lÃ½ dá»± Ã¡n\r\n\r\n2. THá»I GIAN LÃM VIá»C:\r\n- Loáº¡i há»£p Äá»ng: Há»£p Äá»ng lao Äá»ng xÃ¡c Äá»nh thá»i háº¡n 12 thÃ¡ng\r\n- Thá»i gian lÃ m viá»c: 8 giá»/ngÃ y, 5 ngÃ y/tuáº§n (Thá»© 2 - Thá»© 6)\r\n- Giá» lÃ m viá»c: 8:00 - 17:00 (nghá» trÆ°a 12:00 - 13:00)\r\n- LÃ m thÃªm giá»: CÃ³ thá» yÃªu cáº§u khi cáº§n thiáº¿t, tráº£ lÆ°Æ¡ng theo quy Äá»nh\r\n\r\n3. TIá»N LÆ¯Æ NG VÃ PHÃC Lá»¢I:\r\n- LÆ°Æ¡ng cÆ¡ báº£n: 25,000,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p Än trÆ°a: 1,500,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p xÄng xe: 2,000,000 VNÄ/thÃ¡ng\r\n- ThÆ°á»ng hiá»u suáº¥t: Tá»i Äa 5,000,000 VNÄ/thÃ¡ng (tÃ¹y theo KPI)\r\n- ThÆ°á»ng dá»± Ã¡n: Theo káº¿t quáº£ hoÃ n thÃ nh dá»± Ã¡n\r\n- Báº£o hiá»m xÃ£ há»i: CÃ´ng ty ÄÃ³ng 17.5%, nhÃ¢n viÃªn ÄÃ³ng 8%\r\n- Báº£o hiá»m y táº¿: CÃ´ng ty ÄÃ³ng 3%, nhÃ¢n viÃªn ÄÃ³ng 1.5%\r\n- Báº£o hiá»m tháº¥t nghiá»p: CÃ´ng ty ÄÃ³ng 1%, nhÃ¢n viÃªn ÄÃ³ng 1%\r\n\r\n4. NGHá» PHÃP VÃ NGHá» Lá»:\r\n- Nghá» phÃ©p nÄm: 12 ngÃ y/nÄm (tÄng 1 ngÃ y má»i 5 nÄm lÃ m viá»c)\r\n- Nghá» lá»\u0085: Theo quy Äá»nh cá»§a NhÃ  nÆ°á»c\r\n- Nghá» á»m: CÃ³ chá»©ng nháº­n y táº¿\r\n- Nghá» thai sáº£n: Theo quy Äá»nh phÃ¡p luáº­t\r\n\r\n5. TRÃCH NHIá»M VÃ NGHÄ¨A Vá»¤:\r\n- HoÃ n thÃ nh cÃ´ng viá»c ÄÆ°á»£c giao ÄÃºng thá»i háº¡n\r\n- TuÃ¢n thá»§ ná»i quy cÃ´ng ty\r\n- Báº£o máº­t thÃ´ng tin cÃ´ng ty vÃ  khÃ¡ch hÃ ng\r\n- Tham gia ÄÃ o táº¡o, há»i tháº£o khi ÄÆ°á»£c yÃªu cáº§u\r\n- BÃ¡o cÃ¡o tiáº¿n Äá» cÃ´ng viá»c Äá»nh ká»³\r\n\r\n6. ÄIá»U KHOáº¢N Äáº¶C BIá»T:\r\n- Thá»i gian thá»­ viá»c: 2 thÃ¡ng vá»i lÆ°Æ¡ng 85% lÆ°Æ¡ng chÃ­nh thá»©c\r\n- Cháº¥m dá»©t há»£p Äá»ng: BÃ¡o trÆ°á»c 30 ngÃ y\r\n- Bá»i thÆ°á»ng: Náº¿u vi pháº¡m há»£p Äá»ng\r\n- Tranh cháº¥p: Giáº£i quyáº¿t táº¡i TÃ²a Ã¡n TP.HCM\r\n\r\n7. ÄIá»U KHOáº¢N KHÃC:\r\n- Há»£p Äá»ng nÃ y cÃ³ hiá»u lá»±c tá»« ngÃ y 01/02/2024\r\n- Má»i sá»­a Äá»i pháº£i cÃ³ sá»± Äá»ng Ã½ cá»§a cáº£ hai bÃªn\r\n- Há»£p Äá»ng ÄÆ°á»£c láº­p thÃ nh 2 báº£n cÃ³ giÃ¡ trá» phÃ¡p lÃ½ nhÆ° nhau\r\n\r\nCHá»® KÃ VÃ ÄÃNG Dáº¤U:\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG\r\nNguyá»\u0085n VÄn B\r\nTá»ng GiÃ¡m Äá»c\r\n[ÄÃ³ng dáº¥u cÃ´ng ty]\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG  \r\nTráº§n Thá» C\r\n[KÃ½ tÃªn]\r\n\r\nNgÃ y kÃ½: 15/01/2024\r\n",
+                                 "ocr":  {
+                                             "text":  "Há»¢P Äá»NG LAO Äá»NG TOÃN THá»I GIAN\r\n\r\nSá» há»£p Äá»ng: HD-2024-001\r\nNgÃ y kÃ½: 15/01/2024\r\nNgÃ y hiá»u lá»±c: 01/02/2024\r\nNgÃ y káº¿t thÃºc: 31/01/2025\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG:\r\nTÃªn cÃ´ng ty: CÃNG TY Cá» PHáº¦N CÃNG NGHá» ABC TECH\r\nÄá»a chá»: Táº§ng 15, TÃ²a nhÃ  Landmark 72, PhÆ°á»ng PhÃº Má»¹, Quáº­n 7, TP.HCM\r\nMÃ£ sá» thuáº¿: 0123456789\r\nÄáº¡i diá»n: Nguyá»\u0085n VÄn B - Tá»ng GiÃ¡m Äá»c\r\nSá» CMND: 123456789\r\nÄá»a chá»: 123 ÄÆ°á»ng ABC, PhÆ°á»ng XYZ, Quáº­n 1, TP.HCM\r\nÄiá»n thoáº¡i: 0901234567\r\nEmail: ceo@abctech.com.vn\r\nWebsite: www.abctech.com.vn\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG:\r\nHá» tÃªn: Tráº§n Thá» C\r\nNgÃ y sinh: 15/05/1990\r\nSá» CMND: 987654321\r\nÄá»a chá» thÆ°á»ng trÃº: 456 ÄÆ°á»ng DEF, PhÆ°á»ng GHI, Quáº­n 3, TP.HCM\r\nÄá»a chá» táº¡m trÃº: 789 ÄÆ°á»ng JKL, PhÆ°á»ng MNO, Quáº­n 2, TP.HCM\r\nÄiá»n thoáº¡i: 0987654321\r\nEmail: tranthic@email.com\r\nTrÃ¬nh Äá» há»c váº¥n: Äáº¡i há»c CÃ´ng nghá» ThÃ´ng tin\r\nKinh nghiá»m: 5 nÄm trong lÄ©nh vá»±c phÃ¡t triá»n pháº§n má»m\r\n\r\nÄIá»U KHOáº¢N CHÃNH:\r\n\r\n1. Vá» TRÃ CÃNG VIá»C:\r\n- Chá»©c danh: Senior Software Developer\r\n- PhÃ²ng ban: PhÃ²ng PhÃ¡t triá»n Sáº£n pháº©m\r\n- Cáº¥p trÃªn trá»±c tiáº¿p: Nguyá»\u0085n VÄn D - TrÆ°á»ng phÃ²ng PhÃ¡t triá»n\r\n- MÃ´ táº£ cÃ´ng viá»c: PhÃ¡t triá»n á»©ng dá»¥ng web, mobile app, quáº£n lÃ½ dá»± Ã¡n\r\n\r\n2. THá»I GIAN LÃM VIá»C:\r\n- Loáº¡i há»£p Äá»ng: Há»£p Äá»ng lao Äá»ng xÃ¡c Äá»nh thá»i háº¡n 12 thÃ¡ng\r\n- Thá»i gian lÃ m viá»c: 8 giá»/ngÃ y, 5 ngÃ y/tuáº§n (Thá»© 2 - Thá»© 6)\r\n- Giá» lÃ m viá»c: 8:00 - 17:00 (nghá» trÆ°a 12:00 - 13:00)\r\n- LÃ m thÃªm giá»: CÃ³ thá» yÃªu cáº§u khi cáº§n thiáº¿t, tráº£ lÆ°Æ¡ng theo quy Äá»nh\r\n\r\n3. TIá»N LÆ¯Æ NG VÃ PHÃC Lá»¢I:\r\n- LÆ°Æ¡ng cÆ¡ báº£n: 25,000,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p Än trÆ°a: 1,500,000 VNÄ/thÃ¡ng\r\n- Phá»¥ cáº¥p xÄng xe: 2,000,000 VNÄ/thÃ¡ng\r\n- ThÆ°á»ng hiá»u suáº¥t: Tá»i Äa 5,000,000 VNÄ/thÃ¡ng (tÃ¹y theo KPI)\r\n- ThÆ°á»ng dá»± Ã¡n: Theo káº¿t quáº£ hoÃ n thÃ nh dá»± Ã¡n\r\n- Báº£o hiá»m xÃ£ há»i: CÃ´ng ty ÄÃ³ng 17.5%, nhÃ¢n viÃªn ÄÃ³ng 8%\r\n- Báº£o hiá»m y táº¿: CÃ´ng ty ÄÃ³ng 3%, nhÃ¢n viÃªn ÄÃ³ng 1.5%\r\n- Báº£o hiá»m tháº¥t nghiá»p: CÃ´ng ty ÄÃ³ng 1%, nhÃ¢n viÃªn ÄÃ³ng 1%\r\n\r\n4. NGHá» PHÃP VÃ NGHá» Lá»:\r\n- Nghá» phÃ©p nÄm: 12 ngÃ y/nÄm (tÄng 1 ngÃ y má»i 5 nÄm lÃ m viá»c)\r\n- Nghá» lá»\u0085: Theo quy Äá»nh cá»§a NhÃ  nÆ°á»c\r\n- Nghá» á»m: CÃ³ chá»©ng nháº­n y táº¿\r\n- Nghá» thai sáº£n: Theo quy Äá»nh phÃ¡p luáº­t\r\n\r\n5. TRÃCH NHIá»M VÃ NGHÄ¨A Vá»¤:\r\n- HoÃ n thÃ nh cÃ´ng viá»c ÄÆ°á»£c giao ÄÃºng thá»i háº¡n\r\n- TuÃ¢n thá»§ ná»i quy cÃ´ng ty\r\n- Báº£o máº­t thÃ´ng tin cÃ´ng ty vÃ  khÃ¡ch hÃ ng\r\n- Tham gia ÄÃ o táº¡o, há»i tháº£o khi ÄÆ°á»£c yÃªu cáº§u\r\n- BÃ¡o cÃ¡o tiáº¿n Äá» cÃ´ng viá»c Äá»nh ká»³\r\n\r\n6. ÄIá»U KHOáº¢N Äáº¶C BIá»T:\r\n- Thá»i gian thá»­ viá»c: 2 thÃ¡ng vá»i lÆ°Æ¡ng 85% lÆ°Æ¡ng chÃ­nh thá»©c\r\n- Cháº¥m dá»©t há»£p Äá»ng: BÃ¡o trÆ°á»c 30 ngÃ y\r\n- Bá»i thÆ°á»ng: Náº¿u vi pháº¡m há»£p Äá»ng\r\n- Tranh cháº¥p: Giáº£i quyáº¿t táº¡i TÃ²a Ã¡n TP.HCM\r\n\r\n7. ÄIá»U KHOáº¢N KHÃC:\r\n- Há»£p Äá»ng nÃ y cÃ³ hiá»u lá»±c tá»« ngÃ y 01/02/2024\r\n- Má»i sá»­a Äá»i pháº£i cÃ³ sá»± Äá»ng Ã½ cá»§a cáº£ hai bÃªn\r\n- Há»£p Äá»ng ÄÆ°á»£c láº­p thÃ nh 2 báº£n cÃ³ giÃ¡ trá» phÃ¡p lÃ½ nhÆ° nhau\r\n\r\nCHá»® KÃ VÃ ÄÃNG Dáº¤U:\r\n\r\nBÃN A - NGÆ¯á»I Sá»¬ Dá»¤NG LAO Äá»NG\r\nNguyá»\u0085n VÄn B\r\nTá»ng GiÃ¡m Äá»c\r\n[ÄÃ³ng dáº¥u cÃ´ng ty]\r\n\r\nBÃN B - NGÆ¯á»I LAO Äá»NG  \r\nTráº§n Thá» C\r\n[KÃ½ tÃªn]\r\n\r\nNgÃ y kÃ½: 15/01/2024\r\n",
+                                             "status":  "COMPLETED"
+                                         },
+                                 "classification":  {
+                                                        "isContract":  true,
+                                                        "confidence":  0.95,
+                                                        "category":  "TÃ i liá»u",
+                                                        "language":  "vi"
+                                                    },
+                                 "processing":  {
+                                                    "status":  "COMPLETED"
+                                                }
+                             },
+                 "file":  {
+                              "id":  "db7b6c28-b759-4086-948c-167dad3d08c2",
+                              "name":  "hop-dong-day-du.txt",
+                              "type":  "text/plain",
+                              "size":  3757,
+                              "hash":  {
+                                           "md5":  "398040bd85fde7cb8a2228bd027753ce",
+                                           "sha256":  "551b259c48002a2f9b9765c2b9fe4cd1bf26cff69386f6f88686de3ec9d51cc6"
+                                       },
+                              "permissions":  {
+                                                  "read":  [
+                                                               "system",
+                                                               "user-001"
+                                                           ],
+                                                  "write":  [
+                                                                "system"
+                                                            ],
+                                                  "delete":  [
+                                                                 "system"
+                                                             ],
+                                                  "share":  [
+                                                                "system"
+                                                            ]
+                                              },
+                              "security":  {
+                                               "encryption":  "AES-256",
+                                               "watermark":  false,
+                                               "digitalSignature":  false,
+                                               "accessLogging":  true
+                                           },
+                              "version":  1
+                          },
+                 "storage":  {
+                                 "location":  "s3://devgo2003-docgo-bucket/db7b6c28-b759-4086-948c-167dad3d08c2",
+                                 "backupLocations":  [
+
+                                                     ],
+                                 "s3":  {
+                                            "url":  "https://s3.filebase.com/devgo2003-docgo-bucket/documents/db7b6c28-b759-4086-948c-167dad3d08c2_hop-dong-day-du.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256\u0026X-Amz-Credential=D6D49B01A4B01DE0EA12%2F20251021%2Fus-east-1%2Fs3%2Faws4_request\u0026X-Amz-Date=20251021T090033Z\u0026X-Amz-Expires=3600\u0026X-Amz-SignedHeaders=host\u0026X-Amz-Signature=05cd6f70295fba93921143bf050ccdaa64180fe5646816e2f83d0e53da9c1ad3",
+                                            "bucket":  "devgo2003-docgo-bucket",
+                                            "objectKey":  "documents/db7b6c28-b759-4086-948c-167dad3d08c2/hop-dong-day-du.txt",
+                                            "region":  "us-east-1",
+                                            "contentType":  "text/plain",
+                                            "size":  3757,
+                                            "checksum":  {
+                                                             "originalMD5":  "398040bd85fde7cb8a2228bd027753ce"
+                                                         }
+                                        }
+                             },
+                 "metadata":  {
+                                  "fileSystem":  {
+
+                                                 },
+                                  "technical":  {
+                                                    "encoding":  "UTF-8"
+                                                }
+                              },
+                 "audit":  {
+                               "createdBy":  "system",
+                               "lastModifiedBy":  "system",
+                               "version":  1,
+                               "updatedBy":  "system",
+                               "isDeleted":  false
+                           }
+             },
+    "timestamp":  "2025-10-21T09:27:56.474489296Z",
+    "requestId":  "561fc693-0b6b-4884-8953-d359e73b8b61",
+    "path":  "/api/v1/repository-management-service/files/db7b6c28-b759-4086-948c-167dad3d08c2"
+}

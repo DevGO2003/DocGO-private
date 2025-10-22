@@ -1,0 +1,22 @@
+feat: remove fallback logic - return None if AI fails
+
+REMOVED:
+- ❌ _create_fallback_summary() method (63 lines)
+- ❌ Generic fallback data with "Chưa xác định" values
+- ❌ Fake parties structure
+- ❌ Generic risk assessment
+
+CHANGES:
+- ✅ Return None if AI rate limit exhausted
+- ✅ Return None if AI fails to generate
+- ✅ Return None if no AI response
+
+IMPACT:
+- If AI fails → No CONTRACT_SUMMARY_GENERATED event published
+- Clean data only - no fake/placeholder data
+- Better data quality - only real AI-generated summaries
+
+RATIONALE:
+- Fake data pollutes database
+- "Chưa xác định" không có giá trị
+- Better to have no data than bad data

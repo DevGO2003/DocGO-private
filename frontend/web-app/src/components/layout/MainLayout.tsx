@@ -3,12 +3,12 @@
 import React, { useState } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import Sidebar from '../Sidebar'
+import Sidebar from './Sidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { PageTransition } from '../PageTransition'
-import GlobalDragDrop from './GlobalDragDrop'
+import { PageTransition } from '../common/PageTransition'
+import GlobalDragDrop from '../common/GlobalDragDrop'
 
 interface MainLayoutProps {
   children: React.ReactNode

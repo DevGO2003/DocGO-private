@@ -5,7 +5,7 @@ import { MagnifyingGlassIcon, TagIcon, Squares2X2Icon, ListBulletIcon, ArrowPath
 import IncludeExcludeModal from '@/components/modals/IncludeExcludeModal'
 import TimeRangeModal from '@/components/modals/TimeRangeModal'
 import AddFileChoiceModal from '@/components/modals/AddFileChoiceModal'
-import { getContractStatuses, getContractTypes } from '@/utils/tagTranslations'
+import { getContractStatuses, getContractTypes } from '@/config/tags'
 import { useTranslation } from '@/hooks/useTranslation'
 
 type Props = {

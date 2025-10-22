@@ -22,18 +22,18 @@ public class StorageDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RetentionPolicyDto {
-        private Integer retentionPeriod;
-        private String unit;
-        private LocalDateTime deleteAfter;
+        private String duration;
+        private Boolean autoDelete;
+        private String archiveAfter;
     }
 
     @Data
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AccessControlDto {
-        private List<String> allowedUsers;
-        private List<String> allowedRoles;
-        private List<String> deniedUsers;
+        private Boolean isPublic;
+        private List<String> restrictedUsers;
+        private List<String> ipWhitelist;
     }
 
     @Data
@@ -43,21 +43,18 @@ public class StorageDto {
         private String url;
         private String bucket;
         private String objectKey;
-        private String key;
         private String region;
         private String contentType;
         private Long size;
         private String versionId;
         private ChecksumDto checksum;
-        private String storageClass;
     }
 
     @Data
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ChecksumDto {
-        private String originalMD5;
-        private String archiveMD5;
+        private String md5;
     }
 
     @Data
@@ -65,6 +62,10 @@ public class StorageDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class LocalDto {
         private String path;
-        private String directory;
+        private String filename;
+        private String mimeType;
+        private Long size;
+        private String mtime;
+        private String revision;
     }
 }

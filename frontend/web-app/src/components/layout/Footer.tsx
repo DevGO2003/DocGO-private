@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import { APP_CONFIG } from '@/lib/constants'
-import { NavigationLink } from '@/components/NavigationLink'
+import { APP_CONFIG } from '@/config/constants'
+import { NavigationLink } from './NavigationLink'
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
