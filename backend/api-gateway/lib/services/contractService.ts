@@ -122,7 +122,7 @@ class ContractService {
   async getContracts(params: ContractQueryParams = {}, token?: string): Promise<ContractListResponse> {
     try {
       const response: AxiosResponse<ContractListResponse> = await this.client.get(
-        '/api/v1/file-management-service/documents',
+        '/api/v1/repository-management-service/documents',
         {
           params,
           headers: this.getAuthHeaders(token),
@@ -137,7 +137,7 @@ class ContractService {
   async getContract(id: string, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.get(
-        `/api/v1/file-management-service/documents/${id}`,
+        `/api/v1/repository-management-service/documents/${id}`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -151,7 +151,7 @@ class ContractService {
   async createContract(contract: Omit<Contract, 'id'>, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.post(
-        '/api/v1/file-management-service/documents',
+        '/api/v1/repository-management-service/documents',
         contract,
         {
           headers: this.getAuthHeaders(token),
@@ -166,7 +166,7 @@ class ContractService {
   async updateContract(id: string, contract: Partial<Contract>, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.put(
-        `/api/v1/file-management-service/documents/${id}`,
+        `/api/v1/repository-management-service/documents/${id}`,
         contract,
         {
           headers: this.getAuthHeaders(token),
@@ -181,7 +181,7 @@ class ContractService {
   async deleteContract(id: string, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.delete(
-        `/api/v1/file-management-service/documents/${id}`,
+        `/api/v1/repository-management-service/documents/${id}`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -195,7 +195,7 @@ class ContractService {
   async bulkDeleteContracts(ids: string[], token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.delete(
-        `/api/v1/file-management-service/documents/bulk`,
+        `/api/v1/repository-management-service/documents/bulk`,
         {
           data: { ids },
           headers: this.getAuthHeaders(token),
@@ -210,7 +210,7 @@ class ContractService {
   async approveContract(id: string, approval: ApprovalRequest, token?: string): Promise<ContractResponse> {
     try {
       const response: AxiosResponse<ContractResponse> = await this.client.post(
-        `/api/v1/file-management-service/documents/${id}/approve`,
+        `/api/v1/repository-management-service/documents/${id}/approve`,
         approval,
         {
           headers: this.getAuthHeaders(token),
@@ -225,7 +225,7 @@ class ContractService {
   async getContractVersions(id: string, token?: string): Promise<any> {
     try {
       const response = await this.client.get(
-        `/api/v1/file-management-service/documents/${id}/versions`,
+        `/api/v1/repository-management-service/documents/${id}/versions`,
         {
           headers: this.getAuthHeaders(token),
         }
@@ -239,7 +239,7 @@ class ContractService {
   async addComment(id: string, comment: CommentRequest, token?: string): Promise<any> {
     try {
       const response = await this.client.post(
-        `/api/v1/file-management-service/documents/${id}/comments`,
+        `/api/v1/repository-management-service/documents/${id}/comments`,
         comment,
         {
           headers: this.getAuthHeaders(token),
@@ -254,7 +254,7 @@ class ContractService {
   async requestESignature(id: string, esignature: ESignatureRequest, token?: string): Promise<any> {
     try {
       const response = await this.client.post(
-        `/api/v1/file-management-service/documents/${id}/esignature`,
+        `/api/v1/repository-management-service/documents/${id}/esignature`,
         esignature,
         {
           headers: this.getAuthHeaders(token),
@@ -269,7 +269,7 @@ class ContractService {
   async createReminder(id: string, reminder: ReminderRequest, token?: string): Promise<any> {
     try {
       const response = await this.client.post(
-        `/api/v1/file-management-service/documents/${id}/reminders`,
+        `/api/v1/repository-management-service/documents/${id}/reminders`,
         reminder,
         {
           headers: this.getAuthHeaders(token),

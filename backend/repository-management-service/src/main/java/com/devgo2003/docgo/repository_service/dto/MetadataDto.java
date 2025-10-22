@@ -1,13 +1,17 @@
 package com.devgo2003.docgo.repository_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MetadataDto {
     private FileMetadataDto file;
@@ -18,6 +22,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FileMetadataDto {
         private String name;
@@ -28,6 +34,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class HashDto {
         private String md5;
@@ -36,6 +44,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FileSystemDto {
         private String dateAdded;
@@ -50,6 +60,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OriginalDocumentDto {
         private String dcFormat;
@@ -71,6 +83,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ArchivedDocumentDto {
         private String dcFormat;
@@ -88,6 +102,8 @@ public class MetadataDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class TechnicalDto {
         private String encoding;

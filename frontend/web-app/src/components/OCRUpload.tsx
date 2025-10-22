@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { automationAPI } from '@/lib/apis'
+import { automationAPI } from '@/lib/api'
 
 interface OCRUploadProps {
   onResult: (result: any) => void

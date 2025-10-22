@@ -10,7 +10,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractStatus, translateContractType, translateContractTag } from '@/config/tags'
 import DocumentsFilters from '../../_components/DocumentsFilters'
 import DocumentsTable from '../../_components/DocumentsTable'
-import { documentAPI } from '@/lib/api'
+import { repositoryAPI } from '@/lib/api'
 import { mapFileApiPageToPaginatedDocuments } from '@/lib/mappers/file-list-mapper'
 import { InlineLoading } from '@/components/ui/LoadingSpinner'
 // import { tagAPI } from '@/lib/api' // Removed - tags API disabled
@@ -149,7 +149,7 @@ export default function DocumentsPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const axiosResp = await documentAPI.getAllFiles({
+        const axiosResp = await repositoryAPI.getAllFiles({
           page,
           size: pageSize,
           sortBy,

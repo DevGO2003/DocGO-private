@@ -1,6 +1,6 @@
 # Test files API đơn giản
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8002/api/v1/file-management-service/files" -Method GET
+    $response = Invoke-WebRequest -Uri "http://localhost:8002/api/v1/repository-management-service/files" -Method GET
     Write-Host "✅ Status: $($response.StatusCode)"
     $json = $response.Content | ConvertFrom-Json
     Write-Host "`n📊 Total files: $($json.data.result.total_elements)"

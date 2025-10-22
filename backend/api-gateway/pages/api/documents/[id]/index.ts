@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (req.method === 'GET') {
-      const url = `${baseUrl}/api/v1/file-management-service/documents/${id}`
+      const url = `${baseUrl}/api/v1/repository-management-service/documents/${id}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'PUT') {
-      const url = `${baseUrl}/api/v1/file-management-service/documents/${id}/processing-result`
+      const url = `${baseUrl}/api/v1/repository-management-service/documents/${id}/processing-result`
       const response = await fetch(url, {
         method: 'PUT',
         headers: {

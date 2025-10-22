@@ -1,11 +1,15 @@
 package com.devgo2003.docgo.repository_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PartyDto {
     private String id;
@@ -18,6 +22,8 @@ public class PartyDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ContactDto {
         private String email;
@@ -27,6 +33,8 @@ public class PartyDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RepresentativeDto {
         private String name;

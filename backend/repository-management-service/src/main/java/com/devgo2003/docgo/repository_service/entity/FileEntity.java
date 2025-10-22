@@ -22,6 +22,10 @@ public class FileEntity {
     @Id
     private String id;
     
+    // Explicit getter/setter for id to fix Lombok annotation processing issue in Docker
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    
     // Main nested sections - Optimized for MongoDB Atlas (v3 Schema)
     @Field
     private Map<String, Object> overview = new HashMap<>();

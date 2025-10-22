@@ -46,7 +46,7 @@ backend/
 ├── user-management-service/
 │   ├── .env.example
 │   └── .env (không commit)
-├── file-management-service/
+├── repository-management-service/
 │   ├── .env.example
 │   └── .env (không commit)
 ├── automation-service/

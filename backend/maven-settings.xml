@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  
+  <!-- Maven mirrors tối ưu cho Việt Nam -->
+  <mirrors>
+    <!-- Aliyun Maven - Trung Quốc (gần VN nhất, nhanh nhất) -->
+    <mirror>
+      <id>aliyun-central</id>
+      <mirrorOf>central</mirrorOf>
+      <name>Aliyun Maven Central</name>
+      <url>https://maven.aliyun.com/repository/central</url>
+    </mirror>
+    
+    <mirror>
+      <id>aliyun-public</id>
+      <mirrorOf>*</mirrorOf>
+      <name>Aliyun Maven Public</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+    
+    <!-- Huawei Cloud - Backup mirror -->
+    <mirror>
+      <id>huaweicloud</id>
+      <mirrorOf>*</mirrorOf>
+      <name>Huawei Cloud Maven</name>
+      <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+    </mirror>
+    
+    <!-- Tencent Cloud - Backup mirror -->
+    <mirror>
+      <id>tencent</id>
+      <mirrorOf>*</mirrorOf>
+      <name>Tencent Cloud Maven</name>
+      <url>https://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
+    </mirror>
+  </mirrors>
+  
+  <!-- Tối ưu performance -->
+  <localRepository>/root/.m2/repository</localRepository>
+  
+  <profiles>
+    <profile>
+      <id>downloadSources</id>
+      <properties>
+        <downloadSources>false</downloadSources>
+        <downloadJavadocs>false</downloadJavadocs>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <activeProfiles>
+    <activeProfile>downloadSources</activeProfile>
+  </activeProfiles>
+</settings>

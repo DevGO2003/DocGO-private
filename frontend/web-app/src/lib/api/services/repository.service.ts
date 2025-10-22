@@ -108,7 +108,7 @@ export interface RepositoryUpdateData {
   tags?: string[]
 }
 
-export class DocumentAPI {
+export class RepositoryAPI {
   private basePath = '/api/v1/repository-management-service'
 
   // Repositories
@@ -216,7 +216,7 @@ export class DocumentAPI {
 }
 
 // Export instance
-export const documentAPI = new DocumentAPI()
+export const repositoryAPI = new RepositoryAPI()
 
 
 

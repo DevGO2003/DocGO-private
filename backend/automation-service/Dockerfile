@@ -1,10 +1,11 @@
-# Simple single-stage build for Python FastAPI application
+# Development Dockerfile với hot reload & cache optimization
+# Sử dụng Python slim image cho tốc độ tối ưu
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV headless and OCR
-RUN apt-get update && apt-get install -y \
+# Install system dependencies - minimal packages only
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     libmagic1 \
@@ -16,44 +17,49 @@ RUN apt-get update && apt-get install -y \
     libavcodec-dev \
     libavformat-dev \
     libswscale-dev \
-    libv4l-dev \
-    libxvidcore-dev \
-    libx264-dev \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
     libopenblas-dev \
     python3-dev \
-    python3-numpy \
     libtesseract-dev \
     tesseract-ocr \
     tesseract-ocr-eng \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Copy requirements first for better layer caching
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Mount ~/.cache/pip từ host để tái sử dụng cache
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copy source code (thay đổi thường xuyên nhất)
 COPY . .
 
 # Create results directory
 RUN mkdir -p results
 
 # Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
+RUN groupadd -r appuser && useradd -r -g appuser appuser && \
+    chown -R appuser:appuser /app
 
 USER appuser
 
-# Expose port 8003 (internal container port)
+# Expose port 8003
 EXPOSE 8003
 
-# Thiết lập biến môi trường
+# Environment variables cho debug
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# Command khởi chạy service trên cổng 8003
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+# Hot reload với uvicorn --reload
+# Log level info để debug dễ hơn
+CMD ["uvicorn", "main:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8003", \
+     "--reload", \
+     "--log-level", "info"]

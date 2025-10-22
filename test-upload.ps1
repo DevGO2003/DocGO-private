@@ -42,7 +42,7 @@ docker-compose logs --tail=20 automation-service
 
 Write-Host "\n--- Logs File Management Service ---"
 
-docker-compose logs --tail=20 file-management-service
+docker-compose logs --tail=20 repository-management-service
 
 
 $filePath = "test-upload-file.txt"
@@ -87,7 +87,7 @@ docker-compose logs --tail=20 automation-service
 
 Write-Host "\n--- Logs File Management Service ---"
 
-docker-compose logs --tail=20 file-management-service
+docker-compose logs --tail=20 repository-management-service
 
 
 

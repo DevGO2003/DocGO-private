@@ -70,11 +70,11 @@ export default function RootLayout({
             `,
           }}
         />
-        <AuthProvider>
-          <I18nProvider>
+        {/* <AuthProvider>
+          <I18nProvider> */}
             {children}
-          </I18nProvider>
-        </AuthProvider>
+          {/* </I18nProvider>
+        </AuthProvider> */}
       </body>
     </html>
   )

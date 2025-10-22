@@ -352,7 +352,7 @@ export abstract class BaseAPI {
 // lib/api/contract-api.ts
 export class ContractAPI extends BaseAPI {
   constructor(apiClient: ApiClient) {
-    super('/api/v1/file-management-service', apiClient)
+    super('/api/v1/repository-management-service', apiClient)
   }
 
   async getContracts(params?: PaginationParams & ViewParams, options?: ApiRequestConfig) {

@@ -47,7 +47,7 @@ tags:
   "eventType": "FileUploaded",
   "eventId": "evt_1234567890abcdef",
   "timestamp": "2024-01-15T10:30:00.000Z",
-  "source": "file-management-service",
+  "source": "repository-management-service",
   "correlationId": "req_abc123def456",
   "actor": "user:12345",
   "data": {
@@ -229,7 +229,7 @@ async def consume_event(event: EventPayload):
   _id: ObjectId,
   eventId: "evt_1234567890_abcdef",
   eventType: "FileUploaded",
-  source: "file-management-service",
+  source: "repository-management-service",
   actor: "user:12345",
   timestamp: ISODate("2024-01-15T10:30:00.000Z"),
   correlationId: "req_abc123def456",
@@ -288,7 +288,7 @@ db.events.find({"processed": false})
 def test_file_uploaded_event():
     event = EventPayload(
         eventType="FileUploaded",
-        source="file-management-service",
+        source="repository-management-service",
         actor="user:12345",
         data={"fileId": "file_123", "fileName": "test.pdf"}
     )

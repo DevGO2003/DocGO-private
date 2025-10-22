@@ -1,14 +1,18 @@
 package com.devgo2003.docgo.repository_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StorageDto {
     private String location;
@@ -20,6 +24,8 @@ public class StorageDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RetentionPolicyDto {
         private String duration;
@@ -29,6 +35,8 @@ public class StorageDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AccessControlDto {
         private Boolean isPublic;
@@ -38,6 +46,8 @@ public class StorageDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class S3Dto {
         private String url;
@@ -52,6 +62,8 @@ public class StorageDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ChecksumDto {
         private String md5;
@@ -59,6 +71,8 @@ public class StorageDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class LocalDto {
         private String path;

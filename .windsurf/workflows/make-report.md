@@ -148,7 +148,7 @@ const services = {
     'integration-connectors-service': { type: 'FastAPI', port: 8014 },
     'batch-etl-service': { type: 'FastAPI', port: 8015 },
     'health-monitoring-agent': { type: 'FastAPI', port: 8016 },
-    'general-file-management-service': { type: 'FastAPI', port: 8018 }
+    'general-repository-management-service': { type: 'FastAPI', port: 8018 }
 };
 ```
 

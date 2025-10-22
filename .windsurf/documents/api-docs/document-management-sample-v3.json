@@ -563,5 +563,5 @@
   },
   "timestamp": "2025-10-19T08:45:10Z",
   "requestId": "req-xyz789-123abc",
-  "path": "/api/v1/file-management-service/file-details/FILE-2025-001-TEST"
+  "path": "/api/v1/repository-management-service/file-details/FILE-2025-001-TEST"
 }

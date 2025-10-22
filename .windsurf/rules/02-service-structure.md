@@ -109,7 +109,7 @@ tags:
 - frontend: 3000
 - api-gateway: 8000
 - user-management-service: 8001
-- file-management-service: 8002
+- repository-management-service: 8002
 - automation-service: 8003
 
 ---

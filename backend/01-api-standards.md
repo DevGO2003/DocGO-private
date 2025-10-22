@@ -42,7 +42,7 @@ tags:
 - Base path: `/api/v1/{service-name}/...`
 - `service-name` dùng kebab-case trùng tên service trong code:
   - `user-management-service`
-  - `file-management-service`
+  - `repository-management-service`
   - `automation-service`
 - Tài nguyên (resource) dùng số nhiều, kebab-case: `users`, `documents`, `automations`, `events`, `attachments`.
 - Hành động (sub-resource) dùng tiếp đầu ngữ theo REST; chỉ khi là hành động phi-CRUD rõ ràng thì dùng hậu tố dạng action:

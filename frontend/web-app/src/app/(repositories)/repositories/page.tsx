@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent, GradientButton } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { documentAPI, Repository } from '@/lib/api'
+import { repositoryAPI, Repository } from '@/lib/api'
 import toast from 'react-hot-toast'
 import {
   PlusIcon,
@@ -38,7 +38,7 @@ export default function RepositoriesPage() {
   const loadRepositories = async () => {
     try {
       setLoading(true)
-      const response = await documentAPI.getAllRepositories({
+      const response = await repositoryAPI.getAllRepositories({
         page: 0,
         size: 100,
         sortBy: 'createdAt',
@@ -72,7 +72,7 @@ export default function RepositoriesPage() {
         tags: formData.tags
       }
 
-      const response = await documentAPI.createRepository(createData)
+      const response = await repositoryAPI.createRepository(createData)
       
       if (response.data?.data) {
         toast.success('Tạo kho tài liệu thành công')
@@ -90,7 +90,7 @@ export default function RepositoriesPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa kho tài liệu này?')) return
 
     try {
-      await documentAPI.deleteRepository(id)
+      await repositoryAPI.deleteRepository(id)
       toast.success('Xóa kho tài liệu thành công')
       loadRepositories()
     } catch (error: any) {

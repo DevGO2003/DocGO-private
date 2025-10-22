@@ -1,5 +1,5 @@
 # Test API list files
-$uri = "http://localhost:8002/api/v1/file-management-service/files/"
+$uri = "http://localhost:8002/api/v1/repository-management-service/files/"
 $headers = @{
     "Accept" = "application/json"
 }

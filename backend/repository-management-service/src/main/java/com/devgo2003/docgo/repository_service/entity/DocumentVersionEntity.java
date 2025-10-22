@@ -51,5 +51,15 @@ public class DocumentVersionEntity {
         private String changes;
         private List<String> changedFields;
         private Map<String, Object> diff;
+        
+        // Explicit getters to fix Lombok annotation processing issue in Docker
+        public Integer getVersion() { return version; }
+        public String getTag() { return tag; }
+        public String getChangedAt() { return changedAt; }
+        public String getChangedBy() { return changedBy; }
+        public String getChangeType() { return changeType; }
+        public String getChanges() { return changes; }
+        public List<String> getChangedFields() { return changedFields; }
+        public Map<String, Object> getDiff() { return diff; }
     }
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/layout'
 import { useParams, useRouter } from 'next/navigation'
-import { documentAPI } from '@/lib/api'
+import { repositoryAPI } from '@/lib/api'
 import { mapFileApiToUiDocument } from '@/lib/mappers/file-mapper'
 import { useTranslation } from '@/hooks/useTranslation'
 import { translateContractType, translateContractStatus, translateContractTag } from '@/config/tags'
@@ -30,7 +30,7 @@ export default function DocumentDetailPage() {
         
         // Fetch file detail from File Management Service
         console.log('Fetching file (detail) with ID:', params.files)
-        const axiosResp = await documentAPI.getFileById(params.files)
+        const axiosResp = await repositoryAPI.getFileById(params.files)
         const apiData = axiosResp?.data?.data
         if (!apiData) {
           // Document not found, redirect to 404

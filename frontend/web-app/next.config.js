@@ -1,22 +1,88 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // App Router configuration
-  experimental: {
-    appDir: true,
+  // Production optimization
+  swcMinify: true,
+  productionBrowserSourceMaps: false,
+  
+  // Performance optimization
+  modularizeImports: {
+    '@heroicons/react/24/outline': {
+      transform: '@heroicons/react/24/outline/{{member}}',
+    },
+    '@heroicons/react/24/solid': {
+      transform: '@heroicons/react/24/solid/{{member}}',
+    },
   },
+  
   // Hot reload optimization
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
     if (dev && !isServer) {
+      // Optimize for Windows volume mounts
       config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
+        poll: 2000,
+        aggregateTimeout: 500,
         ignored: [
           '**/node_modules/**',
           '**/.git/**',
           '**/System Volume Information/**',
           '**/P:/System Volume Information/**',
-          '**/.next/**'
+          '**/.next/**',
+          '**/dist/**',
+          '**/build/**',
         ]
+      }
+      
+      // Cache optimization
+      config.cache = {
+        type: 'filesystem',
+        cacheDirectory: '.next/cache/webpack',
+        buildDependencies: {
+          config: [__filename]
+        }
+      }
+      
+      // Module resolution optimization
+      config.snapshot = {
+        managedPaths: [/^(.+?[\\/]node_modules[\\/])/],
+        immutablePaths: [],
+      }
+    }
+    
+    // Bundle optimization
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+        runtimeChunk: 'single',
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            lib: {
+              test: /[\\/]node_modules[\\/]/,
+              name: (module) => {
+                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1]
+                return `lib.${packageName?.replace('@', '')}`
+              },
+              priority: 30,
+              minChunks: 1,
+              reuseExistingChunk: true,
+            },
+            commons: {
+              name: 'commons',
+              minChunks: 2,
+              priority: 20,
+            },
+          },
+        },
       }
     }
     

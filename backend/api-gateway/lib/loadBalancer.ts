@@ -151,7 +151,7 @@ export class LoadBalancer {
     // Fallback URLs based on service name
     const fallbackUrls: Record<string, string> = {
       'user-management': 'http://user-management-service:8001',
-      'document-management': 'http://file-management-service:8002',
+      'document-management': 'http://repository-management-service:8002',
       'automation': 'http://automation-service:8003'
     };
 

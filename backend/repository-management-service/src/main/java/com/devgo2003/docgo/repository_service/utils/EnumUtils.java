@@ -48,7 +48,7 @@ public class EnumUtils {
     }
     
     /**
-     * Parse DocumentType - LENIENT (returns UNKNOWN if invalid)
+     * Parse DocumentType - STRICT (throws exception if invalid)
      */
     public static DocumentType parseDocumentType(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -57,8 +57,8 @@ public class EnumUtils {
         try {
             return DocumentType.valueOf(value.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
-            log.warn("Unknown document type: {}, returning UNKNOWN", value);
-            return DocumentType.UNKNOWN;
+            log.error("Invalid document type: {}", value);
+            throw new IllegalArgumentException("Invalid document type: " + value);
         }
     }
     
@@ -260,17 +260,210 @@ public class EnumUtils {
     }
     
     /**
-     * Parse ComplianceStatus - LENIENT (returns PENDING_REVIEW if invalid)
+     * Parse RiskType - LENIENT (returns TECHNICAL if invalid)
      */
-    public static ComplianceStatus parseComplianceStatus(String value) {
+    public static RiskType parseRiskType(String value) {
         if (value == null || value.trim().isEmpty()) {
-            return ComplianceStatus.PENDING_REVIEW;
+            return RiskType.TECHNICAL;
         }
         try {
-            return ComplianceStatus.valueOf(value.toUpperCase().trim());
+            return RiskType.valueOf(value.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
-            log.warn("Unknown compliance status: {}, returning PENDING_REVIEW", value);
-            return ComplianceStatus.PENDING_REVIEW;
+            log.warn("Unknown risk type: {}, returning TECHNICAL", value);
+            return RiskType.TECHNICAL;
+        }
+    }
+    
+    /**
+     * Parse ReminderType - LENIENT (returns PAYMENT_DUE if invalid)
+     */
+    public static ReminderType parseReminderType(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return ReminderType.PAYMENT_DUE;
+        }
+        try {
+            return ReminderType.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown reminder type: {}, returning PAYMENT_DUE", value);
+            return ReminderType.PAYMENT_DUE;
+        }
+    }
+    
+    /**
+     * Parse ReminderStatus - LENIENT (returns PENDING if invalid)
+     */
+    public static ReminderStatus parseReminderStatus(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return ReminderStatus.PENDING;
+        }
+        try {
+            return ReminderStatus.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown reminder status: {}, returning PENDING", value);
+            return ReminderStatus.PENDING;
+        }
+    }
+    
+    /**
+     * Parse SummarizationStatus - LENIENT (returns SKIPPED if invalid)
+     */
+    public static SummarizationStatus parseSummarizationStatus(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return SummarizationStatus.SKIPPED;
+        }
+        try {
+            return SummarizationStatus.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown summarization status: {}, returning SKIPPED", value);
+            return SummarizationStatus.SKIPPED;
+        }
+    }
+    
+    /**
+     * Parse ProcessingStatus - LENIENT (returns COMPLETED if invalid)
+     */
+    public static ProcessingStatus parseProcessingStatus(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return ProcessingStatus.COMPLETED;
+        }
+        try {
+            return ProcessingStatus.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown processing status: {}, returning COMPLETED", value);
+            return ProcessingStatus.COMPLETED;
+        }
+    }
+    
+    /**
+     * Parse ChangeType - LENIENT (returns UPDATE if invalid)
+     */
+    public static ChangeType parseChangeType(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return ChangeType.UPDATE;
+        }
+        try {
+            return ChangeType.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown change type: {}, returning UPDATE", value);
+            return ChangeType.UPDATE;
+        }
+    }
+    
+    /**
+     * Parse AuditAction - LENIENT (returns UPDATE if invalid)
+     */
+    public static AuditAction parseAuditAction(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return AuditAction.UPDATE;
+        }
+        try {
+            return AuditAction.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown audit action: {}, returning UPDATE", value);
+            return AuditAction.UPDATE;
+        }
+    }
+    
+    /**
+     * Parse AccessAction - LENIENT (returns VIEW if invalid)
+     */
+    public static AccessAction parseAccessAction(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return AccessAction.VIEW;
+        }
+        try {
+            return AccessAction.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown access action: {}, returning VIEW", value);
+            return AccessAction.VIEW;
+        }
+    }
+    
+    /**
+     * Parse Encoding - LENIENT (returns UTF_8 if invalid)
+     */
+    public static Encoding parseEncoding(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return Encoding.UTF_8;
+        }
+        try {
+            return Encoding.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown encoding: {}, returning UTF_8", value);
+            return Encoding.UTF_8;
+        }
+    }
+    
+    /**
+     * Parse LineEnding - LENIENT (returns LF if invalid)
+     */
+    public static LineEnding parseLineEnding(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return LineEnding.LF;
+        }
+        try {
+            return LineEnding.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown line ending: {}, returning LF", value);
+            return LineEnding.LF;
+        }
+    }
+    
+    /**
+     * Parse Compression - LENIENT (returns NONE if invalid)
+     */
+    public static Compression parseCompression(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return Compression.NONE;
+        }
+        try {
+            return Compression.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown compression: {}, returning NONE", value);
+            return Compression.NONE;
+        }
+    }
+    
+    /**
+     * Parse Encryption - LENIENT (returns AES_256 if invalid)
+     */
+    public static Encryption parseEncryption(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return Encryption.AES_256;
+        }
+        try {
+            return Encryption.valueOf(value.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown encryption: {}, returning AES_256", value);
+            return Encryption.AES_256;
+        }
+    }
+    
+    /**
+     * Parse S3Region - LENIENT (returns US_EAST_1 if invalid)
+     */
+    public static S3Region parseS3Region(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return S3Region.US_EAST_1;
+        }
+        try {
+            // Handle special case for S3Region enum values
+            String upperValue = value.toUpperCase().trim();
+            switch (upperValue) {
+                case "US-EAST-1":
+                    return S3Region.US_EAST_1;
+                case "US-WEST-2":
+                    return S3Region.US_WEST_2;
+                case "EU-WEST-1":
+                    return S3Region.EU_WEST_1;
+                case "AP-SOUTHEAST-1":
+                    return S3Region.AP_SOUTHEAST_1;
+                default:
+                    return S3Region.US_EAST_1; // Default fallback
+            }
+        } catch (Exception e) {
+            log.warn("Unknown S3 region: {}, returning US_EAST_1", value);
+            return S3Region.US_EAST_1;
         }
     }
 }

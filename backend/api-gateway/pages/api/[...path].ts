@@ -52,7 +52,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     'assets': 'repository-management',
     'repository-management': 'repository-management',
     'repository-management-service': 'repository-management',
-    'file-management-service': 'repository-management',
+    'repository-management-service': 'repository-management',
     'document-management': 'repository-management',
     // automation
     'automation': 'automation',

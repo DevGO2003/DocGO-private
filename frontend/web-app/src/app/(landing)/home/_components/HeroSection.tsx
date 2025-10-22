@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { SparklesIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { automationAPI } from '@/lib/apis'
+import { automationAPI } from '@/lib/api'
 import { CogIcon, DocumentTextIcon, DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'

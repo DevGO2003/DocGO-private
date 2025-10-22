@@ -14,7 +14,7 @@ Xem logs Docker cho toàn bộ services hoặc theo từng service trong môi tr
 - `web-app` (Next.js) - Port 3000
 - `api-gateway` (Next.js) - Port 8000
 - `user-management-service` (Spring Boot) - Port 8001
-- `repository-management-service` (Spring Boot) - Port 8002 (renamed from file-management-service)
+- `repository-management-service` (Spring Boot) - Port 8002 (renamed from repository-management-service)
 - `automation-service` (FastAPI) - Port 8003
 
 ## Lệnh thực thi (PowerShell)

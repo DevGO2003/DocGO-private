@@ -8,7 +8,7 @@
 ### 1. Config Files
 - ✅ `pom.xml`: Đã đổi artifactId, groupId, mainClass
 - ✅ `application.properties`: Đã đổi Swagger titles, Kafka topics, logging package
-- ✅ `docker-compose.yml`: Đã đổi paths từ `file-management-service` → `repository-management-service`
+- ✅ `docker-compose.yml`: Đã đổi paths từ `repository-management-service` → `repository-management-service`
 
 ### 2. Controllers Mới (7 controllers)
 - ✅ `RepositoryController.java` - Main file CRUD
@@ -23,7 +23,7 @@
 - ✅ `RepositoryManagementApplication.java` - Đã tạo trong package `repository_service`
 
 ### 4. API Gateway
-- ✅ `fileService.ts`: Đã đổi tất cả URLs từ `/file-management-service/` → `/repository-management-service/`
+- ✅ `fileService.ts`: Đã đổi tất cả URLs từ `/repository-management-service/` → `/repository-management-service/`
 
 ### 5. Automation Service
 - ✅ `event_schemas.py`: Đã đổi event types từ `File*` → `Repository*`
@@ -121,13 +121,13 @@ mvn test
 ### 3. Test Docker
 ```bash
 # Build image mới
-docker-compose build file-management-service
+docker-compose build repository-management-service
 
 # Start service
-docker-compose up file-management-service
+docker-compose up repository-management-service
 
 # Kiểm tra logs
-docker-compose logs -f file-management-service
+docker-compose logs -f repository-management-service
 
 # Test Swagger UI
 # Mở browser: http://localhost:8002/docs
@@ -187,7 +187,7 @@ Test các endpoints mới:
 ## Hỗ Trợ
 
 Nếu gặp vấn đề trong quá trình refactor:
-1. Check logs: `docker-compose logs -f file-management-service`
+1. Check logs: `docker-compose logs -f repository-management-service`
 2. Check Swagger: `http://localhost:8002/docs`
 3. Check Kafka topics: Verify `repository.*` topics được tạo
 4. Rollback: `git checkout .` hoặc `git stash pop`

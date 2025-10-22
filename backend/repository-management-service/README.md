@@ -78,16 +78,16 @@ Frontend → Repository Service → Kafka → Automation Service
 ## API Endpoints (đã chuẩn hóa URL)
 
 ### Document Management
-- `POST /api/v1/file-management-service/documents` - Tạo tài liệu
-- `GET /api/v1/file-management-service/documents` - Danh sách tài liệu
-- `GET /api/v1/file-management-service/documents/{id}` - Chi tiết tài liệu
-- `PUT /api/v1/file-management-service/documents/{id}` - Cập nhật tài liệu
-- `DELETE /api/v1/file-management-service/documents/{id}` - Xóa tài liệu
+- `POST /api/v1/repository-management-service/documents` - Tạo tài liệu
+- `GET /api/v1/repository-management-service/documents` - Danh sách tài liệu
+- `GET /api/v1/repository-management-service/documents/{id}` - Chi tiết tài liệu
+- `PUT /api/v1/repository-management-service/documents/{id}` - Cập nhật tài liệu
+- `DELETE /api/v1/repository-management-service/documents/{id}` - Xóa tài liệu
 
 ### Tags, Versions, E-Signature, Comments (ví dụ)
-- `GET /api/v1/file-management-service/versions` - Danh sách versions
-- `GET /api/v1/file-management-service/esignatures` - Danh sách e-signatures
-- `GET /api/v1/file-management-service/documents/{id}/comments` - Bình luận theo tài liệu
+- `GET /api/v1/repository-management-service/versions` - Danh sách versions
+- `GET /api/v1/repository-management-service/esignatures` - Danh sách e-signatures
+- `GET /api/v1/repository-management-service/documents/{id}/comments` - Bình luận theo tài liệu
 
 ## Cấu hình
 
@@ -139,7 +139,7 @@ Tất cả API đều trả về response theo format chuẩn:
   "data": {...},
   "timestamp": "2025-08-23T10:00:00Z",
   "requestId": "uuid-string",
-  "path": "/api/v1/file-management-service/contracts"
+  "path": "/api/v1/repository-management-service/contracts"
 }
 ```
 
@@ -200,7 +200,7 @@ mvn test
 
 ### Health Check
 ```
-GET http://localhost:8002/api/v1/file-management-service/health
+GET http://localhost:8002/api/v1/repository-management-service/health
 ```
 
 ### Metrics
@@ -240,7 +240,7 @@ mvn test
 
 ### Health Check
 ```
-GET /api/v1/file-management-service/health
+GET /api/v1/repository-management-service/health
 ```
 
 ### Monitoring
@@ -272,5 +272,5 @@ GET /actuator/metrics
 
 - **Service**: Document Management Service
 - **Port**: 8002
-- **Base URL**: `/api/v1/file-management-service`
+- **Base URL**: `/api/v1/repository-management-service`
 - **Documentation**: `/docs`

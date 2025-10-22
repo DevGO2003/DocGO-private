@@ -1,14 +1,18 @@
 package com.devgo2003.docgo.repository_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContentDto {
     private String plaintext;
@@ -26,6 +30,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SectionDto {
         private String title;
@@ -36,6 +42,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OcrDto {
         private String text;
@@ -50,6 +58,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ExtractionDto {
         private String status;
@@ -62,6 +72,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SummarizationDto {
         private String status;
@@ -75,6 +87,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ClassificationDto {
         private Boolean isContract;
@@ -84,6 +98,8 @@ public class ContentDto {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ProcessingDto {
         private String status;

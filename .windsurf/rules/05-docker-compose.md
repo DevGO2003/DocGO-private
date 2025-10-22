@@ -101,7 +101,7 @@ ports:
   - frontend: "3000:3000"
   - api-gateway: "8000:8000"
   - user-management-service: "8001:8001"
-  - file-management-service: "8002:8002"
+  - repository-management-service: "8002:8002"
   - automation-service: "8003:8003"
   - mongodb: "27017:27017"
   - redis: "6379:6379"
@@ -115,7 +115,7 @@ ports:
 volumes:
   # Code mounting cho hot reload
   - ./backend/user-management-service:/app
-  - ./backend/file-management-service:/app
+  - ./backend/repository-management-service:/app
   - ./backend/automation-service:/app
   - ./backend/api-gateway:/app
   - ./frontend/web-app:/app
@@ -157,7 +157,7 @@ KAFKA_TOPIC_PREFIX=docgo
 # Service URLs
 API_GATEWAY_URL=http://api-gateway:8000
 USER_SERVICE_URL=http://user-management-service:8001
-FILE_SERVICE_URL=http://file-management-service:8002
+FILE_SERVICE_URL=http://repository-management-service:8002
 AUTOMATION_SERVICE_URL=http://automation-service:8003
 ```
 
@@ -195,7 +195,7 @@ networks:
 # Services communicate via service names
 environment:
   - USER_SERVICE_URL=http://user-management-service:8001
-  - FILE_SERVICE_URL=http://file-management-service:8002
+  - FILE_SERVICE_URL=http://repository-management-service:8002
   - AUTOMATION_SERVICE_URL=http://automation-service:8003
 ```
 

@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/layout'
 import { HeaderPanel, PrimaryContent } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { automationAPI } from '@/lib/apis'
+import { automationAPI } from '@/lib/api'
 import UploadProgress from '@/components/UploadProgress'
 import UploadSuccessNotification from '@/components/UploadSuccessNotification'
 

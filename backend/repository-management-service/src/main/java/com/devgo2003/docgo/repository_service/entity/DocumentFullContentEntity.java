@@ -44,4 +44,16 @@ public class DocumentFullContentEntity {
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // Explicit getters to fix Lombok annotation processing issue in Docker
+    public String getId() { return id; }
+    public String getDocumentId() { return documentId; }
+    public String getPlaintext() { return plaintext; }
+    public String getExtractedText() { return extractedText; }
+    public List<Map<String, Object>> getSections() { return sections; }
+    public Map<String, Object> getOcr() { return ocr; }
+    public Object getJsonContent() { return jsonContent; }
+    public Long getContentSize() { return contentSize; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

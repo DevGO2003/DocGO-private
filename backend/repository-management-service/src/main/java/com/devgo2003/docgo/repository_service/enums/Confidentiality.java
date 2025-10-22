@@ -4,5 +4,6 @@ public enum Confidentiality {
     CONFIDENTIAL,
     INTERNAL,
     PUBLIC,
-    RESTRICTED
+    RESTRICTED,
+    UNKNOWN
 }

@@ -31,7 +31,7 @@ db.files.find().limit(5);
     Write-Host ""
     Write-Host "Alternative: Check via API" -ForegroundColor Yellow
     try {
-        $apiResult = Invoke-RestMethod -Uri "http://localhost:8002/api/v1/file-management-service/files"
+        $apiResult = Invoke-RestMethod -Uri "http://localhost:8002/api/v1/repository-management-service/files"
         Write-Host "Files in repository: $($apiResult.data.result.total_elements)" -ForegroundColor Cyan
     } catch {
         Write-Host "API also failed: $($_.Exception.Message)" -ForegroundColor Red

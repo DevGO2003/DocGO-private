@@ -45,7 +45,7 @@ const navigationGroups = [
     items: [
       { nameKey: 'navigation.dashboard', href: '/dashboard', icon: HomeIcon },
       { nameKey: 'navigation.repositories', href: '/repositories', icon: FolderIcon },
-      { nameKey: 'navigation.createDocument', href: '/create-document', icon: DocumentDuplicateIcon },
+      { nameKey: 'navigation.createDocument', href: '/repositories/default/upload-document', icon: DocumentDuplicateIcon },
       { nameKey: 'navigation.uploadDocument', href: '/repositories/default/upload-files', icon: ArrowUpTrayIcon },
       { nameKey: 'navigation.analytics', href: '/analytics', icon: ChartBarIcon },
     ]
@@ -53,12 +53,12 @@ const navigationGroups = [
   {
     titleKey: 'category.management',
     items: [
-      { nameKey: 'navigation.eSignature', href: '/e-signature', icon: PencilSquareIcon },
-      { nameKey: 'navigation.collaboration', href: '/collaboration-comments', icon: ChatBubbleLeftRightIcon },
-      { nameKey: 'navigation.versions', href: '/document-versions', icon: ClockIcon },
+      // { nameKey: 'navigation.eSignature', href: '/e-signature', icon: PencilSquareIcon }, // TODO: Chưa implement
+      // { nameKey: 'navigation.collaboration', href: '/collaboration-comments', icon: ChatBubbleLeftRightIcon }, // TODO: Chưa implement
+      { nameKey: 'navigation.versions', href: '/dashboard/contract-versions', icon: ClockIcon },
       { nameKey: 'navigation.approval', href: '/approval-workflow', icon: CheckCircleIcon },
       { nameKey: 'navigation.permissions', href: '/role-based-permissions', icon: ShieldCheckIcon },
-      { nameKey: 'navigation.reports', href: '/reports', icon: DocumentChartBarIcon },
+      { nameKey: 'navigation.reports', href: '/analytics', icon: DocumentChartBarIcon }, // Tạm map về Analytics
       { nameKey: 'navigation.activity', href: '/activity-history', icon: ClipboardDocumentListIcon },
       { nameKey: 'navigation.aiProcessing', href: '/ai-processing', icon: DocumentTextIcon },
     ]

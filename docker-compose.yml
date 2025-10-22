@@ -101,12 +101,13 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/user-management-service:/app  # Volume mount cho hot reload
+      # KHÔNG mount source code để tránh lỗi Lombok
+      # Chỉ mount logs
       - maven-repo:/root/.m2  # Maven cache volume để tăng tốc build
       - ./logs/user-management:/app/logs
     restart: unless-stopped
 
-  # Repository Management Service (Spring Boot) - formerly file-management-service
+  # Repository Management Service (Spring Boot) - formerly repository-management-service
   repository-management-service:
     container_name: repository-management-service
     build:
@@ -126,7 +127,8 @@ services:
     networks:
       - docgo-network
     volumes:
-      - ./backend/repository-management-service:/app  # Volume mount cho hot reload
+      # KHÔNG mount source code để tránh lỗi Lombok
+      # Chỉ mount uploads và logs
       - maven-repo:/root/.m2  # Maven cache volume để tăng tốc build
       - ./backend/repository-management-service/uploads:/app/uploads
       - ./logs/repository-management:/app/logs
@@ -135,7 +137,9 @@ services:
   # Automation Service (FastAPI)
   automation-service:
     container_name: automation-service
-    image: docgo-automation-service
+    build:
+      context: ./backend/automation-service
+      dockerfile: Dockerfile
     
     ports:
       - "${AUTOMATION_PORT:-8003}:8003"
@@ -154,10 +158,10 @@ services:
       - docgo-network
     volumes:
       - ./backend/automation-service:/app  # Volume mount cho hot reload
+      - pip-cache:/home/appuser/.cache/pip  # Pip cache để tăng tốc install
       - ./backend/automation-service/uploads:/app/uploads
       - ./backend/automation-service/results:/app/results
       - ./logs/automation:/app/logs
-    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload  # Watch mode
     restart: unless-stopped
 
   # API Gateway (Next.js)
@@ -197,23 +201,29 @@ services:
   web-app:
     container_name: web-app
     build:
-      context: ./frontend/web-app  # Giới hạn context chỉ thư mục này (tránh scan toàn project)
+      context: ./frontend/web-app
       dockerfile: Dockerfile
+      target: dev  # dev | builder | runner (production)
+      args:
+        - NODE_ENV=development
     ports:
-      - "3000:3000"  # Map port local
+      - "3000:3000"
     volumes:
-      - ./frontend/web-app:/app  # Mount code host vào container (hot reload key!)
-      - /app/node_modules  # Anonymous volume: Giữ node_modules trong container, tránh conflict với host
+      - ./frontend/web-app:/app  # Hot reload
+      - /app/node_modules  # Prevent host override
+      - /app/.next  # Prevent host override
     environment:
-      - NODE_ENV=development  # Dev mode cho hot reload
-      - CHOKIDAR_USEPOLLING=true  # Windows: Force polling thay vì fs events (fix sync chậm trên shared drive)
-      - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs
-      - NEXT_PUBLIC_API_GATEWAY_URL=http://api-gateway:8000  # Override để kết nối trong Docker network
-      - NEXT_PUBLIC_API_BASE_URL=http://api-gateway:8000  # Override để kết nối trong Docker network
-    stdin_open: true  # Cho phép attach console nếu cần
-    tty: true  # TTY cho dev
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_GATEWAY_URL=http://api-gateway:8000
+      - NEXT_PUBLIC_API_BASE_URL=http://api-gateway:8000
+      - NEXT_TELEMETRY_DISABLED=1
+      - TURBOPACK=1
+    stdin_open: true
+    tty: true
     depends_on:
-      - api-gateway  # Nếu cần backend
+      - api-gateway
     networks:
       - docgo-network
     restart: unless-stopped
@@ -231,6 +241,8 @@ volumes:
   redis-data:
     driver: local
   maven-repo:
+    driver: local
+  pip-cache:
     driver: local
 
 # ==========================================

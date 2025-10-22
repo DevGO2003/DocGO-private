@@ -24,7 +24,7 @@ const swaggerOptions = {
 
       ### 📊 **Available Services**
       - \`user-management-service\` (Port 8001) - Spring Boot
-      - \`file-management-service\` (Port 8002) - Spring Boot  
+      - \`repository-management-service\` (Port 8002) - Spring Boot  
       - \`automation-service\` (Port 8003) - FastAPI
 
       **Base URL**: \`/api/v1/{service-name}/...\`

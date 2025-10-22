@@ -118,8 +118,9 @@ public class FileEventConsumer {
                 
                 // Build fileSystem metadata
                 Map<String, Object> fileSystem = new java.util.HashMap<>();
-                fileSystem.put("dateAdded", entity.getCreatedAt());
-                fileSystem.put("dateModified", entity.getCreatedAt());
+                LocalDateTime now = LocalDateTime.now();
+                fileSystem.put("dateAdded", now);
+                fileSystem.put("dateModified", now);
                 fileSystem.put("mediaFilename", entity.getName());
                 fileSystem.put("originalFilename", asString(data.get("name")));
                 fileSystem.put("originalMD5", asString(fileData != null ? fileData.get("md5") : null));
@@ -153,13 +154,17 @@ public class FileEventConsumer {
                 overviewMap.put("language", "vi"); // Default language
                 entity.setOverview(overviewMap);
                 
+                // Build audit metadata
                 Map<String, Object> auditMap = new java.util.HashMap<>();
-                auditMap.put("createdAt", entity.getCreatedAt());
-                auditMap.put("createdBy", entity.getCreatedBy());
-                auditMap.put("lastModifiedAt", entity.getCreatedAt());
-                auditMap.put("lastModifiedBy", entity.getCreatedBy());
-                auditMap.put("updatedAt", entity.getCreatedAt());
-                auditMap.put("updatedBy", entity.getCreatedBy());
+                LocalDateTime timestamp = LocalDateTime.now();
+                String actor = entity.getOwnerUserId() != null ? entity.getOwnerUserId() : "system";
+                
+                auditMap.put("createdAt", timestamp);
+                auditMap.put("createdBy", actor);
+                auditMap.put("lastModifiedAt", timestamp);
+                auditMap.put("lastModifiedBy", actor);
+                auditMap.put("updatedAt", timestamp);
+                auditMap.put("updatedBy", actor);
                 auditMap.put("deletedAt", null);
                 auditMap.put("deletedBy", null);
                 auditMap.put("version", 1);

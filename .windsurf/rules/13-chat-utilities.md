@@ -128,7 +128,7 @@ prompt/
 ### README files được phép tồn tại (5 files)
 1. `README.md` (root project)
 2. `backend/user-management-service/README.md`
-3. `backend/file-management-service/README.md`
+3. `backend/repository-management-service/README.md`
 4. `backend/automation-service/README.md`
 5. `backend/api-gateway/README.md`
 
