@@ -1,0 +1,10 @@
+export const LOGIN_PATH = '/login';
+export const REGISTER_PATH = '/register';
+export const FORGOT_PASSWORD_PATH = '/forgot-password';
+export const HOME_PATH = '/';
+export const PRODUCTS_PATH = '/products';
+export const PRODUCT_DETAIL_PATH = '/products/:id';
+export const PRODUCT_EDIT_PATH = '/products/:id/edit';
+export const ORDERS_PATH = '/orders';
+export const ORDER_DETAIL_PATH = '/orders/:id';
+export const PROFILE_PATH = '/profile';
