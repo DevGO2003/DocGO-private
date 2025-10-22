@@ -10,7 +10,13 @@ import lombok.Data;
 public class PartyDto {
     private String id;
     private String name;
+    
+    /**
+     * Party type in contract
+     * Enum: CLIENT, VENDOR, PARTNER, GUARANTOR
+     */
     private String type;
+    
     private String role;
     private ContactDto contact;
     private RepresentativeDto representative;

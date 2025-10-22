@@ -22,6 +22,11 @@ public class ContentDto {
     private ClassificationDto classification;
     private ProcessingDto processing;
     private Object jsonContent;
+    
+    /**
+     * JSON content analysis status
+     * Enum: PARSED, INVALID, PENDING
+     */
     private String jsonAnalysisStatus;
 
     @Data
@@ -39,8 +44,19 @@ public class ContentDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OcrDto {
         private String text;
+        
+        /**
+         * OCR processing status
+         * Enum: COMPLETED, FAILED, PROCESSING, SKIPPED
+         */
         private String status;
+        
+        /**
+         * OCR engine used
+         * Enum: GEMINI_VISION, TESSERACT, TESSERACT_FALLBACK, PADDLEOCR
+         */
         private String engine;
+        
         private Double confidence;
         private String processedAt;
         private Double processingTime;
@@ -52,8 +68,18 @@ public class ContentDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ExtractionDto {
+        /**
+         * Text extraction status
+         * Enum: SUCCESS, PARTIAL, FAILED
+         */
         private String status;
+        
+        /**
+         * Extraction method used
+         * Enum: DIRECT, OCR, HYBRID
+         */
         private String method;
+        
         private String extractedAt;
         private Integer characterCount;
         private Integer wordCount;
@@ -64,7 +90,12 @@ public class ContentDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SummarizationDto {
+        /**
+         * Summarization status
+         * Enum: SUCCESS, FAILED, SKIPPED
+         */
         private String status;
+        
         private String model;
         private String processedAt;
         private Double processingTime;
@@ -79,6 +110,11 @@ public class ContentDto {
     public static class ClassificationDto {
         private Boolean isContract;
         private Double confidence;
+        
+        /**
+         * Classified language (ISO 639-1 lowercase)
+         * Enum: vi, en, fr, zh
+         */
         private String language;
     }
 
@@ -86,7 +122,12 @@ public class ContentDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ProcessingDto {
+        /**
+         * Overall processing status
+         * Enum: COMPLETED, PROCESSING, FAILED
+         */
         private String status;
+        
         private String error;
     }
 }

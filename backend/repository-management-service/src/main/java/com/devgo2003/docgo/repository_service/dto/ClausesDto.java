@@ -24,8 +24,19 @@ public class ClausesDto {
         private String name;
         private String description;
         private String content;
+        
+        /**
+         * Clause importance level
+         * Enum: HIGH, MEDIUM, LOW
+         */
         private String importance;
+        
+        /**
+         * Clause risk level
+         * Enum: LOW, MEDIUM, HIGH
+         */
         private String risk;
+        
         private String advice;
     }
 
@@ -36,7 +47,13 @@ public class ClausesDto {
         private String name;
         private String description;
         private String content;
+        
+        /**
+         * Unfavorable clause risk level
+         * Enum: LOW, MEDIUM, HIGH
+         */
         private String risk;
+        
         private String advice;
     }
 }

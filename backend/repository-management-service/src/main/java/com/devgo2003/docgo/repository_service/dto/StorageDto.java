@@ -43,7 +43,13 @@ public class StorageDto {
         private String url;
         private String bucket;
         private String objectKey;
+        
+        /**
+         * AWS S3 region
+         * Enum: us-east-1, us-west-2, eu-west-1, ap-southeast-1
+         */
         private String region;
+        
         private String contentType;
         private Long size;
         private String versionId;

@@ -1,0 +1,399 @@
+{
+  "apiVersion": "v1",
+  "statusCode": 200,
+  "shortMessage": "SUCCESS",
+  "description": "Document retrieved successfully from 3 collections (merged)",
+  "data": {
+    "id": "FILE-2025-001-EXAMPLE",
+    "overview": {
+      "title": "Example Contract Document",
+      "status": "ACTIVE",
+      "documentType": "CONTRACT",
+      "tags": ["contract", "software", "development"],
+      "ownerUserId": "user-001",
+      "language": "vi",
+      "region": "VN",
+      "isNew": false
+    },
+    "metadata": {
+      "file": {
+        "name": "example-contract.pdf",
+        "mimeType": "application/pdf",
+        "size": 2500000,
+        "hash": {
+          "md5": "abc123def456...",
+          "sha256": "1234567890abcdef..."
+        }
+      },
+      "fileSystem": {
+        "dateAdded": "2025-01-15T08:30:00Z",
+        "dateModified": "2025-01-15T09:00:00Z",
+        "originalFilename": "contract-draft-v1.pdf",
+        "originalMD5": "original-md5-hash",
+        "originalFileSize": 2400000,
+        "originalMimeType": "application/pdf",
+        "archiveMD5": "archive-md5-hash",
+        "archiveFileSize": 2500000
+      },
+      "originalDocument": {
+        "dcFormat": "application/pdf",
+        "dcTitle": "Software Development Contract",
+        "dcCreator": "Microsoft Word 2019",
+        "dcDescription": "Contract for software development services",
+        "dcSubject": "Contract, Software, Development",
+        "xmpCreateDate": "2025-01-15T08:00:00Z",
+        "xmpCreatorTool": "Microsoft Word 2019",
+        "xmpModifyDate": "2025-01-15T08:30:00Z",
+        "xmpMetadataDate": "2025-01-15T08:30:00Z",
+        "xmpDocumentID": "doc-2025-001",
+        "xmpInstanceID": "instance-2025-001-v1",
+        "pdfKeywords": "contract, software, development",
+        "pdfProducer": "Microsoft Word 2019",
+        "pdfaidPart": 3,
+        "pdfaidConformance": "B"
+      },
+      "archivedDocument": {
+        "dcFormat": "application/pdf",
+        "dcTitle": "Software Development Contract (Archived)",
+        "dcCreator": "Archive System",
+        "pdfProducer": "OCRmyPDF System v1.0",
+        "xmpCreateDate": "2025-01-15T08:00:00Z",
+        "xmpModifyDate": "2025-01-15T09:00:00Z",
+        "xmpMetadataDate": "2025-01-15T09:00:00Z",
+        "xmpCreatorTool": "OCRmyPDF 16.10.4 / Tesseract OCR",
+        "xmpDocumentID": "doc-2025-001-archived",
+        "pdfaidPart": 3,
+        "pdfaidConformance": "A"
+      },
+      "technical": {
+        "encoding": "UTF-8",
+        "lineEnding": "CRLF",
+        "bom": false,
+        "compression": "DEFLATE",
+        "pages": 20,
+        "wordCount": 5000,
+        "characterCount": 30000
+      }
+    },
+    "contract": {
+      "type": "SOFTWARE_DEVELOPMENT",
+      "effectiveDate": "2025-02-01",
+      "expiryDate": "2025-12-31",
+      "totalValue": 150000,
+      "currency": "USD",
+      "summary": "Contract for developing document management system",
+      "project": "DocGO Platform",
+      "department": "IT Department",
+      "priority": "HIGH",
+      "confidentiality": "CONFIDENTIAL",
+      "workflow": {
+        "currentStage": "REVIEW",
+        "stages": [
+          {
+            "name": "DRAFT",
+            "status": "COMPLETED",
+            "completedAt": "2025-01-15T10:00:00Z",
+            "assignedTo": "user-001"
+          },
+          {
+            "name": "REVIEW",
+            "status": "IN_PROGRESS",
+            "startedAt": "2025-01-16T08:00:00Z",
+            "assignedTo": "user-002"
+          }
+        ]
+      },
+      "parties": [
+        {
+          "id": "party-001",
+          "name": "Tech Company A",
+          "type": "CLIENT",
+          "role": "Client",
+          "taxCode": "TAX001",
+          "contact": {
+            "email": "contact@companya.com",
+            "phone": "+84-123-456-789",
+            "address": "123 Street, City"
+          },
+          "representative": {
+            "name": "John Doe",
+            "position": "CEO",
+            "email": "john@companya.com"
+          }
+        }
+      ],
+      "payment": {
+        "method": "BANK_TRANSFER",
+        "schedule": [
+          {
+            "milestone": "Contract signing",
+            "percentage": 40,
+            "amount": 60000,
+            "dueDate": "2025-02-01T00:00:00Z",
+            "status": "PENDING"
+          },
+          {
+            "milestone": "Phase 1 completion",
+            "percentage": 60,
+            "amount": 90000,
+            "dueDate": "2025-06-30T00:00:00Z",
+            "status": "PENDING"
+          }
+        ]
+      },
+      "clauses": {
+        "key": [
+          {
+            "name": "Scope of Work",
+            "description": "Define project scope",
+            "content": "Development of document management system with AI features",
+            "importance": "HIGH",
+            "risk": "LOW",
+            "advice": "Clearly define deliverables"
+          }
+        ],
+        "unfavorable": [],
+        "intellectualProperty": "All IP belongs to client",
+        "confidentiality": "5-year confidentiality period",
+        "warranty": "12-month warranty",
+        "termination": "30-day notice period"
+      },
+      "reminders": [
+        {
+          "id": "reminder-001",
+          "type": "PAYMENT_DUE",
+          "title": "Payment Phase 1",
+          "description": "First payment due",
+          "content": "40% payment due on contract signing",
+          "dueDate": "2025-02-01T00:00:00Z",
+          "status": "PENDING",
+          "priority": "HIGH"
+        }
+      ],
+      "risk": {
+        "level": "MEDIUM",
+        "factors": [
+          {
+            "type": "TECHNICAL",
+            "description": "New AI technology risk",
+            "content": "Using untested AI models",
+            "probability": "MEDIUM",
+            "impact": "HIGH",
+            "riskToParties": [{"id": "party-001", "name": "Tech Company A"}],
+            "beneficiaries": []
+          }
+        ],
+        "mitigationProposals": [
+          {
+            "description": "Test AI models thoroughly",
+            "content": "Conduct extensive testing phase",
+            "cost": "LOW",
+            "timeline": "2 weeks",
+            "assignedTo": "Development Team"
+          }
+        ],
+        "advice": "Monitor AI performance closely"
+      },
+      "compliance": {
+        "status": "COMPLIANT",
+        "regulations": ["Data Protection Law", "GDPR"],
+        "certifications": ["ISO 27001"],
+        "auditSchedule": "2025-06-01T00:00:00Z",
+        "issues": [],
+        "recommendations": ["Regular security audits"]
+      }
+    },
+    "content": {
+      "plaintext": "This is the full contract text...",
+      "extractedText": "DEVELOPMENT CONTRACT\n\nThis contract is entered into...",
+      "summary": "Software development contract for DocGO platform",
+      "keyTerms": ["development", "software", "payment", "deliverables"],
+      "sections": [
+        {
+          "title": "Article 1: Scope",
+          "description": "Project scope definition",
+          "content": "Development of document management system",
+          "pageNumber": 1
+        }
+      ],
+      "ocr": {
+        "text": "Extracted via OCR...",
+        "status": "COMPLETED",
+        "engine": "TESSERACT",
+        "confidence": 0.95,
+        "processedAt": "2025-01-15T09:15:00Z",
+        "processingTime": 3.5,
+        "error": null,
+        "metadata": {
+          "language": "vie+eng",
+          "pageCount": 20,
+          "boxCount": 500,
+          "averageConfidence": 0.95
+        }
+      },
+      "extraction": {
+        "status": "SUCCESS",
+        "method": "HYBRID",
+        "extractedAt": "2025-01-15T09:10:00Z",
+        "characterCount": 30000,
+        "wordCount": 5000,
+        "error": null
+      },
+      "summarization": {
+        "status": "SUCCESS",
+        "model": "gemini-1.5-flash",
+        "processedAt": "2025-01-15T09:20:00Z",
+        "processingTime": 4.8,
+        "inputTokens": 8000,
+        "outputTokens": 250,
+        "error": null
+      },
+      "classification": {
+        "isContract": true,
+        "confidence": 0.98,
+        "language": "vi"
+      },
+      "processing": {
+        "status": "COMPLETED",
+        "error": null
+      },
+      "jsonContent": null,
+      "jsonAnalysisStatus": null
+    },
+    "storage": {
+      "location": "s3://docgo-contracts/2025/01/",
+      "backupLocations": [
+        "s3://docgo-backup/2025/01/",
+        "gs://docgo-archive/2025/01/"
+      ],
+      "retentionPolicy": {
+        "duration": "10 years",
+        "autoDelete": false,
+        "archiveAfter": "3 years"
+      },
+      "accessControl": {
+        "isPublic": false,
+        "restrictedUsers": ["user-001", "user-002"],
+        "ipWhitelist": ["192.168.1.0/24"]
+      },
+      "s3": {
+        "url": "https://docgo-storage.s3.amazonaws.com/contracts/FILE-2025-001-EXAMPLE.pdf",
+        "bucket": "docgo-storage",
+        "objectKey": "contracts/FILE-2025-001-EXAMPLE.pdf",
+        "region": "us-east-1",
+        "contentType": "application/pdf",
+        "size": 2500000,
+        "versionId": "s3-version-abc123",
+        "checksum": {
+          "md5": "abc123def456..."
+        }
+      },
+      "local": {
+        "path": null,
+        "filename": "example-contract.pdf",
+        "mimeType": "application/pdf",
+        "size": 2500000,
+        "mtime": null,
+        "revision": null
+      }
+    },
+    "security": {
+      "encryption": "AES-256",
+      "watermark": true,
+      "digitalSignature": true,
+      "accessLogging": true,
+      "permissions": {
+        "read": ["user-001", "user-002", "user-003"],
+        "write": ["user-001"],
+        "delete": ["user-001"],
+        "share": ["user-001", "user-002"]
+      }
+    },
+    "versioning": {
+      "current": {
+        "number": 2,
+        "tag": "1.1"
+      },
+      "history": [
+        {
+          "version": 1,
+          "tag": "1.0.0",
+          "changedAt": "2025-01-15T08:30:00Z",
+          "changedBy": "user-001",
+          "changeType": "CREATE",
+          "changes": "Initial version",
+          "changedFields": [],
+          "diff": {}
+        },
+        {
+          "version": 2,
+          "tag": "1.1.0",
+          "changedAt": "2025-01-15T09:00:00Z",
+          "changedBy": "user-001",
+          "changeType": "UPDATE",
+          "changes": "Updated payment terms",
+          "changedFields": ["contract.payment.schedule"],
+          "diff": {
+            "contract.payment.schedule": {
+              "old": "50/50",
+              "new": "40/60"
+            }
+          }
+        }
+      ]
+    },
+    "audit": {
+      "createdAt": "2025-01-15T08:30:00Z",
+      "createdBy": "user-001",
+      "updatedAt": "2025-01-15T09:00:00Z",
+      "updatedBy": "user-001",
+      "deletedAt": null,
+      "deletedBy": null,
+      "isDeleted": false,
+      "changeHistory": [
+        {
+          "action": "CREATE",
+          "timestamp": "2025-01-15T08:30:00Z",
+          "actor": "user-001",
+          "details": "Created document",
+          "ipAddress": "192.168.1.100",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        },
+        {
+          "action": "UPDATE",
+          "timestamp": "2025-01-15T09:00:00Z",
+          "actor": "user-001",
+          "details": "Updated payment schedule",
+          "ipAddress": "192.168.1.100",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+      ],
+      "accessLog": [
+        {
+          "action": "VIEW",
+          "timestamp": "2025-01-15T08:35:00Z",
+          "actor": "user-002",
+          "ipAddress": "192.168.1.101",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        },
+        {
+          "action": "DOWNLOAD",
+          "timestamp": "2025-01-15T08:40:00Z",
+          "actor": "user-002",
+          "ipAddress": "192.168.1.101",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+      ]
+    }
+  },
+  "timestamp": "2025-01-15T09:30:00Z",
+  "requestId": "req-abc123-def456",
+  "path": "/api/v1/repository-management-service/files/FILE-2025-001-EXAMPLE",
+  "_comments": [
+    "This response shows data merged from 3 MongoDB collections:",
+    "1. files collection: overview, metadata (except full content), contract, storage, security, versioning.current, audit",
+    "2. file_versions collection: versioning.history (from all buckets merged)",
+    "3. file_full_contents collection: content.plaintext, content.extractedText, content.sections, content.ocr",
+    "Performance: ~80-120ms for 3-collection merge query"
+  ]
+}
