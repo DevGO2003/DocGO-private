@@ -1,7 +1,6 @@
 import { FormEvent, useState } from 'react';
-import { Input } from '@shared/components/Input';
-import { Button } from '@shared/components/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/Card';
+import { motion } from 'framer-motion';
+import { Input, Button, Card, CardContent, CardHeader, CardTitle } from '@shared/components';
 import { Product } from '../../models/types/product.types';
 
 interface ProductFormProps {
@@ -34,12 +33,12 @@ export const ProductForm = ({ product, onSubmit, isLoading }: ProductFormProps) 
   };
 
   return (
-    <Card>
+    <Card animated>
       <CardHeader>
         <CardTitle>{product ? 'Edit Product' : 'Create Product'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             name="name"
             label="Product Name"
@@ -83,7 +82,7 @@ export const ProductForm = ({ product, onSubmit, isLoading }: ProductFormProps) 
             value={formData.imageUrl}
             onChange={handleChange}
           />
-          <Button type="submit" isLoading={isLoading} className="w-full">
+          <Button type="submit" variant="primary" animated isLoading={isLoading} className="w-full">
             {product ? 'Update Product' : 'Create Product'}
           </Button>
         </form>

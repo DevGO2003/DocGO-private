@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Input } from '@shared/components/Input';
-import { AuthForm } from '../../components/AuthForm';
+import { motion } from 'framer-motion';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useRegisterController } from '../../../controllers/useRegisterController';
 import { LOGIN_PATH } from '@constants';
@@ -15,68 +15,115 @@ export const Register = () => {
   });
 
   return (
-    <AuthForm
-      title="Create your account"
-      onSubmit={handleSubmit(handleRegister)}
-      isLoading={isLoading}
-      error={error?.message}
-      footer={
-        <div>
-          Already have an account?{' '}
-          <Link to={LOGIN_PATH} className="text-primary font-medium hover:underline">
-            Sign in
-          </Link>
-        </div>
-      }
-    >
-      <Input
-        id="name"
-        name="name"
-        type="text"
-        label="Full Name"
-        value={values.name}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={errors.name}
-        placeholder="Enter your full name"
-        autoComplete="name"
-      />
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        label="Email address"
-        value={values.email}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={errors.email}
-        placeholder="Enter your email"
-        autoComplete="email"
-      />
-      <Input
-        id="password"
-        name="password"
-        type="password"
-        label="Password"
-        value={values.password}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={errors.password}
-        placeholder="Enter your password"
-        autoComplete="new-password"
-      />
-      <Input
-        id="confirmPassword"
-        name="confirmPassword"
-        type="password"
-        label="Confirm Password"
-        value={values.confirmPassword}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={errors.confirmPassword}
-        placeholder="Confirm your password"
-        autoComplete="new-password"
-      />
-    </AuthForm>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card animated>
+          <CardHeader>
+            <CardTitle className="text-center">
+              Create your account
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm"
+              >
+                {error.message}
+              </motion.div>
+            )}
+
+            <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                label="Full Name"
+                value={values.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.name}
+                placeholder="Enter your full name"
+                autoComplete="name"
+              />
+
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                label="Email address"
+                value={values.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.email}
+                placeholder="Enter your email"
+                autoComplete="email"
+              />
+
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                label="Password"
+                value={values.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.password}
+                placeholder="Enter your password"
+                autoComplete="new-password"
+              />
+
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                label="Confirm Password"
+                value={values.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.confirmPassword}
+                placeholder="Confirm your password"
+                autoComplete="new-password"
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={isLoading}
+                disabled={isLoading}
+                className="w-full"
+                animated
+              >
+                {isLoading ? 'Creating account...' : 'Sign up'}
+              </Button>
+            </form>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 text-center"
+            >
+              <div className="text-sm text-gray-600">
+                Already have an account?{' '}
+                <Link
+                  to={LOGIN_PATH}
+                  className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 };

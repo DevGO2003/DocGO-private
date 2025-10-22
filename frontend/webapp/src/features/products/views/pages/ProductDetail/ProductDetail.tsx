@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/Card';
-import { Button } from '@shared/components/Button';
+import { motion } from 'framer-motion';
+import { DashboardLayout } from '@shared/layouts';
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@shared/components';
 import { useProduct } from '../../../models/api/productApi';
 import { formatCurrency, formatDate } from '@utils';
 import { ArrowLeft, Edit, Package } from 'lucide-react';
@@ -19,13 +20,24 @@ export const ProductDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Button variant="ghost" onClick={() => navigate('/products')} className="mb-4">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Products
-      </Button>
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <Button variant="outline" onClick={() => navigate('/products')} className="mb-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Products
+        </Button>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+      >
         <div>
           {product.imageUrl ? (
             <img
@@ -40,7 +52,7 @@ export const ProductDetail = () => {
           )}
         </div>
 
-        <Card>
+        <Card animated>
           <CardHeader>
             <CardTitle className="text-3xl">{product.name}</CardTitle>
           </CardHeader>
@@ -73,13 +85,14 @@ export const ProductDetail = () => {
               <p className="mt-1">{formatDate(product.createdAt)}</p>
             </div>
 
-            <Button onClick={() => navigate(`/products/${id}/edit`)} className="w-full">
+            <Button variant="primary" animated onClick={() => navigate(`/products/${id}/edit`)} className="w-full">
               <Edit className="w-4 h-4 mr-2" />
               Edit Product
             </Button>
           </CardContent>
         </Card>
+      </motion.div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };

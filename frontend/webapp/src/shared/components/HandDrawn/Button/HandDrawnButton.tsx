@@ -1,6 +1,6 @@
 import { forwardRef, useRef, useEffect, ButtonHTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import { createRoughCanvas, drawRoughRect } from '@shared/lib/utils';
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import anime from 'animejs';
 
 interface HandDrawnButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

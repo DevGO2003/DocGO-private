@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { HandDrawnInput } from '@shared/components/HandDrawn/Input';
-import { HandDrawnButton } from '@shared/components/HandDrawn/Button';
-import { HandDrawnCard, HandDrawnCardHeader, HandDrawnCardTitle, HandDrawnCardContent } from '@shared/components/HandDrawn/Card';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useLoginController } from '../../../controllers/useLoginController';
 import { REGISTER_PATH, FORGOT_PASSWORD_PATH } from '@constants';
@@ -22,14 +20,14 @@ export const Login = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <HandDrawnCard animated>
-          <HandDrawnCardHeader>
-            <HandDrawnCardTitle className="text-center">
+        <Card animated>
+          <CardHeader>
+            <CardTitle className="text-center">
               Sign in to your account
-            </HandDrawnCardTitle>
-          </HandDrawnCardHeader>
+            </CardTitle>
+          </CardHeader>
 
-          <HandDrawnCardContent>
+          <CardContent>
             {error && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -41,7 +39,7 @@ export const Login = () => {
             )}
 
             <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
-              <HandDrawnInput
+              <Input
                 id="email"
                 name="email"
                 type="email"
@@ -54,7 +52,7 @@ export const Login = () => {
                 autoComplete="email"
               />
 
-              <HandDrawnInput
+              <Input
                 id="password"
                 name="password"
                 type="password"
@@ -67,7 +65,7 @@ export const Login = () => {
                 autoComplete="current-password"
               />
 
-              <HandDrawnButton
+              <Button
                 type="submit"
                 variant="primary"
                 isLoading={isLoading}
@@ -76,7 +74,7 @@ export const Login = () => {
                 animated
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
-              </HandDrawnButton>
+              </Button>
             </form>
 
             <motion.div
@@ -101,8 +99,8 @@ export const Login = () => {
                 </Link>
               </div>
             </motion.div>
-          </HandDrawnCardContent>
-        </HandDrawnCard>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );

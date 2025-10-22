@@ -1,6 +1,6 @@
 import { forwardRef, useRef, useEffect, InputHTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import { createRoughCanvas, drawRoughRect } from '@shared/lib/utils';
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 
 interface HandDrawnInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,17 +9,20 @@ interface HandDrawnInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const HandDrawnInput = forwardRef<HTMLInputElement, HandDrawnInputProps>(
-  ({ className, label, error, helperText, ...props }, ref) => {
+  ({ className, label, error, helperText, value, ...props }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+    const drawCanvas = () => {
       if (canvasRef.current && containerRef.current) {
         const canvas = canvasRef.current;
         const container = containerRef.current;
         
         const width = container.offsetWidth;
         const height = container.offsetHeight;
+        
+        if (width === 0 || height === 0) return; // Skip if container not ready
+        
         canvas.width = width;
         canvas.height = height;
 
@@ -34,7 +37,17 @@ export const HandDrawnInput = forwardRef<HTMLInputElement, HandDrawnInputProps>(
           fillStyle: 'solid',
         });
       }
-    }, [error]);
+    };
+
+    useEffect(() => {
+      // Initial draw
+      drawCanvas();
+      
+      // Retry after a short delay for autofill
+      const timer = setTimeout(drawCanvas, 100);
+      
+      return () => clearTimeout(timer);
+    }, [error, value]);
 
     return (
       <div className="w-full space-y-2">
@@ -61,6 +74,7 @@ export const HandDrawnInput = forwardRef<HTMLInputElement, HandDrawnInputProps>(
           />
           <input
             ref={ref}
+            value={value}
             className={`relative w-full px-4 py-3 bg-transparent focus:outline-none ${className || ''}`}
             {...props}
           />

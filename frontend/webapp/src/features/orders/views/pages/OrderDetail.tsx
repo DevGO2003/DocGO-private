@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/Card';
-import { Button } from '@shared/components/Button';
+import { motion } from 'framer-motion';
+import { DashboardLayout } from '@shared/layouts';
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@shared/components';
 import { useOrder } from '../../models/api/orderApi';
 import { formatCurrency, formatDate } from '@utils';
 import { ArrowLeft } from 'lucide-react';
@@ -19,13 +20,24 @@ export const OrderDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Button variant="ghost" onClick={() => navigate('/orders')} className="mb-4">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Orders
-      </Button>
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        <Button variant="outline" onClick={() => navigate('/orders')} className="mb-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Orders
+        </Button>
+      </motion.div>
 
-      <Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card animated>
         <CardHeader>
           <CardTitle>Order #{order.id}</CardTitle>
         </CardHeader>
@@ -66,7 +78,9 @@ export const OrderDetail = () => {
             </div>
           </div>
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </motion.div>
+      </div>
+    </DashboardLayout>
   );
 };

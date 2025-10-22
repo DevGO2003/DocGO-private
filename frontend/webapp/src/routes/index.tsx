@@ -18,12 +18,12 @@ import {
 const Login = lazy(() => import('@features/auth/views/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@features/auth/views/pages/Register').then(m => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('@features/auth/views/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const Dashboard = lazy(() => import('@features/dashboard').then(m => ({ default: m.Dashboard })));
 const ProductList = lazy(() => import('@features/products/views/pages/ProductList').then(m => ({ default: m.ProductList })));
 const ProductDetail = lazy(() => import('@features/products/views/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
 const ProductEdit = lazy(() => import('@features/products/views/pages/ProductEdit').then(m => ({ default: m.ProductEdit })));
 const OrderList = lazy(() => import('@features/orders/views/pages/OrderList').then(m => ({ default: m.OrderList })));
 const OrderDetail = lazy(() => import('@features/orders/views/pages/OrderDetail').then(m => ({ default: m.OrderDetail })));
-const ComponentsDemo = lazy(() => import('@shared/components/HandDrawn/Demo').then(m => ({ default: m.ComponentsDemo })));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -43,19 +43,17 @@ export const AppRouter = () => {
             <Route path={FORGOT_PASSWORD_PATH} element={<ForgotPassword />} />
           </Route>
 
-          {/* Demo route (public) */}
-          <Route path="/demo" element={<ComponentsDemo />} />
-
-          {/* Private routes */}
-          <Route element={<PrivateRoute />}>
-            <Route path={HOME_PATH} element={<Navigate to={PRODUCTS_PATH} replace />} />
+          {/* Private routes - Temporarily disabled authentication for UI demo */}
+          {/* <Route element={<PrivateRoute />}> */}
+            <Route path={HOME_PATH} element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path={PRODUCTS_PATH} element={<ProductList />} />
             <Route path={PRODUCT_DETAIL_PATH} element={<ProductDetail />} />
             <Route path={PRODUCT_EDIT_PATH} element={<ProductEdit />} />
             <Route path="/products/new" element={<ProductEdit />} />
             <Route path={ORDERS_PATH} element={<OrderList />} />
             <Route path={ORDER_DETAIL_PATH} element={<OrderDetail />} />
-          </Route>
+          {/* </Route> */}
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
