@@ -1,10 +1,10 @@
 package com.devgo2003.docgo.repository_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -22,18 +22,19 @@ public class StorageDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RetentionPolicyDto {
-        private Integer retentionPeriod;
-        private String unit;
-        private LocalDateTime deleteAfter;
+        private String duration;
+        private Boolean autoDelete;
+        private String archiveAfter;
     }
 
     @Data
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AccessControlDto {
-        private List<String> allowedUsers;
-        private List<String> allowedRoles;
-        private List<String> deniedUsers;
+        @JsonProperty("public")
+        private Boolean publicAccess;
+        private List<String> restrictedUsers;
+        private List<String> ipWhitelist;
     }
 
     @Data
@@ -56,8 +57,7 @@ public class StorageDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ChecksumDto {
-        private String originalMD5;
-        private String archiveMD5;
+        private String md5;
     }
 
     @Data
@@ -65,6 +65,10 @@ public class StorageDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class LocalDto {
         private String path;
-        private String directory;
+        private String filename;
+        private String mimeType;
+        private Long size;
+        private String mtime;
+        private String revision;
     }
 }

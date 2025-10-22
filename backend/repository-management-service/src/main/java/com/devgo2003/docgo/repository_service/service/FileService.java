@@ -86,14 +86,13 @@ public class FileService {
             FullFileResponseDto dto = FullFileResponseDto.builder()
                 .id(file.getId())
                 .overview(mapToOverview(file.getOverview()))
+                .metadata(mapToMetadata(file.getMetadata()))
                 .contract(mapToContract(file))
                 .content(mapToContent(file.getContent()))
-                .file(mapToFileInfo(file))
                 .storage(mapToStorage(file.getStorage()))
+                .security(mapToSecurityDto(file.getSecurity()))
                 .versioning(mapToVersioning(file.getVersioning()))
-                .metadata(mapToMetadata(file.getMetadata()))
                 .audit(mapToAudit(file.getAudit()))
-                .processing(file.getStatus() != null && file.getStatus().equals("completed") ? null : file.getProcessingStatus())
                 .build();
 
             log.info("Built full DTO for fileId={}", id);
@@ -171,8 +170,6 @@ public class FileService {
             .title(asString(overviewMap.get("title")))
             .status(normalizeOverviewStatus(asString(overviewMap.get("status"))))
             .documentType(normalizeDocumentType(asString(overviewMap.get("documentType"))))
-            .contractType(asString(overviewMap.get("contractType")))
-            .category(asString(overviewMap.get("category")))
             .tags(asList(overviewMap.get("tags")))
             .ownerUserId(asString(overviewMap.get("ownerUserId")))
             .language(normalizeLanguage(asString(overviewMap.get("language"))))
@@ -217,12 +214,14 @@ public class FileService {
     private ContentDto mapToContent(Map<String, Object> contentMap) {
         if (contentMap == null || contentMap.isEmpty()) return null;
         return ContentDto.builder()
+            .plaintext(asString(contentMap.get("plaintext")))
             .extractedText(asString(contentMap.get("extractedText")))
             .summary(asString(contentMap.get("summary")))
             .keyTerms(asList(contentMap.get("keyTerms")))
             .sections(mapToSections(asList(contentMap.get("sections"))))
-            .plaintext(asString(contentMap.get("plaintext")))
             .ocr(mapToOcr(asMap(contentMap.get("ocr"))))
+            .extraction(mapToExtraction(asMap(contentMap.get("extraction"))))
+            .summarization(mapToSummarization(asMap(contentMap.get("summarization"))))
             .classification(mapToClassification(asMap(contentMap.get("classification"))))
             .processing(mapToProcessing(asMap(contentMap.get("processing"))))
             .jsonContent(contentMap.get("jsonContent"))
@@ -268,23 +267,18 @@ public class FileService {
     private VersioningDto mapToVersioning(Map<String, Object> versioningMap) {
         if (versioningMap == null || versioningMap.isEmpty()) return null;
         return VersioningDto.builder()
-            .currentVersionInfo(mapToCurrentVersionInfo(asMap(versioningMap.get("currentVersionInfo"))))
-            .versions(mapToVersions(asList(versioningMap.get("versions"))))
-            .changeLog(mapToChangeLog(asList(versioningMap.get("changeLog"))))
-            .previousVersion(asString(versioningMap.get("previousVersion")))
-            .changeSummary(asString(versioningMap.get("changeSummary")))
-            .changedFields(asList(versioningMap.get("changedFields")))
-            .diff(asMap(versioningMap.get("diff")))
-            .history(mapToHistory(asList(versioningMap.get("history"))))
+            .current(mapToCurrent(asMap(versioningMap.get("current"))))
+            .history(mapToVersionHistory(asList(versioningMap.get("history"))))
             .build();
     }
 
     private MetadataDto mapToMetadata(Map<String, Object> metadataMap) {
         if (metadataMap == null || metadataMap.isEmpty()) return null;
         return MetadataDto.builder()
+            .file(mapToFile(asMap(metadataMap.get("file"))))
             .fileSystem(mapToFileSystem(asMap(metadataMap.get("fileSystem"))))
-            .originalFile(mapToOriginalFile(asMap(metadataMap.get("originalDocument"))))
-            .archivedFile(mapToArchivedFile(asMap(metadataMap.get("archivedDocument"))))
+            .originalDocument(mapToOriginalDocument(asMap(metadataMap.get("originalDocument"))))
+            .archivedDocument(mapToArchivedDocument(asMap(metadataMap.get("archivedDocument"))))
             .technical(mapToTechnical(asMap(metadataMap.get("technical"))))
             .build();
     }
@@ -292,18 +286,15 @@ public class FileService {
     private AuditDto mapToAudit(Map<String, Object> auditMap) {
         if (auditMap == null || auditMap.isEmpty()) return null;
         return AuditDto.builder()
-            .createdAt(asLocalDateTime(auditMap.get("createdAt")))
+            .createdAt(asString(auditMap.get("createdAt")))
             .createdBy(asString(auditMap.get("createdBy")))
-            .lastModifiedAt(asLocalDateTime(auditMap.get("lastModifiedAt")))
-            .lastModifiedBy(asString(auditMap.get("lastModifiedBy")))
-            .version(asInteger(auditMap.get("version")))
-            .changeHistory(mapToChangeHistory(asList(auditMap.get("changeHistory"))))
-            .accessLog(mapToAccessLog(asList(auditMap.get("accessLog"))))
-            .updatedAt(asLocalDateTime(auditMap.get("updatedAt")))
+            .updatedAt(asString(auditMap.get("updatedAt")))
             .updatedBy(asString(auditMap.get("updatedBy")))
-            .deletedAt(asLocalDateTime(auditMap.get("deletedAt")))
+            .deletedAt(asString(auditMap.get("deletedAt")))
             .deletedBy(asString(auditMap.get("deletedBy")))
             .isDeleted(asBoolean(auditMap.get("isDeleted")))
+            .changeHistory(mapToChangeHistory(asList(auditMap.get("changeHistory"))))
+            .accessLog(mapToAccessLog(asList(auditMap.get("accessLog"))))
             .build();
     }
 
@@ -495,6 +486,47 @@ public class FileService {
         return ContentDto.OcrDto.builder()
             .text(asString(map.get("text")))
             .status(asString(map.get("status")))
+            .engine(asString(map.get("engine")))
+            .confidence(asDouble(map.get("confidence")))
+            .processedAt(asString(map.get("processedAt")))
+            .processingTime(asDouble(map.get("processingTime")))
+            .error(asString(map.get("error")))
+            .metadata(mapToOcrMetadata(asMap(map.get("metadata"))))
+            .build();
+    }
+    
+    private ContentDto.OcrMetadataDto mapToOcrMetadata(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.OcrMetadataDto.builder()
+            .language(asString(map.get("language")))
+            .pageCount(asInteger(map.get("pageCount")))
+            .boxCount(asInteger(map.get("boxCount")))
+            .averageConfidence(asDouble(map.get("averageConfidence")))
+            .build();
+    }
+    
+    private ContentDto.ExtractionDto mapToExtraction(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.ExtractionDto.builder()
+            .status(asString(map.get("status")))
+            .method(asString(map.get("method")))
+            .extractedAt(asString(map.get("extractedAt")))
+            .characterCount(asInteger(map.get("characterCount")))
+            .wordCount(asInteger(map.get("wordCount")))
+            .error(asString(map.get("error")))
+            .build();
+    }
+    
+    private ContentDto.SummarizationDto mapToSummarization(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return ContentDto.SummarizationDto.builder()
+            .status(asString(map.get("status")))
+            .model(asString(map.get("model")))
+            .processedAt(asString(map.get("processedAt")))
+            .processingTime(asDouble(map.get("processingTime")))
+            .inputTokens(asInteger(map.get("inputTokens")))
+            .outputTokens(asInteger(map.get("outputTokens")))
+            .error(asString(map.get("error")))
             .build();
     }
     
@@ -503,7 +535,6 @@ public class FileService {
         return ContentDto.ClassificationDto.builder()
             .isContract(asBoolean(map.get("isContract")))
             .confidence(asDouble(map.get("confidence")))
-            .category(asString(map.get("category")))
             .language(asString(map.get("language")))
             .build();
     }
@@ -545,17 +576,17 @@ public class FileService {
     private StorageDto.RetentionPolicyDto mapToRetentionPolicy(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return StorageDto.RetentionPolicyDto.builder()
-            .retentionPeriod(asInteger(map.get("retentionPeriod")))
-            .unit(asString(map.get("unit")))
-            .deleteAfter(asLocalDateTime(map.get("deleteAfter")))
+            .duration(asString(map.get("duration")))
+            .autoDelete(asBoolean(map.get("autoDelete")))
+            .archiveAfter(asString(map.get("archiveAfter")))
             .build();
     }
     private StorageDto.AccessControlDto mapToAccessControl(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return StorageDto.AccessControlDto.builder()
-            .allowedUsers(asList(map.get("allowedUsers")))
-            .allowedRoles(asList(map.get("allowedRoles")))
-            .deniedUsers(asList(map.get("deniedUsers")))
+            .publicAccess(asBoolean(map.get("public")))
+            .restrictedUsers(asList(map.get("restrictedUsers")))
+            .ipWhitelist(asList(map.get("ipWhitelist")))
             .build();
     }
     private StorageDto.S3Dto mapToS3(Map<String, Object> map) { 
@@ -577,120 +608,187 @@ public class FileService {
     private StorageDto.ChecksumDto mapToChecksum(Map<String, Object> map) {
         if (map == null) return null;
         return StorageDto.ChecksumDto.builder()
-            .originalMD5(asString(map.get("originalMD5")))
-            .archiveMD5(asString(map.get("archiveMD5")))
+            .md5(asString(map.get("md5")))
             .build();
     }
     private StorageDto.LocalDto mapToLocal(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return StorageDto.LocalDto.builder()
             .path(asString(map.get("path")))
-            .directory(asString(map.get("directory")))
+            .filename(asString(map.get("filename")))
+            .mimeType(asString(map.get("mimeType")))
+            .size(asLong(map.get("size")))
+            .mtime(asString(map.get("mtime")))
+            .revision(asString(map.get("revision")))
             .build();
     }
-    private VersioningDto.CurrentVersionInfoDto mapToCurrentVersionInfo(Map<String, Object> map) {
-        if (map == null) return null;
-        return VersioningDto.CurrentVersionInfoDto.builder()
-            .tag(asString(map.get("tag")))
-            .number(asInteger(map.get("number")))
+    
+    private MetadataDto.FileDto mapToFile(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.FileDto.builder()
+            .name(asString(map.get("name")))
+            .mimeType(asString(map.get("mimeType")))
+            .size(asLong(map.get("size")))
+            .hash(mapToMetadataHash(asMap(map.get("hash"))))
             .build();
     }
-    private List<VersioningDto.VersionDto> mapToVersions(List<Object> list) {
-        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
-        
-        List<VersioningDto.VersionDto> versions = new java.util.ArrayList<>();
-        for (Object item : list) {
-            Map<String, Object> versionMap = asMap(item);
-            if (versionMap == null) continue;
-            
-            VersioningDto.VersionDto version = VersioningDto.VersionDto.builder()
-                .version(asString(versionMap.get("version")))
-                .createdAt(asLocalDateTime(versionMap.get("createdAt")))
-                .createdBy(asString(versionMap.get("createdBy")))
-                .changes(asString(versionMap.get("changes")))
-                .fileId(asString(versionMap.get("fileId")))
-                .build();
-            versions.add(version);
-        }
-        
-        return versions;
+    
+    private MetadataDto.HashDto mapToMetadataHash(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return MetadataDto.HashDto.builder()
+            .md5(asString(map.get("md5")))
+            .sha256(asString(map.get("sha256")))
+            .build();
     }
-    private List<VersioningDto.ChangeLogDto> mapToChangeLog(List<Object> list) {
-        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
-        
-        List<VersioningDto.ChangeLogDto> changeLogs = new java.util.ArrayList<>();
-        for (Object item : list) {
-            Map<String, Object> changeLogMap = asMap(item);
-            if (changeLogMap == null) continue;
-            
-            VersioningDto.ChangeLogDto changeLog = VersioningDto.ChangeLogDto.builder()
-                .version(asString(changeLogMap.get("version")))
-                .date(asLocalDateTime(changeLogMap.get("date")))
-                .author(asString(changeLogMap.get("author")))
-                .changes(asString(changeLogMap.get("changes")))
-                .build();
-            changeLogs.add(changeLog);
-        }
-        
-        return changeLogs;
-    }
-    private List<VersioningDto.HistoryDto> mapToHistory(List<Object> list) {
-        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
-        
-        List<VersioningDto.HistoryDto> histories = new java.util.ArrayList<>();
-        for (Object item : list) {
-            Map<String, Object> historyMap = asMap(item);
-            if (historyMap == null) continue;
-            
-            VersioningDto.HistoryDto history = VersioningDto.HistoryDto.builder()
-                .version(asInteger(historyMap.get("version")))
-                .versionTag(asString(historyMap.get("versionTag")))
-                .changedAt(asLocalDateTime(historyMap.get("changedAt")))
-                .changedBy(asString(historyMap.get("changedBy")))
-                .changeType(toUpperEnum(asString(historyMap.get("changeType"))))
-                .storage(mapToStorage(asMap(historyMap.get("storage"))))
-                .build();
-            histories.add(history);
-        }
-        
-        return histories;
-    }
-    private MetadataDto.FileSystemDto mapToFileSystem(Map<String, Object> map) { 
+    
+    private MetadataDto.FileSystemDto mapToFileSystem(Map<String, Object> map) {
         if (map == null || map.isEmpty()) return null;
         return MetadataDto.FileSystemDto.builder()
-            .createdAt(asLocalDateTime(map.get("createdAt")))
-            .modifiedAt(asLocalDateTime(map.get("modifiedAt")))
-            .owner(asString(map.get("owner")))
-            .permissions(asString(map.get("permissions")))
+            .dateAdded(asString(map.get("dateAdded")))
+            .dateModified(asString(map.get("dateModified")))
+            .originalFilename(asString(map.get("originalFilename")))
+            .originalMD5(asString(map.get("originalMD5")))
+            .originalFileSize(asLong(map.get("originalFileSize")))
+            .originalMimeType(asString(map.get("originalMimeType")))
+            .archiveMD5(asString(map.get("archiveMD5")))
+            .archiveFileSize(asLong(map.get("archiveFileSize")))
             .build();
     }
-    private MetadataDto.OriginalFileDto mapToOriginalFile(Map<String, Object> map) {
+    
+    private MetadataDto.OriginalDocumentDto mapToOriginalDocument(Map<String, Object> map) {
         if (map == null || map.isEmpty()) return null;
-        return MetadataDto.OriginalFileDto.builder()
-            .name(asString(map.get("name")))
-            .path(asString(map.get("path")))
-            .source(asString(map.get("source")))
+        return MetadataDto.OriginalDocumentDto.builder()
+            .dcFormat(asString(map.get("dcFormat")))
+            .dcTitle(asString(map.get("dcTitle")))
+            .dcCreator(asString(map.get("dcCreator")))
+            .dcDescription(asString(map.get("dcDescription")))
+            .dcSubject(asString(map.get("dcSubject")))
+            .xmpCreateDate(asString(map.get("xmpCreateDate")))
+            .xmpCreatorTool(asString(map.get("xmpCreatorTool")))
+            .xmpModifyDate(asString(map.get("xmpModifyDate")))
+            .xmpMetadataDate(asString(map.get("xmpMetadataDate")))
+            .xmpDocumentID(asString(map.get("xmpDocumentID")))
+            .xmpInstanceID(asString(map.get("xmpInstanceID")))
+            .pdfKeywords(asString(map.get("pdfKeywords")))
+            .pdfProducer(asString(map.get("pdfProducer")))
+            .pdfaidPart(asInteger(map.get("pdfaidPart")))
+            .pdfaidConformance(asString(map.get("pdfaidConformance")))
             .build();
     }
-    private MetadataDto.ArchivedFileDto mapToArchivedFile(Map<String, Object> map) {
+    private MetadataDto.ArchivedDocumentDto mapToArchivedDocument(Map<String, Object> map) {
         if (map == null || map.isEmpty()) return null;
-        return MetadataDto.ArchivedFileDto.builder()
-            .name(asString(map.get("name")))
-            .path(asString(map.get("path")))
-            .archivedAt(asLocalDateTime(map.get("archivedAt")))
+        return MetadataDto.ArchivedDocumentDto.builder()
+            .dcFormat(asString(map.get("dcFormat")))
+            .dcTitle(asString(map.get("dcTitle")))
+            .dcCreator(asString(map.get("dcCreator")))
+            .pdfProducer(asString(map.get("pdfProducer")))
+            .xmpCreateDate(asString(map.get("xmpCreateDate")))
+            .xmpModifyDate(asString(map.get("xmpModifyDate")))
+            .xmpMetadataDate(asString(map.get("xmpMetadataDate")))
+            .xmpCreatorTool(asString(map.get("xmpCreatorTool")))
+            .xmpDocumentID(asString(map.get("xmpDocumentID")))
+            .pdfaidPart(asInteger(map.get("pdfaidPart")))
+            .pdfaidConformance(asString(map.get("pdfaidConformance")))
             .build();
     }
     private MetadataDto.TechnicalDto mapToTechnical(Map<String, Object> map) { 
         if (map == null || map.isEmpty()) return null;
         return MetadataDto.TechnicalDto.builder()
-            .format(asString(map.get("format")))
-            .mimeType(asString(map.get("mimeType")))
-            .size(asLong(map.get("size")))
             .encoding(asString(map.get("encoding")))
+            .lineEnding(asString(map.get("lineEnding")))
+            .bom(asBoolean(map.get("bom")))
+            .compression(asString(map.get("compression")))
+            .pages(asInteger(map.get("pages")))
+            .wordCount(asInteger(map.get("wordCount")))
+            .characterCount(asInteger(map.get("characterCount")))
             .build();
     }
-    private List<AuditDto.ChangeHistoryDto> mapToChangeHistory(List<Object> list) { return null; }
-    private List<AuditDto.AccessLogDto> mapToAccessLog(List<Object> list) { return null; }
+    private SecurityDto mapToSecurityDto(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return SecurityDto.builder()
+            .encryption(asString(map.get("encryption")))
+            .watermark(asBoolean(map.get("watermark")))
+            .digitalSignature(asBoolean(map.get("digitalSignature")))
+            .accessLogging(asBoolean(map.get("accessLogging")))
+            .permissions(mapToSecurityPermissions(asMap(map.get("permissions"))))
+            .build();
+    }
+    
+    private SecurityDto.PermissionsDto mapToSecurityPermissions(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return SecurityDto.PermissionsDto.builder()
+            .read(asList(map.get("read")))
+            .write(asList(map.get("write")))
+            .delete(asList(map.get("delete")))
+            .share(asList(map.get("share")))
+            .build();
+    }
+    
+    private VersioningDto.CurrentDto mapToCurrent(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) return null;
+        return VersioningDto.CurrentDto.builder()
+            .number(asInteger(map.get("number")))
+            .tag(asString(map.get("tag")))
+            .build();
+    }
+    
+    private List<VersioningDto.HistoryDto> mapToVersionHistory(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        List<VersioningDto.HistoryDto> histories = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> historyMap = asMap(item);
+            if (historyMap == null) continue;
+            VersioningDto.HistoryDto history = VersioningDto.HistoryDto.builder()
+                .version(asInteger(historyMap.get("version")))
+                .tag(asString(historyMap.get("tag")))
+                .changedAt(asString(historyMap.get("changedAt")))
+                .changedBy(asString(historyMap.get("changedBy")))
+                .changeType(asString(historyMap.get("changeType")))
+                .changes(asString(historyMap.get("changes")))
+                .changedFields(asList(historyMap.get("changedFields")))
+                .diff(asMap(historyMap.get("diff")))
+                .build();
+            histories.add(history);
+        }
+        return histories;
+    }
+    
+    private List<AuditDto.ChangeHistoryDto> mapToChangeHistory(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        List<AuditDto.ChangeHistoryDto> histories = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> historyMap = asMap(item);
+            if (historyMap == null) continue;
+            AuditDto.ChangeHistoryDto history = AuditDto.ChangeHistoryDto.builder()
+                .action(asString(historyMap.get("action")))
+                .timestamp(asString(historyMap.get("timestamp")))
+                .actor(asString(historyMap.get("actor")))
+                .details(asString(historyMap.get("details")))
+                .ipAddress(asString(historyMap.get("ipAddress")))
+                .userAgent(asString(historyMap.get("userAgent")))
+                .build();
+            histories.add(history);
+        }
+        return histories;
+    }
+    
+    private List<AuditDto.AccessLogDto> mapToAccessLog(List<Object> list) {
+        if (list == null || list.isEmpty()) return new java.util.ArrayList<>();
+        List<AuditDto.AccessLogDto> logs = new java.util.ArrayList<>();
+        for (Object item : list) {
+            Map<String, Object> logMap = asMap(item);
+            if (logMap == null) continue;
+            AuditDto.AccessLogDto log = AuditDto.AccessLogDto.builder()
+                .action(asString(logMap.get("action")))
+                .timestamp(asString(logMap.get("timestamp")))
+                .actor(asString(logMap.get("actor")))
+                .ipAddress(asString(logMap.get("ipAddress")))
+                .userAgent(asString(logMap.get("userAgent")))
+                .build();
+            logs.add(log);
+        }
+        return logs;
+    }
     
     // =====================
     // Normalization helpers

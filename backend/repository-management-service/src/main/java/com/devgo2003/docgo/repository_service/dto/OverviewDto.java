@@ -13,8 +13,6 @@ public class OverviewDto {
     private String title;
     private String status;
     private String documentType;
-    private String contractType;
-    private String category;
     private List<String> tags;
     private String ownerUserId;
     private String language;
