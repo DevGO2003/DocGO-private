@@ -64,21 +64,28 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-	<!-- Redis Dependencies -->
-	<dependency>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-data-redis</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>redis.clients</groupId>
-		<artifactId>jedis</artifactId>
-	</dependency>
+		<!-- UUID v7 Generator (Time-sortable UUID) -->
+		<dependency>
+			<groupId>com.fasterxml.uuid</groupId>
+			<artifactId>java-uuid-generator</artifactId>
+			<version>4.3.0</version>
+		</dependency>
 
-	<!-- Spring Kafka Dependencies -->
-	<dependency>
-		<groupId>org.springframework.kafka</groupId>
-		<artifactId>spring-kafka</artifactId>
-	</dependency>
+		<!-- Redis Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<!-- Spring Kafka Dependencies -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
 
 		<!-- File Upload Support -->
 		<dependency>

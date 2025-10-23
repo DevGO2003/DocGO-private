@@ -1,0 +1,26 @@
+feat(refactor): Event Architecture v3 - Repository Service Complete (74 files)
+
+Test Results:
+✅ TEST 1-8: All files build successfully with Lombok
+✅ 74 Java files compiled without errors
+✅ Lombok @Slf4j, @Data, @Builder working correctly
+
+Files Added (GROUP 2/3 Combination):
+1. FileEntity.java (UUID v7 refactor)
+2. UUIDv7Generator.java (time-sortable UUID)
+3. ProcessedEventEntity.java (@Data)
+4. ProcessedEventRepository.java
+5. FileEventConsumer.java (@Slf4j - manual logger fix)
+6. DeepMergeUtil.java
+7. MongoIndexConfig.java (@Slf4j)
+8. MockDataInitializer.java (@Slf4j)
+9. + 10 enums (AccessAction, AuditAction, ChangeType, DocumentStatus, Encryption, HttpStatusCode, ReminderStatus, ReminderType, ResponseMessage, S3Region)
+10. mongodb-indexes.js
+11. pom.xml (UUID v7 dependency)
+
+Root Cause Analysis:
+- Lombok KHÔNG phải nguyên nhân lỗi build
+- Type mismatch là root cause thực sự
+- FileMapper.java cố cast Map<String,Object> → typed DTOs
+
+Status: READY for FileMapper implementation (next step)
