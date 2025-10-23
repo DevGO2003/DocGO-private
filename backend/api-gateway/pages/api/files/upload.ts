@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import formidable from 'formidable'
 import fs from 'fs'
 import path from 'path'
+import { randomUUID } from 'crypto'
 
 export const config = {
   api: {
@@ -86,6 +87,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Get user ID from header
     const userId = req.headers['x-user-id'] as string || 'system'
+    
+    // Generate or retrieve correlation ID for request tracing
+    const correlationId = (req.headers['x-correlation-id'] as string) || randomUUID()
 
     // Add query parameters for Automation Service
     const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'
@@ -96,12 +100,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     automationUrl.searchParams.append('folder', folder)
     automationUrl.searchParams.append('user_id', automationUserId)
 
-    // Forward to Automation Service
+    // Forward to Automation Service with correlation ID
     const response = await fetch(automationUrl.toString(), {
       method: 'POST',
       body: formData,
       headers: {
         'X-User-ID': userId,
+        'X-Correlation-Id': correlationId,
       },
     })
 
