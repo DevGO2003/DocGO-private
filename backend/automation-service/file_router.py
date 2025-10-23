@@ -778,7 +778,8 @@ async def upload_document(
                     "retryCount": 2
                 })
                 print(f"Contract processing failed: {e}")
-                summary_result = {"summary": f"Tóm tắt hợp đồng {file.filename}"}
+                # KHÔNG dùng fallback - để null nếu AI fail
+                summary_result = None
         
         # Di chuyển khai báo overview_document_type ra ngoài khối if để tránh lỗi scope
         overview_document_type = "CONTRACT" if is_contract else "GENERAL"
@@ -1091,7 +1092,7 @@ async def upload_document(
                             "data": {
                                 "fileId": file_id,
                                 "summary": summary_result.get("summary"),
-                                "contractMetadata": contract_metadata
+                                "contract": contract_metadata
                             },
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }

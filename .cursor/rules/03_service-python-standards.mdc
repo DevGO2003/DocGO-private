@@ -1,0 +1,428 @@
+---
+id: "rule-service-python"
+name: "Chuẩn hóa cấu trúc Python Service"
+description: "Quy tắc cấu trúc thư mục và dependencies cho Python/FastAPI services"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 40
+tags: ["python", "fastapi", "structure"]
+globs:
+  - "**/*.py"
+  - "**/main.py"
+  - "**/routers.py"
+  - "**/config.py"
+  - "**/requirements.txt"
+  - "**/schemas/**/*.py"
+  - "**/services/**/*.py"
+  - "**/models/**/*.py"
+  - "**/automation-service/**/*.*"
+excludeGlobs: []
+scope: "project"
+services: ["automation-service", "*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Chuẩn cấu trúc cho FastAPI services"
+language: vi
+---
+
+# Quy tắc cấu trúc Python Service (FastAPI)
+
+## Cấu trúc thư mục chuẩn
+
+### Thư mục gốc service gồm:
+- `main.py` - Entry point của ứng dụng
+- `routers.py` (hoặc thư mục `routers/`) - API routes
+- `config.py` - Cấu hình ứng dụng
+- `requirements.txt` - Dependencies
+- `README.md` - Tài liệu service
+- `How to run this microservice.md` - Hướng dẫn chạy
+- `__init__.py` - Python package marker
+- Các thư mục dữ liệu phụ (`results/`, `models/`, `schemas/`, `services/` nếu phát sinh)
+
+### Cấu trúc chi tiết:
+```
+automation-service/
+├── main.py                 # FastAPI app entry point
+├── routers.py              # API routes
+├── config.py               # Configuration
+├── requirements.txt        # Dependencies
+├── README.md               # Service documentation
+├── How to run this microservice.md
+├── __init__.py
+├── schemas/                # Pydantic models
+│   ├── __init__.py
+│   ├── request.py
+│   └── response.py
+├── services/               # Business logic
+│   ├── __init__.py
+│   ├── ai_service.py
+│   └── file_service.py
+├── models/                 # Data models
+│   ├── __init__.py
+│   └── document.py
+├── results/                # Output files
+└── .env.example           # Environment template
+```
+
+## File Implementation
+
+### main.py - Entry Point
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import router
+from config import settings
+
+app = FastAPI(
+    title="Automation Service",
+    description="API xử lý tự động tài liệu",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(router, prefix="/api/v1/automation-service")
+
+@app.get("/")
+async def root():
+    return {"message": "Automation Service API", "version": "1.0.0"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "automation-service"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+### routers.py - API Routes
+```python
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi.responses import JSONResponse
+from schemas.request import ProcessRequest, ValidateRequest
+from schemas.response import RestResponse
+from services.ai_service import AIProcessingService
+from services.file_service import FileProcessingService
+import logging
+
+router = APIRouter(
+    tags=["Automation Service"],
+    responses={404: {"description": "Not found"}},
+)
+
+@router.post("/process")
+async def process_api(
+    file: UploadFile = File(None),
+    data: str = Form(None)
+):
+    """
+    Xử lý tài liệu tự động
+    
+    🔹 Đầu vào
+    📄 file (tùy chọn, multipart)
+    Loại: UploadFile
+    Mô tả: File tài liệu (txt, pdf, docx)
+    
+    📄 data (tùy chọn, form)
+    Loại: string
+    Mô tả: Dữ liệu text để xử lý
+    
+    🔹 Đầu ra
+    📝 data
+    Loại: string
+    Mô tả: Kết quả xử lý tài liệu
+    """
+    try:
+        if file:
+            result = await FileProcessingService.process_file(file)
+        elif data:
+            result = await AIProcessingService.process_text(data)
+        else:
+            raise HTTPException(status_code=400, detail="Cần cung cấp file hoặc data")
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Đã xử lý tài liệu thành công",
+            data=result
+        )
+    except Exception as e:
+        logging.error(f"Error processing document: {str(e)}")
+        raise HTTPException(status_code=500, detail="Lỗi xử lý tài liệu")
+
+@router.post("/validate")
+async def validate_api(
+    file: UploadFile = File(None),
+    data: str = Form(None)
+):
+    """
+    Validate tài liệu
+    
+    🔹 Đầu vào
+    📄 file (tùy chọn, multipart)
+    Loại: UploadFile
+    Mô tả: File tài liệu để validate
+    
+    📄 data (tùy chọn, form)
+    Loại: string
+    Mô tả: Dữ liệu text để validate
+    
+    🔹 Đầu ra
+    📝 data
+    Loại: object
+    Mô tả: Kết quả validation
+    """
+    try:
+        if file:
+            result = await FileProcessingService.validate_file(file)
+        elif data:
+            result = await AIProcessingService.validate_text(data)
+        else:
+            raise HTTPException(status_code=400, detail="Cần cung cấp file hoặc data")
+        
+        return RestResponse(
+            statusCode=200,
+            shortMessage="Success",
+            description="Đã validate tài liệu thành công",
+            data=result
+        )
+    except Exception as e:
+        logging.error(f"Error validating document: {str(e)}")
+        raise HTTPException(status_code=500, detail="Lỗi validate tài liệu")
+```
+
+### config.py - Configuration
+```python
+import os
+from dotenv import load_dotenv
+from pydantic import BaseSettings
+
+load_dotenv()
+
+class Settings(BaseSettings):
+    # Service Configuration
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    DEBUG: bool = False
+    
+    # AI Configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
+    # Database Configuration
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    
+    # Redis Configuration
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
+    
+    # Kafka Configuration
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+    KAFKA_FILE_EVENTS_TOPIC: str = os.getenv("KAFKA_FILE_EVENTS_TOPIC", "file.events")
+    
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
+```
+
+## Quản lý Dependencies
+
+### requirements.txt
+```txt
+# Core dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-dotenv==1.0.0
+pydantic==2.5.0
+
+# AI/ML dependencies
+google-generativeai==0.3.2
+openai==1.3.7
+
+# File processing
+python-multipart==0.0.6
+PyPDF2==3.0.1
+python-docx==1.1.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Message queue
+redis==5.0.1
+kafka-python==2.0.2
+
+# HTTP client
+httpx==0.25.2
+requests==2.31.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+```
+
+### Quy tắc dependencies:
+- Mọi thư viện mới phải được thêm vào `requirements.txt` với phiên bản cố định (pinned)
+- Khi dùng SDK/dịch vụ bên ngoài (S3, AI, DB…), thêm ngay dependency tương ứng và cập nhật hướng dẫn cài đặt trong `How to run this microservice.md`
+- Nếu tách phụ thuộc cho dev/test, dùng thêm `requirements-dev.txt` (không bắt buộc)
+
+## Error Handling
+
+### Xử lý lỗi chủ động
+```python
+from fastapi import HTTPException
+
+# Business logic errors
+if not user:
+    raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
+
+if user.email != new_email and email_exists(new_email):
+    raise HTTPException(status_code=409, detail="Email đã được sử dụng")
+```
+
+### Middleware cho lỗi không lường trước
+```python
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import logging
+import traceback
+
+@app.middleware("http")
+async def error_handler(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}")
+        logging.error(traceback.format_exc())
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "apiVersion": "v1",
+                "statusCode": 500,
+                "shortMessage": "Internal Server Error",
+                "description": "Đã xảy ra lỗi không lường trước",
+                "data": None,
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "requestId": str(uuid4()),
+                "path": str(request.url.path)
+            }
+        )
+```
+
+## Pydantic Schemas
+
+### schemas/request.py
+```python
+from pydantic import BaseModel, Field
+from typing import Optional
+
+class ProcessRequest(BaseModel):
+    data: Optional[str] = Field(None, description="Dữ liệu text để xử lý")
+
+class ValidateRequest(BaseModel):
+    data: Optional[str] = Field(None, description="Dữ liệu text để validate")
+```
+
+### schemas/response.py
+```python
+from pydantic import BaseModel
+from typing import Optional, Any
+from datetime import datetime
+from uuid import uuid4
+
+class RestResponse(BaseModel):
+    apiVersion: str = "v1"
+    statusCode: int
+    shortMessage: str
+    description: str
+    data: Optional[Any] = None
+    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
+    requestId: str = Field(default_factory=lambda: str(uuid4()))
+    path: str
+```
+
+## Service Layer
+
+### services/ai_service.py
+```python
+import google.generativeai as genai
+from config import settings
+
+class AIProcessingService:
+    def __init__(self):
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        self.model = genai.GenerativeModel('gemini-pro')
+    
+    async def process_text(self, text: str) -> str:
+        """Xử lý text bằng AI"""
+        try:
+            response = self.model.generate_content(text)
+            return response.text
+        except Exception as e:
+            raise Exception(f"Lỗi xử lý AI: {str(e)}")
+    
+    async def validate_text(self, text: str) -> dict:
+        """Validate text"""
+        # Implementation
+        pass
+```
+
+### services/file_service.py
+```python
+from fastapi import UploadFile
+import PyPDF2
+from docx import Document
+
+class FileProcessingService:
+    @staticmethod
+    async def process_file(file: UploadFile) -> str:
+        """Xử lý file upload"""
+        content = await file.read()
+        
+        if file.content_type == "text/plain":
+            return content.decode("utf-8")
+        elif file.content_type == "application/pdf":
+            return await FileProcessingService._extract_pdf_text(content)
+        elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return await FileProcessingService._extract_docx_text(content)
+        else:
+            raise Exception("Loại file không được hỗ trợ")
+    
+    @staticmethod
+    async def _extract_pdf_text(content: bytes) -> str:
+        """Trích xuất text từ PDF"""
+        # Implementation
+        pass
+    
+    @staticmethod
+    async def _extract_docx_text(content: bytes) -> str:
+        """Trích xuất text từ DOCX"""
+        # Implementation
+        pass
+```
+
+---
+
+**Lưu ý**: Tất cả Python services phải tuân thủ cấu trúc này để đảm bảo tính nhất quán và dễ bảo trì.

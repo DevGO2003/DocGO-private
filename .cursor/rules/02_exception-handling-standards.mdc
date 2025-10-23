@@ -1,0 +1,383 @@
+---
+id: "rule-exception-handling"
+name: "Chuẩn hóa Exception Handling"
+description: "Quy tắc xử lý exception và error handling cho các microservices"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 31
+tags: ["exceptions", "error-handling", "logging"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["code", "chat"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-23T00:00:00Z"
+notes: "Chuẩn hóa exception để đồng bộ error handling"
+language: vi
+---
+
+# Chuẩn hóa Exception Handling
+
+## Java (Spring Boot) - GlobalExceptionHandler
+
+Sử dụng `GlobalExceptionHandler` hiện có để map các exception thành `RestResponse` với mã HTTP tương ứng: 400/404/409/500 và tổng hợp lỗi validation từ `MethodArgumentNotValidException`.
+
+### GlobalExceptionHandler Implementation
+```java
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<RestResponse<ValidationError>> handleValidationException(
+            MethodArgumentNotValidException ex) {
+        
+        List<String> errors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.toList());
+
+        ValidationError validationError = ValidationError.builder()
+            .errors(errors)
+            .build();
+
+        RestResponse<ValidationError> response = RestResponse.<ValidationError>builder()
+            .statusCode(400)
+            .shortMessage("Bad Request")
+            .description("Dữ liệu đầu vào không hợp lệ")
+            .data(validationError)
+            .build();
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<RestResponse<Void>> handleEntityNotFoundException(
+            EntityNotFoundException ex) {
+        
+        RestResponse<Void> response = RestResponse.<Void>builder()
+            .statusCode(404)
+            .shortMessage("Not Found")
+            .description(ex.getMessage())
+            .data(null)
+            .build();
+
+        return ResponseEntity.status(404).body(response);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<RestResponse<Void>> handleConflictException(
+            ConflictException ex) {
+        
+        RestResponse<Void> response = RestResponse.<Void>builder()
+            .statusCode(409)
+            .shortMessage("Conflict")
+            .description(ex.getMessage())
+            .data(null)
+            .build();
+
+        return ResponseEntity.status(409).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<RestResponse<Void>> handleGenericException(Exception ex) {
+        log.error("Unexpected error occurred", ex);
+        
+        RestResponse<Void> response = RestResponse.<Void>builder()
+            .statusCode(500)
+            .shortMessage("Internal Server Error")
+            .description("Đã xảy ra lỗi không lường trước")
+            .data(null)
+            .build();
+
+        return ResponseEntity.status(500).body(response);
+    }
+}
+```
+
+### Custom Exception Classes
+```java
+// EntityNotFoundException
+public class EntityNotFoundException extends RuntimeException {
+    public EntityNotFoundException(String message) {
+        super(message);
+    }
+}
+
+// ConflictException
+public class ConflictException extends RuntimeException {
+    public ConflictException(String message) {
+        super(message);
+    }
+}
+
+// ValidationError
+@Data
+@Builder
+public class ValidationError {
+    private List<String> errors;
+}
+```
+
+## Python (FastAPI) - Exception Handling
+
+Với các lỗi dự kiến, ném `HTTPException(status_code=...)` hoặc tạo tương đương `RestResponse`; với lỗi không lường trước, dùng middleware/exception handler để trả về `RestResponse` 500 có `requestId`, `timestamp`, `path`.
+
+### FastAPI Exception Handler
+```python
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+import logging
+import traceback
+from datetime import datetime
+from uuid import uuid4
+
+app = FastAPI()
+
+# Custom exception classes
+class EntityNotFoundException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+class ConflictException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+# Exception handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        field = ".".join(str(x) for x in error["loc"])
+        message = error["msg"]
+        errors.append(f"{field}: {message}")
+    
+    response_data = {
+        "apiVersion": "v1",
+        "statusCode": 400,
+        "shortMessage": "Bad Request",
+        "description": "Dữ liệu đầu vào không hợp lệ",
+        "data": {"errors": errors},
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "requestId": str(uuid4()),
+        "path": str(request.url.path)
+    }
+    
+    return JSONResponse(status_code=400, content=response_data)
+
+@app.exception_handler(EntityNotFoundException)
+async def entity_not_found_exception_handler(request: Request, exc: EntityNotFoundException):
+    response_data = {
+        "apiVersion": "v1",
+        "statusCode": 404,
+        "shortMessage": "Not Found",
+        "description": exc.message,
+        "data": None,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "requestId": str(uuid4()),
+        "path": str(request.url.path)
+    }
+    
+    return JSONResponse(status_code=404, content=response_data)
+
+@app.exception_handler(ConflictException)
+async def conflict_exception_handler(request: Request, exc: ConflictException):
+    response_data = {
+        "apiVersion": "v1",
+        "statusCode": 409,
+        "shortMessage": "Conflict",
+        "description": exc.message,
+        "data": None,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "requestId": str(uuid4()),
+        "path": str(request.url.path)
+    }
+    
+    return JSONResponse(status_code=409, content=response_data)
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Unexpected error occurred: {str(exc)}")
+    logging.error(traceback.format_exc())
+    
+    response_data = {
+        "apiVersion": "v1",
+        "statusCode": 500,
+        "shortMessage": "Internal Server Error",
+        "description": "Đã xảy ra lỗi không lường trước",
+        "data": None,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "requestId": str(uuid4()),
+        "path": str(request.url.path)
+    }
+    
+    return JSONResponse(status_code=500, content=response_data)
+```
+
+### Usage trong Service Layer
+```python
+# Service layer
+async def get_user_by_id(user_id: str):
+    user = await user_repository.find_by_id(user_id)
+    if not user:
+        raise EntityNotFoundException(f"Không tìm thấy người dùng với ID: {user_id}")
+    return user
+
+async def create_user(user_data: UserCreateRequest):
+    existing_user = await user_repository.find_by_email(user_data.email)
+    if existing_user:
+        raise ConflictException(f"Email {user_data.email} đã được sử dụng")
+    
+    user = await user_repository.create(user_data)
+    return user
+
+# Controller layer
+@app.post("/users")
+async def create_user(user_data: UserCreateRequest):
+    try:
+        user = await user_service.create_user(user_data)
+        return {
+            "apiVersion": "v1",
+            "statusCode": 201,
+            "shortMessage": "Created",
+            "description": "Đã tạo người dùng thành công",
+            "data": user,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "requestId": str(uuid4()),
+            "path": "/api/v1/user-management-service/users"
+        }
+    except ConflictException:
+        raise  # Let the exception handler deal with it
+    except Exception as e:
+        logging.error(f"Error creating user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+## Error Logging và Monitoring
+
+### Java (Spring Boot)
+```java
+@Component
+@Slf4j
+public class ErrorLogger {
+    
+    public void logError(Exception ex, String context) {
+        log.error("Error in context: {}", context, ex);
+        
+        // Send to monitoring system
+        // sendToMonitoring(ex, context);
+    }
+    
+    public void logValidationError(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.toList());
+            
+        log.warn("Validation errors: {}", errors);
+    }
+}
+```
+
+### Python (FastAPI)
+```python
+import logging
+import traceback
+from datetime import datetime
+
+class ErrorLogger:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+    
+    def log_error(self, exception: Exception, context: str):
+        self.logger.error(f"Error in context: {context}")
+        self.logger.error(f"Exception: {str(exception)}")
+        self.logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Send to monitoring system
+        # self.send_to_monitoring(exception, context)
+    
+    def log_validation_error(self, validation_errors: list):
+        self.logger.warning(f"Validation errors: {validation_errors}")
+```
+
+## Error Response Examples
+
+### Validation Error (400)
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 400,
+  "shortMessage": "Bad Request",
+  "description": "Dữ liệu đầu vào không hợp lệ",
+  "data": {
+    "errors": [
+      "email: Email không đúng định dạng",
+      "name: Tên không được để trống"
+    ]
+  },
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/user-management-service/users"
+}
+```
+
+### Not Found Error (404)
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 404,
+  "shortMessage": "Not Found",
+  "description": "Không tìm thấy người dùng với ID: user-123",
+  "data": null,
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/user-management-service/users/user-123"
+}
+```
+
+### Conflict Error (409)
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 409,
+  "shortMessage": "Conflict",
+  "description": "Email john@example.com đã được sử dụng",
+  "data": null,
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/user-management-service/users"
+}
+```
+
+### Internal Server Error (500)
+```json
+{
+  "apiVersion": "v1",
+  "statusCode": 500,
+  "shortMessage": "Internal Server Error",
+  "description": "Đã xảy ra lỗi không lường trước",
+  "data": null,
+  "timestamp": "2024-01-01T00:00:00Z",
+  "requestId": "uuid-here",
+  "path": "/api/v1/user-management-service/users"
+}
+```
+
+---
+
+**Lưu ý**: Tất cả exception handling phải tuân thủ format RestResponse để đảm bảo tính nhất quán và dễ dàng xử lý ở client.

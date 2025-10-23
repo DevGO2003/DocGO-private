@@ -1,0 +1,171 @@
+---
+alwaysApply: false
+**/*.java, **/*.py, **/*.ts, **/*.tsx, **/*.js, **/*.jsx, **/*.json, **/*.yaml, **/*.yml, **/*.xml, **/*.md, **/*.txt, **/*.html, **/src/**/*.*, **/config/**/*.*, **/scripts/**/*.*
+
+---
+# Tổng quan kiến trúc DocGO
+
+Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách riêng để dễ quản lý và bảo trì.
+
+## 📋 Danh mục rule files
+
+### 1. API Standards
+- **01_api-url-standards.mdc** - Quy tắc URL và endpoint
+- **01_api-response-standards.mdc** - Chuẩn hóa response format
+- **01_api-swagger-standards.mdc** - Tài liệu API Swagger
+
+### 2. Event & Exception Standards
+- **02_event-payload-standards.mdc** - Chuẩn hóa event payload
+- **02_exception-handling-standards.mdc** - Xử lý exception và error
+
+### 3. Service Structure Standards
+- **03_service-python-standards.mdc** - Cấu trúc Python/FastAPI
+- **03_service-java-standards.mdc** - Cấu trúc Java/Spring Boot
+- **03_service-ports-standards.mdc** - Port mapping và docs
+
+### 4. Environment & Git Standards
+- **04_environment-management-standards.mdc** - Quản lý environment
+- **04_git-management-standards.mdc** - Quản lý Git và workflow
+
+### 5. Utility Standards
+- **05_memory-actor-standards.mdc** - Chuẩn hóa Actor cho Audit/Event
+- **06_chat-utilities.mdc** - Quy tắc tiện ích chat
+- **07_no-auto-md-creation.mdc** - Ngăn chặn tạo file MD tự động
+- **08_auto-ignore.mdc** - Tự động thêm vào .cursorignore
+- **file-checking-standards.mdc** - Quy tắc kiểm tra file tồn tại
+
+### 6. Reference Standards
+- **globs-reference-from-windsurf.mdc** - Tham khảo globs patterns từ .windsurf
+- **globs-integration-summary.mdc** - Tổng kết tích hợp globs patterns
+
+## 🎯 Mục tiêu chung
+- Chuẩn hóa URL, payload, error handling giữa các service
+- Chuẩn hóa response envelope và event payload
+- Đồng nhất cách viết tài liệu API
+- Tối ưu workflow phát triển/triển khai
+- Bảo mật thông tin nhạy cảm và quản lý Git
+
+## 🏗️ Cấu trúc Microservices
+
+### Danh sách Services và Cấu hình
+
+| Service | Type | Group ID | Artifact ID | Package Structure | Port | Docs | Status |
+|---------|------|----------|-------------|-------------------|------|------|--------|
+| **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` | ✅ Active |
+| **User Management** | Spring Boot | `com.devgo2003.docgo.backend` | `user-service` | `com.devgo2003.docgo.backend.user_service` | 8001 | `/docs` | ✅ Active |
+| **Repository Management** | Spring Boot | `com.devgo2003.docgo.repository-management-service` | `repository-service` | `com.devgo2003.docgo.repository_service` | 8002 | `/docs` | ✅ Active |
+| **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` | ✅ Active |
+| **Web App** | Next.js | N/A | `web-app` | N/A (Node.js) | 3000 | N/A | ✅ Active |
+
+### Infrastructure Services
+
+| Service | Type | Port | Purpose | Status |
+|---------|------|------|---------|--------|
+| **Kafka** | Confluent | 9092 | Message Broker | ✅ Active |
+| **Zookeeper** | Confluent | 2181 | Kafka Coordination | ✅ Active |
+| **Kafka UI** | Provectus | 8080 | Kafka Monitoring | ✅ Active |
+| **Redis** | Redis | 6379 | Cache & Session | ✅ Active |
+| **MongoDB** | Atlas Cloud | N/A | Primary Database | ✅ Active |
+
+### Quy tắc đặt tên
+
+#### Java (Spring Boot)
+- **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case)
+- **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
+- **Package Structure**: Đổi dấu `-` thành `_` trong package structure
+- **Version**: `1.0.0` (khởi đầu), tăng theo semantic versioning
+
+#### Node.js (Next.js)
+- **Package Name**: Tên service (kebab-case)
+- **Version**: `1.0.0` (khởi đầu)
+
+#### Python (FastAPI)
+- **Module Structure**: Tên service (snake_case)
+- **Version**: Trong `requirements.txt` hoặc `pyproject.toml`
+
+## 📚 Cách sử dụng
+1. **Phát triển API mới**: xem `01_api-*` standards
+2. **Xử lý events/exceptions**: xem `02_event-*` và `02_exception-*` standards
+3. **Tạo service mới**: xem `03_service-*` standards
+4. **Cấu hình môi trường**: xem `04_environment-*` và `04_git-*` standards
+5. **Quản lý Actor/Audit**: xem `05_memory-actor-standards.mdc`
+6. **Tiện ích chat**: xem `06_chat-utilities.mdc`
+7. **Quản lý file**: xem `07_no-auto-md-creation.mdc`, `08_auto-ignore.mdc`, `file-checking-standards.mdc`
+8. **Tham khảo globs**: xem `globs-reference-from-windsurf.mdc`, `globs-integration-summary.mdc`
+
+## 🚀 Hiện trạng dự án
+
+### ✅ Đã hoàn thành
+- **Kiến trúc microservices** với 5 services chính
+- **Event-driven architecture** với Kafka
+- **API Gateway** với load balancing và circuit breaker
+- **Repository Management Service** (thay thế Document Management)
+- **Automation Service** với AI processing
+- **Web App Frontend** với Next.js
+- **Infrastructure** đầy đủ (Kafka, Redis, MongoDB Atlas)
+- **Docker Compose** setup hoàn chỉnh
+- **MongoDB Atlas** đã được dọn dẹp (chỉ còn database chính)
+
+### 🔄 Đang phát triển
+- **User Management Service** - Authentication & Authorization
+- **Event Architecture V3** - Chuẩn hóa event payload
+- **API Documentation** - Swagger/OpenAPI cho tất cả services
+
+### 📋 Cần làm
+- **Testing** - Unit tests và integration tests
+- **Monitoring** - Health checks và metrics
+- **Security** - Authentication và authorization
+- **Performance** - Optimization và caching
+
+## 🎯 Globs Patterns
+Tất cả rules đã được cập nhật với globs patterns từ .windsurf để tối ưu hóa rule triggering:
+- **File types**: `**/*.java`, `**/*.py`, `**/*.ts`, `**/*.js`, `**/*.json`, `**/*.yaml`, `**/*.md`
+- **Directories**: `**/src/**/*.*`, `**/config/**/*.*`, `**/scripts/**/*.*`
+- **Service-specific**: `**/user-management-service/**/*.*`, `**/automation-service/**/*.*`
+- **Configuration**: `**/Dockerfile*`, `**/docker-compose*.yml`, `**/pom.xml`, `**/requirements.txt`
+
+## 🔄 Cập nhật quy tắc
+1. Sửa file rule tương ứng
+2. Cập nhật file này nếu thay đổi cấu trúc
+3. Commit và push theo workflow đã quy định
+
+## 🗂️ Cấu trúc thư mục dự án
+
+```
+DocGO-private-new/
+├── backend/                          # Backend services
+│   ├── api-gateway/                  # Next.js API Gateway (Port 8000)
+│   ├── user-management-service/      # Spring Boot User Service (Port 8001)
+│   ├── repository-management-service/ # Spring Boot Repository Service (Port 8002)
+│   ├── automation-service/           # FastAPI Automation Service (Port 8003)
+│   └── EVENT-ARCHITECTURE-V3.md     # Event architecture documentation
+├── frontend/                         # Frontend applications
+│   └── web-app/                     # Next.js Web App (Port 3000)
+├── .cursor/                          # Cursor IDE configuration
+│   ├── rules/                       # Cursor rules (.mdc files)
+│   ├── commands/                    # Cursor commands
+│   └── mcp.json                     # MCP server configuration
+├── docker-compose.yml               # Docker services orchestration
+├── .env                            # Environment variables
+└── README.md                       # Project documentation
+```
+
+## 🛠️ Công cụ và công nghệ
+
+### Backend Stack
+- **Java/Spring Boot** - User & Repository Management Services
+- **Python/FastAPI** - Automation Service với AI processing
+- **Node.js/Next.js** - API Gateway và Web App
+- **Kafka** - Event-driven messaging
+- **Redis** - Caching và session storage
+- **MongoDB Atlas** - Primary database
+
+### Development Tools
+- **Docker & Docker Compose** - Containerization
+- **Cursor IDE** - AI-powered development
+- **MCP (Model Context Protocol)** - MongoDB, GitHub, Chrome integration
+- **Swagger/OpenAPI** - API documentation
+
+---
+
+**Lưu ý**: Tất cả rule có `alwaysApply: true` để tự động áp dụng cho toàn bộ project.

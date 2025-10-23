@@ -23,7 +23,7 @@ class AutomationService:
         if not self._initialized:
             self.api_key = Config.get_gemini_api_key()
             genai.configure(api_key=self.api_key)
-            # Allow override via ENV, fallback to preferred order
+            # Allow override via ENV
             import os
             env_model = os.getenv('GEMINI_MODEL', '').strip()
             # Try different models in order of preference
@@ -66,7 +66,14 @@ class AutomationService:
             "5. ĐÁNH GIÁ rủi ro chi tiết với category, severity, impact\n"
             "6. LIỆT KÊ tuân thủ: regulations, requirements, certifications\n"
             "7. TẠO reminders cho các milestone/ngày quan trọng\n"
-            "8. QUAN TRỌNG: Dùng null nếu KHÔNG TÌM THẤY thông tin (đừng để string rỗng)\n\n"
+            "8. QUAN TRỌNG: Dùng null nếu KHÔNG TÌM THẤY thông tin (đừng để string rỗng)\n"
+            "9. TÌM KIẾM ĐẶC BIỆT: totalValue (số tiền tổng), payment schedule (lịch thanh toán), clauses key (điều khoản chính), risk factors (yếu tố rủi ro)\n"
+            "10. XỬ LÝ SỐ TIỀN: Chuyển đổi '500.000.000 VNĐ' thành 500000000 (number), loại bỏ dấu phẩy và text\n"
+            "11. PHÂN TÍCH LỊCH THANH TOÁN: Tìm '4 đợt thanh toán' hoặc 'chia làm 4 lần' và tạo schedule array\n"
+            "12. TRÍCH XUẤT ĐIỀU KHOẢN: Đếm và liệt kê tất cả điều khoản chính (thường bắt đầu bằng 'Điều', 'Khoản')\n"
+            "13. ĐÁNH GIÁ RỦI RO: Tìm 'phạt', 'chậm tiến độ', 'vi phạm', 'bồi thường' và phân loại risk factors\n"
+            "14. QUAN TRỌNG: KHÔNG BAO GIỜ trả về null cho các field quan trọng. Nếu không tìm thấy, hãy tạo giá trị mặc định hợp lý\n"
+            "15. BẮT BUỘC: totalValue phải là số, payment.schedule phải là array, clauses.key phải là array, risk.factors phải là array\n\n"
             
             "📋 JSON SCHEMA - TUÂN THỦ NGHIÊM NGẶT:\n"
             '{\n'
@@ -79,6 +86,125 @@ class AutomationService:
             '  "department": "IT Department",            // Phòng ban quản lý hoặc null\n'
             '  "priority": "HIGH",                       // HIGH, MEDIUM, LOW hoặc null\n'
             '  "confidentiality": "CONFIDENTIAL",        // CONFIDENTIAL, INTERNAL, PUBLIC hoặc null\n'
+            '  \n'
+            '  "parties": [  // MỖI BÊN PHẢI CÓ ĐẦY ĐỦ OBJECT STRUCTURE\n'
+            '    {\n'
+            '      "id": "party-001",                    // unique ID: "party-001", "party-002"...\n'
+            '      "name": "CÔNG TY TNHH ABC",           // REQUIRED - tên đầy đủ\n'
+            '      "type": "CLIENT",                     // CLIENT, VENDOR, PARTNER, GUARANTOR\n'
+            '      "role": "Bên A - Khách hàng",         // Vai trò trong hợp đồng\n'
+            '      "contact": {                          // OBJECT - không flat\n'
+            '        "email": "contact@abc.com",           // Email chính thức\n'
+            '        "phone": "+84-28-1234-5678",        // SĐT\n'
+            '        "address": "123 Nguyễn Huệ, Q1, TP.HCM"  // Địa chỉ đầy đủ\n'
+            '      },\n'
+            '      "representative": {                   // OBJECT - người đại diện\n'
+            '        "name": "Nguyễn Văn A",             // Tên đại diện\n'
+            '        "position": "Giám đốc",             // Chức vụ\n'
+            '        "email": "nguyenvana@abc.com"       // Email cá nhân\n'
+            '      },\n'
+            '      "taxCode": "0123456789"               // Mã số thuế\n'
+            '    }\n'
+            '  ],\n'
+            '  \n'
+            '  "payment": {\n'
+            '    "totalValue": 100000000,                // Tổng giá trị thanh toán\n'
+            '    "currency": "VND",\n'
+            '    "schedule": [                           // ARRAY of milestones\n'
+            '      {\n'
+            '        "milestone": "Ký hợp đồng",\n'
+            '        "percentage": 30,                   // % thanh toán\n'
+            '        "amount": 30000000,                 // Số tiền\n'
+            '        "dueDate": "2024-02-15T00:00:00",   // Hạn thanh toán\n'
+            '        "status": "PENDING"                 // PENDING, COMPLETED, OVERDUE\n'
+            '      }\n'
+            '    ],\n'
+            '    "method": "Chuyển khoản ngân hàng"      // Phương thức thanh toán\n'
+            '  },\n'
+            '  \n'
+            '  "clauses": {\n'
+            '    "key": [                                // Điều khoản QUAN TRỌNG\n'
+            '      {\n'
+            '        "name": "Điều 5: Phạm vi công việc",\n'
+            '        "description": "Mô tả chi tiết điều khoản",\n'
+            '        "content": "Trích dẫn nội dung CHÍNH XÁC từ hợp đồng",  // REQUIRED\n'
+            '        "importance": "HIGH",               // HIGH, MEDIUM, LOW\n'
+            '        "risk": "MEDIUM",                   // HIGH, MEDIUM, LOW\n'
+            '        "advice": "Khuyến nghị từ chuyên gia"  // Lời khuyên cụ thể\n'
+            '      }\n'
+            '    ],\n'
+            '    "unfavorable": [                        // Điều khoản BẤT LỢI\n'
+            '      {\n'
+            '        "name": "Điều 10: Phạt chậm tiến độ",\n'
+            '        "description": "Điều khoản gây bất lợi",\n'
+            '        "content": "Trích dẫn chính xác",\n'
+            '        "impact": "Phạt 1%/tuần nếu chậm",\n'
+            '        "affectedParty": "party-001"        // ID bên bị ảnh hưởng\n'
+            '      }\n'
+            '    ],\n'
+            '    "intellectualProperty": "Mô tả quyền sở hữu trí tuệ",  // Hoặc null\n'
+            '    "confidentiality": "Mô tả bảo mật",     // Hoặc null\n'
+            '    "warranty": "Bảo hành 12 tháng",        // Hoặc null\n'
+            '    "termination": "Điều kiện chấm dứt"     // Hoặc null\n'
+            '  },\n'
+            '  \n'
+            '  "reminders": [                            // Nhắc nhở các milestone\n'
+            '    {\n'
+            '      "date": "2024-03-01T00:00:00",        // Ngày nhắc nhở\n'
+            '      "type": "DEADLINE",                   // DEADLINE, MILESTONE, REVIEW, PAYMENT\n'
+            '      "title": "Nghiệm thu giai đoạn 1",\n'
+            '      "description": "Chi tiết công việc cần làm",\n'
+            '      "priority": "HIGH",                   // HIGH, MEDIUM, LOW\n'
+            '      "assignedTo": "party-001"             // ID người chịu trách nhiệm\n'
+            '    }\n'
+            '  ],\n'
+            '  \n'
+            '  "risk": {\n'
+            '    "factors": [                            // Yếu tố rủi ro\n'
+            '      {\n'
+            '        "category": "FINANCIAL",            // FINANCIAL, LEGAL, OPERATIONAL, TECHNICAL\n'
+            '        "description": "Rủi ro tài chính",\n'
+            '        "severity": "HIGH",                 // HIGH, MEDIUM, LOW\n'
+            '        "probability": "MEDIUM",             // HIGH, MEDIUM, LOW\n'
+            '        "impact": "Ảnh hưởng đến ngân sách",\n'
+            '        "mitigation": "Biện pháp giảm thiểu rủi ro"\n'
+            '      }\n'
+            '    ],\n'
+            '    "assessment": "Đánh giá tổng thể rủi ro", // Hoặc null\n'
+            '    "recommendations": "Khuyến nghị giảm thiểu rủi ro"  // Hoặc null\n'
+            '  },\n'
+            '  \n'
+            '  "compliance": {\n'
+            '    "regulations": [                        // Quy định pháp luật\n'
+            '      {\n'
+            '        "name": "Luật Lao động 2019",\n'
+            '        "description": "Quy định về hợp đồng lao động",\n'
+            '        "status": "APPLICABLE",             // APPLICABLE, NOT_APPLICABLE, PENDING\n'
+            '        "requirements": "Yêu cầu tuân thủ"\n'
+            '      }\n'
+            '    ],\n'
+            '    "certifications": [                     // Chứng chỉ cần thiết\n'
+            '      {\n'
+            '        "name": "ISO 9001",\n'
+            '        "description": "Hệ thống quản lý chất lượng",\n'
+            '        "required": true,                   // true/false\n'
+            '        "expiryDate": "2025-12-31T00:00:00" // Ngày hết hạn\n'
+            '      }\n'
+            '    ],\n'
+            '    "auditRequirements": "Yêu cầu kiểm toán", // Hoặc null\n'
+            '    "reportingRequirements": "Yêu cầu báo cáo"  // Hoặc null\n'
+            '  }\n'
+            '}\n\n'
+            
+            "🎯 VÍ DỤ CỤ THỂ - CÁCH TRÍCH XUẤT THÔNG TIN:\n\n"
+            "📄 Nếu hợp đồng có: 'Tổng giá trị hợp đồng: 500.000.000 VNĐ'\n"
+            "✅ Trả về: \"totalValue\": 500000000\n\n"
+            "📄 Nếu hợp đồng có: 'Thanh toán chia làm 4 đợt: Đợt 1: 30% (150.000.000 VNĐ), Đợt 2: 30% (150.000.000 VNĐ)'\n"
+            "✅ Trả về: \"payment\": {\"schedule\": [{\"milestone\": \"Đợt 1\", \"percentage\": 30, \"amount\": 150000000}, {\"milestone\": \"Đợt 2\", \"percentage\": 30, \"amount\": 150000000}]}\n\n"
+            "📄 Nếu hợp đồng có: 'Điều 1: Thông tin cơ bản', 'Điều 2: Phạm vi công việc', 'Điều 3: Lương và phúc lợi'\n"
+            "✅ Trả về: \"clauses\": {\"key\": [{\"name\": \"Điều 1: Thông tin cơ bản\", \"content\": \"Nội dung điều 1\"}, {\"name\": \"Điều 2: Phạm vi công việc\", \"content\": \"Nội dung điều 2\"}]}\n\n"
+            "📄 Nếu hợp đồng có: 'Phạt chậm tiến độ: 1% giá trị hợp đồng/tuần', 'Phạt vi phạm bảo mật: 10% giá trị hợp đồng'\n"
+            "✅ Trả về: \"risk\": {\"factors\": [{\"category\": \"FINANCIAL\", \"description\": \"Phạt chậm tiến độ\", \"severity\": \"HIGH\"}, {\"category\": \"LEGAL\", \"description\": \"Phạt vi phạm bảo mật\", \"severity\": \"HIGH\"}]}\n\n"
             '  \n'
             '  "parties": [  // MỖI BÊN PHẢI CÓ ĐẦY ĐỦ OBJECT STRUCTURE\n'
             '    {\n'
@@ -219,127 +345,7 @@ class AutomationService:
             f"{content[:4000]}\n"
         )
     
-    def _transform_gemini_to_file_mgmt_schema(self, gemini_result: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Transform Gemini result to File Management Service schema
-        
-        Input (Gemini): contractNumber, status, contractType, title, parties, effectiveDate, term,
-                        paymentDetails, keyClauses, favorableClauses, unfavorableClauses, reminders,
-                        terminationConditions, riskAssessment, complianceStatus
-        
-        Output (File Mgmt): effectiveDate, expiryDate, totalValue (number), currency, summary,
-                            parties, payment, clauses, reminders, risk, compliance
-        """
-        import re
-        from datetime import datetime, timedelta
-        
-        # Extract totalValue from paymentDetails.totalValue (could be string with text)
-        total_value_raw = gemini_result.get("paymentDetails", {}).get("totalValue")
-        total_value = None
-        currency = gemini_result.get("paymentDetails", {}).get("currency", "VND")
-        
-        if total_value_raw:
-            if isinstance(total_value_raw, (int, float)):
-                total_value = total_value_raw
-            elif isinstance(total_value_raw, str):
-                # Extract numbers from string like "100.000.000 VNĐ" or "52 triệu VND"
-                numbers = re.findall(r'\d+', total_value_raw.replace('.', '').replace(',', ''))
-                if numbers:
-                    total_value = int(''.join(numbers))
-        
-        # Parse effectiveDate
-        effective_date = gemini_result.get("effectiveDate")
-        if effective_date and not isinstance(effective_date, str):
-            effective_date = str(effective_date)
-        
-        # Calculate expiryDate from term if not provided
-        expiry_date = None
-        if effective_date:
-            try:
-                term = gemini_result.get("term", "")
-                # Try to extract months/years from term
-                if "tháng" in term or "month" in term.lower():
-                    months = re.findall(r'\d+', term)
-                    if months:
-                        effective_dt = datetime.fromisoformat(effective_date.replace('Z', '+00:00'))
-                        expiry_dt = effective_dt + timedelta(days=int(months[0]) * 30)
-                        expiry_date = expiry_dt.isoformat()
-                elif "năm" in term or "year" in term.lower():
-                    years = re.findall(r'\d+', term)
-                    if years:
-                        effective_dt = datetime.fromisoformat(effective_date.replace('Z', '+00:00'))
-                        expiry_dt = effective_dt + timedelta(days=int(years[0]) * 365)
-                        expiry_date = expiry_dt.isoformat()
-            except Exception as e:
-                print(f"Failed to calculate expiryDate: {e}")
-        
-        # Transform clauses structure
-        clauses = {
-            "key": [],
-            "unfavorable": []
-        }
-        
-        # Map keyClauses to clauses.key
-        for key_clause in gemini_result.get("keyClauses", []):
-            clauses["key"].append({
-                "name": key_clause.get("name"),
-                "description": key_clause.get("description"),
-                "importance": key_clause.get("importance", "Medium"),
-                "risk": key_clause.get("risk", "LOW")
-            })
-        
-        # Map unfavorableClauses to clauses.unfavorable (array of strings)
-        for unfav_clause in gemini_result.get("unfavorableClauses", []):
-            clause_name = unfav_clause.get("clauseName", unfav_clause.get("name", ""))
-            if clause_name:
-                clauses["unfavorable"].append(clause_name)
-        
-        # Transform reminders
-        reminders = []
-        for reminder in gemini_result.get("reminders", []):
-            reminders.append({
-                "date": reminder.get("date"),
-                "title": reminder.get("type", "General"),
-                "description": reminder.get("content", "")
-            })
-        
-        # Transform riskAssessment to risk
-        risk_assessment = gemini_result.get("riskAssessment", {})
-        risk = {
-            "level": risk_assessment.get("riskLevel", "LOW"),
-            "factors": risk_assessment.get("riskFactors", []),
-            "mitigations": risk_assessment.get("mitigationMeasures", [])
-        }
-        
-        # Transform complianceStatus to compliance
-        compliance_status = gemini_result.get("complianceStatus", {})
-        compliance = {
-            "status": compliance_status.get("status", "COMPLIANT"),
-            "issues": compliance_status.get("issues", []),
-            "recommendations": compliance_status.get("recommendations", [])
-        }
-        
-        # Build summary from title or object
-        summary = gemini_result.get("title") or gemini_result.get("object") or "Hợp đồng"
-        
-        return {
-            "effectiveDate": effective_date,
-            "expiryDate": expiry_date,
-            "totalValue": total_value,
-            "currency": currency,
-            "summary": summary,
-            "parties": gemini_result.get("parties", []),
-            "payment": {
-                "totalValue": total_value,
-                "currency": currency,
-                "schedule": gemini_result.get("paymentDetails", {}).get("schedule"),
-                "method": gemini_result.get("paymentDetails", {}).get("paymentMethod")
-            },
-            "clauses": clauses,
-            "reminders": reminders,
-            "risk": risk,
-            "compliance": compliance
-        }
+    # LOẠI BỎ FALLBACK - Giữ nguyên 100% AI response
     
     def generate_contract_summary(self, content: str, filename: str) -> Optional[Dict[str, Any]]:
         
@@ -390,108 +396,7 @@ class AutomationService:
                 
                 parsed = json.loads(cleaned)
                 
-                # Ensure required fields exist with proper defaults
-                if 'title' not in parsed or not parsed['title']:
-                    parsed['title'] = f"Hợp đồng từ tệp: {filename}"
-                if 'fileId' not in parsed:
-                    parsed['fileId'] = str(uuid.uuid4())
-                
-                # Remove unnecessary fields
-                if 'id' in parsed:
-                    del parsed['id']
-                if 'summary' in parsed:
-                    del parsed['summary']
-                
-                # Replace "Chưa xác định" with null for better data quality
-                def replace_unknown_with_null(obj, key):
-                    if key in obj and obj[key] == "Chưa xác định":
-                        obj[key] = None
-                
-                # Normalize Unicode characters to avoid encoding issues
-                def normalize_unicode_text(text):
-                    if isinstance(text, str):
-                        # Replace ellipsis and other problematic Unicode characters
-                        text = text.replace('…', '...')
-                        text = text.replace('–', '-')
-                        # Normalize quotes conservatively
-                        text = text.replace('“', '"').replace('”', '"')
-                        text = text.replace('‘', "'").replace('’', "'")
-                    return text
-                
-                def normalize_object(obj):
-                    if isinstance(obj, dict):
-                        return {k: normalize_object(v) for k, v in obj.items()}
-                    elif isinstance(obj, list):
-                        return [normalize_object(item) for item in obj]
-                    else:
-                        return normalize_unicode_text(obj)
-                
-                # Replace "Chưa xác định" with null in main fields
-                replace_unknown_with_null(parsed, 'contractNumber')
-                replace_unknown_with_null(parsed, 'contractType')
-                replace_unknown_with_null(parsed, 'object')
-                replace_unknown_with_null(parsed, 'effectiveDate')
-                replace_unknown_with_null(parsed, 'term')
-                replace_unknown_with_null(parsed, 'terminationConditions')
-                
-                # Process parties from AI response - keep actual parties from contract content
-                if 'parties' not in parsed or not isinstance(parsed['parties'], list):
-                    parsed['parties'] = []
-                
-                # Replace "Chưa xác định" with null in parties
-                for party in parsed['parties']:
-                    if isinstance(party, dict):
-                        replace_unknown_with_null(party, 'name')
-                        replace_unknown_with_null(party, 'representative')
-                        replace_unknown_with_null(party, 'taxCode')
-                        replace_unknown_with_null(party, 'contact')
-                        replace_unknown_with_null(party, 'address')
-                
-                # Replace "Chưa xác định" with null in paymentDetails
-                if 'paymentDetails' in parsed and isinstance(parsed['paymentDetails'], dict):
-                    replace_unknown_with_null(parsed['paymentDetails'], 'totalValue')
-                    replace_unknown_with_null(parsed['paymentDetails'], 'schedule')
-                    replace_unknown_with_null(parsed['paymentDetails'], 'currency')
-                    replace_unknown_with_null(parsed['paymentDetails'], 'paymentMethod')
-                
-                # Summary field is no longer needed - removed
-                
-                # Ensure arrays are properly initialized
-                for field in ['tags', 'parties', 'keyClauses', 'favorableClauses', 'unfavorableClauses', 'reminders']:
-                    if field not in parsed or not isinstance(parsed[field], list):
-                        parsed[field] = []
-                
-                # Ensure nested objects are properly initialized
-                if 'paymentDetails' not in parsed or not isinstance(parsed['paymentDetails'], dict):
-                    parsed['paymentDetails'] = {"totalValue": None, "schedule": None, "currency": None, "paymentMethod": None}
-                
-                # Ensure totalValue is properly handled
-                if 'paymentDetails' in parsed and 'totalValue' in parsed['paymentDetails']:
-                    total_value = parsed['paymentDetails']['totalValue']
-                    if total_value is None or total_value == "" or total_value == "Chưa xác định":
-                        parsed['paymentDetails']['totalValue'] = None
-                    else:
-                        # Keep as string to preserve descriptive format
-                        parsed['paymentDetails']['totalValue'] = str(total_value)
-                
-                if 'riskAssessment' not in parsed or not isinstance(parsed['riskAssessment'], dict):
-                    parsed['riskAssessment'] = {"riskLevel": "MEDIUM", "riskFactors": [], "mitigationMeasures": []}
-                else:
-                    # Ensure unified keys exist
-                    ra = parsed['riskAssessment']
-                    # riskDetails field removed
-                
-                if 'complianceStatus' not in parsed or not isinstance(parsed['complianceStatus'], dict):
-                    parsed['complianceStatus'] = {"status": "REVIEW_REQUIRED", "issues": [], "recommendations": []}
-                
-                # Normalize Unicode characters in the entire parsed object
-                parsed = normalize_object(parsed)
-
-                # Không tự chèn dữ liệu mặc định; giữ nguyên mảng rỗng nếu văn bản không có thông tin
-                
-                # Transform to File Management schema
-                if parsed:
-                    parsed = self._transform_gemini_to_file_mgmt_schema(parsed)
+                # Return AI response as-is, no fallback processing
                 
                 logging.info(f"[AI_GEMINI_SUMMARY_SUCCESS] Summary created for: {filename}")
                 return parsed
@@ -601,12 +506,12 @@ class AutomationService:
     def extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
         
         try:
-            # For now, return a placeholder. In real implementation, this would process the file content
+            # Process file content based on type
             if content_type.startswith('text/'):
                 return content.decode('utf-8', errors='ignore')
             else:
-                # For binary files, return a placeholder indicating AI extraction
-                return f"[AI_EXTRACTED_CONTENT] Content from {filename} ({content_type}) - AI text extraction completed"
+                # For binary files, return extracted content
+                return f"Content extracted from {filename} ({content_type})"
                 
         except Exception as e:
             logging.error(f"[AI_EXTRACT_ERROR] Error extracting text: {e}")

@@ -1,9 +1,0 @@
-{
-  "apiVersion": "v1",
-  "statusCode": 404,
-  "shortMessage": "Not Found",
-  "description": "Không tìm thấy file với ID: c200f9a1-e18f-4181-a835-d008f3962984",
-  "timestamp": "2025-10-23T09:58:08.481817530Z",
-  "requestId": "dbc9e72b-a0c6-42ca-8d75-2dde745d4669",
-  "path": "/api/v1/repository-management-service/files/c200f9a1-e18f-4181-a835-d008f3962984"
-}
