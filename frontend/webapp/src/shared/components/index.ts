@@ -17,3 +17,8 @@ export * from './Animations';
 
 // Export Layout components
 export * from './Layout';
+
+// Export Utility components
+export * from './ProtectedRoute';
+export * from './ErrorBoundary';
+export * from './LoadingSpinner';
