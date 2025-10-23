@@ -4,18 +4,32 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Map;
+
+/**
+ * FullFileResponseDto - Complete Document Response
+ * 
+ * Strategy: Hybrid approach
+ * - Use typed DTO for simple sections (overview)
+ * - Use Map<String,Object> for complex nested sections
+ * Benefits: Avoids Lombok type conflicts, provides flexibility
+ */
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FullFileResponseDto {
     private String id;
+    
+    // Simple section - typed DTO
     private OverviewDto overview;
-    private MetadataDto metadata;
-    private ContractDto contract;
-    private ContentDto content;
-    private StorageDto storage;
-    private SecurityDto security;
-    private VersioningDto versioning;
-    private AuditDto audit;
+    
+    // Complex sections - keep as Map for flexibility
+    private Map<String, Object> metadata;
+    private Map<String, Object> contract;
+    private Map<String, Object> content;
+    private Map<String, Object> storage;
+    private Map<String, Object> security;
+    private Map<String, Object> versioning;
+    private Map<String, Object> audit;
 }
 

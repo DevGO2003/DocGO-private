@@ -3,9 +3,12 @@ package com.devgo2003.docgo.repository_service.controller;
 import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
 import com.devgo2003.docgo.repository_service.entity.FileEntity;
-import com.devgo2003.docgo.repository_service.service.FileService;
+import com.devgo2003.docgo.repository_service.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +24,7 @@ import java.util.UUID;
 public class RepositoryController {
 
     @Autowired
-    private FileService fileService;
+    private IFileService fileService;
 
     @GetMapping
     @Operation(summary = "Lấy danh sách files với phân trang và lọc")
@@ -34,7 +37,9 @@ public class RepositoryController {
             @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId
     ) {
         try {
-            Page<FileEntity> files = fileService.getAllFiles(page, size, sortBy, sortDirection, searchTerm);
+            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            Page<FileEntity> files = fileService.getAllFiles(pageable);
             
             return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
                 .apiVersion("v1")
@@ -68,7 +73,7 @@ public class RepositoryController {
             @PathVariable String id) {
         
         try {
-            FullFileResponseDto fileDto = fileService.getFullFileById(id);
+            FullFileResponseDto fileDto = fileService.getFileDtoById(id).orElse(null);
             if (fileDto == null) {
                 return ResponseEntity.ok(RestResponse.<FullFileResponseDto>builder()
                     .apiVersion("v1")
