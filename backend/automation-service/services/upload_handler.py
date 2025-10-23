@@ -41,7 +41,12 @@ class UploadHandler:
         try:
             # Generate UUID v7
             document_id = str(uuid7())
-            logger.info(f"Generated documentId: {document_id}")
+            logger.info(f"\n{'='*80}")
+            logger.info(f"📤 UPLOAD HANDLER STARTED")
+            logger.info(f"{'='*80}")
+            logger.info(f"Generated documentId (UUID v7): {document_id}")
+            logger.info(f"File: {file_name} | Size: {len(file_data)} bytes | MIME: {mime_type}")
+            logger.info(f"Owner: {owner_user_id} | Actor: {actor} | CorrelationId: {correlation_id}")
             
             # Upload to S3 (mock for now)
             s3_result = self._upload_to_s3(document_id, file_data, file_name, mime_type)
@@ -64,6 +69,9 @@ class UploadHandler:
             
             logger.info(f"Published FILE_UPLOAD_COMPLETED: eventId={event_id}, documentId={document_id}")
             
+            logger.info(f"✅ EVENT 1 PUBLISHED: {event_id}")
+            logger.info(f"{'='*80}\n")
+            
             return {
                 "success": True,
                 "documentId": document_id,
@@ -72,18 +80,46 @@ class UploadHandler:
             }
             
         except Exception as e:
-            logger.error(f"Error handling upload: {str(e)}", exc_info=True)
+            logger.error(f"❌ Error handling upload: {str(e)}", exc_info=True)
+            logger.error(f"{'='*80}\n")
             return {
                 "success": False,
                 "error": str(e)
             }
+    
+    def _is_valid_uuid_v7(self, uuid_str: str) -> bool:
+        """Validate UUID v7 format"""
+        try:
+            # UUID v7 format: 018c4e88-89a1-7000-8000-0123456789ab
+            # Version field (3rd group) should start with 7
+            parts = uuid_str.split('-')
+            if len(parts) != 5:
+                return False
+            
+            # Check version (3rd group should start with 7)
+            version = parts[2][0]
+            if version != '7':
+                logger.warning(f"⚠️ UUID version is {version}, expected 7")
+                return False
+            
+            return True
+        except Exception as e:
+            logger.error(f"UUID validation error: {str(e)}")
+            return False
     
     def _upload_to_s3(self, document_id: str, file_data: bytes, 
                      file_name: str, mime_type: str) -> Dict[str, Any]:
         """Upload file to S3"""
         # TODO: Implement S3 upload
         # For now, return mock result
-        return {
+        logger.info(f"📤 Uploading to S3: {file_name}")
+        
+        # Validate documentId is UUID v7
+        if not self._is_valid_uuid_v7(document_id):
+            logger.error(f"❌ Invalid UUID v7: {document_id}")
+            raise ValueError(f"Invalid UUID v7 format: {document_id}")
+        
+        s3_result = {
             "url": f"https://docgo-storage.s3.amazonaws.com/documents/{document_id}/{file_name}",
             "bucket": "docgo-storage",
             "objectKey": f"documents/{document_id}/{file_name}",
@@ -96,6 +132,9 @@ class UploadHandler:
                 "sha256": "def456..."
             }
         }
+        
+        logger.info(f"✅ S3 upload mock: {s3_result['objectKey']}")
+        return s3_result
     
     def _prepare_event_payload(self, document_id: str, file_name: str, mime_type: str,
                               file_size: int, owner_user_id: str, 

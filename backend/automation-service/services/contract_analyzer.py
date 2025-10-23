@@ -37,9 +37,15 @@ class ContractAnalyzer:
             Dict with analysis result
         """
         try:
+            logger.info(f"\n{'='*80}")
+            logger.info(f"📜 CONTRACT ANALYZER STARTED")
+            logger.info(f"{'='*80}")
+            logger.info(f"DocumentId: {document_id} | isContract: {is_contract}")
+            
             # Only process if isContract=true
             if not is_contract:
-                logger.info(f"Document {document_id} is not a contract, skipping analysis")
+                logger.info(f"⚠️ Document is NOT a contract, skipping Event 3")
+                logger.info(f"{'='*80}\n")
                 return {
                     "success": True,
                     "documentId": document_id,
@@ -47,7 +53,7 @@ class ContractAnalyzer:
                     "eventPublished": False
                 }
             
-            logger.info(f"Analyzing contract for documentId: {document_id}")
+            logger.info(f"📜 Analyzing contract content...")
             
             # Perform contract analysis
             contract_analysis = self._analyze_contract_content(text)
@@ -65,7 +71,8 @@ class ContractAnalyzer:
                 actor=actor
             )
             
-            logger.info(f"Published CONTRACT_SUMMARY_GENERATED: eventId={event_id}, documentId={document_id}")
+            logger.info(f"✅ EVENT 3 PUBLISHED: {event_id}")
+            logger.info(f"{'='*80}\n")
             
             return {
                 "success": True,

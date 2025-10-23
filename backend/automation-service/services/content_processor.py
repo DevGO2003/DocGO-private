@@ -38,13 +38,18 @@ class ContentProcessor:
             Dict with processing result
         """
         try:
+            logger.info(f"\n{'='*80}")
+            logger.info(f"📝 CONTENT PROCESSOR STARTED")
+            logger.info(f"{'='*80}")
+            logger.info(f"DocumentId: {document_id} | MIME: {mime_type}")
+            
             # Extract text
             extracted_text = self._extract_text(file_data, mime_type)
-            logger.info(f"Extracted text length: {len(extracted_text)}")
+            logger.info(f"✅ Text extracted: {len(extracted_text)} characters")
             
             # AI classification
             classification = self._classify_content(extracted_text)
-            logger.info(f"Classification: {classification}")
+            logger.info(f"✅ Classification: isContract={classification.get('isContract')}, type={classification.get('documentType')}, lang={classification.get('language')}")
             
             # Extract PDF metadata if applicable
             pdf_metadata = {}
@@ -66,7 +71,8 @@ class ContentProcessor:
                 actor=actor
             )
             
-            logger.info(f"Published FILE_CONTENT_EXTRACTED: eventId={event_id}, documentId={document_id}")
+            logger.info(f"✅ EVENT 2 PUBLISHED: {event_id}")
+            logger.info(f"{'='*80}\n")
             
             return {
                 "success": True,
