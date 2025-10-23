@@ -16,9 +16,10 @@ import java.util.Optional;
 public interface ProcessedEventRepository extends MongoRepository<ProcessedEventEntity, String> {
     
     /**
-     * Find by eventId (same as findById)
+     * Find by id (eventId)
+     * Note: This is redundant with findById(), but kept for clarity
      */
-    Optional<ProcessedEventEntity> findByEventId(String eventId);
+    Optional<ProcessedEventEntity> findById(String id);
     
     /**
      * Find all events for a document
@@ -33,5 +34,5 @@ public interface ProcessedEventRepository extends MongoRepository<ProcessedEvent
     /**
      * Check if event already processed
      */
-    boolean existsByIdAndEventType(String eventId, String eventType);
+    boolean existsById(String id);
 }
