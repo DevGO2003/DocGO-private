@@ -1,0 +1,343 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent,
+  Button 
+} from '@shared/components';
+import { useAppSelector } from '@store/hooks';
+import { 
+  useMyRepositories, 
+  useFiles 
+} from '@features/repository';
+import { useMyOrganizations } from '@features/organization';
+import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
+
+export const Dashboard = () => {
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
+  const [page] = useState(0);
+  const [size] = useState(5);
+
+  // Fetch user's data
+  const { data: repositories, isLoading: reposLoading } = useMyRepositories({ page, size });
+  const { data: files, isLoading: filesLoading } = useFiles({ page, size });
+  const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
+
+  const stats = [
+    {
+      title: 'Repositories',
+      value: repositories?.totalElements || 0,
+      change: '+12%',
+      color: 'from-blue-500 to-purple-500',
+    },
+    {
+      title: 'Files',
+      value: files?.totalElements || 0,
+      change: '+8%',
+      color: 'from-green-500 to-teal-500',
+    },
+    {
+      title: 'Organizations',
+      value: organizations?.totalElements || 0,
+      change: '+5%',
+      color: 'from-orange-500 to-red-500',
+    },
+    {
+      title: 'Storage Used',
+      value: '2.4 GB',
+      change: '+15%',
+      color: 'from-pink-500 to-rose-500',
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+    },
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Welcome Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Welcome back, {user?.firstName || user?.username}! 👋
+          </h1>
+          <p className="text-gray-600">
+            Here's what's happening with your projects today.
+          </p>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        >
+          {stats.map((stat, index) => (
+            <motion.div key={index} variants={itemVariants}>
+              <Card animated className="h-full">
+                <CardContent className="p-6">
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center`}>
+                    <span className="text-2xl text-white font-bold">
+                      {stat.value.toString().charAt(0)}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-600 mb-1">
+                    {stat.title}
+                  </h3>
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stat.value}
+                    </p>
+                    <span className="text-sm text-green-600 font-medium">
+                      {stat.change}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Recent Repositories */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card animated>
+              <CardHeader>
+                <CardTitle>Recent Repositories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {reposLoading ? (
+                  <div className="text-center py-8 text-gray-500">Loading...</div>
+                ) : repositories && repositories.content.length > 0 ? (
+                  <div className="space-y-3">
+                    {repositories.content.slice(0, 5).map((repo) => (
+                      <motion.div
+                        key={repo.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        onClick={() => navigate(`${REPOSITORIES_PATH}/${repo.id}`)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{repo.name}</h4>
+                            <p className="text-sm text-gray-600">{repo.fileCount} files</p>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(repo.updatedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 mb-4">No repositories yet</p>
+                    <Button
+                      variant="primary"
+                      onClick={() => navigate(REPOSITORIES_PATH)}
+                      animated
+                    >
+                      Create Repository
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Recent Files */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card animated>
+              <CardHeader>
+                <CardTitle>Recent Files</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {filesLoading ? (
+                  <div className="text-center py-8 text-gray-500">Loading...</div>
+                ) : files && files.content.length > 0 ? (
+                  <div className="space-y-3">
+                    {files.content.slice(0, 5).map((file) => (
+                      <motion.div
+                        key={file.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 truncate">
+                              {file.originalName || file.name}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {(file.fileSize / 1024).toFixed(2)} KB
+                            </p>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(file.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No files uploaded yet
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Organizations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Card animated>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>My Organizations</CardTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(ORGANIZATIONS_PATH)}
+                  animated
+                >
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {orgsLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : organizations && organizations.content.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {organizations.content.map((org) => (
+                    <motion.div
+                      key={org.id}
+                      whileHover={{ scale: 1.05 }}
+                      className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg cursor-pointer border-2 border-blue-200"
+                      onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
+                    >
+                      <h4 className="font-bold text-gray-900 mb-1">{org.name}</h4>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                        {org.description || 'No description'}
+                      </p>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span>{org.memberCount} members</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-4">Not part of any organization yet</p>
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate(ORGANIZATIONS_PATH)}
+                    animated
+                  >
+                    Join Organization
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-8"
+        >
+          <Card animated>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(REPOSITORIES_PATH)}
+                  className="h-24"
+                  animated
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">📁</div>
+                    <span className="text-sm">Repositories</span>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(ORGANIZATIONS_PATH)}
+                  className="h-24"
+                  animated
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🏢</div>
+                    <span className="text-sm">Organizations</span>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(PROFILE_PATH)}
+                  className="h-24"
+                  animated
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">👤</div>
+                    <span className="text-sm">Profile</span>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-24"
+                  animated
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">⚙️</div>
+                    <span className="text-sm">Settings</span>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
