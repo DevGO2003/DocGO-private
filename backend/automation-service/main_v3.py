@@ -16,10 +16,10 @@ from routers.upload_router import router as upload_router
 from services.kafka_publisher_v3 import KafkaPublisherV3
 from config import settings
 
-# Configure logging
+# Configure logging - ERROR only
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 

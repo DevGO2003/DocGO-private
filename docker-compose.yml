@@ -147,6 +147,7 @@ services:
       - KAFKA_ENABLED=true
       - KAFKA_WORKER_ENABLED=false
       - ALLOW_LEGACY_WORKER=false
+      - LOG_LEVEL=error
     depends_on:
       - kafka
       - redis
@@ -157,7 +158,7 @@ services:
       - ./backend/automation-service/uploads:/app/uploads
       - ./backend/automation-service/results:/app/results
       - ./logs/automation:/app/logs
-    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload  # Watch mode
+    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload --log-level error
     restart: unless-stopped
 
   # API Gateway (Next.js)
