@@ -1,87 +1,9 @@
-﻿{
-    "apiVersion":  "v1",
-    "statusCode":  200,
-    "shortMessage":  "Success",
-    "description":  "ÄÃ£ láº¥y thÃ´ng tin file thÃ nh cÃ´ng",
-    "data":  {
-                 "id":  "70a28a6e-6af2-44bb-a969-edbb03a54621",
-                 "overview":  {
-                                  "title":  "hop-dong-day-du.txt",
-                                  "status":  "ACTIVE",
-                                  "tags":  [
-
-                                           ],
-                                  "ownerUserId":  "system",
-                                  "language":  "vi",
-                                  "region":  "VN",
-                                  "isNew":  true
-                              },
-                 "file":  {
-                              "id":  "70a28a6e-6af2-44bb-a969-edbb03a54621",
-                              "name":  "hop-dong-day-du.txt",
-                              "type":  "text/plain",
-                              "size":  3757,
-                              "hash":  {
-                                           "md5":  "398040bd85fde7cb8a2228bd027753ce",
-                                           "sha256":  "551b259c48002a2f9b9765c2b9fe4cd1bf26cff69386f6f88686de3ec9d51cc6"
-                                       },
-                              "permissions":  {
-                                                  "read":  [
-                                                               "system",
-                                                               "user-001"
-                                                           ],
-                                                  "write":  [
-                                                                "system"
-                                                            ],
-                                                  "delete":  [
-                                                                 "system"
-                                                             ],
-                                                  "share":  [
-                                                                "system"
-                                                            ]
-                                              },
-                              "security":  {
-                                               "encryption":  "AES-256",
-                                               "watermark":  false,
-                                               "digitalSignature":  false,
-                                               "accessLogging":  true
-                                           },
-                              "version":  1
-                          },
-                 "storage":  {
-                                 "location":  "s3://devgo2003-docgo-bucket/70a28a6e-6af2-44bb-a969-edbb03a54621",
-                                 "backupLocations":  [
-
-                                                     ],
-                                 "s3":  {
-                                            "url":  "https://s3.filebase.com/devgo2003-docgo-bucket/documents/70a28a6e-6af2-44bb-a969-edbb03a54621_hop-dong-day-du.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256\u0026X-Amz-Credential=D6D49B01A4B01DE0EA12%2F20251021%2Fus-east-1%2Fs3%2Faws4_request\u0026X-Amz-Date=20251021T071756Z\u0026X-Amz-Expires=3600\u0026X-Amz-SignedHeaders=host\u0026X-Amz-Signature=6eb2ec47ac9e5c85892d5e9719c640c28151b14ebb027074de76f82c08536618",
-                                            "bucket":  "devgo2003-docgo-bucket",
-                                            "objectKey":  "documents/70a28a6e-6af2-44bb-a969-edbb03a54621/hop-dong-day-du.txt",
-                                            "region":  "us-east-1",
-                                            "contentType":  "text/plain",
-                                            "size":  3757,
-                                            "checksum":  {
-                                                             "originalMD5":  "398040bd85fde7cb8a2228bd027753ce"
-                                                         }
-                                        }
-                             },
-                 "metadata":  {
-                                  "fileSystem":  {
-
-                                                 },
-                                  "technical":  {
-                                                    "encoding":  "UTF-8"
-                                                }
-                              },
-                 "audit":  {
-                               "createdBy":  "system",
-                               "lastModifiedBy":  "system",
-                               "version":  1,
-                               "updatedBy":  "system",
-                               "isDeleted":  false
-                           }
-             },
-    "timestamp":  "2025-10-21T07:19:37.653144038Z",
-    "requestId":  "02929f92-9527-4661-b2ee-536dad2ddd53",
-    "path":  "/api/v1/repository-management-service/files/70a28a6e-6af2-44bb-a969-edbb03a54621"
+{
+  "apiVersion": "v1",
+  "statusCode": 404,
+  "shortMessage": "Not Found",
+  "description": "Không tìm thấy file với ID: c200f9a1-e18f-4181-a835-d008f3962984",
+  "timestamp": "2025-10-23T09:58:08.481817530Z",
+  "requestId": "dbc9e72b-a0c6-42ca-8d75-2dde745d4669",
+  "path": "/api/v1/repository-management-service/files/c200f9a1-e18f-4181-a835-d008f3962984"
 }

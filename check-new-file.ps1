@@ -1,4 +1,4 @@
-$fileId = "70a28a6e-6af2-44bb-a969-edbb03a54621"
+$fileId = "c200f9a1-e18f-4181-a835-d008f3962984"
 $uri = "http://localhost:8002/api/v1/repository-management-service/files/$fileId"
 
 Write-Host "=== CHECKING NEW FILE ===" -ForegroundColor Cyan
