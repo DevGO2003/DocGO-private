@@ -3,7 +3,7 @@ package com.devgo2003.docgo.repository_service.controller;
 import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
 import com.devgo2003.docgo.repository_service.entity.FileEntity;
-import com.devgo2003.docgo.repository_service.service.IFileService;
+import com.devgo2003.docgo.repository_service.service.core.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
