@@ -1,0 +1,8 @@
+feat: add route constants and path helpers
+
+- Create routes.ts with all application routes
+- Add buildPath helper for dynamic routes
+- Define auth repository organization user routes
+- Export from constants index
+
+This establishes routing structure for the application
