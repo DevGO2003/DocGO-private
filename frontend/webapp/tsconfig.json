@@ -26,11 +26,15 @@
       "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@features/*": ["src/features/*"],
+      "@pages": ["src/pages"],
+      "@pages/*": ["src/pages/*"],
       "@utils": ["src/utils"],
       "@utils/*": ["src/utils/*"],
-      "@constants": ["src/constants"],
-      "@constants/*": ["src/constants/*"],
+      "@constants": ["src/shared/constants"],
+      "@constants/*": ["src/shared/constants/*"],
+      "@routes": ["src/routes"],
       "@routes/*": ["src/routes/*"],
+      "@store": ["src/store"],
       "@store/*": ["src/store/*"]
     }
   },

@@ -10,8 +10,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@features': path.resolve(__dirname, './src/features'),
+      '@pages': path.resolve(__dirname, './src/pages'),
       '@utils': path.resolve(__dirname, './src/utils'),
-      '@constants': path.resolve(__dirname, './src/constants'),
+      '@constants': path.resolve(__dirname, './src/shared/constants'),
       '@routes': path.resolve(__dirname, './src/routes'),
       '@store': path.resolve(__dirname, './src/store'),
       '@models': path.resolve(__dirname, './src/features/*/models'),
@@ -20,7 +21,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: true,
   },
 });
