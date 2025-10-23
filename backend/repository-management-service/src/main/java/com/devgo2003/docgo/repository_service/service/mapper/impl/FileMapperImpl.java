@@ -3,7 +3,7 @@ package com.devgo2003.docgo.repository_service.service.mapper.impl;
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
 import com.devgo2003.docgo.repository_service.dto.OverviewDto;
 import com.devgo2003.docgo.repository_service.entity.FileEntity;
-import com.devgo2003.docgo.repository_service.service.mapper.IFileMapper;
+import com.devgo2003.docgo.repository_service.service.core.mapper.IFileMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
