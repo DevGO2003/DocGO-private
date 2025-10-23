@@ -18,6 +18,7 @@ import {
 const Login = lazy(() => import('@features/auth/views/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@features/auth/views/pages/Register').then(m => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('@features/auth/views/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const OAuth2Callback = lazy(() => import('@features/auth/views/pages').then(m => ({ default: m.OAuth2Callback })));
 const Dashboard = lazy(() => import('@features/dashboard').then(m => ({ default: m.Dashboard })));
 const ProductList = lazy(() => import('@features/products/views/pages/ProductList').then(m => ({ default: m.ProductList })));
 const ProductDetail = lazy(() => import('@features/products/views/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
@@ -43,8 +44,11 @@ export const AppRouter = () => {
             <Route path={FORGOT_PASSWORD_PATH} element={<ForgotPassword />} />
           </Route>
 
-          {/* Private routes - Temporarily disabled authentication for UI demo */}
-          {/* <Route element={<PrivateRoute />}> */}
+          {/* OAuth2 callback - no auth required */}
+          <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
+          {/* Private routes */}
+          <Route element={<PrivateRoute />}>
             <Route path={HOME_PATH} element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path={PRODUCTS_PATH} element={<ProductList />} />
@@ -53,10 +57,10 @@ export const AppRouter = () => {
             <Route path="/products/new" element={<ProductEdit />} />
             <Route path={ORDERS_PATH} element={<OrderList />} />
             <Route path={ORDER_DETAIL_PATH} element={<OrderDetail />} />
-          {/* </Route> */}
+          </Route>
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
+          {/* Catch all - redirect to login if not authenticated */}
+          <Route path="*" element={<Navigate to={LOGIN_PATH} replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

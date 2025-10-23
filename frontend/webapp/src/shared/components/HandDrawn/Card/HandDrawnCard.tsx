@@ -1,6 +1,6 @@
 import { forwardRef, useRef, useEffect, HTMLAttributes, ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { createRoughCanvas, drawRoughRect } from '@shared/lib/utils';
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import anime from 'animejs';
 
 interface HandDrawnCardProps extends HTMLAttributes<HTMLDivElement> {

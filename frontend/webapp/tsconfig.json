@@ -26,7 +26,9 @@
       "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@features/*": ["src/features/*"],
+      "@utils": ["src/utils"],
       "@utils/*": ["src/utils/*"],
+      "@constants": ["src/constants"],
       "@constants/*": ["src/constants/*"],
       "@routes/*": ["src/routes/*"],
       "@store/*": ["src/store/*"]

@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useRegister } from '../models/api/authApi';
 import { useAppDispatch } from '@store/hooks';
-import { setCredentials, setLoading, setError } from '../models/state/authSlice';
+import { setLoading, setError } from '../models/state/authSlice';
 import { RegisterData } from '../models/types/auth.types';
-import { HOME_PATH } from '@constants';
+import { LOGIN_PATH } from '@constants';
 
 export const useRegisterController = () => {
   const navigate = useNavigate();
@@ -11,13 +11,26 @@ export const useRegisterController = () => {
   const registerMutation = useRegister();
 
   const handleRegister = async (data: RegisterData) => {
+    console.log('[RegisterController] Starting registration process...');
     dispatch(setLoading(true));
+    dispatch(setError(null));
+
     try {
+      console.log('[RegisterController] Calling register API...');
       const response = await registerMutation.mutateAsync(data);
-      dispatch(setCredentials({ user: response.user, token: response.token }));
-      navigate(HOME_PATH);
-    } catch (error) {
-      dispatch(setError(error instanceof Error ? error.message : 'Registration failed'));
+      console.log('[RegisterController] Registration successful!', {
+        hasUser: !!response.user,
+        message: response.message
+      });
+      
+      // Navigate to login page after successful registration
+      navigate(LOGIN_PATH);
+    } catch (error: any) {
+      console.error('[RegisterController] Registration error:', error);
+      const errorMessage = error?.response?.data?.description || 
+                          error?.message || 
+                          'Đăng ký thất bại. Vui lòng thử lại.';
+      dispatch(setError(errorMessage));
     } finally {
       dispatch(setLoading(false));
     }

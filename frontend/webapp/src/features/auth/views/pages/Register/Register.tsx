@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useRegisterController } from '../../../controllers/useRegisterController';
+import { useAppSelector } from '@store/hooks';
 import { LOGIN_PATH } from '@constants';
 
 export const Register = () => {
-  const { handleRegister, isLoading, error } = useRegisterController();
+  const { handleRegister, isLoading } = useRegisterController();
+  const error = useAppSelector((state) => state.auth.error);
   const { values, errors, handleChange, handleBlur, handleSubmit } = useAuthFormController({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -36,22 +38,22 @@ export const Register = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm"
               >
-                {error.message}
+                {error}
               </motion.div>
             )}
 
             <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
               <Input
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 type="text"
-                label="Full Name"
-                value={values.name}
+                label="Username"
+                value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={errors.name}
-                placeholder="Enter your full name"
-                autoComplete="name"
+                error={errors.username}
+                placeholder="Choose a username"
+                autoComplete="username"
               />
 
               <Input

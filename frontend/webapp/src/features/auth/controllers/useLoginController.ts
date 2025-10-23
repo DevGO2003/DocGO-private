@@ -3,7 +3,7 @@ import { useLogin } from '../models/api/authApi';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials, setLoading, setError } from '../models/state/authSlice';
 import { LoginCredentials } from '../models/types/auth.types';
-import { HOME_PATH } from '@constants';
+import { DASHBOARD_PATH } from '@constants';
 
 export const useLoginController = () => {
   const navigate = useNavigate();
@@ -11,13 +11,48 @@ export const useLoginController = () => {
   const loginMutation = useLogin();
 
   const handleLogin = async (credentials: LoginCredentials) => {
+    console.log('[LoginController] Starting login process...');
     dispatch(setLoading(true));
+    dispatch(setError(null));
+
     try {
-      const response = await loginMutation.mutateAsync(credentials);
-      dispatch(setCredentials({ user: response.user, token: response.token }));
-      navigate(HOME_PATH);
-    } catch (error) {
-      dispatch(setError(error instanceof Error ? error.message : 'Login failed'));
+      console.log('[LoginController] Calling login API...');
+      const authResponse = await loginMutation.mutateAsync(credentials);
+      console.log('[LoginController] Login API response:', {
+        hasAccessToken: !!authResponse.accessToken,
+        hasUser: !!authResponse.user,
+        expiresIn: authResponse.expiresIn
+      });
+
+      if (authResponse.accessToken && authResponse.user) {
+        console.log('[LoginController] Login successful, setting credentials...');
+        
+        // Calculate token expiration
+        const expiresAt = Date.now() + (authResponse.expiresIn * 1000);
+        
+        dispatch(setCredentials({
+          user: authResponse.user,
+          token: authResponse.accessToken,
+          tokenData: {
+            accessToken: authResponse.accessToken,
+            refreshToken: authResponse.refreshToken,
+            expiresAt,
+            tokenType: authResponse.tokenType || 'Bearer'
+          }
+        }));
+        
+        console.log('[LoginController] Navigating to dashboard...');
+        navigate(DASHBOARD_PATH);
+      } else {
+        console.error('[LoginController] Invalid response - missing token or user');
+        dispatch(setError('Invalid response from server'));
+      }
+    } catch (error: any) {
+      console.error('[LoginController] Login error:', error);
+      const errorMessage = error?.response?.data?.description || 
+                          error?.message || 
+                          'Đăng nhập thất bại. Vui lòng thử lại.';
+      dispatch(setError(errorMessage));
     } finally {
       dispatch(setLoading(false));
     }
