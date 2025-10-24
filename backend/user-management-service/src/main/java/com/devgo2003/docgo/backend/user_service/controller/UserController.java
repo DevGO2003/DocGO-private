@@ -1116,4 +1116,124 @@ public class UserController {
                 .data(lockedUsers)
                 .build());
     }
+    
+    @GetMapping("/me/organizations")
+    @Operation(
+        summary = "Lấy danh sách tổ chức của user hiện tại",
+        description = """
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: List<UserOrganizationResponse>
+        Mô tả: Danh sách tổ chức với vai trò và quyền hạn của user
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse>>> getMyOrganizations() {
+        
+        log.info("Getting organizations for current user");
+        
+        // TODO: Get userId from security context
+        String userId = "current-user-id"; 
+        
+        List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse> organizations = 
+            userService.getMyOrganizations(userId);
+        
+        return ResponseEntity.ok(RestResponse.<List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse>>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách tổ chức thành công")
+                .data(organizations)
+                .build());
+    }
+    
+    @PostMapping("/me/switch-organization")
+    @Operation(
+        summary = "Chuyển đổi tổ chức đang làm việc",
+        description = """
+        🔹 Đầu vào
+        
+        📄 organizationId (bắt buộc, body)
+        Loại: string
+        Mô tả: ID của tổ chức cần chuyển sang
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: User
+        Mô tả: Thông tin user với tổ chức active mới
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 403: Forbidden)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<User>> switchOrganization(
+        @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.SwitchOrganizationRequest request) {
+        
+        log.info("Switching organization to: {}", request.getOrganizationId());
+        
+        // TODO: Get userId from security context
+        String userId = "current-user-id";
+        
+        User user = userService.switchOrganization(userId, request.getOrganizationId());
+        
+        return ResponseEntity.ok(RestResponse.<User>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã chuyển tổ chức thành công")
+                .data(user)
+                .build());
+    }
 }

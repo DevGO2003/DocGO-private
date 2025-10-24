@@ -489,3 +489,155 @@ private void initializeDefaultData(String orgId) {
 public WorkflowEntity getOrganizationWorkflow(String orgId) {
     return workflowService.getOrganizationWorkflow(orgId);
 }
+
+/**
+ * Get organizations by user ID with detailed membership info
+ */
+public List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse> getOrganizationsByUserIdWithDetails(String userId, String activeOrgId) {
+    log.info("Getting organizations with details for user: {}", userId);
+    
+    // Find all memberships for this user
+    List<OrganizationMembership> memberships = membershipRepository.findByUserId(userId);
+    
+    return memberships.stream()
+        .filter(m -> m.getStatus() == OrganizationMembership.MembershipStatus.ACTIVE)
+        .map(membership -> {
+            Organization org = organizationRepository.findById(membership.getOrganizationId()).orElse(null);
+            if (org == null) return null;
+            
+            // Determine role
+            String role = "member";
+            if (org.getOwnerUserId().equals(userId)) {
+                role = "owner";
+            } else if (membership.getIsAdmin() || 
+                      (org.getAdminUserIds() != null && org.getAdminUserIds().contains(userId))) {
+                role = "manager";
+            }
+            
+            // Get permissions
+            List<String> permissions = membership.getPermissions();
+            if (permissions == null) {
+                permissions = role.equals("owner") ? List.of("all") : List.of();
+            }
+            
+            return com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse.builder()
+                .organizationId(org.getId())
+                .organizationName(org.getName())
+                .organizationCode(org.getCode())
+                .myRole(role)
+                .myPermissions(permissions)
+                .isActive(org.getId().equals(activeOrgId))
+                .memberCount(org.getMemberCount())
+                .joinedAt(membership.getJoinedAt())
+                .build();
+        })
+        .filter(java.util.Objects::nonNull)
+        .collect(java.util.stream.Collectors.toList());
+}
+
+/**
+ * Accept invitation
+ */
+public OrganizationMembershipResponse acceptInvitation(String token, String userId) {
+    log.info("User {} accepting invitation with token: {}", userId, token);
+    
+    // Find invitation by token
+    Invitation invitation = invitationRepository.findByToken(token)
+        .orElseThrow(() -> new ResourceNotFoundException("Lời mời không tồn tại hoặc đã hết hạn"));
+    
+    // Check invitation status and expiry
+    if (invitation.getStatus() != Invitation.InvitationStatus.PENDING) {
+        throw new InvalidOrganizationOperationException("Lời mời đã được xử lý");
+    }
+    
+    if (invitation.getExpiresAt().isBefore(LocalDateTime.now())) {
+        throw new InvalidOrganizationOperationException("Lời mời đã hết hạn");
+    }
+    
+    // Get user by ID
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+    
+    // Verify email matches
+    if (!user.getEmail().equals(invitation.getEmail())) {
+        throw new InvalidOrganizationOperationException("Email không khớp với lời mời");
+    }
+    
+    // Check if already a member
+    Optional<OrganizationMembership> existingMembership = membershipRepository
+        .findByOrganizationIdAndUserId(invitation.getOrganizationId(), userId);
+    
+    if (existingMembership.isPresent()) {
+        throw new InvalidOrganizationOperationException("Bạn đã là thành viên của tổ chức này");
+    }
+    
+    // Create membership
+    OrganizationMembership membership = OrganizationMembership.builder()
+        .id(UUID.randomUUID().toString())
+        .organizationId(invitation.getOrganizationId())
+        .userId(userId)
+        .roleIds(invitation.getRoleIds())
+        .status(OrganizationMembership.MembershipStatus.ACTIVE)
+        .invitedBy(invitation.getInvitedBy())
+        .invitedAt(invitation.getCreatedAt())
+        .joinedAt(LocalDateTime.now())
+        .build();
+    
+    membershipRepository.save(membership);
+    
+    // Update invitation status
+    invitation.setStatus(Invitation.InvitationStatus.ACCEPTED);
+    invitationRepository.save(invitation);
+    
+    // Update member count
+    updateMemberCount(invitation.getOrganizationId());
+    
+    log.info("User {} accepted invitation to organization {}", userId, invitation.getOrganizationId());
+    
+    return OrganizationMembershipResponse.fromEntity(membership);
+}
+
+/**
+ * Reject invitation
+ */
+public void rejectInvitation(String token, String userId) {
+    log.info("User {} rejecting invitation with token: {}", userId, token);
+    
+    // Find invitation by token
+    Invitation invitation = invitationRepository.findByToken(token)
+        .orElseThrow(() -> new ResourceNotFoundException("Lời mời không tồn tại"));
+    
+    // Get user by ID
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+    
+    // Verify email matches
+    if (!user.getEmail().equals(invitation.getEmail())) {
+        throw new InvalidOrganizationOperationException("Email không khớp với lời mời");
+    }
+    
+    // Update invitation status
+    invitation.setStatus(Invitation.InvitationStatus.REJECTED);
+    invitationRepository.save(invitation);
+    
+    log.info("User {} rejected invitation to organization {}", userId, invitation.getOrganizationId());
+}
+
+/**
+ * Validate user membership in organization
+ */
+public void validateUserMembership(String userId, String organizationId) {
+    log.info("Validating membership for user {} in organization {}", userId, organizationId);
+    
+    OrganizationMembership membership = membershipRepository
+        .findByOrganizationIdAndUserId(organizationId, userId)
+        .orElseThrow(() -> new UnauthorizedOrganizationAccessException(
+            "Bạn không phải thành viên của tổ chức này"));
+    
+    if (membership.getStatus() != OrganizationMembership.MembershipStatus.ACTIVE) {
+        throw new UnauthorizedOrganizationAccessException(
+            "Membership không ở trạng thái active");
+    }
+}
+
+}

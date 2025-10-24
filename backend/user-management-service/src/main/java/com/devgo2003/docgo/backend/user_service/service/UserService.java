@@ -29,6 +29,7 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrganizationService organizationService;
     
     private final MongoTemplate mongoTemplate;
     
@@ -334,5 +335,40 @@ public class UserService {
     
     public List<User> getUsersByLastLoginBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return userRepository.findByLastLoginBetween(startDate, endDate);
+    }
+    
+    /**
+     * Get organizations for current user with role and permissions
+     */
+    public List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse> getMyOrganizations(String userId) {
+        log.info("Getting organizations for user: {}", userId);
+        
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        return organizationService.getOrganizationsByUserIdWithDetails(
+            userId, 
+            user.getActiveOrganizationId()
+        );
+    }
+    
+    /**
+     * Switch user's active organization
+     */
+    public User switchOrganization(String userId, String organizationId) {
+        log.info("User {} switching to organization: {}", userId, organizationId);
+        
+        // Validate user thuộc organization này
+        organizationService.validateUserMembership(userId, organizationId);
+        
+        // Update activeOrganizationId
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setActiveOrganizationId(organizationId);
+        User updatedUser = userRepository.save(user);
+        
+        log.info("User {} switched to organization: {}", userId, organizationId);
+        return updatedUser;
     }
 }

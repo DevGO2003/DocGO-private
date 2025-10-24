@@ -1031,5 +1031,133 @@ public class OrganizationController {
                 .data(users)
                 .build());
     }
+    
+    @PostMapping("/invitations/{token}/accept")
+    @Operation(
+        summary = "Chấp nhận lời mời tham gia tổ chức",
+        description = """
+        🔹 Đầu vào
+        
+        📄 token (bắt buộc, path)
+        Loại: string
+        Mô tả: Token của lời mời
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: OrganizationMembershipResponse
+        Mô tả: Thông tin membership sau khi chấp nhận
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found, 400: Bad Request)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<OrganizationMembershipResponse>> acceptInvitation(
+        @Parameter(description = "Token của lời mời")
+        @PathVariable String token) {
+        
+        log.info("[OrganizationController] Accepting invitation with token: {}", token);
+        
+        // TODO: Get userId from security context
+        String userId = "current-user-id";
+        
+        OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, userId);
+        
+        return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã chấp nhận lời mời thành công")
+                .data(membership)
+                .build());
+    }
+    
+    @PostMapping("/invitations/{token}/reject")
+    @Operation(
+        summary = "Từ chối lời mời tham gia tổ chức",
+        description = """
+        🔹 Đầu vào
+        
+        📄 token (bắt buộc, path)
+        Loại: string
+        Mô tả: Token của lời mời
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Void>> rejectInvitation(
+        @Parameter(description = "Token của lời mời")
+        @PathVariable String token) {
+        
+        log.info("[OrganizationController] Rejecting invitation with token: {}", token);
+        
+        // TODO: Get userId from security context
+        String userId = "current-user-id";
+        
+        organizationService.rejectInvitation(token, userId);
+        
+        return ResponseEntity.ok(RestResponse.<Void>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã từ chối lời mời")
+                .data(null)
+                .build());
+    }
 }
 
