@@ -7,12 +7,7 @@ from typing import List, Dict, Any, Optional, Callable
 import redis.asyncio as redis
 
 from config import Config
-from schemas.event_schemas import (
-    EventPayload, EventType, EventStatus, EventHandlerRequest,
-    EventHandlerResponse, EventSubscriptionRequest, EventSubscriptionResponse,
-    EventPublishRequest, EventPublishResponse, EventHistoryRequest,
-    EventHistoryResponse, WebSocketEvent
-)
+# Event schemas removed - using direct dict for Kafka events
 
 class EventService:
     def __init__(self):

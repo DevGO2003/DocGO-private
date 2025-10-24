@@ -44,7 +44,8 @@ public class DocgoFileEventsConsumer {
             
             // Extract data section
             Map<String, Object> data = asMap(eventMap.get("data"));
-            String documentId = (String) data.get("documentId");
+            // Phase 3: switch to fileId (fallback to documentId for backward compatibility)
+            String documentId = (String) (data.get("fileId") != null ? data.get("fileId") : data.get("documentId"));
             
             if (documentId == null) {
                 log.error("❌ Missing documentId in event data: {}", data);
@@ -71,37 +72,37 @@ public class DocgoFileEventsConsumer {
         }
     }
     
-    private void handleFileUploadCompleted(String documentId, Map<String, Object> eventData, String correlationId, String eventId) {
+    private void handleFileUploadCompleted(String fileId, Map<String, Object> eventData, String correlationId, String eventId) {
         try {
-            log.info("📨 Received FILE_UPLOAD_COMPLETED: eventId={}, documentId={}, correlationId={}", eventId, documentId, correlationId);
+            log.info("📨 Received FILE_UPLOAD_COMPLETED: eventId={}, fileId={}, correlationId={}", eventId, fileId, correlationId);
             
-            fileEventService.processFileUploadCompleted(documentId, eventData, correlationId, "system");
+            fileEventService.processFileMetadataRecorded(fileId, eventData, correlationId, "system");
             
-            log.info("✅ Processed file upload completed: documentId={}", documentId);
+            log.info("✅ Processed file upload completed: fileId={}", fileId);
         } catch (Exception e) {
             log.error("❌ Error processing FILE_UPLOAD_COMPLETED: {}", e.getMessage(), e);
         }
     }
     
-    private void handleFileContentExtracted(String documentId, Map<String, Object> eventData, String correlationId, String eventId) {
+    private void handleFileContentExtracted(String fileId, Map<String, Object> eventData, String correlationId, String eventId) {
         try {
-            log.info("📨 Received FILE_CONTENT_EXTRACTED: eventId={}, documentId={}, correlationId={}", eventId, documentId, correlationId);
+            log.info("📨 Received FILE_CONTENT_EXTRACTED: eventId={}, fileId={}, correlationId={}", eventId, fileId, correlationId);
             
-            fileEventService.processFileContentExtracted(documentId, eventData, correlationId, "system");
+            fileEventService.processFilePlaintextExtracted(fileId, eventData, correlationId, "system");
             
-            log.info("✅ Processed file content extracted: documentId={}", documentId);
+            log.info("✅ Processed file content extracted: fileId={}", fileId);
         } catch (Exception e) {
             log.error("❌ Error processing FILE_CONTENT_EXTRACTED: {}", e.getMessage(), e);
         }
     }
     
-    private void handleContractSummaryGenerated(String documentId, Map<String, Object> eventData, String correlationId, String eventId) {
+    private void handleContractSummaryGenerated(String fileId, Map<String, Object> eventData, String correlationId, String eventId) {
         try {
-            log.info("📨 Received CONTRACT_SUMMARY_GENERATED: eventId={}, documentId={}, correlationId={}", eventId, documentId, correlationId);
+            log.info("📨 Received CONTRACT_SUMMARY_GENERATED: eventId={}, fileId={}, correlationId={}", eventId, fileId, correlationId);
             
-            fileEventService.processContractSummaryGenerated(documentId, eventData, correlationId, "system");
+            fileEventService.processContractSummaryGenerated(fileId, eventData, correlationId, "system");
             
-            log.info("✅ Processed contract summary generated: documentId={}", documentId);
+            log.info("✅ Processed contract summary generated: fileId={}", fileId);
         } catch (Exception e) {
             log.error("❌ Error processing CONTRACT_SUMMARY_GENERATED: {}", e.getMessage(), e);
         }

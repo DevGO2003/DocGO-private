@@ -25,6 +25,7 @@ from services.async_processor import async_processor
 from services.progress_service import ProgressService
 from services.extract_file_service import ExtractFileService
 from services.contract_summary_service import ContractSummaryService
+from utils.binary_filter import safe_log_dict, safe_log_text
 
 # Create router
 router = APIRouter(prefix="/api/v1/automation-service/files", tags=["APIs Quản lý File"])
@@ -60,7 +61,8 @@ async def publish_kafka_event(event: dict, document_id: str = None):
         producer = await get_kafka_producer()
         # Use single topic as per EVENT-ARCHITECTURE-V3.md
         topic = "docgo-file-events"
-        key = document_id or event.get("data", {}).get("documentId", "unknown")
+        # Use fileId as the Kafka key (fallback to documentId for backward compatibility)
+        key = document_id or event.get("data", {}).get("fileId") or event.get("data", {}).get("documentId", "unknown")
         await producer.send_and_wait(topic, event, key=key.encode('utf-8'))
         print(f"[DEBUG] Published -> topic={topic} key={key}")
     except Exception as e:
@@ -325,6 +327,48 @@ async def check_file_version(
 
 
 # Unified upload implementation (helper used by upload_file)
+def detect_mime_type(file_content: bytes, filename: str, client_content_type: str) -> str:
+    """
+    Detect correct MIME type from file content and extension.
+    Falls back to client-provided content type if detection fails.
+    """
+    # Check file extension first
+    if filename:
+        filename_lower = filename.lower()
+        if filename_lower.endswith('.docx'):
+            return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        elif filename_lower.endswith('.doc'):
+            return 'application/msword'
+        elif filename_lower.endswith('.pdf'):
+            return 'application/pdf'
+        elif filename_lower.endswith('.txt'):
+            return 'text/plain'
+        elif filename_lower.endswith('.json'):
+            return 'application/json'
+    
+    # Check file signature (magic bytes)
+    if len(file_content) >= 4:
+        # DOCX files start with PK (ZIP signature)
+        if file_content[:2] == b'PK':
+            # Check if it's a DOCX by looking for specific ZIP entries
+            try:
+                # Look for word/document.xml in the ZIP structure
+                if b'word/document.xml' in file_content[:1024]:
+                    return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            except:
+                pass
+        
+        # PDF files start with %PDF
+        if file_content[:4] == b'%PDF':
+            return 'application/pdf'
+        
+        # JSON files start with { or [
+        if file_content[0] in [b'{', b'[']:
+            return 'application/json'
+    
+    # Fallback to client-provided content type
+    return client_content_type or 'application/octet-stream'
+
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
@@ -339,9 +383,7 @@ async def upload_document(
     """
     from services.audit_service import audit_service
     from utils.retry_helper import retry_async
-    from schemas.event_schemas import (
-        RepositoryMetadataRecordedEvent, RepositoryPlaintextExtractedEvent, ContractSummaryGeneratedEvent
-    )
+    # Event schemas removed - using direct dict for Kafka events
     
     correlation_id = request.headers.get("X-Correlation-Id") or str(uuid.uuid4())
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -351,26 +393,34 @@ async def upload_document(
         size = int(request.headers.get("content-length") or 0)
         sync_mode = True  # TEMPORARILY: Always use sync processing (was: size < 2 * 1024 * 1024)
         
+        # Read file content for MIME type detection
+        file_content = await file.read()
+        await file.seek(0)  # Reset file pointer
+        
+        # Detect correct MIME type
+        detected_mime_type = detect_mime_type(file_content, file.filename, file.content_type)
+        print(f"[DEBUG] MIME type detection: filename='{file.filename}', client='{file.content_type}', detected='{detected_mime_type}'")
+        
         # Start audit logging
         await audit_service.log_processing_session({
             "correlationId": correlation_id,
             "documentId": None,  # Will be set after file upload
             "fileName": file.filename,
             "fileSize": size,
-            "contentType": file.content_type,
+            "contentType": detected_mime_type,
             "metadata": {"syncMode": sync_mode, "userAgent": request.headers.get("user-agent")}
         })
         
-        # Log file metadata recorded event
+        # Log file upload event
         await audit_service.log_event({
             "eventVersion": "v1",
-            "eventType": "file.metadata.recorded",
+            "eventType": "FILE_UPLOAD_STARTED",
             "correlationId": correlation_id,
             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
             "data": {
                 "fileName": file.filename,
                 "fileSize": size,
-                "contentType": file.content_type,
+                "contentType": detected_mime_type,
                 "syncMode": sync_mode
             },
             "metadata": {"source": "automation-service", "serviceVersion": "1.0.0"}
@@ -402,10 +452,10 @@ async def upload_document(
                 "result": {"fileUrl": file_url, "fileId": file_id}
             })
             
-            # Log file metadata recorded event
+            # Log file upload completed event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "file.metadata.recorded",
+                "eventType": "FILE_UPLOAD_COMPLETED",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
@@ -456,18 +506,22 @@ async def upload_document(
                 on_retry=lambda retry_count, e: print(f"OCR retry {retry_count}: {e}")
             )
             
+            # Log OCR result safely (filter binary data)
+            print(f"[DEBUG] OCR extraction result: {safe_log_dict(extraction_result)}")
             if extraction_result["success"]:
                 ocr_text = extraction_result["text"]
                 plaintext_text = ocr_text
                 json_content_text = None
+                print(f"[DEBUG] OCR text extracted, length: {len(ocr_text) if ocr_text else 0}, preview: {safe_log_text(ocr_text, 100)}")
                 
                 # Xử lý JSON content riêng biệt
                 if file.content_type and file.content_type.lower() == "application/json":
                     json_content_text = extraction_result["text"]
             else:
-                # Fallback nếu OCR thất bại
-                ocr_text = f"OCR failed for {file.filename}"
-                plaintext_text = ocr_text
+                # OCR thất bại - không có fallback, trả về null
+                print(f"[DEBUG] OCR failed: {extraction_result.get('error', 'Unknown error')}")
+                ocr_text = None
+                plaintext_text = None
                 json_content_text = None
             
             await audit_service.add_session_step(correlation_id, {
@@ -689,15 +743,34 @@ async def upload_document(
                 "startedAt": datetime.now(timezone.utc)
             })
             
-            classification_result = await retry_async(
-                ocr_service.classify_document,
-                plaintext_text, file.filename,
-                max_retries=2,
-                backoff_factor=1.5,
-                exceptions=(Exception,),
-                on_retry=lambda retry_count, e: print(f"Classification retry {retry_count}: {e}")
-            )
+            # Nếu có text content, dùng text. Nếu không, gửi file trực tiếp cho AI
+            if plaintext_text and len(plaintext_text.strip()) > 0:
+                print(f"[DEBUG] Using extracted text for AI classification, text length: {len(plaintext_text)}")
+                classification_result = await retry_async(
+                    ai_service.classify_document,
+                    plaintext_text, file.filename,
+                    max_retries=2,
+                    backoff_factor=1.5,
+                    exceptions=(Exception,),
+                    on_retry=lambda retry_count, e: print(f"AI classification retry {retry_count}: {e}")
+                )
+            else:
+                print(f"[DEBUG] No text content, sending file directly to AI for classification")
+                # Gửi file trực tiếp cho AI để xử lý
+                file_content = await file.read()
+                await file.seek(0)
+                classification_result = await retry_async(
+                    ai_service.classify_document_from_file,
+                    file_content, file.filename, file.content_type,
+                    max_retries=2,
+                    backoff_factor=1.5,
+                    exceptions=(Exception,),
+                    on_retry=lambda retry_count, e: print(f"AI file classification retry {retry_count}: {e}")
+                )
+            # Log classification safely
+            print(f"[DEBUG] AI Classification result: {safe_log_dict(classification_result)}")
             is_contract = bool(classification_result.get("isContract", False))
+            print(f"[DEBUG] is_contract from AI: {is_contract}")
             
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "AI_CLASSIFICATION",
@@ -709,7 +782,7 @@ async def upload_document(
             # Log document classified event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "file.plaintext.extracted",
+                "eventType": "FILE_CONTENT_EXTRACTED",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
@@ -737,16 +810,22 @@ async def upload_document(
                 "retryable": True,
                 "retryCount": 2
             })
-            print(f"Classification failed, using fallback: {e}")
+            print(f"Classification failed, no fallback: {e}")
+            # No fallback - AI only
             classification_result = {
-                "isContract": file.filename.lower().endswith(('.pdf', '.docx')),
-                "confidence": 0.5,
-                "category": "Tài liệu thông thường"
+                "isContract": False,
+                "confidence": 0.0,
+                "category": "Unknown",
+                "documentType": "NOT_DOCUMENT",
+                "language": None,
+                "reasons": ["AI classification failed"]
             }
-            is_contract = bool(classification_result.get("isContract"))
+            is_contract = False
+            print(f"[DEBUG] AI Classification failed, is_contract: {is_contract}")
         
         # 4) Run summarization and extract contract metadata if contract
         summary_result = None
+        print(f"[DEBUG] About to check contract condition: is_contract={is_contract}")
         if is_contract:
             try:
                 await audit_service.add_session_step(correlation_id, {
@@ -763,6 +842,8 @@ async def upload_document(
                     exceptions=(Exception,),
                     on_retry=lambda retry_count, e: print(f"Summarization retry {retry_count}: {e}")
                 )
+                # Log summary safely
+                print(f"[DEBUG] Summary result: {safe_log_dict(summary_result) if summary_result else None}")
                 
                 await audit_service.add_session_step(correlation_id, {
                     "stepName": "AI_SUMMARIZATION",
@@ -774,7 +855,7 @@ async def upload_document(
                 # Log contract summary updated event
                 await audit_service.log_event({
                     "eventVersion": "v1",
-                    "eventType": "contract.summary.generated",
+                    "eventType": "CONTRACT_SUMMARY_GENERATED",
                     "correlationId": correlation_id,
                     "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                     "data": {
@@ -870,7 +951,7 @@ async def upload_document(
                         } if not Config.S3_ENABLED else None
                     }
                     
-                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED documentId={file_id} size={size} mimeType={file.content_type}")
+                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED fileId={file_id} size={size} mimeType={file.content_type}")
                     
                     metadata_evt = {
                         "eventVersion": "1.0",
@@ -881,7 +962,7 @@ async def upload_document(
                         "correlationId": correlation_id,
                         "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
-                            "documentId": file_id,
+                            "fileId": file_id,
                             "fileName": file.filename,
                             "mimeType": file.content_type,
                             "size": size,
@@ -896,18 +977,8 @@ async def upload_document(
                                     "md5": md5_hash,
                                     "sha256": sha256_hash
                                 },
-                                "permissions": {
-                                    "read": ["system", "admin"],
-                                    "write": ["system"],
-                                    "delete": ["system"],
-                                    "share": ["system"]
-                                },
-                                "security": {
-                                    "encryption": "AES-256",
-                                    "watermark": False,
-                                    "digitalSignature": False,
-                                    "accessLogging": True
-                                },
+                                "permissions": None,  # Should come from user management, not hardcoded,
+                                "security": None,  # Should come from security config, not hardcoded,
                                 "version": 1
                             },
                             "metadata": {
@@ -923,10 +994,10 @@ async def upload_document(
                                     "archiveFileSize": None
                                 },
                                 "technical": {
-                                    "encoding": "UTF-8",
-                                    "lineEnding": "LF",
-                                    "bom": False,
-                                    "compression": "NONE",
+                                    "encoding": None,  # Should be detected, not hardcoded
+                                    "lineEnding": None,  # Should be detected, not hardcoded
+                                    "bom": None,  # Should be detected, not hardcoded
+                                    "compression": None,  # Should be detected, not hardcoded
                                     "pages": None,
                                     "wordCount": len(plaintext_text.split()) if plaintext_text else 0,
                                     "characterCount": len(plaintext_text) if plaintext_text else 0
@@ -937,30 +1008,38 @@ async def upload_document(
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
                     await publish_kafka_event(metadata_evt, file_id)
-                    print(f"[DEBUG] Published -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED documentId={file_id}")
+                    print(f"[DEBUG] Published -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED fileId={file_id}")
 
                     # 2) FILE_CONTENT_EXTRACTED - Enhanced payload theo EVENT-ARCHITECTURE-V3.md
-                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED documentId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
+                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED fileId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
                     
                     # Enhanced classification result - Match EVENT-ARCHITECTURE-V3.md enums
-                    enhanced_classification = {
-                        "documentType": classification_result.get("documentType"),  # CONTRACT, INVOICE, MEMO, REPORT, AGREEMENT, NOT_DOCUMENT - No fallback, use null
-                        "isContract": classification_result.get("isContract", False),
-                        "confidence": classification_result.get("confidence", 0.85),
-                        "reasons": classification_result.get("reasons", ["Document processing completed"]),
-                        "contractSubtype": classification_result.get("contractSubtype", None),
-                        "category": classification_result.get("category"),  # No fallback - use null
-                        "language": classification_result.get("language")  # vi, en, fr, zh - No fallback, use null
-                    }
+                    enhanced_classification = None  # Phase 1: set classification = null in FILE_CONTENT_EXTRACTED
                     
                     # Extract key terms from plaintext (simple extraction)
-                    key_terms = []
-                    if plaintext_text:
-                        words = plaintext_text.split()[:50]  # First 50 words
-                        key_terms = [w for w in words if len(w) > 3][:10]  # First 10 meaningful words
+                    # Phase 1: remove keyTerms/sections/summary from FILE_CONTENT_EXTRACTED
                     
                     # Create extractedText (cleaned version)
-                    extracted_text = " ".join(plaintext_text.split()) if plaintext_text else ""
+                    extracted_text = " ".join(plaintext_text.split()) if plaintext_text else None
+                    
+                    # Filter binary content before sending to Kafka
+                    from utils.binary_filter import is_likely_binary
+                    
+                    # plaintext: Set to None if binary content (indicates unextractable/binary file)
+                    # This tells the repository service that the file content is binary/unreadable
+                    safe_plaintext = None if (plaintext_text and is_likely_binary(plaintext_text)) else plaintext_text
+                    
+                    # extractedText: Keep human-readable text even if original file was binary
+                    # This allows the repository to have readable content when available
+                    # Only filter if the extracted text itself is binary (shouldn't happen with proper extraction)
+                    safe_extracted_text = extracted_text
+                    if extracted_text and is_likely_binary(extracted_text):
+                        print(f"[WARN] Extracted text appears binary, this shouldn't happen with proper extraction")
+                        safe_extracted_text = None
+                    
+                    if safe_plaintext is None and plaintext_text is not None:
+                        print(f"[WARN] Binary content detected, setting plaintext to None (indicates binary file, size: {len(plaintext_text)} bytes)")
+                        print(f"[INFO] extractedText will contain readable content if extraction was successful")
                     
                     plaintext_evt = {
                         "eventVersion": "1.0",
@@ -971,45 +1050,28 @@ async def upload_document(
                         "correlationId": correlation_id,
                         "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
-                            "documentId": file_id,
+                            "fileId": file_id,
                             "title": file.filename,
-                            "plaintext": plaintext_text,  # Raw text
-                            "extractedText": extracted_text,  # Cleaned text
-                            "summary": plaintext_text[:200] if plaintext_text else None,
-                            "keyTerms": key_terms,
-                            "sections": [],  # Will be populated by AI analysis
+                            "plaintext": safe_plaintext,  # Raw text (filtered)
+                            "extractedText": safe_extracted_text,  # Cleaned text (filtered)
+                            # Phase 1: remove summary/keyTerms/sections
                             "ocr": {
-                                "text": plaintext_text if file.content_type.lower() != "application/json" else None,
+                                "text": safe_plaintext if file.content_type.lower() != "application/json" else None,  # Use filtered version (None for binary)
                                 "status": "COMPLETED" if plaintext_text else "SKIPPED",  # COMPLETED, FAILED, PROCESSING, SKIPPED
                                 "engine": "TESSERACT",  # GEMINI_VISION, TESSERACT, TESSERACT_FALLBACK, PADDLEOCR
                                 "confidence": 1.0 if plaintext_text else 0.0,  # Enhanced field
                                 "processedAt": now_iso,  # Enhanced field
                                 "processingTime": 0.0,  # Enhanced field
-                                "error": None,  # Enhanced field
-                                "metadata": {  # Enhanced field
-                                    "language": "vie+eng",
-                                    "pageCount": 1,
-                                    "boxCount": 0,
-                                    "averageConfidence": 1.0 if plaintext_text else 0.0
-                                } if plaintext_text else None
-                            },
-                            "extraction": {  # NEW: extraction details
-                                "status": "SUCCESS" if plaintext_text else "FAILED",  # SUCCESS, PARTIAL, FAILED
-                                "method": "DIRECT",  # DIRECT, OCR, HYBRID
+                                # Phase 1: merge extraction fields into ocr
+                                "method": "DIRECT",
                                 "extractedAt": now_iso,
                                 "characterCount": len(plaintext_text) if plaintext_text else 0,
                                 "wordCount": len(plaintext_text.split()) if plaintext_text else 0,
-                                "error": None
+                                "error": None,  # Enhanced field
+                                "metadata": None  # Should come from actual OCR metadata, not fake data
                             },
-                            "summarization": {  # NEW: summarization details
-                                "status": "SUCCESS" if plaintext_text else "SKIPPED",  # SUCCESS, FAILED, SKIPPED
-                                "model": "gemini-1.5-flash",  # String - AI model name, not enum
-                                "processedAt": now_iso,
-                                "processingTime": 0.0,
-                                "inputTokens": len(plaintext_text.split()) if plaintext_text else 0,
-                                "outputTokens": len(plaintext_text[:200].split()) if plaintext_text else 0,
-                                "error": None
-                            },
+                            # Phase 1: remove extraction object; summarization -> aiSummarization = null
+                            "aiSummarization": None,
                             "jsonContent": json_content_text,
                             "jsonAnalysisStatus": "PARSED" if json_content_text else None,
                             "classification": enhanced_classification,
@@ -1018,10 +1080,12 @@ async def upload_document(
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
                     await publish_kafka_event(plaintext_evt, file_id)
-                    print(f"[DEBUG] Published -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED documentId={file_id}")
+                    print(f"[DEBUG] Published -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED fileId={file_id}")
 
                     # 3) CONTRACT_SUMMARY_GENERATED (if contract) - Enhanced payload theo EVENT-ARCHITECTURE-V3.md
-                    if bool(classification_result.get("isContract")) and summary_result:
+                    contract_condition = bool(classification_result.get("isContract")) and summary_result
+                    print(f"[DEBUG] Contract condition check: isContract={classification_result.get('isContract')}, summary_result={summary_result is not None}, condition={contract_condition}")
+                    if contract_condition:
                         print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=CONTRACT_SUMMARY_GENERATED documentId={file_id}")
                         
                         # Prepare FULL contract metadata theo EVENT-ARCHITECTURE-V3.md - AI không trả về thì null
@@ -1057,20 +1121,20 @@ async def upload_document(
                                     },
                                     "taxCode": party.get("taxCode") if isinstance(party, dict) else None
                                 }
-                                for party in (summary_result.get("parties") or [])
-                            ],
+                                for party in summary_result.get("parties", [])
+                            ] if summary_result.get("parties") else None,
                             
                             # Payment - full structure with schedule
                             "payment": {
-                                "schedule": summary_result.get("payment", {}).get("schedule") or [],
+                                "schedule": summary_result.get("payment", {}).get("schedule"),
                                 "method": summary_result.get("payment", {}).get("method"),  # BANK_TRANSFER, CREDIT_CARD, WIRE, CHECK, CASH, DIGITAL_WALLET - No fallback, use null
                                 "paymentMethod": summary_result.get("payment", {}).get("paymentMethod")
                             },
                             
                             # Clauses - full structure
                             "clauses": {
-                                "key": summary_result.get("clauses", {}).get("key") or [],
-                                "unfavorable": summary_result.get("clauses", {}).get("unfavorable") or [],
+                                "key": summary_result.get("clauses", {}).get("key"),
+                                "unfavorable": summary_result.get("clauses", {}).get("unfavorable"),
                                 "intellectualProperty": summary_result.get("clauses", {}).get("intellectualProperty"),
                                 "confidentiality": summary_result.get("clauses", {}).get("confidentiality"),
                                 "warranty": summary_result.get("clauses", {}).get("warranty"),
@@ -1083,31 +1147,31 @@ async def upload_document(
                                     "date": reminder.get("date") if isinstance(reminder, dict) else None,
                                     "type": reminder.get("type"),  # PAYMENT_DUE, MILESTONE_REVIEW, EXPIRY_WARNING, CONTRACT_RENEWAL - No fallback, use null
                                     "title": reminder.get("title") if isinstance(reminder, dict) else None,
-                                    "description": reminder.get("description", "") if isinstance(reminder, dict) else "",
+                                    "description": reminder.get("description") if isinstance(reminder, dict) else None,
                                     "notifyBefore": reminder.get("notifyBefore") if isinstance(reminder, dict) else None,
                                     "status": reminder.get("status"),  # PENDING, SENT, RESOLVED, OVERDUE - No fallback, use null
                                     "assignedTo": reminder.get("assignedTo") if isinstance(reminder, dict) else None
                                 }
-                                for reminder in (summary_result.get("reminders") or [])
-                            ],
+                                for reminder in summary_result.get("reminders", [])
+                            ] if summary_result.get("reminders") else None,
                             
                             # Risk - full structure
                             "risk": {
                                 "level": summary_result.get("risk", {}).get("level") or summary_result.get("risk", {}).get("riskLevel"),  # LOW, MEDIUM, HIGH - No fallback, use null
                                 "score": summary_result.get("risk", {}).get("score"),
-                                "factors": summary_result.get("risk", {}).get("factors") or [],
-                                "mitigations": summary_result.get("risk", {}).get("mitigations") or summary_result.get("risk", {}).get("mitigationProposals") or [],
+                                "factors": summary_result.get("risk", {}).get("factors"),
+                                "mitigations": summary_result.get("risk", {}).get("mitigations") or summary_result.get("risk", {}).get("mitigationProposals"),
                                 "advice": summary_result.get("risk", {}).get("advice")
                             },
                             
                             # Compliance - full structure
                             "compliance": {
                                 "status": summary_result.get("compliance", {}).get("status") or summary_result.get("compliance", {}).get("complianceStatus"),  # COMPLIANT, NON_COMPLIANT, PENDING_REVIEW, IN_AUDIT - No fallback, use null
-                                "requirements": summary_result.get("compliance", {}).get("requirements") or [],
-                                "regulations": summary_result.get("compliance", {}).get("regulations") or [],
-                                "certifications": summary_result.get("compliance", {}).get("certifications") or [],
-                                "issues": summary_result.get("compliance", {}).get("issues") or [],
-                                "recommendations": summary_result.get("compliance", {}).get("recommendations") or []
+                                "requirements": summary_result.get("compliance", {}).get("requirements"),
+                                "regulations": summary_result.get("compliance", {}).get("regulations"),
+                                "certifications": summary_result.get("compliance", {}).get("certifications"),
+                                "issues": summary_result.get("compliance", {}).get("issues"),
+                                "recommendations": summary_result.get("compliance", {}).get("recommendations")
                             }
                         }
                         
@@ -1120,14 +1184,20 @@ async def upload_document(
                             "correlationId": correlation_id,
                             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                             "data": {
-                                "documentId": file_id,
-                                "summary": summary_result.get("summary"),
+                                "fileId": file_id,
+                                # Phase 1 additions
+                                "summary": summary_result.get("summary") if summary_result else None,
+                                "keyTerms": summary_result.get("keyTerms") if isinstance(summary_result, dict) else None,
+                                "sections": summary_result.get("sections") if isinstance(summary_result, dict) else None,
+                                "language": classification_result.get("language"),
+                                "classification": classification_result,
+                                "aiSummarization": summary_result,
                                 "contract": contract_metadata
                             },
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }
                         await publish_kafka_event(contract_evt, file_id)
-                        print(f"[DEBUG] Published -> topic=docgo-file-events eventType=CONTRACT_SUMMARY_GENERATED documentId={file_id}")
+                        print(f"[DEBUG] Published -> topic=docgo-file-events eventType=CONTRACT_SUMMARY_GENERATED fileId={file_id}")
                 except Exception as pub_err:
                     print(f"[WARN] Kafka publish failed (non-blocking): {pub_err}")
 
@@ -1175,7 +1245,7 @@ async def upload_document(
             # Log automation completed event
             await audit_service.log_event({
                 "eventVersion": "v1",
-                "eventType": "file.plaintext.extracted",
+                "eventType": "FILE_CONTENT_EXTRACTED",
                 "correlationId": correlation_id,
                 "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {

@@ -270,9 +270,7 @@ class Config:
             "batch_size": int(os.getenv("EVENT_BATCH_SIZE", "100")),
             "timeout": int(os.getenv("EVENT_TIMEOUT", "30")),  # seconds
             "channels": {
-                "file_metadata_recorded": os.getenv("EVENT_CHANNEL_FILE_METADATA_RECORDED", "file.metadata.recorded"),
-                "file_plaintext_extracted": os.getenv("EVENT_CHANNEL_FILE_PLAINTEXT_EXTRACTED", "file.plaintext.extracted"),
-                "contract_summary_generated": os.getenv("EVENT_CHANNEL_CONTRACT_SUMMARY_GENERATED", "contract.summary.generated"),
+                "docgo_file_events": os.getenv("EVENT_CHANNEL_DOCGO_FILE_EVENTS", "docgo-file-events"),
             },
         }
 

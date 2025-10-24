@@ -322,7 +322,7 @@ public class FileEventServiceImpl implements IFileEventService {
     public FileEntity processFileMetadataRecorded(String fileId, Map<String, Object> eventData, 
                                                  String correlationId, String actor) {
         try {
-            log.info("Processing file.metadata.recorded for fileId: {}", fileId);
+            log.info("Processing FILE_UPLOAD_COMPLETED for fileId: {}", fileId);
             
             // Extract data from event
             Map<String, Object> data = (Map<String, Object>) eventData.get("data");
@@ -486,8 +486,8 @@ public class FileEventServiceImpl implements IFileEventService {
             return saved;
             
         } catch (Exception e) {
-            log.error("Error processing file.metadata.recorded event: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to process file.metadata.recorded event", e);
+            log.error("Error processing FILE_UPLOAD_COMPLETED event: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process FILE_UPLOAD_COMPLETED event", e);
         }
     }
     
@@ -495,7 +495,7 @@ public class FileEventServiceImpl implements IFileEventService {
     public FileEntity processFilePlaintextExtracted(String fileId, Map<String, Object> eventData,
                                                    String correlationId, String actor) {
         try {
-            log.info("Processing file.plaintext.extracted for fileId: {}", fileId);
+            log.info("Processing FILE_CONTENT_EXTRACTED for fileId: {}", fileId);
             
             // Extract data from event
             Map<String, Object> data = (Map<String, Object>) eventData.get("data");
@@ -594,8 +594,8 @@ public class FileEventServiceImpl implements IFileEventService {
             return saved;
             
         } catch (Exception e) {
-            log.error("Error processing file.plaintext.extracted event: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to process file.plaintext.extracted event", e);
+            log.error("Error processing FILE_CONTENT_EXTRACTED event: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process FILE_CONTENT_EXTRACTED event", e);
         }
     }
     

@@ -1,0 +1,22 @@
+SOFTWARE DEVELOPMENT CONTRACT
+
+This agreement is made between Company A and Company B for the development of DocGO platform.
+
+Terms and conditions:
+1. Development period: 6 months
+2. Total value: $100,000 USD
+3. Payment: 50% upfront, 50% on completion
+4. Confidentiality: All information is confidential
+5. Project: DocGO Platform Development
+6. Department: IT Department
+7. Priority: HIGH
+8. Effective date: January 1, 2025
+9. Expiry date: December 31, 2025
+
+Parties:
+- Company A (CLIENT)
+- Company B (VENDOR)
+
+Payment method: BANK_TRANSFER
+Risk level: MEDIUM
+Compliance status: COMPLIANT

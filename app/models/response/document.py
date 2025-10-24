@@ -1,9 +1,0 @@
-from pydantic import BaseModel
-from typing import Optional, Any
-
-class DocumentResponse(BaseModel):
-    apiVersion: str = "v1"
-    statusCode: int
-    shortMessage: str
-    description: str
-    data: Optional[Any] = None

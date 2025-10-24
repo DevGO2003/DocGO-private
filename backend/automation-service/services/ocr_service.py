@@ -16,6 +16,14 @@ import numpy as np
 import io
 import base64
 
+# Document processing libraries
+try:
+    from docx import Document
+    DOCX_AVAILABLE = True
+except ImportError:
+    DOCX_AVAILABLE = False
+    logging.warning("python-docx not available")
+
 # OCR Libraries
 try:
     import pytesseract
@@ -200,6 +208,68 @@ class OCRService:
         
         return result
     
+    def extract_text_from_docx(self, file_content: bytes, filename: str) -> Dict[str, Any]:
+        """Trích xuất text từ file DOCX"""
+        if not DOCX_AVAILABLE:
+            return {
+                "success": False,
+                "text": "",
+                "confidence": 0.0,
+                "error": "python-docx not available"
+            }
+        
+        try:
+            # Load DOCX document from bytes
+            doc = Document(io.BytesIO(file_content))
+            
+            # Extract text from all paragraphs
+            paragraphs = []
+            for paragraph in doc.paragraphs:
+                if paragraph.text.strip():
+                    paragraphs.append(paragraph.text.strip())
+            
+            # Extract text from tables
+            tables_text = []
+            for table in doc.tables:
+                for row in table.rows:
+                    row_text = []
+                    for cell in row.cells:
+                        if cell.text.strip():
+                            row_text.append(cell.text.strip())
+                    if row_text:
+                        tables_text.append(" | ".join(row_text))
+            
+            # Combine all text
+            all_text = []
+            if paragraphs:
+                all_text.extend(paragraphs)
+            if tables_text:
+                all_text.extend(tables_text)
+            
+            extracted_text = "\n".join(all_text)
+            
+            return {
+                "success": True,
+                "text": extracted_text,
+                "confidence": 1.0,
+                "engine": "python-docx",
+                "metadata": {
+                    "paragraphs": len(paragraphs),
+                    "tables": len(doc.tables),
+                    "totalTextLength": len(extracted_text)
+                }
+            }
+            
+        except Exception as e:
+            logging.error(f"Error extracting text from DOCX: {e}")
+            return {
+                "success": False,
+                "text": "",
+                "confidence": 0.0,
+                "error": str(e),
+                "engine": "python-docx"
+            }
+
     def extract_text_from_file(self, file_content: bytes, filename: str, engine: str = "auto") -> Dict[str, Any]:
         """Trích xuất text từ file ảnh"""
         try:
@@ -309,6 +379,21 @@ class OCRService:
                     }
                 except Exception as e:
                     logging.warning(f"Text reading failed: {e}")
+            
+            # Xử lý file DOCX
+            if content_type.lower() in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/docx"]:
+                docx_result = self.extract_text_from_docx(file_content, filename)
+                if docx_result["success"]:
+                    docx_result["metadata"] = {
+                        "fileType": "DOCX",
+                        "contentType": content_type,
+                        "size": len(file_content),
+                        "processedAt": datetime.now(timezone.utc).isoformat(),
+                        "extractionEngine": docx_result.get("engine", "python-docx"),
+                        "confidence": docx_result.get("confidence", 1.0),
+                        **docx_result.get("metadata", {})
+                    }
+                return docx_result
             
             # Xử lý file ảnh với OCR
             if content_type.lower().startswith('image/'):

@@ -40,10 +40,7 @@ from schemas.batch_schemas import (
     BatchJobCancelRequest, BatchJobRetryRequest, BatchProcessingRequest,
     BatchProcessingResponse
 )
-from schemas.event_schemas import (
-    EventHandlerRequest, EventSubscriptionRequest, EventPublishRequest,
-    EventHistoryRequest, EventHandlerResponse
-)
+# Event schemas removed - using direct dict for Kafka events
 from schemas.view_schemas import ViewType, ViewMapper, PaginatedViewResponse
 
 router = APIRouter(prefix="/api/v1/automation-service")

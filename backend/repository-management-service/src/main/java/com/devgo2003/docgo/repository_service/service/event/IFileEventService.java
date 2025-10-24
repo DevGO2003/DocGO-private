@@ -72,7 +72,7 @@ public interface IFileEventService {
     void markEventAsProcessed(String eventId, String eventType, String documentId);
     
     /**
-     * Process file.metadata.recorded event
+     * Process FILE_UPLOAD_COMPLETED event
      * Creates document skeleton with file metadata
      * 
      * @param fileId UUID of the file
@@ -85,7 +85,7 @@ public interface IFileEventService {
                                           String correlationId, String actor);
     
     /**
-     * Process file.plaintext.extracted event
+     * Process FILE_CONTENT_EXTRACTED event
      * Adds extracted content and classification to existing document
      * 
      * @param fileId UUID of the file

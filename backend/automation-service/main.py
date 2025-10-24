@@ -9,6 +9,7 @@ import routers
 from contract_router import router as contract_router
 from file_router import router as file_router
 from ocr_router import router as ocr_router
+# upload_router removed - using file_router endpoint
 import time
 
 # Hot reload test

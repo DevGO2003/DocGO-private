@@ -23,6 +23,10 @@ class AutomationService:
         if not self._initialized:
             self.api_key = Config.get_gemini_api_key()
             genai.configure(api_key=self.api_key)
+            # Phase 2: Vietnamese instruction constant for AI responses
+            self.VIETNAMESE_RESPONSE_INSTRUCTION = (
+                "Lưu ý: Trả lời BẰNG TIẾNG VIỆT, không kèm markdown hay giải thích, chỉ JSON hợp lệ."
+            )
             # Allow override via ENV
             import os
             env_model = os.getenv('GEMINI_MODEL', '').strip()
@@ -366,6 +370,8 @@ class AutomationService:
                     logging.warning(f"[AI_PROMPT_TRUNCATE] Content too large ({len(safe_content)} chars). Truncating to {max_chars} chars.")
                     safe_content = safe_content[:max_chars]
                 prompt = self.get_contract_summary_prompt(safe_content, filename)
+                # Phase 2: enforce Vietnamese JSON-only output
+                prompt = f"{prompt}\n\n{self.VIETNAMESE_RESPONSE_INSTRUCTION}"
                 logging.info(f"[AI_SUMMARY_ATTEMPT] Attempt {attempt + 1}/{max_retries} for: {filename}")
                 response = self.model.generate_content(prompt)
                 
@@ -447,7 +453,7 @@ class AutomationService:
                 categories=', '.join(categories),
                 filename=filename,
                 content=content[:8000] if isinstance(content, str) else str(content)[:8000]
-            )
+            ) + f"\n\n{self.VIETNAMESE_RESPONSE_INSTRUCTION}"
             
             response = self.model.generate_content(classification_prompt)
             
@@ -491,6 +497,110 @@ class AutomationService:
             
         except Exception as e:
             logging.error(f"[AI_CLASSIFICATION_ERROR] Error in classification: {e}")
+            return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": [str(e)], "contractSubtype": None}
+    
+    def classify_document_from_file(self, file_content: bytes, filename: str, content_type: str) -> Dict[str, Any]:
+        """
+        Classify document by sending file directly to AI instead of extracting text first.
+        This is useful for files that OCR cannot process (like .docx).
+        """
+        import tempfile
+        import os
+        from utils.mime_mapper import get_proper_mime_type, is_supported_by_gemini
+        
+        try:
+            # Fix mime type if needed
+            proper_mime_type = get_proper_mime_type(filename, content_type)
+            logging.info(f"[AI_FILE_CLASSIFICATION] Classifying file: {filename}, original_mime: {content_type}, proper_mime: {proper_mime_type}")
+            
+            # Check if supported by Gemini
+            if not is_supported_by_gemini(proper_mime_type):
+                logging.warning(f"[AI_FILE_CLASSIFICATION] MIME type not supported by Gemini: {proper_mime_type}")
+                return {
+                    "documentType": "other",
+                    "isContract": False,
+                    "confidence": 1.0,
+                    "reasons": [f"Loại file không được hỗ trợ: {proper_mime_type}"],
+                    "contractSubtype": None
+                }
+            
+            # Create a prompt that asks AI to analyze the file content
+            prompt = f"""
+            Phân tích file "{filename}" (loại: {proper_mime_type}) và xác định loại tài liệu.
+            
+            Trả về JSON với các trường:
+            - documentType: "contract", "invoice", "report", "other"
+            - isContract: true/false
+            - confidence: 0.0-1.0
+            - reasons: ["lý do 1", "lý do 2"]
+            - contractSubtype: null hoặc loại hợp đồng nếu là contract
+            
+            {self.VIETNAMESE_RESPONSE_INSTRUCTION}
+            """
+            
+            # Upload file to Gemini File API
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as temp_file:
+                temp_file.write(file_content)
+                temp_file_path = temp_file.name
+            
+            try:
+                # Upload file using Gemini File API with proper mime type
+                uploaded_file = genai.upload_file(temp_file_path, mime_type=proper_mime_type)
+                logging.info(f"[AI_FILE_UPLOAD] File uploaded: {uploaded_file.uri}")
+                
+                # Send prompt with uploaded file
+                response = self.model.generate_content([prompt, uploaded_file])
+            finally:
+                # Clean up temp file
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+            
+            if response.text:
+                # Parse the response
+                try:
+                    cleaned = response.text.strip()
+                    if cleaned.startswith('```json'):
+                        cleaned = cleaned[7:]
+                    if cleaned.startswith('```'):
+                        cleaned = cleaned[3:]
+                    if cleaned.endswith('```'):
+                        cleaned = cleaned[:-3]
+                    
+                    result = json.loads(cleaned)
+                    
+                    # Map to unified schema
+                    document_type = result.get("documentType") or "other"
+                    is_contract = bool(result.get("isContract") or (str(document_type).lower() == "contract"))
+                    confidence = float(result.get("confidence", 0.5))
+                    reasons = result.get("reasons", [])
+                    if not isinstance(reasons, list):
+                        reasons = [str(reasons)]
+                    contract_subtype = result.get("contractSubtype") if is_contract else None
+                    
+                    logging.info(f"[AI_FILE_CLASSIFICATION] Result: {document_type}, isContract: {is_contract}")
+                    
+                    return {
+                        "documentType": str(document_type),
+                        "isContract": is_contract,
+                        "confidence": confidence,
+                        "reasons": reasons,
+                        "contractSubtype": contract_subtype
+                    }
+                    
+                except json.JSONDecodeError:
+                    # Fallback classification based on filename
+                    filename_lower = filename.lower()
+                    contract_indicators = ['hop-dong', 'contract', 'hợp đồng', 'thỏa thuận', 'agreement']
+                    
+                    if any(indicator in filename_lower for indicator in contract_indicators):
+                        return {"documentType": "contract", "isContract": True, "confidence": 0.8, "reasons": ["Tên file có dấu hiệu hợp đồng"], "contractSubtype": None}
+                    else:
+                        return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": ["Không phân tích được nội dung"], "contractSubtype": None}
+            
+            return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": ["Không có phản hồi từ AI"], "contractSubtype": None}
+            
+        except Exception as e:
+            logging.error(f"[AI_FILE_CLASSIFICATION_ERROR] Error in file classification: {e}")
             return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": [str(e)], "contractSubtype": None}
     
     def extract_text_with_gemini(self, content: bytes, filename: str, content_type: str) -> str:
