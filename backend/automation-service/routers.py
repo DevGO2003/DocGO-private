@@ -28,8 +28,8 @@ from services.file_service import FileStorageService
 # Initialize document processor
 document_processor = DocumentProcessor()
 # from services.notification_service import NotificationService
-from services.batch_service import BatchService
-from services.event_service import EventService
+# from services.batch_service import BatchService  # DISABLED - Requires Redis
+# from services.event_service import EventService  # DISABLED - Requires Redis
 # from schemas.notification_schemas import (
 #     NotificationRequest, NotificationHistoryRequest, NotificationTemplate,
 #     EmailNotificationRequest, SMSNotificationRequest, PushNotificationRequest,
@@ -192,12 +192,13 @@ async def get_gemini_config(request: Request):
 
 # Initialize services (will be initialized in main.py)
 # notification_service = NotificationService()
-batch_service = BatchService()
+# batch_service = BatchService()  # DISABLED - Requires Redis
 # Import global event_service instance
-from global_instances import event_service
+# from global_instances import event_service  # DISABLED - Requires Redis
 
-@router.post("/batch/process", summary="Xử lý batch", tags=["📦 APIs Xử lý Batch"])
-async def process_batch_api(
+# DISABLED - Requires Redis
+# @router.post("/batch/process", summary="Xử lý batch", tags=["📦 APIs Xử lý Batch"])
+async def process_batch_api_disabled(
     request: Request,
     batch_request: BatchProcessingRequest
 ):
@@ -247,8 +248,9 @@ async def process_batch_api(
             requestId=str(uuid.uuid4())
         )
 
-@router.get("/batch/status/{job_id}", summary="Trạng thái job", tags=["📦 APIs Xử lý Batch"])
-async def get_batch_job_status_api(
+# DISABLED - Requires Redis
+# @router.get("/batch/status/{job_id}", summary="Trạng thái job", tags=["📦 APIs Xử lý Batch"])
+async def get_batch_job_status_api_disabled(
     request: Request,
     job_id: str
 ):

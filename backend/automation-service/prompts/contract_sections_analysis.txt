@@ -6,4 +6,4 @@ Mỗi section cần có:
 - pageNumber: Số trang (đặt 1 nếu không biết)
 
 Văn bản:
-{text}
+{{text}}

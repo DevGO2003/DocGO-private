@@ -9,7 +9,7 @@ from services.ocr_service import OCRService
 from services.ai_processing_service import AutomationService
 from services.file_service import FileStorageService
 from services.websocket_manager import WebSocketManager
-from services.event_service import EventService
+# from services.event_service import EventService  # DISABLED - Requires Redis
 from services.file_api_builder import build_file_api_payload
 from datetime import datetime, timezone
 import httpx
@@ -23,8 +23,9 @@ class AsyncDocumentProcessor:
         self.file_service = FileStorageService()
         self.websocket_manager = WebSocketManager()
         # Import global event_service instance
-        from global_instances import event_service
-        self.event_service = event_service
+        # from global_instances import event_service  # DISABLED - Requires Redis
+        # self.event_service = event_service  # DISABLED - Requires Redis
+        self.event_service = None  # DISABLED - Requires Redis
     
     async def process_document_async(self, document_data: Dict[str, Any]):
         """Process document asynchronously"""
@@ -136,13 +137,14 @@ class AsyncDocumentProcessor:
             })
             
             # 8) Publish completion event
-            await self.event_service.publish_event({
-                "eventType": "DocumentProcessed",
-                "documentId": document_id,
-                "status": "COMPLETED",
-                "isContract": is_contract,
-                "classificationResult": classification_result
-            })
+            # DISABLED - Requires Redis
+            # await self.event_service.publish_event({
+            #     "eventType": "DocumentProcessed",
+            #     "documentId": document_id,
+            #     "status": "COMPLETED",
+            #     "isContract": is_contract,
+            #     "classificationResult": classification_result
+            # })
             
         except Exception as e:
             logger.error(f"Async processing failed for {document_id}: {e}")
@@ -156,11 +158,12 @@ class AsyncDocumentProcessor:
             })
             
             # Publish error event
-            await self.event_service.publish_event({
-                "eventType": "DocumentProcessingFailed",
-                "documentId": document_id,
-                "error": str(e)
-            })
+            # DISABLED - Requires Redis
+            # await self.event_service.publish_event({
+            #     "eventType": "DocumentProcessingFailed",
+            #     "documentId": document_id,
+            #     "error": str(e)
+            # })
 
 # Global processor instance
 async_processor = AsyncDocumentProcessor()

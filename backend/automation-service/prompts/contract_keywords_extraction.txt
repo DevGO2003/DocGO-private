@@ -6,4 +6,4 @@ Tập trung vào:
 - Thời hạn, giá trị, đối tác
 
 Văn bản:
-{text}
+{{text}}

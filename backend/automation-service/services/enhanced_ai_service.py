@@ -19,6 +19,7 @@ import random
 from typing import Dict, Any, Optional, List
 import google.generativeai as genai
 from services.prompt_templates import PromptTemplates, PromptValidator
+from utils.enum_validator import EnumValidator
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,10 @@ class EnhancedAIService:
         
         if not model_initialized:
             raise Exception("Could not initialize any Gemini model")
+        
+        # Initialize enum validator
+        self.enum_validator = EnumValidator()
+        logger.info("[ENHANCED_AI_SERVICE] Enum validator initialized")
     
     def classify_document(self, extracted_text: str, filename: str) -> Dict[str, Any]:
         """
@@ -69,8 +74,11 @@ class EnhancedAIService:
         try:
             logger.info(f"[DOCUMENT_CLASSIFICATION] Starting classification for: {filename}")
             
-            # Get prompt template
-            prompt = PromptTemplates.get_document_classification_prompt(extracted_text, filename)
+            # Get prompt template with enum validation
+            prompt = self._load_prompt_template(
+                "document_classification_enum",
+                extractedText=extracted_text[:8000] if extracted_text else ""
+            )
             
             # Generate response
             response = self._generate_ai_response(prompt, "document_classification")
@@ -78,17 +86,13 @@ class EnhancedAIService:
             if not response:
                 return self._get_fallback_classification(filename)
             
-            # Validate response
-            validation_result = PromptValidator.validate_document_classification(response)
-            
-            if not validation_result["valid"]:
-                logger.warning(f"[VALIDATION_ERRORS] {validation_result['errors']}")
+            # Validate response with enum validator
+            validated_response = self.enum_validator.validate_document_classification(response)
             
             logger.info(f"[DOCUMENT_CLASSIFICATION] Completed for: {filename}")
             return {
                 "success": True,
-                "classification": validation_result["response"],
-                "validation": validation_result,
+                "classification": validated_response,
                 "filename": filename
             }
             
@@ -588,3 +592,23 @@ class EnhancedAIService:
             "pdfaidPart": "3",
             "pdfaidConformance": "B"
         }
+    
+    def _load_prompt_template(self, template_name: str, **kwargs) -> str:
+        """Load prompt template from file and format with variables"""
+        import os
+        
+        try:
+            # Get the directory of this service
+            service_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            prompts_dir = os.path.join(service_dir, "prompts")
+            template_path = os.path.join(prompts_dir, f"{template_name}.txt")
+            
+            with open(template_path, 'r', encoding='utf-8') as f:
+                template = f.read()
+                
+            # Format template with provided variables
+            return template.format(**kwargs)
+        except Exception as e:
+            logger.error(f"Error loading prompt template {template_name}: {e}")
+            # Fallback to basic template
+            return f"Process the following content: {kwargs.get('extractedText', '')}"

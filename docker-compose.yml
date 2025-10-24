@@ -90,7 +90,6 @@ services:
     ports:
       - "${USER_MANAGEMENT_PORT:-8001}:8001"
     env_file:
-      - .env
       - ./backend/user-management-service/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -116,7 +115,6 @@ services:
     ports:
       - "${REPOSITORY_MANAGEMENT_PORT:-8002}:8002"
     env_file:
-      - .env
       - ./backend/repository-management-service/.env
     environment:
       - ENVIRONMENT=docker
@@ -140,7 +138,6 @@ services:
     ports:
       - "${AUTOMATION_PORT:-8003}:8003"
     env_file:
-      - .env
       - ./backend/automation-service/.env
     environment:
       - ENVIRONMENT=development
@@ -171,7 +168,6 @@ services:
     ports:
       - "${API_GATEWAY_PORT:-8000}:8000"
     env_file:
-      - .env
       - ./backend/api-gateway/.env
     environment:
       - ENVIRONMENT=docker

@@ -20,9 +20,9 @@ from datetime import datetime
 import uuid
 # Legacy Kafka worker disabled by default; guarded at runtime
 # from services.notification_service import NotificationService
-from services.batch_service import BatchService
+# from services.batch_service import BatchService  # DISABLED - Requires Redis
 from config import Config
-from global_instances import event_service, audit_service, batch_service
+from global_instances import audit_service  # event_service and batch_service DISABLED
 
 app = FastAPI(
     title="Automation Service API",
@@ -160,11 +160,11 @@ async def on_startup():
         # Initialize all services
         # await notification_service.initialize()
         await audit_service.initialize()
-        await batch_service.initialize()
-        await event_service.initialize()
+        # await batch_service.initialize()  # DISABLED - Requires Redis
+        # await event_service.initialize()  # DISABLED - Requires Redis
         
         # Start event processing
-        await event_service.start_event_processing()
+        # await event_service.start_event_processing()  # DISABLED - Requires Redis
         
         # Start Kafka worker (legacy) ONLY when both flags are enabled
         if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true" and os.getenv("ALLOW_LEGACY_WORKER", "false").lower() == "true":
@@ -184,8 +184,8 @@ async def on_shutdown():
         # Stop all services
         # await notification_service.close()
         await audit_service.close()
-        await batch_service.close()
-        await event_service.close()
+        # await batch_service.close()  # DISABLED - Requires Redis
+        # await event_service.close()  # DISABLED - Requires Redis
         if os.getenv("KAFKA_WORKER_ENABLED", "false").lower() == "true" and os.getenv("ALLOW_LEGACY_WORKER", "false").lower() == "true":
             try:
                 from kafka_worker import worker

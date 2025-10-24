@@ -183,6 +183,143 @@ public class FileEntity {
     public void setFile(Map<String, Object> file) {
         metadata.put("file", file);
     }
+    
+    // Additional helper methods for mapping
+    public String getContentType() {
+        return (String) overview.get("contentType");
+    }
+    
+    public void setContentType(String contentType) {
+        overview.put("contentType", contentType);
+    }
+    
+    public String getPlaintext() {
+        return (String) content.get("plaintext");
+    }
+    
+    public void setPlaintext(String plaintext) {
+        content.put("plaintext", plaintext);
+    }
+    
+    public String getSummary() {
+        return (String) content.get("summary");
+    }
+    
+    public void setSummary(String summary) {
+        content.put("summary", summary);
+    }
+    
+    public List<String> getKeyTerms() {
+        return (List<String>) content.get("keyTerms");
+    }
+    
+    public void setKeyTerms(List<String> keyTerms) {
+        content.put("keyTerms", keyTerms);
+    }
+    
+    public Boolean getIsContract() {
+        return (Boolean) overview.get("isContract");
+    }
+    
+    public void setIsContract(Boolean isContract) {
+        overview.put("isContract", isContract);
+    }
+    
+    public Double getConfidence() {
+        return (Double) overview.get("confidence");
+    }
+    
+    public void setConfidence(Double confidence) {
+        overview.put("confidence", confidence);
+    }
+    
+    public List<String> getReasons() {
+        return (List<String>) overview.get("reasons");
+    }
+    
+    public void setReasons(List<String> reasons) {
+        overview.put("reasons", reasons);
+    }
+    
+    public String getOcrStatus() {
+        return (String) content.get("ocrStatus");
+    }
+    
+    public void setOcrStatus(String ocrStatus) {
+        content.put("ocrStatus", ocrStatus);
+    }
+    
+    public String getOcrEngine() {
+        return (String) content.get("ocrEngine");
+    }
+    
+    public void setOcrEngine(String ocrEngine) {
+        content.put("ocrEngine", ocrEngine);
+    }
+    
+    public Double getOcrConfidence() {
+        return (Double) content.get("ocrConfidence");
+    }
+    
+    public void setOcrConfidence(Double ocrConfidence) {
+        content.put("ocrConfidence", ocrConfidence);
+    }
+    
+    public String getFileUrl() {
+        return (String) storage.get("fileUrl");
+    }
+    
+    public void setFileUrl(String fileUrl) {
+        storage.put("fileUrl", fileUrl);
+    }
+    
+    public String getMd5Hash() {
+        return (String) metadata.get("md5Hash");
+    }
+    
+    public void setMd5Hash(String md5Hash) {
+        metadata.put("md5Hash", md5Hash);
+    }
+    
+    public String getSha256Hash() {
+        return (String) metadata.get("sha256Hash");
+    }
+    
+    public void setSha256Hash(String sha256Hash) {
+        metadata.put("sha256Hash", sha256Hash);
+    }
+    
+    public String getDateModified() {
+        return (String) metadata.get("dateModified");
+    }
+    
+    public void setDateModified(String dateModified) {
+        metadata.put("dateModified", dateModified);
+    }
+    
+    public String getDateAdded() {
+        return (String) metadata.get("dateAdded");
+    }
+    
+    public void setDateAdded(String dateAdded) {
+        metadata.put("dateAdded", dateAdded);
+    }
+    
+    public Integer getWordCount() {
+        return (Integer) metadata.get("wordCount");
+    }
+    
+    public void setWordCount(Integer wordCount) {
+        metadata.put("wordCount", wordCount);
+    }
+    
+    public Integer getCharacterCount() {
+        return (Integer) metadata.get("characterCount");
+    }
+    
+    public void setCharacterCount(Integer characterCount) {
+        metadata.put("characterCount", characterCount);
+    }
 }
 
 

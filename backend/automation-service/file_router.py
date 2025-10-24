@@ -20,7 +20,7 @@ from services.ocr_service import OCRService
 from services.ai_processing_service import AutomationService
 from services.file_service import FileStorageService
 from services.websocket_manager import WebSocketManager
-from services.event_service import EventService
+# from services.event_service import EventService  # DISABLED - Requires Redis
 from services.async_processor import async_processor
 from services.progress_service import ProgressService
 from services.extract_file_service import ExtractFileService
@@ -35,7 +35,32 @@ ocr_service = OCRService()
 ai_service = AutomationService()
 websocket_manager = WebSocketManager()
 # Import global event_service instance
-from global_instances import event_service
+# from global_instances import event_service  # DISABLED - Requires Redis
+
+# Direct Kafka producer for publishing events (no Redis needed)
+from aiokafka import AIOKafkaProducer
+import json
+
+# Global Kafka producer
+kafka_producer = None
+
+async def get_kafka_producer():
+    global kafka_producer
+    if kafka_producer is None:
+        from config import Config
+        kafka_producer = AIOKafkaProducer(
+            bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
+            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        )
+        await kafka_producer.start()
+    return kafka_producer
+
+async def publish_kafka_event(topic: str, event: dict):
+    try:
+        producer = await get_kafka_producer()
+        await producer.send_and_wait(topic, event)
+    except Exception as e:
+        print(f"[WARN] Kafka publish failed: {e}")
 progress_service = ProgressService()
 extract_file_service = ExtractFileService()
 contract_summary_service = ContractSummaryService()
@@ -320,7 +345,7 @@ async def upload_document(
     try:
         # Get file size from content-length header
         size = int(request.headers.get("content-length") or 0)
-        sync_mode = size < 2 * 1024 * 1024  # 2MB threshold
+        sync_mode = True  # TEMPORARILY: Always use sync processing (was: size < 2 * 1024 * 1024)
         
         # Start audit logging
         await audit_service.log_processing_session({
@@ -907,7 +932,7 @@ async def upload_document(
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
-                    await event_service.publish_kafka("file.metadata.recorded", metadata_evt)
+                    await publish_kafka_event("file.metadata.recorded", metadata_evt)
                     print(f"[DEBUG] Published -> topic=file.metadata.recorded fileId={file_id}")
 
                     # 2) file.plaintext.extracted - Enhanced payload theo sample.json
@@ -988,7 +1013,7 @@ async def upload_document(
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
-                    await event_service.publish_kafka("file.plaintext.extracted", plaintext_evt)
+                    await publish_kafka_event("file.plaintext.extracted", plaintext_evt)
                     print(f"[DEBUG] Published -> topic=file.plaintext.extracted fileId={file_id}")
 
                     # 3) contract.summary.generated (if contract) - Enhanced payload theo sample.json
@@ -1096,7 +1121,7 @@ async def upload_document(
                             },
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }
-                        await event_service.publish_kafka("contract.summary.generated", contract_evt)
+                        await publish_kafka_event("contract.summary.generated", contract_evt)
                         print(f"[DEBUG] Published -> topic=contract.summary.generated fileId={file_id}")
                 except Exception as pub_err:
                     print(f"[WARN] Kafka publish failed (non-blocking): {pub_err}")
@@ -1162,7 +1187,7 @@ async def upload_document(
                 "shortMessage": "Created",
                 "description": "Document created and processed (sync)",
                 "data": {
-                    "documentId": file_id,
+                    "fileId": file_id,
                     "fileUrl": file_url,
                     "correlationId": correlation_id
                 },
@@ -1182,15 +1207,16 @@ async def upload_document(
                 }))
                 
                 # Publish initial event
-                await event_service.publish_event({
-                    "eventType": "file.metadata.recorded",
-                    "documentId": file_id,
-                    "fileUrl": file_url,
-                    "filename": file.filename,
-                    "fileSize": size,
-                    "contentType": file.content_type,
-                    "userId": "system"
-                })
+                # DISABLED - Requires Redis
+                # await event_service.publish_event({
+                #     "eventType": "file.metadata.recorded",
+                #     "documentId": file_id,
+                #     "fileUrl": file_url,
+                #     "filename": file.filename,
+                #     "fileSize": size,
+                #     "contentType": file.content_type,
+                #     "userId": "system"
+                # })
                 
                 # Notify WebSocket clients
                 await websocket_manager.broadcast_progress(file_id, {

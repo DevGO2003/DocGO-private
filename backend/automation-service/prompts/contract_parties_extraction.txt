@@ -7,4 +7,4 @@ Tìm kiếm:
 - Người đại diện và chức vụ
 
 Văn bản:
-{text}
+{{text}}

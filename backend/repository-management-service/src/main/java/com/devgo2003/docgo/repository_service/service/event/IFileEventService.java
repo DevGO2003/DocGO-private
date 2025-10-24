@@ -70,4 +70,30 @@ public interface IFileEventService {
      * @param documentId Document ID
      */
     void markEventAsProcessed(String eventId, String eventType, String documentId);
+    
+    /**
+     * Process file.metadata.recorded event
+     * Creates document skeleton with file metadata
+     * 
+     * @param fileId UUID of the file
+     * @param eventData Event payload data
+     * @param correlationId Request correlation ID
+     * @param actor Actor performing action
+     * @return Created/Updated FileEntity
+     */
+    FileEntity processFileMetadataRecorded(String fileId, Map<String, Object> eventData, 
+                                          String correlationId, String actor);
+    
+    /**
+     * Process file.plaintext.extracted event
+     * Adds extracted content and classification to existing document
+     * 
+     * @param fileId UUID of the file
+     * @param eventData Event payload data
+     * @param correlationId Request correlation ID
+     * @param actor Actor performing action
+     * @return Updated FileEntity
+     */
+    FileEntity processFilePlaintextExtracted(String fileId, Map<String, Object> eventData,
+                                           String correlationId, String actor);
 }
