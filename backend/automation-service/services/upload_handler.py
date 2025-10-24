@@ -9,7 +9,7 @@ Responsibilities:
 
 import logging
 from typing import Dict, Any, Optional
-from uuid_extensions import uuid7
+from utils.uuid_generator import uuid7
 from services.kafka_publisher_v3 import KafkaPublisherV3
 
 logger = logging.getLogger(__name__)
@@ -88,18 +88,17 @@ class UploadHandler:
             }
     
     def _is_valid_uuid_v7(self, uuid_str: str) -> bool:
-        """Validate UUID v7 format"""
+        """Validate UUID format (accept both v4 and v7)"""
         try:
-            # UUID v7 format: 018c4e88-89a1-7000-8000-0123456789ab
-            # Version field (3rd group) should start with 7
+            # Accept both UUID v4 and v7 formats
             parts = uuid_str.split('-')
             if len(parts) != 5:
                 return False
             
-            # Check version (3rd group should start with 7)
+            # Check version (3rd group should start with 4 or 7)
             version = parts[2][0]
-            if version != '7':
-                logger.warning(f"⚠️ UUID version is {version}, expected 7")
+            if version not in ['4', '7']:
+                logger.warning(f"⚠️ UUID version is {version}, expected 4 or 7")
                 return False
             
             return True

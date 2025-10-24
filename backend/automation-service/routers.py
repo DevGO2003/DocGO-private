@@ -22,14 +22,10 @@ from openpyxl import load_workbook
 from striprtf.striprtf import rtf_to_text
 import csv
 from services.ai_processing_service import AutomationService
-from services.document_processor import DocumentProcessor
 from services.file_service import FileStorageService
 
-# Initialize document processor
-document_processor = DocumentProcessor()
-# from services.notification_service import NotificationService
-# from services.batch_service import BatchService  # DISABLED - Requires Redis
-# from services.event_service import EventService  # DISABLED - Requires Redis
+# Document processor removed - not used
+# Removed unused service imports
 # from schemas.notification_schemas import (
 #     NotificationRequest, NotificationHistoryRequest, NotificationTemplate,
 #     EmailNotificationRequest, SMSNotificationRequest, PushNotificationRequest,
@@ -188,135 +184,13 @@ async def get_gemini_config(request: Request):
 # TEMPORARILY DISABLED - Missing twilio dependency
 
 # Initialize services (will be initialized in main.py)
-# notification_service = NotificationService()
-# batch_service = BatchService()  # DISABLED - Requires Redis
-# Import global event_service instance
-# from global_instances import event_service  # DISABLED - Requires Redis
+# Removed unused service instances
 
-# DISABLED - Requires Redis
-# @router.post("/batch/process", summary="Xử lý batch", tags=["📦 APIs Xử lý Batch"])
-async def process_batch_api_disabled(
-    request: Request,
-    batch_request: BatchProcessingRequest
-):
-    try:
-        await batch_service.initialize()
-        
-        # Tạo batch job
-        job_request = BatchJobRequest(
-            type="ai_processing",
-            name=f"Batch processing {len(batch_request.files)} files",
-            data={
-                "files": batch_request.files,
-                "processing_type": batch_request.processing_type,
-                "options": batch_request.options or {},
-                "callback_url": batch_request.callback_url
-            }
-        )
-        
-        job = await batch_service.create_batch_job(job_request)
-        
-        # Bắt đầu xử lý job
-        asyncio.create_task(batch_service.process_batch_job(job.id))
-        
-        result = BatchProcessingResponse(
-            job_id=job.id,
-            total_files=len(batch_request.files),
-            estimated_time=len(batch_request.files) * 30,  # 30 seconds per file
-            status_url=f"/api/v1/automation-service/batch/status/{job.id}"
-        )
-        
-        return RestResponse(
-            statusCode=201,
-            shortMessage="Created",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
+# Batch processing endpoint removed - batch_service.py deleted
 
-# DISABLED - Requires Redis
-# @router.get("/batch/status/{job_id}", summary="Trạng thái job", tags=["📦 APIs Xử lý Batch"])
-async def get_batch_job_status_api_disabled(
-    request: Request,
-    job_id: str
-):
-    try:
-        await batch_service.initialize()
-        result = await batch_service.get_batch_job_status(job_id)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            data=result.model_dump(),
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except ValueError as e:
-        return RestResponse(
-            statusCode=404,
-            shortMessage="Not Found",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
-    except Exception as e:
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(timezone.utc),
-            requestId=str(uuid.uuid4())
-        )
+# Batch status endpoint removed - batch_service.py deleted
 
-@router.get("/batch/jobs", summary="Danh sách jobs với projection", tags=["📦 APIs Xử lý Batch"])
-async def get_batch_jobs_api(
-    request: Request,
-    view: ViewType = Query(ViewType.TABLE),
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    job_type: str = Query(None),
-    status: str = Query(None),
-    priority: str = Query(None)
-):
-    try:
-        logger.info(f"Retry OCR request for document: {document_id}")
-        
-        result = await document_processor.retry_ocr(document_id)
-        
-        return RestResponse(
-            statusCode=200,
-            shortMessage="Success",
-            data=result,
-            path=request.url.path,
-            timestamp=datetime.now(),
-            requestId=str(uuid.uuid4())
-        )
-        
-    except Exception as e:
-        logger.error(f"Retry OCR failed: {str(e)}")
-        return RestResponse(
-            statusCode=500,
-            shortMessage="Internal Server Error",
-            data=None,
-            path=request.url.path,
-            timestamp=datetime.now(),
-            requestId=str(uuid.uuid4())
-        )
+# Batch jobs endpoint removed - batch_service.py deleted
 
 
 @router.get("/health", summary="Health check", tags=["🏥 APIs Kiểm tra Hệ thống"])

@@ -121,18 +121,18 @@ class PromptTemplates:
     @staticmethod
     def get_contract_analysis_prompt(extracted_text: str, filename: str) -> str:
         """
-        Template for contract analysis (Event 3)
+        Template for FULL contract analysis with detailed schema (Event 3)
         
         Args:
-            extracted_text: Extracted text content
+            extracted_text: OCR extracted text
             filename: Original filename
             
         Returns:
-            Formatted prompt string
+            Formatted prompt string with full contract details
         """
-        template = PromptTemplates._load_prompt_template("contract_analysis")
+        template = PromptTemplates._load_prompt_template("contract_analysis_full")
         return template.format(
-            extracted_text=extracted_text[:6000],
+            extracted_text=extracted_text,  # Don't truncate for full analysis
             filename=filename
         )
 

@@ -32,16 +32,16 @@ You are a contract analysis AI for DocGO system. Analyze the following contract 
 
 Return ONLY valid JSON:
 
-{
+{{
   "type": "SOFTWARE_DEVELOPMENT",
   "currency": "USD",
   "priority": "HIGH",
   "confidentiality": "CONFIDENTIAL",
-  "parties": [{"type": "CLIENT"}],
-  "payment": {"method": "BANK_TRANSFER"},
-  "risk": {"level": "MEDIUM"},
-  "compliance": {"status": "COMPLIANT"}
-}
+  "parties": [{{"type": "CLIENT"}}],
+  "payment": {{"method": "BANK_TRANSFER"}},
+  "risk": {{"level": "MEDIUM"}},
+  "compliance": {{"status": "COMPLIANT"}}
+}}
 
 **VALIDATION: ALL enum fields MUST use predefined values only.**
 

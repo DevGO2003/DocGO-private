@@ -23,6 +23,13 @@ class AutomationService:
         if not self._initialized:
             self.api_key = Config.get_gemini_api_key()
             genai.configure(api_key=self.api_key)
+            
+            # Initialize OpenRouter as backup
+            from utils.openrouter_client import OpenRouterClient
+            self.openrouter = OpenRouterClient()
+            if self.openrouter.is_available():
+                logging.info("[AI_INIT] OpenRouter configured as backup")
+            
             # Phase 2: Vietnamese instruction constant for AI responses
             self.VIETNAMESE_RESPONSE_INSTRUCTION = (
                 "Lưu ý: Trả lời BẰNG TIẾNG VIỆT, không kèm markdown hay giải thích, chỉ JSON hợp lệ."
@@ -49,7 +56,61 @@ class AutomationService:
             
             if not model_initialized:
                 raise Exception("Could not initialize any Gemini model")
-            self._initialized = True
+            AutomationService._initialized = True
+    
+    def _is_quota_error(self, error_str: str) -> bool:
+        """Check if error is Gemini quota exceeded"""
+        quota_indicators = [
+            '429',
+            'quota',
+            'rate limit',
+            'requests per day',
+            'exceeded your current quota'
+        ]
+        error_lower = error_str.lower()
+        return any(indicator in error_lower for indicator in quota_indicators)
+    
+    def _generate_with_fallback(self, prompt: str, max_tokens: int = 2000) -> Optional[str]:
+        """
+        Generate content with fallback mechanism:
+        1. Try Gemini first
+        2. If quota error → fallback to OpenRouter
+        3. If all fail → return None
+        """
+        # Try Gemini first
+        try:
+            response = self.model.generate_content(prompt)
+            if response.text:
+                logging.info("[AI_FALLBACK] Gemini success")
+                return response.text
+        except Exception as e:
+            error_str = str(e)
+            
+            # Check if it's quota error
+            if self._is_quota_error(error_str):
+                logging.warning(f"[AI_FALLBACK] Gemini quota exceeded, trying OpenRouter...")
+                
+                # Fallback to OpenRouter
+                if self.openrouter and self.openrouter.is_available():
+                    try:
+                        openrouter_response = self.openrouter.generate_content(prompt, max_tokens)
+                        if openrouter_response:
+                            logging.info("[AI_FALLBACK] OpenRouter success")
+                            return openrouter_response
+                        else:
+                            logging.error("[AI_FALLBACK] OpenRouter returned no content")
+                    except Exception as or_error:
+                        logging.error(f"[AI_FALLBACK] OpenRouter failed: {or_error}")
+                else:
+                    logging.error("[AI_FALLBACK] OpenRouter not configured")
+            else:
+                # Not quota error, just log
+                logging.error(f"[AI_FALLBACK] Gemini error (not quota): {error_str[:100]}")
+            
+            # All methods failed
+            raise e
+        
+        return None
     
     def get_contract_summary_prompt(self, content: str, filename: str) -> str:
         """
@@ -373,14 +434,16 @@ class AutomationService:
                 # Phase 2: enforce Vietnamese JSON-only output
                 prompt = f"{prompt}\n\n{self.VIETNAMESE_RESPONSE_INSTRUCTION}"
                 logging.info(f"[AI_SUMMARY_ATTEMPT] Attempt {attempt + 1}/{max_retries} for: {filename}")
-                response = self.model.generate_content(prompt)
                 
-                if not response.text:
-                    logging.warning(f"[AI_GEMINI_EMPTY] Empty response for: {filename}")
+                # Use fallback mechanism (Gemini → OpenRouter)
+                response_text = self._generate_with_fallback(prompt, max_tokens=4000)
+                
+                if not response_text:
+                    logging.warning(f"[AI_EMPTY] No response from any AI provider for: {filename}")
                     return None
                 
                 # Parse JSON response
-                summary_text = response.text.strip()
+                summary_text = response_text.strip()
                 
                 # Clean up response text
                 cleaned = summary_text
@@ -442,17 +505,46 @@ class AutomationService:
     def classify_document(self, content: str, filename: str) -> Dict[str, Any]:
         
         try:
-            # Quick classification prompt (force Vietnamese and JSON-only)
+            from utils.smart_sampler import SmartSampler
+            
+            # STEP 1: Quick keyword-based pre-check (instant, no AI call needed)
+            keyword_confidence = SmartSampler.get_contract_confidence(content)
+            
+            if keyword_confidence >= 0.7:
+                # High confidence from keywords - skip AI to save quota
+                logging.info(f"[AI_CLASSIFY] Keyword pre-check: confidence={keyword_confidence:.2f}, skipping AI")
+                return {
+                    "documentType": "contract",
+                    "isContract": True,
+                    "confidence": keyword_confidence,
+                    "reasons": ["Phát hiện từ khóa hợp đồng rõ ràng trong nội dung"],
+                    "contractSubtype": None
+                }
+            
+            # STEP 2: Use AI for uncertain cases (only if keyword check is not confident)
+            logging.info(f"[AI_CLASSIFY] Keyword pre-check: confidence={keyword_confidence:.2f}, using AI for better accuracy")
+            
+            # Use simple 3-part sampling (universal, fast)
+            sampling_result = SmartSampler.sample_three_parts(
+                text=content,
+                max_chars=9000  # Balanced: 40% head + 30% middle + 30% tail
+            )
+            
+            sample_text = sampling_result['sample']
+            metadata = sampling_result['metadata']
+            
+            logging.info(f"[AI_CLASSIFY] Sampling: method={metadata['method']}, sample_length={metadata['sample_length']}, original_length={metadata['original_length']}")
+            
+            # Use simple prompt with sampled content
             categories = [
                 "contract", "syllabus", "curriculum", "textbook", "lecture_notes", "assignment",
                 "research_paper", "invoice", "receipt", "policy", "manual", "letter", "report", "other"
             ]
-            # Load prompt from file
             classification_prompt = self._load_prompt_template(
                 "document_classification_legacy",
                 categories=', '.join(categories),
                 filename=filename,
-                content=content[:8000] if isinstance(content, str) else str(content)[:8000]
+                content=sample_text
             ) + f"\n\n{self.VIETNAMESE_RESPONSE_INSTRUCTION}"
             
             response = self.model.generate_content(classification_prompt)
@@ -468,36 +560,85 @@ class AutomationService:
                     if cleaned.endswith('```'):
                         cleaned = cleaned[:-3]
                     result = json.loads(cleaned)
-                    # Map to unified schema
-                    document_type = result.get("documentType") or result.get("classification") or "other"
-                    is_contract = bool(result.get("isContract") or (str(document_type).lower() == "contract"))
+                    
+                    # Map to unified schema with validation
+                    document_type_raw = result.get("documentType") or result.get("classification")
+                    
+                    # Validate documentType against allowed categories
+                    if document_type_raw and str(document_type_raw).lower() in [c.lower() for c in categories]:
+                        document_type = str(document_type_raw).lower()
+                    else:
+                        # Invalid or missing documentType - set to null for uncertain cases
+                        logging.warning(f"[AI_CLASSIFY] Invalid documentType '{document_type_raw}', setting to null")
+                        document_type = None
+                    is_contract = bool(result.get("isContract") or (document_type and str(document_type).lower() == "contract"))
                     confidence = float(result.get("confidence", 0.5))
                     reasons = result.get("reasons", [])
                     if not isinstance(reasons, list):
                         reasons = [str(reasons)]
                     contract_subtype = result.get("contractSubtype") if is_contract else None
                     return {
-                        "documentType": str(document_type),
+                        "documentType": document_type,  # Keep as None if invalid, not string "None"
                         "isContract": is_contract,
                         "confidence": confidence,
                         "reasons": reasons,
                         "contractSubtype": contract_subtype
                     }
-                except json.JSONDecodeError:
-                    # Fallback classification based on filename
-                    filename_lower = filename.lower()
-                    contract_indicators = ['hop-dong', 'contract', 'hợp đồng', 'thỏa thuận', 'agreement']
+                except json.JSONDecodeError as je:
+                    logging.warning(f"[AI_CLASSIFY] JSON parse failed: {je}, trying keyword-based fallback")
                     
-                    if any(indicator in filename_lower for indicator in contract_indicators):
-                        return {"documentType": "contract", "isContract": True, "confidence": 0.8, "reasons": ["Tệp có dấu hiệu hợp đồng"], "contractSubtype": None}
+                    # Fallback: Use keyword-based confidence scoring
+                    from utils.smart_sampler import SmartSampler
+                    
+                    confidence = SmartSampler.get_contract_confidence(content)
+                    is_contract = confidence >= 0.7
+                    
+                    if is_contract:
+                        return {
+                            "documentType": "contract",
+                            "isContract": True,
+                            "confidence": confidence,
+                            "reasons": ["Phát hiện từ khóa hợp đồng trong nội dung"],
+                            "contractSubtype": None
+                        }
                     else:
-                        return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": ["Không có tín hiệu rõ ràng"], "contractSubtype": None}
+                        return {
+                            "documentType": "other",
+                            "isContract": False,
+                            "confidence": 0.5,
+                            "reasons": ["Không đủ dấu hiệu hợp đồng"],
+                            "contractSubtype": None
+                        }
             
-            return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": ["Không có phản hồi từ AI"], "contractSubtype": None}
+            # No AI response - use keyword fallback
+            logging.warning("[AI_CLASSIFY] No AI response, using keyword fallback")
+            from utils.smart_sampler import SmartSampler
+            confidence = SmartSampler.get_contract_confidence(content)
+            is_contract = confidence >= 0.7
+            
+            return {
+                "documentType": "contract" if is_contract else "other",
+                "isContract": is_contract,
+                "confidence": confidence,
+                "reasons": ["Phát hiện từ khóa hợp đồng (AI không khả dụng)"] if is_contract else ["Không đủ dấu hiệu hợp đồng"],
+                "contractSubtype": None
+            }
             
         except Exception as e:
             logging.error(f"[AI_CLASSIFICATION_ERROR] Error in classification: {e}")
-            return {"documentType": "other", "isContract": False, "confidence": 0.5, "reasons": [str(e)], "contractSubtype": None}
+            
+            # Fallback to keyword-based detection on any error
+            from utils.smart_sampler import SmartSampler
+            confidence = SmartSampler.get_contract_confidence(content)
+            is_contract = confidence >= 0.7
+            
+            return {
+                "documentType": "contract" if is_contract else "other",
+                "isContract": is_contract,
+                "confidence": confidence,
+                "reasons": [f"Phát hiện từ khóa hợp đồng (AI lỗi: {str(e)[:50]}...)"] if is_contract else [f"Lỗi AI, dùng keyword fallback: {str(e)[:50]}..."],
+                "contractSubtype": None
+            }
     
     def classify_document_from_file(self, file_content: bytes, filename: str, content_type: str) -> Dict[str, Any]:
         """

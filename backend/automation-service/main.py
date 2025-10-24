@@ -145,7 +145,7 @@ async def health_check():
         shortMessage="Success",
         description="Automation Service is running and healthy",
         data={
-            "status": "healthy",
+        "status": "healthy",
             "service": "Automation Service",
             "version": "2.0.0",
             "ai_model": "Gemini 2.0 Flash",

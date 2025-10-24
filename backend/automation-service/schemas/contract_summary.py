@@ -20,7 +20,11 @@ class PaymentDetails(BaseModel):
 class KeyClause(BaseModel):
     name: str = Field(...)
     description: str = Field(...)
-    source: str = Field(...)
+    content: str = Field(...)
+    importance: str = Field(...)
+    risk: str = Field(...)
+    advice: str = Field(...)
+    pageNumber: Optional[int] = Field(None)
 
 class FavorableClause(BaseModel):
     clauseName: str = Field(...)
@@ -30,7 +34,19 @@ class FavorableClause(BaseModel):
 class UnfavorableClause(BaseModel):
     clauseName: str = Field(...)
     description: str = Field(...)
-    riskTo: str = Field(...)
+    content: str = Field(...)
+    risk: str = Field(...)
+    advice: str = Field(...)
+    pageNumber: Optional[int] = Field(None)
+
+class AllClause(BaseModel):
+    name: str = Field(...)
+    description: str = Field(...)
+    content: str = Field(...)
+    importance: Optional[str] = Field(None)
+    risk: str = Field(...)
+    advice: str = Field(...)
+    pageNumber: int = Field(...)
 
 class Reminder(BaseModel):
     type: str = Field(..., description="xem xét, hết hạn")
@@ -63,6 +79,7 @@ class ContractSummary(BaseModel):
     keyClauses: List[KeyClause] = Field(...)
     favorableClauses: List[FavorableClause] = Field(...)
     unfavorableClauses: List[UnfavorableClause] = Field(...)
+    allClauses: List[AllClause] = Field(...)
     reminders: List[Reminder] = Field(...)
     terminationConditions: str = Field(...)
     riskAssessment: RiskAssessment = Field(...)

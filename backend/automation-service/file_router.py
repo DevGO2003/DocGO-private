@@ -499,7 +499,7 @@ async def upload_document(
             # Sử dụng OCR service thống nhất để trích xuất text và metadata
             extraction_result = await retry_async(
                 ocr_service.extract_text_and_metadata,
-                file_content, file.filename, file.content_type,
+                file_content, file.filename, detected_mime_type,
                 max_retries=2,
                 backoff_factor=1.5,
                 exceptions=(Exception,),
@@ -761,7 +761,7 @@ async def upload_document(
                 await file.seek(0)
                 classification_result = await retry_async(
                     ai_service.classify_document_from_file,
-                    file_content, file.filename, file.content_type,
+                    file_content, file.filename, detected_mime_type,
                     max_retries=2,
                     backoff_factor=1.5,
                     exceptions=(Exception,),
@@ -835,7 +835,7 @@ async def upload_document(
                 })
                 
                 summary_result = await retry_async(
-                    ocr_service.generate_contract_summary,
+                    ai_service.generate_contract_summary,
                     ocr_text, file.filename,
                     max_retries=2,
                     backoff_factor=1.5,
@@ -944,14 +944,14 @@ async def upload_document(
                         "local": {
                             "path": file_url,
                             "filename": file.filename,
-                            "mimeType": file.content_type,
+                            "mimeType": detected_mime_type,
                             "size": size,
                             "mtime": None,
                             "revision": None
                         } if not Config.S3_ENABLED else None
                     }
                     
-                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED fileId={file_id} size={size} mimeType={file.content_type}")
+                    print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_UPLOAD_COMPLETED fileId={file_id} size={size} mimeType={detected_mime_type}")
                     
                     metadata_evt = {
                         "eventVersion": "1.0",
@@ -964,7 +964,7 @@ async def upload_document(
                         "data": {
                             "fileId": file_id,
                             "fileName": file.filename,
-                            "mimeType": file.content_type,
+                            "mimeType": detected_mime_type,
                             "size": size,
                             "ownerUserId": "system",
                             "storage": storage_block,
@@ -1070,8 +1070,7 @@ async def upload_document(
                                 "error": None,  # Enhanced field
                                 "metadata": None  # Should come from actual OCR metadata, not fake data
                             },
-                            # Phase 1: remove extraction object; summarization -> aiSummarization = null
-                            "aiSummarization": None,
+                            # Phase 1: remove extraction object; summarization -> aiSummarization removed
                             "jsonContent": json_content_text,
                             "jsonAnalysisStatus": "PARSED" if json_content_text else None,
                             "classification": enhanced_classification,
@@ -1175,6 +1174,48 @@ async def upload_document(
                             }
                         }
                         
+                        # Prepare clauses with all section
+                        clauses = {}
+                        if summary_result and isinstance(summary_result, dict):
+                            # Add key clauses if available
+                            if "clauses" in summary_result and "key" in summary_result["clauses"]:
+                                clauses["key"] = summary_result["clauses"]["key"]
+                            
+                            # Add unfavorable clauses if available
+                            if "clauses" in summary_result and "unfavorable" in summary_result["clauses"]:
+                                clauses["unfavorable"] = summary_result["clauses"]["unfavorable"]
+                            
+                            # Create all clauses section with enhanced structure
+                            all_clauses = []
+                            if "clauses" in summary_result:
+                                # Process key clauses
+                                if "key" in summary_result["clauses"]:
+                                    for clause in summary_result["clauses"]["key"]:
+                                        all_clauses.append({
+                                            "name": clause.get("name"),
+                                            "description": clause.get("description", "") + (" Đây là điều khoản quan trọng vì " + clause.get("advice", "") if clause.get("importance") == "HIGH" else ""),
+                                            "content": clause.get("content"),
+                                            "importance": clause.get("importance"),
+                                            "risk": clause.get("risk"),
+                                            "advice": clause.get("advice"),
+                                            "pageNumber": clause.get("pageNumber")
+                                        })
+                                
+                                # Process unfavorable clauses
+                                if "unfavorable" in summary_result["clauses"]:
+                                    for clause in summary_result["clauses"]["unfavorable"]:
+                                        all_clauses.append({
+                                            "name": clause.get("name"),
+                                            "description": clause.get("description", ""),
+                                            "content": clause.get("content"),
+                                            "importance": "LOW",  # Unfavorable clauses are typically low importance
+                                            "risk": clause.get("risk", "HIGH"),
+                                            "advice": clause.get("advice", ""),
+                                            "pageNumber": clause.get("pageNumber")
+                                        })
+                            
+                            clauses["all"] = all_clauses
+
                         contract_evt = {
                             "eventVersion": "1.0",
                             "eventType": "CONTRACT_SUMMARY_GENERATED",
@@ -1191,8 +1232,8 @@ async def upload_document(
                                 "sections": summary_result.get("sections") if isinstance(summary_result, dict) else None,
                                 "language": classification_result.get("language"),
                                 "classification": classification_result,
-                                "aiSummarization": summary_result,
-                                "contract": contract_metadata
+                                "clauses": clauses if clauses else None,
+                                # aiSummarization and contract fields removed as requested
                             },
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }

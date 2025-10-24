@@ -6,6 +6,9 @@ from datetime import datetime, timezone
 from schemas.response import RestResponse
 from services.ocr_service import OCRService
 
+# Import shared utilities from file_router
+from file_router import detect_mime_type
+
 router = APIRouter(prefix="/api/v1/automation-service")
 
 
@@ -42,20 +45,9 @@ async def contract_summarize_api(
                 detail=f"File quá lớn. Kích thước tối đa cho phép: {MAX_FILE_SIZE // (1024*1024)}MB. File hiện tại: {len(file_content) // (1024*1024)}MB"
             )
         
-        # Validation content type - chỉ hỗ trợ file hợp đồng
-        allowed_content_types = [
-            'application/pdf',  # .pdf
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
-            'application/msword',  # .doc
-            'text/plain',  # .txt
-            'text/html'  # .html
-        ]
-        
-        if file.content_type and file.content_type not in allowed_content_types:
-            raise HTTPException(
-                status_code=400, 
-                detail="Định dạng file không được hỗ trợ cho hợp đồng. Chỉ hỗ trợ: PDF, DOCX, DOC, TXT, HTML"
-            )
+        # Detect proper MIME type (SHARED with upload endpoint)
+        detected_mime_type = detect_mime_type(file_content, file.filename, file.content_type)
+        logging.info(f"[CONTRACT_SUMMARIZE] File: {file.filename}, detected MIME: {detected_mime_type}")
         
         # Validation file extension
         filename_lower = file.filename.lower()
@@ -66,16 +58,25 @@ async def contract_summarize_api(
                 detail="Định dạng file không được hỗ trợ cho hợp đồng. Chỉ hỗ trợ: PDF, DOCX, DOC, TXT, HTML"
             )
         
-        # Đọc nội dung file (đơn giản hóa)
+        # Extract text using OCRService (SHARED with upload endpoint)
         try:
-            if filename_lower.endswith('.txt'):
-                content = file_content.decode('utf-8', errors='ignore')
-            elif filename_lower.endswith('.html') or filename_lower.endswith('.htm'):
-                content = file_content.decode('utf-8', errors='ignore')
+            ocr_service = OCRService()
+            extraction_result = ocr_service.extract_text_and_metadata(file_content, file.filename, detected_mime_type)
+            
+            if extraction_result["success"]:
+                content = extraction_result["text"]
+                logging.info(f"[CONTRACT_SUMMARIZE] Text extracted: {len(content)} chars")
             else:
-                # Với PDF, DOCX, DOC - tạm thời trả về thông báo
-                content = f"[File: {file.filename}] - Nội dung file cần được xử lý bởi AI để trích xuất text."
+                error_msg = extraction_result.get("error", "Unknown error")
+                logging.error(f"[CONTRACT_SUMMARIZE] Extraction failed: {error_msg}")
+                raise HTTPException(
+                    status_code=422, 
+                    detail=f"Không thể trích xuất text từ file: {error_msg}"
+                )
+        except HTTPException:
+            raise
         except Exception as e:
+            logging.error(f"[CONTRACT_SUMMARIZE] Exception during extraction: {e}")
             raise HTTPException(
                 status_code=422, 
                 detail=f"Không thể đọc file: {str(e)}"

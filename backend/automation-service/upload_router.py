@@ -11,7 +11,6 @@ from typing import Optional
 import uuid
 from services.upload_handler import UploadHandler
 from services.content_processor import ContentProcessor
-from services.contract_analyzer import ContractAnalyzer
 from services.kafka_publisher_v3 import KafkaPublisherV3
 from schemas.event_schemas_v3 import FileUploadCompletedEvent
 
@@ -26,7 +25,6 @@ router = APIRouter(
 kafka_publisher = KafkaPublisherV3()
 upload_handler = UploadHandler(kafka_publisher)
 content_processor = ContentProcessor(kafka_publisher)
-contract_analyzer = ContractAnalyzer(kafka_publisher)
 
 
 @router.post("/upload")
@@ -90,21 +88,12 @@ async def upload_file(
         else:
             logger.info(f"✅ Event 2 published: documentId={document_id}")
             
-            # Step 3: Analyze contract if applicable (Event 3) - async
+            # Step 3: Contract analysis removed - Event 3 disabled
             is_contract = content_result.get("isContract", False)
             if is_contract:
-                contract_result = contract_analyzer.analyze_contract(
-                    document_id=document_id,
-                    text="extracted_text_placeholder",  # Would use actual extracted text
-                    is_contract=is_contract,
-                    correlation_id=correlation_id,
-                    actor="system"
-                )
-                
-                if contract_result["success"] and contract_result.get("eventPublished"):
-                    logger.info(f"✅ Event 3 published: documentId={document_id}")
-                else:
-                    logger.info(f"ℹ️ Event 3 not published (not a contract)")
+                logger.info(f"ℹ️ Contract detected but analysis disabled: documentId={document_id}")
+            else:
+                logger.info(f"ℹ️ Document is not a contract: documentId={document_id}")
         
         return {
             "success": True,
