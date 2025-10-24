@@ -1,7 +1,5 @@
 ---
-alwaysApply: false
-**/*.java, **/*.py, **/*.ts, **/*.tsx, **/*.js, **/*.jsx, **/*.json, **/*.yaml, **/*.yml, **/*.xml, **/*.md, **/*.txt, **/*.html, **/src/**/*.*, **/config/**/*.*, **/scripts/**/*.*
-
+alwaysApply: true
 ---
 # Tổng quan kiến trúc DocGO
 
@@ -83,16 +81,6 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - **Module Structure**: Tên service (snake_case)
 - **Version**: Trong `requirements.txt` hoặc `pyproject.toml`
 
-## 📚 Cách sử dụng
-1. **Phát triển API mới**: xem `01_api-*` standards
-2. **Xử lý events/exceptions**: xem `02_event-*` và `02_exception-*` standards
-3. **Tạo service mới**: xem `03_service-*` standards
-4. **Cấu hình môi trường**: xem `04_environment-*` và `04_git-*` standards
-5. **Quản lý Actor/Audit**: xem `05_memory-actor-standards.mdc`
-6. **Tiện ích chat**: xem `06_chat-utilities.mdc`
-7. **Quản lý file**: xem `07_no-auto-md-creation.mdc`, `08_auto-ignore.mdc`, `file-checking-standards.mdc`
-8. **Tham khảo globs**: xem `globs-reference-from-windsurf.mdc`, `globs-integration-summary.mdc`
-
 ## 🚀 Hiện trạng dự án
 
 ### ✅ Đã hoàn thành
@@ -116,13 +104,6 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - **Monitoring** - Health checks và metrics
 - **Security** - Authentication và authorization
 - **Performance** - Optimization và caching
-
-## 🎯 Globs Patterns
-Tất cả rules đã được cập nhật với globs patterns từ .windsurf để tối ưu hóa rule triggering:
-- **File types**: `**/*.java`, `**/*.py`, `**/*.ts`, `**/*.js`, `**/*.json`, `**/*.yaml`, `**/*.md`
-- **Directories**: `**/src/**/*.*`, `**/config/**/*.*`, `**/scripts/**/*.*`
-- **Service-specific**: `**/user-management-service/**/*.*`, `**/automation-service/**/*.*`
-- **Configuration**: `**/Dockerfile*`, `**/docker-compose*.yml`, `**/pom.xml`, `**/requirements.txt`
 
 ## 🔄 Cập nhật quy tắc
 1. Sửa file rule tương ứng

@@ -1,40 +1,7 @@
 ---
-id: "rule-api-url"
-name: "Chuẩn hóa URL API"
-description: "Quy tắc đặt URL và endpoint cho các microservices"
-version: "1.0.0"
-alwaysApply: true
-enabled: true
-priority: 20
-tags: ["api", "url", "endpoint"]
-globs:
-  - "**/*.java"
-  - "**/*.py"
-  - "**/*.ts"
-  - "**/*.tsx"
-  - "**/*.js"
-  - "**/*.jsx"
-  - "**/controller/**/*.java"
-  - "**/router/**/*.py"
-  - "**/api/**/*.ts"
-  - "**/api/**/*.js"
-excludeGlobs: []
-scope: "project"
-services: ["*"]
-appliesTo: ["code", "chat"]
-match: ""
-variables: {}
-rules: []
-examples: []
-references: []
-commands: []
-owners: ["devgo2003"]
-createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-10-01T00:00:00Z"
-notes: "Rule URL cốt lõi cho API design"
-language: vi
+globs: "**/*.java,**/*.py,**/*.ts,**/*.tsx,**/*.js,**/*.jsx,**/controller/**/*.java,**/router/**/*.py,**/api/**/*.ts,**/api/**/*.js"
+alwaysApply: false
 ---
-
 # Quy tắc URL API
 
 ## 1) Quy tắc URL

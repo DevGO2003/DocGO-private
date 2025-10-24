@@ -1,30 +1,7 @@
 ---
-id: "rule-event-payload"
-name: "Chuẩn hóa Event Payload"
 description: "Quy tắc chuẩn hóa event payload cho các microservices"
-version: "1.0.0"
-alwaysApply: true
-enabled: true
-priority: 30
-tags: ["events", "payload", "messaging"]
-globs: []
-excludeGlobs: []
-scope: "project"
-services: ["*"]
-appliesTo: ["code", "chat"]
-match: ""
-variables: {}
-rules: []
-examples: []
-references: []
-commands: []
-owners: ["devgo2003"]
-createdAt: "2025-09-23T00:00:00Z"
-updatedAt: "2025-09-23T00:00:00Z"
-notes: "Chuẩn hóa payload để đồng bộ logging/trace"
-language: vi
+alwaysApply: false
 ---
-
 # Chuẩn hóa Event Payload Standard
 
 Tất cả events giữa các services phải tuân thủ schema chuẩn sau để đảm bảo tính nhất quán và traceability:
