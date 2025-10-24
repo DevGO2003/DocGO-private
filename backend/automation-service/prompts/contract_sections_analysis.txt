@@ -1,0 +1,9 @@
+Phân tích văn bản hợp đồng sau và trích xuất các phần/section chính. 
+Mỗi section cần có:
+- title: Tiêu đề phần (ngắn gọn)
+- description: Mô tả nội dung phần (1-2 câu)
+- content: Nội dung chính của phần (trích dẫn từ văn bản)
+- pageNumber: Số trang (đặt 1 nếu không biết)
+
+Văn bản:
+{text}

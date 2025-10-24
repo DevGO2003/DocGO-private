@@ -1,0 +1,9 @@
+Trích xuất các từ khóa chính từ văn bản hợp đồng sau.
+Tập trung vào:
+- Loại hợp đồng (lao động, dịch vụ, mua bán...)
+- Lĩnh vực hoạt động (công nghệ, xây dựng, tài chính...)
+- Các điều khoản quan trọng
+- Thời hạn, giá trị, đối tác
+
+Văn bản:
+{text}

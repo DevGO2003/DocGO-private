@@ -28,10 +28,8 @@ class AutomationService:
             env_model = os.getenv('GEMINI_MODEL', '').strip()
             # Try different models in order of preference
             models_to_try = ([env_model] if env_model else []) + [
-                'gemini-2.0-flash',
-                'gemini-1.5-flash',
-                'gemini-1.5-pro',
-                'gemini-1.0-pro'
+                'gemini-2.0-flash-exp',
+                'gemini-1.5-flash-latest'
             ]
             
             model_initialized = False
@@ -275,7 +273,7 @@ class AutomationService:
             '      "description": "Chi tiết công việc cần làm",\n'
             '      "notifyBefore": 7,                    // Nhắc trước X ngày\n'
             '      "status": "PENDING",                  // PENDING, COMPLETED, CANCELLED\n'
-            '      "assignedTo": "user-001"              // ID người phụ trách\n'
+            '      "assignedTo": "admin"              // ID người phụ trách\n'
             '    }\n'
             '  ],\n'
             '  \n'
@@ -443,20 +441,12 @@ class AutomationService:
                 "contract", "syllabus", "curriculum", "textbook", "lecture_notes", "assignment",
                 "research_paper", "invoice", "receipt", "policy", "manual", "letter", "report", "other"
             ]
-            classification_prompt = (
-                "Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.\n"
-                "Hãy phân loại loại tài liệu dưới đây. Chỉ trả về JSON hợp lệ với cấu trúc:\n"
-                "{\n"
-                "  \"documentType\": string,\n"
-                "  \"isContract\": boolean,\n"
-                "  \"contractSubtype\": string|null,\n"
-                "  \"confidence\": number,\n"
-                "  \"reasons\": [string]\n"
-                "}\n\n"
-                "Yêu cầu: Không giải thích thêm, không kèm markdown, chỉ JSON.\n"
-                f"Danh mục hợp lệ: {', '.join(categories)}\n\n"
-                f"Tên tệp: {filename}\n"
-                "Nội dung tài liệu (cắt ngắn nếu quá dài):\n" + (content[:8000] if isinstance(content, str) else str(content)[:8000])
+            # Load prompt from file
+            classification_prompt = self._load_prompt_template(
+                "document_classification_legacy",
+                categories=', '.join(categories),
+                filename=filename,
+                content=content[:8000] if isinstance(content, str) else str(content)[:8000]
             )
             
             response = self.model.generate_content(classification_prompt)
@@ -522,16 +512,10 @@ class AutomationService:
             return []
         
         try:
-            prompt = f"""
-            Phân tích văn bản hợp đồng sau và trích xuất các phần/section chính. 
-            Mỗi section cần có:
-            - title: Tiêu đề phần (ngắn gọn)
-            - description: Mô tả nội dung phần (1-2 câu)
-            - content: Nội dung chính của phần (trích dẫn từ văn bản)
-            - pageNumber: Số trang (đặt 1 nếu không biết)
-            
-            Văn bản:
-            {text[:2000]}
+            prompt = self._load_prompt_template(
+                "contract_sections_analysis",
+                text=text[:2000]
+            ) + """
             
             Trả về JSON array với tối đa 5 sections quan trọng nhất.
             """
@@ -578,16 +562,10 @@ class AutomationService:
             return []
         
         try:
-            prompt = f"""
-            Trích xuất các từ khóa chính từ văn bản hợp đồng sau.
-            Tập trung vào:
-            - Loại hợp đồng (lao động, dịch vụ, mua bán...)
-            - Lĩnh vực hoạt động (công nghệ, xây dựng, tài chính...)
-            - Các điều khoản quan trọng
-            - Thời hạn, giá trị, đối tác
-            
-            Văn bản:
-            {text[:1500]}
+            prompt = self._load_prompt_template(
+                "contract_keywords_extraction",
+                text=text[:1500]
+            ) + """
             
             Trả về JSON array với tối đa 8 từ khóa quan trọng nhất.
             """
@@ -630,17 +608,10 @@ class AutomationService:
             return []
         
         try:
-            prompt = f"""
-            Phân tích văn bản hợp đồng và trích xuất thông tin các bên tham gia.
-            Tìm kiếm:
-            - Tên công ty/cá nhân
-            - Địa chỉ
-            - Email, điện thoại
-            - Mã số thuế
-            - Người đại diện và chức vụ
-            
-            Văn bản:
-            {text[:2500]}
+            prompt = self._load_prompt_template(
+                "contract_parties_extraction",
+                text=text[:2500]
+            ) + """
             
             Trả về JSON array với format:
             [
@@ -737,3 +708,23 @@ class AutomationService:
             parties.append(current_party)
         
         return parties[:3]
+    
+    def _load_prompt_template(self, template_name: str, **kwargs) -> str:
+        """Load prompt template from file and format with variables"""
+        import os
+        
+        try:
+            # Get the directory of this service
+            service_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            prompts_dir = os.path.join(service_dir, "prompts")
+            template_path = os.path.join(prompts_dir, f"{template_name}.txt")
+            
+            with open(template_path, 'r', encoding='utf-8') as f:
+                template = f.read()
+                
+            # Format template with provided variables
+            return template.format(**kwargs)
+        except Exception as e:
+            logging.error(f"Error loading prompt template {template_name}: {e}")
+            # Fallback to basic template
+            return f"Process the following content: {kwargs.get('content', '')}"

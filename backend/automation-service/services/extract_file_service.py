@@ -73,7 +73,7 @@ class ExtractFileService:
                             "sha256": sha256_hash
                         },
                         "permissions": {
-                            "read": ["system", "user-001"],
+                            "read": ["system", "admin"],
                             "write": ["system"],
                             "delete": ["system"],
                             "share": ["system"]

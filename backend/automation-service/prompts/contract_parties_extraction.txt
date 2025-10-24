@@ -1,0 +1,10 @@
+Phân tích văn bản hợp đồng và trích xuất thông tin các bên tham gia.
+Tìm kiếm:
+- Tên công ty/cá nhân
+- Địa chỉ
+- Email, điện thoại
+- Mã số thuế
+- Người đại diện và chức vụ
+
+Văn bản:
+{text}

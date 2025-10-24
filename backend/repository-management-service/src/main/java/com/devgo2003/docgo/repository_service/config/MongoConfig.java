@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * - Repository scanning
  */
 @Configuration
-@EnableMongoRepositories(basePackages = "com.devgo2003.docgo.repository_service.repository")
 public class MongoConfig {
 
     /**

@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface ProcessedEventRepository extends MongoRepository<ProcessedEventEntity, String> {
     
     /**
-     * Find by eventId (same as findById)
+     * Find by eventId
      */
     Optional<ProcessedEventEntity> findByEventId(String eventId);
     

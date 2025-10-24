@@ -1,0 +1,16 @@
+Luôn trả lời HOÀN TOÀN bằng TIẾNG VIỆT.
+Hãy phân loại loại tài liệu dưới đây. Chỉ trả về JSON hợp lệ với cấu trúc:
+{
+  "documentType": string,
+  "isContract": boolean,
+  "contractSubtype": string|null,
+  "confidence": number,
+  "reasons": [string]
+}
+
+Yêu cầu: Không giải thích thêm, không kèm markdown, chỉ JSON.
+Danh mục hợp lệ: {categories}
+
+Tên tệp: {filename}
+Nội dung tài liệu (cắt ngắn nếu quá dài):
+{content}

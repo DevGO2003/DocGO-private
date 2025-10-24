@@ -21,7 +21,10 @@ import java.time.LocalDateTime;
 public class ProcessedEventEntity {
     
     @Id
-    private String id;  // eventId from Kafka event
+    private String id;  // MongoDB document ID
+    
+    @Indexed
+    private String eventId;  // eventId from Kafka event
     
     @Indexed
     private String eventType;  // FILE_UPLOAD_COMPLETED, FILE_CONTENT_EXTRACTED, CONTRACT_SUMMARY_GENERATED
@@ -35,7 +38,8 @@ public class ProcessedEventEntity {
      * Constructor for easy creation
      */
     public ProcessedEventEntity(String eventId, String eventType, String documentId) {
-        this.id = eventId;
+        this.id = java.util.UUID.randomUUID().toString(); // Generate unique ID
+        this.eventId = eventId;
         this.eventType = eventType;
         this.documentId = documentId;
         this.processedAt = LocalDateTime.now();

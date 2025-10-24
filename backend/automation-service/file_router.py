@@ -868,7 +868,7 @@ async def upload_document(
                                     "sha256": sha256_hash
                                 },
                                 "permissions": {
-                                    "read": ["system", "user-001"],
+                                    "read": ["system", "admin"],
                                     "write": ["system"],
                                     "delete": ["system"],
                                     "share": ["system"]
@@ -1164,9 +1164,6 @@ async def upload_document(
                 "data": {
                     "documentId": file_id,
                     "fileUrl": file_url,
-                    "classificationResult": classification_result,
-                    "summaryResult": summary_result,
-                    "processingStatus": "COMPLETED",
                     "correlationId": correlation_id
                 },
             })
@@ -1220,7 +1217,6 @@ async def upload_document(
                 "data": {
                     "documentId": file_id,
                     "fileUrl": file_url,
-                    "processingStatus": "PROCESSING",
                     "websocketUrl": f"ws://localhost:8003/ws/document/{file_id}",
                     "correlationId": correlation_id
                 },
