@@ -91,8 +91,8 @@ class EventService:
                 published_at=datetime.now(timezone.utc)
             )
 
-    async def publish_kafka(self, topic: str, message: Dict[str, Any]) -> None:
-        """Publish a message to Kafka using a shared AIOKafkaProducer.
+    async def publish_kafka(self, message: Dict[str, Any], document_id: str = None) -> None:
+        """Publish a message to Kafka using single topic 'docgo-file-events'.
         Fallback to print if Kafka not configured.
         """
         try:
@@ -104,10 +104,15 @@ class EventService:
                     value_serializer=lambda v: json.dumps(v, default=str).encode('utf-8'),
                 )
                 await self.kafka_producer.start()
+            
+            # Use single topic as per EVENT-ARCHITECTURE-V3.md
+            topic = "docgo-file-events"
+            key = document_id or message.get("data", {}).get("documentId", "unknown")
+            
             preview = json.dumps(message, default=str)
-            print(f"[DEBUG] Kafka publish start topic={topic} bootstrap={Config.KAFKA_BOOTSTRAP_SERVERS} size={len(preview)} preview={preview[:200]}")
-            await self.kafka_producer.send_and_wait(topic, message)
-            print(f"[DEBUG] Kafka publish done topic={topic}")
+            print(f"[DEBUG] Kafka publish start topic={topic} key={key} bootstrap={Config.KAFKA_BOOTSTRAP_SERVERS} size={len(preview)} preview={preview[:200]}")
+            await self.kafka_producer.send_and_wait(topic, message, key=key.encode('utf-8'))
+            print(f"[DEBUG] Kafka publish done topic={topic} key={key}")
         except Exception as e:
             print(f"[WARN] Kafka publish failed ({topic}): {e}. Message: {json.dumps(message)[:500]}")
 
@@ -257,50 +262,50 @@ class EventService:
         except Exception as e:
             print(f"Error publishing WebSocket event: {e}")
 
-    async def handle_file_metadata_recorded_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
+    async def handle_file_upload_completed_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
         
         try:
             event = request.event
             
-            # Xử lý file metadata recorded
-            print(f"Processing file metadata recorded event: {event.eventId}")
+            # Xử lý file upload completed
+            print(f"Processing file upload completed event: {event.eventId}")
             
             return EventHandlerResponse(
                 success=True,
-                message="File metadata recorded event processed successfully",
+                message="File upload completed event processed successfully",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
             
         except Exception as e:
-            print(f"Error handling file metadata recorded event: {e}")
+            print(f"Error handling file upload completed event: {e}")
             return EventHandlerResponse(
                 success=False,
-                message=f"Failed to process file metadata recorded event: {str(e)}",
+                message=f"Failed to process file upload completed event: {str(e)}",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
 
-    async def handle_file_plaintext_extracted_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
+    async def handle_file_content_extracted_event(self, request: EventHandlerRequest) -> EventHandlerResponse:
         
         try:
             event = request.event
             
-            # Xử lý file plaintext extracted
-            print(f"Processing file plaintext extracted event: {event.eventId}")
+            # Xử lý file content extracted
+            print(f"Processing file content extracted event: {event.eventId}")
             
             return EventHandlerResponse(
                 success=True,
-                message="File plaintext extracted event processed successfully",
+                message="File content extracted event processed successfully",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
             
         except Exception as e:
-            print(f"Error handling file plaintext extracted event: {e}")
+            print(f"Error handling file content extracted event: {e}")
             return EventHandlerResponse(
                 success=False,
-                message=f"Failed to process file plaintext extracted event: {str(e)}",
+                message=f"Failed to process file content extracted event: {str(e)}",
                 processed_at=datetime.now(timezone.utc),
                 retry_count=request.retry_count
             )
@@ -332,10 +337,10 @@ class EventService:
     async def start_event_processing(self):
         
         try:
-            # Đăng ký các handlers cho 3 event cần thiết
-            self.register_handler("file.metadata.recorded", self.handle_file_metadata_recorded_event)
-            self.register_handler("file.plaintext.extracted", self.handle_file_plaintext_extracted_event)
-            self.register_handler("contract.summary.generated", self.handle_contract_summary_generated_event)
+            # Đăng ký các handlers cho 3 event theo EVENT-ARCHITECTURE-V3.md
+            self.register_handler("FILE_UPLOAD_COMPLETED", self.handle_file_upload_completed_event)
+            self.register_handler("FILE_CONTENT_EXTRACTED", self.handle_file_content_extracted_event)
+            self.register_handler("CONTRACT_SUMMARY_GENERATED", self.handle_contract_summary_generated_event)
             
             # Subscribe to channels
             subscription_request = EventSubscriptionRequest(

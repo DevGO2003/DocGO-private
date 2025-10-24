@@ -9,7 +9,7 @@ Kiến trúc event-driven cho file upload flow với 3 microservices:
 
 **Version:** 3.0  
 **Created:** 2025-10-23  
-**Status:** ✅ Final Design
+**Status:** ✅ Implemented & Tested
 
 ---
 
@@ -26,14 +26,15 @@ User Upload File
     ├─ 2. Upload to S3
     ├─ 3. OCR/Extract text
     ├─ 4. AI Processing (classify, summarize)
-    └─ 5. Publish Kafka Events (3 events):
+    └─ 5. Publish Kafka Events (3 events) to single topic:
          ① FILE_UPLOAD_COMPLETED
          ② FILE_CONTENT_EXTRACTED
          ③ CONTRACT_SUMMARY_GENERATED (conditional)
                      ↓
 📊 Repository Service (Passive)
-    └─ Kafka Consumer
-        ├─ Listen events
+    └─ Single Kafka Consumer (DocgoFileEventsConsumer)
+        ├─ Listen to topic: docgo-file-events
+        ├─ Route by eventType
         └─ UPSERT MongoDB (deep merge)
 ```
 
@@ -656,6 +657,7 @@ Replication Factor: 3
 Retention: 7 days
 Compression: lz4
 Message Key: documentId (UUID v7)
+Message Value: Event payload with eventType field
 ```
 
 ### Consumer Groups
@@ -666,10 +668,11 @@ Automation Service:
   Topics: [] # Không consume
 
 Repository Service:
-  Group ID: repository-service-consumer
+  Group ID: docgo-repo-events-v1
   Topics: [docgo-file-events]
   Auto Offset Reset: earliest
   Enable Auto Commit: false
+  Consumer: DocgoFileEventsConsumer (single consumer)
 ```
 
 ### Message Format
@@ -696,25 +699,29 @@ Repository Service:
 
 ### Automation Service
 
-- [ ] Generate UUID v7 for documentId
-- [ ] Upload file to S3
-- [ ] Extract text (OCR/Direct)
-- [ ] AI classification (documentType, language, category)
-- [ ] Publish Event 1: FILE_UPLOAD_COMPLETED
-- [ ] Publish Event 2: FILE_CONTENT_EXTRACTED
-- [ ] Extract PDF metadata if mimeType = PDF
-- [ ] Conditional: AI contract analysis if isContract=true
-- [ ] Conditional: Publish Event 3 if isContract=true
+- [x] Generate UUID v7 for documentId
+- [x] Upload file to S3
+- [x] Extract text (OCR/Direct)
+- [x] AI classification (documentType, language, category)
+- [x] Publish Event 1: FILE_UPLOAD_COMPLETED
+- [x] Publish Event 2: FILE_CONTENT_EXTRACTED
+- [x] Extract PDF metadata if mimeType = PDF
+- [x] Conditional: AI contract analysis if isContract=true
+- [x] Conditional: Publish Event 3 if isContract=true
+- [x] Single topic: docgo-file-events
+- [x] Field names: documentId, fileName, mimeType
 
 ### Repository Service
 
-- [ ] Create FileEntity skeleton on Event 1
-- [ ] Set default: status="UPLOADED", region="VN", priority="LOW"
-- [ ] Deep merge content on Event 2
-- [ ] Update status="PROCESSED" on Event 2
-- [ ] Deep merge contract on Event 3
-- [ ] Idempotency check (processed_events)
-- [ ] Error handling: Event 2/3 arrives before Event 1
+- [x] Create FileEntity skeleton on Event 1
+- [x] Set default: status="UPLOADED", region="VN", priority="LOW"
+- [x] Deep merge content on Event 2
+- [x] Update status="PROCESSED" on Event 2
+- [x] Deep merge contract on Event 3
+- [x] Idempotency check (processed_events)
+- [x] Error handling: Event 2/3 arrives before Event 1
+- [x] Single consumer: DocgoFileEventsConsumer
+- [x] Route by eventType field
 
 ### Monitoring
 
@@ -725,6 +732,6 @@ Repository Service:
 
 ---
 
-**Status:** 🟢 Ready for Implementation  
+**Status:** 🟢 Implemented & Tested  
 **Version:** 3.0  
-**Last Updated:** 2025-10-23
+**Last Updated:** 2025-10-24
