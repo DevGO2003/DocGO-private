@@ -4,6 +4,7 @@ import com.devgo2003.docgo.backend.user_service.dto.*;
 import com.devgo2003.docgo.backend.user_service.entity.Invitation;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
+import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.common.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.List;
 public class OrganizationController {
 
     private final OrganizationService organizationService;
+    private final UserService userService;
 
     @GetMapping
     @Operation(
@@ -374,7 +378,7 @@ public class OrganizationController {
             .build());
     }
 
-    @PostMapping("/{id}/members")
+    @PostMapping("/{id}/members/invite")
     @Operation(
         summary = "Organization Management - Mời thành viên vào tổ chức",
         description = """
@@ -435,12 +439,13 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Inviting member to organization: {}", id);
         
-        // Lấy owner user ID từ organization để có quyền mời thành viên
-        OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
-        String currentUserId = organizationResponse.getOwnerUserId();
+        // Lấy userId từ SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        OrganizationMembershipResponse membership = organizationService.inviteMember(id, request, currentUserId);
+        OrganizationMembershipResponse membership = organizationService.inviteMember(id, request, currentUser.getId());
         
         return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
             .statusCode(201)
@@ -596,8 +601,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Updating member {} in organization: {}", userId, id);
         
-        organizationService.updateMember(id, userId, request, "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.updateMember(id, userId, request, currentUser.getId());
         OrganizationMembershipResponse membership = OrganizationMembershipResponse.builder()
             .organizationId(id)
             .userId(userId)
@@ -669,12 +678,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Removing member {} from organization: {}", userId, id);
         
-        // Lấy owner user ID từ organization để có quyền xóa thành viên
-        OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
-        String currentUserId = organizationResponse.getOwnerUserId();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        organizationService.removeMember(id, userId, currentUserId);
+        organizationService.removeMember(id, userId, currentUser.getId());
         
         return ResponseEntity.ok(RestResponse.<Void>builder()
             .statusCode(200)
@@ -741,8 +750,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Adding admin to organization: {}", id);
         
-        organizationService.addAdmin(id, request.getUserId(), "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.addAdmin(id, request.getUserId(), currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -812,8 +825,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Removing admin from organization: {}", id);
         
-        organizationService.removeAdmin(id, userId, "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.removeAdmin(id, userId, currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -882,8 +899,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Transferring ownership of organization: {}", id);
         
-        organizationService.transferOwnership(id, request.getNewOwnerId(), "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.transferOwnership(id, request.getNewOwnerId(), currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -1083,10 +1104,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Accepting invitation with token: {}", token);
         
-        // TODO: Get userId from security context
-        String userId = "current-user-id";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, userId);
+        OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, user.getId());
         
         return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
                 .statusCode(200)
@@ -1147,10 +1170,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Rejecting invitation with token: {}", token);
         
-        // TODO: Get userId from security context
-        String userId = "current-user-id";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        organizationService.rejectInvitation(token, userId);
+        organizationService.rejectInvitation(token, user.getId());
         
         return ResponseEntity.ok(RestResponse.<Void>builder()
                 .statusCode(200)

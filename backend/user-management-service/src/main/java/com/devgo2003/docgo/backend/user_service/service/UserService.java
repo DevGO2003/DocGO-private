@@ -3,8 +3,9 @@ package com.devgo2003.docgo.backend.user_service.service;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +25,24 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrganizationService organizationService;
-    
     private final MongoTemplate mongoTemplate;
+    
+    @Autowired
+    public UserService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        @Lazy OrganizationService organizationService,
+        MongoTemplate mongoTemplate) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.organizationService = organizationService;
+        this.mongoTemplate = mongoTemplate;
+    }
     
     public User createUser(User user) {
         log.info("Creating new user: {}", user.getUsername());

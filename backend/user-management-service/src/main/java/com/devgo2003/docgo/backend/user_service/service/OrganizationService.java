@@ -98,6 +98,18 @@ public class OrganizationService {
 
         Organization savedOrganization = organizationRepository.save(organization);
         
+        // Tạo membership cho owner
+        OrganizationMembership ownerMembership = OrganizationMembership.builder()
+                .id(UUID.randomUUID().toString())
+                .organizationId(savedOrganization.getId())
+                .userId(request.getOwnerUserId())
+                .isAdmin(true)
+                .status(OrganizationMembership.MembershipStatus.ACTIVE)
+                .permissions(List.of("all"))
+                .build();
+        membershipRepository.save(ownerMembership);
+        log.info("Created owner membership for user: {}", request.getOwnerUserId());
+        
         // Khởi tạo dữ liệu mặc định
         initializeDefaultData(savedOrganization.getId());
         
@@ -278,6 +290,7 @@ public class OrganizationService {
                 .status(OrganizationMembership.MembershipStatus.PENDING)
                 .invitedBy(currentUserId)
                 .invitedAt(LocalDateTime.now())
+                .token(invitation.getToken())
                 .build();
     }
 
@@ -617,7 +630,7 @@ public void rejectInvitation(String token, String userId) {
     }
     
     // Update invitation status
-    invitation.setStatus(Invitation.InvitationStatus.REJECTED);
+    invitation.setStatus(Invitation.InvitationStatus.DECLINED);
     invitationRepository.save(invitation);
     
     log.info("User {} rejected invitation to organization {}", userId, invitation.getOrganizationId());
