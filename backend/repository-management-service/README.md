@@ -1,99 +1,114 @@
-# Document Management Service
+# Repository Management Service
 
 ## Tổng quan
-Document Management Service là microservice Spring Boot quản lý tài liệu và hợp đồng với tính năng **xử lý file upload tự động bằng AI** thông qua Kafka.
+Repository Management Service là microservice Spring Boot quản lý kho lưu trữ tài liệu với kiến trúc **8 sections v3 schema** và tích hợp **Kafka event-driven processing**.
 
 ## Tính năng chính
 
-### 1. Quản lý tài liệu cơ bản
-- CRUD operations cho tài liệu và hợp đồng
-- Phân trang, sắp xếp, tìm kiếm
-- Quản lý trạng thái tài liệu
-- Lịch sử sự kiện và file đính kèm
+### 1. **8 Sections v3 Schema Architecture**
+- **Overview**: Thông tin cơ bản (title, status, documentType, ownerUserId)
+- **Metadata**: Thông tin file (mimeType, size, encoding, compression)
+- **Contract**: Phân tích hợp đồng (parties, clauses, payment, risk)
+- **Content**: Nội dung xử lý (extractedText, classification, summarization)
+- **Storage**: Thông tin lưu trữ (S3, local, backup)
+- **Security**: Bảo mật (encryption, access control, compliance)
+- **Versioning**: Quản lý phiên bản (version, history, changes)
+- **Audit**: Kiểm toán (createdAt, updatedAt, createdBy, isDeleted)
 
-### 2. **File Upload & AI Processing (MỚI)**
-- Upload file với multipart/form-data
-- Tự động phát hiện loại file (PDF, DOCX, TXT)
-- Phân loại file: hợp đồng hoặc tài liệu thường
-- Gửi yêu cầu xử lý AI qua Kafka
-- Nhận kết quả xử lý và tự động tạo tài liệu
+### 2. **Event-Driven Processing**
+- **FILE_UPLOAD_COMPLETED**: Tạo skeleton với defaults
+- **FILE_CONTENT_EXTRACTED**: Deep merge content section
+- **CONTRACT_SUMMARY_GENERATED**: Deep merge contract section (conditional)
+- Idempotency handling với ProcessedEventEntity
+- Deep merge utilities cho 8 sections
 
-### 3. **Document Summary & AI Insights (MỚI)**
-- Tóm tắt tài liệu tự động
-- Phân loại loại tài liệu
-- Đánh giá mức độ rủi ro
-- Trích xuất điều khoản chính
-- Trạng thái xử lý AI
+### 3. **REST API Management**
+- CRUD operations cho files
+- Pagination, sorting, filtering
+- Soft delete và restore functionality
+- Comprehensive validation
+- Standardized RestResponse format
 
-### 4. **Kafka Integration (MỚI)**
-- Producer: Gửi yêu cầu xử lý tài liệu
-- Consumer: Nhận kết quả xử lý từ AI service
-- Asynchronous processing
-- Event-driven architecture
+### 4. **Kafka Integration**
+- Consumer: Nhận events từ automation-service
+- Event routing và processing
+- Error handling và retry logic
+- Correlation ID tracking
 
 ## Kiến trúc hệ thống
 
 ```
-Frontend → Document Service → Kafka → Automation Service
+Frontend → API Gateway → Repository Service → MongoDB Atlas
                 ↓
-            Database (MongoDB Atlas)
-                ↓
-            File Storage (Local)
+            Kafka Events ← Automation Service
 ```
 
-## Luồng xử lý
+## Luồng xử lý Event
 
-### Upload file thường
-1. Frontend gửi file với `isContract=false`
-2. Document Service lưu file và metadata
-3. Trả về response thành công
+### Event 1: FILE_UPLOAD_COMPLETED
+1. Automation Service upload file lên S3
+2. Gửi event FILE_UPLOAD_COMPLETED qua Kafka
+3. Repository Service nhận event
+4. Tạo skeleton FileEntity với status="UPLOADED"
+5. Lưu vào MongoDB
 
-### Upload file hợp đồng
-1. Frontend gửi file với `isContract=true`
-2. Document Service lưu file và metadata
-3. Gửi yêu cầu xử lý qua Kafka
-4. Automation Service xử lý file
-5. Gửi kết quả qua Kafka
-6. Document Service tạo tài liệu với thông tin AI
-7. Cập nhật trạng thái xử lý
+### Event 2: FILE_CONTENT_EXTRACTED
+1. Automation Service xử lý file và trích xuất nội dung
+2. Gửi event FILE_CONTENT_EXTRACTED qua Kafka
+3. Repository Service nhận event
+4. Deep merge content section vào FileEntity
+5. Cập nhật status="PROCESSED"
 
-## API Endpoints (đã chuẩn hóa URL)
+### Event 3: CONTRACT_SUMMARY_GENERATED (Conditional)
+1. Nếu file là hợp đồng, Automation Service phân tích
+2. Gửi event CONTRACT_SUMMARY_GENERATED qua Kafka
+3. Repository Service nhận event
+4. Deep merge contract section vào FileEntity
+5. Cập nhật contract analysis data
 
-### Document Management
-- `POST /api/v1/file-management-service/documents` - Tạo tài liệu
-- `GET /api/v1/file-management-service/documents` - Danh sách tài liệu
-- `GET /api/v1/file-management-service/documents/{id}` - Chi tiết tài liệu
-- `PUT /api/v1/file-management-service/documents/{id}` - Cập nhật tài liệu
-- `DELETE /api/v1/file-management-service/documents/{id}` - Xóa tài liệu
+## API Endpoints
 
-### Tags, Versions, E-Signature, Comments (ví dụ)
-- `GET /api/v1/file-management-service/versions` - Danh sách versions
-- `GET /api/v1/file-management-service/esignatures` - Danh sách e-signatures
-- `GET /api/v1/file-management-service/documents/{id}/comments` - Bình luận theo tài liệu
+### File Management
+- `GET /api/v1/repository-management-service/files` - Danh sách files với phân trang
+- `GET /api/v1/repository-management-service/files/{id}` - Chi tiết file
+- `POST /api/v1/repository-management-service/files` - Tạo file mới
+- `PUT /api/v1/repository-management-service/files/{id}` - Cập nhật file
+- `DELETE /api/v1/repository-management-service/files/{id}` - Xóa file (soft delete)
+- `PUT /api/v1/repository-management-service/files/{id}/restore` - Khôi phục file
+
+### Health Check
+- `GET /actuator/health` - Kiểm tra trạng thái service
+- `GET /actuator/info` - Thông tin service
+
+### Documentation
+- `GET /docs` - Swagger UI documentation
 
 ## Cấu hình
 
 ### Database
-- MongoDB Atlas (primary database)
-- Collections tự động tạo khi cần
-- Không sử dụng MariaDB (đã chuyển sang MongoDB)
+- **MongoDB Atlas**: Primary database
+- **Collection**: `files` (FileEntity documents)
+- **Indexes**: Tự động tạo cho performance
+- **Connection**: Sử dụng MONGODB_ATLAS_URI từ .env
 
 ### Kafka
-- Bootstrap servers: localhost:9092
-- Topics: `document-processing-requests`, `document-processing-results`
-- Consumer group: `document-service-group`
+- **Bootstrap servers**: kafka:9092 (Docker) / localhost:9092 (Local)
+- **Topics**: `docgo-file-events`
+- **Consumer group**: `docgo-repo-events-v1`
+- **Event types**: FILE_UPLOAD_COMPLETED, FILE_CONTENT_EXTRACTED, CONTRACT_SUMMARY_GENERATED
 
-### File Upload
-- Thư mục upload: `uploads/`
-- Kích thước tối đa: 50MB
-- Hỗ trợ: PDF, DOCX, TXT
+### Service Configuration
+- **Port**: 8002
+- **Context path**: `/`
+- **Documentation**: `/docs`
+- **Health check**: `/actuator/health`
 
 ## Chạy ứng dụng
 
 ### Yêu cầu
 - Java 17+
 - Maven 3.6+
-- MongoDB Atlas
+- MongoDB Atlas (MONGODB_ATLAS_URI trong .env)
 - Kafka 3.0+
 
 ### Cách chạy
@@ -101,13 +116,18 @@ Frontend → Document Service → Kafka → Automation Service
 # 1. Cài đặt dependencies
 mvn clean install
 
-# 2. Cấu hình database và Kafka
+# 2. Cấu hình environment variables
+cp .env.example .env
+# Chỉnh sửa .env với MONGODB_ATLAS_URI
+
 # 3. Chạy ứng dụng
 mvn spring-boot:run
 ```
 
-Ứng dụng chạy tại (qua docker compose): http://localhost:8002
-API Documentation: http://localhost:8002/docs#/
+**URLs:**
+- Service: http://localhost:8002
+- API Documentation: http://localhost:8002/docs
+- Health Check: http://localhost:8002/actuator/health
 
 ## Cấu trúc Response
 
