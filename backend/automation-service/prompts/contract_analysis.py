@@ -2,174 +2,184 @@
 Contract Analysis Prompt Template
 """
 
-PROMPT = """Bạn là chuyên gia phân tích hợp đồng với kinh nghiệm pháp lý 15+ năm.
-Hãy phân tích CHI TIẾT từng dòng văn bản hợp đồng và tạo JSON ĐẦY ĐỦ, CHÍNH XÁC.
+PROMPT = """Bạn là chuyên gia phân tích hợp đồng với 15+ năm kinh nghiệm pháp lý.
+Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên dưới.
 
-🎯 YÊU CẦU PHÂN TÍCH:
-1. ĐỌC KỸ và TRÍCH XUẤT thông tin CHÍNH XÁC từ văn bản (KHÔNG đoán, KHÔNG sáng tạo)
-2. TÌM KIẾM mọi chi tiết: tên, chức vụ, email, phone, địa chỉ, mã số thuế, giá trị, ngày tháng
-3. XÁC ĐỊNH loại bên (type): CLIENT, VENDOR, PARTNER, GUARANTOR
-4. PHÂN TÍCH điều khoản có lợi/bất lợi cho từng bên (phải có content trích dẫn)
-5. ĐÁNH GIÁ rủi ro chi tiết với category, severity, impact
-6. LIỆT KÊ tuân thủ: regulations, requirements, certifications
-7. TẠO reminders cho các milestone/ngày quan trọng
-8. QUAN TRỌNG: Dùng null nếu KHÔNG TÌM THẤY thông tin (đừng để string rỗng)
+🎯 YÊU CẦU:
+1. Trích xuất CHÍNH XÁC từ văn bản (KHÔNG đoán)
+2. Dùng null nếu KHÔNG TÌM THẤY thông tin
+3. Tuân thủ NGHIÊM NGẶT kiểu dữ liệu
+4. Trả về JSON thuần, KHÔNG có markdown ```json
 
-📋 JSON SCHEMA - TUÂN THỦ NGHIÊM NGẶT:
+📋 SCHEMA:
 
-{
-  "effectiveDate": "2024-02-01T00:00:00",  // ISO 8601, REQUIRED
-  "expiryDate": "2026-02-01T00:00:00",     // ISO 8601 hoặc null
-  "totalValue": 100000000,                  // NUMBER (không dấu phẩy, không text)
-  "currency": "VND",                        // VND, USD, EUR...
-  "summary": "Tóm tắt ngắn gọn 50-100 từ", // REQUIRED
-  "project": "Dự án DocGO Platform",        // Tên dự án hoặc null
-  "department": "IT Department",            // Phòng ban quản lý hoặc null
-  "priority": "HIGH",                       // HIGH, MEDIUM, LOW hoặc null
-  "confidentiality": "CONFIDENTIAL",        // CONFIDENTIAL, INTERNAL, PUBLIC hoặc null
+{{
+  "effectiveDate": null,  // string ISO8601 - ngày hiệu lực hợp đồng, bắt buộc nếu tìm thấy, vd: "2024-02-01T00:00:00", format: YYYY-MM-DDTHH:MM:SS
+  "expiryDate": null,  // string ISO8601 - ngày hết hạn, có thể null, vd: "2026-02-01T00:00:00", format: YYYY-MM-DDTHH:MM:SS hoặc null
+  "totalValue": null,  // number - tổng giá trị hợp đồng không dấu phẩy, vd: 100000000, KHÔNG có dấu phẩy hay text
+  "currency": null,  // string enum (VND|USD|EUR|JPY) - đơn vị tiền tệ, vd: "VND", bắt buộc nếu có totalValue
+  "summary": null,  // string - tóm tắt 50-100 từ, bắt buộc nếu là hợp đồng, mô tả ngắn gọn nội dung chính
+  "project": null,  // string - tên dự án liên quan, có thể null, vd: "Dự án DocGO Platform"
+  "department": null,  // string - phòng ban quản lý, có thể null, vd: "IT Department"
+  "priority": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ ưu tiên, có thể null, vd: "HIGH"
+  "confidentiality": null,  // string enum (CONFIDENTIAL|INTERNAL|PUBLIC|RESTRICTED) - mức độ bảo mật, có thể null, vd: "CONFIDENTIAL"
+  "contractType": null,  // string enum (CONTRACT|PURCHASE_ORDER|INVOICE|AGREEMENT|OTHER) - loại hợp đồng, có thể null, vd: "CONTRACT"
   
-  "parties": [  // MỖI BÊN PHẢI CÓ ĐẦY ĐỦ OBJECT STRUCTURE
-    {
-      "id": "party-001",                    // unique ID: "party-001", "party-002"...
-      "name": "CÔNG TY TNHH ABC",           // REQUIRED - tên đầy đủ
-      "type": "CLIENT",                     // CLIENT, VENDOR, PARTNER, GUARANTOR
-      "role": "Bên A - Khách hàng",         // Vai trò trong hợp đồng
-      "contact": {                          // OBJECT - không flat
-        "email": "contact@abc.com",         // Email chính thức
-        "phone": "+84-28-1234-5678",        // SĐT
-        "address": "123 Nguyễn Huệ, Q1, TP.HCM"  // Địa chỉ đầy đủ
-      },
-      "representative": {                   // OBJECT - người đại diện
-        "name": "Nguyễn Văn A",             // Tên đại diện
-        "position": "Giám đốc",             // Chức vụ
-        "email": "nguyenvana@abc.com"       // Email cá nhân
-      },
-      "taxCode": "0123456789"               // Mã số thuế
-    }
+  "parties": [  // array of objects - danh sách các bên tham gia (tối thiểu 2 bên nếu là hợp đồng)
+    {{
+      "id": null,  // string - unique identifier, vd: "party-001"
+      "name": null,  // string - tên đầy đủ bên tham gia, bắt buộc, vd: "CÔNG TY TNHH ABC"
+      "type": null,  // string enum (CLIENT|VENDOR|PARTNER|GUARANTOR) - loại bên, bắt buộc
+      "role": null,  // string - vai trò trong hợp đồng, vd: "Bên A - Khách hàng"
+      "contact": {{  // object - thông tin liên hệ
+        "email": null,  // string - email chính thức, có thể null
+        "phone": null,  // string - số điện thoại, có thể null, vd: "+84-28-1234-5678"
+        "address": null  // string - địa chỉ đầy đủ, có thể null
+      }},
+      "representative": {{  // object - thông tin người đại diện
+        "name": null,  // string - tên người đại diện, có thể null
+        "position": null,  // string - chức vụ, có thể null
+        "email": null  // string - email cá nhân, có thể null
+      }},
+      "taxCode": null  // string - mã số thuế, có thể null
+    }}
   ],
   
-  "payment": {
-    "totalValue": 100000000,                // Tổng giá trị thanh toán
-    "currency": "VND",
-    "schedule": [                           // ARRAY of milestones
-      {
-        "milestone": "Ký hợp đồng",
-        "percentage": 30,                   // % thanh toán
-        "amount": 30000000,                 // Số tiền
-        "dueDate": "2024-02-15T00:00:00",   // Hạn thanh toán
-        "status": "PENDING"                 // PENDING, COMPLETED, OVERDUE
-      }
-    ],
-    "method": "Chuyển khoản ngân hàng"      // Phương thức thanh toán
-  },
+  "payment": {{  // object - thông tin thanh toán
+    "totalValue": null,  // number - tổng giá trị thanh toán, có thể null
+    "currency": null,  // string enum (VND|USD|EUR|JPY) - đơn vị tiền tệ
+    "method": null,  // string enum (BANK_TRANSFER|CREDIT_CARD|WIRE|CHECK|CASH|DIGITAL_WALLET) - phương thức thanh toán
+    "schedule": [  // array of objects - lịch trình thanh toán, có thể rỗng []
+      {{
+        "milestone": null,  // string - mốc thanh toán, vd: "Ký hợp đồng"
+        "percentage": null,  // number - phần trăm thanh toán, vd: 30
+        "amount": null,  // number - số tiền, vd: 30000000
+        "dueDate": null,  // string ISO8601 - hạn thanh toán
+        "status": null  // string enum (PENDING|PAID|OVERDUE|CANCELLED) - trạng thái
+      }}
+    ]
+  }},
   
-  "clauses": {
-    "key": [                                // Điều khoản QUAN TRỌNG
-      {
-        "name": "Điều 5: Phạm vi công việc",
-        "description": "Mô tả chi tiết điều khoản",
-        "content": "Trích dẫn nội dung CHÍNH XÁC từ hợp đồng",  // REQUIRED
-        "importance": "HIGH",               // HIGH, MEDIUM, LOW
-        "risk": "MEDIUM",                   // HIGH, MEDIUM, LOW
-        "advice": "Khuyến nghị từ chuyên gia",  // Lời khuyên cụ thể
-        "pageNumber": 3                     // Số trang tìm thấy
-      }
+  "clauses": {{  // object - các điều khoản
+    "key": [  // array of objects - điều khoản quan trọng
+      {{
+        "name": null,  // string - tên điều khoản, vd: "Điều 5: Phạm vi công việc"
+        "description": null,  // string - mô tả chi tiết
+        "content": null,  // string - trích dẫn CHÍNH XÁC từ hợp đồng, bắt buộc
+        "importance": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ quan trọng
+        "risk": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ rủi ro
+        "advice": null,  // string - khuyến nghị từ chuyên gia
+        "pageNumber": null  // number - số trang tìm thấy
+      }}
     ],
-    "unfavorable": [                        // Điều khoản BẤT LỢI
-      {
-        "name": "Điều 10: Phạt chậm tiến độ",
-        "description": "Điều khoản gây bất lợi",
-        "content": "Trích dẫn chính xác",
-        "impact": "Phạt 1%/tuần nếu chậm",
-        "affectedParty": "party-001",       // ID bên bị ảnh hưởng
-        "pageNumber": 5                    // Số trang tìm thấy
-      }
+    "unfavorable": [  // array of objects - điều khoản bất lợi
+      {{
+        "name": null,
+        "description": null,
+        "content": null,
+        "impact": null,  // string - ảnh hưởng cụ thể
+        "affectedParty": null,  // string - ID bên bị ảnh hưởng
+        "pageNumber": null
+      }}
     ],
-    "all": [                                // TẤT CẢ ĐIỀU KHOẢN CÓ TRONG FILE HỢP ĐỒNG
-      {
-        "name": "Điều 5: Phạm vi công việc",
-        "description": "Điều khoản xác định phạm vi công việc cần thực hiện. Đây là điều khoản quan trọng vì nó định nghĩa ranh giới và trách nhiệm của các bên trong hợp đồng.",
-        "content": "Trích dẫn nội dung CHÍNH XÁC từ hợp đồng",
-        "importance": "HIGH",
-        "risk": "MEDIUM",
-        "advice": "Khuyến nghị từ chuyên gia",
-        "pageNumber": 3
-      },
-      {
-        "name": "Điều 10: Phạt chậm tiến độ",
-        "description": "Điều khoản quy định về phạt chậm tiến độ. Đây là điều khoản bất lợi vì nó có thể gây thiệt hại tài chính nếu không hoàn thành đúng hạn.",
-        "content": "Trích dẫn chính xác",
-        "importance": "LOW",
-        "risk": "HIGH",
-        "advice": "Cần đảm bảo tiến độ thực hiện",
-        "pageNumber": 5
-      }
-    ],
-    "intellectualProperty": "Mô tả quyền sở hữu trí tuệ",  // Hoặc null
-    "confidentiality": "Mô tả bảo mật",     // Hoặc null
-    "warranty": "Bảo hành 12 tháng",        // Hoặc null
-    "termination": "Điều kiện chấm dứt"     // Hoặc null
-  },
+    "all": [],  // array of objects - tất cả điều khoản, cấu trúc giống key[]
+    "intellectualProperty": null,  // string - mô tả quyền sở hữu trí tuệ, có thể null
+    "confidentiality": null,  // string - mô tả bảo mật, có thể null
+    "warranty": null,  // string - điều kiện bảo hành, có thể null
+    "termination": null  // string - điều kiện chấm dứt, có thể null
+  }},
   
-  "reminders": [                            // Nhắc nhở các milestone
-    {
-      "date": "2024-03-01T00:00:00",        // Ngày nhắc nhở
-      "type": "DEADLINE",                   // DEADLINE, MILESTONE, REVIEW, PAYMENT
-      "title": "Nghiệm thu giai đoạn 1",
-      "description": "Chi tiết công việc cần làm",
-      "priority": "HIGH",                   // HIGH, MEDIUM, LOW
-      "assignedTo": "party-001"             // ID người chịu trách nhiệm
-    }
+  "keyTerms": [  // array of objects - từ ngữ chuyên ngành, kỹ thuật, pháp lý cần giải thích
+    {{
+      "term": null,  // string - từ ngữ chuyên ngành, vd: "software", bắt buộc nếu có keyTerms
+      "definition": null,  // string - giải thích chi tiết ý nghĩa của từ ngữ trong ngữ cảnh hợp đồng, bắt buộc
+      "category": null,  // string enum (TECHNICAL|LEGAL|FINANCIAL|OPERATIONAL) - danh mục từ ngữ, bắt buộc, vd: "TECHNICAL"
+      "frequency": null,  // number - số lần xuất hiện trong hợp đồng, vd: 5, bắt buộc
+      "context": null  // string - ngữ cảnh sử dụng của từ ngữ, vd: "Được sử dụng trong phạm vi công việc", có thể null
+    }}
   ],
   
-  "risk": {
-    "factors": [                            // Yếu tố rủi ro
-      {
-        "category": "FINANCIAL",            // FINANCIAL, LEGAL, OPERATIONAL, TECHNICAL
-        "description": "Rủi ro tài chính",
-        "severity": "HIGH",                 // HIGH, MEDIUM, LOW
-        "probability": "MEDIUM",            // HIGH, MEDIUM, LOW
-        "impact": "Ảnh hưởng đến ngân sách",
-        "mitigation": "Biện pháp giảm thiểu rủi ro"
-      }
-    ],
-    "assessment": "Đánh giá tổng thể rủi ro", // Hoặc null
-    "recommendations": "Khuyến nghị giảm thiểu rủi ro"  // Hoặc null
-  },
+  "reminders": [  // array of objects - nhắc nhở milestone
+    {{
+      "date": null,  // string ISO8601 - ngày nhắc nhở
+      "type": null,  // string enum (DEADLINE|MILESTONE|REVIEW|PAYMENT) - loại nhắc nhở
+      "title": null,  // string - tiêu đề ngắn gọn
+      "description": null,  // string - mô tả chi tiết
+      "priority": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ ưu tiên
+      "assignedTo": null  // string - ID người chịu trách nhiệm
+    }}
+  ],
   
-  "compliance": {
-    "regulations": [                        // Quy định pháp luật
-      {
-        "name": "Luật Lao động 2019",
-        "description": "Quy định về hợp đồng lao động",
-        "status": "APPLICABLE",             // APPLICABLE, NOT_APPLICABLE, PENDING
-        "requirements": "Yêu cầu tuân thủ"
-      }
+  "risk": {{  // object - đánh giá rủi ro
+    "level": null,  // string enum (LOW|MEDIUM|HIGH) - mức độ rủi ro tổng thể
+    "factors": [  // array of objects - các yếu tố rủi ro
+      {{
+        "category": null,  // string enum (FINANCIAL|LEGAL|OPERATIONAL|TECHNICAL|SCHEDULE) - danh mục rủi ro
+        "description": null,  // string - mô tả rủi ro
+        "severity": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ nghiêm trọng
+        "probability": null,  // string enum (HIGH|MEDIUM|LOW) - xác suất xảy ra
+        "impact": null,  // string - ảnh hưởng cụ thể
+        "mitigation": null  // string - biện pháp giảm thiểu
+      }}
     ],
-    "certifications": [                     // Chứng chỉ cần thiết
-      {
-        "name": "ISO 9001",
-        "description": "Hệ thống quản lý chất lượng",
-        "required": true,                   // true/false
-        "expiryDate": "2025-12-31T00:00:00" // Ngày hết hạn
-      }
+    "assessment": null,  // string - đánh giá tổng thể, có thể null
+    "recommendations": null  // string - khuyến nghị, có thể null
+  }},
+  
+  "compliance": {{  // object - tuân thủ pháp luật
+    "status": null,  // string enum (COMPLIANT|NON_COMPLIANT|PENDING_REVIEW|IN_AUDIT) - trạng thái tuân thủ
+    "regulations": [  // array of objects - các quy định
+      {{
+        "name": null,  // string - tên quy định
+        "description": null,  // string - mô tả
+        "status": null,  // string enum (APPLICABLE|NOT_APPLICABLE|PENDING) - trạng thái áp dụng
+        "requirements": null  // string - yêu cầu tuân thủ
+      }}
     ],
-    "auditRequirements": "Yêu cầu kiểm toán", // Hoặc null
-    "reportingRequirements": "Yêu cầu báo cáo"  // Hoặc null
-  }
-}
+    "certifications": [  // array of objects - chứng chỉ cần thiết
+      {{
+        "name": null,  // string - tên chứng chỉ
+        "description": null,  // string - mô tả
+        "required": null,  // boolean - bắt buộc hay không
+        "expiryDate": null  // string ISO8601 - ngày hết hạn
+      }}
+    ],
+    "auditRequirements": null,  // string - yêu cầu kiểm toán, có thể null
+    "reportingRequirements": null  // string - yêu cầu báo cáo, có thể null
+  }},
+  
+  "processing": {{  // object - metadata xử lý
+    "status": null,  // string enum (COMPLETED|PROCESSING|FAILED) - trạng thái xử lý
+    "confidence": null,  // number float 0.0-1.0 - độ tin cậy
+    "steps": [],  // array of objects - các bước xử lý, có thể rỗng
+    "totalProcessingTime": null,  // number - tổng thời gian xử lý (giây)
+    "error": null  // string - thông báo lỗi nếu có, null nếu thành công
+  }},
+  
+  "technical": {{  // object - metadata kỹ thuật
+    "encoding": null,  // string enum (UTF-8|UTF-16|ASCII) - encoding file
+    "lineEnding": null,  // string enum (LF|CRLF) - kiểu xuống dòng
+    "compression": null,  // string enum (NONE|GZIP|DEFLATE) - nén
+    "fileSize": null,  // number - kích thước file (bytes)
+    "characterCount": null,  // number - số ký tự
+    "lineCount": null,  // number - số dòng
+    "pageCount": null,  // number - số trang
+    "pdfVersion": null,  // string - phiên bản PDF nếu là file PDF
+    "title": null,  // string - tiêu đề document
+    "author": null,  // string - tác giả
+    "creator": null,  // string - ứng dụng tạo
+    "producer": null,  // string - ứng dụng xuất
+    "creationDate": null,  // string ISO8601 - ngày tạo
+    "modificationDate": null  // string ISO8601 - ngày sửa cuối
+  }}
+}}
 
-⚠️ LƯU Ý CỰC KỲ QUAN TRỌNG:
-1. totalValue: PHẢI là NUMBER (52000000), KHÔNG PHẢI string
-2. Dates: ISO 8601 format ("2024-02-01T00:00:00")
-3. Parties: PHẢI có id, type, contact object, representative object
-4. Payment.schedule: PHẢI là ARRAY, không phải string
-5. Risk.factors: PHẢI là ARRAY of objects với category, severity
-6. Compliance: PHẢI có regulations, certifications arrays
-7. Null: Dùng null nếu không tìm thấy (KHÔNG dùng "", [], {})
-8. KHÔNG dùng "...", "……" - phải có nội dung cụ thể
-9. Trích dẫn: content field PHẢI là text thật từ hợp đồng
-10. Chỉ trả về JSON thuần, KHÔNG có ```json hoặc markdown
+⚠️ QUY TẮC JSON:
+- Không dấu phẩy thừa ở cuối object/array cuối cùng
+- Strings dùng ngoặc kép ""
+- Đóng đúng tất cả {{}} và []
+- totalValue, amount, percentage PHẢI là number không dấu phẩy
+- Dates PHẢI là ISO 8601 format
 
 📄 HỢP ĐỒNG CẦN PHÂN TÍCH (Tên file: {filename}):
 {extracted_text}

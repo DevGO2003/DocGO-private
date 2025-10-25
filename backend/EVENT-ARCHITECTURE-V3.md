@@ -350,16 +350,20 @@ Fields extracted:
 {
   "eventVersion": "1.0",
   "eventType": "CONTRACT_SUMMARY_GENERATED",
-  "eventId": "018c4e88-8b13-7002-8002-abcdef123456",
-  "timestamp": "2025-10-23T10:00:25.000Z",
-  "source": "automation-service",
-  "correlationId": "req-abc123",
-  "actor": "system",
+	"eventId": "6adb881f-4a35-49a4-90b9-fbca58b11845",
+	"timestamp": "2025-10-25T08:17:58.538925+00:00",
+	"source": "automation-service",
+	"correlationId": "22f27b61-8c40-47d2-a7c5-9b65b0883899",
+	"actor": {
+		"userId": "system",
+		"userRole": "system",
+		"ip": "172.20.0.1"
+	},
   
   "data": {
-    "documentId": "018c4e88-89a1-7000-8000-fedcba987654",
-    
+    "fileId": "018c4e88-89a1-7000-8000-fedcba987654",
     "contract": {
+      "summary": "Hợp đồng hợp tác kinh doanh...",
       "type": "SOFTWARE_DEVELOPMENT",
       "effectiveDate": "2025-11-01",
       "expiryDate": "2025-12-31",
