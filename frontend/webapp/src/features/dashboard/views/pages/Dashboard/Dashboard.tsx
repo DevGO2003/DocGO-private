@@ -17,15 +17,22 @@ import { useMyOrganizations } from '@features/organization';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 
 export const Dashboard = () => {
+  console.log('[Dashboard] Rendering...');
+  
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
   const [page] = useState(0);
   const [size] = useState(5);
 
-  // Fetch user's data
-  const { data: repositories, isLoading: reposLoading } = useMyRepositories({ page, size });
-  const { data: files, isLoading: filesLoading } = useFiles({ page, size });
-  const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
+  // Temporarily disable API calls for testing
+  const repositories = null;
+  const reposLoading = false;
+  const files = null;
+  const filesLoading = false;
+  const organizations = null;
+  const orgsLoading = false;
+
+  console.log('[Dashboard] User:', user);
 
   const stats = [
     {
@@ -73,7 +80,7 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="w-full p-6">
       <div className="max-w-7xl mx-auto">
         {/* Welcome Header */}
         <motion.div

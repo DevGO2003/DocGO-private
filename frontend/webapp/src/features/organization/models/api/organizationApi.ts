@@ -7,6 +7,9 @@ import {
   OrganizationMember,
   InviteMemberData,
   UpdateMemberData,
+  Invitation,
+  AcceptInvitationData,
+  AcceptInvitationResponse,
 } from '../types/organization.types';
 import { PaginationParams, PaginatedResponse } from '@features/repository';
 
@@ -24,19 +27,35 @@ const organizationApi = {
 
   getOrganizationById: async (id: string): Promise<Organization> => {
     const response = await apiClient.get<Organization>(`${BASE_PATH}/organizations/${id}`);
+    console.log('🔍 [API] getOrganizationById full response:', response.data.data);
+    console.log('🔍 [API] userRole:', response.data.data?.userRole);
+    console.log('🔍 [API] ownerUserId:', response.data.data?.ownerUserId);
+    console.log('🔍 [API] owner (legacy):', response.data.data?.owner);
     return response.data.data!;
   },
 
   getMyOrganizations: async (params?: PaginationParams): Promise<PaginatedResponse<Organization>> => {
     const response = await apiClient.get<PaginatedResponse<Organization>>(
-      `${BASE_PATH}/organizations/my`,
+      `${BASE_PATH}/users/me/organizations`,
       { params }
     );
+    console.log('📋 [API] getMyOrganizations response:', response.data.data);
+    console.log('📋 [API] Total organizations:', response.data.data?.totalElements);
+    console.log('📋 [API] Organizations list:', response.data.data?.content?.map(org => ({
+      id: org.id,
+      name: org.name,
+      userRole: org.userRole
+    })));
     return response.data.data!;
   },
 
   createOrganization: async (data: OrganizationCreateData): Promise<Organization> => {
+    console.log('📤 [API] Creating organization with data:', data);
     const response = await apiClient.post<Organization>(`${BASE_PATH}/organizations`, data);
+    console.log('✅ [API] Create organization response:', response.data.data);
+    console.log('🔍 [API] Created org name:', response.data.data?.name);
+    console.log('🔍 [API] Created org ID:', response.data.data?.id);
+    console.log('🔍 [API] Created org ownerUserId:', response.data.data?.ownerUserId);
     return response.data.data!;
   },
 
@@ -80,6 +99,28 @@ const organizationApi = {
 
   leaveOrganization: async (orgId: string): Promise<void> => {
     await apiClient.post<void>(`${BASE_PATH}/organizations/${orgId}/leave`);
+  },
+
+  // Invitations
+  getInvitationByToken: async (token: string): Promise<Invitation> => {
+    const response = await apiClient.get<Invitation>(`${BASE_PATH}/invitations/${token}`);
+    return response.data.data!;
+  },
+
+  acceptInvitation: async (data: AcceptInvitationData): Promise<AcceptInvitationResponse> => {
+    console.log('📤 [API] Accepting invitation with token:', data.token);
+    const response = await apiClient.post<AcceptInvitationResponse>(
+      `${BASE_PATH}/invitations/accept`,
+      data
+    );
+    console.log('✅ [API] Accept invitation response:', response.data.data);
+    return response.data.data!;
+  },
+
+  declineInvitation: async (data: AcceptInvitationData): Promise<void> => {
+    console.log('📤 [API] Declining invitation with token:', data.token);
+    await apiClient.post<void>(`${BASE_PATH}/invitations/decline`, data);
+    console.log('✅ [API] Declined invitation successfully');
   },
 };
 
@@ -191,6 +232,32 @@ export const useLeaveOrganization = () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
     },
+  });
+};
+
+// Invitations
+export const useGetInvitationByToken = (token: string) => {
+  return useQuery({
+    queryKey: ['invitation', token],
+    queryFn: () => organizationApi.getInvitationByToken(token),
+    enabled: !!token,
+  });
+};
+
+export const useAcceptInvitation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationApi.acceptInvitation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
+    },
+  });
+};
+
+export const useDeclineInvitation = () => {
+  return useMutation({
+    mutationFn: organizationApi.declineInvitation,
   });
 };
 

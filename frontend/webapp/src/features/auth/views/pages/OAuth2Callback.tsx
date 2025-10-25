@@ -13,10 +13,19 @@ export const OAuth2Callback = () => {
     const handleCallback = async () => {
       // Get token from URL params (backend should redirect with token)
       const token = searchParams.get('token');
+      const refreshToken = searchParams.get('refreshToken');
+      const username = searchParams.get('username');
       const error = searchParams.get('error');
 
+      console.log('[OAuth2Callback] URL params:', { 
+        hasToken: !!token, 
+        hasRefreshToken: !!refreshToken, 
+        username,
+        error 
+      });
+
       if (error) {
-        console.error('OAuth2 error:', error);
+        console.error('[OAuth2Callback] OAuth2 error:', error);
         navigate(LOGIN_PATH, { 
           state: { error: 'Google login failed. Please try again.' } 
         });
@@ -25,24 +34,33 @@ export const OAuth2Callback = () => {
 
       if (token) {
         try {
-          // Store token
+          // Store tokens immediately
           localStorage.setItem('token', token);
+          if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
+          }
+          
+          console.log('[OAuth2Callback] Fetching user info from API...');
           
           // Get user info using the token
-          const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/user-management-service/auth/me`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/user-management-service/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
           });
 
+          console.log('[OAuth2Callback] API response status:', response.status);
+
           if (response.ok) {
             const result = await response.json();
+            console.log('[OAuth2Callback] API response data:', result);
             
-            if (result.data) {
+            if (result.data && result.data.user) {
               // Store user info and token in Redux
+              console.log('[OAuth2Callback] Setting credentials in Redux:', result.data.user);
               dispatch(setCredentials({ 
                 user: result.data.user, 
-                token: result.data.accessToken || token 
+                token: result.data.token || token 
               }));
 
               // Store refresh token if available
@@ -50,23 +68,28 @@ export const OAuth2Callback = () => {
                 localStorage.setItem('refreshToken', result.data.refreshToken);
               }
 
+              console.log('[OAuth2Callback] Login successful, redirecting to home...');
               // Redirect to home
               navigate(HOME_PATH);
             } else {
-              throw new Error('Invalid response format');
+              throw new Error('Invalid response format: missing user data');
             }
           } else {
-            throw new Error('Failed to get user info');
+            const errorData = await response.text();
+            console.error('[OAuth2Callback] API error response:', errorData);
+            throw new Error(`Failed to get user info: ${response.status}`);
           }
         } catch (error) {
-          console.error('Failed to process OAuth2 callback:', error);
+          console.error('[OAuth2Callback] Failed to process OAuth2 callback:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
           navigate(LOGIN_PATH, { 
             state: { error: 'Authentication failed. Please try again.' } 
           });
         }
       } else {
         // No token found, redirect to login
+        console.warn('[OAuth2Callback] No token found in URL params');
         navigate(LOGIN_PATH);
       }
     };

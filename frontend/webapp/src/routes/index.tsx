@@ -14,11 +14,13 @@ import {
   ORDER_DETAIL_PATH,
 } from '@constants';
 
-// Lazy load pages
+// Import OAuth2Callback directly (not lazy) for debugging
+import { OAuth2Callback } from '@features/auth/views/pages';
+
+// Lazy load other pages
 const Login = lazy(() => import('@features/auth/views/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@features/auth/views/pages/Register').then(m => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('@features/auth/views/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
-const OAuth2Callback = lazy(() => import('@features/auth/views/pages').then(m => ({ default: m.OAuth2Callback })));
 const Dashboard = lazy(() => import('@features/dashboard').then(m => ({ default: m.Dashboard })));
 const ProductList = lazy(() => import('@features/products/views/pages/ProductList').then(m => ({ default: m.ProductList })));
 const ProductDetail = lazy(() => import('@features/products/views/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
@@ -45,6 +47,7 @@ export const AppRouter = () => {
           </Route>
 
           {/* OAuth2 callback - no auth required */}
+          <Route path="/auth/oauth2/callback" element={<OAuth2Callback />} />
           <Route path="/oauth2/callback" element={<OAuth2Callback />} />
 
           {/* Private routes */}

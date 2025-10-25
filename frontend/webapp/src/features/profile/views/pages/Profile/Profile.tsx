@@ -150,7 +150,7 @@ export const Profile = () => {
                         Cancel
                       </Button>
                       <Button
-                        variant="primary"
+                        variant="outline"
                         onClick={handleSave}
                         isLoading={updateProfileMutation.isPending}
                         className="flex items-center gap-2"

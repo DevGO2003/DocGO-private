@@ -31,7 +31,9 @@ export const useAuthFormController = <T extends Record<string, any>>(initialValu
     if (name === 'email') {
       error = validateEmail(value) || '';
     } else if (name === 'password') {
-      error = validatePassword(value) || '';
+      // Pass username to allow bypass for admin/123456
+      const username = (values as any).username || '';
+      error = validatePassword(value, username) || '';
     } else if (name === 'confirmPassword' && 'password' in values) {
       error = value !== values.password ? 'Passwords do not match' : '';
     } else if (!value) {

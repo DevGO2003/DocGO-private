@@ -72,11 +72,24 @@ const repositoryApi = {
   uploadFile: async ({ file, repositoryId, tags, metadata }: FileUploadData): Promise<FileItem> => {
     const formData = new FormData();
     formData.append('file', file);
-    if (repositoryId) formData.append('repositoryId', repositoryId);
-    if (tags) formData.append('tags', JSON.stringify(tags));
-    if (metadata) formData.append('metadata', JSON.stringify(metadata));
+    
+    // Prepare metadata object
+    const metadataObj: any = {};
+    if (repositoryId) metadataObj.repositoryId = repositoryId;
+    if (tags) metadataObj.tags = tags;
+    if (metadata) Object.assign(metadataObj, metadata);
+    
+    // Append metadata as JSON string
+    if (Object.keys(metadataObj).length > 0) {
+      formData.append('metadata', JSON.stringify(metadataObj));
+    }
 
-    const response = await apiClient.post<FileItem>(`${BASE_PATH}/files/upload`, formData);
+    // Use automation-service endpoint instead of repository-management-service
+    const response = await apiClient.post<FileItem>('/api/v1/automation-service/files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data.data!;
   },
 

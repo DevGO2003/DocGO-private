@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Star,
+  Building2,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ const navigationGroups = [
     title: 'Management',
     items: [
       { name: 'Documents', href: '/documents', icon: FileText },
+      { name: 'Organizations', href: '/organizations', icon: Building2 },
       { name: 'Users', href: '/users', icon: Users },
     ]
   },

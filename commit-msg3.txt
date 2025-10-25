@@ -1,7 +1,0 @@
-fix: use upsert to fix race condition in Kafka event processing
-
-- Change updateFirst() to upsert() in FileUpdateService
-- Add setOnInsert() for default values when creating entity
-- Fixes race condition where FILE_METADATA_RECORDED overwrites contract/content
-- Now any event can create entity if not exists
-- Contract and content data now persists correctly

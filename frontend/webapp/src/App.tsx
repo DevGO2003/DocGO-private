@@ -5,10 +5,10 @@ import { store } from '@store';
 import { ErrorBoundary, ProtectedRoute } from '@shared/components';
 import { AuthLayout, DashboardLayout } from '@shared/layouts';
 import { NotFound, Unauthorized, Settings } from '@pages';
-import { Login, Register } from '@features/auth/views/pages';
+import { Login, Register, OAuth2Callback } from '@features/auth/views/pages';
 import { Dashboard } from '@features/dashboard/views/pages';
 import { RepositoryList, RepositoryDetail } from '@features/repository/views/pages';
-import { OrganizationList, OrganizationDetail } from '@features/organization/views/pages';
+import { OrganizationList, OrganizationDetail, OrganizationWorkspace, OrganizationMembers, AcceptInvitation } from '@features/organization/views/pages';
 import { Profile } from '@features/profile/views/pages';
 import {
   LOGIN_PATH,
@@ -18,6 +18,9 @@ import {
   REPOSITORY_DETAIL_PATH,
   ORGANIZATIONS_PATH,
   ORGANIZATION_DETAIL_PATH,
+  ORGANIZATION_WORKSPACE_PATH,
+  ORGANIZATION_MEMBERS_PATH,
+  ACCEPT_INVITATION_PATH,
   PROFILE_PATH,
   SETTINGS_PATH,
   NOT_FOUND_PATH,
@@ -41,11 +44,17 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>
+              {/* OAuth2 Callback - No Layout Required */}
+              <Route path="/auth/oauth2/callback" element={<OAuth2Callback />} />
+              
               {/* Public Routes */}
               <Route element={<AuthLayout />}>
                 <Route path={LOGIN_PATH} element={<Login />} />
                 <Route path={REGISTER_PATH} element={<Register />} />
               </Route>
+
+              {/* Public Invitation Route (no layout) */}
+              <Route path={ACCEPT_INVITATION_PATH} element={<AcceptInvitation />} />
 
               {/* Protected Routes */}
               <Route
@@ -64,6 +73,8 @@ function App() {
                 {/* Organization Routes */}
                 <Route path={ORGANIZATIONS_PATH} element={<OrganizationList />} />
                 <Route path={ORGANIZATION_DETAIL_PATH} element={<OrganizationDetail />} />
+                <Route path={ORGANIZATION_WORKSPACE_PATH} element={<OrganizationWorkspace />} />
+                <Route path={ORGANIZATION_MEMBERS_PATH} element={<OrganizationMembers />} />
                 
                 {/* User Routes */}
                 <Route path={PROFILE_PATH} element={<Profile />} />

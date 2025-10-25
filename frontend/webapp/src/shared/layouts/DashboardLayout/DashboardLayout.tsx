@@ -1,18 +1,14 @@
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import { MainLayout } from '../MainLayout';
 
-interface DashboardLayoutProps {
-  children: ReactNode;
-}
-
-export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+export const DashboardLayout = () => {
   return (
     <MainLayout
       showSidebar={true}
       showHeader={true}
       sidebarCollapsed={false}
     >
-      {children}
+      <Outlet />
     </MainLayout>
   );
 };

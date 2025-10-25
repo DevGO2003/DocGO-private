@@ -69,7 +69,7 @@ export const NotFound = () => {
                 Go Back
               </Button>
               <Button
-                variant="primary"
+                variant="outline"
                 onClick={() => navigate(HOME_PATH)}
                 className="flex items-center gap-2"
                 animated

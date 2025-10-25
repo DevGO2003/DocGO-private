@@ -47,12 +47,78 @@ public class OrganizationService {
         return organizations.map(OrganizationResponse::fromEntity);
     }
 
+    public Page<OrganizationResponse> getMyOrganizations(String username, int pageNumber, int pageSize) {
+        log.info("🔍 Getting organizations for user: {}, page: {}, size: {}", username, pageNumber, pageSize);
+
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user: " + username));
+
+        // Tạo pageable
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "joinedAt"));
+        
+        // Lấy tất cả organizations mà user là member
+        Page<OrganizationMembership> memberships = membershipRepository.findByUserId(user.getId(), pageable);
+        
+        // Convert sang OrganizationResponse
+        return memberships.map(membership -> {
+            // Lấy organization từ repository
+            Organization org = organizationRepository.findById(membership.getOrganizationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy organization: " + membership.getOrganizationId()));
+            
+            OrganizationResponse response = OrganizationResponse.fromEntity(org);
+            
+            // Thêm thông tin role của user trong org này
+            response.setUserRole(membership.getSimpleRole());
+            
+            // Thêm permissions
+            if (membership.getPermissions() != null) {
+                response.setUserPermissions(membership.getPermissions());
+            }
+            
+            return response;
+        });
+    }
+
     public Optional<OrganizationResponse> getOrganizationById(String id) {
         log.info("Getting organization by id: {}", id);
         
         return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(OrganizationResponse::fromEntity);
+    }
+
+    public Optional<OrganizationResponse> getOrganizationByIdWithUserRole(String id, String currentUserId) {
+        log.info("Getting organization by id: {} for user: {}", id, currentUserId);
+        
+        return organizationRepository.findById(id)
+                .filter(org -> org.getDeletedAt() == null)
+                .map(org -> {
+                    OrganizationResponse response = OrganizationResponse.fromEntity(org);
+                    
+                    log.info("Checking role for user {} in org {}", currentUserId, id);
+                    log.info("Organization ownerUserId: {}", org.getOwnerUserId());
+                    log.info("Are they equal? {}", org.getOwnerUserId().equals(currentUserId));
+                    
+                    // Determine user's role in this organization
+                    if (org.getOwnerUserId() != null && org.getOwnerUserId().equals(currentUserId)) {
+                        response.setUserRole("OWNER");
+                        log.info("✅ User is OWNER");
+                    } else if (org.getAdminUserIds() != null && org.getAdminUserIds().contains(currentUserId)) {
+                        response.setUserRole("MANAGER");
+                        log.info("✅ User is MANAGER");
+                        // TODO: Get user's specific permissions from membership
+                    } else if (org.getUserIds() != null && org.getUserIds().contains(currentUserId)) {
+                        response.setUserRole("MEMBER");
+                        log.info("✅ User is MEMBER");
+                    } else {
+                        response.setUserRole("MEMBER"); // Default
+                        log.info("⚠️ User not found in org, defaulting to MEMBER");
+                    }
+                    
+                    log.info("Final role for user {} in organization {}: {}", currentUserId, id, response.getUserRole());
+                    return response;
+                });
     }
 
     public Optional<OrganizationResponse> getOrganizationByCode(String code) {
@@ -65,6 +131,7 @@ public class OrganizationService {
 
     public OrganizationResponse createOrganization(OrganizationCreateRequest request) {
         log.info("Creating organization with name: {}", request.getName());
+        log.info("Owner User ID from request: {}", request.getOwnerUserId());
 
         // Kiểm tra trùng lặp
         if (request.getCode() != null && !request.getCode().trim().isEmpty()) {
@@ -97,6 +164,7 @@ public class OrganizationService {
                 .build();
 
         Organization savedOrganization = organizationRepository.save(organization);
+        log.info("Saved organization with ID: {}, Owner: {}", savedOrganization.getId(), savedOrganization.getOwnerUserId());
         
         // Tạo membership cho owner
         OrganizationMembership ownerMembership = OrganizationMembership.builder()
@@ -258,12 +326,20 @@ public class OrganizationService {
 
         // Kiểm tra user đã là member chưa
         Optional<User> user = userRepository.findByEmail(request.getEmail());
+        log.info("Checking if email {} exists in system: {}", request.getEmail(), user.isPresent());
+        
         if (user.isPresent()) {
+            log.info("User found with ID: {}", user.get().getId());
             Optional<OrganizationMembership> existingMembership = membershipRepository
                     .findByOrganizationIdAndUserId(orgId, user.get().getId());
+            
             if (existingMembership.isPresent()) {
+                log.error("❌ User {} is already a member of organization {}", user.get().getEmail(), orgId);
                 throw new InvalidOrganizationOperationException("Người dùng đã là thành viên của tổ chức");
             }
+            log.info("✅ User exists but not a member yet. Proceeding with invitation.");
+        } else {
+            log.info("✅ Email not found in system. Will create invitation for new user.");
         }
 
         // Tạo invitation

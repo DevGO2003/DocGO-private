@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, Building2, Users, Crown, Calendar } from 'lucide-react';
+import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -11,13 +11,14 @@ import {
   Input,
   LoadingSpinner,
 } from '@shared/components';
-import { useMyOrganizations } from '@features/organization';
-import { ORGANIZATION_DETAIL_PATH } from '@constants';
+import { useMyOrganizations, CreateOrganizationDialog } from '@features/organization';
+import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
 
 export const OrganizationList = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const size = 12;
 
   const { data, isLoading, error } = useMyOrganizations({
@@ -26,18 +27,57 @@ export const OrganizationList = () => {
     searchTerm: searchTerm || undefined,
   });
 
+  // Debug: Log response structure
+  console.log('🔍 Organizations API Response:', { data, isLoading, error });
+
   const handleCreateOrganization = () => {
-    console.log('Create organization');
-    // TODO: Open create modal
+    setIsCreateDialogOpen(true);
   };
 
   const handleOrganizationClick = (orgId: string) => {
-    navigate(ORGANIZATION_DETAIL_PATH.replace(':id', orgId));
+    navigate(ORGANIZATION_WORKSPACE_PATH.replace(':id', orgId));
+  };
+
+  const getRoleBadge = (role?: string) => {
+    if (!role) return null;
+    
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return (
+          <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+            <Crown className="w-3 h-3" />
+            Owner
+          </div>
+        );
+      case 'MANAGER':
+        return (
+          <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+            <UserCog className="w-3 h-3" />
+            Manager
+          </div>
+        );
+      case 'MEMBER':
+        return (
+          <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+            <Shield className="w-3 h-3" />
+            Member
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <>
+      {/* Create Organization Dialog */}
+      <CreateOrganizationDialog
+        open={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+      />
+
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -54,7 +94,7 @@ export const OrganizationList = () => {
               </p>
             </div>
             <Button
-              variant="primary"
+              variant="outline"
               onClick={handleCreateOrganization}
               className="flex items-center gap-2"
               animated
@@ -91,8 +131,20 @@ export const OrganizationList = () => {
           </Card>
         )}
 
+        {/* Data structure error */}
+        {!isLoading && !error && data && !data.content && (
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="p-6">
+              <p className="text-yellow-700">
+                Invalid response format. Please contact support.
+              </p>
+              <pre className="mt-2 text-xs">{JSON.stringify(data, null, 2)}</pre>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Empty State */}
-        {!isLoading && !error && data && data.content.length === 0 && (
+        {!isLoading && !error && data && data.content && data.content.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -108,7 +160,7 @@ export const OrganizationList = () => {
                   Create an organization to start collaborating with your team
                 </p>
                 <Button
-                  variant="primary"
+                  variant="outline"
                   onClick={handleCreateOrganization}
                   className="inline-flex items-center gap-2"
                   animated
@@ -122,7 +174,7 @@ export const OrganizationList = () => {
         )}
 
         {/* Organizations Grid */}
-        {!isLoading && !error && data && data.content.length > 0 && (
+        {!isLoading && !error && data && data.content && data.content.length > 0 && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -142,11 +194,14 @@ export const OrganizationList = () => {
                 >
                   <Card animated className="h-full">
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <CardTitle className="text-lg mb-2 line-clamp-1">
-                            {org.name}
-                          </CardTitle>
+                          <div className="flex items-center gap-2 mb-2">
+                            <CardTitle className="text-lg line-clamp-1">
+                              {org.name}
+                            </CardTitle>
+                            {getRoleBadge(org.userRole)}
+                          </div>
                           <p className="text-sm text-gray-600 line-clamp-2">
                             {org.description || 'No description'}
                           </p>
@@ -234,7 +289,8 @@ export const OrganizationList = () => {
             )}
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

@@ -16,11 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -115,6 +119,7 @@ public class OrganizationController {
             .build());
     }
 
+
     @GetMapping("/{id}")
     @Operation(
         summary = "Organization Management - Lấy chi tiết tổ chức",
@@ -162,12 +167,21 @@ public class OrganizationController {
     )
     public ResponseEntity<RestResponse<OrganizationResponse>> getOrganization(
         @Parameter(description = "ID của tổ chức") 
-        @PathVariable String id) {
+        @PathVariable String id,
+        @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
         
-        log.info("[OrganizationController] Getting organization with id: {}", id);
+        log.info("[OrganizationController] Getting organization with id: {} for user: {}", id, userDetails.getUsername());
         
-        OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+        // Get current user
+        User currentUser = userService.getUserByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Get organization with user's role
+        OrganizationResponse organization = organizationService.getOrganizationByIdWithUserRole(id, currentUser.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+        
+        log.info("[OrganizationController] User {} has role {} in organization {}", 
+                 currentUser.getUsername(), organization.getUserRole(), id);
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)

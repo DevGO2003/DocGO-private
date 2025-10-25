@@ -18,6 +18,8 @@ export const MainLayout = ({
   sidebarCollapsed = false,
   onSidebarToggle,
 }: MainLayoutProps) => {
+  console.log('[MainLayout] Rendering, showHeader:', showHeader);
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed);
   const COLLAPSE_STORAGE_KEY = 'sidebar_collapsed';
@@ -44,7 +46,7 @@ export const MainLayout = ({
   };
 
   return (
-    <div className={`h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 flex ${showSidebar ? (isCollapsed ? 'lg:pl-16' : 'lg:pl-64') : ''}`}>
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 flex">
       {/* Sidebar */}
       {showSidebar && (
         <>
@@ -79,7 +81,7 @@ export const MainLayout = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 ${showSidebar ? (isCollapsed ? 'ml-16' : 'ml-64') : ''}`}>
         {/* Header */}
         {showHeader && (
           <Header
@@ -95,11 +97,9 @@ export const MainLayout = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="flex-1 overflow-auto"
+          className="flex-1 overflow-y-auto"
         >
-          <div className="mx-auto px-4 py-6">
-            {children}
-          </div>
+          {children}
         </motion.main>
       </div>
 

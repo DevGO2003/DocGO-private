@@ -15,6 +15,7 @@ public interface OrganizationMembershipRepository extends MongoRepository<Organi
     List<OrganizationMembership> findByOrganizationId(String organizationId);
     Page<OrganizationMembership> findByOrganizationId(String organizationId, Pageable pageable);
     List<OrganizationMembership> findByUserId(String userId);
+    Page<OrganizationMembership> findByUserId(String userId, Pageable pageable);
 }
 
 

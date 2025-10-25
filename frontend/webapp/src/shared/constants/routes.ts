@@ -17,6 +17,9 @@ export const REPOSITORY_CREATE_PATH = '/repositories/create';
 export const ORGANIZATIONS_PATH = '/organizations';
 export const ORGANIZATION_DETAIL_PATH = '/organizations/:id';
 export const ORGANIZATION_CREATE_PATH = '/organizations/create';
+export const ORGANIZATION_WORKSPACE_PATH = '/organizations/:id/workspace';
+export const ORGANIZATION_MEMBERS_PATH = '/organizations/:id/members';
+export const ACCEPT_INVITATION_PATH = '/invitations/accept';
 
 // User Routes
 export const PROFILE_PATH = '/profile';

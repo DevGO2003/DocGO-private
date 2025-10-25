@@ -71,7 +71,7 @@ export const Login = () => {
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="outline"
                 isLoading={isLoading}
                 disabled={isLoading || isGoogleLoading}
                 className="w-full"

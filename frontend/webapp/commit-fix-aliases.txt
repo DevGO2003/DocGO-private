@@ -1,0 +1,8 @@
+fix: update vite config and tsconfig with correct path aliases
+
+- Add pages alias to vite config
+- Fix constants path to shared constants
+- Add pages store routes to tsconfig paths
+- Fix all path aliases for proper module resolution
+
+This fixes module resolution errors when running dev server

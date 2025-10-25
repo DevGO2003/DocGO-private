@@ -4,19 +4,26 @@ import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
+import com.devgo2003.docgo.backend.user_service.dto.OrganizationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +35,7 @@ import java.util.Set;
 public class UserController {
     
     private final UserService userService;
+    private final com.devgo2003.docgo.backend.user_service.service.OrganizationService organizationService;
     
     @GetMapping
     @Operation(
@@ -1119,64 +1127,59 @@ public class UserController {
     
     @GetMapping("/me/organizations")
     @Operation(
-        summary = "Lấy danh sách tổ chức của user hiện tại",
+        summary = "Lấy danh sách organizations của user hiện tại",
         description = """
+        🔹 Đầu vào
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (default: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số lượng bản ghi trên mỗi trang (default: 10)
+        
         🔹 Đầu ra
         
         📝 data
-        Loại: List<UserOrganizationResponse>
-        Mô tả: Danh sách tổ chức với vai trò và quyền hạn của user
+        Loại: Page<OrganizationResponse>
+        Mô tả: Danh sách tổ chức mà user hiện tại là thành viên với role và permissions
         
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
+        🔍 Lưu ý
         
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
+        - Endpoint này yêu cầu authentication
+        - Trả về tất cả organizations mà user là member (OWNER/MANAGER/MEMBER)
+        - Kết quả bao gồm cả userRole và userPermissions cho mỗi organization
+        - Kết quả được phân trang theo page và size
         """
     )
-    public ResponseEntity<RestResponse<List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse>>> getMyOrganizations() {
-        
-        log.info("Getting organizations for current user");
-        
-        // TODO: Get userId from security context
-        String userId = "current-user-id"; 
-        
-        List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse> organizations = 
-            userService.getMyOrganizations(userId);
-        
-        return ResponseEntity.ok(RestResponse.<List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationResponse>>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách tổ chức thành công")
-                .data(organizations)
-                .build());
+    public ResponseEntity<RestResponse<Page<OrganizationResponse>>> getMyOrganizations(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal UserDetails currentUser
+    ) {
+        log.info("🔍 [GET /api/v1/user-management-service/users/me/organizations] - User: {}, Page: {}, Size: {}",
+            currentUser.getUsername(), page, size);
+
+        Page<OrganizationResponse> organizations = organizationService.getMyOrganizations(
+            currentUser.getUsername(),
+            page,
+            size
+        );
+
+        log.info("✅ Found {} organizations for user: {}", organizations.getTotalElements(), currentUser.getUsername());
+
+        return ResponseEntity.ok(RestResponse.<Page<OrganizationResponse>>builder()
+            .apiVersion("v1")
+            .data(organizations)
+            .statusCode(HttpStatus.OK.value())
+            .shortMessage("Lấy danh sách organizations thành công")
+            .build());
     }
-    
-    @PostMapping("/me/switch-organization")
+
+    @PatchMapping("/me/switch-organization")
     @Operation(
-        summary = "Chuyển đổi tổ chức đang làm việc",
+        summary = "Chuyển đổi organization hiện tại", 
         description = """
         🔹 Đầu vào
         
@@ -1224,10 +1227,12 @@ public class UserController {
         
         log.info("Switching organization to: {}", request.getOrganizationId());
         
-        // TODO: Get userId from security context
-        String userId = "current-user-id";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        User user = userService.switchOrganization(userId, request.getOrganizationId());
+        User user = userService.switchOrganization(currentUser.getId(), request.getOrganizationId());
         
         return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)

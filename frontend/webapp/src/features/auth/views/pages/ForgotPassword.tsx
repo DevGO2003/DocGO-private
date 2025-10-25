@@ -46,7 +46,7 @@ export const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="outline"
                 className="w-full"
                 animated
               >

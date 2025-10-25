@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -20,13 +20,15 @@ import {
   Button,
   LoadingSpinner,
 } from '@shared/components';
-import { useRepository, useFiles, useDeleteFile } from '@features/repository';
+import { useRepository, useFiles, useDeleteFile, useUploadFile } from '@features/repository';
 import { REPOSITORIES_PATH } from '@constants';
 
 export const RepositoryDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [page, setPage] = useState(0);
   const size = 20;
 
@@ -37,6 +39,7 @@ export const RepositoryDetail = () => {
     // Add repositoryId filter if your API supports it
   });
   const deleteFileMutation = useDeleteFile();
+  const uploadFileMutation = useUploadFile();
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -78,8 +81,41 @@ export const RepositoryDetail = () => {
   };
 
   const handleUpload = () => {
-    console.log('Open upload modal');
-    // TODO: Implement upload modal
+    // Trigger file input click
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      console.log('[RepositoryDetail] Uploading file:', file.name);
+      
+      await uploadFileMutation.mutateAsync({
+        file,
+        repositoryId: id,
+        tags: [],
+        metadata: {
+          uploadedFrom: 'repository-detail',
+          repositoryName: repository?.name || 'Unknown',
+        },
+      });
+
+      console.log('[RepositoryDetail] File uploaded successfully');
+      alert('File uploaded successfully!');
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('[RepositoryDetail] Upload failed:', error);
+      alert('Failed to upload file. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (repoLoading) {
@@ -93,7 +129,7 @@ export const RepositoryDetail = () => {
           <CardContent className="p-8 text-center">
             <p className="text-gray-700">Repository not found</p>
             <Button
-              variant="primary"
+              variant="outline"
               onClick={() => navigate(REPOSITORIES_PATH)}
               className="mt-4"
               animated
@@ -145,14 +181,23 @@ export const RepositoryDetail = () => {
                 Settings
               </Button>
               <Button
-                variant="primary"
+                variant="outline"
                 onClick={handleUpload}
+                disabled={uploading}
                 className="flex items-center gap-2"
                 animated
               >
                 <Upload className="w-4 h-4" />
-                Upload Files
+                {uploading ? 'Uploading...' : 'Upload Files'}
               </Button>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+              />
             </div>
           </div>
         </motion.div>
@@ -327,7 +372,7 @@ export const RepositoryDetail = () => {
                   <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">No files in this repository yet</p>
                   <Button
-                    variant="primary"
+                    variant="outline"
                     onClick={handleUpload}
                     className="inline-flex items-center gap-2"
                     animated

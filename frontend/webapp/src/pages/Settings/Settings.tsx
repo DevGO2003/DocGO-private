@@ -217,7 +217,7 @@ export const Settings = () => {
 
                     <div className="flex justify-end">
                       <Button
-                        variant="primary"
+                        variant="outline"
                         onClick={handleProfileUpdate}
                         isLoading={updateProfileMutation.isPending}
                         className="flex items-center gap-2"
@@ -326,7 +326,7 @@ export const Settings = () => {
 
                     <div className="flex justify-end pt-4 border-t border-gray-200">
                       <Button
-                        variant="primary"
+                        variant="outline"
                         onClick={handlePasswordChange}
                         isLoading={changePasswordMutation.isPending}
                         className="flex items-center gap-2"

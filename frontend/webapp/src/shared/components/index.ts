@@ -22,3 +22,4 @@ export * from './Layout';
 export * from './ProtectedRoute';
 export * from './ErrorBoundary';
 export * from './LoadingSpinner';
+export * from './Dialog';

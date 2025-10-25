@@ -5,7 +5,7 @@ FROM maven:3.9-eclipse-temurin-17
 WORKDIR /app
 
 # Copy Maven settings với mirrors tối ưu cho Việt Nam
-COPY ../maven-settings.xml /root/.m2/settings.xml
+# COPY ../maven-settings.xml /root/.m2/settings.xml
 
 # Copy pom.xml first for better layer caching
 COPY pom.xml .

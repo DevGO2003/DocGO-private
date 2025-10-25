@@ -1,18 +1,14 @@
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import { MainLayout } from '../MainLayout';
 
-interface AuthLayoutProps {
-  children: ReactNode;
-}
-
-export const AuthLayout = ({ children }: AuthLayoutProps) => {
+export const AuthLayout = () => {
   return (
     <MainLayout
       showSidebar={false}
       showHeader={false}
       sidebarCollapsed={false}
     >
-      {children}
+      <Outlet />
     </MainLayout>
   );
 };

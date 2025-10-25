@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button, Input } from '@shared/components';
+import { useAppSelector, useAppDispatch } from '@store/hooks';
+import { logout } from '@features/auth/models/state/authSlice';
+import { LOGIN_PATH } from '@constants';
 import {
   Menu,
   Search,
@@ -24,19 +27,36 @@ export const Header = ({
   showNotifications = true,
   showUserMenu = true,
 }: HeaderProps) => {
+  console.log('[Header] Rendering Header component');
+  
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user: authUser } = useAppSelector((state) => state.auth);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
-  // Mock user data
+  // Get user data from Redux store
   const user = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: null,
+    name: authUser?.firstName && authUser?.lastName 
+      ? `${authUser.firstName} ${authUser.lastName}`
+      : authUser?.username || 'User',
+    email: authUser?.email || '',
+    avatar: authUser?.avatar || null,
   };
+
+  console.log('[Header] User from Redux:', authUser);
+  console.log('[Header] Formatted user:', user);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchTerm);
+  };
+
+  const handleLogout = () => {
+    console.log('[Header] Logging out...');
+    dispatch(logout());
+    navigate(LOGIN_PATH);
   };
 
   return (
@@ -145,7 +165,7 @@ export const Header = ({
                     </Link>
                     <hr className="my-1" />
                     <button
-                      onClick={() => console.log('Logout')}
+                      onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
                       <LogOut className="h-4 w-4" />

@@ -97,7 +97,7 @@ export const Register = () => {
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="outline"
                 isLoading={isLoading}
                 disabled={isLoading}
                 className="w-full"

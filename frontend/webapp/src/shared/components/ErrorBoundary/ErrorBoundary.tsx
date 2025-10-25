@@ -67,7 +67,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
                 <div className="flex gap-4">
                   <Button 
-                    variant="primary" 
+                    variant="outline" 
                     onClick={this.handleReset}
                     animated
                   >

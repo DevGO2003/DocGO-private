@@ -62,7 +62,7 @@ export const RepositoryList = () => {
               </p>
             </div>
             <Button
-              variant="primary"
+              variant="outline"
               onClick={handleCreateRepository}
               className="flex items-center gap-2"
               animated
@@ -116,7 +116,7 @@ export const RepositoryList = () => {
                   Get started by creating your first repository
                 </p>
                 <Button
-                  variant="primary"
+                  variant="outline"
                   onClick={handleCreateRepository}
                   className="inline-flex items-center gap-2"
                   animated

@@ -94,7 +94,7 @@ export const OrganizationDetail = () => {
           <CardContent className="p-8 text-center">
             <p className="text-gray-700">Organization not found</p>
             <Button
-              variant="primary"
+              variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
               className="mt-4"
               animated
@@ -310,7 +310,7 @@ export const OrganizationDetail = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Members</CardTitle>
-                  <Button variant="primary" className="flex items-center gap-2" animated>
+                  <Button variant="outline" className="flex items-center gap-2" animated>
                     <Users className="w-4 h-4" />
                     Invite Members
                   </Button>
@@ -378,7 +378,7 @@ export const OrganizationDetail = () => {
                   <div className="text-center py-12">
                     <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-4">No members yet</p>
-                    <Button variant="primary" className="inline-flex items-center gap-2" animated>
+                    <Button variant="outline" className="inline-flex items-center gap-2" animated>
                       <Users className="w-4 h-4" />
                       Invite Members
                     </Button>
