@@ -189,8 +189,8 @@ public class FileEventServiceImpl implements IFileEventService {
                 throw new IllegalArgumentException("Event data is null");
             }
             
-            // Map contract analysis data
-            Map<String, Object> contractAnalysis = (Map<String, Object>) data.get("contractAnalysis");
+            // Map contract analysis data (data is the contract metadata directly, not wrapped in contractAnalysis)
+            Map<String, Object> contractAnalysis = data;
             if (contractAnalysis != null) {
                 Map<String, Object> entityContract = entity.getContract();
                 if (entityContract == null) {
@@ -200,7 +200,13 @@ public class FileEventServiceImpl implements IFileEventService {
                 
                 // Map basic contract info
                 entityContract.put("type", asString(contractAnalysis.get("type")));
+                entityContract.put("effectiveDate", asString(contractAnalysis.get("effectiveDate")));
+                entityContract.put("expiryDate", asString(contractAnalysis.get("expiryDate")));
+                entityContract.put("totalValue", contractAnalysis.get("totalValue"));
                 entityContract.put("currency", asString(contractAnalysis.get("currency")));
+                entityContract.put("summary", asString(contractAnalysis.get("summary")));
+                entityContract.put("project", asString(contractAnalysis.get("project")));
+                entityContract.put("department", asString(contractAnalysis.get("department")));
                 entityContract.put("priority", asString(contractAnalysis.get("priority")));
                 entityContract.put("confidentiality", asString(contractAnalysis.get("confidentiality")));
                 
@@ -243,6 +249,12 @@ public class FileEventServiceImpl implements IFileEventService {
                     complianceSection.put("status", asString(compliance.get("status")));
                     complianceSection.put("requirements", compliance.get("requirements"));
                     complianceSection.put("deadlines", compliance.get("deadlines"));
+                }
+                
+                // Map clauses
+                Map<String, Object> clauses = (Map<String, Object>) contractAnalysis.get("clauses");
+                if (clauses != null) {
+                    entityContract.put("clauses", clauses);
                 }
                 
                 // Map reminders
