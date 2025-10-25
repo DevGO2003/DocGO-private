@@ -55,13 +55,13 @@ public class DocgoFileEventsConsumer {
             // Route to appropriate handler based on event type
             switch (eventType) {
                 case "FILE_UPLOAD_COMPLETED":
-                    handleFileUploadCompleted(documentId, data, correlationId, eventId);
+                    handleFileUploadCompleted(documentId, eventMap, correlationId, eventId);
                     break;
                 case "FILE_CONTENT_EXTRACTED":
-                    handleFileContentExtracted(documentId, data, correlationId, eventId);
+                    handleFileContentExtracted(documentId, eventMap, correlationId, eventId);
                     break;
                 case "CONTRACT_SUMMARY_GENERATED":
-                    handleContractSummaryGenerated(documentId, data, correlationId, eventId);
+                    handleContractSummaryGenerated(documentId, eventMap, correlationId, eventId);
                     break;
                 default:
                     log.warn("⚠️ Unknown event type: {}", eventType);
@@ -72,11 +72,11 @@ public class DocgoFileEventsConsumer {
         }
     }
     
-    private void handleFileUploadCompleted(String fileId, Map<String, Object> eventData, String correlationId, String eventId) {
+    private void handleFileUploadCompleted(String fileId, Map<String, Object> eventMap, String correlationId, String eventId) {
         try {
             log.info("📨 Received FILE_UPLOAD_COMPLETED: eventId={}, fileId={}, correlationId={}", eventId, fileId, correlationId);
             
-            fileEventService.processFileMetadataRecorded(fileId, eventData, correlationId, "system");
+            fileEventService.processFileMetadataRecorded(fileId, eventMap, correlationId, "system");
             
             log.info("✅ Processed file upload completed: fileId={}", fileId);
         } catch (Exception e) {
@@ -84,11 +84,11 @@ public class DocgoFileEventsConsumer {
         }
     }
     
-    private void handleFileContentExtracted(String fileId, Map<String, Object> eventData, String correlationId, String eventId) {
+    private void handleFileContentExtracted(String fileId, Map<String, Object> eventMap, String correlationId, String eventId) {
         try {
             log.info("📨 Received FILE_CONTENT_EXTRACTED: eventId={}, fileId={}, correlationId={}", eventId, fileId, correlationId);
             
-            fileEventService.processFilePlaintextExtracted(fileId, eventData, correlationId, "system");
+            fileEventService.processFilePlaintextExtracted(fileId, eventMap, correlationId, "system");
             
             log.info("✅ Processed file content extracted: fileId={}", fileId);
         } catch (Exception e) {

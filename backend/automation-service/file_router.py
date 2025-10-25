@@ -1135,7 +1135,7 @@ async def upload_document(
                             "priority": summary_result.get("priority"),  # HIGH, MEDIUM, LOW - No fallback, use null
                             "confidentiality": summary_result.get("confidentiality"),  # CONFIDENTIAL, INTERNAL, PUBLIC, RESTRICTED - No fallback, use null
                             
-                            # Parties - ensure full structure with id, type, contact, representative
+                            # Parties - ensure full structure with id, type, contact, representative (default to empty list if not present)
                             "parties": [
                                 {
                                     "id": party.get("id") if isinstance(party, dict) else None,
@@ -1155,7 +1155,7 @@ async def upload_document(
                                     "taxCode": party.get("taxCode") if isinstance(party, dict) else None
                                 }
                                 for party in summary_result.get("parties", [])
-                            ] if summary_result.get("parties") else None,
+                            ] if summary_result.get("parties") else [],
                             
                             # Payment - full structure with schedule
                             "payment": {
@@ -1174,7 +1174,7 @@ async def upload_document(
                                 "termination": summary_result.get("clauses", {}).get("termination")
                             },
                             
-                            # Reminders - full structure
+                            # Reminders - full structure (default to empty list if not present)
                             "reminders": [
                                 {
                                     "date": reminder.get("date") if isinstance(reminder, dict) else None,
@@ -1186,7 +1186,7 @@ async def upload_document(
                                     "assignedTo": reminder.get("assignedTo") if isinstance(reminder, dict) else None
                                 }
                                 for reminder in summary_result.get("reminders", [])
-                            ] if summary_result.get("reminders") else None,
+                            ] if summary_result.get("reminders") else [],
                             
                             # Risk - full structure
                             "risk": {
@@ -1258,17 +1258,7 @@ async def upload_document(
                             "source": "automation-service",
                             "correlationId": correlation_id,
                             "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
-                            "data": {
-                                "fileId": file_id,
-                                # Phase 1 additions
-                                "summary": summary_result.get("summary") if summary_result else None,
-                                "keyTerms": summary_result.get("keyTerms") if isinstance(summary_result, dict) else None,
-                                "sections": summary_result.get("sections") if isinstance(summary_result, dict) else None,
-                                "language": classification_result.get("language"),
-                                "classification": classification_result,
-                                "clauses": clauses if clauses else None,
-                                # aiSummarization and contract fields removed as requested
-                            },
+                            "data": contract_metadata,
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }
                         await publish_kafka_event(contract_evt, file_id)

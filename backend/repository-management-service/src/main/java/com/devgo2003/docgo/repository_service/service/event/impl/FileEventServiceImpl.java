@@ -449,6 +449,22 @@ public class FileEventServiceImpl implements IFileEventService {
                 if (fileSystem != null) {
                     entity.setDateModified(asString(fileSystem.get("dateModified")));
                     entity.setDateAdded(asString(fileSystem.get("dateAdded")));
+                    
+                    // Map fileSystem metadata to entity.metadata.fileSystem
+                    Map<String, Object> entityMetadata = entity.getMetadata();
+                    if (entityMetadata == null) {
+                        entityMetadata = new HashMap<>();
+                        entity.setMetadata(entityMetadata);
+                    }
+                    
+                    Map<String, Object> fileSystemSection = (Map<String, Object>) entityMetadata.computeIfAbsent("fileSystem", k -> new HashMap<>());
+                    fileSystemSection.put("mediaFilename", asString(fileSystem.get("mediaFilename")));
+                    fileSystemSection.put("originalFilename", asString(fileSystem.get("originalFilename")));
+                    fileSystemSection.put("originalMD5", asString(fileSystem.get("originalMD5")));
+                    fileSystemSection.put("originalFileSize", asLong(fileSystem.get("originalFileSize")));
+                    fileSystemSection.put("originalMimeType", asString(fileSystem.get("originalMimeType")));
+                    fileSystemSection.put("archiveMD5", asString(fileSystem.get("archiveMD5")));
+                    fileSystemSection.put("archiveFileSize", asLong(fileSystem.get("archiveFileSize")));
                 }
                 
                 Map<String, Object> technical = (Map<String, Object>) metadata.get("technical");
@@ -477,6 +493,14 @@ public class FileEventServiceImpl implements IFileEventService {
             audit.put("createdAt", Instant.now().toString());
             audit.put("createdBy", actor);
             audit.put("correlationId", correlationId);
+            
+            // Extract event metadata (serviceVersion, region)
+            Map<String, Object> eventMetadata = (Map<String, Object>) eventData.get("metadata");
+            if (eventMetadata != null) {
+                audit.put("serviceVersion", asString(eventMetadata.get("serviceVersion")));
+                audit.put("region", asString(eventMetadata.get("region")));
+            }
+            
             entity.setAudit(audit);
             
             // Save entity
@@ -511,6 +535,27 @@ public class FileEventServiceImpl implements IFileEventService {
             entity.setPlaintext(asString(data.get("plaintext")));
             entity.setExtractedText(asString(data.get("extractedText")));
             entity.setSummary(asString(data.get("summary")));
+            
+            // Map title and JSON content
+            String title = asString(data.get("title"));
+            if (title != null) {
+                Map<String, Object> overview = entity.getOverview();
+                if (overview == null) {
+                    overview = new HashMap<>();
+                    entity.setOverview(overview);
+                }
+                overview.put("title", title);
+            }
+            
+            Map<String, Object> jsonContent = (Map<String, Object>) data.get("jsonContent");
+            if (jsonContent != null) {
+                Map<String, Object> entityContent = entity.getContent();
+                if (entityContent == null) {
+                    entityContent = new HashMap<>();
+                    entity.setContent(entityContent);
+                }
+                entityContent.put("jsonContent", jsonContent);
+            }
             
             // Map key terms
             List<String> keyTerms = (List<String>) data.get("keyTerms");
@@ -578,6 +623,28 @@ public class FileEventServiceImpl implements IFileEventService {
                 entityContent.put("sections", sections);
             }
             
+            // Map jsonAnalysisStatus
+            String jsonAnalysisStatus = asString(data.get("jsonAnalysisStatus"));
+            if (jsonAnalysisStatus != null) {
+                Map<String, Object> entityContent = entity.getContent();
+                if (entityContent == null) {
+                    entityContent = new HashMap<>();
+                    entity.setContent(entityContent);
+                }
+                entityContent.put("jsonAnalysisStatus", jsonAnalysisStatus);
+            }
+            
+            // Map processing information
+            Map<String, Object> processing = (Map<String, Object>) data.get("processing");
+            if (processing != null) {
+                Map<String, Object> entityContent = entity.getContent();
+                if (entityContent == null) {
+                    entityContent = new HashMap<>();
+                    entity.setContent(entityContent);
+                }
+                entityContent.put("processing", processing);
+            }
+            
             // Update audit
             Map<String, Object> audit = entity.getAudit();
             if (audit == null) {
@@ -586,6 +653,13 @@ public class FileEventServiceImpl implements IFileEventService {
             }
             audit.put("updatedAt", Instant.now().toString());
             audit.put("updatedBy", actor);
+            
+            // Extract event metadata (serviceVersion, region) từ eventData
+            Map<String, Object> eventMetadata = (Map<String, Object>) eventData.get("metadata");
+            if (eventMetadata != null) {
+                audit.put("serviceVersion", asString(eventMetadata.get("serviceVersion")));
+                audit.put("region", asString(eventMetadata.get("region")));
+            }
             
             // Save entity
             FileEntity saved = fileRepository.save(entity);
