@@ -1082,8 +1082,10 @@ async def upload_document(
                     print(f"[DEBUG] Published -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED fileId={file_id}")
 
                     # 3) CONTRACT_SUMMARY_GENERATED (if contract) - Enhanced payload theo EVENT-ARCHITECTURE-V3.md
-                    contract_condition = bool(classification_result.get("isContract")) and summary_result
-                    print(f"[DEBUG] Contract condition check: isContract={classification_result.get('isContract')}, summary_result={summary_result is not None}, condition={contract_condition}")
+                    # Check if summary_result is valid (not an error dict)
+                    is_valid_summary = summary_result and not summary_result.get("error")
+                    contract_condition = bool(classification_result.get("isContract")) and is_valid_summary
+                    print(f"[DEBUG] Contract condition check: isContract={classification_result.get('isContract')}, summary_result={summary_result is not None}, is_valid_summary={is_valid_summary}, condition={contract_condition}")
                     if contract_condition:
                         print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=CONTRACT_SUMMARY_GENERATED documentId={file_id}")
                         

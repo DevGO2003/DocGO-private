@@ -56,19 +56,8 @@ class GeminiClient:
         self.model = self._initialize_model()
     
     def _initialize_model(self):
-        """Initialize Gemini model with fallback strategy and caching"""
-        # Step 1: Try cached model first (fastest)
-        cached_model = ModelCache.get_cached_model()
-        if cached_model:
-            try:
-                model = genai.GenerativeModel(cached_model)
-                logger.info(f"[GEMINI_CLIENT] Using cached model: {cached_model}")
-                self.current_model_name = cached_model
-                return model
-            except Exception as e:
-                logger.warning(f"[GEMINI_CLIENT] Cached model failed: {e}, trying others...")
-        
-        # Step 2: Try models from config
+        """Initialize Gemini model with fallback strategy"""
+        # Try models from config
         models_to_try = Config.get_gemini_models()
         
         for model_name in models_to_try:
@@ -78,8 +67,6 @@ class GeminiClient:
                 actual_model_name = model.model_name
                 logger.info(f"[GEMINI_CLIENT] Initialized with {actual_model_name}")
                 self.current_model_name = actual_model_name
-                # Save successful model to cache
-                ModelCache.save_cached_model(actual_model_name)
                 return model
             except Exception as e:
                 logger.warning(f"[GEMINI_CLIENT_FALLBACK] Failed to initialize {model_name}: {e}")
@@ -89,7 +76,7 @@ class GeminiClient:
     
     def generate_content(self, prompt: str) -> Optional[str]:
         """Generate content using Gemini"""
-        try:
+        try:           
             response = self.model.generate_content(prompt)
             if response.text:
                 return response.text
