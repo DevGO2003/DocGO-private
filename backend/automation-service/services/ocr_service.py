@@ -219,6 +219,16 @@ class OCRService:
             }
         
         try:
+            # Validate DOCX file format before processing
+            if len(file_content) < 4:
+                return {
+                    "success": False,
+                    "text": "",
+                    "confidence": 0.0,
+                    "error": "DOCX file appears to be corrupted or incomplete (too small)",
+                    "engine": "python-docx"
+                }
+            
             # Load DOCX document from bytes
             doc = Document(io.BytesIO(file_content))
             

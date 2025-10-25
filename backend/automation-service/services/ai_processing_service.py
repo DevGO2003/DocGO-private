@@ -510,12 +510,12 @@ class AutomationService:
                 content=sample_text
             ) + f"\n\n{self.VIETNAMESE_RESPONSE_INSTRUCTION}"
             
-            response = self.model.generate_content(classification_prompt)
+            response_text = self.gemini_client.generate_content(classification_prompt)
             
-            if response.text:
+            if response_text:
                 # Parse classification result
                 try:
-                    cleaned = response.text.strip()
+                    cleaned = response_text.strip()
                     if cleaned.startswith('```json'):
                         cleaned = cleaned[7:]
                     if cleaned.startswith('```'):

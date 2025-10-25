@@ -85,7 +85,7 @@ Hãy phân tích CHI TIẾT từng dòng văn bản hợp đồng và tạo JSON
         "pageNumber": 5                    // Số trang tìm thấy
       }
     ],
-    "all": [                                // TẤT CẢ ĐIỀU KHOẢN
+    "all": [                                // TẤT CẢ ĐIỀU KHOẢN CÓ TRONG FILE HỢP ĐỒNG
       {
         "name": "Điều 5: Phạm vi công việc",
         "description": "Điều khoản xác định phạm vi công việc cần thực hiện. Đây là điều khoản quan trọng vì nó định nghĩa ranh giới và trách nhiệm của các bên trong hợp đồng.",

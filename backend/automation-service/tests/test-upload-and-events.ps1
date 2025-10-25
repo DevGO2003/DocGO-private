@@ -2,8 +2,7 @@
 # Mục đích: Upload file, theo dõi event publishing và xem kết quả contract summary
 
 param(
-    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\luu-ban-nhap-tu-dong-2.docx",
-    [int]$WaitSeconds = 5
+    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\luu-ban-nhap-tu-dong-2.docx"
 )
 
 Write-Host "========================================" -ForegroundColor Cyan
@@ -42,8 +41,7 @@ try {
     $fileId = $response.data.fileId
     
     # Step 2: Wait for processing
-    Write-Host "[2] Waiting $WaitSeconds seconds for event processing..." -ForegroundColor Yellow
-    Start-Sleep -Seconds $WaitSeconds
+    Write-Host "Event processing..." -ForegroundColor Yellow
     Write-Host ""
     
     # Step 3: Check logs for events
