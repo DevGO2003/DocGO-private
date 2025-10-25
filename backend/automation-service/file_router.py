@@ -1250,7 +1250,7 @@ async def upload_document(
                             
                             clauses["all"] = all_clauses
 
-                        # Add fileId to contract_metadata for event routing
+                        # Add fileId and other fields to contract_metadata for event routing
                         contract_metadata["fileId"] = file_id
                         
                         contract_evt = {

@@ -263,18 +263,6 @@ public class FileEventServiceImpl implements IFileEventService {
                     entityContract.put("reminders", reminders);
                 }
                 
-                // Map key terms
-                List<String> keyTerms = (List<String>) contractAnalysis.get("keyTerms");
-                if (keyTerms != null) {
-                    entityContract.put("keyTerms", keyTerms);
-                }
-                
-                // Map sections
-                List<Map<String, Object>> sections = (List<Map<String, Object>>) contractAnalysis.get("sections");
-                if (sections != null) {
-                    entityContract.put("sections", sections);
-                }
-                
                 // Map summary
                 String summary = asString(contractAnalysis.get("summary"));
                 if (summary != null) {
