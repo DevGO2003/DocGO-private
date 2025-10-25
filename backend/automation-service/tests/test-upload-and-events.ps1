@@ -25,24 +25,13 @@ Write-Log "" "White"
 Write-Log "[1] Uploading file..." "Yellow"
 $uri = "http://localhost:8003/api/v1/automation-service/files"
 
-$fileBytes = [System.IO.File]::ReadAllBytes((Resolve-Path $FilePath))
-$boundary = [System.Guid]::NewGuid().ToString()
-$LF = "`r`n"
-
-$bodyLines = @()
-$bodyLines += "--$boundary"
-$bodyLines += 'Content-Disposition: form-data; name="file"; filename="luu-ban-nhap-tu-dong-2.docx"'
-$bodyLines += 'Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-$bodyLines += ''
-
-$encoding = [System.Text.Encoding]::GetEncoding('iso-8859-1')
-$bodyLines += $encoding.GetString($fileBytes)
-$bodyLines += "--$boundary--"
-
-$body = $bodyLines -join $LF
+# Use PowerShell's built-in multipart form data handling
+$fileItem = Get-Item $FilePath
 
 try {
-    $response = Invoke-RestMethod -Uri $uri -Method Post -ContentType "multipart/form-data; boundary=$boundary" -Body $body
+    $response = Invoke-RestMethod -Uri $uri -Method Post -Form @{
+        file = $fileItem
+    }
     
     Write-Log "[SUCCESS] Upload completed!" "Green"
     Write-Log "  File ID: $($response.data.fileId)" "White"

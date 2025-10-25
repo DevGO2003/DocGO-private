@@ -394,8 +394,11 @@ async def upload_document(
         sync_mode = True  # TEMPORARILY: Always use sync processing (was: size < 2 * 1024 * 1024)
         
         # Read file content for MIME type detection
+        print(f"[DEBUG_READ1] Reading file for MIME detection...")
         file_content = await file.read()
+        print(f"[DEBUG_READ1] Read {len(file_content)} bytes")
         await file.seek(0)  # Reset file pointer
+        print(f"[DEBUG_READ1] Seeked back to position 0")
         
         # Detect correct MIME type
         detected_mime_type = detect_mime_type(file_content, file.filename, file.content_type)
@@ -493,8 +496,10 @@ async def upload_document(
                 "startedAt": datetime.now(timezone.utc)
             })
             
+            print(f"[DEBUG_READ2] Reading file for OCR processing...")
             file_content = await file.read()
             await file.seek(0)
+            print(f"[DEBUG_READ2] Read {len(file_content)} bytes")
             
             # Sử dụng OCR service thống nhất để trích xuất text và metadata
             extraction_result = await retry_async(
