@@ -6,6 +6,7 @@ import uuid
 from typing import Optional, Dict, Any
 import google.generativeai as genai
 from config import Config
+from utils.ai_clients import AIClientFactory
 
 
 class AutomationService:
@@ -21,54 +22,21 @@ class AutomationService:
     
     def __init__(self):
         if not self._initialized:
-            self.api_key = Config.get_gemini_api_key()
-            genai.configure(api_key=self.api_key)
+            # Initialize AI clients from factory
+            self.gemini_client = AIClientFactory.get_gemini_client()
+            self.openrouter_client = AIClientFactory.get_openrouter_client()
             
-            # Initialize OpenRouter as backup
-            from utils.openrouter_client import OpenRouterClient
-            self.openrouter = OpenRouterClient()
-            if self.openrouter.is_available():
-                logging.info("[AI_INIT] OpenRouter configured as backup")
-            
-            # Phase 2: Vietnamese instruction constant for AI responses
+            # Vietnamese instruction constant for AI responses
             self.VIETNAMESE_RESPONSE_INSTRUCTION = (
                 "Lưu ý: Trả lời BẰNG TIẾNG VIỆT, không kèm markdown hay giải thích, chỉ JSON hợp lệ."
             )
-            # Allow override via ENV
-            import os
-            env_model = os.getenv('GEMINI_MODEL', '').strip()
-            # Try different models in order of preference
-            models_to_try = ([env_model] if env_model else []) + [
-                'gemini-2.0-flash-exp',
-                'gemini-1.5-flash-latest'
-            ]
             
-            model_initialized = False
-            for model_name in models_to_try:
-                try:
-                    self.model = genai.GenerativeModel(model_name)
-                    logging.info(f"[AUTOMATION_SERVICE_SINGLETON] AutomationService initialized with {model_name}")
-                    model_initialized = True
-                    break
-                except Exception as e:
-                    logging.warning(f"[AI_MODEL_FALLBACK] Failed to initialize {model_name}: {e}")
-                    continue
-            
-            if not model_initialized:
-                raise Exception("Could not initialize any Gemini model")
+            logging.info("[AUTOMATION_SERVICE_SINGLETON] AutomationService initialized")
             AutomationService._initialized = True
     
     def _is_quota_error(self, error_str: str) -> bool:
         """Check if error is Gemini quota exceeded"""
-        quota_indicators = [
-            '429',
-            'quota',
-            'rate limit',
-            'requests per day',
-            'exceeded your current quota'
-        ]
-        error_lower = error_str.lower()
-        return any(indicator in error_lower for indicator in quota_indicators)
+        return AIClientFactory.is_quota_error(error_str)
     
     def _generate_with_fallback(self, prompt: str, max_tokens: int = 2000) -> Optional[str]:
         """
@@ -79,10 +47,7 @@ class AutomationService:
         """
         # Try Gemini first
         try:
-            response = self.model.generate_content(prompt)
-            if response.text:
-                logging.info("[AI_FALLBACK] Gemini success")
-                return response.text
+            return self.gemini_client.generate_content(prompt)
         except Exception as e:
             error_str = str(e)
             
@@ -91,9 +56,9 @@ class AutomationService:
                 logging.warning(f"[AI_FALLBACK] Gemini quota exceeded, trying OpenRouter...")
                 
                 # Fallback to OpenRouter
-                if self.openrouter and self.openrouter.is_available():
+                if self.openrouter_client.is_available():
                     try:
-                        openrouter_response = self.openrouter.generate_content(prompt, max_tokens)
+                        openrouter_response = self.openrouter_client.generate_content(prompt, max_tokens)
                         if openrouter_response:
                             logging.info("[AI_FALLBACK] OpenRouter success")
                             return openrouter_response
@@ -109,8 +74,6 @@ class AutomationService:
             
             # All methods failed
             raise e
-        
-        return None
     
     def get_contract_summary_prompt(self, content: str, filename: str) -> str:
         """

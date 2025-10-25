@@ -19,7 +19,6 @@ import random
 from typing import Dict, Any, Optional, List
 import google.generativeai as genai
 from services.prompt_templates import PromptTemplates, PromptValidator
-from utils.enum_validator import EnumValidator
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -32,15 +31,8 @@ class EnhancedAIService:
         self.api_key = Config.get_gemini_api_key()
         genai.configure(api_key=self.api_key)
         
-        # Initialize Gemini model
-        import os
-        env_model = os.getenv('GEMINI_MODEL', '').strip()
-        models_to_try = ([env_model] if env_model else []) + [
-            'gemini-2.0-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-pro',
-            'gemini-1.0-pro'
-        ]
+        # Initialize Gemini model from config (from .env via GEMINI_MODELS)
+        models_to_try = Config.get_gemini_models()
         
         model_initialized = False
         for model_name in models_to_try:
@@ -55,10 +47,6 @@ class EnhancedAIService:
         
         if not model_initialized:
             raise Exception("Could not initialize any Gemini model")
-        
-        # Initialize enum validator
-        self.enum_validator = EnumValidator()
-        logger.info("[ENHANCED_AI_SERVICE] Enum validator initialized")
     
     def classify_document(self, extracted_text: str, filename: str) -> Dict[str, Any]:
         """

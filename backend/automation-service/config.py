@@ -82,6 +82,12 @@ class Config:
         if not api_key:
             raise ValueError("Biến môi trường GEMINI_API_KEY chưa được thiết lập.")
         return api_key
+    
+    @classmethod
+    def get_gemini_models(cls) -> List[str]:
+        """Get list of Gemini models from env, separated by comma"""
+        models_str = os.getenv("GEMINI_MODELS", "models/gemini-1.5-flash,models/gemini-1.5-pro")
+        return [model.strip() for model in models_str.split(",") if model.strip()]
 
     # ==========================================
     # S3 CONFIGURATION (Required - No fallback)

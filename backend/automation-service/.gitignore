@@ -80,6 +80,7 @@ Thumbs.db
 *.backup
 temp/
 tmp/
+.model_cache
 
 # AI Processing specific
 results/
