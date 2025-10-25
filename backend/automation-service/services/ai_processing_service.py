@@ -69,9 +69,18 @@ class AutomationService:
         
         logging.info(f"[AI_SUMMARY_START] Starting summary generation for: {filename}")
         
+        # Validate content
+        if not content or not isinstance(content, str):
+            logging.warning(f"[AI_SUMMARY_INVALID_CONTENT] Content is None or not string, returning None")
+            return None
+        
         for attempt in range(max_retries):
             try:
                 safe_content = content
+                if not safe_content or len(safe_content) == 0:
+                    logging.warning(f"[AI_SUMMARY_EMPTY_CONTENT] Content is empty for: {filename}")
+                    return None
+                
                 if len(safe_content) > max_chars:
                     logging.warning(f"[AI_PROMPT_TRUNCATE] Content too large ({len(safe_content)} chars). Truncating to {max_chars} chars.")
                     safe_content = safe_content[:max_chars]

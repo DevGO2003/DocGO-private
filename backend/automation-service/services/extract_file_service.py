@@ -142,16 +142,23 @@ class ExtractFileService:
         """
         try:
             logging.info(f"[EXTRACT_CONTENT] Starting extraction for: {filename}")
+            logging.debug(f"[EXTRACT_CONTENT_DEBUG] content_type={content_type}, file_size={len(file_content)} bytes")
             
             # Step 1: Extract plaintext (raw, không AI)
+            logging.debug(f"[EXTRACT_CONTENT_STEP1] Extracting plaintext...")
             plaintext_result = self._extract_plaintext(file_content, filename, content_type)
             plaintext = plaintext_result["text"]
+            logging.debug(f"[EXTRACT_CONTENT_STEP1_RESULT] method={plaintext_result.get('method')}, extracted_length={len(plaintext)} chars")
             
             # Step 2: OCR nếu cần (fallback)
+            logging.debug(f"[EXTRACT_CONTENT_STEP2] Performing OCR if needed...")
             ocr_result = self._perform_ocr(file_content, filename, content_type, plaintext)
+            logging.debug(f"[EXTRACT_CONTENT_STEP2_RESULT] ocr_status={ocr_result.get('status')}")
             
             # Step 3: Classification (AI)
+            logging.debug(f"[EXTRACT_CONTENT_STEP3] Classifying document...")
             classification_result = self._classify_document(plaintext, filename)
+            logging.debug(f"[EXTRACT_CONTENT_STEP3_RESULT] documentType={classification_result.get('documentType')}, isContract={classification_result.get('isContract')}")
             
             # Step 4: Extract extractedText (cleaned/processed)
             extracted_text = self._clean_text(plaintext)
@@ -212,28 +219,74 @@ class ExtractFileService:
     ) -> Dict[str, Any]:
         """Extract plaintext từ file - không qua AI"""
         try:
+            logging.debug(f"[PLAINTEXT_EXTRACT_START] filename={filename}, content_type={content_type}, size={len(file_content)} bytes")
+            
             if content_type.lower() == "application/json":
+                logging.debug(f"[PLAINTEXT_EXTRACT] Processing JSON file")
                 text = file_content.decode('utf-8', errors='ignore')
+                logging.debug(f"[PLAINTEXT_EXTRACT_SUCCESS] Extracted {len(text)} characters from JSON")
                 return {"text": text, "method": "direct"}
+            
             elif content_type.lower() in ["text/plain", "text/csv", "text/html"]:
+                logging.debug(f"[PLAINTEXT_EXTRACT] Processing text file: {content_type}")
                 text = file_content.decode('utf-8', errors='ignore')
+                logging.debug(f"[PLAINTEXT_EXTRACT_SUCCESS] Extracted {len(text)} characters from text")
                 return {"text": text, "method": "direct"}
-            elif content_type.lower() in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"]:
-                # Handle .docx and .doc files
+            
+            elif content_type.lower() == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or filename.lower().endswith('.docx'):
+                logging.debug(f"[PLAINTEXT_EXTRACT] Processing DOCX file: {filename}")
                 try:
                     from docx import Document
                     from io import BytesIO
+                    
                     doc = Document(BytesIO(file_content))
-                    text = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-                    return {"text": text, "method": "docx"}
+                    paragraphs = []
+                    for para in doc.paragraphs:
+                        if para.text.strip():
+                            paragraphs.append(para.text)
+                    
+                    text = '\n'.join(paragraphs)
+                    logging.debug(f"[PLAINTEXT_EXTRACT_SUCCESS] Extracted {len(text)} characters from DOCX ({len(paragraphs)} paragraphs)")
+                    logging.debug(f"[PLAINTEXT_EXTRACT_PREVIEW] First 200 chars: {text[:200]}")
+                    return {"text": text, "method": "docx_direct"}
                 except Exception as docx_error:
-                    logging.warning(f"[DOCX_EXTRACT_FAILED] {docx_error}, falling back to OCR")
-                    return {"text": "", "method": "ocr_required"}
-            else:
-                # Other formats - might need OCR
+                    logging.warning(f"[PLAINTEXT_EXTRACT_DOCX_FAILED] {docx_error}, trying zipfile fallback...")
+                    try:
+                        # Fallback: Try to extract text using zipfile directly
+                        import zipfile
+                        from io import BytesIO
+                        import xml.etree.ElementTree as ET
+                        
+                        with zipfile.ZipFile(BytesIO(file_content)) as zip_ref:
+                            # Read document.xml from the DOCX
+                            xml_content = zip_ref.read('word/document.xml')
+                            root = ET.fromstring(xml_content)
+                            
+                            # Extract text from all text elements
+                            namespace = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+                            texts = []
+                            for t in root.findall('.//w:t', namespace):
+                                if t.text:
+                                    texts.append(t.text)
+                            
+                            text = ''.join(texts)
+                            logging.debug(f"[PLAINTEXT_EXTRACT_ZIPFILE_SUCCESS] Extracted {len(text)} characters from DOCX via zipfile")
+                            logging.debug(f"[PLAINTEXT_EXTRACT_PREVIEW] First 200 chars: {text[:200]}")
+                            return {"text": text, "method": "docx_zipfile"}
+                    except Exception as zip_error:
+                        logging.error(f"[PLAINTEXT_EXTRACT_DOCX_ZIPFILE_FAILED] {zip_error}, falling back to OCR")
+                        return {"text": "", "method": "ocr_required"}
+            
+            elif content_type.lower() == "application/pdf" or filename.lower().endswith('.pdf'):
+                logging.debug(f"[PLAINTEXT_EXTRACT] Processing PDF file: {filename}")
                 return {"text": "", "method": "ocr_required"}
+            
+            else:
+                logging.debug(f"[PLAINTEXT_EXTRACT] Unknown content type: {content_type}, will use OCR")
+                return {"text": "", "method": "ocr_required"}
+        
         except Exception as e:
-            logging.error(f"[PLAINTEXT_EXTRACT_ERROR] {e}")
+            logging.error(f"[PLAINTEXT_EXTRACT_ERROR] {e}", exc_info=True)
             return {"text": "", "method": "failed"}
     
     def _perform_ocr(
@@ -391,7 +444,22 @@ class ExtractFileService:
     def _classify_document(self, text: str, filename: str) -> Dict[str, Any]:
         """Classify document với AI"""
         try:
+            logging.debug(f"[CLASSIFICATION_START] filename={filename}, text_length={len(text)} chars")
+            logging.debug(f"[CLASSIFICATION_PREVIEW] First 300 chars: {text[:300]}")
+            
+            # Log character analysis
+            if text:
+                lines = text.split('\n')
+                logging.debug(f"[CLASSIFICATION_ANALYSIS] Total lines: {len(lines)}")
+                logging.debug(f"[CLASSIFICATION_ANALYSIS] First 5 lines:")
+                for i, line in enumerate(lines[:5]):
+                    logging.debug(f"  Line {i+1}: {line[:100]}")
+            
             result = self.ai_service.classify_document(text, filename)
+            
+            logging.debug(f"[CLASSIFICATION_RESULT] documentType={result.get('documentType')}, isContract={result.get('isContract')}, confidence={result.get('confidence')}")
+            logging.debug(f"[CLASSIFICATION_REASONS] {result.get('reasons', [])}")
+            
             return {
                 "documentType": result.get("documentType", "OTHER"),
                 "isContract": result.get("isContract", False),
@@ -402,7 +470,7 @@ class ExtractFileService:
                 "language": "vi"  # Default
             }
         except Exception as e:
-            logging.error(f"[CLASSIFICATION_ERROR] {e}")
+            logging.error(f"[CLASSIFICATION_ERROR] {e}", exc_info=True)
             return {
                 "documentType": "OTHER",
                 "isContract": False,

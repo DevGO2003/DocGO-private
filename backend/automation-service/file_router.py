@@ -743,17 +743,43 @@ async def upload_document(
                 "startedAt": datetime.now(timezone.utc)
             })
             
-            # Nếu có text content, dùng text. Nếu không, gửi file trực tiếp cho AI
+            # Pre-check with SmartSampler (keyword-based confidence)
+            print(f"[DEBUG] SmartSampler pre-check starting...")
+            from utils.smart_sampler import SmartSampler
+            
+            keyword_confidence = 0.0
+            classification_method = "AI"
+            
             if plaintext_text and len(plaintext_text.strip()) > 0:
-                print(f"[DEBUG] Using extracted text for AI classification, text length: {len(plaintext_text)}")
-                classification_result = await retry_async(
-                    ai_service.classify_document,
-                    plaintext_text, file.filename,
-                    max_retries=2,
-                    backoff_factor=1.5,
-                    exceptions=(Exception,),
-                    on_retry=lambda retry_count, e: print(f"AI classification retry {retry_count}: {e}")
-                )
+                keyword_confidence = SmartSampler.get_contract_confidence(plaintext_text)
+                print(f"[DEBUG] SmartSampler keyword confidence: {keyword_confidence}")
+                print(f"[DEBUG] SmartSampler keywords found: {SmartSampler.CONTRACT_KEYWORDS}")
+                
+                # If high confidence from keywords, skip AI and use SmartSampler result
+                if keyword_confidence >= 0.7:
+                    print(f"[DEBUG] SmartSampler high confidence ({keyword_confidence}), skipping AI classification")
+                    classification_result = {
+                        "documentType": "contract",
+                        "isContract": True,
+                        "confidence": keyword_confidence,
+                        "reasons": ["Phát hiện từ khóa hợp đồng rõ ràng từ SmartSampler"],
+                        "contractSubtype": None,
+                        "category": "Hợp đồng",
+                        "language": "vi"
+                    }
+                    classification_method = "SmartSampler"
+                else:
+                    print(f"[DEBUG] SmartSampler confidence {keyword_confidence} < 0.7, using AI classification")
+                    print(f"[DEBUG] Using extracted text for AI classification, text length: {len(plaintext_text)}")
+                    classification_result = await retry_async(
+                        ai_service.classify_document,
+                        plaintext_text, file.filename,
+                        max_retries=2,
+                        backoff_factor=1.5,
+                        exceptions=(Exception,),
+                        on_retry=lambda retry_count, e: print(f"AI classification retry {retry_count}: {e}")
+                    )
+                    classification_method = "AI"
             else:
                 print(f"[DEBUG] No text content, sending file directly to AI for classification")
                 # Gửi file trực tiếp cho AI để xử lý
@@ -767,10 +793,13 @@ async def upload_document(
                     exceptions=(Exception,),
                     on_retry=lambda retry_count, e: print(f"AI file classification retry {retry_count}: {e}")
                 )
+                classification_method = "AI"
+            
             # Log classification safely
             print(f"[DEBUG] AI Classification result: {safe_log_dict(classification_result)}")
             is_contract = bool(classification_result.get("isContract", False))
             print(f"[DEBUG] is_contract from AI: {is_contract}")
+            print(f"[DEBUG] Classification method: {classification_method}, SmartSampler confidence: {keyword_confidence}")
             
             await audit_service.add_session_step(correlation_id, {
                 "stepName": "AI_CLASSIFICATION",
