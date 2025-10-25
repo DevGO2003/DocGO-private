@@ -251,10 +251,48 @@ public class FileEventServiceImpl implements IFileEventService {
                     complianceSection.put("deadlines", compliance.get("deadlines"));
                 }
                 
-                // Map clauses
+                // Map clauses (key, favorable, unfavorable, all, and other clause types)
                 Map<String, Object> clauses = (Map<String, Object>) contractAnalysis.get("clauses");
                 if (clauses != null) {
-                    entityContract.put("clauses", clauses);
+                    Map<String, Object> clausesSection = (Map<String, Object>) entityContract.computeIfAbsent("clauses", k -> new HashMap<>());
+                    
+                    // Map key clauses
+                    List<Map<String, Object>> keyClauses = (List<Map<String, Object>>) clauses.get("key");
+                    if (keyClauses != null) {
+                        clausesSection.put("key", keyClauses);
+                    }
+                    
+                    // Map favorable clauses
+                    List<Map<String, Object>> favorableClauses = (List<Map<String, Object>>) clauses.get("favorable");
+                    if (favorableClauses != null) {
+                        clausesSection.put("favorable", favorableClauses);
+                    }
+                    
+                    // Map unfavorable clauses
+                    List<Map<String, Object>> unfavorableClauses = (List<Map<String, Object>>) clauses.get("unfavorable");
+                    if (unfavorableClauses != null) {
+                        clausesSection.put("unfavorable", unfavorableClauses);
+                    }
+                    
+                    // Map all clauses
+                    List<Map<String, Object>> allClauses = (List<Map<String, Object>>) clauses.get("all");
+                    if (allClauses != null) {
+                        clausesSection.put("all", allClauses);
+                    }
+                    
+                    // Map other clause types (intellectualProperty, confidentiality, warranty, termination)
+                    if (clauses.get("intellectualProperty") != null) {
+                        clausesSection.put("intellectualProperty", clauses.get("intellectualProperty"));
+                    }
+                    if (clauses.get("confidentiality") != null) {
+                        clausesSection.put("confidentiality", clauses.get("confidentiality"));
+                    }
+                    if (clauses.get("warranty") != null) {
+                        clausesSection.put("warranty", clauses.get("warranty"));
+                    }
+                    if (clauses.get("termination") != null) {
+                        clausesSection.put("termination", clauses.get("termination"));
+                    }
                 }
                 
                 // Map reminders

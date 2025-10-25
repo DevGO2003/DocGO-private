@@ -10,6 +10,12 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
 2. Dùng null nếu KHÔNG TÌM THẤY thông tin
 3. Tuân thủ NGHIÊM NGẶT kiểu dữ liệu
 4. Trả về JSON thuần, KHÔNG có markdown ```json
+5. ⚠️ QUAN TRỌNG: "clauses.all" PHẢI chứa TẤT CẢ các điều khoản trong hợp đồng (Điều 1, Điều 2, Điều 3, v.v.), KHÔNG được bỏ sót bất kỳ điều khoản nào
+6. ⚠️ PHÂN LOẠI ĐIỀU KHOẢN (bắt buộc):
+   - "key": Các điều khoản có RỦI RO CAO hoặc ẢNH HƯỞNG LỚN (vi phạm, chấm dứt, trách nhiệm pháp lý, bồi thường, v.v.)
+   - "favorable": Các điều khoản về QUYỀN LỢI, LỢI ÍCH của các bên (quyền sở hữu, quyền hủy bỏ, quyền bảo vệ, v.v.)
+   - "unfavorable": Các điều khoản về HẠN CHẾ, NGHĨA VỤ NẶNG, RỦI RO (cấm, giới hạn, trách nhiệm, bồi thường, v.v.)
+7. Mỗi điều khoản PHẢI được phân loại vào ít nhất một trong ba loại trên (key/favorable/unfavorable). Bất khả kkháng lắm thì sẽ có vài trường bị null
 
 📋 SCHEMA:
 
@@ -67,7 +73,7 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
   }},
   
   "clauses": {{  // object - các điều khoản
-    "key": [  // array of objects - điều khoản quan trọng
+    "key": [  // array of objects - điều khoản quan trọng (có rủi ro cao, ảnh hưởng lớn)
       {{
         "name": null,  // string - tên điều khoản, vd: "Điều 5: Phạm vi công việc"
         "description": null,  // string - mô tả chi tiết
@@ -78,7 +84,17 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
         "pageNumber": null  // number - số trang tìm thấy
       }}
     ],
-    "unfavorable": [  // array of objects - điều khoản bất lợi
+    "favorable": [  // array of objects - điều khoản thuận lợi (quyền lợi, lợi ích, KHÔNG có risk field)
+      {{
+        "name": null,  // string - tên điều khoản, vd: "Điều 3: Quyền lợi của bên A"
+        "description": null,  // string - mô tả chi tiết
+        "content": null,  // string - trích dẫn CHÍNH XÁC từ hợp đồng, bắt buộc
+        "importance": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ quan trọng
+        "advice": null,  // string - khuyến nghị từ chuyên gia
+        "pageNumber": null  // number - số trang tìm thấy
+      }}
+    ],
+    "unfavorable": [  // array of objects - điều khoản bất lợi (hạn chế, nghĩa vụ nặng, rủi ro)
       {{
         "name": null,
         "description": null,
@@ -88,7 +104,17 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
         "pageNumber": null
       }}
     ],
-    "all": [],  // array of objects - tất cả điều khoản trong hợp đồng, cấu trúc giống key[]
+    "all": [  // array of objects - TẤT CẢ điều khoản trong hợp đồng (BẮTBUỘC trích xuất TOÀN BỘ, không bỏ sót)
+      {{
+        "name": null,  // string - tên điều khoản, vd: "Điều 1: Định nghĩa", "Điều 2: Mục tiêu"
+        "description": null,  // string - mô tả chi tiết (50-100 từ)
+        "content": null,  // string - trích dẫn CHÍNH XÁC từ hợp đồng (BẮTBUỘC)
+        "importance": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ quan trọng
+        "risk": null,  // string enum (HIGH|MEDIUM|LOW) - có thể null nếu là favorable
+        "advice": null,  // string - khuyến nghị
+        "pageNumber": null  // number - số trang
+      }}
+    ],
     "intellectualProperty": null,  // string - mô tả quyền sở hữu trí tuệ, có thể null
     "confidentiality": null,  // string - mô tả bảo mật, có thể null
     "warranty": null,  // string - điều kiện bảo hành, có thể null
@@ -163,6 +189,24 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
 - Đóng đúng tất cả {{}} và []
 - totalValue, amount, percentage PHẢI là number không dấu phẩy
 - Dates PHẢI là ISO 8601 format
+
+📌 HƯỚNG DẪN TRÍCH XUẤT ĐIỀU KHOẢN:
+1. QUÉT TOÀN BỘ hợp đồng từ đầu đến cuối
+2. Tìm TẤT CẢ các điều khoản (Điều 1, Điều 2, Điều 3, ..., Điều N)
+3. Với mỗi điều khoản tìm thấy:
+   - Thêm vào "clauses.all" (BẮTBUỘC)
+   - Nếu có rủi ro cao/ảnh hưởng lớn → thêm vào "clauses.key"
+   - Nếu là quyền lợi/lợi ích → thêm vào "clauses.favorable"
+   - Nếu là hạn chế/bất lợi → thêm vào "clauses.unfavorable"
+4. KHÔNG được bỏ sót bất kỳ điều khoản nào
+5. Mỗi điều khoản trong "clauses.all" PHẢI có "content" (trích dẫn chính xác)
+
+📝 VÍ DỤ PHÂN LOẠI:
+- "Điều 1: Định nghĩa" → "all" (tất cả điều khoản)
+- "Điều 3: Quyền lợi của bên A" → "all" + "favorable" (quyền lợi)
+- "Điều 5: Trách nhiệm pháp lý" → "all" + "key" (rủi ro cao)
+- "Điều 7: Chấm dứt hợp đồng" → "all" + "key" (ảnh hưởng lớn)
+- "Điều 8: Bồi thường" → "all" + "unfavorable" (hạn chế/rủi ro)
 
 📄 HỢP ĐỒNG CẦN PHÂN TÍCH (Tên file: {filename}):
 {extracted_text}

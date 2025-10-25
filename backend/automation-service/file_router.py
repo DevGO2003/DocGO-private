@@ -1211,44 +1211,64 @@ async def upload_document(
                         # Prepare clauses with all section
                         clauses = {}
                         if summary_result and isinstance(summary_result, dict):
-                            # Add key clauses if available
-                            if "clauses" in summary_result and "key" in summary_result["clauses"]:
-                                clauses["key"] = summary_result["clauses"]["key"]
-                            
-                            # Add unfavorable clauses if available
-                            if "clauses" in summary_result and "unfavorable" in summary_result["clauses"]:
-                                clauses["unfavorable"] = summary_result["clauses"]["unfavorable"]
-                            
-                            # Create all clauses section with enhanced structure
-                            all_clauses = []
-                            if "clauses" in summary_result:
-                                # Process key clauses
-                                if "key" in summary_result["clauses"]:
-                                    for clause in summary_result["clauses"]["key"]:
-                                        all_clauses.append({
-                                            "name": clause.get("name"),
-                                            "description": clause.get("description", "") + (" Đây là điều khoản quan trọng vì " + clause.get("advice", "") if clause.get("importance") == "HIGH" else ""),
-                                            "content": clause.get("content"),
-                                            "importance": clause.get("importance"),
-                                            "risk": clause.get("risk"),
-                                            "advice": clause.get("advice"),
-                                            "pageNumber": clause.get("pageNumber")
-                                        })
+                            # Priority: Use AI's "all" clauses if available
+                            if "clauses" in summary_result and "all" in summary_result["clauses"] and summary_result["clauses"]["all"]:
+                                # Use AI's all clauses directly (preferred)
+                                clauses["all"] = summary_result["clauses"]["all"]
                                 
-                                # Process unfavorable clauses
+                                # Also extract key/favorable/unfavorable from AI if provided
+                                if "key" in summary_result["clauses"]:
+                                    clauses["key"] = summary_result["clauses"]["key"]
+                                if "favorable" in summary_result["clauses"]:
+                                    clauses["favorable"] = summary_result["clauses"]["favorable"]
                                 if "unfavorable" in summary_result["clauses"]:
-                                    for clause in summary_result["clauses"]["unfavorable"]:
-                                        all_clauses.append({
-                                            "name": clause.get("name"),
-                                            "description": clause.get("description", ""),
-                                            "content": clause.get("content"),
-                                            "importance": "LOW",  # Unfavorable clauses are typically low importance
-                                            "risk": clause.get("risk", "HIGH"),
-                                            "advice": clause.get("advice", ""),
-                                            "pageNumber": clause.get("pageNumber")
-                                        })
-                            
-                            clauses["all"] = all_clauses
+                                    clauses["unfavorable"] = summary_result["clauses"]["unfavorable"]
+                            else:
+                                # Build all clauses from key/favorable/unfavorable
+                                all_clauses = []
+                                if "clauses" in summary_result:
+                                    # Process key clauses
+                                    if "key" in summary_result["clauses"]:
+                                        for clause in summary_result["clauses"]["key"]:
+                                            all_clauses.append({
+                                                "name": clause.get("name"),
+                                                "description": clause.get("description", "") + (" Đây là điều khoản quan trọng vì " + clause.get("advice", "") if clause.get("importance") == "HIGH" else ""),
+                                                "content": clause.get("content"),
+                                                "importance": clause.get("importance"),
+                                                "risk": clause.get("risk"),
+                                                "advice": clause.get("advice"),
+                                                "pageNumber": clause.get("pageNumber")
+                                            })
+                                    
+                                    # Process favorable clauses (no risk field)
+                                    if "favorable" in summary_result["clauses"]:
+                                        for clause in summary_result["clauses"]["favorable"]:
+                                            all_clauses.append({
+                                                "name": clause.get("name"),
+                                                "description": clause.get("description", ""),
+                                                "content": clause.get("content"),
+                                                "importance": clause.get("importance", "MEDIUM"),
+                                                "advice": clause.get("advice", ""),
+                                                "pageNumber": clause.get("pageNumber")
+                                            })
+                                    
+                                    # Process unfavorable clauses
+                                    if "unfavorable" in summary_result["clauses"]:
+                                        for clause in summary_result["clauses"]["unfavorable"]:
+                                            all_clauses.append({
+                                                "name": clause.get("name"),
+                                                "description": clause.get("description", ""),
+                                                "content": clause.get("content"),
+                                                "importance": "LOW",  # Unfavorable clauses are typically low importance
+                                                "risk": clause.get("risk", "HIGH"),
+                                                "advice": clause.get("advice", ""),
+                                                "pageNumber": clause.get("pageNumber")
+                                            })
+                                
+                                clauses["all"] = all_clauses
+                        
+                        # Add clauses to contract_metadata
+                        contract_metadata["clauses"] = clauses
 
                         # Add fileId and other fields to contract_metadata for event routing
                         contract_metadata["fileId"] = file_id
