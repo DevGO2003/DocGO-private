@@ -25,6 +25,12 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
   "confidentiality": null,  // string enum (CONFIDENTIAL|INTERNAL|PUBLIC|RESTRICTED) - mức độ bảo mật, có thể null, vd: "CONFIDENTIAL"
   "contractType": null,  // string enum (CONTRACT|PURCHASE_ORDER|INVOICE|AGREEMENT|OTHER) - loại hợp đồng, có thể null, vd: "CONTRACT"
   
+  "classification": {{  // object - thông tin phân loại và xử lý
+    "model": null,  // string - tên model AI được sử dụng, vd: "gemini-1.5-flash", bắt buộc
+    "inputTokens": null,  // number - số tokens đầu vào, vd: 3500, có thể null
+    "outputTokens": null  // number - số tokens đầu ra, vd: 250, có thể null
+  }},
+  
   "parties": [  // array of objects - danh sách các bên tham gia (tối thiểu 2 bên nếu là hợp đồng)
     {{
       "id": null,  // string - unique identifier, vd: "party-001"
@@ -82,7 +88,7 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
         "pageNumber": null
       }}
     ],
-    "all": [],  // array of objects - tất cả điều khoản, cấu trúc giống key[]
+    "all": [],  // array of objects - tất cả điều khoản trong hợp đồng, cấu trúc giống key[]
     "intellectualProperty": null,  // string - mô tả quyền sở hữu trí tuệ, có thể null
     "confidentiality": null,  // string - mô tả bảo mật, có thể null
     "warranty": null,  // string - điều kiện bảo hành, có thể null
@@ -101,12 +107,14 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
   
   "reminders": [  // array of objects - nhắc nhở milestone
     {{
-      "date": null,  // string ISO8601 - ngày nhắc nhở
-      "type": null,  // string enum (DEADLINE|MILESTONE|REVIEW|PAYMENT) - loại nhắc nhở
-      "title": null,  // string - tiêu đề ngắn gọn
-      "description": null,  // string - mô tả chi tiết
-      "priority": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ ưu tiên
-      "assignedTo": null  // string - ID người chịu trách nhiệm
+      "id": null,  // string - unique identifier, vd: "reminder-001", bắt buộc
+      "type": null,  // string enum (DEADLINE|MILESTONE|REVIEW|PAYMENT|PAYMENT_DUE) - loại nhắc nhở, bắt buộc
+      "title": null,  // string - tiêu đề ngắn gọn, bắt buộc, vd: "Payment Phase 1"
+      "description": null,  // string - mô tả chi tiết, có thể null
+      "content": null,  // string - nội dung chi tiết, có thể null
+      "dueDate": null,  // string ISO8601 - hạn chót, bắt buộc, vd: "2025-11-30T00:00:00"
+      "status": null,  // string enum (PENDING|COMPLETED|OVERDUE|CANCELLED) - trạng thái, bắt buộc, vd: "PENDING"
+      "priority": null  // string enum (HIGH|MEDIUM|LOW) - mức độ ưu tiên, bắt buộc, vd: "HIGH"
     }}
   ],
   
@@ -115,10 +123,10 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
     "factors": [  // array of objects - các yếu tố rủi ro
       {{
         "category": null,  // string enum (FINANCIAL|LEGAL|OPERATIONAL|TECHNICAL|SCHEDULE) - danh mục rủi ro
-        "description": null,  // string - mô tả rủi ro
+        "description": null,  // string - mô tả rủi ro kiểu tóm tắt cho người đọc
         "severity": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ nghiêm trọng
         "probability": null,  // string enum (HIGH|MEDIUM|LOW) - xác suất xảy ra
-        "impact": null,  // string - ảnh hưởng cụ thể
+        "impact": null,  // string - ảnh hưởng cụ thể như thê nào
         "mitigation": null  // string - biện pháp giảm thiểu
       }}
     ],
@@ -146,31 +154,6 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
     ],
     "auditRequirements": null,  // string - yêu cầu kiểm toán, có thể null
     "reportingRequirements": null  // string - yêu cầu báo cáo, có thể null
-  }},
-  
-  "processing": {{  // object - metadata xử lý
-    "status": null,  // string enum (COMPLETED|PROCESSING|FAILED) - trạng thái xử lý
-    "confidence": null,  // number float 0.0-1.0 - độ tin cậy
-    "steps": [],  // array of objects - các bước xử lý, có thể rỗng
-    "totalProcessingTime": null,  // number - tổng thời gian xử lý (giây)
-    "error": null  // string - thông báo lỗi nếu có, null nếu thành công
-  }},
-  
-  "technical": {{  // object - metadata kỹ thuật
-    "encoding": null,  // string enum (UTF-8|UTF-16|ASCII) - encoding file
-    "lineEnding": null,  // string enum (LF|CRLF) - kiểu xuống dòng
-    "compression": null,  // string enum (NONE|GZIP|DEFLATE) - nén
-    "fileSize": null,  // number - kích thước file (bytes)
-    "characterCount": null,  // number - số ký tự
-    "lineCount": null,  // number - số dòng
-    "pageCount": null,  // number - số trang
-    "pdfVersion": null,  // string - phiên bản PDF nếu là file PDF
-    "title": null,  // string - tiêu đề document
-    "author": null,  // string - tác giả
-    "creator": null,  // string - ứng dụng tạo
-    "producer": null,  // string - ứng dụng xuất
-    "creationDate": null,  // string ISO8601 - ngày tạo
-    "modificationDate": null  // string ISO8601 - ngày sửa cuối
   }}
 }}
 

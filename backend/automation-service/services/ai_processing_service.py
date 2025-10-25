@@ -653,16 +653,16 @@ class AutomationService:
                 logging.info(f"[AI_FILE_UPLOAD] File uploaded: {uploaded_file.uri}")
                 
                 # Send prompt with uploaded file
-                response = self.model.generate_content([prompt, uploaded_file])
+                response_text = self.gemini_client.generate_content(f"{prompt}\n\nFile: {uploaded_file.uri}")
             finally:
                 # Clean up temp file
                 if os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
             
-            if response.text:
+            if response_text:
                 # Parse the response
                 try:
-                    cleaned = response.text.strip()
+                    cleaned = response_text.strip()
                     if cleaned.startswith('```json'):
                         cleaned = cleaned[7:]
                     if cleaned.startswith('```'):
