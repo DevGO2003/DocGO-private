@@ -100,52 +100,89 @@ class GeminiClient:
 
 
 class OpenRouterClient:
-    """OpenRouter AI client wrapper with model fallback"""
+    """OpenRouter AI client wrapper with model fallback (HTTP-based, not genai)"""
     
     def __init__(self):
         """Initialize OpenRouter client with model fallback"""
+        import requests
+        
         self.api_key = Config.get_openrouter_api_key()
         self.models_to_try = Config.get_openrouter_models()
         self.current_model_name = None
-        self.client = None
+        self.base_url = "https://openrouter.ai/api/v1"
+        self.requests = requests
         
         if not self.api_key:
             logger.warning("[OPENROUTER_CLIENT] API key not configured")
             return
         
-        # Configure genai with OpenRouter API key
-        genai.configure(api_key=self.api_key)
-        
-        # Try models in order
+        # Try to validate API key with first model
         for model_name in self.models_to_try:
             try:
-                self.client = genai.GenerativeModel(model_name)
-                self.current_model_name = model_name
-                logger.info(f"[OPENROUTER_CLIENT] Initialized with model: {model_name}")
-                return
+                # Test with a simple request
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                test_payload = {
+                    "model": model_name,
+                    "messages": [{"role": "user", "content": "test"}],
+                    "max_tokens": 10
+                }
+                response = self.requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=test_payload,
+                    timeout=5
+                )
+                if response.status_code == 200:
+                    self.current_model_name = model_name
+                    logger.info(f"[OPENROUTER_CLIENT] Initialized with model: {model_name}")
+                    return
             except Exception as e:
                 logger.warning(f"[OPENROUTER_CLIENT_FALLBACK] Failed to initialize {model_name}: {e}")
                 continue
         
         logger.error("[OPENROUTER_CLIENT] Could not initialize any OpenRouter model")
-        self.client = None
+        self.current_model_name = None
     
     def is_available(self) -> bool:
         """Check if OpenRouter client is available"""
-        return self.client is not None and bool(self.api_key)
+        return bool(self.api_key) and self.current_model_name is not None
     
     def generate_content(self, prompt: str, max_tokens: int = 2000) -> Optional[str]:
-        """Generate content using OpenRouter"""
+        """Generate content using OpenRouter HTTP API"""
         if not self.is_available():
             logger.error("[OPENROUTER_CLIENT] Client not available")
             return None
         
         try:
-            response = self.client.generate_content(prompt, max_tokens)
-            if response and response.text:
-                logger.info(f"[OPENROUTER_CLIENT] Success with model: {self.current_model_name}")
-                return response.text
-            return None
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": self.current_model_name,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens
+            }
+            
+            response = self.requests.post(
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "choices" in data and len(data["choices"]) > 0:
+                    content = data["choices"][0].get("message", {}).get("content", "")
+                    logger.info(f"[OPENROUTER_CLIENT] Success with model: {self.current_model_name}")
+                    return content
+            else:
+                logger.error(f"[OPENROUTER_CLIENT_ERROR] HTTP {response.status_code}: {response.text}")
+                return None
         except Exception as e:
             logger.error(f"[OPENROUTER_CLIENT_ERROR] {e}")
             raise

@@ -218,6 +218,17 @@ class ExtractFileService:
             elif content_type.lower() in ["text/plain", "text/csv", "text/html"]:
                 text = file_content.decode('utf-8', errors='ignore')
                 return {"text": text, "method": "direct"}
+            elif content_type.lower() in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"]:
+                # Handle .docx and .doc files
+                try:
+                    from docx import Document
+                    from io import BytesIO
+                    doc = Document(BytesIO(file_content))
+                    text = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
+                    return {"text": text, "method": "docx"}
+                except Exception as docx_error:
+                    logging.warning(f"[DOCX_EXTRACT_FAILED] {docx_error}, falling back to OCR")
+                    return {"text": "", "method": "ocr_required"}
             else:
                 # Other formats - might need OCR
                 return {"text": "", "method": "ocr_required"}

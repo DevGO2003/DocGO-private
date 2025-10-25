@@ -7,7 +7,7 @@ from config import Config
 from utils.ai_clients import AIClientFactory
 from prompts.contract_analysis import PROMPT as CONTRACT_ANALYSIS_PROMPT
 
- Invoke-Expression "powershell -ExecutionPolicy Bypass -File 'p:\\DevGO2003\\DocGO-private-new\\backend\\automation-service\\tests\\test-upload-and-events.ps1'"
+
 class AutomationService:
     
     _instance = None
