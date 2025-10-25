@@ -51,9 +51,9 @@ class GeminiClient:
     def __init__(self):
         """Initialize Gemini client with model fallback and caching"""
         self.api_key = Config.get_gemini_api_key()
+        self.current_model_name = None
         genai.configure(api_key=self.api_key)
         self.model = self._initialize_model()
-        self.current_model_name = None
     
     def _initialize_model(self):
         """Initialize Gemini model with fallback strategy and caching"""
@@ -74,10 +74,12 @@ class GeminiClient:
         for model_name in models_to_try:
             try:
                 model = genai.GenerativeModel(model_name)
-                logger.info(f"[GEMINI_CLIENT] Initialized with {model_name}")
-                self.current_model_name = model_name
+                # Use actual model name from genai (may have 'models/' prefix)
+                actual_model_name = model.model_name
+                logger.info(f"[GEMINI_CLIENT] Initialized with {actual_model_name}")
+                self.current_model_name = actual_model_name
                 # Save successful model to cache
-                ModelCache.save_cached_model(model_name)
+                ModelCache.save_cached_model(actual_model_name)
                 return model
             except Exception as e:
                 logger.warning(f"[GEMINI_CLIENT_FALLBACK] Failed to initialize {model_name}: {e}")
@@ -98,26 +100,39 @@ class GeminiClient:
 
 
 class OpenRouterClient:
-    """OpenRouter AI client wrapper"""
+    """OpenRouter AI client wrapper with model fallback"""
     
     def __init__(self):
-        """Initialize OpenRouter client"""
-        try:
-            from utils.openrouter_client_v2 import OpenRouterClient as ORClient
-            self.client = ORClient()
-            self.available = self.client.is_available()
-            if self.available:
-                logger.info("[OPENROUTER_CLIENT] Initialized successfully")
-            else:
-                logger.warning("[OPENROUTER_CLIENT] Not available (no API key)")
-        except Exception as e:
-            logger.error(f"[OPENROUTER_CLIENT_ERROR] Failed to initialize: {e}")
-            self.client = None
-            self.available = False
+        """Initialize OpenRouter client with model fallback"""
+        self.api_key = Config.get_openrouter_api_key()
+        self.models_to_try = Config.get_openrouter_models()
+        self.current_model_name = None
+        self.client = None
+        
+        if not self.api_key:
+            logger.warning("[OPENROUTER_CLIENT] API key not configured")
+            return
+        
+        # Configure genai with OpenRouter API key
+        genai.configure(api_key=self.api_key)
+        
+        # Try models in order
+        for model_name in self.models_to_try:
+            try:
+                self.client = genai.GenerativeModel(model_name)
+                self.current_model_name = model_name
+                logger.info(f"[OPENROUTER_CLIENT] Initialized with model: {model_name}")
+                return
+            except Exception as e:
+                logger.warning(f"[OPENROUTER_CLIENT_FALLBACK] Failed to initialize {model_name}: {e}")
+                continue
+        
+        logger.error("[OPENROUTER_CLIENT] Could not initialize any OpenRouter model")
+        self.client = None
     
     def is_available(self) -> bool:
-        """Check if OpenRouter is available"""
-        return self.available and self.client is not None
+        """Check if OpenRouter client is available"""
+        return self.client is not None and bool(self.api_key)
     
     def generate_content(self, prompt: str, max_tokens: int = 2000) -> Optional[str]:
         """Generate content using OpenRouter"""
@@ -126,23 +141,32 @@ class OpenRouterClient:
             return None
         
         try:
-            return self.client.generate_content(prompt, max_tokens)
+            response = self.client.generate_content(prompt, max_tokens)
+            if response and response.text:
+                logger.info(f"[OPENROUTER_CLIENT] Success with model: {self.current_model_name}")
+                return response.text
+            return None
         except Exception as e:
             logger.error(f"[OPENROUTER_CLIENT_ERROR] {e}")
             raise
 
 
 class AIClientFactory:
-    """Factory for creating AI clients with fallback support"""
+    """Factory for creating AI clients with fallback support and model caching"""
     
     _gemini_client: Optional[GeminiClient] = None
     _openrouter_client: Optional[OpenRouterClient] = None
+    _current_model: Optional[str] = None
+    _current_client: Optional[str] = None
     
     @classmethod
     def get_gemini_client(cls) -> GeminiClient:
         """Get or create Gemini client (singleton)"""
         if cls._gemini_client is None:
             cls._gemini_client = GeminiClient()
+            cls._current_client = "gemini"
+            cls._current_model = f"gemini:{cls._gemini_client.current_model_name}"
+            logger.info(f"[AI_FACTORY] Initialized Gemini client with model: {cls._gemini_client.current_model_name}")
         return cls._gemini_client
     
     @classmethod
@@ -150,7 +174,42 @@ class AIClientFactory:
         """Get or create OpenRouter client (singleton)"""
         if cls._openrouter_client is None:
             cls._openrouter_client = OpenRouterClient()
+            cls._current_client = "openrouter"
+            cls._current_model = Config.get_openrouter_model()
+            logger.info(f"[AI_FACTORY] Initialized OpenRouter client with model: {cls._current_model}")
         return cls._openrouter_client
+    
+    @classmethod
+    def get_current_client(cls) -> str:
+        """Get current active AI client name"""
+        if cls._current_client is None:
+            cls.get_gemini_client()  # Initialize default
+        return cls._current_client
+    
+    @classmethod
+    def get_current_model(cls) -> str:
+        """Get current active model name"""
+        if cls._current_model is None:
+            cls.get_gemini_client()  # Initialize default
+        return cls._current_model
+    
+    @classmethod
+    def set_current_model(cls, model_name: str, client_name: str = "gemini") -> None:
+        """Set current model and client, save to cache"""
+        cls._current_model = f"{client_name}:{model_name}"
+        cls._current_client = client_name
+        ModelCache.save_cached_model(model_name)
+        logger.info(f"[AI_FACTORY] Switched to {client_name} model: {model_name}")
+    
+    @classmethod
+    def get_cached_client_model(cls) -> Optional[tuple]:
+        """Get cached client and model from file"""
+        cached = ModelCache.get_cached_model()
+        if cached and ":" in cached:
+            client_name, model_name = cached.split(":", 1)
+            logger.info(f"[AI_FACTORY] Found cached: client={client_name}, model={model_name}")
+            return (client_name, model_name)
+        return None
     
     @classmethod
     def is_quota_error(cls, error_str: str) -> bool:

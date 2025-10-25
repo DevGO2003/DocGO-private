@@ -1,17 +1,28 @@
-# Test Upload DOCX and Monitor Events
-# Mục đích: Upload file, theo dõi event publishing và xem kết quả contract summary
-
 param(
-    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\luu-ban-nhap-tu-dong-2.docx"
+    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\luu-ban-nhap-tu-dong-2.docx",
+    [string]$LogDir = ".\logs"
 )
 
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "TEST UPLOAD & EVENT PUBLISHING" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+}
 
-# Step 1: Upload file
-Write-Host "[1] Uploading file..." -ForegroundColor Yellow
+$timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$logFile = Join-Path $LogDir "test-events_$timestamp.log"
+
+function Write-Log {
+    param([string]$Message, [string]$ForegroundColor = "White")
+    Write-Host $Message -ForegroundColor $ForegroundColor
+    Add-Content -Path $logFile -Value $Message
+}
+
+Write-Log "========================================" "Cyan"
+Write-Log "TEST UPLOAD & EVENT PUBLISHING" "Cyan"
+Write-Log "========================================" "Cyan"
+Write-Log "Log file: $logFile" "Gray"
+Write-Log "" "White"
+
+Write-Log "[1] Uploading file..." "Yellow"
 $uri = "http://localhost:8003/api/v1/automation-service/files"
 
 $fileBytes = [System.IO.File]::ReadAllBytes((Resolve-Path $FilePath))
@@ -33,71 +44,88 @@ $body = $bodyLines -join $LF
 try {
     $response = Invoke-RestMethod -Uri $uri -Method Post -ContentType "multipart/form-data; boundary=$boundary" -Body $body
     
-    Write-Host "[SUCCESS] Upload completed!" -ForegroundColor Green
-    Write-Host "  File ID: $($response.data.fileId)" -ForegroundColor White
-    Write-Host "  Correlation ID: $($response.data.correlationId)" -ForegroundColor Gray
-    Write-Host ""
+    Write-Log "[SUCCESS] Upload completed!" "Green"
+    Write-Log "  File ID: $($response.data.fileId)" "White"
+    Write-Log "  Correlation ID: $($response.data.correlationId)" "Gray"
+    Write-Log "" "White"
     
     $fileId = $response.data.fileId
     
-    # Step 2: Wait for processing
-    Write-Host "Event processing..." -ForegroundColor Yellow
-    Write-Host ""
+    Write-Log "Event processing..." "Yellow"
+    Write-Log "" "White"
     
-    # Step 3: Check logs for events
-    Write-Host "[3] Checking automation service logs..." -ForegroundColor Yellow
-    Write-Host "----------------------------------------" -ForegroundColor Gray
+    Write-Log "[3] Checking automation service logs..." "Yellow"
+    Write-Log "----------------------------------------" "Gray"
     
-    $logs = docker logs automation-service --tail 50 2>&1 | Out-String
+    $logs = docker logs automation-service --tail 100 2>&1 | Out-String
     
-    # Filter relevant logs
     $eventLogs = $logs -split "`n" | Where-Object {
         $_ -match "Published.*topic=docgo-file-events" -or
         $_ -match "eventType=" -or
         $_ -match "fileId=$fileId" -or
-        $_ -match "\[JSON_PARSE\]" -or
         $_ -match "Summary result:" -or
-        $_ -match "Classification result:"
+        $_ -match "Classification result:" -or
+        $_ -match "AI Classification result:" -or
+        $_ -match "Contract condition check:"
     }
+    
+    $events = @()
     
     if ($eventLogs.Count -gt 0) {
         foreach ($log in $eventLogs) {
             if ($log -match "FILE_UPLOAD_COMPLETED") {
-                Write-Host "  [OK] FILE_UPLOAD_COMPLETED" -ForegroundColor Green
+                Write-Log "  [OK] FILE_UPLOAD_COMPLETED" "Green"
+                $events += "FILE_UPLOAD_COMPLETED"
             }
             elseif ($log -match "FILE_CONTENT_EXTRACTED") {
-                Write-Host "  [OK] FILE_CONTENT_EXTRACTED" -ForegroundColor Green
+                Write-Log "  [OK] FILE_CONTENT_EXTRACTED" "Green"
+                $events += "FILE_CONTENT_EXTRACTED"
             }
             elseif ($log -match "CONTRACT_SUMMARY_GENERATED") {
-                Write-Host "  [OK] CONTRACT_SUMMARY_GENERATED" -ForegroundColor Green
+                Write-Log "  [OK] CONTRACT_SUMMARY_GENERATED" "Green"
+                $events += "CONTRACT_SUMMARY_GENERATED"
             }
-            elseif ($log -match "Classification result:") {
-                Write-Host "  [INFO] Classification found" -ForegroundColor Cyan
+            elseif ($log -match "AI Classification result:") {
+                Write-Log "  [INFO] AI Classification found" "Cyan"
             }
             elseif ($log -match "Summary result:") {
-                Write-Host "  [INFO] Summary found" -ForegroundColor Cyan
+                Write-Log "  [INFO] Contract Summary found" "Cyan"
             }
-            elseif ($log -match "JSON_PARSE") {
-                Write-Host "  [DEBUG] JSON parsing log found" -ForegroundColor Yellow
+            elseif ($log -match "Contract condition check:") {
+                Write-Log "  [INFO] Contract condition evaluated" "Cyan"
             }
         }
-    } else {
-        Write-Host "  [WARN] No events found in logs" -ForegroundColor Yellow
+    }
+    else {
+        Write-Log "  [WARN] No events found in logs" "Yellow"
     }
     
-    Write-Host ""
-    Write-Host "[4] Full logs (last 100 lines)..." -ForegroundColor Yellow
-    Write-Host "----------------------------------------" -ForegroundColor Gray
+    Write-Log "" "White"
+    Write-Log "[4] Event Summary" "Yellow"
+    Write-Log "----------------------------------------" "Gray"
+    Write-Log "Total events captured: $($events.Count)" "White"
+    Write-Log "Events: $($events -join ', ')" "White"
+    Write-Log "" "White"
     
-    # Show last 100 lines of logs
-    docker logs automation-service --tail 100 2>&1
+    Write-Log "[5] Full logs (last 100 lines)..." "Yellow"
+    Write-Log "----------------------------------------" "Gray"
     
-} catch {
-    Write-Host "[ERROR] Upload FAILED!" -ForegroundColor Red
-    Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Yellow
+    $fullLogs = docker logs automation-service --tail 100 2>&1
+    foreach ($line in $fullLogs) {
+        Write-Log $line "White"
+    }
+}
+catch {
+    Write-Log "[ERROR] Upload FAILED!" "Red"
+    Write-Log "Error: $($_.Exception.Message)" "Yellow"
 }
 
+Write-Log "" "White"
+Write-Log "========================================" "Cyan"
+Write-Log "TEST COMPLETED" "Cyan"
+Write-Log "========================================" "Cyan"
+Write-Log "Log file saved: $logFile" "Gray"
+Write-Log "" "White"
+
 Write-Host ""
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "TEST COMPLETED" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "[LOG] Log file: $logFile" -ForegroundColor Gray

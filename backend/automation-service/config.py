@@ -88,6 +88,22 @@ class Config:
         """Get list of Gemini models from env, separated by comma"""
         models_str = os.getenv("GEMINI_MODELS", "models/gemini-1.5-flash,models/gemini-1.5-pro")
         return [model.strip() for model in models_str.split(",") if model.strip()]
+    
+    @classmethod
+    def get_openrouter_api_key(cls) -> str:
+        """Get OpenRouter API key"""
+        return os.getenv("OPENROUTER_API_KEY", "")
+    
+    @classmethod
+    def get_openrouter_model(cls) -> str:
+        """Get OpenRouter model name"""
+        return os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-chat-v3.1")
+    
+    @classmethod
+    def get_openrouter_models(cls) -> List[str]:
+        """Get list of OpenRouter models from env, separated by comma"""
+        models_str = os.getenv("OPENROUTER_MODELS", "deepseek/deepseek-chat-v3.1,meta-llama/llama-3.1-405b-instruct,gpt-4o")
+        return [model.strip() for model in models_str.split(",") if model.strip()]
 
     # ==========================================
     # S3 CONFIGURATION (Required - No fallback)
