@@ -413,9 +413,37 @@ public class OrganizationService {
                 .build();
     }
 
-    public List<Invitation> getPendingInvitations(String email) {
+    public List<InvitationResponse> getPendingInvitations(String email) {
         log.info("Getting pending invitations for email: {}", email);
-        return invitationRepository.findByEmailAndStatus(email, Invitation.InvitationStatus.PENDING);
+        
+        List<Invitation> invitations = invitationRepository.findByEmailAndStatus(email, Invitation.InvitationStatus.PENDING);
+        
+        // Convert sang InvitationResponse và populate organization name + inviter name
+        return invitations.stream()
+                .map(invitation -> {
+                    InvitationResponse response = InvitationResponse.fromEntity(invitation);
+                    
+                    // Lấy tên organization
+                    organizationRepository.findById(invitation.getOrganizationId())
+                            .ifPresent(org -> response.setOrganizationName(org.getName()));
+                    
+                    // Lấy tên người mời
+                    if (invitation.getInvitedBy() != null) {
+                        userRepository.findById(invitation.getInvitedBy())
+                                .ifPresent(user -> {
+                                    String fullName = user.getFirstName() != null && user.getLastName() != null
+                                            ? user.getFirstName() + " " + user.getLastName()
+                                            : user.getUsername();
+                                    response.setInvitedByName(fullName);
+                                });
+                    }
+                    
+                    log.debug("Invitation for org: {}, created at: {}", 
+                            response.getOrganizationName(), response.getCreatedAt());
+                    
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     public Page<User> getAvailableUsers(Pageable pageable, String searchTerm) {

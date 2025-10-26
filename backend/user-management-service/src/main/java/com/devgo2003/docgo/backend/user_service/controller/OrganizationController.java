@@ -1036,7 +1036,7 @@ public class OrganizationController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<Invitation>>> getPendingInvitations() {
+    public ResponseEntity<RestResponse<List<InvitationResponse>>> getPendingInvitations() {
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -1045,9 +1045,13 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Getting pending invitations for user: {}", user.getEmail());
         
-        List<Invitation> invitations = organizationService.getPendingInvitations(user.getEmail());
+        List<InvitationResponse> invitations = organizationService.getPendingInvitations(user.getEmail());
         
-        return ResponseEntity.ok(RestResponse.<List<Invitation>>builder()
+        log.info("[OrganizationController] Found {} pending invitations", invitations.size());
+        invitations.forEach(inv -> log.info("  - Organization: {}, Created: {}", 
+                inv.getOrganizationName(), inv.getCreatedAt()));
+        
+        return ResponseEntity.ok(RestResponse.<List<InvitationResponse>>builder()
             .statusCode(200)
             .shortMessage("Success")
             .description("Đã lấy danh sách lời mời chờ xử lý thành công")
