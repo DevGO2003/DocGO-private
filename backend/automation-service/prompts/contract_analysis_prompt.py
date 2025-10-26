@@ -87,10 +87,10 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
     "favorable": [  // array of objects - điều khoản thuận lợi (quyền lợi, lợi ích, KHÔNG có risk field)
       {{
         "name": null,  // string - tên điều khoản, vd: "Điều 3: Quyền lợi của bên A"
-        "description": null,  // string - mô tả chi tiết
+        "description": null,  // string - MÔ TẢ LỢI ÍCH: Mô tả rõ ràng điều khoản này mang lại lợi ích gì cho bên tham gia, VÌ SAO nó lợi (giải thích nguyên nhân, lý do)
         "content": null,  // string - trích dẫn CHÍNH XÁC từ hợp đồng, bắt buộc
         "importance": null,  // string enum (HIGH|MEDIUM|LOW) - mức độ quan trọng
-        "advice": null,  // string - khuyến nghị từ chuyên gia
+        "advice": null,  // string - LỜI KHUYÊN: Khuyến nghị cụ thể nên làm GÌ để chủ động tận dụng lợi ích này, hoặc cách bảo vệ quyền lợi này
         "pageNumber": null  // number - số trang tìm thấy
       }}
     ],

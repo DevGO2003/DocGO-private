@@ -49,7 +49,7 @@ except Exception as e:
 
 def test_contract_summary():
     try:
-        from prompts.contract_analysis import get_contract_analysis_prompt
+        from prompts.contract_analysis_prompt import get_contract_analysis_prompt
         from docx import Document
         import os
         

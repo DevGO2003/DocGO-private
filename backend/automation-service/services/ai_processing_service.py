@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 import google.generativeai as genai
 from config import Config
 from utils.ai_clients import AIClientFactory
-from prompts.contract_analysis import PROMPT as CONTRACT_ANALYSIS_PROMPT
+from prompts.contract_analysis_prompt import PROMPT as CONTRACT_ANALYSIS_PROMPT
 
 
 class AutomationService:

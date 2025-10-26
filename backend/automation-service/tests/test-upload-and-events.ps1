@@ -1,5 +1,5 @@
 param(
-    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\luu-ban-nhap-tu-dong-2.docx",
+    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\hop-dong-xay-dung.docx",
     [string]$LogDir = ".\logs"
 )
 
@@ -29,12 +29,16 @@ $uri = "http://localhost:8003/api/v1/automation-service/files"
 $fileItem = Get-Item $FilePath
 
 try {
+    $repositoryId = "repo-" + [guid]::NewGuid().ToString().Substring(0, 8)
+    
     $response = Invoke-RestMethod -Uri $uri -Method Post -Form @{
         file = $fileItem
+        repository_id = $repositoryId
     }
     
     Write-Log "[SUCCESS] Upload completed!" "Green"
     Write-Log "  File ID: $($response.data.fileId)" "White"
+    Write-Log "  Repository ID: $repositoryId" "Cyan"
     Write-Log "  Correlation ID: $($response.data.correlationId)" "Gray"
     Write-Log "" "White"
     

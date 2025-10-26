@@ -209,6 +209,7 @@ public class FileEventServiceImpl implements IFileEventService {
                 entityContract.put("department", asString(contractAnalysis.get("department")));
                 entityContract.put("priority", asString(contractAnalysis.get("priority")));
                 entityContract.put("confidentiality", asString(contractAnalysis.get("confidentiality")));
+                entityContract.put("repositoryId", asString(contractAnalysis.get("repositoryId")));
                 
                 // Map parties
                 List<Map<String, Object>> parties = (List<Map<String, Object>>) contractAnalysis.get("parties");

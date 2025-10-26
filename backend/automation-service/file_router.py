@@ -76,9 +76,10 @@ contract_summary_service = ContractSummaryService()
 async def upload_file(
     request: Request,
     file: UploadFile = File(...),
+    repository_id: str = Form(...),
     metadata: str | None = Form(None),
 ):
-    return await upload_document(request=request, file=file, metadata=metadata)
+    return await upload_document(request=request, file=file, metadata=metadata, repository_id=repository_id)
 
 
 @router.get("/{file_id}/download", summary="Download file")
@@ -373,6 +374,7 @@ async def upload_document(
     request: Request,
     file: UploadFile = File(...),
     metadata: str | None = Form(None),
+    repository_id: str | None = Form(None),
 ):
     """
     Unified document upload endpoint with full audit logging, event publishing, error handling, and retry.
@@ -380,6 +382,7 @@ async def upload_document(
     - Large files (>=2MB): async processing, returns 202
     - Builds payload matching File Management API schema
     - Non-contract documents have contract=null
+    - repository_id: Optional repository ID to associate with the document
     """
     from services.audit_service import audit_service
     from utils.retry_helper import retry_async
@@ -1134,6 +1137,7 @@ async def upload_document(
                             "department": summary_result.get("department"),
                             "priority": summary_result.get("priority"),  # HIGH, MEDIUM, LOW - No fallback, use null
                             "confidentiality": summary_result.get("confidentiality"),  # CONFIDENTIAL, INTERNAL, PUBLIC, RESTRICTED - No fallback, use null
+                            "repositoryId": repository_id,  # Optional repository ID from upload param
                             
                             # Parties - ensure full structure with id, type, contact, representative (default to empty list if not present)
                             "parties": [
