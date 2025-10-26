@@ -27,7 +27,7 @@ const navigationGroups = [
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
       { name: 'Repositories', href: '/products', icon: Folder },
-      { name: 'Upload Document', href: '/products/new', icon: Upload },
+      { name: 'Upload Document', href: '/upload', icon: Upload },
       { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     ]
   },

@@ -24,3 +24,5 @@ export * from './ErrorBoundary';
 export * from './LoadingSpinner';
 export * from './Dialog';
 export * from './NotificationBell';
+export { default as HeaderPanel } from './HeaderPanel';
+export { default as PrimaryContent } from './PrimaryContent';

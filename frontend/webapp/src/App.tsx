@@ -10,6 +10,7 @@ import { Dashboard } from '@features/dashboard/views/pages';
 import { RepositoryList, RepositoryDetail } from '@features/repository/views/pages';
 import { OrganizationList, OrganizationDetail, OrganizationWorkspace, OrganizationMembers, AcceptInvitation } from '@features/organization/views/pages';
 import { Profile } from '@features/profile/views/pages';
+import UploadPage from '@features/upload/views/UploadPage';
 import {
   LOGIN_PATH,
   REGISTER_PATH,
@@ -69,6 +70,9 @@ function App() {
                 {/* Repository Routes */}
                 <Route path={REPOSITORIES_PATH} element={<RepositoryList />} />
                 <Route path={REPOSITORY_DETAIL_PATH} element={<RepositoryDetail />} />
+                
+                {/* Upload Routes */}
+                <Route path="/upload" element={<UploadPage />} />
                 
                 {/* Organization Routes */}
                 <Route path={ORGANIZATIONS_PATH} element={<OrganizationList />} />
