@@ -205,8 +205,8 @@ services:
       - NODE_ENV=development  # Dev mode cho hot reload
       - CHOKIDAR_USEPOLLING=true  # Windows: Force polling thay vì fs events (fix sync chậm trên shared drive)
       - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs - cũng hỗ trợ Vite
-      - VITE_API_GATEWAY_URL=http://api-gateway:8000  # Vite env variable - dùng container network name
-      - VITE_API_BASE_URL=http://api-gateway:8000  # Vite env variable - dùng container network name
+      - VITE_API_GATEWAY_URL=http://localhost:8000  # Vite env variable - dùng localhost để browser có thể truy cập
+      - VITE_API_BASE_URL=http://localhost:8000  # Vite env variable - dùng localhost để browser có thể truy cập
     stdin_open: true  # Cho phép attach console nếu cần
     tty: true  # TTY cho dev
     depends_on:

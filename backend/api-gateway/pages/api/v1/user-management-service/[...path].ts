@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import serviceManager from '../../../../lib/services';
+import axios from 'axios';
+import { Config } from '../../../../lib/config';
+import { withCors } from '../../../../lib/cors';
 
 export const config = {
   api: {
@@ -7,35 +9,43 @@ export const config = {
   },
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const requestId = Math.random().toString(36).slice(2);
+  
   try {
     // Get the path after /api/v1/user-management-service/
     const { path } = req.query;
     const pathStr = Array.isArray(path) ? path.join('/') : path || '';
     
-    console.log('[User-Management Proxy] Request:', {
+    console.log(`[${requestId}] [User-Management Proxy] Request:`, {
       method: req.method,
       path: pathStr,
-      body: req.body
+      hasBody: !!req.body
     });
 
-    // Forward request to user-management-service
-    // serviceManager.proxyRequest(serviceKey, method, endpoint, data, headers)
-    const data = await serviceManager.proxyRequest(
-      'user-management',  // Key từ config
-      req.method || 'GET',
-      `/${pathStr}`,
-      req.body,
-      {
-        ...req.headers,
-        host: undefined,
-      }
-    );
+    // Get User Management Service URL from config
+    const userMgmtUrl = Config.getUserManagementServiceUrl();
+    const targetUrl = `${userMgmtUrl}/api/v1/user-management-service/${pathStr}`;
+    
+    console.log(`[${requestId}] Forwarding to: ${targetUrl}`);
 
-    console.log('[User-Management Proxy] Success');
+    // Forward request to user-management-service
+    const response = await axios({
+      method: req.method || 'GET',
+      url: targetUrl,
+      data: req.body,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.authorization || '',
+        'X-Request-ID': requestId
+      },
+      timeout: 10000
+    });
+
+    console.log(`[${requestId}] [User-Management Proxy] Success - Status: ${response.status}`);
 
     // Return response
-    return res.status(200).json(data);
+    return res.status(response.status).json(response.data);
   } catch (error: any) {
     console.error('[User-Management Proxy] Error:', error);
     
@@ -52,3 +62,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withCors(handler);

@@ -3,6 +3,13 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosE
 // Get API base URL from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
+// Log environment variables for debugging
+console.log('[API Client] Environment:', {
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  API_BASE_URL,
+  NODE_ENV: import.meta.env.NODE_ENV,
+});
+
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
