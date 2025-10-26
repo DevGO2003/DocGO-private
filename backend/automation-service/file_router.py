@@ -1515,30 +1515,3 @@ async def websocket_endpoint(websocket: WebSocket, document_id: str):
             await websocket.close()
         except:
             pass
-
-
-@router.get("/events/{job_id}/status", summary="Trạng thái xử lý JSON", tags=["📁 APIs Quản lý File"])
-async def get_event_status(job_id: str):
-    await progress_service.initialize()
-    status = await progress_service.get_status(job_id)
-    if not status:
-        return RestResponse(
-            apiVersion="v1",
-            statusCode=404,
-            shortMessage="Not Found",
-            description="Job không tồn tại hoặc đã hết hạn",
-            data=None,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            requestId=str(uuid.uuid4()),
-            path=f"/api/v1/automation-service/files/events/{job_id}/status"
-        )
-    return RestResponse(
-        apiVersion="v1",
-        statusCode=200,
-        shortMessage="Success",
-        description="Lấy trạng thái job thành công",
-        data=status,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        requestId=str(uuid.uuid4()),
-        path=f"/api/v1/automation-service/files/events/{job_id}/status"
-    )

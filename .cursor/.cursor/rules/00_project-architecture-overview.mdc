@@ -1,0 +1,112 @@
+---
+id: "rule-overview"
+name: "Tổng quan kiến trúc dự án DocGO"
+description: "Tổng quan kiến trúc, danh mục rule files và cách áp dụng"
+version: "1.0.0"
+alwaysApply: true
+enabled: true
+priority: 10
+tags: ["overview", "architecture", "standards"]
+globs: []
+excludeGlobs: []
+scope: "project"
+services: ["*"]
+appliesTo: ["all"]
+match: ""
+variables: {}
+rules: []
+examples: []
+references: []
+commands: []
+owners: ["devgo2003"]
+createdAt: "2025-09-23T00:00:00Z"
+updatedAt: "2025-09-28T00:00:00Z"
+notes: "Luôn nạp để định hướng tổng thể cho agent"
+language: vi
+---
+
+# Tổng quan kiến trúc DocGO
+
+Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách riêng để dễ quản lý và bảo trì.
+
+## 📋 Danh mục rule files
+
+### 1. API Standards (`api-standards.mdc`)
+- Chuẩn hóa API cho DocGO
+- URL, payload, response format
+- Tên handler và quy ước đặt tên
+- Ví dụ triển khai từ hiện trạng
+- Bảo mật và versioning
+
+### 2. Event & Exception Standards (`event-exception-standards.mdc`)
+- Chuẩn hóa Event Payload
+- Quy tắc Exception Handling
+- Quy tắc viết tài liệu API (tiếng Việt)
+- Chuẩn mô tả Input/Output
+
+### 3. Service Structure Standards (`service-structure-standards.mdc`)
+- Cấu trúc service (FastAPI, Spring Boot)
+- Quản lý dependencies và Maven/Gradle
+- Port mapping và đường dẫn docs
+- Quy tắc tên folder/package
+
+### 4. Environment & Git Standards (`environment-git-standards.mdc`)
+- Quản lý file môi trường (.env, .env.example)
+- Quy tắc .gitignore theo loại service
+- Remote repository (origin + private)
+- Quy trình push và đồng bộ
+
+### 5. Docker Development Standards (`docker-local-standards.mdc`)
+- Docker Local rules
+- Dockerfile chuẩn
+- Docker Compose Development
+- Port và Networking
+
+## 🎯 Mục tiêu chung
+- Chuẩn hóa URL, payload, error handling giữa các service
+- Chuẩn hóa response envelope và event payload
+- Đồng nhất cách viết tài liệu API
+- Tối ưu workflow phát triển/triển khai
+- Bảo mật thông tin nhạy cảm và quản lý Git
+
+## 🏗️ Cấu trúc Microservices
+
+### Danh sách Services và Cấu hình
+
+| Service | Type | Group ID | Artifact ID | Package Structure | Port | Docs |
+|---------|------|----------|-------------|-------------------|------|------|
+| **API Gateway** | Next.js | N/A | `api-gateway` | N/A (Node.js) | 8000 | `/docs` |
+| **User Management** | Spring Boot | `com.devgo2003.docgo.backend` | `user-service` | `com.devgo2003.docgo.backend.user_service` | 8001 | `/docs` |
+| **Document Management** | Spring Boot | `com.devgo2003.docgo.file-management-service` | `document-service` | `com.devgo2003.docgo.document_service` | 8002 | `/docs` |
+| **Automation Service** | FastAPI | N/A | N/A | Python modules | 8003 | `/docs` |
+
+### Quy tắc đặt tên
+
+#### Java (Spring Boot)
+- **Group ID**: `com.devgo2003.docgo.{service-name}` (dùng kebab-case)
+- **Artifact ID**: Viết tắt từ tên microservice (dùng kebab-case)
+- **Package Structure**: Đổi dấu `-` thành `_` trong package structure
+- **Version**: `1.0.0` (khởi đầu), tăng theo semantic versioning
+
+#### Node.js (Next.js)
+- **Package Name**: Tên service (kebab-case)
+- **Version**: `1.0.0` (khởi đầu)
+
+#### Python (FastAPI)
+- **Module Structure**: Tên service (snake_case)
+- **Version**: Trong `requirements.txt` hoặc `pyproject.toml`
+
+## 📚 Cách sử dụng
+1. Phát triển API mới: xem `api-standards.mdc` và `event-exception-standards.mdc`
+2. Tạo service mới: xem `service-structure-standards.mdc`
+3. Cấu hình môi trường: xem `environment-git-standards.mdc`
+4. Làm việc với Docker: xem `docker-local-standards.mdc`
+
+## 🔄 Cập nhật quy tắc
+1. Sửa file rule tương ứng
+2. Cập nhật file này nếu thay đổi cấu trúc
+3. Commit và push theo workflow đã quy định
+
+---
+
+Lưu ý: Tất cả rule có `alwaysApply: true` để tự động áp dụng cho toàn bộ project.

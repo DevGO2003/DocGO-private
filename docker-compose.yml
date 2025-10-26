@@ -198,15 +198,15 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/webapp:/app  # Mount code host vào container (hot reload key!)
-      - webapp-node-modules:/app/node_modules  # Named volume: Giữ node_modules trong container
+      - webapp-node-modules:/app/node_modules  # Named volume: Giữ node_modules từ Dockerfile
       - npm-cache:/root/.npm  # Cache npm packages
+      - ./frontend/webapp:/app  # Mount code host vào container (hot reload key!)
     environment:
       - NODE_ENV=development  # Dev mode cho hot reload
       - CHOKIDAR_USEPOLLING=true  # Windows: Force polling thay vì fs events (fix sync chậm trên shared drive)
       - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs - cũng hỗ trợ Vite
-      - VITE_API_GATEWAY_URL=http://api-gateway:8000  # Vite env variable (thay NEXT_PUBLIC)
-      - VITE_API_BASE_URL=http://api-gateway:8000  # Vite env variable (thay NEXT_PUBLIC)
+      - VITE_API_GATEWAY_URL=http://api-gateway:8000  # Vite env variable - dùng container network name
+      - VITE_API_BASE_URL=http://api-gateway:8000  # Vite env variable - dùng container network name
     stdin_open: true  # Cho phép attach console nếu cần
     tty: true  # TTY cho dev
     depends_on:

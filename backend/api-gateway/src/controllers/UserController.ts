@@ -40,18 +40,18 @@ export class UserController {
     if (!this.validateMethod(['POST'])) return
 
     try {
-      const { email, password } = this.req.body
+      const { username, password } = this.req.body
 
-      if (!email || !password) {
+      if (!username || !password) {
         const requestId = generateRequestId()
         throw new ValidationError(
-          'Email and password are required',
+          'Username and password are required',
           requestId,
           this.req.url || '/api/auth/login'
         )
       }
 
-      const result = await authService.login({ email, password })
+      const result = await authService.login({ username, password })
       return this.success(result, 200, 'Login successful')
     } catch (error: any) {
       return this.error(error)
