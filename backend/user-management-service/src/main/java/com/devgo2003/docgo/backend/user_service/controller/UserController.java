@@ -4,19 +4,26 @@ import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
+import com.devgo2003.docgo.backend.user_service.dto.OrganizationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +35,7 @@ import java.util.Set;
 public class UserController {
     
     private final UserService userService;
+    private final com.devgo2003.docgo.backend.user_service.service.OrganizationService organizationService;
     
     @GetMapping
     @Operation(
@@ -1114,6 +1122,123 @@ public class UserController {
                 .shortMessage("Success")
                 .description("Đã lấy danh sách tài khoản bị khóa thành công")
                 .data(lockedUsers)
+                .build());
+    }
+    
+    @GetMapping("/me/organizations")
+    @Operation(
+        summary = "Lấy danh sách organizations của user hiện tại",
+        description = """
+        🔹 Đầu vào
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (default: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số lượng bản ghi trên mỗi trang (default: 10)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Page<OrganizationResponse>
+        Mô tả: Danh sách tổ chức mà user hiện tại là thành viên với role và permissions
+        
+        🔍 Lưu ý
+        
+        - Endpoint này yêu cầu authentication
+        - Trả về tất cả organizations mà user là member (OWNER/MANAGER/MEMBER)
+        - Kết quả bao gồm cả userRole và userPermissions cho mỗi organization
+        - Kết quả được phân trang theo page và size
+        """
+    )
+    public ResponseEntity<RestResponse<Page<OrganizationResponse>>> getMyOrganizations(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal UserDetails currentUser
+    ) {
+        log.info("🔍 [GET /api/v1/user-management-service/users/me/organizations] - User: {}, Page: {}, Size: {}",
+            currentUser.getUsername(), page, size);
+
+        Page<OrganizationResponse> organizations = organizationService.getMyOrganizations(
+            currentUser.getUsername(),
+            page,
+            size
+        );
+
+        log.info("✅ Found {} organizations for user: {}", organizations.getTotalElements(), currentUser.getUsername());
+
+        return ResponseEntity.ok(RestResponse.<Page<OrganizationResponse>>builder()
+            .apiVersion("v1")
+            .data(organizations)
+            .statusCode(HttpStatus.OK.value())
+            .shortMessage("Lấy danh sách organizations thành công")
+            .build());
+    }
+
+    @PatchMapping("/me/switch-organization")
+    @Operation(
+        summary = "Chuyển đổi organization hiện tại", 
+        description = """
+        🔹 Đầu vào
+        
+        📄 organizationId (bắt buộc, body)
+        Loại: string
+        Mô tả: ID của tổ chức cần chuyển sang
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: User
+        Mô tả: Thông tin user với tổ chức active mới
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 403: Forbidden)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<User>> switchOrganization(
+        @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.SwitchOrganizationRequest request) {
+        
+        log.info("Switching organization to: {}", request.getOrganizationId());
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        User user = userService.switchOrganization(currentUser.getId(), request.getOrganizationId());
+        
+        return ResponseEntity.ok(RestResponse.<User>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã chuyển tổ chức thành công")
+                .data(user)
                 .build());
     }
 }

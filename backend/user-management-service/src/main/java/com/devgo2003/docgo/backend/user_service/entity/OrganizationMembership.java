@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Document(collection = "organization_memberships")
@@ -30,6 +31,12 @@ public class OrganizationMembership {
 
     @Field("role_ids")
     private Set<String> roleIds;
+
+    @Field("simple_role")
+    private String simpleRole;
+
+    @Field("permissions")
+    private List<String> permissions;
 
     @Field("status")
     @Builder.Default

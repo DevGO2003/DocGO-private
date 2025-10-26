@@ -197,7 +197,7 @@ services:
       context: ./frontend/web-app  # Giới hạn context chỉ thư mục này (tránh scan toàn project)
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"  # Map port local
+      - "3001:3000"  # Map port local 3001 → container 3000
     volumes:
       - ./frontend/web-app:/app  # Mount code host vào container (hot reload key!)
       - /app/node_modules  # Anonymous volume: Giữ node_modules trong container, tránh conflict với host
@@ -238,7 +238,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
-
-
-
+        - subne

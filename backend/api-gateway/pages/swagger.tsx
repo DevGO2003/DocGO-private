@@ -91,16 +91,16 @@ export default function SwaggerPage() {
     },
     'File Management Service': {
       port: 8002,
-      container: 'file-management-service',
+      container: 'repository-management-service',
       description: 'Quản lý tài liệu, workflow, approval processes',
       technology: 'Spring Boot',
       icon: '📄',
       color: '#4facfe',
       endpoints: [
-        { method: 'GET', path: '/api/v1/file-management-service/documents', description: 'List documents' },
-        { method: 'POST', path: '/api/v1/file-management-service/documents', description: 'Create document' },
-        { method: 'GET', path: '/api/v1/file-management-service/documents/{id}', description: 'Get document' },
-        { method: 'PUT', path: '/api/v1/file-management-service/documents/{id}', description: 'Update document' },
+        { method: 'GET', path: '/api/v1/repository-management-service/documents', description: 'List documents' },
+        { method: 'POST', path: '/api/v1/repository-management-service/documents', description: 'Create document' },
+        { method: 'GET', path: '/api/v1/repository-management-service/documents/{id}', description: 'Get document' },
+        { method: 'PUT', path: '/api/v1/repository-management-service/documents/{id}', description: 'Update document' },
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },

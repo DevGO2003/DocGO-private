@@ -16,7 +16,7 @@ export const config = {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method || 'GET';
-  const fullPath = `/api/v1/file-management-service/documents`;
+  const fullPath = `/api/v1/repository-management-service/documents`;
   
   logger.info(`🔄 Documents API Proxy: ${method} ${fullPath}`);
 

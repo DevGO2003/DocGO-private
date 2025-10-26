@@ -18,6 +18,7 @@ public class OrganizationMembershipResponse {
     private String invitedBy;
     private LocalDateTime invitedAt;
     private LocalDateTime joinedAt;
+    private String token; // Invitation token for accepting/rejecting
 
     public static OrganizationMembershipResponse fromEntity(OrganizationMembership membership) {
         if (membership == null) {

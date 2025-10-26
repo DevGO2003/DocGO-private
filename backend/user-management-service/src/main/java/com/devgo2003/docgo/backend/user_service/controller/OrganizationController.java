@@ -4,6 +4,7 @@ import com.devgo2003.docgo.backend.user_service.dto.*;
 import com.devgo2003.docgo.backend.user_service.entity.Invitation;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
+import com.devgo2003.docgo.backend.user_service.service.UserService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.common.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,9 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,6 +35,7 @@ import java.util.List;
 public class OrganizationController {
 
     private final OrganizationService organizationService;
+    private final UserService userService;
 
     @GetMapping
     @Operation(
@@ -111,6 +119,7 @@ public class OrganizationController {
             .build());
     }
 
+
     @GetMapping("/{id}")
     @Operation(
         summary = "Organization Management - Lấy chi tiết tổ chức",
@@ -158,12 +167,21 @@ public class OrganizationController {
     )
     public ResponseEntity<RestResponse<OrganizationResponse>> getOrganization(
         @Parameter(description = "ID của tổ chức") 
-        @PathVariable String id) {
+        @PathVariable String id,
+        @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
         
-        log.info("[OrganizationController] Getting organization with id: {}", id);
+        log.info("[OrganizationController] Getting organization with id: {} for user: {}", id, userDetails.getUsername());
         
-        OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
-            new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+        // Get current user
+        User currentUser = userService.getUserByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Get organization with user's role
+        OrganizationResponse organization = organizationService.getOrganizationByIdWithUserRole(id, currentUser.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
+        
+        log.info("[OrganizationController] User {} has role {} in organization {}", 
+                 currentUser.getUsername(), organization.getUserRole(), id);
         
         return ResponseEntity.ok(RestResponse.<OrganizationResponse>builder()
             .statusCode(200)
@@ -374,7 +392,7 @@ public class OrganizationController {
             .build());
     }
 
-    @PostMapping("/{id}/members")
+    @PostMapping("/{id}/members/invite")
     @Operation(
         summary = "Organization Management - Mời thành viên vào tổ chức",
         description = """
@@ -435,12 +453,13 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Inviting member to organization: {}", id);
         
-        // Lấy owner user ID từ organization để có quyền mời thành viên
-        OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
-        String currentUserId = organizationResponse.getOwnerUserId();
+        // Lấy userId từ SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        OrganizationMembershipResponse membership = organizationService.inviteMember(id, request, currentUserId);
+        OrganizationMembershipResponse membership = organizationService.inviteMember(id, request, currentUser.getId());
         
         return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
             .statusCode(201)
@@ -596,8 +615,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Updating member {} in organization: {}", userId, id);
         
-        organizationService.updateMember(id, userId, request, "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.updateMember(id, userId, request, currentUser.getId());
         OrganizationMembershipResponse membership = OrganizationMembershipResponse.builder()
             .organizationId(id)
             .userId(userId)
@@ -669,12 +692,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Removing member {} from organization: {}", userId, id);
         
-        // Lấy owner user ID từ organization để có quyền xóa thành viên
-        OrganizationResponse organizationResponse = organizationService.getOrganizationById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
-        String currentUserId = organizationResponse.getOwnerUserId();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        organizationService.removeMember(id, userId, currentUserId);
+        organizationService.removeMember(id, userId, currentUser.getId());
         
         return ResponseEntity.ok(RestResponse.<Void>builder()
             .statusCode(200)
@@ -741,8 +764,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Adding admin to organization: {}", id);
         
-        organizationService.addAdmin(id, request.getUserId(), "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.addAdmin(id, request.getUserId(), currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -812,8 +839,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Removing admin from organization: {}", id);
         
-        organizationService.removeAdmin(id, userId, "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.removeAdmin(id, userId, currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -882,8 +913,12 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Transferring ownership of organization: {}", id);
         
-        organizationService.transferOwnership(id, request.getNewOwnerId(), "system");
-        // TODO: Implement proper current user context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User currentUser = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.transferOwnership(id, request.getNewOwnerId(), currentUser.getId());
         OrganizationResponse organization = organizationService.getOrganizationById(id).orElseThrow(() -> 
             new ResourceNotFoundException("Không tìm thấy tổ chức với ID: " + id));
         
@@ -895,15 +930,13 @@ public class OrganizationController {
             .build());
     }
 
-    @GetMapping("/invitations/pending")
+    @GetMapping("/invitations/me/pending")
     @Operation(
-        summary = "Lấy danh sách lời mời chờ xử lý",
+        summary = "Lấy danh sách lời mời chờ xử lý của user hiện tại",
         description = """
         🔹 Đầu vào
         
-        📄 email (query, bắt buộc)
-        Loại: string
-        Mô tả: Email của user để lấy danh sách lời mời
+        Không cần tham số (lấy từ JWT token)
         
         🔹 Đầu ra
         
@@ -940,13 +973,16 @@ public class OrganizationController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<Invitation>>> getPendingInvitations(
-        @Parameter(description = "Email của user") 
-        @RequestParam String email) {
+    public ResponseEntity<RestResponse<List<Invitation>>> getPendingInvitations() {
         
-        log.info("[OrganizationController] Getting pending invitations for email: {}", email);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        List<Invitation> invitations = organizationService.getPendingInvitations(email);
+        log.info("[OrganizationController] Getting pending invitations for user: {}", user.getEmail());
+        
+        List<Invitation> invitations = organizationService.getPendingInvitations(user.getEmail());
         
         return ResponseEntity.ok(RestResponse.<List<Invitation>>builder()
             .statusCode(200)
@@ -1029,6 +1065,149 @@ public class OrganizationController {
                 .shortMessage("Success")
                 .description("Đã lấy danh sách user có thể mời thành công")
                 .data(users)
+                .build());
+    }
+    
+    @PostMapping("/invitations/{token}/accept")
+    @Operation(
+        summary = "Chấp nhận lời mời tham gia tổ chức",
+        description = """
+        🔹 Đầu vào
+        
+        📄 token (bắt buộc, path)
+        Loại: string
+        Mô tả: Token của lời mời
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: OrganizationMembershipResponse
+        Mô tả: Thông tin membership sau khi chấp nhận
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found, 400: Bad Request)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<OrganizationMembershipResponse>> acceptInvitation(
+        @Parameter(description = "Token của lời mời")
+        @PathVariable String token) {
+        
+        log.info("[OrganizationController] Accepting invitation with token: {}", token);
+        
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            log.info("[OrganizationController] User {} accepting invitation", username);
+            
+            User user = userService.getUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            log.info("[OrganizationController] Found user with ID: {}", user.getId());
+            
+            OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, user.getId());
+            
+            log.info("[OrganizationController] Invitation accepted successfully for organization: {}", membership.getOrganizationId());
+            
+            return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
+                    .statusCode(200)
+                    .shortMessage("Success")
+                    .description("Đã chấp nhận lời mời thành công")
+                    .data(membership)
+                    .build());
+        } catch (Exception e) {
+            log.error("[OrganizationController] Error accepting invitation: ", e);
+            throw e;
+        }
+    }
+    
+    @PostMapping("/invitations/{token}/reject")
+    @Operation(
+        summary = "Từ chối lời mời tham gia tổ chức",
+        description = """
+        🔹 Đầu vào
+        
+        📄 token (bắt buộc, path)
+        Loại: string
+        Mô tả: Token của lời mời
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: null
+        Mô tả: Không có dữ liệu trả về
+        
+        📊 apiVersion
+        Loại: string
+        Mô tả: Phiên bản API (v1)
+        
+        🔢 statusCode
+        Loại: integer
+        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
+        
+        📋 shortMessage
+        Loại: string
+        Mô tả: Thông báo ngắn gọn về kết quả
+        
+        📖 description
+        Loại: string
+        Mô tả: Mô tả chi tiết về kết quả xử lý
+        
+        🕒 timestamp
+        Loại: string (ISO-8601)
+        Mô tả: Thời gian xử lý yêu cầu
+        
+        🆔 requestId
+        Loại: string (UUID)
+        Mô tả: Định danh duy nhất của yêu cầu
+        
+        🛣️ path
+        Loại: string
+        Mô tả: Đường dẫn API được gọi
+        """
+    )
+    public ResponseEntity<RestResponse<Void>> rejectInvitation(
+        @Parameter(description = "Token của lời mời")
+        @PathVariable String token) {
+        
+        log.info("[OrganizationController] Rejecting invitation with token: {}", token);
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        organizationService.rejectInvitation(token, user.getId());
+        
+        return ResponseEntity.ok(RestResponse.<Void>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã từ chối lời mời")
+                .data(null)
                 .build());
     }
 }

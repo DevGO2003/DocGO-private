@@ -32,6 +32,10 @@ public class OrganizationResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private List<String> userIds;
+    
+    // User's role and permissions in this organization (set when fetching user's organizations)
+    private String userRole;  // OWNER, MANAGER, MEMBER
+    private List<String> userPermissions;  // Only for MANAGER role
 
     public static OrganizationResponse fromEntity(Organization organization) {
         if (organization == null) {

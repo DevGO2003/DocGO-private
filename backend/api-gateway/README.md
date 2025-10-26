@@ -54,7 +54,7 @@ npm run dev
 ## Mô tả
 API Gateway sử dụng Next.js để kết nối và quản lý 3 microservices chính của DocGO (kiến trúc mới):
 - `user-management-service` → 8001 → 8000
-- `file-management-service` → 8002 → 8000  
+- `repository-management-service` → 8002 → 8000  
 - `automation-service` → 8003 → 8000
 
 **Frontend**: `web-app` (Next.js) chạy trên port 3000, giao tiếp với API Gateway qua port 8000
@@ -94,7 +94,7 @@ NODE_ENV=development
 
 # Service URLs (internal)
 USER_MANAGEMENT_SERVICE_URL=http://user-management-service:8000
-FILE_MANAGEMENT_SERVICE_URL=http://file-management-service:8000
+FILE_MANAGEMENT_SERVICE_URL=http://repository-management-service:8000
 AUTOMATION_SERVICE_URL=http://automation-service:8000
 
 # Kafka Configuration (internal)
@@ -249,11 +249,11 @@ DELETE /api/v1/user-management-service/users/{id}
 
 ### Document Management Service
 ```
-GET    /api/v1/file-management-service/documents
-POST   /api/v1/file-management-service/documents
-GET    /api/v1/file-management-service/documents/{id}
-PUT    /api/v1/file-management-service/documents/{id}
-DELETE /api/v1/file-management-service/documents/{id}
+GET    /api/v1/repository-management-service/documents
+POST   /api/v1/repository-management-service/documents
+GET    /api/v1/repository-management-service/documents/{id}
+PUT    /api/v1/repository-management-service/documents/{id}
+DELETE /api/v1/repository-management-service/documents/{id}
 ```
 
 ### Automation Service

@@ -1,0 +1,364 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@shared/lib/api';
+import {
+  Repository,
+  RepositoryCreateData,
+  RepositoryUpdateData,
+  FileItem,
+  FileUploadData,
+  Contract,
+  ContractCreateData,
+  ContractUpdateData,
+  Document,
+  DocumentCreateData,
+  PaginationParams,
+  PaginatedResponse,
+} from '../types/repository.types';
+
+const BASE_PATH = '/api/v1/repository-management-service';
+
+// Repository API
+const repositoryApi = {
+  // Repositories
+  getAllRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
+    const response = await apiClient.get<PaginatedResponse<Repository>>(
+      `${BASE_PATH}/repositories`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getRepositoryById: async (id: string): Promise<Repository> => {
+    const response = await apiClient.get<Repository>(`${BASE_PATH}/repositories/${id}`);
+    return response.data.data!;
+  },
+
+  getMyRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
+    const response = await apiClient.get<PaginatedResponse<Repository>>(
+      `${BASE_PATH}/repositories/my`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  createRepository: async (data: RepositoryCreateData): Promise<Repository> => {
+    const response = await apiClient.post<Repository>(`${BASE_PATH}/repositories`, data);
+    return response.data.data!;
+  },
+
+  updateRepository: async (id: string, data: RepositoryUpdateData): Promise<Repository> => {
+    const response = await apiClient.put<Repository>(`${BASE_PATH}/repositories/${id}`, data);
+    return response.data.data!;
+  },
+
+  deleteRepository: async (id: string): Promise<void> => {
+    await apiClient.delete<void>(`${BASE_PATH}/repositories/${id}`);
+  },
+
+  // Files
+  getAllFiles: async (params?: PaginationParams): Promise<PaginatedResponse<FileItem>> => {
+    const response = await apiClient.get<PaginatedResponse<FileItem>>(
+      `${BASE_PATH}/files`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getFileById: async (id: string): Promise<FileItem> => {
+    const response = await apiClient.get<FileItem>(`${BASE_PATH}/files/${id}`);
+    return response.data.data!;
+  },
+
+  uploadFile: async ({ file, repositoryId, tags, metadata }: FileUploadData): Promise<FileItem> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Prepare metadata object
+    const metadataObj: any = {};
+    if (repositoryId) metadataObj.repositoryId = repositoryId;
+    if (tags) metadataObj.tags = tags;
+    if (metadata) Object.assign(metadataObj, metadata);
+    
+    // Append metadata as JSON string
+    if (Object.keys(metadataObj).length > 0) {
+      formData.append('metadata', JSON.stringify(metadataObj));
+    }
+
+    // Use automation-service endpoint instead of repository-management-service
+    const response = await apiClient.post<FileItem>('/api/v1/automation-service/files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data.data!;
+  },
+
+  deleteFile: async (id: string): Promise<void> => {
+    await apiClient.delete<void>(`${BASE_PATH}/files/${id}`);
+  },
+
+  downloadFile: async (id: string): Promise<Blob> => {
+    const response = await apiClient.get(`${BASE_PATH}/files/${id}/download`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  // Contracts
+  getAllContracts: async (params?: PaginationParams): Promise<PaginatedResponse<Contract>> => {
+    const response = await apiClient.get<PaginatedResponse<Contract>>(
+      `${BASE_PATH}/contracts`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getContractById: async (id: string): Promise<Contract> => {
+    const response = await apiClient.get<Contract>(`${BASE_PATH}/contracts/${id}`);
+    return response.data.data!;
+  },
+
+  createContract: async (data: ContractCreateData): Promise<Contract> => {
+    const response = await apiClient.post<Contract>(`${BASE_PATH}/contracts`, data);
+    return response.data.data!;
+  },
+
+  updateContract: async (id: string, data: ContractUpdateData): Promise<Contract> => {
+    const response = await apiClient.put<Contract>(`${BASE_PATH}/contracts/${id}`, data);
+    return response.data.data!;
+  },
+
+  deleteContract: async (id: string): Promise<void> => {
+    await apiClient.delete<void>(`${BASE_PATH}/contracts/${id}`);
+  },
+
+  restoreContract: async (id: string): Promise<Contract> => {
+    const response = await apiClient.put<Contract>(`${BASE_PATH}/contracts/${id}/restore`);
+    return response.data.data!;
+  },
+
+  // Documents
+  getAllDocuments: async (params?: PaginationParams): Promise<PaginatedResponse<Document>> => {
+    const response = await apiClient.get<PaginatedResponse<Document>>(
+      `${BASE_PATH}/documents`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getDocumentById: async (id: string): Promise<Document> => {
+    const response = await apiClient.get<Document>(`${BASE_PATH}/documents/${id}`);
+    return response.data.data!;
+  },
+
+  createDocument: async (data: DocumentCreateData): Promise<Document> => {
+    const response = await apiClient.post<Document>(`${BASE_PATH}/documents`, data);
+    return response.data.data!;
+  },
+
+  updateDocument: async (id: string, data: Partial<DocumentCreateData>): Promise<Document> => {
+    const response = await apiClient.put<Document>(`${BASE_PATH}/documents/${id}`, data);
+    return response.data.data!;
+  },
+
+  deleteDocument: async (id: string): Promise<void> => {
+    await apiClient.delete<void>(`${BASE_PATH}/documents/${id}`);
+  },
+
+  restoreDocument: async (id: string): Promise<Document> => {
+    const response = await apiClient.put<Document>(`${BASE_PATH}/documents/${id}/restore`);
+    return response.data.data!;
+  },
+};
+
+// React Query hooks
+
+// Repositories
+export const useRepositories = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['repositories', params],
+    queryFn: () => repositoryApi.getAllRepositories(params),
+  });
+};
+
+export const useMyRepositories = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['my-repositories', params],
+    queryFn: () => repositoryApi.getMyRepositories(params),
+  });
+};
+
+export const useRepository = (id: string) => {
+  return useQuery({
+    queryKey: ['repository', id],
+    queryFn: () => repositoryApi.getRepositoryById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateRepository = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.createRepository,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+    },
+  });
+};
+
+export const useUpdateRepository = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: RepositoryUpdateData }) =>
+      repositoryApi.updateRepository(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+    },
+  });
+};
+
+export const useDeleteRepository = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.deleteRepository,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+    },
+  });
+};
+
+// Files
+export const useFiles = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['files', params],
+    queryFn: () => repositoryApi.getAllFiles(params),
+  });
+};
+
+export const useFile = (id: string) => {
+  return useQuery({
+    queryKey: ['file', id],
+    queryFn: () => repositoryApi.getFileById(id),
+    enabled: !!id,
+  });
+};
+
+export const useUploadFile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.uploadFile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+    },
+  });
+};
+
+export const useDeleteFile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.deleteFile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+    },
+  });
+};
+
+// Contracts
+export const useContracts = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['contracts', params],
+    queryFn: () => repositoryApi.getAllContracts(params),
+  });
+};
+
+export const useContract = (id: string) => {
+  return useQuery({
+    queryKey: ['contract', id],
+    queryFn: () => repositoryApi.getContractById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateContract = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.createContract,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+    },
+  });
+};
+
+export const useUpdateContract = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ContractUpdateData }) =>
+      repositoryApi.updateContract(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['contract', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+    },
+  });
+};
+
+export const useDeleteContract = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.deleteContract,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+    },
+  });
+};
+
+// Documents
+export const useDocuments = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['documents', params],
+    queryFn: () => repositoryApi.getAllDocuments(params),
+  });
+};
+
+export const useDocument = (id: string) => {
+  return useQuery({
+    queryKey: ['document', id],
+    queryFn: () => repositoryApi.getDocumentById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateDocument = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.createDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+};
+
+export const useUpdateDocument = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<DocumentCreateData> }) =>
+      repositoryApi.updateDocument(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['document', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+};
+
+export const useDeleteDocument = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: repositoryApi.deleteDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+};
+
+export default repositoryApi;
