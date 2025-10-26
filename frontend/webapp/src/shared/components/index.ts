@@ -23,3 +23,4 @@ export * from './ProtectedRoute';
 export * from './ErrorBoundary';
 export * from './LoadingSpinner';
 export * from './Dialog';
+export * from './NotificationBell';

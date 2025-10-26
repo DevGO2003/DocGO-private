@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button, Input } from '@shared/components';
+import { NotificationBell } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { logout } from '@features/auth/models/state/authSlice';
 import { LOGIN_PATH } from '@constants';
 import {
   Menu,
   Search,
-  Bell,
   User,
   LogOut,
   Settings,
@@ -103,16 +102,7 @@ export const Header = ({
             )}
 
             {/* Notifications */}
-            {showNotifications && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400"></span>
-              </motion.button>
-            )}
+            {showNotifications && <NotificationBell />}
 
             {/* User Menu */}
             {showUserMenu && (

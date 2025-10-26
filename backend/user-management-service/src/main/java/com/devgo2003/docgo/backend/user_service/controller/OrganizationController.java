@@ -930,15 +930,13 @@ public class OrganizationController {
             .build());
     }
 
-    @GetMapping("/invitations/pending")
+    @GetMapping("/invitations/me/pending")
     @Operation(
-        summary = "Lấy danh sách lời mời chờ xử lý",
+        summary = "Lấy danh sách lời mời chờ xử lý của user hiện tại",
         description = """
         🔹 Đầu vào
         
-        📄 email (query, bắt buộc)
-        Loại: string
-        Mô tả: Email của user để lấy danh sách lời mời
+        Không cần tham số (lấy từ JWT token)
         
         🔹 Đầu ra
         
@@ -975,13 +973,16 @@ public class OrganizationController {
         Mô tả: Đường dẫn API được gọi
         """
     )
-    public ResponseEntity<RestResponse<List<Invitation>>> getPendingInvitations(
-        @Parameter(description = "Email của user") 
-        @RequestParam String email) {
+    public ResponseEntity<RestResponse<List<Invitation>>> getPendingInvitations() {
         
-        log.info("[OrganizationController] Getting pending invitations for email: {}", email);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
         
-        List<Invitation> invitations = organizationService.getPendingInvitations(email);
+        log.info("[OrganizationController] Getting pending invitations for user: {}", user.getEmail());
+        
+        List<Invitation> invitations = organizationService.getPendingInvitations(user.getEmail());
         
         return ResponseEntity.ok(RestResponse.<List<Invitation>>builder()
             .statusCode(200)
@@ -1112,25 +1113,37 @@ public class OrganizationController {
         Mô tả: Đường dẫn API được gọi
         """
     )
+    @PostMapping("/invitations/{token}/accept")
     public ResponseEntity<RestResponse<OrganizationMembershipResponse>> acceptInvitation(
         @Parameter(description = "Token của lời mời")
         @PathVariable String token) {
         
         log.info("[OrganizationController] Accepting invitation with token: {}", token);
         
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.getUserByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, user.getId());
-        
-        return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã chấp nhận lời mời thành công")
-                .data(membership)
-                .build());
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            log.info("[OrganizationController] User {} accepting invitation", username);
+            
+            User user = userService.getUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            log.info("[OrganizationController] Found user with ID: {}", user.getId());
+            
+            OrganizationMembershipResponse membership = organizationService.acceptInvitation(token, user.getId());
+            
+            log.info("[OrganizationController] Invitation accepted successfully for organization: {}", membership.getOrganizationId());
+            
+            return ResponseEntity.ok(RestResponse.<OrganizationMembershipResponse>builder()
+                    .statusCode(200)
+                    .shortMessage("Success")
+                    .description("Đã chấp nhận lời mời thành công")
+                    .data(membership)
+                    .build());
+        } catch (Exception e) {
+            log.error("[OrganizationController] Error accepting invitation: ", e);
+            throw e;
+        }
     }
     
     @PostMapping("/invitations/{token}/reject")

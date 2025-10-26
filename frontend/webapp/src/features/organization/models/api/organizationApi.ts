@@ -107,19 +107,29 @@ const organizationApi = {
     return response.data.data!;
   },
 
-  acceptInvitation: async (data: AcceptInvitationData): Promise<AcceptInvitationResponse> => {
+  getMyPendingInvitations: async (): Promise<Invitation[]> => {
+    const response = await apiClient.get<Invitation[]>(`${BASE_PATH}/organizations/invitations/me/pending`);
+    return response.data.data!;
+  },
+
+  acceptInvitation: async (data: AcceptInvitationData): Promise<any> => {
     console.log('📤 [API] Accepting invitation with token:', data.token);
-    const response = await apiClient.post<AcceptInvitationResponse>(
-      `${BASE_PATH}/invitations/accept`,
-      data
+    const response = await apiClient.post<any>(
+      `${BASE_PATH}/organizations/invitations/${data.token}/accept`
     );
     console.log('✅ [API] Accept invitation response:', response.data.data);
-    return response.data.data!;
+    // Backend returns OrganizationMembershipResponse, map to expected format
+    const membership = response.data.data;
+    return {
+      organizationId: membership.organizationId,
+      userId: membership.userId,
+      role: membership.roleIds?.[0] || 'MEMBER',
+    };
   },
 
   declineInvitation: async (data: AcceptInvitationData): Promise<void> => {
     console.log('📤 [API] Declining invitation with token:', data.token);
-    await apiClient.post<void>(`${BASE_PATH}/invitations/decline`, data);
+    await apiClient.post<void>(`${BASE_PATH}/organizations/invitations/${data.token}/reject`);
     console.log('✅ [API] Declined invitation successfully');
   },
 };
@@ -244,6 +254,16 @@ export const useGetInvitationByToken = (token: string) => {
   });
 };
 
+export const useMyPendingInvitations = () => {
+  return useQuery({
+    queryKey: ['my-pending-invitations'],
+    queryFn: () => organizationApi.getMyPendingInvitations(),
+    refetchInterval: 15000, // Refresh every 15 seconds (faster!)
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    retry: 1, // Retry once if failed
+  });
+};
+
 export const useAcceptInvitation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -251,13 +271,18 @@ export const useAcceptInvitation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['my-pending-invitations'] });
     },
   });
 };
 
 export const useDeclineInvitation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: organizationApi.declineInvitation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-pending-invitations'] });
+    },
   });
 };
 
