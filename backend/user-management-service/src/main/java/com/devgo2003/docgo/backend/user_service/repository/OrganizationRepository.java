@@ -50,6 +50,12 @@ public interface OrganizationRepository extends MongoRepository<Organization, St
 
     // Kiểm tra tồn tại theo name
     boolean existsByName(String name);
+    
+    // Kiểm tra tồn tại theo code (chỉ orgs chưa xóa)
+    boolean existsByCodeAndDeletedAtIsNull(String code);
+    
+    // Kiểm tra tồn tại theo name (chỉ orgs chưa xóa)
+    boolean existsByNameAndDeletedAtIsNull(String name);
 
     // Tìm organization chưa bị xóa
     @Query("{'deletedAt': null}")

@@ -176,14 +176,14 @@ public class OrganizationService {
         log.info("Creating organization with name: {}", request.getName());
         log.info("Owner User ID from request: {}", request.getOwnerUserId());
 
-        // Kiểm tra trùng lặp
+        // Kiểm tra trùng lặp - CHỈ với organizations chưa bị xóa
         if (request.getCode() != null && !request.getCode().trim().isEmpty()) {
-            if (organizationRepository.existsByCode(request.getCode())) {
+            if (organizationRepository.existsByCodeAndDeletedAtIsNull(request.getCode())) {
                 throw new DuplicateOrganizationException("Mã tổ chức đã tồn tại: " + request.getCode());
             }
         }
 
-        if (organizationRepository.existsByName(request.getName())) {
+        if (organizationRepository.existsByNameAndDeletedAtIsNull(request.getName())) {
             throw new DuplicateOrganizationException("Tên tổ chức đã tồn tại: " + request.getName());
         }
 
@@ -235,16 +235,16 @@ public class OrganizationService {
         return organizationRepository.findById(id)
                 .filter(org -> org.getDeletedAt() == null)
                 .map(organization -> {
-                    // Kiểm tra trùng lặp nếu có thay đổi
+                    // Kiểm tra trùng lặp nếu có thay đổi - CHỈ với orgs chưa bị xóa
                     if (request.getName() != null && !request.getName().equals(organization.getName())) {
-                        if (organizationRepository.existsByName(request.getName())) {
+                        if (organizationRepository.existsByNameAndDeletedAtIsNull(request.getName())) {
                             throw new DuplicateOrganizationException("Tên tổ chức đã tồn tại: " + request.getName());
                         }
                         organization.setName(request.getName());
                     }
 
                     if (request.getCode() != null && !request.getCode().equals(organization.getCode())) {
-                        if (organizationRepository.existsByCode(request.getCode())) {
+                        if (organizationRepository.existsByCodeAndDeletedAtIsNull(request.getCode())) {
                             throw new DuplicateOrganizationException("Mã tổ chức đã tồn tại: " + request.getCode());
                         }
                         organization.setCode(request.getCode());
