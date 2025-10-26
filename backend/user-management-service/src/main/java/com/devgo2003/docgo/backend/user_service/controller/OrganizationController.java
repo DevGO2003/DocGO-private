@@ -5,6 +5,7 @@ import com.devgo2003.docgo.backend.user_service.entity.Invitation;
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
+import com.devgo2003.docgo.backend.user_service.repository.UserRepository;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.common.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,7 @@ public class OrganizationController {
 
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @GetMapping
     @Operation(
@@ -119,6 +121,67 @@ public class OrganizationController {
             .build());
     }
 
+    @GetMapping(params = "userId")
+    @Operation(
+        summary = "Lấy danh sách organizations theo userId",
+        description = """
+        🔹 Đầu vào
+        
+        📄 userId (bắt buộc, query)
+        Loại: string
+        Mô tả: ID của user cần lấy danh sách organizations
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (mặc định: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Kích thước trang (mặc định: 10)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Page<OrganizationResponse>
+        Mô tả: Danh sách organizations mà user là thành viên
+        
+        ⚠️ Lưu ý
+        - Trả về tất cả organizations mà user có tham gia (là member)
+        - Kết quả bao gồm userRole và userPermissions cho mỗi organization
+        - Kết quả được phân trang theo page và size
+        - Các organizations đã bị xóa (deletedAt != null) sẽ KHÔNG được trả về
+        - Endpoint này hữu ích cho: admin xem orgs của user, profile page, etc.
+        - URL: GET /organizations?userId={userId}&page=0&size=10
+        """
+    )
+    public ResponseEntity<RestResponse<Page<OrganizationResponse>>> getOrganizationsByUserId(
+        @RequestParam String userId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("🔍 [GET /organizations?userId={}] - Page: {}, Size: {}", userId, page, size);
+
+        // Tìm user theo userId
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user với ID: " + userId));
+
+        // Lấy organizations của user
+        Page<OrganizationResponse> organizations = organizationService.getMyOrganizations(
+            user.getUsername(),
+            page,
+            size
+        );
+
+        log.info("✅ Found {} organizations for user: {} ({})", 
+            organizations.getTotalElements(), user.getUsername(), userId);
+
+        return ResponseEntity.ok(RestResponse.<Page<OrganizationResponse>>builder()
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách organizations thành công")
+            .data(organizations)
+            .build());
+    }
 
     @GetMapping("/{id}")
     @Operation(

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,30 +55,72 @@ public class OrganizationService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user: " + username));
 
-        // Tạo pageable
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "joinedAt"));
+        // Lấy TẤT CẢ memberships (không phân trang) để filter trước
+        List<OrganizationMembership> allMemberships = membershipRepository.findByUserId(user.getId(), Pageable.unpaged())
+                .getContent();
         
-        // Lấy tất cả organizations mà user là member
-        Page<OrganizationMembership> memberships = membershipRepository.findByUserId(user.getId(), pageable);
+        log.info("Found {} total memberships for user: {}", allMemberships.size(), username);
         
-        // Convert sang OrganizationResponse
-        return memberships.map(membership -> {
-            // Lấy organization từ repository
-            Organization org = organizationRepository.findById(membership.getOrganizationId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy organization: " + membership.getOrganizationId()));
-            
-            OrganizationResponse response = OrganizationResponse.fromEntity(org);
-            
-            // Thêm thông tin role của user trong org này
-            response.setUserRole(membership.getSimpleRole());
-            
-            // Thêm permissions
-            if (membership.getPermissions() != null) {
-                response.setUserPermissions(membership.getPermissions());
-            }
-            
-            return response;
+        // Convert sang OrganizationResponse và FILTER deleted orgs TRƯỚC
+        List<OrganizationResponse> allOrgResponses = allMemberships.stream()
+                .map(membership -> {
+                    // Lấy organization từ repository - BẮT BUỘC lọc deletedAt
+                    return organizationRepository.findById(membership.getOrganizationId())
+                            .filter(o -> {
+                                boolean notDeleted = o.getDeletedAt() == null;
+                                if (!notDeleted) {
+                                    log.debug("Filtering out deleted organization: {} ({})", o.getName(), o.getId());
+                                }
+                                return notDeleted;
+                            })
+                            .map(org -> {
+                                OrganizationResponse response = OrganizationResponse.fromEntity(org);
+                                
+                                // Thêm thông tin role của user trong org này
+                                response.setUserRole(membership.getSimpleRole());
+                                
+                                // Thêm permissions
+                                if (membership.getPermissions() != null) {
+                                    response.setUserPermissions(membership.getPermissions());
+                                }
+                                
+                                log.debug("Mapped organization: {} with role: {}", org.getName(), membership.getSimpleRole());
+                                
+                                return response;
+                            })
+                            .orElse(null);  // Return null for deleted orgs
+                })
+                .filter(org -> org != null)  // Remove null entries (deleted orgs)
+                .collect(Collectors.toList());
+        
+        log.info("After filtering: {} non-deleted organizations from {} memberships", 
+            allOrgResponses.size(), allMemberships.size());
+        
+        // Sort theo joinedAt (mới nhất trước)
+        allOrgResponses.sort((a, b) -> {
+            // Assuming createdAt as joinedAt proxy - adjust if you have actual joinedAt field
+            if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
+            return b.getCreatedAt().compareTo(a.getCreatedAt());
         });
+        
+        // BÂY GIỜ MỚI phân trang SAU KHI đã filter
+        int start = pageNumber * pageSize;
+        int end = Math.min(start + pageSize, allOrgResponses.size());
+        
+        List<OrganizationResponse> pageContent = start < allOrgResponses.size() 
+                ? allOrgResponses.subList(start, end)
+                : Collections.emptyList();
+        
+        log.info("Returning page {}: {} organizations (total: {})", 
+            pageNumber, pageContent.size(), allOrgResponses.size());
+        
+        // Tạo Page với kết quả đã phân trang ĐÚNG
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return new org.springframework.data.domain.PageImpl<>(
+                pageContent, 
+                pageable, 
+                allOrgResponses.size()  // Total non-deleted orgs
+        );
     }
 
     public Optional<OrganizationResponse> getOrganizationById(String id) {

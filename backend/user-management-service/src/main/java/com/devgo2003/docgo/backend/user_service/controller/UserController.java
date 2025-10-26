@@ -2,6 +2,7 @@ package com.devgo2003.docgo.backend.user_service.controller;
 
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
+import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
 import com.devgo2003.docgo.backend.user_service.dto.OrganizationResponse;
