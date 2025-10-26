@@ -1,4 +1,3 @@
-
 name: DocGO
 
 services:
@@ -92,7 +91,6 @@ services:
     env_file:
       - ./backend/user-management-service/.env
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
       - ENVIRONMENT=docker
     depends_on:
       - kafka
@@ -183,6 +181,7 @@ services:
       - ./backend/api-gateway:/app  # Volume mount cho hot reload
       - /app/node_modules  # Exclude node_modules từ mount
       - /app/.next  # Exclude .next build folder
+      - npm-cache:/root/.npm  # Cache npm packages
       - ./logs/api-gateway:/app/logs
     restart: unless-stopped
 
@@ -190,23 +189,24 @@ services:
   # FRONTEND
   # ==========================================
 
-  # Web App Frontend (Next.js)
-  web-app:
-    container_name: web-app
+  # Web App Frontend (React + Vite)
+  webapp:
+    container_name: webapp
     build:
-      context: ./frontend/web-app  # Giới hạn context chỉ thư mục này (tránh scan toàn project)
+      context: ./frontend/webapp
       dockerfile: Dockerfile
     ports:
-      - "3001:3000"  # Map port local 3001 → container 3000
+      - "3000:3000"
     volumes:
-      - ./frontend/web-app:/app  # Mount code host vào container (hot reload key!)
-      - /app/node_modules  # Anonymous volume: Giữ node_modules trong container, tránh conflict với host
+      - ./frontend/webapp:/app  # Mount code host vào container (hot reload key!)
+      - webapp-node-modules:/app/node_modules  # Named volume: Giữ node_modules trong container
+      - npm-cache:/root/.npm  # Cache npm packages
     environment:
       - NODE_ENV=development  # Dev mode cho hot reload
       - CHOKIDAR_USEPOLLING=true  # Windows: Force polling thay vì fs events (fix sync chậm trên shared drive)
-      - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs
-      - NEXT_PUBLIC_API_GATEWAY_URL=http://api-gateway:8000  # Override để kết nối trong Docker network
-      - NEXT_PUBLIC_API_BASE_URL=http://api-gateway:8000  # Override để kết nối trong Docker network
+      - WATCHPACK_POLLING=true  # Fix Watchpack errors (EIO i/o) trong logs - cũng hỗ trợ Vite
+      - VITE_API_GATEWAY_URL=http://api-gateway:8000  # Vite env variable (thay NEXT_PUBLIC)
+      - VITE_API_BASE_URL=http://api-gateway:8000  # Vite env variable (thay NEXT_PUBLIC)
     stdin_open: true  # Cho phép attach console nếu cần
     tty: true  # TTY cho dev
     depends_on:
@@ -229,6 +229,10 @@ volumes:
     driver: local
   maven-repo:
     driver: local
+  npm-cache:
+    driver: local
+  webapp-node-modules:
+    driver: local
 
 # ==========================================
 # NETWORKS
@@ -238,4 +242,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subne
+        - subnet: 172.20.0.0/16

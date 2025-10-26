@@ -217,7 +217,7 @@ export default function SwaggerPage() {
       });
 
     return () => clearTimeout(timeout);
-  }, [selectedService, serviceConnectionMapping, isLoadingSpec]);
+  }, [selectedService, serviceConnectionMapping]);
 
   return (
     <>

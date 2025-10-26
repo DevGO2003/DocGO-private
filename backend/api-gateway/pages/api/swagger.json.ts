@@ -6,31 +6,11 @@ import { swaggerSpec } from '@/lib/swagger';
  * /api/swagger.json:
  *   get:
  *     summary: Lấy OpenAPI specification
- *     description:
- *       ## 📋 OpenAPI Specification
- *       
- *       Endpoint này trả về OpenAPI 3.0.3 specification cho API Gateway BFF.
- *       Sử dụng để hiển thị Swagger UI hoặc tích hợp với các công cụ khác.
- *       
- *       ### 🔹 Đầu vào
- *       🚫 Không có tham số đầu vào
- *       
- *       ### 🔹 Đầu ra
- *       📄 **OpenAPI Specification**
- *       Loại: application/json
- *       Mô tả: OpenAPI 3.0.3 specification document
- *       
- *       ### 📋 Response Codes
- *       - **200 OK**: Specification được trả về thành công
- *       
- *       ### 🔗 Related Endpoints
- *       - `GET /swagger` - Swagger UI page
- *       - `GET /api/health` - Health check endpoint
- *       
+ *     description: Endpoint này trả về OpenAPI 3.0.3 specification cho API Gateway BFF. Sử dụng để hiển thị Swagger UI hoặc tích hợp với các công cụ khác.
  *     tags: [API Gateway BFF]
  *     responses:
  *       200:
- *         description: OpenAPI specification
+ *         description: OpenAPI specification được trả về thành công
  *         content:
  *           application/json:
  *             schema:

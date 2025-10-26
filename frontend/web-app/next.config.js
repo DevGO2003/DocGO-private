@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // App Router configuration
-  experimental: {
-    appDir: true,
-  },
+  experimental: {},
   // Hot reload optimization
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {

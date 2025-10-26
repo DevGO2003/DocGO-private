@@ -11,7 +11,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install all dependencies (including dev dependencies)
-RUN npm install
+# Use npm ci for deterministic installs (cache-friendly)
+RUN npm ci
 
 # Create logs directory and public directory
 RUN mkdir -p logs public
