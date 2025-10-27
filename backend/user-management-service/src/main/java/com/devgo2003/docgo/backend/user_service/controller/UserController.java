@@ -829,9 +829,9 @@ public class UserController {
         Loại: string
         Mô tả: ID của người dùng cần đổi mật khẩu
         
-        🔑 newPassword (bắt buộc, query)
-        Loại: string
-        Mô tả: Mật khẩu mới
+        🔑 request (bắt buộc, body)
+        Loại: ChangePasswordRequest
+        Mô tả: Request chứa mật khẩu mới
         
         🔹 Đầu ra
         
@@ -870,11 +870,11 @@ public class UserController {
     )
     public ResponseEntity<RestResponse<User>> updatePassword(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Mật khẩu mới") @RequestParam String newPassword) {
+            @Parameter(description = "Request đổi mật khẩu") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.ChangePasswordRequest request) {
         
         log.info("Updating password for user: {}", id);
         
-        User updatedUser = userService.updatePassword(id, newPassword);
+        User updatedUser = userService.updatePassword(id, request.getNewPassword());
         
         return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)

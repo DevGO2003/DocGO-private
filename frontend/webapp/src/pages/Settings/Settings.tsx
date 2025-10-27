@@ -6,8 +6,6 @@ import {
   Bell,
   Globe,
   Shield,
-  Smartphone,
-  Mail,
   Eye,
   EyeOff,
   Save,
@@ -29,7 +27,6 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'preferences';
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
-  const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   const updateProfileMutation = useUpdateProfile();
@@ -43,7 +40,6 @@ export const Settings = () => {
   });
 
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
@@ -80,18 +76,25 @@ export const Settings = () => {
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Passwords do not match');
+      alert('Mật khẩu không khớp!');
+      return;
+    }
+
+    if (!user?.id) {
+      alert('Không tìm thấy thông tin người dùng!');
       return;
     }
 
     try {
       await changePasswordMutation.mutateAsync({
-        oldPassword: passwordData.oldPassword,
+        userId: user.id,
         newPassword: passwordData.newPassword,
       });
-      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+      alert('Đổi mật khẩu thành công!');
     } catch (error) {
       console.error('Failed to change password:', error);
+      alert('Đổi mật khẩu thất bại! Vui lòng thử lại.');
     }
   };
 
@@ -242,42 +245,12 @@ export const Settings = () => {
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Change Password
+                        Đổi mật khẩu
                       </h3>
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Current Password
-                          </label>
-                          <div className="relative">
-                            <Input
-                              type={showOldPassword ? 'text' : 'password'}
-                              value={passwordData.oldPassword}
-                              onChange={(e) =>
-                                setPasswordData({
-                                  ...passwordData,
-                                  oldPassword: e.target.value,
-                                })
-                              }
-                              placeholder="Enter current password"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowOldPassword(!showOldPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                            >
-                              {showOldPassword ? (
-                                <EyeOff className="w-5 h-5" />
-                              ) : (
-                                <Eye className="w-5 h-5" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            New Password
+                            Mật khẩu mới
                           </label>
                           <div className="relative">
                             <Input
@@ -289,7 +262,7 @@ export const Settings = () => {
                                   newPassword: e.target.value,
                                 })
                               }
-                              placeholder="Enter new password"
+                              placeholder="Nhập mật khẩu mới"
                             />
                             <button
                               type="button"
@@ -307,7 +280,7 @@ export const Settings = () => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Confirm New Password
+                            Xác nhận mật khẩu mới
                           </label>
                           <Input
                             type="password"
@@ -318,7 +291,7 @@ export const Settings = () => {
                                 confirmPassword: e.target.value,
                               })
                             }
-                            placeholder="Confirm new password"
+                            placeholder="Xác nhận mật khẩu mới"
                           />
                         </div>
                       </div>

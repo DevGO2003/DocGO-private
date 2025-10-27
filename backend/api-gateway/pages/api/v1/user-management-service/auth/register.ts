@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '../../../../../lib/services';
+import { withCors } from '../../../../../lib/cors';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -9,11 +10,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('[User-Management] Register request received:', req.body);
     
-    // Forward to user-management service
+    // Forward to user-management service with full path
     const data = await serviceManager.proxyRequest(
       'user-management',
       'POST',
-      '/auth/register',
+      '/api/v1/user-management-service/auth/register',
       req.body,
       req.headers
     );
@@ -35,3 +36,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withCors(handler);

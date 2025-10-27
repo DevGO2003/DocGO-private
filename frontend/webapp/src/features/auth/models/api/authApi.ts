@@ -36,9 +36,16 @@ const authApi = {
       password: '***'
     });
     
+    // Backend chỉ cần username, email, password
+    const payload = {
+      username: data.username,
+      email: data.email,
+      password: data.password
+    };
+    
     const response = await apiClient.post<AuthResponse>(
       `${BASE_PATH}/auth/register`,
-      data
+      payload
     );
     
     if (!response.data.data) {
@@ -94,10 +101,10 @@ const authApi = {
     );
   },
 
-  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
+  changePassword: async (userId: string, newPassword: string): Promise<void> => {
     await apiClient.put<void>(
-      `${BASE_PATH}/auth/change-password`,
-      { oldPassword, newPassword }
+      `${BASE_PATH}/users/${userId}/password`,
+      { newPassword }
     );
   },
 
@@ -156,8 +163,8 @@ export const useResetPassword = () => {
 
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }) =>
-      authApi.changePassword(oldPassword, newPassword),
+    mutationFn: ({ userId, newPassword }: { userId: string; newPassword: string }) =>
+      authApi.changePassword(userId, newPassword),
   });
 };
 
