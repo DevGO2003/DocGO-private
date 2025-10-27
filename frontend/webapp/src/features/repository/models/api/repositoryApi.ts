@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@shared/lib/api';
 import {
   Repository,
+  RepositoryType,
   RepositoryCreateData,
   RepositoryUpdateData,
   FileItem,
@@ -36,6 +37,22 @@ const repositoryApi = {
   getMyRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
     const response = await apiClient.get<PaginatedResponse<Repository>>(
       `${BASE_PATH}/repositories/my`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getPersonalRepositories: async (params?: PaginationParams & { userId?: string }): Promise<PaginatedResponse<Repository>> => {
+    const response = await apiClient.get<PaginatedResponse<Repository>>(
+      `${BASE_PATH}/repositories/personal`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
+  getOrganizationRepositories: async (params?: PaginationParams & { organizationId?: string }): Promise<PaginatedResponse<Repository>> => {
+    const response = await apiClient.get<PaginatedResponse<Repository>>(
+      `${BASE_PATH}/repositories/organization`,
       { params }
     );
     return response.data.data!;
@@ -185,6 +202,20 @@ export const useMyRepositories = (params?: PaginationParams) => {
   return useQuery({
     queryKey: ['my-repositories', params],
     queryFn: () => repositoryApi.getMyRepositories(params),
+  });
+};
+
+export const usePersonalRepositories = (params?: PaginationParams & { userId?: string }) => {
+  return useQuery({
+    queryKey: ['personal-repositories', params],
+    queryFn: () => repositoryApi.getPersonalRepositories({ ...params, userId: params?.userId || 'user-001' }),
+  });
+};
+
+export const useOrganizationRepositories = (params?: PaginationParams & { organizationId?: string }) => {
+  return useQuery({
+    queryKey: ['organization-repositories', params],
+    queryFn: () => repositoryApi.getOrganizationRepositories({ ...params, organizationId: params?.organizationId || 'org-001' }),
   });
 };
 

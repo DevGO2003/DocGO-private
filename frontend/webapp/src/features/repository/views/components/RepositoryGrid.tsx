@@ -1,0 +1,217 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  LoadingSpinner,
+} from '@shared/components';
+import { Plus, Search, FolderOpen, Users, FileText, Clock, Building, User } from 'lucide-react';
+import { Repository } from '@features/repository/models/types/repository.types';
+
+interface RepositoryGridProps {
+  repositories: Repository[];
+  isLoading?: boolean;
+  error?: string | null;
+  onCreateRepository?: () => void;
+  onRepositoryClick?: (repositoryId: string) => void;
+}
+
+export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
+  repositories,
+  isLoading = false,
+  error = null,
+  onCreateRepository,
+  onRepositoryClick,
+}) => {
+  const navigate = useNavigate();
+
+  const handleRepositoryClick = (repoId: string) => {
+    if (onRepositoryClick) {
+      onRepositoryClick(repoId);
+    } else {
+      // Default navigation
+      navigate(`/repositories/${repoId}`);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const getRepositoryIcon = (type: string) => {
+    return type === 'ORGANIZATION' ? (
+      <Building className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
+    ) : (
+      <User className="w-8 h-8 text-blue-500 flex-shrink-0 ml-2" />
+    );
+  };
+
+  const getRepositoryTypeLabel = (type: string) => {
+    return type === 'ORGANIZATION' ? 'Tổ chức' : 'Cá nhân';
+  };
+
+  const getRepositoryTypeColor = (type: string) => {
+    return type === 'ORGANIZATION'
+      ? 'bg-purple-100 text-purple-800'
+      : 'bg-blue-100 text-blue-800';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <LoadingSpinner text="Đang tải repositories..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="p-6">
+          <p className="text-red-700 text-center">
+            {error}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (repositories.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center py-16"
+      >
+        <Card>
+          <CardContent className="p-12">
+            <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Không có repository nào
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Bắt đầu bằng cách tạo repository đầu tiên của bạn
+            </p>
+            {onCreateRepository && (
+              <Button
+                variant="outline"
+                onClick={onCreateRepository}
+                className="inline-flex items-center gap-2"
+                animated
+              >
+                <Plus className="w-5 h-5" />
+                Tạo Repository
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.05 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+      >
+        {repositories.map((repo, index) => (
+          <motion.div
+            key={repo.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ scale: 1.02 }}
+            onClick={() => handleRepositoryClick(repo.id)}
+            className="cursor-pointer"
+          >
+            <Card animated className="h-full">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg mb-2 line-clamp-1">
+                      {repo.name}
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {repo.description || 'Không có mô tả'}
+                    </p>
+                  </div>
+                  {getRepositoryIcon(repo.type)}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {/* Type Badge */}
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRepositoryTypeColor(
+                        repo.type
+                      )}`}
+                    >
+                      {getRepositoryTypeLabel(repo.type)}
+                    </span>
+                    {repo.isPublic && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Công khai
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-700">
+                        {repo.fileCount} tệp
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-700">
+                        {repo.memberCount} thành viên
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Size */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Dung lượng:</span>
+                    <span className="font-medium text-gray-900">
+                      {formatFileSize(repo.totalSize)}
+                    </span>
+                  </div>
+
+                  {/* Owner */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Chủ sở hữu:</span>
+                    <span className="font-medium text-gray-900">
+                      {repo.ownerName || repo.ownerUserId}
+                    </span>
+                  </div>
+
+                  {/* Updated Time */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      Cập nhật: {new Date(repo.updatedAt).toLocaleDateString('vi-VN')}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
+    </>
+  );
+};

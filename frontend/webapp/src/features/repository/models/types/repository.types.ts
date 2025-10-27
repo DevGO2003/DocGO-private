@@ -1,11 +1,16 @@
 // Repository types matching backend
 
+export type RepositoryType = 'PERSONAL' | 'ORGANIZATION';
+
 export interface Repository {
   id: string;
   name: string;
   description?: string;
-  owner: string; // userId/username
+  type: RepositoryType;
+  ownerUserId: string;
   ownerName?: string;
+  organizationId?: string;
+  organizationName?: string;
   memberCount: number;
   fileCount: number;
   totalSize: number; // bytes
@@ -13,6 +18,26 @@ export interface Repository {
   updatedAt: string;
   isPublic: boolean;
   tags?: string[];
+  metadata?: Record<string, any>;
+  settings?: RepositorySettings;
+  permissions?: RepositoryPermission[];
+}
+
+export interface RepositorySettings {
+  allowFileUpload?: boolean;
+  maxFileSize?: number;
+  allowedFileTypes?: string[];
+  enableVersioning?: boolean;
+  enableComments?: boolean;
+  enableTags?: boolean;
+}
+
+export interface RepositoryPermission {
+  userId: string;
+  role: string; // OWNER, ADMIN, EDITOR, VIEWER
+  permissions: string[]; // READ, WRITE, DELETE, ADMIN
+  grantedBy: string;
+  grantedAt: string;
 }
 
 export interface RepositoryCreateData {

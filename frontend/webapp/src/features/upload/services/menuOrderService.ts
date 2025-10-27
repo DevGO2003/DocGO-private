@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { MenuItem } from '../components/SortableMenu'
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001'
+// Use Vite environment variables for frontend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 /**
  * Save menu order to User Management Service

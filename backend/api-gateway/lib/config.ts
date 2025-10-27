@@ -145,7 +145,7 @@ export class Config {
         url: this.getRepositoryManagementServiceUrl(),
       port: 8002,
       healthCheck: '/actuator/health',
-      timeout: 10000
+      timeout: 30000
     },
     
     'automation': {

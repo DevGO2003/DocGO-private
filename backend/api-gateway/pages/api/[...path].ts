@@ -9,8 +9,22 @@ import { withApiHandler } from '@/lib/http/withApiHandler';
 
 export const config = {
   api: {
-    // Disable bodyParser to handle multipart requests properly
-    bodyParser: false
+    // Enable bodyParser for JSON, disable for multipart
+    bodyParser: {
+      sizeLimit: '10mb',
+      json: {
+        limit: '10mb'
+      },
+      text: {
+        limit: '10mb'
+      },
+      // Disable for raw/multipart to handle file uploads
+      raw: false,
+      urlEncoded: {
+        extended: true,
+        limit: '10mb'
+      }
+    }
   }
 };
 
@@ -50,8 +64,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     'contracts': 'repository-management',
     'files': 'repository-management',
     'assets': 'repository-management',
+    'repositories': 'repository-management',
     'repository-management': 'repository-management',
-    'repository-management-service': 'repository-management',
     'repository-management-service': 'repository-management',
     'document-management': 'repository-management',
     // automation
@@ -105,7 +119,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   });
 
   // Keep original endpoint including /api/v1/...
-  const endpoint = fullApiPath;
+  // For repository-management service, need to add service name to path
+  let endpoint = fullApiPath;
+  if (serviceKey === 'repository-management') {
+    // Insert /repository-management-service after /api/v1
+    const parts = endpoint.split('/');
+    if (parts[1] === 'api' && parts[2] === 'v1') {
+      parts.splice(3, 0, 'repository-management-service');
+      endpoint = parts.join('/');
+    }
+  }
 
     // Get service instance
     const service = serviceManager.getService(serviceKey);
@@ -183,17 +206,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if ('Content-Type' in headers) delete headers['Content-Type'];
       if ('Content-Length' in headers) delete headers['Content-Length'];
     } else {
-      // For POST/PUT/PATCH, forward the raw body stream
-      // Since bodyParser is disabled, req.body will be a Buffer
-      if (req.body) {
-        requestData = req.body;
-      }
-      
-      // For multipart requests, don't let axios modify Content-Type
-      if (headers['Content-Type'] && headers['Content-Type'].includes('multipart/form-data')) {
-        // Keep original Content-Type for multipart
-        // Don't let axios serialize the body
-      }
+      // For POST/PUT/PATCH, forward the parsed body
+      requestData = req.body;
     }
 
     // Make request to microservice
