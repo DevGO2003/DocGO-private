@@ -19,8 +19,8 @@ export default function ImagePreview({ file }: ImagePreviewProps) {
   }, [file])
 
   return (
-    <div className="w-full h-full flex flex-col bg-white rounded-lg overflow-hidden">
-      <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4">
+    <div className="w-full h-full flex flex-col bg-white min-h-0">
+      <div className="flex-1 min-h-0 overflow-auto bg-gray-100 flex items-center justify-center p-4">
         {url ? (
           <img
             src={url}

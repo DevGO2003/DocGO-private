@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react'
-import { HeaderPanel, PrimaryContent } from '@shared/components'
+import { ControlMainLayout } from '@shared/layouts'
+import UploadLayout from '../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
 import SystemInfoPanel from '../components/SystemInfoPanel'
-import SortableMenu from '../components/SortableMenu'
-import { saveMenuOrder } from '../services/menuOrderService'
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -12,7 +11,6 @@ export default function UploadPage() {
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
   const [baseContractId, setBaseContractId] = useState('')
   const [newVersionName, setNewVersionName] = useState('')
-  const [menuOpen, setMenuOpen] = useState(false) // Add this line
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
 
   const handleOcrFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +29,7 @@ export default function UploadPage() {
       console.log('Uploading file:', selectedFile.name)
       // TODO: Implement upload logic
       // const response = await uploadFile(selectedFile)
-      
+
       // Simulate upload
       await new Promise(resolve => setTimeout(resolve, 2000))
       console.log('Upload completed')
@@ -44,44 +42,30 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="space-y-6 p-[10px]">
-        <HeaderPanel 
-          title="Upload tài liệu"
-          subtitle="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
-          breadcrumbs={[{ label: 'Tài liệu', href: '/documents' }, { label: 'Upload', current: true }]}
-        />
+    <ControlMainLayout
+      title="Upload tài liệu"
+      subtitle="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
+      breadcrumbs={[{ label: 'Upload', href: '/upload' }]}
+    >
+      <UploadLayout>
+        {/* Left Column: Upload Controls */}
+        <div className="lg:col-span-1 space-y-6 flex flex-col">
+              {/* Versioning + Upload - Same Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Versioning Panel */}
+                <div>
+                  <VersioningPanel
+                    createFromOldVersion={createFromOldVersion}
+                    setCreateFromOldVersion={setCreateFromOldVersion}
+                    baseContractId={baseContractId}
+                    setBaseContractId={setBaseContractId}
+                    newVersionName={newVersionName}
+                    setNewVersionName={setNewVersionName}
+                  />
+                </div>
 
-        <PrimaryContent className="bg-gray-50">
-          <div className="space-y-6 p-[10px]">
-            {/* SortableMenu */}
-            <SortableMenu
-              items={[
-                { id: 'versioning', label: 'Tạo phiên bản' },
-                { id: 'upload', label: 'Tải tệp lên' },
-                { id: 'system-info', label: 'Thông tin hệ thống' },
-              ]}
-              onSave={saveMenuOrder}
-            />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column: Upload Controls */}
-              <div className="lg:col-span-1 space-y-6">
-                {/* Versioning + Upload - Same Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Versioning Panel */}
-                  <div>
-                    <VersioningPanel
-                      createFromOldVersion={createFromOldVersion}
-                      setCreateFromOldVersion={setCreateFromOldVersion}
-                      baseContractId={baseContractId}
-                      setBaseContractId={setBaseContractId}
-                      newVersionName={newVersionName}
-                      setNewVersionName={setNewVersionName}
-                    />
-                  </div>
-
-                  {/* Upload Panel - No scroll */}
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col min-h-fit">
+                {/* Upload Panel - No scroll */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col min-h-fit">
                   <div className="p-4 border-b border-gray-100">
                     <h3 className="text-base font-semibold text-gray-900">
                       Tải tệp lên <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>
@@ -169,42 +153,39 @@ export default function UploadPage() {
                       </div>
                     )}
                   </div>
-                  </div>
                 </div>
-
-                {/* System Info Panel */}
-                <SystemInfoPanel />
               </div>
 
-              {/* Right Column: File Preview */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex-1 overflow-y-auto flex flex-col">
-                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {selectedFile ? `Preview: ${selectedFile.name}` : 'Chọn file để xem trước'}
-                    </p>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    {selectedFile ? (
-                      <PreviewFactory file={selectedFile} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center">
-                          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <p className="text-gray-500 font-medium">Chọn file để xem trước</p>
-                          <p className="text-sm text-gray-400 mt-1">Hỗ trợ PDF, hình ảnh, tài liệu, Excel, audio, video</p>
-                        </div>
+              {/* System Info Panel */}
+              <SystemInfoPanel />
+            </div>
+
+            {/* Right Column: File Preview */}
+            <div className="lg:col-span-2 lg:row-span-3">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col w-full h-full">
+                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {selectedFile ? `Preview: ${selectedFile.name}` : 'Chọn file để xem trước'}
+                  </p>
+                </div>
+<div className="p-4 overflow-visible">
+                  {selectedFile ? (
+                    <PreviewFactory file={selectedFile} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-gray-500 font-medium">Chọn file để xem trước</p>
+                        <p className="text-sm text-gray-400 mt-1">Hỗ trợ PDF, hình ảnh, tài liệu, Excel, audio, video</p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-        </PrimaryContent>
-      </div>
-    </div>
+      </UploadLayout>
+    </ControlMainLayout>
   )
 }

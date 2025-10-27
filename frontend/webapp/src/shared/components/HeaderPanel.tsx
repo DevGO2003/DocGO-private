@@ -33,19 +33,23 @@ function HeaderPanel({
 
   return (
     <div
-      className={`sticky top-0 z-50 bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 shadow-sm ${className}`}
       style={{
         maxHeight: '300px',
         overflow: 'hidden'
       }}
     >
-      <div className="px-4 py-[5px]">
-        <div className="flex items-start justify-between gap-4">
-          {/* Left section - natural width */}
-          <div className="shrink-0">
+      {/* Decorative blobs */}
+      <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
+
+      <div className="relative z-10 px-6 py-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          {/* Left section */}
+          <div className="flex-1">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
-              <nav className="flex mb-1" aria-label="Breadcrumb">
+              <nav className="flex mb-2" aria-label="Breadcrumb">
                 <ol className="flex items-center space-x-1 text-sm">
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={index} className="flex items-center">
@@ -70,7 +74,7 @@ function HeaderPanel({
             )}
 
             {/* Title */}
-            <h1 className="inline-block w-auto text-xl font-bold text-gray-900 mb-1">{title}</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-1">{title}</h1>
             
             {/* Subtitle */}
             {subtitle && (
@@ -79,15 +83,15 @@ function HeaderPanel({
 
             {/* Children content */}
             {children && (
-              <div className="mt-1">
+              <div className="mt-2">
                 {children}
               </div>
             )}
           </div>
 
-          {/* Right section - takes remaining space */}
+          {/* Right section */}
           {right && (
-            <div className="flex-1 min-w-0">
+            <div className="flex gap-2">
               {right}
             </div>
           )}

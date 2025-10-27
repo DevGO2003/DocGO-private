@@ -19,8 +19,10 @@ export type PreviewType = 'pdf' | 'image' | 'document' | 'excel' | 'audio' | 'vi
  * 📄 **Tài liệu**:
  *   - PDF (.pdf)
  *   - Word (.docx, .doc)
+ *   - OpenDocument (.odt)
+ *   - Rich Text (.rtf)
  *   - Text (.txt)
- *   - Markdown (.md, .markdown)
+ *   - Markdown (.md, .markdown, .rst)
  *   - HTML (.html, .htm)
  * 
  * 🖼️ **Hình ảnh**:
@@ -35,7 +37,7 @@ export type PreviewType = 'pdf' | 'image' | 'document' | 'excel' | 'audio' | 'vi
  * 
  * 📊 **Bảng tính**:
  *   - Excel (.xlsx, .xls)
- *   - CSV (.csv)
+ *   - CSV (.csv, .tsv)
  * 
  * 🎵 **Audio**:
  *   - MP3 (.mp3)
@@ -54,6 +56,26 @@ export type PreviewType = 'pdf' | 'image' | 'document' | 'excel' | 'audio' | 'vi
  *   - FLV (.flv)
  *   - WMV (.wmv)
  *   - 3GP (.3gp)
+ * 
+ * 💻 **Code & Config Files**:
+ *   - JavaScript (.js, .jsx, .json, .jsonc)
+ *   - TypeScript (.ts, .tsx)
+ *   - Python (.py, .ipynb)
+ *   - Java (.java)
+ *   - C/C++ (.c, .cpp, .h)
+ *   - Go (.go)
+ *   - Ruby (.rb)
+ *   - PHP (.php)
+ *   - SQL (.sql)
+ *   - Shell (.sh, .bash, .ps1, .bat, .cmd)
+ *   - CSS (.css)
+ *   - Vue (.vue)
+ *   - GraphQL (.graphql, .gql)
+ *   - Config (.xml, .yaml, .yml, .ini, .env, .log, .cfg, .conf, .toml)
+ *   - Build files (.makefile, .dockerfile, .gitignore, .gitattributes)
+ *   - Package files (.package.json, .composer.json, .pom.xml, .requirements.txt, .manifest.json)
+ *   - Linting (.eslintrc, .prettierrc, .babelrc)
+ *   - Plist (.plist)
  */
 
 interface PreviewFactoryProps {
@@ -76,32 +98,63 @@ const getPreviewType = (file: File): PreviewType => {
     return 'image'
   }
 
-  // Documents (DOCX, TXT, DOC)
+  // HTML (check before text extensions)
+  if (
+    mimeType === 'text/html' ||
+    ext === 'html' ||
+    ext === 'htm'
+  ) {
+    return 'html'
+  }
+
+  // Markdown (check before text extensions)
+  if (
+    mimeType === 'text/markdown' ||
+    mimeType === 'text/x-markdown' ||
+    ext === 'md' ||
+    ext === 'markdown'
+  ) {
+    return 'markdown'
+  }
+
+  // Text-based files - use TextPreview
+  const textExtensions = [
+    'txt', 'csv', 'tsv', 'json', 'xml', 'yaml', 'yml', 'ini', 'env', 'log', 'cfg', 'conf',
+    'rst', 'js', 'ts', 'css', 'py', 'java', 'cpp', 'c', 'h', 'sql',
+    'sh', 'bash', 'ps1', 'bat', 'cmd', 'jsonc', 'vue', 'jsx', 'tsx', 'go', 'rb', 'php',
+    'toml', 'ipynb', 'plist', 'graphql', 'gql', 'makefile', 'dockerfile', 'gitignore',
+    'gitattributes', 'eslintrc', 'prettierrc', 'babelrc', 'requirements.txt', 'manifest.json',
+    'package.json', 'composer.json', 'pom.xml'
+  ]
+
+  if (textExtensions.includes(ext) || mimeType.startsWith('text/')) {
+    return 'text'
+  }
+
+  // Documents (DOCX, DOC, ODT, RTF)
   if (
     mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
     mimeType === 'application/msword' ||
-    mimeType === 'text/plain' ||
+    mimeType === 'application/vnd.oasis.opendocument.text' ||
+    mimeType === 'application/rtf' ||
     ext === 'docx' ||
     ext === 'doc' ||
-    ext === 'txt'
+    ext === 'odt' ||
+    ext === 'rtf'
   ) {
     if (ext === 'docx') {
       return 'docx'
-    } else if (ext === 'txt') {
-      return 'text'
     } else {
       return 'document'
     }
   }
 
-  // Excel (XLSX, XLS, CSV)
+  // Excel (XLSX, XLS)
   if (
     mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
     mimeType === 'application/vnd.ms-excel' ||
-    mimeType === 'text/csv' ||
     ext === 'xlsx' ||
-    ext === 'xls' ||
-    ext === 'csv'
+    ext === 'xls'
   ) {
     return 'excel'
   }
@@ -116,25 +169,6 @@ const getPreviewType = (file: File): PreviewType => {
     return 'video'
   }
 
-  // HTML
-  if (
-    mimeType === 'text/html' ||
-    ext === 'html' ||
-    ext === 'htm'
-  ) {
-    return 'html'
-  }
-
-  // Markdown
-  if (
-    mimeType === 'text/markdown' ||
-    mimeType === 'text/x-markdown' ||
-    ext === 'md' ||
-    ext === 'markdown'
-  ) {
-    return 'markdown'
-  }
-
   // Default
   return 'default'
 }
@@ -144,17 +178,17 @@ export default function PreviewFactory({ file }: PreviewFactoryProps) {
   const previewType = getPreviewType(file)
 
   const previewComponents: Record<PreviewType, React.ReactNode> = {
-    pdf: <PDFPreview file={file} />,
-    image: <ImagePreview file={file} />,
-    document: <DocumentPreview file={file} />,
-    excel: <ExcelPreview file={file} />,
-    audio: <AudioPreview file={file} />,
-    video: <VideoPreview file={file} />,
-    html: <HTMLPreview file={file} />,
-    markdown: <MarkdownPreview file={file} />,
-    default: <DefaultPreview file={file} />,
-    text: <TextPreview file={file} />,
-    docx: <DocxPreview file={file} />,
+    pdf: <PDFPreview key={file.name} file={file} />,
+    image: <ImagePreview key={file.name} file={file} />,
+    document: <DocumentPreview key={file.name} file={file} />,
+    excel: <ExcelPreview key={file.name} file={file} />,
+    audio: <AudioPreview key={file.name} file={file} />,
+    video: <VideoPreview key={file.name} file={file} />,
+    html: <HTMLPreview key={file.name} file={file} />,
+    markdown: <MarkdownPreview key={file.name} file={file} />,
+    default: <DefaultPreview key={file.name} file={file} />,
+    text: <TextPreview key={file.name} file={file} />,
+    docx: <DocxPreview key={file.name} file={file} />,
   }
 
   return previewComponents[previewType]
