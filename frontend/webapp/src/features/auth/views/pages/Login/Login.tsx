@@ -4,10 +4,14 @@ import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useLoginController } from '../../../controllers/useLoginController';
 import { useGoogleLogin } from '../../../controllers/useGoogleLogin';
+import { useAutoLogin } from '../../../controllers/useAutoLogin';
 import { useAppSelector } from '@store/hooks';
 import { REGISTER_PATH, FORGOT_PASSWORD_PATH } from '@constants';
 
 export const Login = () => {
+  // Auto-login từ account.txt nếu file tồn tại
+  useAutoLogin();
+
   const { handleLogin, isLoading } = useLoginController();
   const { handleGoogleLogin, isLoading: isGoogleLoading } = useGoogleLogin();
   const { error } = useAppSelector((state) => state.auth); // Get error from Redux
