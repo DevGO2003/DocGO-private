@@ -4,6 +4,12 @@ import UploadLayout from '../../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
 import SystemInfoPanel from '../components/SystemInfoPanel'
+import UploadSuccessNotification from '../components/UploadSuccessNotification'
+import RepositoryPicker from '../components/RepositoryPicker'
+import RecentUploadsPanel from '../components/RecentUploadsPanel'
+import { Modal } from '@shared/components'
+import { automationFileApi } from '../../models/api/automationFileApi'
+import { Button, Text, Card, CardHeader, CardContent, Stack } from '@shared/components'
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -12,6 +18,15 @@ export default function UploadPage() {
   const [baseContractId, setBaseContractId] = useState('')
   const [newVersionName, setNewVersionName] = useState('')
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
+
+  const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>('')
+  const [selectedRepositoryName, setSelectedRepositoryName] = useState<string>('')
+  const [recentRefreshKey, setRecentRefreshKey] = useState<number>(0)
+
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [successInfo, setSuccessInfo] = useState<{fileName: string; fileSize?: string; fileType?: string} | null>(null)
+  const [showError, setShowError] = useState(false)
+  const [errorInfo, setErrorInfo] = useState<{ message: string; status?: number } | null>(null)
 
   const handleOcrFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -23,19 +38,29 @@ export default function UploadPage() {
 
   const handleOcrExtract = async () => {
     if (!selectedFile) return
+    if (!selectedRepositoryId) {
+      setShowError(true)
+      setErrorInfo({ message: 'Vui lòng chọn repository trước khi upload' })
+      return
+    }
 
     setOcrLoading(true)
     try {
-      console.log('Uploading file:', selectedFile.name)
-      // TODO: Implement upload logic
-      // const response = await uploadFile(selectedFile)
+      const res = await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
+      const name = selectedFile.name
+      const sizeStr = `${(selectedFile.size / 1024).toFixed(2)} KB`
+      const type = selectedFile.type
 
-      // Simulate upload
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      console.log('Upload completed')
+      setSuccessInfo({ fileName: name, fileSize: sizeStr, fileType: type })
+      setShowSuccess(true)
       setSelectedFile(null)
-    } catch (error) {
-      console.error('Upload error:', error)
+      setRecentRefreshKey((k) => k + 1)
+    } catch (err: any) {
+      const message = err?.body?.description || err?.message || 'Tải lên thất bại'
+      const status = err?.status || undefined
+      setErrorInfo({ message, status })
+      setShowError(true)
+      console.error('Upload error:', err)
     } finally {
       setOcrLoading(false)
     }
@@ -49,9 +74,17 @@ export default function UploadPage() {
     >
       <UploadLayout>
         {/* Left Column: Upload Controls */}
-        <div className="lg:col-span-1 space-y-6 flex flex-col">
+        <Stack gap="6">
+              {/* Repository Picker */}
+              <Card>
+                <RepositoryPicker
+                  value={selectedRepositoryId}
+                  onChange={(id, name) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
+                />
+              </Card>
               {/* Versioning + Upload - Same Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* TODO: Refactor Grid bằng UI Kit nếu có */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
                 {/* Versioning Panel */}
                 <div>
                   <VersioningPanel
@@ -63,24 +96,23 @@ export default function UploadPage() {
                     setNewVersionName={setNewVersionName}
                   />
                 </div>
-
                 {/* Upload Panel - No scroll */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col min-h-fit">
-                  <div className="p-4 border-b border-gray-100">
-                    <h3 className="text-base font-semibold text-gray-900">
+                <Card className="flex flex-col min-h-fit">
+                  <CardHeader className="px-4 py-3 border-b border-gray-100">
+                    <Text variant="h3" fontWeight="semibold" color="gray900">
                       Tải tệp lên <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>
-                    </h3>
-                  </div>
-                  <div className="p-4 flex-1">
+                    </Text>
+                  </CardHeader>
+                  <CardContent className="p-4 flex-1">
                     <input
                       ref={ocrFileInputRef}
                       type="file"
                       onChange={handleOcrFileSelect}
                       className="hidden"
                     />
-
                     {selectedFile ? (
-                      <div className="space-y-3">
+                      <Stack gap="3">
+                        {/* File selected UI */}
                         <div className="grid grid-cols-[40px_1fr] gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                             <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -88,77 +120,75 @@ export default function UploadPage() {
                             </svg>
                           </div>
                           <div className="min-w-0 w-full">
-                            <h4 className="text-sm font-semibold text-gray-900 break-words" title={selectedFile.name}>{selectedFile.name}</h4>
-                            <p className="text-xs text-gray-600">
+                            <Text as="h4" className="text-sm font-semibold text-gray-900 break-words" title={selectedFile.name}>{selectedFile.name}</Text>
+                            <Text as="p" className="text-xs text-gray-600">
                               {(selectedFile.size / 1024).toFixed(2)} KB • {selectedFile.type || 'Không xác định'}
-                            </p>
+                            </Text>
                           </div>
                           <div className="col-span-2 grid grid-cols-2 gap-2">
-                            <button
+                            <Button
+                              variant="outline"
                               onClick={() => setSelectedFile(null)}
-                              className="inline-flex w-full justify-center px-3 py-1.5 text-xs border border-gray-300 text-gray-700 bg-transparent hover:bg-gray-50 rounded-lg transition-colors"
+                              className="w-full text-xs"
                             >
                               Chọn file khác
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="outline"
                               onClick={() => ocrFileInputRef.current?.click()}
-                              className="inline-flex w-full justify-center px-3 py-1.5 text-xs border border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 rounded-lg transition-colors"
+                              className="w-full text-xs"
                             >
                               Thay đổi
-                            </button>
+                            </Button>
                           </div>
                         </div>
-
-                        <button
+                        <Button
+                          fullWidth
+                          size="sm"
+                          variant="outline"
                           onClick={handleOcrExtract}
-                          disabled={!selectedFile || ocrLoading}
-                          className="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-all duration-200"
+                          disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
                         >
                           {ocrLoading ? (
                             <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
+                              {/* TODO: Replace svg spinner by <LoadingSpinner/> */}
                               Đang upload...
                             </>
                           ) : (
                             <>
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                              </svg>
+                              {/* TODO: Replace svg icon by <IconUpload /> */}
                               Xác nhận tải tệp lên
                             </>
                           )}
-                        </button>
-                      </div>
+                        </Button>
+                      </Stack>
                     ) : (
                       <div className="text-center py-4">
+                        {/* TODO: Refactor icon & text layout bằng UI Kit */}
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <h4 className="text-base font-semibold text-gray-900 mb-2">Kéo thả file vào đây để upload</h4>
-                        <p className="text-sm text-gray-600 mb-3">Hỗ trợ mọi loại file • Tối đa 50MB</p>
-                        <button
+                        <Text as="h4" className="text-base font-semibold text-gray-900 mb-2">Kéo thả file vào đây để upload</Text>
+                        <Text as="p" className="text-sm text-gray-600 mb-3">Hỗ trợ mọi loại file • Tối đa 50MB</Text>
+                        <Button
                           onClick={() => ocrFileInputRef.current?.click()}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                          className="inline-flex items-center"
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
                           Chọn file
-                        </button>
+                        </Button>
                       </div>
                     )}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
-
               {/* System Info Panel */}
               <SystemInfoPanel />
-            </div>
+            </Stack>
 
             {/* Right Column: File Preview */}
             <div className="lg:col-span-2 lg:row-span-3">
@@ -168,7 +198,7 @@ export default function UploadPage() {
                     {selectedFile ? `Preview: ${selectedFile.name}` : 'Chọn file để xem trước'}
                   </p>
                 </div>
-<div className="p-4 overflow-visible">
+                <div className="p-4 overflow-visible">
                   {selectedFile ? (
                     <PreviewFactory file={selectedFile} />
                   ) : (
@@ -185,7 +215,47 @@ export default function UploadPage() {
                 </div>
               </div>
             </div>
+            {/* Bottom: Recent Uploads */}
+            <div className="lg:col-span-3">
+              <RecentUploadsPanel key={recentRefreshKey} limit={5} />
+            </div>
       </UploadLayout>
+
+      {/* Success Modal */}
+      {showSuccess && successInfo && (
+        <UploadSuccessNotification
+          fileName={successInfo.fileName}
+          fileSize={successInfo.fileSize}
+          fileType={successInfo.fileType}
+          onClose={() => setShowSuccess(false)}
+          onUploadMore={() => setShowSuccess(false)}
+          showActions={false}
+        />
+      )}
+
+      {/* Error Modal */}
+      <Modal
+        isOpen={showError}
+        onClose={() => setShowError(false)}
+        title="Tải lên thất bại"
+        size="sm"
+      >
+        <div className="p-4">
+          <p className="text-sm text-gray-700">{errorInfo?.message || 'Đã xảy ra lỗi khi tải tệp lên.'}</p>
+          {errorInfo?.status && (
+            <p className="text-xs text-gray-500 mt-2">Mã lỗi: {errorInfo.status}</p>
+          )}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setShowError(false)}
+              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </Modal>
+
     </ControlMainLayout>
   )
 }
