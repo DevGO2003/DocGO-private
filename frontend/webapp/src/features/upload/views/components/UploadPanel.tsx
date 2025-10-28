@@ -51,7 +51,7 @@ export default function UploadPanel({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-80 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
       <div className="p-4 border-b border-gray-100">
         <h3 className="text-base font-semibold text-gray-900">
           Upload file <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>

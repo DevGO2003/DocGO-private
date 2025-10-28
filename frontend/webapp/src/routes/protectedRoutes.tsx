@@ -2,10 +2,13 @@ import { Route } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { ProtectedRoute } from '@shared/components';
 import { MainLayout } from '@shared/layouts';
-import {
+import { 
   Dashboard,
   RepositoryList,
   RepositoryDetail,
+  RepositoryFileDetail,
+  RepositoryFilesList,
+  RepositoryUploadDocument,
   OrganizationList,
   OrganizationDetail,
   OrganizationWorkspace,
@@ -31,7 +34,10 @@ export const protectedRoutes = (
 
     {/* Repository Routes */}
     <Route path={PROTECTED_ROUTES.REPOSITORIES} element={<RepositoryList />} />
+    <Route path={PROTECTED_ROUTES.REPOSITORY_FILES_LIST} element={<RepositoryFilesList />} />
     <Route path={PROTECTED_ROUTES.REPOSITORY_DETAIL} element={<RepositoryDetail />} />
+    <Route path={PROTECTED_ROUTES.REPOSITORY_FILE_DETAIL} element={<RepositoryFileDetail />} />
+    <Route path={PROTECTED_ROUTES.REPOSITORY_UPLOAD_DOCUMENT} element={<RepositoryUploadDocument />} />
 
     {/* Upload Routes */}
     <Route path={PROTECTED_ROUTES.UPLOAD} element={<UploadPage />} />

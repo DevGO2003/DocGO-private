@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react'
 import {HeaderPanel} from '../../layouts/HeaderPanel/HeaderPanel'
+import { LoadingSpinner } from '@shared/layouts/LoadingSpinner/LoadingSpinner'
 
 interface ControlMainLayoutProps {
   children: ReactNode
@@ -12,6 +13,10 @@ interface ControlMainLayoutProps {
   }>
   showToolbar?: boolean
   toolbarContent?: ReactNode
+  loading?: boolean
+  loadingText?: string
+  headerChildren?: ReactNode
+  headerRight?: ReactNode
 }
 
 /**
@@ -34,21 +39,46 @@ export function ControlMainLayout({
   breadcrumbs,
   showToolbar = false,
   toolbarContent,
+  loading = false,
+  loadingText = '',
+  headerChildren,
+  headerRight,
 }: ControlMainLayoutProps) {
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState(false)
 
   return (
     <div className="flex flex-col h-full w-full relative gap-2.5">
       {/* Header Panel */}
-      {(title || subtitle || (breadcrumbs && breadcrumbs.length > 0)) && (
+      {(title || subtitle || (breadcrumbs && breadcrumbs.length > 0) || headerChildren || headerRight) && (
         <div className="flex-shrink-0">
-          <HeaderPanel title={title ?? ''} subtitle={subtitle} breadcrumbs={breadcrumbs} />
+          <HeaderPanel title={title ?? ''} subtitle={subtitle} breadcrumbs={breadcrumbs} right={headerRight}>
+            {headerChildren}
+          </HeaderPanel>
         </div>
       )}
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        {children}
+      <div className="flex-1 overflow-y-auto relative">
+        {loading ? (
+          <div className="space-y-4 p-4">
+            <div className="animate-pulse space-y-3">
+              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
+              <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
+              <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
+            </div>
+            <div className="animate-pulse h-64 bg-gray-100 rounded-xl"></div>
+          </div>
+        ) : (
+          children
+        )}
+
+        {loading && (
+          <LoadingSpinner overlay transparentBg text={loadingText} />
+        )}
       </div>
 
       {/* Floating Toolbar Panel */}

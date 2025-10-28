@@ -1,0 +1,208 @@
+'use client'
+
+import React, { useState } from 'react'
+import { Header } from './Header'
+import { Footer } from './Footer'
+import Sidebar from './Sidebar'
+import { useAuth } from '@/hooks/useAuth'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { PageTransition } from '../common/PageTransition'
+import GlobalDragDrop from '../common/GlobalDragDrop'
+
+interface MainLayoutProps {
+  children: React.ReactNode
+  showSidebar?: boolean
+  showHeader?: boolean
+  showFooter?: boolean
+  sidebarCollapsed?: boolean
+  onSidebarToggle?: (collapsed: boolean) => void
+}
+
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  showSidebar = true,
+  showHeader = true,
+  showFooter = true,
+  sidebarCollapsed = false,
+  onSidebarToggle,
+}) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed)
+  const COLLAPSE_STORAGE_KEY = 'sidebar_collapsed'
+
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(COLLAPSE_STORAGE_KEY) : null
+      if (saved != null) {
+        setIsCollapsed(saved === 'true')
+      }
+    } catch {}
+  }, [])
+
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsCollapsed(collapsed)
+    onSidebarToggle?.(collapsed)
+    try {
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, String(collapsed))
+    } catch {}
+  }
+
+  return (
+    <div className={`h-screen overflow-hidden bg-gray-50 flex ${showSidebar ? (isCollapsed ? 'lg:pl-16' : 'lg:pl-64') : ''}`}>
+      {/* Sidebar */}
+      {showSidebar && (
+        <>
+          {/* Mobile overlay */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 z-40 lg:hidden bg-gray-600 bg-opacity-75 transition-opacity"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+          
+          {/* Sidebar */}
+          <div
+            className={`
+              fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0
+              ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}
+            `}
+          >
+            <Sidebar 
+              collapsed={isCollapsed}
+              onCollapseToggle={() => handleSidebarCollapse(!isCollapsed)}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        {showHeader && (
+          <Header
+            onMenuToggle={handleSidebarToggle}
+            showSearch={true}
+            showNotifications={true}
+            showUserMenu={true}
+          />
+        )}
+
+        {/* Page Content - internal scroll only */}
+        <main className="flex-1 overflow-auto" suppressHydrationWarning>
+          <div className="mx-auto px-2 py-6">
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </div>
+        </main>
+
+        {/* Footer */}
+        {showFooter && <Footer />}
+      </div>
+
+      {/* Desktop collapse toggle handle */}
+      {showSidebar && (
+        <button
+          type="button"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+          onClick={() => handleSidebarCollapse(!isCollapsed)}
+          className={`hidden lg:flex items-center justify-center fixed top-24 z-50 h-8 w-8 rounded-full border bg-white shadow-sm hover:shadow-md transition-all ${isCollapsed ? 'left-4' : 'left-64 -ml-4'}`}
+        >
+          <span className="text-sm font-semibold">{isCollapsed ? '>' : '<'}</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Layout variants
+export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading, isAuthenticated } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    // Temporarily disabled redirect to prevent loop with middleware
+    // TODO: Fix authentication flow coordination between middleware and client-side
+    console.log('[DashboardLayout] Auth check - isAuthenticated:', isAuthenticated, 'loading:', loading)
+    
+    // if (!loading && !isAuthenticated) {
+    //   // Add a longer delay to ensure AuthContext has fully initialized
+    //   // Check localStorage directly as fallback to prevent false redirects
+    //   const timeoutId = setTimeout(() => {
+    //     // Double-check auth state before redirecting
+    //     const hasStoredToken = typeof window !== 'undefined' && 
+    //       (window.localStorage.getItem('auth_token') || 
+    //        window.localStorage.getItem('docgo_auth_v1'))
+    //     
+    //     if (!hasStoredToken) {
+    //       console.log('[DashboardLayout] No stored token found, redirecting to login - isAuthenticated:', isAuthenticated, 'loading:', loading)
+    //       router.replace('/auth/login')
+    //     } else {
+    //       console.log('[DashboardLayout] Stored token found, waiting for AuthContext to sync - isAuthenticated:', isAuthenticated, 'loading:', loading)
+    //     }
+    //   }, 3000) // Tăng delay lên 3000ms để đảm bảo AuthContext sync hoàn toàn
+    //   
+    //   return () => clearTimeout(timeoutId)
+    // }
+  }, [loading, isAuthenticated, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900" />
+      </div>
+    )
+  }
+
+  // Temporarily disabled auth check for testing
+  // if (!user) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <h2 className="text-xl font-semibold text-gray-900 mb-2">Cần đăng nhập</h2>
+  //         <p className="text-gray-600">Vui lòng đăng nhập để truy cập trang này.</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
+
+  return (
+    <GlobalDragDrop>
+      <MainLayout
+        showSidebar={true}
+        showHeader={true}
+        showFooter={false}
+        sidebarCollapsed={false}
+      >
+        {children}
+      </MainLayout>
+    </GlobalDragDrop>
+  )
+}
+
+export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <MainLayout
+    showSidebar={false}
+    showHeader={false}
+    showFooter={true}
+  >
+    {children}
+  </MainLayout>
+)
+
+export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <MainLayout
+    showSidebar={false}
+    showHeader={true}
+    showFooter={true}
+  >
+    {children}
+  </MainLayout>
+)

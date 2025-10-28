@@ -1,3 +1,3 @@
 export * from './Unauthorized';
 export * from './NotFound';
-export { Settings } from '../features/settings/view/pages/Settings';
+export { Settings } from '../features/settings/views/pages/Settings';

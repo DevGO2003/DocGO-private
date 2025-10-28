@@ -28,6 +28,56 @@ export const fileAPI = {
     }
   },
 
+  // Get repository files (mock)
+  getRepositoryFiles: async (repositoryId: string) => {
+    // Mock some files based on repositoryId for demo purposes
+    const now = Date.now();
+    const files = [
+      {
+        fileId: `${repositoryId}-file-001`,
+        fileName: `Hợp đồng mua bán #${repositoryId}`,
+        size: 1536,
+        uploadedAt: new Date(now - 1000 * 60 * 60).toISOString(),
+        status: 'ACTIVE',
+        contractType: 'PURCHASE',
+        tags: ['legal', 'priority'],
+        fileType: 'pdf',
+        fileSize: 1536,
+      },
+      {
+        fileId: `${repositoryId}-file-002`,
+        fileName: `Báo cáo tài chính ${repositoryId}`,
+        size: 24576,
+        uploadedAt: new Date(now - 1000 * 60 * 30).toISOString(),
+        status: 'PENDING_REVIEW',
+        contractType: 'REPORT',
+        tags: ['finance'],
+        fileType: 'pdf',
+        fileSize: 24576,
+      },
+      {
+        fileId: `${repositoryId}-file-003`,
+        fileName: `Ghi chú cuộc họp ${repositoryId}`,
+        size: 768,
+        uploadedAt: new Date(now - 1000 * 60 * 5).toISOString(),
+        status: 'DRAFT',
+        contractType: 'NOTE',
+        tags: ['meeting'],
+        fileType: 'txt',
+        fileSize: 768,
+      },
+    ];
+
+    return {
+      statusCode: 200,
+      shortMessage: 'Repository files retrieved successfully (mock)',
+      data: {
+        files,
+        total: files.length,
+      },
+    };
+  },
+
   // Get file list
   getFileList: async (limit = 10, offset = 0) => {
     // TODO: Implement actual fetch

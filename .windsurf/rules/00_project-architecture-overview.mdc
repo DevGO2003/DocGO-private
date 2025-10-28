@@ -31,7 +31,7 @@ Dự án DocGO dùng kiến trúc microservices với các bộ quy tắc tách 
 - **05_memory-actor-standards.mdc** - Chuẩn hóa Actor cho Audit/Event
 - **06_chat-utilities.mdc** - Quy tắc tiện ích chat
 - **07_no-auto-md-creation.mdc** - Ngăn chặn tạo file MD tự động
-- **08_auto-ignore.mdc** - Tự động thêm vào .cursorignore
+- **08_auto-ignore.mdc** - Tự động thêm vào .windsurfignore
 - **file-checking-standards.mdc** - Quy tắc kiểm tra file tồn tại
 
 ### 6. Reference Standards
@@ -141,10 +141,8 @@ DocGO-private-new/
 │   └── EVENT-ARCHITECTURE-V3.md     # Event architecture documentation
 ├── frontend/                         # Frontend applications
 │   └── web-app/                     # Next.js Web App (Port 3000)
-├── .cursor/                          # Cursor IDE configuration
-│   ├── rules/                       # Cursor rules (.mdc files)
-│   ├── commands/                    # Cursor commands
-│   └── mcp.json                     # MCP server configuration
+├── .windsurf/                        # Windsurf configuration
+│   └── rules/                       # Windsurf rules (.mdc files)
 ├── docker-compose.yml               # Docker services orchestration
 ├── .env                            # Environment variables
 └── README.md                       # Project documentation
@@ -162,8 +160,7 @@ DocGO-private-new/
 
 ### Development Tools
 - **Docker & Docker Compose** - Containerization
-- **Cursor IDE** - AI-powered development
-- **MCP (Model Context Protocol)** - MongoDB, GitHub, Chrome integration
+- **Windsurf** - AI-powered development
 - **Swagger/OpenAPI** - API documentation
 
 ---

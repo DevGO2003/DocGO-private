@@ -7,6 +7,7 @@ interface RepositoryTabsProps {
   onTabChange: (tab: RepositoryType) => void;
   personalCount?: number;
   organizationCount?: number;
+  publicCount?: number;
 }
 
 export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
@@ -14,6 +15,7 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
   onTabChange,
   personalCount = 0,
   organizationCount = 0,
+  publicCount = 0,
 }) => {
   const tabs = [
     {
@@ -27,6 +29,12 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
       label: 'Tổ chức',
       count: organizationCount,
       description: 'Kho lưu trữ của tổ chức',
+    },
+    {
+      id: 'PUBLIC' as RepositoryType,
+      label: 'Công khai',
+      count: publicCount,
+      description: 'Kho lưu trữ công khai',
     },
   ];
 

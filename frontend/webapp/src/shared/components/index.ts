@@ -14,6 +14,7 @@ export * from './UIComponents/Flex';
 export * from './UIComponents/Stack';
 export * from './UIComponents/Table';
 export * from './UIComponents/Tabs/Tabs';
+export * from './Modals/CreateRepositoryModal';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

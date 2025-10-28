@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
-import { Button, Input, HeaderPanel } from '@shared/components';
+import { Button, Input, CreateRepositoryModal } from '@shared/components';
 import {
   usePersonalRepositories,
   useOrganizationRepositories,
+  usePublicRepositories,
   RepositoryType
 } from '@features/repositories';
 import { RepositoryTabs } from '@features/repositories/views/components/RepositoryTabs';
 import { RepositoryGrid } from '@features/repositories/views/components/RepositoryGrid';
-import { CreateRepositoryModal } from '@features/repositories/views/components/CreateRepositoryModal';
+import type { RepositoryCreateData } from '@features/repositories/models/types/repository.types';
+import { useCreateRepository } from '@features/repositories/models/api/repositoryApi';
 import { REPOSITORY_DETAIL_PATH } from '@shared/constants';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
+import { ControlMainLayout } from '@shared/layouts';
 
 export const RepositoryList = () => {
   const navigate = useNavigate();
@@ -19,9 +23,9 @@ export const RepositoryList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const createRepo = useCreateRepository();
   const size = 12;
 
-  // Fetch repositories based on active tab
   const {
     data: personalData,
     isLoading: personalLoading,
@@ -42,12 +46,29 @@ export const RepositoryList = () => {
     searchTerm: searchTerm || undefined,
   });
 
-  // Get current data based on active tab
-  const currentData = activeTab === 'PERSONAL' ? personalData : organizationData;
-  const currentLoading = activeTab === 'PERSONAL' ? personalLoading : organizationLoading;
-  const currentError = activeTab === 'PERSONAL' ? personalError : organizationError;
+  const {
+    data: publicData,
+    isLoading: publicLoading,
+    error: publicError
+  } = usePublicRepositories({
+    page,
+    size,
+    searchTerm: searchTerm || undefined,
+  });
 
-  // Convert error object to string for display
+  const currentData =
+    activeTab === 'PERSONAL' ? personalData :
+    activeTab === 'ORGANIZATION' ? organizationData :
+    publicData;
+  const currentLoading =
+    activeTab === 'PERSONAL' ? personalLoading :
+    activeTab === 'ORGANIZATION' ? organizationLoading :
+    publicLoading;
+  const currentError =
+    activeTab === 'PERSONAL' ? personalError :
+    activeTab === 'ORGANIZATION' ? organizationError :
+    publicError;
+
   const errorMessage = currentError
     ? typeof currentError === 'string'
       ? currentError
@@ -58,22 +79,11 @@ export const RepositoryList = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateSubmit = async (data: any) => {
+  const handleCreateSubmit = async (data: RepositoryCreateData) => {
     setIsCreating(true);
     try {
-      // TODO: Call API to create repository
-      console.log('Creating repository:', data);
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Close modal and refresh data
+      await createRepo.mutateAsync(data);
       setIsCreateModalOpen(false);
-
-      // TODO: Invalidate queries to refresh data
-      // queryClient.invalidateQueries(['personal-repositories']);
-      // queryClient.invalidateQueries(['organization-repositories']);
-
     } catch (error) {
       console.error('Failed to create repository:', error);
     } finally {
@@ -87,13 +97,13 @@ export const RepositoryList = () => {
 
   const handleTabChange = (tab: RepositoryType) => {
     setActiveTab(tab);
-    setPage(0); // Reset page when changing tabs
-    setSearchTerm(''); // Clear search when changing tabs
+    setPage(0);
+    setSearchTerm('');
   };
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    setPage(0); // Reset page when searching
+    setPage(0);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -101,41 +111,40 @@ export const RepositoryList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Panel */}
-        <HeaderPanel
-          title="My Repositories"
-          subtitle="Manage your document repositories and files"
-          right={
-            <Button
-              variant="outline"
-              onClick={handleCreateRepository}
-              className="inline-flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              New Repository
-            </Button>
-          }
+    <ControlMainLayout
+      title="My Repositories"
+      subtitle="Manage your document repositories and files"
+      breadcrumbs={[{ label: 'Repositories', href: '/repositories', current: true }]}
+      headerChildren={
+        <RepositoryTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          personalCount={personalData?.totalElements || 0}
+          organizationCount={organizationData?.totalElements || 0}
+          publicCount={publicData?.totalElements || 0}
         />
-
-        {/* Primary Content */}
-        <div>
-          {/* Tabs */}
-          <RepositoryTabs
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            personalCount={personalData?.totalElements || 0}
-            organizationCount={organizationData?.totalElements || 0}
-          />
-
+      }
+      headerRight={
+        <Button
+          variant="outline"
+          onClick={handleCreateRepository}
+          className="inline-flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          New Repository
+        </Button>
+      }
+      showToolbar={false}
+    >
+      <RepositoryLayout className="min-h-full">
+        <div className="max-w-7xl mx-auto w-full">
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder={`Tìm kiếm ${activeTab === 'PERSONAL' ? 'cá nhân' : 'tổ chức'} repositories...`}
+                placeholder={`Tìm kiếm ${activeTab === 'PERSONAL' ? 'cá nhân' : activeTab === 'ORGANIZATION' ? 'tổ chức' : 'công khai'} repositories...`}
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
@@ -205,7 +214,8 @@ export const RepositoryList = () => {
           onSubmit={handleCreateSubmit}
           isLoading={isCreating}
         />
-      </div>
-    </div>
+      </RepositoryLayout>
+    </ControlMainLayout>
   );
 };
+

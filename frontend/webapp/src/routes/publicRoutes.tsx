@@ -1,5 +1,5 @@
 import { Route } from 'react-router-dom';
-import { Login, Register, OAuth2Callback } from './routeComponents';
+import { Login, Register, OAuth2Callback, Home } from './routeComponents';
 import { PUBLIC_ROUTES, OAUTH_ROUTES } from './routeConfig';
 
 export const publicRoutes = (
@@ -11,5 +11,6 @@ export const publicRoutes = (
     {/* Public Routes */}
     <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
     <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
+    <Route path={PUBLIC_ROUTES.HOME} element={<Home />} />
   </>
 );

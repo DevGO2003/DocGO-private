@@ -3,6 +3,7 @@
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, Response, Form, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
+from collections import deque
 import io
 import json
 import uuid
@@ -71,15 +72,17 @@ progress_service = ProgressService()
 extract_file_service = ExtractFileService()
 contract_summary_service = ContractSummaryService()
 
+# Recent uploads in-memory queue (most recent last)
+RECENT_UPLOADS = deque(maxlen=50)
+
 
 @router.post("", summary="Upload document", tags=["📁 APIs Quản lý File"])
 async def upload_file(
     request: Request,
     file: UploadFile = File(...),
     repository_id: str = Form(...),
-    metadata: str | None = Form(None),
 ):
-    return await upload_document(request=request, file=file, metadata=metadata, repository_id=repository_id)
+    return await upload_document(request=request, file=file, repository_id=repository_id)
 
 
 @router.get("/{file_id}/download", summary="Download file")
@@ -173,6 +176,44 @@ async def get_all_files(
             path="/api/v1/automation-service/files"
         )
 
+
+@router.get("/recent", summary="Top uploads gần đây", response_model=RestResponse[List[dict]])
+async def get_recent_uploads(limit: int = Query(5)):
+    try:
+        # Get most recent items first
+        items = list(RECENT_UPLOADS)
+        if not items:
+            return RestResponse(
+                apiVersion="v1",
+                statusCode=200,
+                shortMessage="Success",
+                description="Không có uploads gần đây",
+                data=[],
+                timestamp=datetime.now().isoformat(),
+                requestId=str(uuid.uuid4()),
+                path="/api/v1/automation-service/files/recent"
+            )
+        items = list(reversed(items))[: max(1, min(50, limit))]
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Lấy danh sách upload gần đây thành công",
+            data=items,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path="/api/v1/automation-service/files/recent"
+        )
+    except Exception as e:
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=500,
+            shortMessage="Internal Server Error",
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path="/api/v1/automation-service/files/recent"
+        )
 
 @router.get("/{file_id}", summary="Chi tiết file", response_model=RestResponse[dict])
 async def get_file_details(
@@ -373,7 +414,6 @@ def detect_mime_type(file_content: bytes, filename: str, client_content_type: st
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
-    metadata: str | None = Form(None),
     repository_id: str | None = Form(None),
 ):
     """
@@ -442,7 +482,7 @@ async def upload_document(
             
             upload_result = await retry_async(
                 file_service.upload_file,
-                file, folder="documents", user_id="system",
+                file, folder="files", user_id="system",
                 max_retries=3,
                 backoff_factor=2.0,
                 exceptions=(Exception,),
@@ -472,6 +512,17 @@ async def upload_document(
                     "contentType": file.content_type
                 },
                 "metadata": {"source": "automation-service", "serviceVersion": "1.0.0"}
+            })
+
+            # Add to recent uploads queue
+            RECENT_UPLOADS.append({
+                "fileId": file_id,
+                "fileName": file.filename,
+                "fileSize": size,
+                "contentType": detected_mime_type,
+                "fileUrl": file_url,
+                "repositoryId": repository_id,
+                "uploadedAt": now_iso,
             })
             
         except Exception as e:

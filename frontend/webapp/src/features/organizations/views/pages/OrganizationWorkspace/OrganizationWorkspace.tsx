@@ -80,7 +80,6 @@ export const OrganizationWorkspace = () => {
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
-              animated
             >
               Back to Organizations
             </Button>
@@ -120,7 +119,6 @@ export const OrganizationWorkspace = () => {
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
               className="flex items-center gap-2"
-              animated
             >
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -130,7 +128,6 @@ export const OrganizationWorkspace = () => {
               variant="outline"
               className="flex items-center gap-2"
               onClick={() => setIsUploadDialogOpen(true)}
-              animated
             >
               <Upload className="w-4 h-4" />
               Upload Contract
@@ -253,7 +250,7 @@ export const OrganizationWorkspace = () => {
                         className="pl-10"
                       />
                     </div>
-                    <Button variant="outline" animated>
+                    <Button variant="outline">
                       Filter
                     </Button>
                   </div>
@@ -296,11 +293,13 @@ export const OrganizationWorkspace = () => {
                               <FileIcon className="w-5 h-5 text-blue-600 mt-1" />
                               <div className="flex-1">
                                 <h4 className="font-medium text-gray-900">{contract.title}</h4>
-                                {contract.description && (
-                                  <p className="text-sm text-gray-600 mt-1">{contract.description}</p>
+                                {contract.content && (
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
+                                  </p>
                                 )}
                                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                  <span>{contract.fileName}</span>
+                                  <span>{contract.type}</span>
                                   <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                                 </div>
                               </div>
@@ -367,20 +366,19 @@ export const OrganizationWorkspace = () => {
           {/* Members Tab */}
           {activeTab === 'members' && (
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Team Members</CardTitle>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center gap-2"
-                    onClick={() => navigate(`/organizations/${id}/members`)}
-                    animated
-                  >
-                    <Users className="w-4 h-4" />
-                    Manage Members
-                  </Button>
-                </div>
-              </CardHeader>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Team Members</CardTitle>
+                      <Button 
+                        variant="outline" 
+                        className="flex items-center gap-2"
+                        onClick={() => navigate(`/organizations/${id}/members`)}
+                      >
+                        <Users className="w-4 h-4" />
+                        Manage Members
+                      </Button>
+                    </div>
+                  </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -391,7 +389,6 @@ export const OrganizationWorkspace = () => {
                     variant="outline" 
                     className="inline-flex items-center gap-2"
                     onClick={() => navigate(`/organizations/${id}/members`)}
-                    animated
                   >
                     <Users className="w-4 h-4" />
                     Go to Members Management

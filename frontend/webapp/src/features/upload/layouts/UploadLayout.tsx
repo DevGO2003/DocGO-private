@@ -17,7 +17,7 @@ function UploadLayout({ children, className = '' }: UploadLayoutProps) {
   return (
     <div
       className={
-        `grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-full items-start ` +
+        `grid grid-cols-1 lg:grid-cols-3 gap-[10px] lg:gap-[10px] h-full items-start ` +
         // Only remove margins for immediate children to keep inner centering (mx-auto) working
         `[&>*]:m-0 ` +
         className

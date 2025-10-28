@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Button, LoadingSpinner, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text } from '@shared/components';
-import { Flex, Stack } from '@shared/components';
+import { Button, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import { fileAPI } from '@features/upload/services/file-api';
 import { DocumentsFilters } from '@features/repositories/views/components/DocumentsFilters/DocumentsFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
+import { ControlMainLayout } from '@shared/layouts';
 
 interface RepoFileItem {
   fileId: string;
@@ -56,20 +56,18 @@ export const RepositoryFilesList: React.FC = () => {
     );
   }, [files, search]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-center py-16">
-            <LoadingSpinner text="Đang tải danh sách tệp..." />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <ControlMainLayout
+      title="Repository Files"
+      subtitle={id ? `Mã repo: ${id}` : undefined}
+      breadcrumbs={[
+        { label: 'Repositories', href: '/repositories' },
+        { label: id ? `Repo ${id}` : 'Repository', href: id ? `/repositories/${id}` : '/repositories' },
+        { label: 'Files', current: true },
+      ]}
+      loading={isLoading}
+      loadingText="Đang tải danh sách tệp..."
+    >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header + Filters */}
         <Card>
@@ -162,6 +160,6 @@ export const RepositoryFilesList: React.FC = () => {
           </TableContainer>
         )}
       </div>
-    </div>
+    </ControlMainLayout>
   );
 }

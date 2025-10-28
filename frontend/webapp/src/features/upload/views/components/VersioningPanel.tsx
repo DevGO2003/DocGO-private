@@ -20,7 +20,7 @@ export default function VersioningPanel({
 }: VersioningPanelProps) {
   return (
     <Card>
-      <CardContent>
+      <CardContent className="pt-4">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div>
             <Text as="h4" className="text-base font-semibold text-gray-900">

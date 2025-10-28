@@ -3,11 +3,10 @@ import { BrowserRouter, Routes } from 'react-router-dom';
 import { publicRoutes } from './publicRoutes';
 import { protectedRoutes } from './protectedRoutes';
 import { errorRoutes } from './errorRoutes';
+import { LoadingSpinner } from '@shared/components';
 
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="text-lg">Loading...</div>
-  </div>
+  <LoadingSpinner fullScreen />
 );
 
 export const AppRouter = () => {

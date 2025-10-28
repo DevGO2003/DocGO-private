@@ -27,14 +27,24 @@ export const DASHBOARD_ROUTES = {
 } as const;
 
 // ============================================
+// 🌐 LANDING ROUTES
+// ============================================
+export const LANDING_ROUTES = {
+  HOME: '/home',
+} as const;
+
+// ============================================
 // 📁 REPOSITORY ROUTES
 // ============================================
 export const REPOSITORY_ROUTES = {
   LIST: '/repositories',
   DETAIL: '/repositories/:id',
+  FILES_LIST: '/repositories/:id/files',
   CREATE: '/repositories/create',
   EDIT: '/repositories/:id/edit',
+  FILE_DETAIL: '/repositories/:id/files/:fileId',
   UPLOAD: '/upload',
+  UPLOAD_DOCUMENT: '/repositories/:id/upload-document',
 } as const;
 
 // ============================================
@@ -131,6 +141,7 @@ export const validatePath = (
  */
 export const PUBLIC_ROUTES = {
   ...AUTH_ROUTES,
+  ...LANDING_ROUTES,
   ACCEPT_INVITATION: ORGANIZATION_ROUTES.ACCEPT_INVITATION,
 } as const;
 
@@ -182,9 +193,13 @@ export const FORGOT_PASSWORD_PATH = AUTH_ROUTES.FORGOT_PASSWORD;
 export const RESET_PASSWORD_PATH = AUTH_ROUTES.RESET_PASSWORD;
 export const HOME_PATH = DASHBOARD_ROUTES.HOME;
 export const DASHBOARD_PATH = DASHBOARD_ROUTES.DASHBOARD;
+export const LANDING_HOME_PATH = LANDING_ROUTES.HOME;
 export const REPOSITORIES_PATH = REPOSITORY_ROUTES.LIST;
 export const REPOSITORY_DETAIL_PATH = REPOSITORY_ROUTES.DETAIL;
+export const REPOSITORY_FILES_LIST_PATH = REPOSITORY_ROUTES.FILES_LIST;
 export const REPOSITORY_CREATE_PATH = REPOSITORY_ROUTES.CREATE;
+export const REPOSITORY_FILE_DETAIL_PATH = REPOSITORY_ROUTES.FILE_DETAIL;
+export const REPOSITORY_UPLOAD_DOCUMENT_PATH = REPOSITORY_ROUTES.UPLOAD_DOCUMENT;
 export const ORGANIZATIONS_PATH = ORGANIZATION_ROUTES.LIST;
 export const ORGANIZATION_DETAIL_PATH = ORGANIZATION_ROUTES.DETAIL;
 export const ORGANIZATION_CREATE_PATH = ORGANIZATION_ROUTES.CREATE;

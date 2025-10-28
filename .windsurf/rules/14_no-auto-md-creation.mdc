@@ -4,7 +4,7 @@ alwaysApply: true
 # Quy tắc ngăn chặn tạo file MD tự động
 
 ## Mục tiêu
-- Ngăn chặn Cursor AI tự động tạo file markdown (.md) không cần thiết
+- Ngăn chặn agent tự động tạo file markdown (.md) không cần thiết
 - Chỉ cho phép tạo file MD khi được yêu cầu rõ ràng
 - Giữ workspace sạch sẽ, tránh file rác
 
@@ -36,5 +36,5 @@ alwaysApply: true
 
 ## Ghi chú
 - Quy tắc này áp dụng cho mọi file có extension .md
-- Không áp dụng cho file .mdc (Cursor rules)
+- Không áp dụng cho file .mdc (Windsurf rules)
 - Ưu tiên giữ workspace sạch sẽ hơn việc tạo tài liệu tự động

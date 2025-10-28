@@ -72,10 +72,14 @@ export default function UploadPage() {
       breadcrumbs={[{ label: 'Upload', href: '/upload' }]}
     >
       <UploadLayout>
+        {/* Top: Recent Uploads */}
+        <div className="lg:col-span-3">
+          <RecentUploadsPanel key={recentRefreshKey} limit={5} />
+        </div>
         {/* Left Column: Upload Controls */}
         <div className="lg:col-span-1 space-y-6 flex flex-col">
               {/* Repository Picker */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex-none">
                 <RepositoryPicker
                   value={selectedRepositoryId}
                   onChange={(id: string, name: string) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
@@ -212,10 +216,7 @@ export default function UploadPage() {
                 </div>
               </div>
             </div>
-            {/* Bottom: Recent Uploads */}
-            <div className="lg:col-span-3">
-              <RecentUploadsPanel key={recentRefreshKey} limit={5} />
-            </div>
+
       </UploadLayout>
 
       {/* Success Modal */}

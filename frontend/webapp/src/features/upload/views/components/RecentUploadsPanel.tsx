@@ -53,15 +53,15 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
 
   return (
     <Card className={className}>
-      <CardContent>
-        <Stack gap={1}>
+      <CardContent style={{ paddingTop: 24 }}>
+        <Stack gap="10px">
           <Flex align="center" justify="between">
             <Text as="h3" className="text-base font-semibold text-gray-900">Uploads gần đây</Text>
             {loading && <Text as="span" className="text-xs text-gray-500">Đang tải...</Text>}
           </Flex>
 
           {error && (
-            <Text as="div" className="text-xs text-red-600">{error}</Text>
+            <Text as="p" className="text-xs text-red-600">{error}</Text>
           )}
 
           {(!items || items.length === 0) ? (

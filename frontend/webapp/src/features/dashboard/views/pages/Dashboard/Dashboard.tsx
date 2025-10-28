@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAppSelector } from '@store/hooks';
@@ -9,7 +9,7 @@ import {
 import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
-import { Card, CardContent, CardHeader, CardTitle, Button, Text } from '@shared/components';
+import { Card, CardContent, CardHeader, CardTitle, Button, Text, SketchBox, SketchCircle, SketchLine, LoadingSpinner } from '@shared/components';
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
@@ -32,24 +32,28 @@ export const Dashboard = () => {
       value: repositories?.totalElements || 0,
       change: '+12%',
       color: 'from-blue-500 to-purple-500',
+      icon: '📁',
     },
     {
       title: 'Files',
       value: files?.totalElements || 0,
       change: '+8%',
       color: 'from-green-500 to-teal-500',
+      icon: '🗂️',
     },
     {
       title: 'Organizations',
       value: organizations?.totalElements || 0,
       change: '+5%',
       color: 'from-orange-500 to-red-500',
+      icon: '🏢',
     },
     {
       title: 'Storage Used',
       value: '2.4 GB',
       change: '+15%',
       color: 'from-pink-500 to-rose-500',
+      icon: '💾',
     },
   ];
 
@@ -71,9 +75,34 @@ export const Dashboard = () => {
     },
   };
 
+  const NumberCounter = ({ value }: { value: number }) => {
+    const [display, setDisplay] = useState(0);
+    const target = typeof value === 'number' ? value : 0;
+    React.useEffect(() => {
+      let start = 0;
+      const duration = 600;
+      const startTime = performance.now();
+      let raf = 0;
+      const tick = (t: number) => {
+        const p = Math.min(1, (t - startTime) / duration);
+        setDisplay(Math.round(start + (target - start) * p));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      return () => cancelAnimationFrame(raf);
+    }, [target]);
+    return <>{display}</>;
+  };
+
   return (
     <div className="w-full p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative">
+        <div className="absolute -top-4 -left-6 opacity-40 pointer-events-none hidden md:block">
+          <SketchLine x1={0} y1={20} x2={140} y2={20} className="rotate-[-6deg]" />
+        </div>
+        <div className="absolute -top-6 right-0 opacity-30 pointer-events-none hidden md:block">
+          <SketchCircle diameter={80} className="" />
+        </div>
         {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -96,27 +125,32 @@ export const Dashboard = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
         >
           {stats.map((stat, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <Card className="h-full">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center`}>
-                    <span className="text-2xl text-white font-bold">
-                      {stat.value.toString().charAt(0)}
-                    </span>
-                  </div>
-                  <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
-                    {stat.title}
-                  </Text>
-                  <div className="flex items-baseline justify-between">
-                    <Text as="p" className="text-2xl font-bold text-gray-900">
-                      {stat.value}
+            <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02, rotate: 0.2 }}>
+              <div className="relative h-full">
+                <div className="absolute -inset-1 opacity-50">
+                  <SketchBox width={320} height={160} className="w-full h-full" />
+                </div>
+                <Card className="h-full relative">
+                  <CardContent className="p-6">
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
+                      <span className="text-2xl">
+                        {stat.icon}
+                      </span>
+                    </div>
+                    <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
+                      {stat.title}
                     </Text>
-                    <Text as="span" className="text-sm text-green-600 font-medium">
-                      {stat.change}
-                    </Text>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="flex items-baseline justify-between">
+                      <Text as="p" className="text-2xl font-bold text-gray-900">
+                        {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
+                      </Text>
+                      <Text as="span" className="text-sm text-green-600 font-medium">
+                        {stat.change}
+                      </Text>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -134,7 +168,7 @@ export const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 {reposLoading ? (
-                  <div className="text-center py-8 text-gray-500"><Text as="p" className="text-gray-500">Loading...</Text></div>
+                  <div className="py-6"><LoadingSpinner /></div>
                 ) : repositories && repositories.content.length > 0 ? (
                   <div className="space-y-3">
                     {repositories.content.slice(0, 5).map((repo) => (
@@ -183,7 +217,7 @@ export const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 {filesLoading ? (
-                  <div className="text-center py-8 text-gray-500"><Text as="p" className="text-gray-500">Loading...</Text></div>
+                  <div className="py-6"><LoadingSpinner /></div>
                 ) : files && files.content.length > 0 ? (
                   <div className="space-y-3">
                     {files.content.slice(0, 5).map((file) => (
@@ -238,7 +272,7 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent>
               {orgsLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <div className="py-6"><LoadingSpinner /></div>
               ) : organizations && organizations.content.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {organizations.content.map((org) => (

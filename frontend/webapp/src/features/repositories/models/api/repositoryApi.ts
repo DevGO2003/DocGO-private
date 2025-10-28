@@ -15,7 +15,7 @@ import {
   PaginatedResponse,
 } from '../types/repository.types';
 
-const BASE_PATH = '/api/v1/repository-management-service';
+const BASE_PATH = '/api/v1/repository-management-service/v1';
 
 // Repository API
 const repositoryApi = {
@@ -42,8 +42,9 @@ const repositoryApi = {
   },
 
   getPersonalRepositories: async (params?: PaginationParams & { userId?: string }): Promise<PaginatedResponse<Repository>> => {
+    // Align to backend Swagger: personal repos via /repositories/my
     const response = await apiClient.get<PaginatedResponse<Repository>>(
-      `${BASE_PATH}/repositories/personal`,
+      `${BASE_PATH}/repositories/my`,
       { params }
     );
     return response.data.data!;
@@ -55,6 +56,27 @@ const repositoryApi = {
       { params }
     );
     return response.data.data!;
+  },
+
+  getPublicRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
+    try {
+      const response = await apiClient.get<PaginatedResponse<Repository>>(
+        `${BASE_PATH}/repositories/public`,
+        { params }
+      );
+      return response.data.data!;
+    } catch (err) {
+      // Fallback khi backend chưa có: trả về trang rỗng để UI hiển thị bình thường
+      return {
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        currentPage: params?.page ?? 0,
+        pageSize: params?.size ?? 0,
+        hasNext: false,
+        hasPrevious: false,
+      };
+    }
   },
 
   createRepository: async (data: RepositoryCreateData): Promise<Repository> => {
@@ -207,7 +229,7 @@ export const useMyRepositories = (params?: PaginationParams) => {
 export const usePersonalRepositories = (params?: PaginationParams & { userId?: string }) => {
   return useQuery({
     queryKey: ['personal-repositories', params],
-    queryFn: () => repositoryApi.getPersonalRepositories({ ...params, userId: params?.userId || 'user-001' }),
+    queryFn: () => repositoryApi.getPersonalRepositories(params),
   });
 };
 
@@ -215,6 +237,13 @@ export const useOrganizationRepositories = (params?: PaginationParams & { organi
   return useQuery({
     queryKey: ['organization-repositories', params],
     queryFn: () => repositoryApi.getOrganizationRepositories({ ...params, organizationId: params?.organizationId || 'org-001' }),
+  });
+};
+
+export const usePublicRepositories = (params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['public-repositories', params],
+    queryFn: () => repositoryApi.getPublicRepositories(params),
   });
 };
 

@@ -1,6 +1,6 @@
 // Repository types matching backend
 
-export type RepositoryType = 'PERSONAL' | 'ORGANIZATION';
+export type RepositoryType = 'PERSONAL' | 'ORGANIZATION' | 'PUBLIC';
 
 export interface Repository {
   id: string;

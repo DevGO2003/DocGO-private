@@ -143,11 +143,11 @@ class FileStorageService:
                         Prefix=file_id
                     )
                     
-                    # If not found, try with documents folder
+                    # If not found, try with files folder
                     if 'Contents' not in response or not response['Contents']:
                         response = s3_client.list_objects_v2(
                             Bucket=self.s3_bucket,
-                            Prefix=f"documents/{file_id}"
+                            Prefix=f"files/{file_id}"
                         )
                     
                     # If still not found, try with automation-service prefix
@@ -431,9 +431,9 @@ class FileStorageService:
     
     def _generate_s3_key(self, file_id: str, filename: str, folder: Optional[str] = None, user_id: Optional[str] = None) -> str:
         
-        # Create folder structure: {folder or documents}/{file_id}_{filename}
-        # Use 'documents' as default folder to match existing S3 structure
-        folder_path = folder or "documents"
+        # Create folder structure: {folder or files}/{file_id}_{filename}
+        # Use 'files' as default folder per latest requirement
+        folder_path = folder or "files"
         return f"{folder_path}/{file_id}_{filename}"
     
     def _calculate_checksum(self, content: bytes) -> str:

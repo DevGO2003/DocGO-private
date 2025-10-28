@@ -35,6 +35,14 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.href = '/';
   };
 
+  handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -65,18 +73,22 @@ export class ErrorBoundary extends Component<Props, State> {
                   </details>
                 )}
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 flex-wrap">
+                  <Button 
+                    variant="outline" 
+                    onClick={this.handleBack}
+                  >
+                    Quay lại
+                  </Button>
                   <Button 
                     variant="outline" 
                     onClick={this.handleReset}
-                    animated
                   >
                     Go to Home
                   </Button>
                   <Button 
                     variant="outline" 
                     onClick={() => window.location.reload()}
-                    animated
                   >
                     Reload Page
                   </Button>
