@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { Button, Input, CreateRepositoryModal } from '@shared/components';
@@ -18,6 +19,7 @@ import { ControlMainLayout } from '@shared/layouts';
 
 export const RepositoryList = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<RepositoryType>('PERSONAL');
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,6 +86,17 @@ export const RepositoryList = () => {
     try {
       await createRepo.mutateAsync(data);
       setIsCreateModalOpen(false);
+      // Force refetch ngay tab hiện tại để hiển thị repo mới
+      if (activeTab === 'PERSONAL') {
+        await queryClient.invalidateQueries({ queryKey: ['personal-repositories'] });
+        await queryClient.refetchQueries({ queryKey: ['personal-repositories'] });
+      } else if (activeTab === 'ORGANIZATION') {
+        await queryClient.invalidateQueries({ queryKey: ['organization-repositories'] });
+        await queryClient.refetchQueries({ queryKey: ['organization-repositories'] });
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ['public-repositories'] });
+        await queryClient.refetchQueries({ queryKey: ['public-repositories'] });
+      }
     } catch (error) {
       console.error('Failed to create repository:', error);
     } finally {

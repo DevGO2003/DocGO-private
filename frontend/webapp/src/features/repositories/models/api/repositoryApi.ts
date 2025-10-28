@@ -260,8 +260,13 @@ export const useCreateRepository = () => {
   return useMutation({
     mutationFn: repositoryApi.createRepository,
     onSuccess: () => {
+      // Generic lists
       queryClient.invalidateQueries({ queryKey: ['repositories'] });
       queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+      // Pages using specific keys
+      queryClient.invalidateQueries({ queryKey: ['personal-repositories'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-repositories'] });
+      queryClient.invalidateQueries({ queryKey: ['public-repositories'] });
     },
   });
 };
