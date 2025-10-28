@@ -2,6 +2,7 @@ package com.devgo2003.docgo.backend.user_service.controller;
 
 import com.devgo2003.docgo.backend.user_service.entity.User;
 import com.devgo2003.docgo.backend.user_service.service.UserService;
+import com.devgo2003.docgo.backend.user_service.service.OrganizationService;
 import com.devgo2003.docgo.backend.user_service.common.response.RestResponse;
 import com.devgo2003.docgo.backend.user_service.dto.UserSearchRequest;
 import com.devgo2003.docgo.backend.user_service.dto.OrganizationResponse;
@@ -568,52 +569,24 @@ public class UserController {
         Loại: string
         Mô tả: ID của người dùng cần cập nhật
         
-        📝 userDetails (bắt buộc, body)
-        Loại: User
-        Mô tả: Thông tin cập nhật cho người dùng
+        📝 request (bắt buộc, body)
+        Loại: UpdateUserRequest
+        Mô tả: Thông tin cập nhật (firstName, lastName, email, phone)
         
         🔹 Đầu ra
         
         📝 data
         Loại: User
         Mô tả: Thông tin người dùng đã được cập nhật
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 400: Bad Request, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<User>> updateUser(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody User userDetails) {
+            @Parameter(description = "Thông tin cập nhật") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.UpdateUserRequest request) {
         
-        log.info("Updating user: {}", id);
+        log.info("Updating user: {} with data: {}", id, request);
         
-        User updatedUser = userService.updateUser(id, userDetails);
+        User updatedUser = userService.updateUserInfo(id, request);
         
         return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
@@ -633,57 +606,66 @@ public class UserController {
         Loại: string
         Mô tả: ID của người dùng cần cập nhật trạng thái
         
-        📊 status (bắt buộc, query)
-        Loại: User.UserStatus
-        Mô tả: Trạng thái mới (ACTIVE, INACTIVE, SUSPENDED, LOCKED)
+        📊 request (bắt buộc, body)
+        Loại: UpdateStatusRequest
+        Mô tả: Request chứa trạng thái mới (ACTIVE, INACTIVE, SUSPENDED, DELETED)
         
         🔹 Đầu ra
         
         📝 data
         Loại: User
         Mô tả: Thông tin người dùng với trạng thái đã cập nhật
-        
-        📊 apiVersion
-        Loại: string
-        Mô tả: Phiên bản API (v1)
-        
-        🔢 statusCode
-        Loại: integer
-        Mô tả: Mã trạng thái HTTP (200: OK, 404: Not Found)
-        
-        📋 shortMessage
-        Loại: string
-        Mô tả: Thông báo ngắn gọn về kết quả
-        
-        📖 description
-        Loại: string
-        Mô tả: Mô tả chi tiết về kết quả xử lý
-        
-        🕒 timestamp
-        Loại: string (ISO-8601)
-        Mô tả: Thời gian xử lý yêu cầu
-        
-        🆔 requestId
-        Loại: string (UUID)
-        Mô tả: Định danh duy nhất của yêu cầu
-        
-        🛣️ path
-        Loại: string
-        Mô tả: Đường dẫn API được gọi
         """
     )
     public ResponseEntity<RestResponse<User>> updateUserStatus(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Trạng thái mới") @RequestParam User.UserStatus status) {
+            @Parameter(description = "Request cập nhật trạng thái") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.UpdateStatusRequest request) {
         
-        log.info("Updating user status: {} to {}", id, status);
+        log.info("Updating user status: {} to {}", id, request.getStatus());
         
-        User updatedUser = userService.updateUserStatus(id, status);
+        User updatedUser = userService.updateUserStatus(id, request.getStatus());
         
         return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Đã cập nhật trạng thái người dùng thành công")
+                .data(updatedUser)
+                .build());
+    }
+    
+    @PutMapping("/{id}/role")
+    @Operation(
+        summary = "Cập nhật vai trò người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần cập nhật vai trò
+        
+        👤 request (bắt buộc, body)
+        Loại: UpdateRoleRequest
+        Mô tả: Request chứa vai trò mới (ADMIN, USER, MODERATOR)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: User
+        Mô tả: Thông tin người dùng với vai trò đã cập nhật
+        """
+    )
+    public ResponseEntity<RestResponse<User>> updateUserRole(
+            @Parameter(description = "ID người dùng") @PathVariable String id,
+            @Parameter(description = "Request cập nhật vai trò") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.UpdateRoleRequest request) {
+        
+        log.info("Updating user role: {} to {}", id, request.getRole());
+        
+        User updatedUser = userService.updateUserRole(id, request.getRole());
+        
+        return ResponseEntity.ok(RestResponse.<User>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã cập nhật vai trò người dùng thành công")
                 .data(updatedUser)
                 .build());
     }
@@ -828,9 +810,9 @@ public class UserController {
         Loại: string
         Mô tả: ID của người dùng cần đổi mật khẩu
         
-        🔑 newPassword (bắt buộc, query)
-        Loại: string
-        Mô tả: Mật khẩu mới
+        🔑 request (bắt buộc, body)
+        Loại: ChangePasswordRequest
+        Mô tả: Request chứa mật khẩu mới
         
         🔹 Đầu ra
         
@@ -869,11 +851,11 @@ public class UserController {
     )
     public ResponseEntity<RestResponse<User>> updatePassword(
             @Parameter(description = "ID người dùng") @PathVariable String id,
-            @Parameter(description = "Mật khẩu mới") @RequestParam String newPassword) {
+            @Parameter(description = "Request đổi mật khẩu") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.ChangePasswordRequest request) {
         
         log.info("Updating password for user: {}", id);
         
-        User updatedUser = userService.updatePassword(id, newPassword);
+        User updatedUser = userService.updatePassword(id, request.getNewPassword());
         
         return ResponseEntity.ok(RestResponse.<User>builder()
                 .statusCode(200)

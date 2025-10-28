@@ -237,12 +237,54 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
+    public User updateUserInfo(String id, com.devgo2003.docgo.backend.user_service.dto.UpdateUserRequest request) {
+        log.info("Updating user info: {} with data: {}", id, request);
+        
+        return userRepository.findById(id)
+                .map(user -> {
+                    if (request.getFirstName() != null) {
+                        user.setFirstName(request.getFirstName());
+                    }
+                    if (request.getLastName() != null) {
+                        user.setLastName(request.getLastName());
+                    }
+                    if (request.getEmail() != null) {
+                        user.setEmail(request.getEmail());
+                    }
+                    if (request.getPhone() != null) {
+                        user.setPhone(request.getPhone());
+                    }
+                    if (request.getAvatarUrl() != null) {
+                        user.setAvatarUrl(request.getAvatarUrl());
+                    }
+                    if (request.getProfilePicture() != null) {
+                        user.setProfilePicture(request.getProfilePicture());
+                    }
+                    
+                    user.setUpdatedAt(LocalDateTime.now());
+                    return userRepository.save(user);
+                })
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+    
     public User updateUserStatus(String id, User.UserStatus status) {
         log.info("Updating user status: {} to {}", id, status);
         
         return userRepository.findById(id)
                 .map(user -> {
                     user.setStatus(status);
+                    return userRepository.save(user);
+                })
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+    
+    public User updateUserRole(String id, User.UserRole role) {
+        log.info("Updating user role: {} to {}", id, role);
+        
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setRole(role);
+                    user.setUpdatedAt(LocalDateTime.now());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));

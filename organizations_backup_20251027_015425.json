@@ -1,0 +1,1442 @@
+﻿[
+    {
+        "id":  "2b545924-e92b-440c-9071-1e7bdbfce9a8",
+        "name":  "truong luan",
+        "code":  null,
+        "description":  "12331",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T17:08:43.57",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "576c8a3c-dcd6-4174-97e5-c20111b48106",
+        "name":  "kkhaasdfsd",
+        "code":  null,
+        "description":  "fsdf",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:18:52.48",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "9c2e1327-805f-4684-9ed1-85535195d016",
+        "name":  "aaaaa",
+        "code":  null,
+        "description":  "aa",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:20:52.312",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "cec98208-a8cc-4518-8a15-9106665ee2dc",
+        "name":  "ffffff",
+        "code":  null,
+        "description":  "ffff",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:35:56.833",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "be55c9c4-9968-4047-a738-874a333b1f81",
+        "name":  "ffffffff",
+        "code":  null,
+        "description":  "ff",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:36:16.221",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "6ba08f46-6150-4b88-ae6b-f19ed7096dd8",
+        "name":  "dfsdf",
+        "code":  null,
+        "description":  "fsdfs",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:37:15.525",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "a32a9695-2c4f-42c5-96a2-52c4971d34da",
+        "name":  "ggg",
+        "code":  null,
+        "description":  "ggg",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:41:10.367",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "4eadda85-c834-4a5d-85b7-993c419b3624",
+        "name":  "fff",
+        "code":  null,
+        "description":  "f",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:44:58.179",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "629e3927-86e3-4e9b-92f8-76b071eb2ceb",
+        "name":  "dÃ¡d",
+        "code":  null,
+        "description":  "dÃ¡",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:55:56.016",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "d5890a0f-55d1-4272-b70c-afae8501926a",
+        "name":  "truongluan34",
+        "code":  null,
+        "description":  "ggg",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T15:12:16.897",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "1e4d4225-818c-43f6-ad55-1ade23be1844",
+        "name":  "truongluan333",
+        "code":  null,
+        "description":  "123123",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T15:18:29.545",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "c08e34d6-78ae-4640-9f59-fe21cc85ec97",
+        "name":  "truongluan3332",
+        "code":  null,
+        "description":  "",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T15:22:08.826",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "d01610db-95e1-489b-aa91-d22aac599415",
+        "name":  "ytr",
+        "code":  null,
+        "description":  "á»·ty",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:17:12.112",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "2c91992d-5253-4ca6-ba34-86540a5ec3bc",
+        "name":  "truong luan 2",
+        "code":  null,
+        "description":  "sadasd",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T17:09:04.845",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "7f250deb-6e50-4c09-addf-6780348bae94",
+        "name":  "truong luan 333",
+        "code":  null,
+        "description":  "fksdjlfkjsdl",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T17:53:00.719",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "463f738a-a365-4586-8316-ff5a3bf51b99",
+        "name":  "truong luan 334",
+        "code":  null,
+        "description":  "qeqwwq",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:02:52.221",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "dfee16dc-9d3a-4b65-a720-6bc923e1b047",
+        "name":  "fsd",
+        "code":  null,
+        "description":  "fsdf",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:08:43.343",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "6d2f6ebd-c165-4a99-a88e-07085e644ff7",
+        "name":  "dfasd",
+        "code":  null,
+        "description":  "dd",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:15:27.028",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "07a9b81c-7f12-4340-8bcb-db9eed26ff1e",
+        "name":  "SADASD",
+        "code":  null,
+        "description":  "DDD",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:27:17.54",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "83a1eca4-6171-45b6-9251-7cc627f497eb",
+        "name":  "gfdgd",
+        "code":  null,
+        "description":  "ggg",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:32:05.387",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "69754180-b5f9-4e17-83e5-5502ececa2fb",
+        "name":  "dgdf",
+        "code":  null,
+        "description":  "gdfgdf",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9ca2e91f53c6881fdc1b1",
+        "adminUserIds":  [
+                             "68f9ca2e91f53c6881fdc1b1"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:37:33.361",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "556179ae-01e7-420d-817a-17b20517363d",
+        "name":  "cxzc",
+        "code":  null,
+        "description":  "czxcz",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:38:34.894",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "6e4f45d1-ea9f-4b0a-a43b-0c3a2e23a41b",
+        "name":  "string",
+        "code":  "string",
+        "description":  "string",
+        "address":  "string",
+        "phone":  "string",
+        "email":  "string",
+        "website":  "string",
+        "ownerUserId":  "string",
+        "adminUserIds":  [
+                             "string"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-26T18:26:51.727",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "14dd3d64-7183-4407-8bf3-40c014834319",
+        "name":  "truongluan33377",
+        "code":  null,
+        "description":  "sdfsdfsd",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-26T18:47:27.406",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "8c78bef9-64a6-4b12-8879-fda2914a8c57",
+        "name":  "AdminOrg21960572511",
+        "code":  "AO21331390785",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T17:01:19.865",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "bb319093-b5fc-469f-aec2-6bb319c15fab",
+        "name":  "TestOrg2_613970494",
+        "code":  "TO21951394230",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fb9f6909310665bc19f3b7",
+        "adminUserIds":  [
+                             "68fb9f6909310665bc19f3b7"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T15:46:52.605",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "22136e67-9c48-4615-9930-0577dff00571",
+        "name":  "FixOrg",
+        "code":  "FIX001",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fba02009310665bc19f3ba",
+        "adminUserIds":  [
+                             "68fba02009310665bc19f3ba"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T15:49:52.751",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "28d74628-be0a-4282-bc37-56c87bd4e906",
+        "name":  "FinalOrg1647947578",
+        "code":  "FO2070023788",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fba6a125c3adc6d43b30f8",
+        "adminUserIds":  [
+                             "68fba6a125c3adc6d43b30f8"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:17:39.448",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "b0576394-9742-4997-a6a3-d0bddda62ece",
+        "name":  "FinalOrg2_269284126",
+        "code":  "FO2480148831",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fba6a125c3adc6d43b30f8",
+        "adminUserIds":  [
+                             "68fba6a125c3adc6d43b30f8"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:17:42.813",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "ffd5bb44-1e64-46c3-ad04-94aa72ad6c68",
+        "name":  "Updated Name",
+        "code":  "DBG001",
+        "description":  "Updated Desc",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fba7c825c3adc6d43b30fb",
+        "adminUserIds":  [
+                             "68fba7c825c3adc6d43b30fb"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:22:33.732",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "98127655-f093-4c02-9348-9df94ba3bcc7",
+        "name":  "TestOrg2_591053737",
+        "code":  "TO2982244048",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fba9ec9e1230eab8824151",
+        "adminUserIds":  [
+                             "68fba9ec9e1230eab8824151"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:31:44.77",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "f3e2fe49-e85c-4feb-ac08-0b40046c837a",
+        "name":  "TestOrg21708745191",
+        "code":  "TO21132353025",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbad721ea4a7ef10b48be8",
+        "adminUserIds":  [
+                             "68fbad721ea4a7ef10b48be8"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:46:46.352",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "583d698f-7cc6-4635-9f27-4cc0217cde54",
+        "name":  "Updated Organization",
+        "code":  "TO1708539567",
+        "description":  "Updated Description",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbae621ea4a7ef10b48beb",
+        "adminUserIds":  [
+                             "68fbae621ea4a7ef10b48beb"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:50:51.375",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "2765c26d-e5cc-441b-a601-ebf68c454e86",
+        "name":  "TestOrg21882686696",
+        "code":  "TO21890000736",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbae621ea4a7ef10b48beb",
+        "adminUserIds":  [
+                             "68fbae621ea4a7ef10b48beb"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:50:48.883",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "25e42f41-118a-4822-b841-b152385d7627",
+        "name":  "TestOrg791631272",
+        "code":  "TO225133038",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbafc2b67c10a66216f9d8",
+        "adminUserIds":  [
+                             "68fbafc2b67c10a66216f9d8"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T16:56:38.151",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "c0002815-7de4-411c-8a60-251401bc7ca1",
+        "name":  "Updated Admin Org",
+        "code":  "AO644396652",
+        "description":  "Updated by admin",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T17:01:24.22",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "9ef41f37-400c-40dc-a96d-0611b9c43ca5",
+        "name":  "Updated Org",
+        "code":  "TO1060267929",
+        "description":  "Updated",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fb9f6909310665bc19f3b7",
+        "adminUserIds":  [
+                             "68fb9f6909310665bc19f3b7"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T15:46:52.038",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "18eeb844-c058-4385-b26c-75af35af42b9",
+        "name":  "FinalOrg484435596",
+        "code":  "FO639779460",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T17:11:50.719",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "18765fc5-212d-4517-99eb-eb4c54bcc0ed",
+        "name":  "Org2771716884",
+        "code":  "O2138874059",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:16:11.822",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "f4050fc4-f0c9-459a-b83d-3430b78af380",
+        "name":  "TestOrg972632867",
+        "code":  "TO2077024697",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbb7bd6552579361d3de30",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  2,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:09:04.21",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "39d2c56b-f8c6-43b4-9a20-0a7e31a5ec19",
+        "name":  "Org21778150385",
+        "code":  "O2889128505",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T17:30:44.232",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "2add9326-8e11-4404-8d2f-40aa528d0669",
+        "name":  "Updated Test Org 557771235",
+        "code":  "TO36781680",
+        "description":  "This is an updated description",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T15:12:46.834",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "1a6b468b-257b-4959-9647-9279bd1aff43",
+        "name":  "Updated_FinalOrg_819434430",
+        "code":  "FTO_807614494",
+        "description":  "Updated Description",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68fbb8b76552579361d3de36",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T18:03:18.285",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "65b4dbf2-6c27-40bc-b4d2-8f8c934845a6",
+        "name":  "SecondOrg_388087070",
+        "code":  "SO_419957924",
+        "description":  null,
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-24T17:34:53.756",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "a945d222-3116-4f46-8e82-ac5f91fe685c",
+        "name":  "truongluan",
+        "code":  null,
+        "description":  "dskjf",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T17:53:27.788",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "14e67ed6-ecd4-45ed-9f23-659349919be8",
+        "name":  "kkhaa",
+        "code":  null,
+        "description":  "truong luan ",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T17:11:17.766",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "feb380f0-4299-4035-a7ee-e89fca1dd6df",
+        "name":  "truongluan3",
+        "code":  null,
+        "description":  "fsÄf",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:10:40.918",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    },
+    {
+        "id":  "f20dca20-8e49-4ca3-bd94-774191bff789",
+        "name":  "truong 3",
+        "code":  null,
+        "description":  "4324234",
+        "address":  null,
+        "phone":  null,
+        "email":  null,
+        "website":  null,
+        "ownerUserId":  "68f9cabd91f53c6881fdc1b3",
+        "adminUserIds":  [
+                             "68f9cabd91f53c6881fdc1b3"
+                         ],
+        "memberCount":  1,
+        "settings":  {
+                         "allowMemberInvite":  true,
+                         "requireAdminApproval":  false,
+                         "maxMembers":  null,
+                         "customSettings":  null
+                     },
+        "status":  "ACTIVE",
+        "createdBy":  null,
+        "updatedBy":  null,
+        "createdAt":  null,
+        "updatedAt":  "2025-10-25T14:13:51.512",
+        "deletedAt":  null,
+        "userIds":  null,
+        "userRole":  null,
+        "userPermissions":  null
+    }
+]
