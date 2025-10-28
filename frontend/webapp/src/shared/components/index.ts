@@ -10,6 +10,9 @@ export * from './UIComponents/Label';
 export * from './UIComponents/Textarea';
 export * from './UIComponents/Sketch';
 export * from './UIComponents/Text';
+export * from './UIComponents/Flex';
+export * from './UIComponents/Stack';
+export * from './UIComponents/Table';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

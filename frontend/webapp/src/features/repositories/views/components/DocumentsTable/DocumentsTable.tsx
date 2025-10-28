@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import { Link } from 'react-router-dom';
-import { Table, TableHeader, TableRow, TableCell, Text } from '@shared/components';
+import { Table, TableHeader, TableRow, TableCell, Text, TableContainer } from '@shared/components';
 
 export interface DocumentsTableItem {
   fileId: string;
@@ -16,27 +16,27 @@ export interface DocumentsTableItem {
 export const DocumentsTable: React.FC<{ items: DocumentsTableItem[]; repositoryId: string }>
   = ({ items, repositoryId }) => {
   return (
-    <Table.Container>
-      <Table minWidth="full" dividerColor="gray200">
+    <TableContainer>
+      <Table>
         <thead>
-          <TableRow bg="gray50">
-            <TableHeader align="left"><Text size="xs" fontWeight="medium" color="gray500" textTransform="uppercase">Tài liệu</Text></TableHeader>
-            <TableHeader align="left"><Text size="xs" fontWeight="medium" color="gray500" textTransform="uppercase">Trạng thái</Text></TableHeader>
-            <TableHeader align="left"><Text size="xs" fontWeight="medium" color="gray500" textTransform="uppercase">Loại</Text></TableHeader>
-            <TableHeader align="left"><Text size="xs" fontWeight="medium" color="gray500" textTransform="uppercase">Kích thước</Text></TableHeader>
-            <TableHeader align="left"><Text size="xs" fontWeight="medium" color="gray500" textTransform="uppercase">Tải lên lúc</Text></TableHeader>
+          <TableRow>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tài liệu</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Trạng thái</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Loại</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Kích thước</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tải lên lúc</Text></TableHeader>
             <TableHeader></TableHeader>
           </TableRow>
         </thead>
         <tbody>
           {items.map((f) => (
             <TableRow key={f.fileId}>
-              <TableCell><Text size="sm" color="gray900" isBreakAll>{f.fileName}</Text></TableCell>
-              <TableCell><Text size="sm" color="gray600">{f.status || '-'}</Text></TableCell>
-              <TableCell><Text size="sm" color="gray600">{f.contractType || '-'}</Text></TableCell>
-              <TableCell><Text size="sm" color="gray600">{(f.fileSize ?? 0)} bytes</Text></TableCell>
-              <TableCell><Text size="sm" color="gray600">{f.uploadedAt ? new Date(f.uploadedAt).toLocaleString('vi-VN') : '-'}</Text></TableCell>
-              <TableCell align="right">
+              <TableCell><Text className="text-sm text-gray-900 break-all">{f.fileName}</Text></TableCell>
+              <TableCell><Text className="text-sm text-gray-600">{f.status || '-'}</Text></TableCell>
+              <TableCell><Text className="text-sm text-gray-600">{f.contractType || '-'}</Text></TableCell>
+              <TableCell><Text className="text-sm text-gray-600">{(f.fileSize ?? 0)} bytes</Text></TableCell>
+              <TableCell><Text className="text-sm text-gray-600">{f.uploadedAt ? new Date(f.uploadedAt).toLocaleString('vi-VN') : '-'}</Text></TableCell>
+              <TableCell>
                 <Link
                   to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: repositoryId, fileId: f.fileId })}
                 >
@@ -47,6 +47,6 @@ export const DocumentsTable: React.FC<{ items: DocumentsTableItem[]; repositoryI
           ))}
         </tbody>
       </Table>
-    </Table.Container>
+    </TableContainer>
   );
 }

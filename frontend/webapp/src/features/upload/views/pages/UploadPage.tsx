@@ -7,9 +7,8 @@ import SystemInfoPanel from '../components/SystemInfoPanel'
 import UploadSuccessNotification from '../components/UploadSuccessNotification'
 import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
-import { Modal } from '@shared/components'
 import { automationFileApi } from '../../models/api/automationFileApi'
-import { Button, Text, Card, CardHeader, CardContent, Stack } from '@shared/components'
+import { Button, Text, Modal } from '@shared/components'
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -46,7 +45,7 @@ export default function UploadPage() {
 
     setOcrLoading(true)
     try {
-      const res = await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
+      await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
       const name = selectedFile.name
       const sizeStr = `${(selectedFile.size / 1024).toFixed(2)} KB`
       const type = selectedFile.type
@@ -74,14 +73,14 @@ export default function UploadPage() {
     >
       <UploadLayout>
         {/* Left Column: Upload Controls */}
-        <Stack gap="6">
+        <div className="lg:col-span-1 space-y-6 flex flex-col">
               {/* Repository Picker */}
-              <Card>
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
                 <RepositoryPicker
                   value={selectedRepositoryId}
-                  onChange={(id, name) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
+                  onChange={(id: string, name: string) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
                 />
-              </Card>
+              </div>
               {/* Versioning + Upload - Same Row */}
               {/* TODO: Refactor Grid bằng UI Kit nếu có */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
@@ -97,13 +96,12 @@ export default function UploadPage() {
                   />
                 </div>
                 {/* Upload Panel - No scroll */}
-                <Card className="flex flex-col min-h-fit">
-                  <CardHeader className="px-4 py-3 border-b border-gray-100">
-                    <Text variant="h3" fontWeight="semibold" color="gray900">
-                      Tải tệp lên <span className="text-gray-500 font-normal">• Chọn file để xử lý OCR và phân loại</span>
-                    </Text>
-                  </CardHeader>
-                  <CardContent className="p-4 flex-1">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col min-h-fit">
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-base font-semibold text-gray-900">Tải tệp lên</h3>
+                    <p className="text-xs text-gray-500 mt-1">Repository: {selectedRepositoryName || 'Chưa chọn'}</p>
+                  </div>
+                  <div className="p-4 flex-1">
                     <input
                       ref={ocrFileInputRef}
                       type="file"
@@ -111,7 +109,7 @@ export default function UploadPage() {
                       className="hidden"
                     />
                     {selectedFile ? (
-                      <Stack gap="3">
+                      <div className="space-y-3">
                         {/* File selected UI */}
                         <div className="grid grid-cols-[40px_1fr] gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -143,8 +141,7 @@ export default function UploadPage() {
                           </div>
                         </div>
                         <Button
-                          fullWidth
-                          size="sm"
+                          style={{ width: '100%' }}
                           variant="outline"
                           onClick={handleOcrExtract}
                           disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
@@ -161,7 +158,7 @@ export default function UploadPage() {
                             </>
                           )}
                         </Button>
-                      </Stack>
+                      </div>
                     ) : (
                       <div className="text-center py-4">
                         {/* TODO: Refactor icon & text layout bằng UI Kit */}
@@ -183,12 +180,12 @@ export default function UploadPage() {
                         </Button>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
               {/* System Info Panel */}
               <SystemInfoPanel />
-            </Stack>
+            </div>
 
             {/* Right Column: File Preview */}
             <div className="lg:col-span-2 lg:row-span-3">

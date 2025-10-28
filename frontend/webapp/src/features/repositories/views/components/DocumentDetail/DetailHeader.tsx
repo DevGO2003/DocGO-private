@@ -1,5 +1,4 @@
 import React from 'react';
-import { Flex, Stack, Heading, Text, Breadcrumbs } from '@shared/components';
 
 interface Crumb {
   label: string;
@@ -14,19 +13,30 @@ export const DetailHeader: React.FC<{
   right?: React.ReactNode;
 }> = ({ title, subtitle, breadcrumbs = [], right }) => {
   return (
-    <Stack gap="2">
-      <Flex align="center" justify="between" gap="3">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <Heading level={1} size="xl" fontWeight="semibold" color="gray900" isTruncated title={title}>
-            {title}
-          </Heading>
-          {subtitle && <Text size="sm" color="gray600" mt="1">{subtitle}</Text>}
+          <h1 className="text-xl font-semibold text-gray-900 truncate" title={title}>{title}</h1>
+          {subtitle && <div className="text-sm text-gray-600 mt-1">{subtitle}</div>}
         </div>
         {right}
-      </Flex>
+      </div>
       {breadcrumbs.length > 0 && (
-        <Breadcrumbs size="sm" color="gray500" items={breadcrumbs.map(c => ({...c, href: c.href, label: c.label, isCurrent: c.current}))}/>
+        <nav className="text-sm text-gray-500">
+          <ol className="flex items-center gap-2">
+            {breadcrumbs.map((c, idx) => (
+              <li key={idx} className={c.current ? 'text-gray-900' : ''}>
+                {c.href ? (
+                  <a href={c.href} className="hover:underline">{c.label}</a>
+                ) : (
+                  <span>{c.label}</span>
+                )}
+                {idx < breadcrumbs.length - 1 && <span className="mx-1 text-gray-300">/</span>}
+              </li>
+            ))}
+          </ol>
+        </nav>
       )}
-    </Stack>
+    </div>
   );
 }
