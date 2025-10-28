@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '@store';
 import { ErrorBoundary, ProtectedRoute } from '@shared/components';
 import { AuthLayout, DashboardLayout } from '@shared/layouts';
-import { NotFound, Unauthorized, Settings } from '@pages';
+import { NotFound, Unauthorized, Settings, Users } from '@pages';
 import { Login, Register, OAuth2Callback } from '@features/auth/views/pages';
 import { Dashboard } from '@features/dashboard/views/pages';
 import { RepositoryList, RepositoryDetail } from '@features/repository/views/pages';
@@ -23,6 +23,7 @@ import {
   ACCEPT_INVITATION_PATH,
   PROFILE_PATH,
   SETTINGS_PATH,
+  USERS_PATH,
   NOT_FOUND_PATH,
   UNAUTHORIZED_PATH,
 } from '@constants';
@@ -79,6 +80,9 @@ function App() {
                 {/* User Routes */}
                 <Route path={PROFILE_PATH} element={<Profile />} />
                 <Route path={SETTINGS_PATH} element={<Settings />} />
+                
+                {/* Admin Routes */}
+                <Route path={USERS_PATH} element={<Users />} />
               </Route>
 
               {/* Error Routes */}

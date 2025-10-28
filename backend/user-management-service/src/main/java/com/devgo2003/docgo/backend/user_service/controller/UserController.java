@@ -689,6 +689,43 @@ public class UserController {
                 .build());
     }
     
+    @PutMapping("/{id}/role")
+    @Operation(
+        summary = "Cập nhật vai trò người dùng", 
+        description = """
+        🔹 Đầu vào
+        
+        🆔 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của người dùng cần cập nhật vai trò
+        
+        👤 request (bắt buộc, body)
+        Loại: UpdateRoleRequest
+        Mô tả: Request chứa vai trò mới (ADMIN, USER, MODERATOR)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: User
+        Mô tả: Thông tin người dùng với vai trò đã cập nhật
+        """
+    )
+    public ResponseEntity<RestResponse<User>> updateUserRole(
+            @Parameter(description = "ID người dùng") @PathVariable String id,
+            @Parameter(description = "Request cập nhật vai trò") @Valid @RequestBody com.devgo2003.docgo.backend.user_service.dto.UpdateRoleRequest request) {
+        
+        log.info("Updating user role: {} to {}", id, request.getRole());
+        
+        User updatedUser = userService.updateUserRole(id, request.getRole());
+        
+        return ResponseEntity.ok(RestResponse.<User>builder()
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã cập nhật vai trò người dùng thành công")
+                .data(updatedUser)
+                .build());
+    }
+    
     @PutMapping("/{id}/roles")
     @Operation(
         summary = "Gán vai trò cho người dùng", 

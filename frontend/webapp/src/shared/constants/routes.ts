@@ -24,6 +24,7 @@ export const ACCEPT_INVITATION_PATH = '/invitations/accept';
 // User Routes
 export const PROFILE_PATH = '/profile';
 export const SETTINGS_PATH = '/settings';
+export const USERS_PATH = '/users';
 
 // Error Routes
 export const NOT_FOUND_PATH = '/404';

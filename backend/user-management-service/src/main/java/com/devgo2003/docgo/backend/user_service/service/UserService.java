@@ -248,6 +248,18 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
+    public User updateUserRole(String id, User.UserRole role) {
+        log.info("Updating user role: {} to {}", id, role);
+        
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setRole(role);
+                    user.setUpdatedAt(LocalDateTime.now());
+                    return userRepository.save(user);
+                })
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+    
     public User assignRoles(String id, Set<String> roleIds) {
         log.info("Assigning roles to user: {}", id);
         

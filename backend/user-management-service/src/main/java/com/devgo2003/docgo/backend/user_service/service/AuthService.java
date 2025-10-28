@@ -150,15 +150,14 @@ public class AuthService {
     }
 
     private AuthResponse.UserInfo createUserInfo(User user) {
-        AuthResponse.UserInfo info = new AuthResponse.UserInfo(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getFirstName(),
-            user.getLastName(),
-            user.getRoleIds(),
-            user.getStatus()
-        );
+        AuthResponse.UserInfo info = new AuthResponse.UserInfo();
+        info.setId(user.getId());
+        info.setUsername(user.getUsername());
+        info.setEmail(user.getEmail());
+        info.setFirstName(user.getFirstName());
+        info.setLastName(user.getLastName());
+        info.setRole(user.getRole() != null ? user.getRole().name() : "USER");
+        info.setStatus(user.getStatus() != null ? user.getStatus().name() : "ACTIVE");
         // Compute fullName and map avatarUrl for frontend display consistency
         String first = user.getFirstName();
         String last = user.getLastName();
