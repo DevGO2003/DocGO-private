@@ -1,14 +1,12 @@
--description: Git Restore ENV Local
-
 # Git Restore ENV Local
 
 Push commits lên remote repository origin.
 
-Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần: 
+Lập Cursor TODO, lưu ý Phần nào trước thì phải thực thiện xong trước rồi mới qua Phần tiếp theo, ko được làm song song các Phần: 
   Phần 1 - Lấy tham số
   1) Lấy thời gian hiện tại (theo định dạng hh-mm-dd-MM-yyyy) để làm tên thư mục backup env sẽ phục hồi, ví dụ: `.git-backup/env/<Thời gian hiện tại>`
 
-  Phần 2 - Thực hiện lần lượt các công việc sau bằng Windsurf, đừng sài powershell cũng như tạo file ps1:
+  Phần 2 - Thực hiện lần lượt các công việc sau bằng Cursor, đừng sài powershell cũng như tạo file ps1:
   1) - Phục hồi (restore) tất cả các file env đã được lưu trong thư mục `/.git-backup/env/<Thời gian hiện tại>` về đúng vị trí gốc trong project.
     - Đọc file `metadata.json` trong thư mục backup để lấy thông tin mapping giữa tên file backup và đường dẫn gốc.
     - Với mỗi object trong mảng metadata:
@@ -28,11 +26,11 @@ Lập Windsurf TODO, lưu ý Phần nào trước thì phải thực thiện xon
             "OriginalPath": "frontend/web-app/.env.local"
         },
         {
-            "BackupName": "windsurf_mcp.json",
-            "OriginalPath": ".windsurf/mcp.json"
+            "BackupName": "cursor_mcp.json",
+            "OriginalPath": ".cursor/mcp.json"
         }
         ]
         ```
         - File `backend_user-management-service_.env` trong backup sẽ được đặt lại thành `backend/user-management-service/.env`.
         - File `frontend_env_.env.local` trong backup sẽ được đặt lại thành `frontend/web-app/.env.local`.
-        - File `windsurf_mcp.json` trong backup sẽ được đặt lại thành `.windsurf/mcp.json`.
+        - File `cursor_mcp.json` trong backup sẽ được đặt lại thành `.cursor/mcp.json`.

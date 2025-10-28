@@ -1,7 +1,3 @@
----
-description: Do All Command - Chạy toàn bộ tác vụ tự động, áp dụng mọi thay đổi không hỏi lại
----
-
 # Do All Command - Chạy toàn bộ tác vụ tự động, áp dụng mọi thay đổi không hỏi lại
 
 ## Mục đích
@@ -58,7 +54,7 @@ description: Do All Command - Chạy toàn bộ tác vụ tự động, áp dụ
 - Không tự động tạo/chỉnh README.md hay .md khác (trừ khi user yêu cầu rõ).
 
 ## Bảo vệ an toàn và giới hạn
-- Không tạo file `.md` mới ngoài phạm vi `.windsurf/workflows/` hoặc theo yêu cầu rõ ràng.
+- Không tạo file `.md` mới ngoài phạm vi `.cursor/commands/` hoặc theo yêu cầu rõ ràng.
 - Không động chạm `.env`/secrets trừ khi có chỉ định cụ thể trong yêu cầu.
 - Không trả HTTP 204; luôn 200 với `statusCode: 204` theo chuẩn response.
 - Tự động tuân thủ đường dẫn `/api/v1/{service-name}/...` khi thêm sửa endpoint.
@@ -80,5 +76,3 @@ description: Do All Command - Chạy toàn bộ tác vụ tự động, áp dụ
 - Ưu tiên an toàn dữ liệu và tiêu chuẩn codebase của DocGO.
 - Dừng lại và báo cáo nếu phát hiện rủi ro cao hoặc thiếu thông tin nghiệp vụ cốt lõi.
 - Mọi hành động đều được log ngắn gọn trong tiến trình để dễ trace.
-
-

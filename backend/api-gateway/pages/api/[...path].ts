@@ -5,12 +5,27 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '@/lib/services';
 import logger from '@/lib/logger';
 import { withApiHandler } from '@/lib/http/withApiHandler';
+import { withCors } from '@/lib/cors';
 // Note: Use global Buffer if needed; avoid importing 'buffer' to prevent build issues
 
 export const config = {
   api: {
-    // Disable bodyParser to handle multipart requests properly
-    bodyParser: false
+    // Enable bodyParser for JSON, disable for multipart
+    bodyParser: {
+      sizeLimit: '10mb',
+      json: {
+        limit: '10mb'
+      },
+      text: {
+        limit: '10mb'
+      },
+      // Disable for raw/multipart to handle file uploads
+      raw: false,
+      urlEncoded: {
+        extended: true,
+        limit: '10mb'
+      }
+    }
   }
 };
 
@@ -37,65 +52,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     queryPath: req.query.path
   });
 
-  // Map of tokens to service keys
+  // Map of tokens to service keys - ONLY full service names allowed
   const tokenToService: Record<string, string> = {
-    // user
-    'auth': 'user-management',
-    'oauth2': 'user-management',
-    'users': 'user-management',
-    'user-management': 'user-management',
+    // user-management service
     'user-management-service': 'user-management',
-    // repository
-    'documents': 'repository-management',
-    'contracts': 'repository-management',
-    'files': 'repository-management',
-    'assets': 'repository-management',
-    'repository-management': 'repository-management',
+    // repository-management service
     'repository-management-service': 'repository-management',
-    'repository-management-service': 'repository-management',
-    'document-management': 'repository-management',
-    // automation
-    'automation': 'automation',
-    'ai': 'automation',
+    // automation service
     'automation-service': 'automation'
   };
 
-  // Handle different path structures
+  // Handle path structure - ONLY accept /api/v1/service-name/... format
   let serviceKey = '';
   
-  // Check for new pattern: /api/v1/service-name/v1/resource (with duplicate v1)
-  if (parts.length >= 4 && parts[0] === 'api' && parts[1] === 'v1' && parts[3] === 'v1') {
+  // Only accept: /api/v1/service-name/resource/...
+  if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1') {
     const serviceName = parts[2];
     serviceKey = tokenToService[serviceName] || '';
-  }
-  // Check for automation-service pattern: /api/v1/automation-service/v1/...
-  else if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1' && parts[2] === 'automation-service') {
-    serviceKey = 'automation';
-  }
-  // Check for other service patterns: /api/v1/service-name/...
-  else if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1') {
-    const serviceName = parts[2];
-    serviceKey = tokenToService[serviceName] || '';
-  }
-  // Fallback: use original logic for backward compatibility
-  else {
-    const primaryToken = parts[0] === 'v1' && parts.length > 1 ? parts[1] : parts[0] || '';
-    serviceKey = tokenToService[primaryToken] || '';
-    
-    if (!serviceKey) {
-      // Fallback: scan all segments for a known token
-      for (const seg of parts) {
-        if (tokenToService[seg]) {
-          serviceKey = tokenToService[seg];
-          break;
-        }
-      }
-    }
   }
   
+  // If service not found, return 400 error
   if (!serviceKey) {
-    // Default to user-management if still unknown
-    serviceKey = 'user-management';
+    logger.error(`❌ Invalid service path: ${fullPath}`);
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: `Invalid API path. Expected format: /api/v1/{service-name}/{resource}. Valid services: user-management-service, repository-management-service, automation-service`
+    });
   }
   
   logger.info(`🎯 [DEBUG] Service key determined:`, {
@@ -105,7 +87,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   });
 
   // Keep original endpoint including /api/v1/...
-  const endpoint = fullApiPath;
+  // For repository-management service, add service name to path only if not already present
+  let endpoint = fullApiPath;
+  if (serviceKey === 'repository-management') {
+    // Check if repository-management-service is already in the path
+    const parts = endpoint.split('/');
+    if (parts[1] === 'api' && parts[2] === 'v1' && parts[3] !== 'repository-management-service') {
+      // Only insert if not already present
+      parts.splice(3, 0, 'repository-management-service');
+      endpoint = parts.join('/');
+    }
+  }
 
     // Get service instance
     const service = serviceManager.getService(serviceKey);
@@ -183,17 +175,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if ('Content-Type' in headers) delete headers['Content-Type'];
       if ('Content-Length' in headers) delete headers['Content-Length'];
     } else {
-      // For POST/PUT/PATCH, forward the raw body stream
-      // Since bodyParser is disabled, req.body will be a Buffer
-      if (req.body) {
-        requestData = req.body;
-      }
-      
-      // For multipart requests, don't let axios modify Content-Type
-      if (headers['Content-Type'] && headers['Content-Type'].includes('multipart/form-data')) {
-        // Keep original Content-Type for multipart
-        // Don't let axios serialize the body
-      }
+      // For POST/PUT/PATCH, forward the parsed body
+      requestData = req.body;
     }
 
     // Make request to microservice
@@ -233,4 +216,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withApiHandler(handler);
+export default withCors(handler);

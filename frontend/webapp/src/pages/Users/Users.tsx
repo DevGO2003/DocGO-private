@@ -18,13 +18,21 @@ import {
   LoadingSpinner,
 } from '@shared/components';
 import { useAppSelector } from '@store/hooks';
-import { useUsers, useDeleteUser, useUpdateUserStatus } from '@features/users/api/usersApi';
+import { useUsers, useDeleteUser, useUpdateUserStatus, useUpdateUser, User } from '@features/users/api/usersApi';
 
 export const Users = () => {
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  });
   
   const { data: usersData, isLoading } = useUsers({
     page,
@@ -35,6 +43,7 @@ export const Users = () => {
 
   const deleteUserMutation = useDeleteUser();
   const updateStatusMutation = useUpdateUserStatus();
+  const updateUserMutation = useUpdateUser();
 
   // Check if current user is admin
   if (currentUser?.role !== 'ADMIN') {
@@ -72,6 +81,44 @@ export const Users = () => {
     } catch (error) {
       console.error('Failed to update status:', error);
       alert('Cập nhật trạng thái thất bại!');
+    }
+  };
+
+  const handleOpenEditModal = (user: User) => {
+    setEditingUser(user);
+    setEditForm({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      phone: user.phone || '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingUser(null);
+    setEditForm({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+    });
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+    
+    try {
+      await updateUserMutation.mutateAsync({
+        id: editingUser.id,
+        data: editForm,
+      });
+      alert('Đã cập nhật thông tin người dùng thành công!');
+      handleCloseEditModal();
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      alert('Cập nhật thông tin thất bại!');
     }
   };
 
@@ -243,6 +290,7 @@ export const Users = () => {
                               )}
                             </button>
                             <button
+                              onClick={() => handleOpenEditModal(user)}
                               className="text-gray-600 hover:text-blue-600 transition-colors"
                               title="Chỉnh sửa"
                             >
@@ -288,6 +336,80 @@ export const Users = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Edit User Modal */}
+        {isEditModalOpen && editingUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Chỉnh sửa thông tin người dùng
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tên
+                  </label>
+                  <Input
+                    value={editForm.firstName}
+                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    placeholder="Nhập tên"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Họ
+                  </label>
+                  <Input
+                    value={editForm.lastName}
+                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    placeholder="Nhập họ"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <Input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Số điện thoại
+                  </label>
+                  <Input
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="+84..."
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={handleUpdateUser}
+                  disabled={updateUserMutation.isPending}
+                  className="flex-1"
+                >
+                  {updateUserMutation.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleCloseEditModal}
+                  className="flex-1"
+                >
+                  Hủy
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );

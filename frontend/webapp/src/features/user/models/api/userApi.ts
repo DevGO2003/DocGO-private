@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@shared/lib/api';
 import { UserProfile, UserCreateData, UserUpdateData, UserFilterParams } from '../types/user.types';
-import { PaginatedResponse } from '@features/repository';
+import { PaginatedResponse } from '@features/repositories/models/types';
 
 const BASE_PATH = '/api/v1/user-management-service';
 

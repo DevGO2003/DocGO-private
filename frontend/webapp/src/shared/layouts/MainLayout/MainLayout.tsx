@@ -2,6 +2,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { ControlMainLayout } from './ControlMainLayout';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -97,28 +98,14 @@ export const MainLayout = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-hidden p-2.5"
         >
-          {children}
+          <ControlMainLayout>
+            {children}
+          </ControlMainLayout>
         </motion.main>
       </div>
 
-      {/* Desktop collapse toggle handle */}
-      {showSidebar && (
-        <motion.button
-          initial={false}
-          animate={{
-            left: isCollapsed ? 16 : 256 - 16
-          }}
-          type="button"
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={isCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
-          onClick={() => handleSidebarCollapse(!isCollapsed)}
-          className="hidden lg:flex items-center justify-center fixed top-24 z-50 h-8 w-8 rounded-full border-2 border-gray-300 bg-white shadow-md hover:shadow-lg transition-all hover:scale-110"
-        >
-          <span className="text-sm font-bold text-gray-700">{isCollapsed ? '>' : '<'}</span>
-        </motion.button>
-      )}
     </div>
   );
 };

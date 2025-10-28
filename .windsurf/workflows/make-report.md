@@ -1,7 +1,3 @@
----
-description: Tạo Báo Cáo Tiến Độ Hằng Ngày
----
-
 # Tạo Báo Cáo Tiến Độ Hằng Ngày
 
 ## Mục đích

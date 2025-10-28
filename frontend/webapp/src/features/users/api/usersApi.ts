@@ -71,9 +71,28 @@ const usersApi = {
     role?: string;
     search?: string;
   }): Promise<UsersResponse> => {
-    const response = await apiClient.get<any>(`${BASE_PATH}/users`, { params });
-    // Backend returns: { data: { users: [], total: N, ... } }
-    return response.data?.data || response.data || { users: [], total: 0, page: 1, limit: 10 };
+    // Convert 1-indexed page to 0-indexed for Spring Boot
+    const apiParams = {
+      ...params,
+      page: params?.page ? params.page - 1 : 0,
+    };
+    
+    const response = await apiClient.get<any>(`${BASE_PATH}/users`, { params: apiParams });
+    // Backend returns Spring Page: { data: { content: [], totalElements: N, number: 0, size: 10 } }
+    const pageData = response.data?.data || response.data;
+    
+    if (pageData?.content) {
+      // Spring Page format
+      return {
+        users: pageData.content,
+        total: pageData.totalElements || 0,
+        page: (pageData.number || 0) + 1, // Convert back to 1-indexed
+        limit: pageData.size || 10,
+      };
+    }
+    
+    // Fallback
+    return { users: [], total: 0, page: 1, limit: 10 };
   },
 
   // Get user by ID
@@ -103,8 +122,7 @@ const usersApi = {
   updateUserStatus: async (id: string, status: string): Promise<User> => {
     const response = await apiClient.put<any>(
       `${BASE_PATH}/users/${id}/status`,
-      null,
-      { params: { status } }
+      { status }
     );
     return response.data?.data || response.data;
   },

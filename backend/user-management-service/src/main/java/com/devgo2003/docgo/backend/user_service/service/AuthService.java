@@ -66,6 +66,17 @@ public class AuthService {
     public AuthResponse login(String username, String password) {
         return userRepository.findByUsername(username)
                 .map(user -> {
+                    // Check if user is suspended or deleted
+                    if (user.getStatus() == User.UserStatus.SUSPENDED) {
+                        return new AuthResponse(false, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", null, null, null);
+                    }
+                    if (user.getStatus() == User.UserStatus.DELETED) {
+                        return new AuthResponse(false, "Tài khoản không tồn tại", null, null, null);
+                    }
+                    if (user.getStatus() == User.UserStatus.INACTIVE) {
+                        return new AuthResponse(false, "Tài khoản chưa được kích hoạt", null, null, null);
+                    }
+                    
                     if (passwordEncoder.matches(password, user.getPassword())) {
                         // Update last login
                         user.setLastLogin(LocalDateTime.now());

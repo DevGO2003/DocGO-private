@@ -70,10 +70,7 @@ class Logger:
         self._logger.addHandler(console_handler)
         
         # File handler for persistent logging
-        log_dir = Path("logs")
-        log_dir.mkdir(exist_ok=True)
-        
-        file_handler = logging.FileHandler(log_dir / "automation-service.log")
+        file_handler = logging.FileHandler(Path("../.windsurf/logs/automation-service.log"))
         file_handler.setFormatter(JsonFormatter())
         self._logger.addHandler(file_handler)
         
@@ -231,4 +228,3 @@ def log_external_call(service: str, url: str, method: str, status_code: int, dur
 def log_database_query(operation: str, collection: str, duration_ms: int, request_id: str, correlation_id: str, **kwargs):
     
     logger.log_database_query(operation, collection, duration_ms, request_id, correlation_id, **kwargs)
-

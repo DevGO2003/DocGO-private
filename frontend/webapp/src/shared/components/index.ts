@@ -1,26 +1,19 @@
-// Export Hand-Drawn components as default
-export { HandDrawnButton as Button } from './HandDrawn/Button';
-export { HandDrawnInput as Input } from './HandDrawn/Input';
-export {
-  HandDrawnCard as Card,
-  HandDrawnCardHeader as CardHeader,
-  HandDrawnCardTitle as CardTitle,
-  HandDrawnCardContent as CardContent,
-  HandDrawnCardFooter as CardFooter,
-} from './HandDrawn/Card';
-
-// Export Sketch components
-export * from './HandDrawn/Sketch';
-
-// Export Animation components
-export * from './Animations';
-
-// Export Layout components
-export * from './Layout';
+// Export UIComponents
+export * from './UIComponents/Button';
+export * from './UIComponents/Card';
+export * from './UIComponents/Input';
+export * from './UIComponents/Dialog';
+export * from './UIComponents/Switch';
+export * from './UIComponents/Modal';
+export * from './UIComponents/Select';
+export * from './UIComponents/Label';
+export * from './UIComponents/Textarea';
+export * from './UIComponents/Sketch';
+export * from './UIComponents/Text';
 
 // Export Utility components
-export * from './ProtectedRoute';
-export * from './ErrorBoundary';
-export * from './LoadingSpinner';
-export * from './Dialog';
-export * from './NotificationBell';
+export * from '../layouts/LoadingSpinner';
+export * from '../layouts/ErrorBoundary';
+export * from '../layouts/NotificationBell';
+export * from '../layouts/HeaderPanel';
+export * from '../layouts/ProtectedRoute';

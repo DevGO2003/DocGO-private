@@ -1,7 +1,3 @@
----
-description: Docker Status
----
-
 # Docker Status
 
 Xem trạng thái các Docker containers đang chạy cho kiến trúc 5 services.
@@ -38,9 +34,3 @@ docker compose -f docker-compose.yml logs -f <service-name>
 - Sử dụng `/docker-down` để dừng tất cả services
 - Sử dụng `/docker-logs` để xem logs chi tiết
 - Kiến trúc mới: 5 services (1 frontend + 4 microservices)
-
-
-
-
-
-

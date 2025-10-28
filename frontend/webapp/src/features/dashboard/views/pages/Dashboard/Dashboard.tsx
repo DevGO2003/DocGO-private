@@ -1,20 +1,15 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent,
-  Button 
-} from '@shared/components';
+import { motion } from 'framer-motion';
 import { useAppSelector } from '@store/hooks';
 import { 
   useMyRepositories, 
   useFiles 
-} from '@features/repository';
-import { useMyOrganizations } from '@features/organization';
+} from '@features/repositories';
+import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
+// removed unused type imports
+import { Card, CardContent, CardHeader, CardTitle, Button, Text } from '@shared/components';
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
@@ -25,12 +20,9 @@ export const Dashboard = () => {
   const [size] = useState(5);
 
   // Temporarily disable API calls for testing
-  const repositories = null;
-  const reposLoading = false;
-  const files = null;
-  const filesLoading = false;
-  const organizations = null;
-  const orgsLoading = false;
+  const { data: repositories, isLoading: reposLoading } = useMyRepositories({ page, size });
+  const { data: files, isLoading: filesLoading } = useFiles({ page, size });
+  const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
 
   console.log('[Dashboard] User:', user);
 
@@ -88,12 +80,12 @@ export const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <Text as="h1" className="text-4xl font-bold text-gray-900 mb-2">
             Welcome back, {user?.firstName || user?.username}! 👋
-          </h1>
-          <p className="text-gray-600">
+          </Text>
+          <Text as="p" className="text-gray-600">
             Here's what's happening with your projects today.
-          </p>
+          </Text>
         </motion.div>
 
         {/* Stats Grid */}
@@ -105,23 +97,23 @@ export const Dashboard = () => {
         >
           {stats.map((stat, index) => (
             <motion.div key={index} variants={itemVariants}>
-              <Card animated className="h-full">
+              <Card className="h-full">
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center`}>
                     <span className="text-2xl text-white font-bold">
                       {stat.value.toString().charAt(0)}
                     </span>
                   </div>
-                  <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
                     {stat.title}
-                  </h3>
+                  </Text>
                   <div className="flex items-baseline justify-between">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <Text as="p" className="text-2xl font-bold text-gray-900">
                       {stat.value}
-                    </p>
-                    <span className="text-sm text-green-600 font-medium">
+                    </Text>
+                    <Text as="span" className="text-sm text-green-600 font-medium">
                       {stat.change}
-                    </span>
+                    </Text>
                   </div>
                 </CardContent>
               </Card>
@@ -136,13 +128,13 @@ export const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card animated>
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Repositories</CardTitle>
               </CardHeader>
               <CardContent>
                 {reposLoading ? (
-                  <div className="text-center py-8 text-gray-500">Loading...</div>
+                  <div className="text-center py-8 text-gray-500"><Text as="p" className="text-gray-500">Loading...</Text></div>
                 ) : repositories && repositories.content.length > 0 ? (
                   <div className="space-y-3">
                     {repositories.content.slice(0, 5).map((repo) => (
@@ -154,8 +146,8 @@ export const Dashboard = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-semibold text-gray-900">{repo.name}</h4>
-                            <p className="text-sm text-gray-600">{repo.fileCount} files</p>
+                            <Text as="h4" className="font-semibold text-gray-900">{repo.name}</Text>
+                            <Text as="p" className="text-sm text-gray-600">{repo.fileCount} files</Text>
                           </div>
                           <span className="text-xs text-gray-500">
                             {new Date(repo.updatedAt).toLocaleDateString()}
@@ -166,11 +158,10 @@ export const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500 mb-4">No repositories yet</p>
+                    <Text as="p" className="text-gray-500 mb-4">No repositories yet</Text>
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={() => navigate(REPOSITORIES_PATH)}
-                      animated
                     >
                       Create Repository
                     </Button>
@@ -186,13 +177,13 @@ export const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <Card animated>
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Files</CardTitle>
               </CardHeader>
               <CardContent>
                 {filesLoading ? (
-                  <div className="text-center py-8 text-gray-500">Loading...</div>
+                  <div className="text-center py-8 text-gray-500"><Text as="p" className="text-gray-500">Loading...</Text></div>
                 ) : files && files.content.length > 0 ? (
                   <div className="space-y-3">
                     {files.content.slice(0, 5).map((file) => (
@@ -203,12 +194,12 @@ export const Dashboard = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 truncate">
+                            <Text as="h4" className="font-semibold text-gray-900 truncate">
                               {file.originalName || file.name}
-                            </h4>
-                            <p className="text-sm text-gray-600">
+                            </Text>
+                            <Text as="p" className="text-sm text-gray-600">
                               {(file.fileSize / 1024).toFixed(2)} KB
-                            </p>
+                            </Text>
                           </div>
                           <span className="text-xs text-gray-500">
                             {new Date(file.createdAt).toLocaleDateString()}
@@ -219,7 +210,7 @@ export const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    No files uploaded yet
+                    <Text as="p" className="text-gray-500">No files uploaded yet</Text>
                   </div>
                 )}
               </CardContent>
@@ -233,14 +224,13 @@ export const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card animated>
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>My Organizations</CardTitle>
                 <Button
                   variant="outline"
                   onClick={() => navigate(ORGANIZATIONS_PATH)}
-                  animated
                 >
                   View All
                 </Button>
@@ -258,23 +248,22 @@ export const Dashboard = () => {
                       className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg cursor-pointer border-2 border-blue-200"
                       onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
                     >
-                      <h4 className="font-bold text-gray-900 mb-1">{org.name}</h4>
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      <Text as="h4" className="font-bold text-gray-900 mb-1">{org.name}</Text>
+                      <Text as="p" className="text-sm text-gray-600 mb-2 line-clamp-2">
                         {org.description || 'No description'}
-                      </p>
+                      </Text>
                       <div className="flex items-center text-xs text-gray-500">
-                        <span>{org.memberCount} members</span>
+                        <Text as="span" className="text-gray-500">{org.memberCount} members</Text>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">Not part of any organization yet</p>
+                  <Text as="p" className="text-gray-500 mb-4">Not part of any organization yet</Text>
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => navigate(ORGANIZATIONS_PATH)}
-                    animated
                   >
                     Join Organization
                   </Button>
@@ -291,7 +280,7 @@ export const Dashboard = () => {
           transition={{ delay: 0.7 }}
           className="mt-8"
         >
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
@@ -301,43 +290,39 @@ export const Dashboard = () => {
                   variant="outline"
                   onClick={() => navigate(REPOSITORIES_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">📁</div>
-                    <span className="text-sm">Repositories</span>
+                    <Text as="span" className="text-sm">Repositories</Text>
                   </div>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => navigate(ORGANIZATIONS_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">🏢</div>
-                    <span className="text-sm">Organizations</span>
+                    <Text as="span" className="text-sm">Organizations</Text>
                   </div>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => navigate(PROFILE_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">👤</div>
-                    <span className="text-sm">Profile</span>
+                    <Text as="span" className="text-sm">Profile</Text>
                   </div>
                 </Button>
                 <Button
                   variant="outline"
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">⚙️</div>
-                    <span className="text-sm">Settings</span>
+                    <Text as="span" className="text-sm">Settings</Text>
                   </div>
                 </Button>
               </div>
