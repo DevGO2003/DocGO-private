@@ -1,8 +1,5 @@
----
-description: Docker Logs với Auto-Debug
----
-
 # Docker Logs với Auto-Debug
+
 Xem logs Docker cho toàn bộ services hoặc theo từng service trong môi trường development (kiến trúc 5 services) với chức năng auto-debug.
 
 ## Hành vi mặc định

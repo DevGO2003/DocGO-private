@@ -1,12 +1,8 @@
----
-description: Mongo Command - Kết nối MongoDB qua MCP Server
----
-
 # Mongo Command - Kết nối MongoDB qua MCP Server
 
 ## Mục đích
 Khi người dùng cần làm việc với database, command này sẽ:
-- **BẮT BUỘC sử dụng MCP MongoDB Server** có sẵn trong Windsurf
+- **BẮT BUỘC sử dụng MCP MongoDB Server** có sẵn trong Cursor
 - **KHÔNG được tạo file script** Python/JavaScript
 - **Kết nối trực tiếp** với MongoDB qua MCP tools
 - **Thực hiện queries** trực tiếp qua MCP requests
@@ -15,7 +11,7 @@ Khi người dùng cần làm việc với database, command này sẽ:
 ## Quy trình thực hiện
 
 ### 1. 🔌 Kết nối MongoDB qua MCP Server
-- **BẮT BUỘC** sử dụng MCP MongoDB Server tools có sẵn trong Windsurf
+- **BẮT BUỘC** sử dụng MCP MongoDB Server tools có sẵn trong Cursor
 - **KHÔNG được** tạo file script Python/JavaScript
 - **KHÔNG được** sử dụng pymongo trực tiếp
 - **KHÔNG được** sử dụng mongosh trực tiếp
@@ -52,7 +48,7 @@ Khi người dùng cần làm việc với database, command này sẽ:
 - **Khuyến nghị next steps** với timeline
 
 ## ⚠️ QUY TẮC NGHIÊM NGẶT
-- **BẮT BUỘC** sử dụng MCP MongoDB Server tools có sẵn trong Windsurf
+- **BẮT BUỘC** sử dụng MCP MongoDB Server tools có sẵn trong Cursor
 - **KHÔNG được** tạo file script Python/JavaScript
 - **KHÔNG được** sử dụng pymongo trực tiếp
 - **KHÔNG được** sử dụng mongosh trực tiếp

@@ -9,6 +9,7 @@ export * from './UIComponents/Select';
 export * from './UIComponents/Label';
 export * from './UIComponents/Textarea';
 export * from './UIComponents/Sketch';
+export * from './UIComponents/Text';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

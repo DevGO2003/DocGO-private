@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '@store';
 import { ErrorBoundary } from '@shared/components';
 import { AppRouter } from '@routes';
+import React, { useEffect } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,6 +16,10 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  useEffect(() => {
+    console.log('Frontend log: Application started');
+  }, []);
+
   return (
     <ErrorBoundary>
       <Provider store={store}>

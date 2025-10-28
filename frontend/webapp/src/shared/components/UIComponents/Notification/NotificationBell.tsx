@@ -3,16 +3,43 @@ import { Bell, Check, X, Building2, Clock, RefreshCw } from 'lucide-react';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
 import { Button } from '@shared/components';
 import { Invitation } from '@features/organizations/models/types/organization.types';
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { data: invitations, isLoading, refetch, isFetching } = useMyPendingInvitations();
   const { mutate: acceptInvitation, isPending: isAccepting } = useAcceptInvitation();
   const { mutate: declineInvitation, isPending: isDeclining } = useDeclineInvitation();
 
   const pendingCount = invitations?.length || 0;
+
+  const drawCanvas = () => {
+    if (!panelRef.current || !canvasRef.current) return;
+    const el = panelRef.current;
+    const canvas = canvasRef.current;
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+    if (width === 0 || height === 0) return;
+    canvas.width = width;
+    canvas.height = height;
+    const rc = createRoughCanvas(canvas);
+    drawRoughRect(rc, 6, 6, width - 12, height - 12, {
+      stroke: '#94a3b8',
+      strokeWidth: 2,
+      roughness: 1.5,
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(drawCanvas, 50);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen, isLoading, isFetching, pendingCount]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -93,7 +120,12 @@ export const NotificationBell = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div ref={panelRef} className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 relative">
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ width: '100%', height: '100%' }}
+          />
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">

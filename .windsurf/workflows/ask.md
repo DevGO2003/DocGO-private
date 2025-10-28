@@ -1,5 +1,6 @@
 ---
-description: Ask Command - Phân tích vấn đề
+description: 
+auto_execution_mode: 3
 ---
 
 # Ask Command - Phân tích vấn đề
@@ -42,7 +43,7 @@ Khi người dùng gặp vấn đề, command này sẽ:
 | # | Tên phương pháp | Chi tiết thực hiện | ✅ Ưu điểm | ⚠️ Nhược điểm | 🎯 Độ khó & Thời gian & Chi phí |
 |--|-----------------|-------------------|------------|---------------|--------------------------------|
 | **1** | Sửa trực tiếp | Thực hiện thay đổi code ngay tại vị trí lỗi, không refactor | ✅ Nhanh chóng: Giải quyết vấn đề trong thời gian ngắn✅ Ít thay đổi: Không ảnh hưởng đến các phần khác của hệ thống✅ Rủi ro thấp: Chỉ sửa đúng phần có vấn đề | ⚠️ Có thể gây side effect: Thay đổi nhỏ có thể ảnh hưởng đến logic khác⚠️ Không giải quyết gốc rễ: Chỉ xử lý triệu chứng, không cải thiện kiến trúc⚠️ Khó maintain: Code có thể trở nên phức tạp theo thời gian | 🟢 Dễ - < 1h - Thấp |
- cải thiện chất lượng, tách biệt concerns | ✅ Code sạch hơn: Cải thiện readability và maintainability✅ Dễ maintain: Cấu trúc rõ ràng, dễ debug và mở rộng✅ Giảm technical debt: Loại bỏ code smell và anti-patterns | ⚠️ Cần test kỹ: Phải đảm bảo không break existing functionality⚠️ Có thể break existing: Thay đổi cấu trúc có thể ảnh hưởng đến integration⚠️ Thời gian dài: Cần phân tích và thiết kế lại | 🟡 Trung b| **2** | Refactor code | Tái cấu trúc code đểình - 2-4h - Trung bình |
+| **2** | Refactor code | Tái cấu trúc code để cải thiện chất lượng, tách biệt concerns | ✅ Code sạch hơn: Cải thiện readability và maintainability✅ Dễ maintain: Cấu trúc rõ ràng, dễ debug và mở rộng✅ Giảm technical debt: Loại bỏ code smell và anti-patterns | ⚠️ Cần test kỹ: Phải đảm bảo không break existing functionality⚠️ Có thể break existing: Thay đổi cấu trúc có thể ảnh hưởng đến integration⚠️ Thời gian dài: Cần phân tích và thiết kế lại | 🟡 Trung bình - 2-4h - Trung bình |
 | **3** | Thay đổi architecture | Thiết kế lại kiến trúc hệ thống để giải quyết vấn đề triệt để | ✅ Giải quyết triệt để: Xử lý nguyên nhân gốc rễ của vấn đề✅ Scalable: Kiến trúc mới có thể mở rộng tốt hơn✅ Future-proof: Phù hợp với yêu cầu phát triển dài hạn | ⚠️ Thay đổi lớn: Ảnh hưởng đến toàn bộ hệ thống⚠️ Cần migration: Phải chuyển đổi dữ liệu và logic hiện tại⚠️ Rủi ro cao: Có thể gây downtime và mất dữ liệu | 🔴 Khó - > 1 ngày - Cao |
 | **4** | Workaround tạm thời | Tạo giải pháp tạm thời để bypass vấn đề, không sửa code chính | ✅ Giải quyết ngay: Khôi phục service trong thời gian ngắn nhất✅ Không ảnh hưởng code: Không thay đổi logic hiện tại✅ Rủi ro thấp: Không có tác động đến hệ thống chính | ⚠️ Không bền vững: Chỉ là giải pháp tạm thời, vấn đề vẫn tồn tại⚠️ Cần fix sau: Phải có kế hoạch giải quyết triệt để⚠️ Có thể gây confusion: Team có thể quên rằng đây chỉ là workaround | 🟢 Dễ - < 30 phút - Thấp |
 
@@ -180,7 +181,6 @@ docker network inspect <network-name>
 docker volume ls
 docker volume inspect <volume-name>
 ```
-
 
 ## ⚠️ QUAN TRỌNG: Quy tắc điều tra trước khi đưa ra phương án
 

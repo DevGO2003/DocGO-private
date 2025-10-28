@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import { cn } from '@shared/lib/utils';
 import {
   CardProps,
@@ -9,10 +9,55 @@ import {
   CardFooterProps,
 } from './Card.types';
 import { cardStyles } from './Card.styles';
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn(cardStyles.card, className)} {...props} />
-));
+export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, children, ...rest }, ref) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const drawCanvas = () => {
+    if (!containerRef.current || !canvasRef.current) return;
+    const el = containerRef.current;
+    const canvas = canvasRef.current;
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+    if (width === 0 || height === 0) return;
+    canvas.width = width;
+    canvas.height = height;
+    const rc = createRoughCanvas(canvas);
+    drawRoughRect(rc, 6, 6, width - 12, height - 12, {
+      stroke: '#94a3b8',
+      strokeWidth: 2,
+      roughness: 1.5,
+    });
+  };
+
+  useEffect(() => {
+    drawCanvas();
+    const t = setTimeout(drawCanvas, 100);
+    return () => clearTimeout(t);
+  }, [className, children]);
+
+  const setRefs = (node: HTMLDivElement | null) => {
+    (containerRef as any).current = node;
+    if (typeof ref === 'function') {
+      (ref as (instance: HTMLDivElement | null) => void)(node);
+    } else if (ref) {
+      (ref as any).current = node;
+    }
+  };
+
+  return (
+    <div ref={setRefs} className={cn('relative', cardStyles.card, className)} {...rest}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ width: '100%', height: '100%' }}
+      />
+      {children}
+    </div>
+  );
+});
 Card.displayName = 'Card';
 
 export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(

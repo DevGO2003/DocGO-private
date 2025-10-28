@@ -1,8 +1,4 @@
----
-description: Docker Local
----
-
-# Docker Local
+# Docker Start
 
 Khởi động toàn Docker Compose cho kiến trúc 5 services.
 
@@ -22,9 +18,3 @@ docker compose -f docker-compose.yml up -d --no-recreate --no-build
 - Yêu cầu Docker Desktop đang chạy.
 - Dùng /docker-logs để xem log, /docker-status để xem trạng thái, và /docker-down để tắt.
 - Kiến trúc mới: 5 services (1 frontend + 4 microservices).
-
-
-
-
-
-

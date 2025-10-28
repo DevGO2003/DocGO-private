@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils'
 
 interface HeaderPanelProps {
   title: string
@@ -27,18 +28,49 @@ function HeaderPanel({
   maxHeightTablet = 240,
   maxHeightMobile = 200
 }: HeaderPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const mhDesktop = maxHeightDesktop
   const mhTablet = maxHeightTablet
   const mhMobile = maxHeightMobile
 
+  const drawCanvas = () => {
+    if (!containerRef.current || !canvasRef.current) return
+    const el = containerRef.current
+    const canvas = canvasRef.current
+    const width = el.offsetWidth
+    const height = el.offsetHeight
+    if (width === 0 || height === 0) return
+    canvas.width = width
+    canvas.height = height
+    const rc = createRoughCanvas(canvas)
+    drawRoughRect(rc, 8, 8, width - 16, height - 16, {
+      stroke: '#94a3b8',
+      strokeWidth: 2,
+      roughness: 1.5,
+    })
+  }
+
+  useEffect(() => {
+    drawCanvas()
+    const t = setTimeout(drawCanvas, 100)
+    return () => clearTimeout(t)
+  }, [title, subtitle, className])
+
   return (
     <div
+      ref={containerRef}
       className={`relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 shadow-sm ${className}`}
       style={{
         maxHeight: '300px',
         overflow: 'hidden'
       }}
     >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ width: '100%', height: '100%' }}
+      />
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-indigo-200/30 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-purple-200/30 blur-3xl" />
