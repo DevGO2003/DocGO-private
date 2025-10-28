@@ -1,5 +1,5 @@
 import React from 'react'
-import { Input } from '@shared/components'
+import { Input, Card, CardContent, Text, Switch } from '@shared/components'
 
 interface VersioningPanelProps {
   createFromOldVersion: boolean
@@ -19,40 +19,32 @@ export default function VersioningPanel({
   setNewVersionName
 }: VersioningPanelProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm h-80 overflow-hidden flex flex-col">
-      <div className="p-4 overflow-auto">
-        <div className="flex items-center justify-between mb-3">
+    <Card>
+      <CardContent>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div>
-            <h4 className="text-base font-semibold text-gray-900">
+            <Text as="h4" className="text-base font-semibold text-gray-900">
               Tạo phiên bản từ hợp đồng cũ <span className="text-gray-500 font-normal">• Chọn hợp đồng đã có để tạo phiên bản mới</span>
-            </h4>
+            </Text>
+            <Text as="p" className="text-xs text-amber-600" style={{ marginTop: 4 }}>Tính năng đang tạm thời vô hiệu hóa. Sẽ có ở phiên bản sau.</Text>
           </div>
-          <label className="inline-flex items-center cursor-pointer select-none">
-            <input 
-              type="checkbox" 
-              className="sr-only peer" 
-              checked={createFromOldVersion} 
-              onChange={(e) => setCreateFromOldVersion(e.target.checked)} 
-              aria-checked={createFromOldVersion} 
-              aria-label="Tạo phiên bản từ hợp đồng cũ" 
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-indigo-600 transition-colors relative">
-              <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow peer-checked:translate-x-[20px]" />
-            </div>
-            <span className="ml-3 text-sm text-gray-700">{createFromOldVersion ? 'Bật' : 'Tắt'}</span>
-          </label>
+          <div>
+            <Switch checked={false} disabled onChange={() => {}} aria-label="Tạo phiên bản từ hợp đồng cũ (đang tạm tắt)" />
+            <Text as="span" className="text-sm text-gray-700" style={{ marginLeft: 8 }}>Tạm tắt</Text>
+          </div>
         </div>
 
-        {createFromOldVersion && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {false && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <Input
                 label="ID hợp đồng gốc"
                 type="text"
                 value={baseContractId}
-                onChange={(e) => setBaseContractId(e.target.value)}
+                onChange={(e) => setBaseContractId((e.target as any).value)}
                 placeholder="VD: 1024"
                 helperText="Nhập ID của hợp đồng cần tạo phiên bản mới."
+                disabled
               />
             </div>
             <div>
@@ -60,14 +52,15 @@ export default function VersioningPanel({
                 label="Tên phiên bản mới (tùy chọn)"
                 type="text"
                 value={newVersionName}
-                onChange={(e) => setNewVersionName(e.target.value)}
+                onChange={(e) => setNewVersionName((e.target as any).value)}
                 placeholder="VD: v2 hoặc 2.0"
                 helperText="Để trống để hệ thống tự đánh số tiếp theo."
+                disabled
               />
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

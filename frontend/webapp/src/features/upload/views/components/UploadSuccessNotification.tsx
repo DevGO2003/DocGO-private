@@ -1,4 +1,6 @@
 import React from 'react'
+import { Modal, Card, CardContent, Button, Text } from '@shared/components'
+import { Flex, Stack } from '@shared/components'
 
 interface UploadSuccessNotificationProps {
   fileName: string
@@ -25,143 +27,49 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
   onClose,
   showActions = true
 }) => {
-  const formatFileSize = (size?: string) => {
-    if (!size) return ''
-    return ` (${size})`
-  }
-
-  const getFileIcon = (type?: string) => {
-    return (
-      <div className="w-5 h-5 text-blue-500 flex items-center justify-center">
-        📄
-      </div>
-    )
-  }
+  const formatFileSize = (size?: string) => (size ? ` (${size})` : '')
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 ease-out">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 text-green-500 flex items-center justify-center text-2xl">
-                ✅
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Tải lên thành công
-              </h3>
-              <p className="text-sm text-gray-500">
-                Tệp đã được lưu vào hệ thống
-              </p>
-            </div>
-          </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <div className="w-6 h-6 flex items-center justify-center text-xl">✕</div>
-            </button>
-          )}
-        </div>
+    <Modal isOpen onClose={onClose} title="Tải lên thành công">
+      <Card>
+        <CardContent>
+          <Flex align="center" justify="between" style={{ marginBottom: 12 }}>
+            <Flex align="center" gap={8}>
+              <div style={{ width: 32, height: 32, color: '#16a34a', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✅</div>
+              <Stack gap={2}>
+                <Text as="h3" className="text-lg font-semibold text-gray-900">Tải lên thành công</Text>
+                <Text as="p" className="text-sm text-gray-500">Tệp đã được lưu vào hệ thống</Text>
+              </Stack>
+            </Flex>
+            {onClose && (
+              <Button variant="ghost" onClick={onClose}>Đóng</Button>
+            )}
+          </Flex>
 
-        {/* File Info */}
-        <div className="p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            {getFileIcon(fileType)}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {fileName}
-              </p>
-              <p className="text-xs text-gray-500">
-                {fileType?.toUpperCase()}{formatFileSize(fileSize)}
-              </p>
+          <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
+            <div style={{ width: 20, height: 20, color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <Text className="text-sm font-medium text-gray-900" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Text>
+              <Text className="text-xs text-gray-500">{fileType?.toUpperCase()}{formatFileSize(fileSize)}</Text>
             </div>
-          </div>
+          </Flex>
 
-          {/* Success Message */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <div className="w-5 h-5 text-green-500 mr-2 flex items-center justify-center">✅</div>
-              <p className="text-sm text-green-800">
-                Tệp <span className="font-medium">{fileName}</span> đã được tải lên và xử lý thành công.
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
           {showActions && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                {onViewFile && (
-                  <button
-                    onClick={onViewFile}
-                    className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                  >
-                    <div className="w-4 h-4 mr-2">👁️</div>
-                    Xem tệp
-                  </button>
-                )}
-                
-                {onViewDetails && (
-                  <button
-                    onClick={onViewDetails}
-                    className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-                  >
-                    <div className="w-4 h-4 mr-2">📄</div>
-                    Chi tiết
-                  </button>
-                )}
-                {onViewList && (
-                  <button
-                    onClick={onViewList}
-                    className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-                  >
-                    <div className="w-4 h-4 mr-2">📚</div>
-                    Xem danh sách
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {onDownloadFile && (
-                  <button
-                    onClick={onDownloadFile}
-                    className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                  >
-                    <div className="w-4 h-4 mr-2">⬇️</div>
-                    Tải xuống
-                  </button>
-                )}
-                
-                {onUploadMore && (
-                  <button
-                    onClick={onUploadMore}
-                    className="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    <div className="w-4 h-4 mr-2">➕</div>
-                    Tải thêm
-                  </button>
-                )}
-              </div>
-            </div>
+            <Stack gap={8}>
+              <Flex gap={8}>
+                {onViewFile && <Button onClick={onViewFile}>Xem tệp</Button>}
+                {onViewDetails && <Button variant="secondary" onClick={onViewDetails}>Chi tiết</Button>}
+                {onViewList && <Button variant="secondary" onClick={onViewList}>Xem danh sách</Button>}
+              </Flex>
+              <Flex gap={8}>
+                {onDownloadFile && <Button variant="outline" onClick={onDownloadFile}>Tải xuống</Button>}
+                {onUploadMore && <Button variant="outline" onClick={onUploadMore}>Tải thêm</Button>}
+              </Flex>
+            </Stack>
           )}
-
-          {/* Close Button */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <button
-              onClick={onClose}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </Modal>
   )
 }
 
