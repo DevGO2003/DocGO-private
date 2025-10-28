@@ -1,0 +1,345 @@
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  Button,
+  LoadingSpinner,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '@shared/components';
+import { 
+  ArrowLeft, 
+  Settings, 
+  Users, 
+  FileText, 
+  Activity,
+  Building,
+  User,
+  Lock,
+  Globe,
+  Calendar,
+  HardDrive
+} from 'lucide-react';
+import { useRepository } from '@features/repositories/models/api/repositoryApi';
+import { RepositoryType } from '@features/repositories/models/types';
+
+export const RepositoryDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('files');
+
+  const { data: repository, isLoading, error } = useRepository(id || '');
+
+  const handleBack = () => {
+    navigate('/repositories');
+  };
+
+  const handleSettings = () => {
+    // TODO: Open settings modal or navigate to settings page
+    console.log('Open repository settings');
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const getRepositoryTypeLabel = (type: RepositoryType) => {
+    return type === 'ORGANIZATION' ? 'Tổ chức' : 'Cá nhân';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex items-center justify-center py-16">
+            <LoadingSpinner text="Đang tải thông tin repository..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !repository) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto p-6">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-6">
+              <p className="text-red-700 text-center">
+                Không thể tải thông tin repository. Vui lòng thử lại.
+              </p>
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" onClick={handleBack}>
+                  Quay lại danh sách
+            </Button>
+              </div>
+          </CardContent>
+        </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="outline"
+              onClick={handleBack}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Quay lại
+              </Button>
+              <Button
+                variant="outline"
+              onClick={handleSettings}
+              className="inline-flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Cài đặt
+              </Button>
+          </div>
+          
+          <div className="flex items-center gap-3 mb-2">
+            {repository.type === 'ORGANIZATION' ? (
+              <Building className="w-8 h-8 text-purple-500" />
+            ) : (
+              <User className="w-8 h-8 text-blue-500" />
+            )}
+            <h1 className="text-3xl font-bold text-gray-900">{repository.name}</h1>
+          </div>
+          
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <span>{getRepositoryTypeLabel(repository.type)}</span>
+            <span className="flex items-center gap-1">
+              {repository.isPublic ? (
+                <Globe className="w-4 h-4 text-green-500" />
+              ) : (
+                <Lock className="w-4 h-4 text-gray-500" />
+              )}
+              {repository.isPublic ? 'Công khai' : 'Riêng tư'}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              Cập nhật: {new Date(repository.updatedAt).toLocaleDateString('vi-VN')}
+            </span>
+            </div>
+          </div>
+
+        {/* Primary Content */}
+        <div>
+          {/* Repository Info */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            {/* Main Info */}
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Thông tin Repository</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Mô tả</h4>
+                      <p className="text-gray-600">
+                        {repository.description || 'Không có mô tả'}
+                  </p>
+                </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Chủ sở hữu</h4>
+                        <p className="text-gray-600">
+                          {repository.ownerName || repository.ownerUserId}
+                  </p>
+                </div>
+                      
+                      {repository.organizationId && (
+                <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Tổ chức</h4>
+                          <p className="text-gray-600">
+                            {repository.organizationName || repository.organizationId}
+                          </p>
+                        </div>
+                      )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+            </div>
+
+            {/* Stats Sidebar */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Thống kê</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">Tệp</span>
+                      </div>
+                      <span className="font-medium">{repository.fileCount}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">Thành viên</span>
+                      </div>
+                      <span className="font-medium">{repository.memberCount}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <HardDrive className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">Dung lượng</span>
+                </div>
+                      <span className="font-medium">{formatFileSize(repository.totalSize)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+                </div>
+                  </div>
+
+          {/* Content Section */}
+          <div className="mt-8">
+            {/* Tabs Navigation */}
+            <div className="flex gap-4 border-b border-gray-200 mb-6">
+              <button
+                onClick={() => setActiveTab('files')}
+                className={`pb-3 px-4 border-b-2 transition-colors ${
+                  activeTab === 'files'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Tệp
+                      </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('members')}
+                className={`pb-3 px-4 border-b-2 transition-colors ${
+                  activeTab === 'members'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Thành viên
+                      </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`pb-3 px-4 border-b-2 transition-colors ${
+                  activeTab === 'activity'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  Hoạt động
+                      </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`pb-3 px-4 border-b-2 transition-colors ${
+                  activeTab === 'settings'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Cài đặt
+                      </div>
+              </button>
+                      </div>
+
+            {/* Tab Content */}
+            {activeTab === 'files' && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Chưa có tệp nào
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Tải lên tệp đầu tiên để bắt đầu
+                    </p>
+                    <Button>Tải lên tệp</Button>
+                </div>
+            </CardContent>
+          </Card>
+            )}
+
+            {activeTab === 'members' && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Quản lý thành viên
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Mời thành viên mới để cộng tác trên repository
+                    </p>
+                    <Button>Mời thành viên</Button>
+                </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {activeTab === 'activity' && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Hoạt động gần đây
+                    </h3>
+                    <p className="text-gray-600">
+                      Chưa có hoạt động nào được ghi lại
+                    </p>
+                </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {activeTab === 'settings' && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Cài đặt Repository
+                    </h3>
+                    <p className="text-gray-600">
+                      Tùy chỉnh cấu hình và quyền truy cập
+                    </p>
+                </div>
+            </CardContent>
+          </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

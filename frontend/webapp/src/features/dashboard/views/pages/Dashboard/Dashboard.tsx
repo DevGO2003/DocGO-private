@@ -1,20 +1,15 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent,
-  Button 
-} from '@shared/components';
+import { motion } from 'framer-motion';
 import { useAppSelector } from '@store/hooks';
 import { 
   useMyRepositories, 
   useFiles 
-} from '@features/repository';
-import { useMyOrganizations } from '@features/organization';
+} from '@features/repositories';
+import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
+// removed unused type imports
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@shared/components';
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
@@ -25,12 +20,9 @@ export const Dashboard = () => {
   const [size] = useState(5);
 
   // Temporarily disable API calls for testing
-  const repositories = null;
-  const reposLoading = false;
-  const files = null;
-  const filesLoading = false;
-  const organizations = null;
-  const orgsLoading = false;
+  const { data: repositories, isLoading: reposLoading } = useMyRepositories({ page, size });
+  const { data: files, isLoading: filesLoading } = useFiles({ page, size });
+  const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
 
   console.log('[Dashboard] User:', user);
 
@@ -105,7 +97,7 @@ export const Dashboard = () => {
         >
           {stats.map((stat, index) => (
             <motion.div key={index} variants={itemVariants}>
-              <Card animated className="h-full">
+              <Card className="h-full">
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center`}>
                     <span className="text-2xl text-white font-bold">
@@ -136,7 +128,7 @@ export const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card animated>
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Repositories</CardTitle>
               </CardHeader>
@@ -168,9 +160,8 @@ export const Dashboard = () => {
                   <div className="text-center py-8">
                     <p className="text-gray-500 mb-4">No repositories yet</p>
                     <Button
-                      variant="primary"
+                      variant="default"
                       onClick={() => navigate(REPOSITORIES_PATH)}
-                      animated
                     >
                       Create Repository
                     </Button>
@@ -186,7 +177,7 @@ export const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <Card animated>
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Files</CardTitle>
               </CardHeader>
@@ -233,14 +224,13 @@ export const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card animated>
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>My Organizations</CardTitle>
                 <Button
                   variant="outline"
                   onClick={() => navigate(ORGANIZATIONS_PATH)}
-                  animated
                 >
                   View All
                 </Button>
@@ -272,9 +262,8 @@ export const Dashboard = () => {
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-4">Not part of any organization yet</p>
                   <Button
-                    variant="primary"
+                    variant="default"
                     onClick={() => navigate(ORGANIZATIONS_PATH)}
-                    animated
                   >
                     Join Organization
                   </Button>
@@ -291,7 +280,7 @@ export const Dashboard = () => {
           transition={{ delay: 0.7 }}
           className="mt-8"
         >
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
@@ -301,7 +290,6 @@ export const Dashboard = () => {
                   variant="outline"
                   onClick={() => navigate(REPOSITORIES_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">📁</div>
@@ -312,7 +300,6 @@ export const Dashboard = () => {
                   variant="outline"
                   onClick={() => navigate(ORGANIZATIONS_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">🏢</div>
@@ -323,7 +310,6 @@ export const Dashboard = () => {
                   variant="outline"
                   onClick={() => navigate(PROFILE_PATH)}
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">👤</div>
@@ -333,7 +319,6 @@ export const Dashboard = () => {
                 <Button
                   variant="outline"
                   className="h-24"
-                  animated
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">⚙️</div>

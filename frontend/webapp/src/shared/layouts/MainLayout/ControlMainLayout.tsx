@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import HeaderPanel from '../../components/HeaderPanel'
+import {HeaderPanel} from '../../layouts/HeaderPanel/HeaderPanel'
 
 interface ControlMainLayoutProps {
   children: ReactNode
@@ -29,7 +29,7 @@ interface ControlMainLayoutProps {
  */
 export function ControlMainLayout({
   children,
-  title = 'Content',
+  title,
   subtitle,
   breadcrumbs,
   showToolbar = false,
@@ -40,9 +40,11 @@ export function ControlMainLayout({
   return (
     <div className="flex flex-col h-full w-full relative gap-2.5">
       {/* Header Panel */}
-      <div className="flex-shrink-0">
-        <HeaderPanel title={title} subtitle={subtitle} breadcrumbs={breadcrumbs} />
-      </div>
+      {(title || subtitle || (breadcrumbs && breadcrumbs.length > 0)) && (
+        <div className="flex-shrink-0">
+          <HeaderPanel title={title ?? ''} subtitle={subtitle} breadcrumbs={breadcrumbs} />
+        </div>
+      )}
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto">

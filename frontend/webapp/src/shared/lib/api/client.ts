@@ -264,6 +264,11 @@ class ApiClient {
   async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> {
     return this.client.patch(url, data, config)
   }
+
+  // Raw GET for non-ApiResponse payloads (e.g., Blob downloads)
+  async getRaw<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.client.get<T>(url, config)
+  }
 }
 
 export const apiClient = new ApiClient()

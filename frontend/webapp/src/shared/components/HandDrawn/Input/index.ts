@@ -1,1 +1,0 @@
-export { HandDrawnInput } from './HandDrawnInput';

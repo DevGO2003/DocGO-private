@@ -1,5 +1,4 @@
 import React from 'react'
-import { ContentLayout } from '../../layouts/ContentLayout'
 
 interface UploadLayoutProps {
   children: React.ReactNode
@@ -16,9 +15,16 @@ interface UploadLayoutProps {
  */
 function UploadLayout({ children, className = '' }: UploadLayoutProps) {
   return (
-    <ContentLayout className={className}>
+    <div
+      className={
+        `grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-full items-start ` +
+        // Only remove margins for immediate children to keep inner centering (mx-auto) working
+        `[&>*]:m-0 ` +
+        className
+      }
+    >
       {children}
-    </ContentLayout>
+    </div>
   )
 }
 

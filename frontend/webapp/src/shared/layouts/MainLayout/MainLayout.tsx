@@ -2,6 +2,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { ControlMainLayout } from './ControlMainLayout';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -97,9 +98,11 @@ export const MainLayout = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="flex-1 overflow-y-auto p-2.5"
+          className="flex-1 overflow-hidden p-2.5"
         >
-          {children}
+          <ControlMainLayout>
+            {children}
+          </ControlMainLayout>
         </motion.main>
       </div>
 
