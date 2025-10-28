@@ -1,0 +1,94 @@
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { automationFileApi, AutomationRecentItem } from '../../models/api/automationFileApi'
+import { Text, Button, Card, CardContent } from '@shared/components'
+import { Flex, Stack } from '@shared/components'
+import { REPOSITORY_DETAIL_PATH, REPOSITORY_FILE_DETAIL_PATH } from '@constants'
+
+interface RecentUploadsPanelProps {
+  limit?: number
+  className?: string
+}
+
+const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, className }) => {
+  const nav = useNavigate()
+  const [items, setItems] = useState<AutomationRecentItem[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    setLoading(true)
+    automationFileApi
+      .getRecent(limit)
+      .then((res) => {
+        if (!mounted) return
+        setItems(res.data || [])
+      })
+      .catch((e) => {
+        if (!mounted) return
+        setError(e?.message || 'Không thể tải danh sách uploads gần đây')
+      })
+      .finally(() => {
+        if (!mounted) return
+        setLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [limit])
+
+  const openDetail = (repoId?: string | null, fileId?: string) => {
+    if (!repoId || !fileId) return
+    nav(REPOSITORY_FILE_DETAIL_PATH.replace(':id', repoId).replace(':fileId', fileId))
+  }
+  const openRepo = (repoId?: string | null) => {
+    if (!repoId) return
+    nav(REPOSITORY_DETAIL_PATH.replace(':id', repoId))
+  }
+  const openPreview = (repoId?: string | null, fileId?: string) => {
+    // Tạm thời dùng trang chi tiết
+    openDetail(repoId, fileId)
+  }
+
+  return (
+    <Card className={className}>
+      <CardContent>
+        <Stack gap={1}>
+          <Flex align="center" justify="between">
+            <Text as="h3" className="text-base font-semibold text-gray-900">Uploads gần đây</Text>
+            {loading && <Text as="span" className="text-xs text-gray-500">Đang tải...</Text>}
+          </Flex>
+
+          {error && (
+            <Text as="div" className="text-xs text-red-600">{error}</Text>
+          )}
+
+          {(!items || items.length === 0) ? (
+            <Text as="p" className="text-sm text-gray-600">Chưa có dữ liệu</Text>
+          ) : (
+            <Stack gap={0}>
+              {items.map((it) => (
+                <Flex key={it.fileId} align="center" justify="between" style={{ padding: '12px', background: '#fff', borderBottom: '1px solid #eee' }}>
+                  <div style={{ minWidth: 0, flex: 1, marginRight: 12 }}>
+                    <p className="text-sm font-medium text-gray-900 truncate" title={it.fileName}>{it.fileName}</p>
+                    <p className="text-xs text-gray-500" style={{ marginTop: 2 }}>
+                      {(it.fileSize / 1024).toFixed(2)} KB • {it.contentType} • {new Date(it.uploadedAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <Flex align="center" gap={8}>
+                    <Button variant="outline" size="sm" onClick={() => openDetail(it.repositoryId, it.fileId)}>Chi tiết</Button>
+                    <Button variant="outline" size="sm" onClick={() => openRepo(it.repositoryId)}>Repository</Button>
+                    <Button variant="default" size="sm" onClick={() => openPreview(it.repositoryId, it.fileId)}>Preview</Button>
+                  </Flex>
+                </Flex>
+              ))}
+            </Stack>
+          )}
+        </Stack>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default RecentUploadsPanel
