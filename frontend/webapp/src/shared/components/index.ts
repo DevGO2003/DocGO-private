@@ -13,6 +13,7 @@ export * from './UIComponents/Text';
 export * from './UIComponents/Flex';
 export * from './UIComponents/Stack';
 export * from './UIComponents/Table';
+export * from './UIComponents/Tabs/Tabs';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';
