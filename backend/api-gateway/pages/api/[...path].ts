@@ -1,5 +1,7 @@
 // Load environment variables first
 import '@/lib/env-loader';
+import formidable from 'formidable';
+import fs from 'fs';
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import serviceManager from '@/lib/services';
@@ -251,24 +253,71 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       requestData = req.body;
     }
 
-    // Make request to microservice
-    const requestConfig: any = {
-      method: method as any,
-      url: endpoint,
-      data: requestData,
-      headers,
-      params: sanitizedParams,
-      maxBodyLength: Infinity,
-      maxContentLength: Infinity,
-      validateStatus: () => true // Don't throw on non-2xx status codes
-    };
+    // If multipart/form-data, parse with formidable and forward as FormData via fetch
+    let response;
+    const isMultipart = (headers['Content-Type'] || '').includes('multipart/form-data');
+    if (isMultipart && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      const form = formidable({
+        maxFileSize: 50 * 1024 * 1024,
+        uploadDir: '/tmp',
+        keepExtensions: true,
+      });
+      const [fields, files] = await form.parse(req as any);
 
-    // For multipart requests, prevent axios from serializing the body
-    if (headers['Content-Type'] && headers['Content-Type'].includes('multipart/form-data')) {
-      requestConfig.transformRequest = [(data: any) => data];
+      const formData = new FormData();
+      // append fields
+      Object.keys(fields).forEach((key) => {
+        const val = fields[key];
+        const value = Array.isArray(val) ? val[0] : val;
+        if (value !== undefined && value !== null) formData.append(key, String(value));
+      });
+      // append files
+      Object.keys(files).forEach((key) => {
+        const f = files[key] as any;
+        const arr = Array.isArray(f) ? f : [f];
+        arr.forEach((item) => {
+          if (!item) return;
+          const buf = fs.readFileSync(item.filepath);
+          const blob = new Blob([buf], { type: item.mimetype || 'application/octet-stream' });
+          formData.append(key, blob, item.originalFilename || 'file');
+        });
+      });
+
+      // Build target URL
+      const targetUrl = `${service.defaults.baseURL}${endpoint}`;
+      // Build headers (exclude content-type to let fetch set boundary)
+      const fwdHeaders: Record<string, string> = {};
+      if (headers['Authorization']) fwdHeaders['Authorization'] = headers['Authorization'];
+      if (headers['X-Correlation-Id']) fwdHeaders['X-Correlation-Id'] = headers['X-Correlation-Id'];
+      if (headers['X-Actor']) fwdHeaders['X-Actor'] = headers['X-Actor'];
+      if (headers['X-User-Token']) fwdHeaders['X-User-Token'] = headers['X-User-Token'];
+      if (headers['X-User-Id']) fwdHeaders['X-User-Id'] = headers['X-User-Id'];
+      if (headers['X-User-Roles']) fwdHeaders['X-User-Roles'] = headers['X-User-Roles'];
+      if (headers['X-Username']) fwdHeaders['X-Username'] = headers['X-Username'];
+      if (headers['X-User-Email']) fwdHeaders['X-User-Email'] = headers['X-User-Email'];
+
+      const fetchResp = await fetch(targetUrl, {
+        method,
+        headers: fwdHeaders,
+        body: formData as any,
+      } as any);
+      const contentType = fetchResp.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await fetchResp.json() : await fetchResp.text();
+      response = { status: fetchResp.status, data } as any;
+    } else {
+      // Default axios proxy for non-multipart
+      const requestConfig: any = {
+        method: method as any,
+        url: endpoint,
+        data: requestData,
+        headers,
+        params: sanitizedParams,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        validateStatus: () => true // Don't throw on non-2xx status codes
+      };
+      response = await service.request(requestConfig);
     }
-
-    const response = await service.request(requestConfig);
 
     // Ensure CORS headers on proxied response (override any upstream wildcard)
     res.setHeader('Access-Control-Allow-Origin', req.headers['origin'] || '*');

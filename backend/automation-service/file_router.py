@@ -3,6 +3,7 @@
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, Response, Form, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
+import os
 from collections import deque
 import io
 import json
@@ -215,6 +216,133 @@ async def get_recent_uploads(limit: int = Query(5)):
             path="/api/v1/automation-service/files/recent"
         )
 
+
+@router.post("/presign", summary="Tạo presigned URL để upload trực tiếp")
+async def presign_upload(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    filename = body.get("filename") or body.get("fileName") or "upload.bin"
+    content_type = body.get("contentType") or "application/octet-stream"
+    repository_id = body.get("repository_id") or body.get("repositoryId")
+
+    if not filename:
+        raise HTTPException(status_code=400, detail="filename required")
+
+    file_id = str(uuid.uuid4())
+    s3_enabled = os.getenv("S3_ENABLED", "false").lower() == "true"
+    s3_bucket = os.getenv("S3_BUCKET", "devgo2003-docgo-bucket")
+    s3_endpoint = os.getenv("S3_ENDPOINT", "https://s3.filebase.com")
+    s3_region = os.getenv("S3_REGION", "us-east-1")
+    s3_access_key = os.getenv("S3_ACCESS_KEY_ID", "")
+    s3_secret_key = os.getenv("S3_SECRET_ACCESS_KEY", "")
+
+    folder = body.get("folder") or "files"
+    s3_key = f"{folder}/{file_id}_{filename}"
+
+    if not s3_enabled or not s3_access_key or not s3_secret_key:
+        raise HTTPException(status_code=500, detail="S3 presign is not enabled")
+
+    try:
+        import boto3
+        from botocore.config import Config as BotoConfig
+        s3_client = boto3.client(
+            's3',
+            endpoint_url=s3_endpoint,
+            region_name=s3_region,
+            aws_access_key_id=s3_access_key,
+            aws_secret_access_key=s3_secret_key,
+            config=BotoConfig(signature_version='s3v4', s3={'addressing_style': 'path'})
+        )
+        upload_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={'Bucket': s3_bucket, 'Key': s3_key, 'ContentType': content_type},
+            ExpiresIn=900
+        )
+        return RestResponse(
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Presigned URL created",
+            data={
+                "method": "PUT",
+                "uploadUrl": upload_url,
+                "fileKey": s3_key,
+                "fileId": file_id,
+                "repositoryId": repository_id
+            },
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path="/api/v1/automation-service/files/presign"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Presign failed: {e}")
+
+
+@router.post("/complete", summary="Hoàn tất upload trực tiếp và xử lý nền")
+async def complete_upload(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    file_key = body.get("fileKey")
+    file_id = body.get("fileId")
+    repository_id = body.get("repository_id") or body.get("repositoryId")
+    content_type = body.get("contentType") or None
+    size = body.get("size") or 0
+
+    if not file_key or not file_id:
+        raise HTTPException(status_code=400, detail="fileKey and fileId are required")
+
+    s3_enabled = os.getenv("S3_ENABLED", "false").lower() == "true"
+    s3_bucket = os.getenv("S3_BUCKET", "devgo2003-docgo-bucket")
+    s3_endpoint = os.getenv("S3_ENDPOINT", "https://s3.filebase.com")
+    s3_region = os.getenv("S3_REGION", "us-east-1")
+    s3_access_key = os.getenv("S3_ACCESS_KEY_ID", "")
+    s3_secret_key = os.getenv("S3_SECRET_ACCESS_KEY", "")
+
+    if not s3_enabled or not s3_access_key or not s3_secret_key:
+        raise HTTPException(status_code=500, detail="S3 not enabled")
+
+    try:
+        import boto3
+        from botocore.config import Config as BotoConfig
+        s3_client = boto3.client(
+            's3',
+            endpoint_url=s3_endpoint,
+            region_name=s3_region,
+            aws_access_key_id=s3_access_key,
+            aws_secret_access_key=s3_secret_key,
+            config=BotoConfig(signature_version='s3v4', s3={'addressing_style': 'path'})
+        )
+        s3_client.head_object(Bucket=s3_bucket, Key=file_key)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Uploaded object not found: {e}")
+
+    try:
+        await progress_service.start(file_id)
+    except Exception:
+        pass
+
+    return RestResponse(
+        apiVersion="v1",
+        statusCode=202,
+        shortMessage="Accepted",
+        description="Upload completed. Processing started.
+",
+        data={
+            "fileId": file_id,
+            "fileKey": file_key,
+            "repositoryId": repository_id,
+            "size": size,
+            "contentType": content_type
+        },
+        timestamp=datetime.now().isoformat(),
+        requestId=str(uuid.uuid4()),
+        path="/api/v1/automation-service/files/complete"
+    )
 @router.get("/{file_id}", summary="Chi tiết file", response_model=RestResponse[dict])
 async def get_file_details(
     file_id: str

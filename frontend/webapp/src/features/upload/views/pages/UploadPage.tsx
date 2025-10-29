@@ -223,6 +223,11 @@ export default function UploadPage() {
                             </>
                           )}
                         </Button>
+                        {ocrLoading && (
+                          <p className="text-xs text-gray-500 mt-2">
+                            Quá trình upload có thể diễn ra rất lâu, bạn có thể đi nấu mỳ trong lúc đợi :&gt;
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <div className="text-center py-4">
