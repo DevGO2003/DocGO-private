@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
@@ -20,6 +21,7 @@ import { ControlMainLayout } from '@shared/layouts';
 export const RepositoryList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<RepositoryType>('PERSONAL');
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +29,7 @@ export const RepositoryList = () => {
   const [isCreating, setIsCreating] = useState(false);
   const createRepo = useCreateRepository();
   const size = 12;
+
 
   const {
     data: personalData,
@@ -125,9 +128,9 @@ export const RepositoryList = () => {
 
   return (
     <ControlMainLayout
-      title="My Repositories"
-      subtitle="Manage your document repositories and files"
-      breadcrumbs={[{ label: 'Repositories', href: '/repositories', current: true }]}
+      title={t('repositories.list.title')}
+      subtitle={t('repositories.list.subtitle')}
+      breadcrumbs={[{ label: t('nav.repositories'), href: '/repositories', current: true }]}
       headerChildren={
         <RepositoryTabs
           activeTab={activeTab}
@@ -138,14 +141,16 @@ export const RepositoryList = () => {
         />
       }
       headerRight={
-        <Button
-          variant="outline"
-          onClick={handleCreateRepository}
-          className="inline-flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          New Repository
-        </Button>
+        activeTab !== 'PUBLIC' ? (
+          <Button
+            variant="outline"
+            onClick={handleCreateRepository}
+            className="inline-flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            {t('repositories.list.new')}
+          </Button>
+        ) : null
       }
       showToolbar={false}
     >
@@ -157,7 +162,13 @@ export const RepositoryList = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder={`Tìm kiếm ${activeTab === 'PERSONAL' ? 'cá nhân' : activeTab === 'ORGANIZATION' ? 'tổ chức' : 'công khai'} repositories...`}
+                placeholder={
+                  activeTab === 'PERSONAL'
+                    ? t('repositories.list.search.personal')
+                    : activeTab === 'ORGANIZATION'
+                    ? t('repositories.list.search.organization')
+                    : t('repositories.list.search.public')
+                }
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
@@ -170,7 +181,7 @@ export const RepositoryList = () => {
             repositories={currentData?.content || []}
             isLoading={currentLoading}
             error={errorMessage}
-            onCreateRepository={handleCreateRepository}
+            onCreateRepository={activeTab !== 'PUBLIC' ? handleCreateRepository : undefined}
             onRepositoryClick={handleRepositoryClick}
           />
 
@@ -178,9 +189,11 @@ export const RepositoryList = () => {
           {currentData && currentData.totalPages > 1 && (
             <div className="flex items-center justify-between mt-8">
               <div className="text-sm text-gray-700">
-                Hiển thị {currentData.currentPage * currentData.pageSize + 1} đến{' '}
-                {Math.min((currentData.currentPage + 1) * currentData.pageSize, currentData.totalElements)}{' '}
-                trong số {currentData.totalElements} repositories
+                {t('repositories.list.pagination.showing', {
+                  from: currentData.currentPage * currentData.pageSize + 1,
+                  to: Math.min((currentData.currentPage + 1) * currentData.pageSize, currentData.totalElements),
+                  total: currentData.totalElements,
+                })}
               </div>
 
               <div className="flex items-center space-x-2">
@@ -190,7 +203,7 @@ export const RepositoryList = () => {
                   onClick={() => handlePageChange(page - 1)}
                   disabled={!currentData.hasPrevious}
                 >
-                  Trước
+                  {t('repositories.list.pagination.prev')}
                 </Button>
 
                 <div className="flex items-center space-x-1">
@@ -213,7 +226,7 @@ export const RepositoryList = () => {
                   onClick={() => handlePageChange(page + 1)}
                   disabled={!currentData.hasNext}
                 >
-                  Sau
+                  {t('repositories.list.pagination.next')}
                 </Button>
               </div>
             </div>

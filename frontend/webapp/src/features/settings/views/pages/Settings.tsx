@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   User,
   Lock,
@@ -26,6 +27,7 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'preferences';
 
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [showNewPassword, setShowNewPassword] = useState(false);
 
@@ -60,10 +62,10 @@ export const Settings = () => {
   });
 
   const tabs = [
-    { id: 'profile' as SettingsTab, label: 'Profile', icon: User },
-    { id: 'security' as SettingsTab, label: 'Security', icon: Lock },
-    { id: 'notifications' as SettingsTab, label: 'Notifications', icon: Bell },
-    { id: 'preferences' as SettingsTab, label: 'Preferences', icon: Globe },
+    { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: User },
+    { id: 'security' as SettingsTab, label: t('settings.tabs.security'), icon: Lock },
+    { id: 'notifications' as SettingsTab, label: t('settings.tabs.notifications'), icon: Bell },
+    { id: 'preferences' as SettingsTab, label: t('settings.tabs.preferences'), icon: Globe },
   ];
 
   const handleProfileUpdate = async () => {
@@ -100,10 +102,10 @@ export const Settings = () => {
 
   return (
     <ControlMainLayout
-      title="Settings"
-      breadcrumbs={[{ label: 'Settings', href: '/settings', current: true }]}
+      title={t('settings.title')}
+      breadcrumbs={[{ label: t('nav.settings'), href: '/settings', current: true }]}
       loading={!user}
-      loadingText="Loading settings..."
+      loadingText={t('app.loading')}
     >
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
@@ -112,7 +114,7 @@ export const Settings = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Settings</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
           <p className="text-gray-600">Manage your account settings and preferences</p>
         </motion.div>
 
@@ -358,32 +360,34 @@ export const Settings = () => {
             {activeTab === 'preferences' && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Application Preferences</CardTitle>
+                  <CardTitle>{t('settings.tabs.preferences')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Language
+                        {t('settings.preferences.language')}
                       </label>
                       <select
                         value={preferenceSettings.language}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const lang = e.target.value;
                           setPreferenceSettings({
                             ...preferenceSettings,
-                            language: e.target.value,
-                          })
-                        }
+                            language: lang,
+                          });
+                          void i18n.changeLanguage(lang);
+                        }}
                         className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                       >
-                        <option value="en">English</option>
-                        <option value="vi">Vietnamese</option>
+                        <option value="en">{t('settings.preferences.english')}</option>
+                        <option value="vi">{t('settings.preferences.vietnamese')}</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Timezone
+                        {t('settings.preferences.timezone')}
                       </label>
                       <select
                         value={preferenceSettings.timezone}
@@ -403,7 +407,7 @@ export const Settings = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Theme
+                        {t('settings.preferences.theme')}
                       </label>
                       <select
                         value={preferenceSettings.theme}
@@ -423,7 +427,7 @@ export const Settings = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Date Format
+                        {t('settings.preferences.dateFormat')}
                       </label>
                       <select
                         value={preferenceSettings.dateFormat}

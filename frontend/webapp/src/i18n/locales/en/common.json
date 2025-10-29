@@ -1,0 +1,504 @@
+{
+  "app": {
+    "title": "DocGO",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "orders": "Orders",
+    "profile": "Profile",
+    "settings": "Settings",
+    "repositories": "Repositories",
+    "organizations": "Organizations",
+    "upload": "Upload",
+    "analytics": "Analytics",
+    "documents": "Documents",
+    "users": "Users"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "notifications": "Notifications",
+      "preferences": "Preferences"
+    },
+    "preferences": {
+      "language": "Language",
+      "timezone": "Timezone",
+      "theme": "Theme",
+      "dateFormat": "Date Format",
+      "english": "English",
+      "vietnamese": "Vietnamese"
+    }
+  },
+  "organizations": {
+    "list": {
+      "title": "My Organizations",
+      "subtitle": "Manage your organizations and team collaboration",
+      "new": "New Organization",
+      "searchPlaceholder": "Search organizations...",
+      "loading": "Loading organizations...",
+      "error": "Failed to load organizations. Please try again.",
+      "invalidResponse": "Invalid response format. Please contact support.",
+      "empty": {
+        "title": "No organizations yet",
+        "desc": "Create an organization to start collaborating with your team",
+        "cta": "Create Organization"
+      },
+      "badges": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "member": "Member",
+        "public": "Public",
+        "openInvites": "Open Invites"
+      },
+      "members": "{{count}} members",
+      "ownerLabel": "Owner",
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "pageOf": "Page {{page}} of {{total}}"
+      }
+    },
+    "detail": {
+      "loading": "Loading organization...",
+      "notFound": "Organization not found",
+      "backToList": "Back to Organizations",
+      "actions": "Actions",
+      "stats": {
+        "members": "Members",
+        "repositories": "Repositories",
+        "status": "Status",
+        "active": "Active",
+        "created": "Created"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "members": "Members",
+        "repositories": "Repositories",
+        "settings": "Settings"
+      },
+      "overview": {
+        "title": "Organization Details",
+        "name": "Name",
+        "description": "Description",
+        "noDescription": "No description",
+        "owner": "Owner",
+        "settings": "Settings",
+        "flags": {
+          "public": "Public",
+          "openInvitations": "Open Invitations",
+          "requiresApproval": "Requires Approval"
+        }
+      },
+      "members": {
+        "title": "Members",
+        "invite": "Invite Members",
+        "loading": "Loading members...",
+        "none": "No members yet",
+        "joined": "Joined {{date}}",
+        "remove": "Remove"
+      },
+      "repositories": {
+        "title": "Repositories",
+        "empty": "No repositories in this organization yet"
+      },
+      "settings": {
+        "title": "Organization Settings",
+        "general": "General Settings",
+        "public": {
+          "label": "Public Organization",
+          "desc": "Allow anyone to view this organization"
+        },
+        "allowInvitations": {
+          "label": "Allow Invitations",
+          "desc": "Members can invite new people"
+        },
+        "requireApproval": {
+          "label": "Require Approval",
+          "desc": "New members need approval before joining"
+        },
+        "danger": {
+          "title": "Danger Zone",
+          "delete": "Delete Organization",
+          "desc": "Once deleted, this organization cannot be recovered",
+          "cta": "Delete Organization"
+        }
+      }
+    },
+    "workspace": {
+      "loading": "Loading workspace...",
+      "notFound": "Organization not found",
+      "back": "Back",
+      "backToList": "Back to Organizations",
+      "tabs": {
+        "contracts": "Contracts",
+        "pendingApprovals": "Pending Approvals",
+        "reports": "Reports",
+        "members": "Members",
+        "settings": "Settings"
+      },
+      "stats": {
+        "totalContracts": "Total Contracts",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "searchContracts": "Search contracts...",
+      "filter": "Filter",
+      "allContracts": "All Contracts",
+      "updating": "Updating...",
+      "loadingContracts": "Loading contracts...",
+      "noContracts": "No contracts yet",
+      "contractsAppear": "Contracts will appear here when they are available",
+      "pendingApprovalsTitle": "Pending Approvals",
+      "noPending": "No contracts pending approval",
+      "reportsTitle": "Analytics & Reports",
+      "noReports": "No data available for reports",
+      "membersCard": {
+        "title": "Team Members",
+        "manage": "Manage Members",
+        "desc": "View and manage your team members",
+        "go": "Go to Members Management"
+      },
+      "settings": {
+        "title": "Organization Settings",
+        "general": "General Settings",
+        "orgName": "Organization Name",
+        "description": "Description",
+        "noDescription": "No description"
+      }
+    },
+    "acceptInvitation": {
+      "invalidTitle": "Invalid Link",
+      "invalidDesc": "This invitation link is invalid or expired.",
+      "goToOrganizations": "Go to Organizations",
+      "error": "Error",
+      "header": {
+        "title": "Organization Invitation",
+        "subtitle": "You've been invited to join an organization"
+      },
+      "orgName": "Organization Name",
+      "invitedAs": "You've been invited to join this organization as a {{role}}",
+      "invitedTo": "Invited to: {{email}}",
+      "note": "Click Accept to join this organization and start collaborating with your team.",
+      "decline": "Decline",
+      "declining": "Declining...",
+      "accept": "Accept Invitation",
+      "accepting": "Accepting..."
+    },
+    "members": {
+      "loading": "Loading members...",
+      "notFound": "Organization not found",
+      "backToWorkspace": "Back to Workspace",
+      "title": "Members",
+      "manageFor": "Manage team members for <strong>{{name}}</strong>",
+      "inviteMember": "Invite Member",
+      "teamMembers": "Team Members ({{count}})",
+      "aboutRolesTitle": "About Member Roles",
+      "roles": {
+        "owner": "Owner: Full access to all organization features and settings",
+        "manager": "Manager: Can approve contracts and manage team based on assigned permissions",
+        "member": "Member: Can upload and manage their own contracts"
+      },
+      "backToOrganizations": "Back to Organizations"
+    },
+    "inviteModal": {
+      "successTitle": "Invitation Sent!",
+      "copyLink": "Copy Link",
+      "done": "Done",
+      "successHeaderTitle": "Invitation created successfully!",
+      "successHeaderDesc": "Share this link with {{email}} to accept the invitation",
+      "invitationLink": "Invitation Link:",
+      "copy": "Copy",
+      "copied": "Invitation link copied to clipboard!",
+      "nextSteps": "Next Steps:",
+      "steps": {
+        "copy": "Copy the invitation link above",
+        "send": "Send it to {{email}} via email, chat, or any messaging app",
+        "accept": "They can click the link to accept and join your organization"
+      },
+      "note": "Note: Automatic email notifications are not yet enabled. Please send this link manually to the invited member.",
+      "dialogTitle": "Invite Team Member",
+      "cancel": "Cancel",
+      "sendInvitation": "Send Invitation",
+      "sending": "Sending...",
+      "header": {
+        "title": "Invite new member",
+        "subtitle": "Send an email invitation to join your organization"
+      },
+      "errorTitle": "Error",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "colleague@example.com",
+      "selectRole": "Select Role",
+      "role": {
+        "member": {
+          "title": "Member",
+          "desc": "Basic access - Can upload and manage their own contracts"
+        },
+        "manager": {
+          "title": "Manager",
+          "desc": "Management access - Can approve contracts and manage team (requires permissions selection)"
+        }
+      },
+      "managerPermissions": {
+        "title": "Manager Permissions",
+        "subtitle": "Select permissions for this manager"
+      },
+      "infoNote": "The invited member will receive an email with a link to accept the invitation. The link expires in 7 days.",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "permissionsRequired": "Please select at least one permission for Manager role",
+        "submitFailed": "Failed to send invitation"
+      }
+    },
+    "createDialog": {
+      "title": "Create New Organization",
+      "cancel": "Cancel",
+      "create": "Create Organization",
+      "creating": "Creating...",
+      "header": {
+        "title": "Organization Details",
+        "subtitle": "Create a new organization to collaborate with your team"
+      },
+      "errorTitle": "Error",
+      "orgNameLabel": "Organization Name",
+      "orgNamePlaceholder": "e.g., Acme Corporation",
+      "descriptionLabel": "Description",
+      "descriptionOptional": "(optional)",
+      "descriptionPlaceholder": "Brief description of your organization...",
+      "descriptionCounter": "{{count}} / 500 characters",
+      "note": "Note: You will be the owner of this organization and can manage all settings after creation.",
+      "errors": {
+        "nameRequired": "Organization name is required",
+        "nameMin": "Organization name must be at least 3 characters",
+        "nameMax": "Organization name must be less than 100 characters",
+        "descMax": "Description must be less than 500 characters",
+        "authRequired": "User not authenticated. Please login again.",
+        "submitFailed": "Failed to create organization"
+      }
+    }
+  },
+  "repositories": {
+    "list": {
+      "title": "My Repositories",
+      "subtitle": "Manage your document repositories and files",
+      "new": "New Repository",
+      "search": {
+        "personal": "Search personal repositories...",
+        "organization": "Search organization repositories...",
+        "public": "Search public repositories..."
+      },
+      "pagination": {
+        "showing": "Showing {{from}} to {{to}} of {{total}} repositories",
+        "prev": "Previous",
+        "next": "Next"
+      }
+    },
+    "detail": {
+      "loading": "Loading repository info...",
+      "error": "Unable to load repository. Please try again.",
+      "back": "Back",
+      "settings": "Settings",
+      "type": {
+        "organization": "Organization",
+        "personal": "Personal",
+        "public": "Public",
+        "private": "Private"
+      },
+      "updated": "Updated: {{date}}",
+      "info": {
+        "title": "Repository Information",
+        "description": "Description",
+        "noDescription": "No description",
+        "owner": "Owner",
+        "organization": "Organization"
+      },
+      "stats": {
+        "title": "Statistics",
+        "files": "Files",
+        "members": "Members",
+        "storage": "Storage"
+      },
+      "tabs": {
+        "files": "Files",
+        "members": "Members",
+        "activity": "Activity",
+        "settings": "Settings"
+      },
+      "empty": {
+        "files": {
+          "title": "No files yet",
+          "desc": "Upload your first file to get started",
+          "upload": "Upload File"
+        },
+        "members": {
+          "title": "Manage Members",
+          "desc": "Invite new members to collaborate on this repository",
+          "invite": "Invite Member"
+        },
+        "activity": {
+          "title": "Recent Activity",
+          "desc": "No activities recorded yet"
+        },
+        "settings": {
+          "title": "Repository Settings",
+          "desc": "Customize configuration and access permissions"
+        }
+      }
+    },
+    "tabs": {
+      "personal": {
+        "label": "Personal",
+        "description": "Your personal repositories"
+      },
+      "organization": {
+        "label": "Organization",
+        "description": "Organization repositories"
+      },
+      "public": {
+        "label": "Public",
+        "description": "Public repositories"
+      }
+    },
+    "documentsFilters": {
+      "searchPlaceholder": "Search documents...",
+      "refresh": "Refresh",
+      "grid": "Grid",
+      "list": "List"
+    },
+    "files": {
+      "title": "Repository Files",
+      "subtitle": "Repo ID: {{id}}",
+      "manage": "Document Management",
+      "empty": {
+        "notFound": "No matching documents found.",
+        "clearSearch": "Clear search"
+      },
+      "table": {
+        "document": "Document",
+        "status": "Status",
+        "type": "Type",
+        "size": "Size",
+        "uploadedAt": "Uploaded At",
+        "viewDetail": "View Detail"
+      },
+      "breadcrumbs": {
+        "repo": "Repo {{id}}",
+        "repository": "Repository",
+        "files": "Files"
+      },
+      "loading": "Loading files..."
+    }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "goBack": "Go Back",
+    "goHome": "Go Home"
+  },
+  "unauthorized": {
+    "title": "Access Denied",
+    "description": "Sorry, you don't have permission to access this page. Please contact your administrator if you believe this is an error.",
+    "goBack": "Go Back",
+    "goHome": "Go Home"
+  },
+  "profile": {
+    "title": "My Profile",
+    "manage": "Manage your personal information",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "labels": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "department": "Department",
+      "position": "Position"
+    },
+    "placeholders": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "email@example.com",
+      "phone": "+84 xxx xxx xxx"
+    },
+    "stats": {
+      "repositories": "Repositories",
+      "organizations": "Organizations"
+    },
+    "account": {
+      "title": "Account Information",
+      "status": "Status",
+      "role": "Role",
+      "memberSince": "Member since"
+    },
+    "notSet": "Not set"
+  },
+  "upload": {
+    "versioningPanel": {
+      "title": "Create version from existing contract",
+      "subtitle": "• Choose an existing contract to create a new version",
+      "disabledNote": "This feature is temporarily disabled. It will be available in the next version.",
+      "disabled": "Disabled",
+      "baseId": "Base contract ID",
+      "newVersionName": "New version name (optional)",
+      "baseIdHelper": "Enter the ID of the contract to create a new version.",
+      "newVersionNameHelper": "Leave empty to auto-increment."
+    }
+  },
+  "sidebar": {
+    "favorites": "Favorites",
+    "groups": {
+      "storage": "Repositories",
+      "management": "Management",
+      "settings": "Settings"
+    },
+    "tooltips": {
+      "expand": "Expand menu",
+      "collapse": "Collapse menu",
+      "editMode": "Edit mode",
+      "unpin": "Unpin",
+      "pin": "Pin to favorites",
+      "editLabel": "Edit label"
+    },
+    "placeholder": {
+      "labelName": "Item name"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Recent activity overview",
+    "welcome": "Welcome back, {{name}}! 👋",
+    "whatsHappening": "Here's what's happening with your projects today.",
+    "stats": {
+      "repositories": "Repositories",
+      "files": "Files",
+      "organizations": "Organizations",
+      "storageUsed": "Storage Used"
+    },
+    "recentRepositories": "Recent Repositories",
+    "filesCount": "{{count}} files",
+    "noRepositories": "No repositories yet",
+    "createRepository": "Create Repository",
+    "recentFiles": "Recent Files",
+    "noFiles": "No files uploaded yet",
+    "myOrganizations": "My Organizations",
+    "viewAll": "View All",
+    "noDescription": "No description",
+    "members": "{{count}} members",
+    "notInOrganization": "Not part of any organization yet",
+    "joinOrganization": "Join Organization",
+    "quickActions": "Quick Actions",
+    "btn": {
+      "repositories": "Repositories",
+      "organizations": "Organizations",
+      "profile": "Profile",
+      "settings": "Settings"
+    }
+  }
+}

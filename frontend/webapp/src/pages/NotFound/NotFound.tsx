@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { FileQuestion, ArrowLeft, Home } from 'lucide-react';
 import { Card, CardContent, Button } from '@shared/components';
@@ -6,6 +7,7 @@ import { HOME_PATH } from '@constants';
 
 export const NotFound = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
@@ -32,7 +34,7 @@ export const NotFound = () => {
               transition={{ delay: 0.3 }}
               className="text-6xl font-bold text-gray-900 mb-3"
             >
-              404
+              {t('notFound.code')}
             </motion.h1>
 
             <motion.h2
@@ -41,7 +43,7 @@ export const NotFound = () => {
               transition={{ delay: 0.4 }}
               className="text-2xl font-semibold text-gray-900 mb-3"
             >
-              Page Not Found
+              {t('notFound.title')}
             </motion.h2>
 
             <motion.p
@@ -50,7 +52,7 @@ export const NotFound = () => {
               transition={{ delay: 0.5 }}
               className="text-gray-600 mb-8"
             >
-              The page you're looking for doesn't exist or has been moved.
+              {t('notFound.description')}
             </motion.p>
 
             <motion.div
@@ -63,19 +65,17 @@ export const NotFound = () => {
                 variant="outline"
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2"
-                animated
               >
                 <ArrowLeft className="w-4 h-4" />
-                Go Back
+                {t('notFound.goBack')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate(HOME_PATH)}
                 className="flex items-center gap-2"
-                animated
               >
                 <Home className="w-4 h-4" />
-                Go Home
+                {t('notFound.goHome')}
               </Button>
             </motion.div>
           </CardContent>

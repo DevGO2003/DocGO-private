@@ -17,7 +17,6 @@ export const RepositoryList = lazy(() => import('@features/repositories/views/pa
 export const RepositoryDetail = lazy(() => import('@features/repositories/views/pages/RepositoryDetail').then(m => ({ default: m.RepositoryDetail })));
 export const RepositoryFileDetail = lazy(() => import('@features/repositories/views/pages/RepositoryFileDetail').then(m => ({ default: m.RepositoryFileDetail })));
 export const RepositoryFilesList = lazy(() => import('@features/repositories/views/pages/RepositoryFilesList').then(m => ({ default: m.RepositoryFilesList })));
-export const RepositoryUploadDocument = lazy(() => import('@features/repositories/views/pages/RepositoryUploadDocument/RepositoryUploadDocument').then(m => ({ default: m.RepositoryUploadDocument })));
 
 // Organization
 export const OrganizationList = lazy(() => import('@features/organizations/views/pages/OrganizationList').then(m => ({ default: m.OrganizationList })));

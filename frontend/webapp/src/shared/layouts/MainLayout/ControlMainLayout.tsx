@@ -47,7 +47,7 @@ export function ControlMainLayout({
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState(false)
 
   return (
-    <div className="flex flex-col h-full w-full relative gap-2.5">
+    <div id="control-main-layout-root" className="flex flex-col h-full w-full relative gap-2.5">
       {/* Header Panel */}
       {(title || subtitle || (breadcrumbs && breadcrumbs.length > 0) || headerChildren || headerRight) && (
         <div className="flex-shrink-0">
@@ -77,7 +77,7 @@ export function ControlMainLayout({
         )}
 
         {loading && (
-          <LoadingSpinner overlay transparentBg text={loadingText} />
+          <LoadingSpinner fullScreen transparentBg text={loadingText} />
         )}
       </div>
 

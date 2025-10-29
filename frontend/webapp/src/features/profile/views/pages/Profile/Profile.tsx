@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { User, Mail, Phone, Briefcase, Building2, Calendar, Edit2, Save } from 'lucide-react';
 import {
   Card,
@@ -16,6 +17,7 @@ import { useUpdateProfile } from '@features/auth';
 
 export const Profile = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const updateProfileMutation = useUpdateProfile();
 
@@ -58,10 +60,10 @@ export const Profile = () => {
 
   return (
     <ControlMainLayout
-      title="My Profile"
-      breadcrumbs={[{ label: 'Profile', href: '/profile', current: true }]}
+      title={t('profile.title')}
+      breadcrumbs={[{ label: t('nav.profile'), href: '/profile', current: true }]}
       loading={!user}
-      loadingText="Loading profile..."
+      loadingText={t('app.loading')}
     >
       {user && (
         <div className="max-w-4xl mx-auto p-6">
@@ -71,8 +73,8 @@ export const Profile = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
-            <p className="text-gray-600">Manage your personal information</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('profile.title')}</h1>
+            <p className="text-gray-600">{t('profile.manage')}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -109,11 +111,11 @@ export const Profile = () => {
                       <div className="grid grid-cols-2 gap-4 text-center">
                         <div>
                           <div className="text-2xl font-bold text-gray-900">0</div>
-                          <div className="text-sm text-gray-600">Repositories</div>
+                          <div className="text-sm text-gray-600">{t('profile.stats.repositories')}</div>
                         </div>
                         <div>
                           <div className="text-2xl font-bold text-gray-900">0</div>
-                          <div className="text-sm text-gray-600">Organizations</div>
+                          <div className="text-sm text-gray-600">{t('profile.stats.organizations')}</div>
                         </div>
                       </div>
                     </div>
@@ -131,7 +133,7 @@ export const Profile = () => {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Personal Information</CardTitle>
+                    <CardTitle>{t('profile.title')}</CardTitle>
                     {!isEditing ? (
                       <Button
                         variant="outline"
@@ -139,7 +141,7 @@ export const Profile = () => {
                         className="flex items-center gap-2"
                       >
                         <Edit2 className="w-4 h-4" />
-                        Edit
+                        {t('profile.edit')}
                       </Button>
                     ) : (
                       <div className="flex gap-2">
@@ -148,7 +150,7 @@ export const Profile = () => {
                           onClick={handleCancel}
                           disabled={updateProfileMutation.isPending}
                         >
-                          Cancel
+                          {t('profile.cancel')}
                         </Button>
                         <Button
                           variant="outline"
@@ -157,7 +159,7 @@ export const Profile = () => {
                           className="flex items-center gap-2"
                         >
                           <Save className="w-4 h-4" />
-                          Save
+                          {t('profile.save')}
                         </Button>
                       </div>
                     )}
@@ -170,14 +172,14 @@ export const Profile = () => {
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <User className="w-4 h-4" />
-                          First Name
+                          {t('profile.labels.firstName')}
                         </label>
                         {isEditing ? (
                           <Input
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            placeholder="First name"
+                            placeholder={t('profile.placeholders.firstName')}
                           />
                         ) : (
                           <p className="text-gray-900">{user.firstName}</p>
@@ -186,14 +188,14 @@ export const Profile = () => {
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <User className="w-4 h-4" />
-                          Last Name
+                          {t('profile.labels.lastName')}
                         </label>
                         {isEditing ? (
                           <Input
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
-                            placeholder="Last name"
+                            placeholder={t('profile.placeholders.lastName')}
                           />
                         ) : (
                           <p className="text-gray-900">{user.lastName}</p>
@@ -206,7 +208,7 @@ export const Profile = () => {
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <Mail className="w-4 h-4" />
-                          Email
+                          {t('profile.labels.email')}
                         </label>
                         {isEditing ? (
                           <Input
@@ -214,7 +216,7 @@ export const Profile = () => {
                             type="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="email@example.com"
+                            placeholder={t('profile.placeholders.email')}
                           />
                         ) : (
                           <p className="text-gray-900">{user.email}</p>
@@ -223,7 +225,7 @@ export const Profile = () => {
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <Phone className="w-4 h-4" />
-                          Phone
+                          {t('profile.labels.phone')}
                         </label>
                         {isEditing ? (
                           <Input
@@ -231,10 +233,10 @@ export const Profile = () => {
                             type="tel"
                             value={formData.phone}
                             onChange={handleChange}
-                            placeholder="+84 xxx xxx xxx"
+                            placeholder={t('profile.placeholders.phone')}
                           />
                         ) : (
-                          <p className="text-gray-900">{user.phone || 'Not set'}</p>
+                          <p className="text-gray-900">{user.phone || t('profile.notSet')}</p>
                         )}
                       </div>
                     </div>
@@ -244,7 +246,7 @@ export const Profile = () => {
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <Building2 className="w-4 h-4" />
-                          Department
+                          {t('profile.labels.department')}
                         </label>
                         {isEditing ? (
                           <Input
@@ -254,13 +256,13 @@ export const Profile = () => {
                             placeholder="Engineering"
                           />
                         ) : (
-                          <p className="text-gray-900">{user.department || 'Not set'}</p>
+                          <p className="text-gray-900">{user.department || t('profile.notSet')}</p>
                         )}
                       </div>
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                           <Briefcase className="w-4 h-4" />
-                          Position
+                          {t('profile.labels.position')}
                         </label>
                         {isEditing ? (
                           <Input
@@ -270,7 +272,7 @@ export const Profile = () => {
                             placeholder="Software Engineer"
                           />
                         ) : (
-                          <p className="text-gray-900">{user.position || 'Not set'}</p>
+                          <p className="text-gray-900">{user.position || t('profile.notSet')}</p>
                         )}
                       </div>
                     </div>
@@ -278,17 +280,17 @@ export const Profile = () => {
                     {/* Account Info */}
                     <div className="pt-6 border-t border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Account Information
+                        {t('profile.account.title')}
                       </h3>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Status</span>
+                          <span className="text-sm text-gray-600">{t('profile.account.status')}</span>
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {user.status}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Role</span>
+                          <span className="text-sm text-gray-600">{t('profile.account.role')}</span>
                           <span className="text-sm font-medium text-gray-900">
                             {user.role}
                           </span>
@@ -296,7 +298,7 @@ export const Profile = () => {
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4" />
-                            Member since
+                            {t('profile.account.memberSince')}
                           </span>
                           <span className="text-sm font-medium text-gray-900">
                             {new Date(user.createdAt).toLocaleDateString()}

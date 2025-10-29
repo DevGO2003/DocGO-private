@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { UserPlus, ArrowLeft, Users as UsersIcon } from 'lucide-react';
 import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner } from '@shared/components';
@@ -16,6 +17,7 @@ import { ORGANIZATIONS_PATH } from '@constants';
 export const OrganizationMembers = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
@@ -40,7 +42,7 @@ export const OrganizationMembers = () => {
   console.log('🔍 [Members Page] Members count:', members.length);
 
   if (isLoading) {
-    return <LoadingSpinner text="Loading members..." fullScreen />;
+    return <LoadingSpinner text={t('organizations.members.loading')} fullScreen />;
   }
 
   if (!organization) {
@@ -48,13 +50,12 @@ export const OrganizationMembers = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-700 mb-4">Organization not found</p>
+            <p className="text-gray-700 mb-4">{t('organizations.members.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
-              animated
             >
-              Back to Organizations
+              {t('organizations.members.backToOrganizations')}
             </Button>
           </CardContent>
         </Card>
@@ -82,17 +83,16 @@ export const OrganizationMembers = () => {
               variant="outline"
               onClick={() => navigate(`/organizations/${id}/workspace`)}
               className="flex items-center gap-2 mb-4"
-              animated
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Workspace
+              {t('organizations.members.backToWorkspace')}
             </Button>
 
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Members</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{t('organizations.members.title')}</h1>
                 <p className="text-gray-600 mt-1">
-                  Manage team members for <strong>{organization.name}</strong>
+                  {t('organizations.members.manageFor', { name: organization.name })}
                 </p>
               </div>
 
@@ -100,10 +100,9 @@ export const OrganizationMembers = () => {
                 <Button
                   onClick={() => setIsInviteModalOpen(true)}
                   className="flex items-center gap-2"
-                  animated
                 >
                   <UserPlus className="w-5 h-5" />
-                  Invite Member
+                  {t('organizations.members.inviteMember')}
                 </Button>
               )}
             </div>
@@ -115,7 +114,7 @@ export const OrganizationMembers = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <UsersIcon className="w-5 h-5" />
-                  Team Members ({members.length})
+                  {t('organizations.members.teamMembers', { count: members.length })}
                 </CardTitle>
               </div>
             </CardHeader>
@@ -133,25 +132,19 @@ export const OrganizationMembers = () => {
 
           {/* Info Section */}
           <div className="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">About Member Roles</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">{t('organizations.members.aboutRolesTitle')}</h3>
             <ul className="space-y-2 text-sm text-blue-800">
               <li className="flex items-start gap-2">
                 <span className="font-semibold mt-0.5">•</span>
-                <span>
-                  <strong>Owner:</strong> Full access to all organization features and settings
-                </span>
+                <span>{t('organizations.members.roles.owner')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-semibold mt-0.5">•</span>
-                <span>
-                  <strong>Manager:</strong> Can approve contracts and manage team based on assigned permissions
-                </span>
+                <span>{t('organizations.members.roles.manager')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-semibold mt-0.5">•</span>
-                <span>
-                  <strong>Member:</strong> Can upload and manage their own contracts
-                </span>
+                <span>{t('organizations.members.roles.member')}</span>
               </li>
             </ul>
           </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -39,6 +40,7 @@ export const OrganizationWorkspace = () => {
   // const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false); // Temporarily disabled
 
   const { data: organization, isLoading } = useOrganization(id!);
+  const { t } = useTranslation();
   const { 
     data: contractsData, 
     isLoading: contractsLoading, 
@@ -59,15 +61,15 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'contracts' as WorkspaceTab, label: 'Contracts', icon: FileText },
-    { id: 'pending-approvals' as WorkspaceTab, label: 'Pending Approvals', icon: Clock },
-    { id: 'reports' as WorkspaceTab, label: 'Reports', icon: BarChart3 },
-    { id: 'members' as WorkspaceTab, label: 'Members', icon: Users },
-    { id: 'settings' as WorkspaceTab, label: 'Settings', icon: Settings },
+    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
+    { id: 'pending-approvals' as WorkspaceTab, label: t('organizations.workspace.tabs.pendingApprovals'), icon: Clock },
+    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: BarChart3 },
+    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: Users },
+    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
   ];
 
   if (isLoading) {
-    return <LoadingSpinner text="Loading workspace..." fullScreen />;
+    return <LoadingSpinner text={t('organizations.workspace.loading')} fullScreen />;
   }
 
   if (!organization) {
@@ -76,12 +78,12 @@ export const OrganizationWorkspace = () => {
         <Card>
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-700 mb-4">Organization not found</p>
+            <p className="text-gray-700 mb-4">{t('organizations.workspace.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
             >
-              Back to Organizations
+              {t('organizations.workspace.backToList')}
             </Button>
           </CardContent>
         </Card>
@@ -121,7 +123,7 @@ export const OrganizationWorkspace = () => {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {t('organizations.workspace.back')}
             </Button>
             {/* Temporarily disabled - Upload Contract feature */}
             {/* <Button
@@ -143,7 +145,7 @@ export const OrganizationWorkspace = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{organization.name}</h1>
-              <p className="text-gray-600">{organization.description || 'No description'}</p>
+              <p className="text-gray-600">{organization.description || t('organizations.workspace.settings.noDescription')}</p>
             </div>
           </div>
 
@@ -155,7 +157,7 @@ export const OrganizationWorkspace = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-blue-700 font-medium">Total Contracts</p>
+                  <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
                   <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
                 </div>
                 <FileText className="w-10 h-10 text-blue-500" />
@@ -168,7 +170,7 @@ export const OrganizationWorkspace = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-yellow-700 font-medium">Pending</p>
+                  <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
                   <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
                 </div>
                 <Clock className="w-10 h-10 text-yellow-500" />
@@ -181,7 +183,7 @@ export const OrganizationWorkspace = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-green-700 font-medium">Approved</p>
+                  <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
                   <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
                 </div>
                 <CheckCircle className="w-10 h-10 text-green-500" />
@@ -194,7 +196,7 @@ export const OrganizationWorkspace = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-red-700 font-medium">Rejected</p>
+                  <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
                   <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
                 </div>
                 <XCircle className="w-10 h-10 text-red-500" />
@@ -244,14 +246,14 @@ export const OrganizationWorkspace = () => {
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <Input
                         type="text"
-                        placeholder="Search contracts..."
+                        placeholder={t('organizations.workspace.searchContracts')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
                       />
                     </div>
                     <Button variant="outline">
-                      Filter
+                      {t('organizations.workspace.filter')}
                     </Button>
                   </div>
                 </CardContent>
@@ -261,11 +263,11 @@ export const OrganizationWorkspace = () => {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>All Contracts</CardTitle>
+                    <CardTitle>{t('organizations.workspace.allContracts')}</CardTitle>
                     {contractsFetching && !contractsLoading && (
                       <span className="text-sm text-blue-600 flex items-center gap-2">
                         <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-                        Updating...
+                        {t('organizations.workspace.updating')}
                       </span>
                     )}
                   </div>
@@ -273,13 +275,13 @@ export const OrganizationWorkspace = () => {
                 <CardContent>
                   {contractsLoading ? (
                     <div className="text-center py-12">
-                      <LoadingSpinner text="Loading contracts..." />
+                      <LoadingSpinner text={t('organizations.workspace.loadingContracts')} />
                     </div>
                   ) : contracts.length === 0 ? (
                     <div className="text-center py-12">
                       <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">No contracts yet</p>
-                      <p className="text-sm text-gray-500">Contracts will appear here when they are available</p>
+                      <p className="text-gray-600 mb-4">{t('organizations.workspace.noContracts')}</p>
+                      <p className="text-sm text-gray-500">{t('organizations.workspace.contractsAppear')}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -326,56 +328,38 @@ export const OrganizationWorkspace = () => {
               </Card>
             </div>
           )}
-
-          {/* Pending Approvals Tab */}
-          {activeTab === 'pending-approvals' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Pending Approvals
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No contracts pending approval</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Reports Tab */}
-          {activeTab === 'reports' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Analytics & Reports
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No data available for reports</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          
+              {/* Pending Approvals Tab */}
+              {activeTab === 'pending-approvals' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="w-5 h-5" />
+                      {t('organizations.workspace.pendingApprovalsTitle')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12">
+                      <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">{t('organizations.workspace.noPending')}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
           {/* Members Tab */}
           {activeTab === 'members' && (
             <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Team Members</CardTitle>
+                      <CardTitle>{t('organizations.workspace.membersCard.title')}</CardTitle>
                       <Button 
                         variant="outline" 
                         className="flex items-center gap-2"
                         onClick={() => navigate(`/organizations/${id}/members`)}
                       >
                         <Users className="w-4 h-4" />
-                        Manage Members
+                        {t('organizations.workspace.membersCard.manage')}
                       </Button>
                     </div>
                   </CardHeader>
@@ -383,7 +367,7 @@ export const OrganizationWorkspace = () => {
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">
-                    View and manage your team members
+                    {t('organizations.workspace.membersCard.desc')}
                   </p>
                   <Button 
                     variant="outline" 
@@ -391,7 +375,7 @@ export const OrganizationWorkspace = () => {
                     onClick={() => navigate(`/organizations/${id}/members`)}
                   >
                     <Users className="w-4 h-4" />
-                    Go to Members Management
+                    {t('organizations.workspace.membersCard.go')}
                   </Button>
                 </div>
               </CardContent>
@@ -402,24 +386,24 @@ export const OrganizationWorkspace = () => {
           {activeTab === 'settings' && (
             <Card>
               <CardHeader>
-                <CardTitle>Organization Settings</CardTitle>
+                <CardTitle>{t('organizations.workspace.settings.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">General Settings</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('organizations.workspace.settings.general')}</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">Organization Name</p>
+                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.orgName')}</p>
                           <p className="text-sm text-gray-600">{organization.name}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">Description</p>
+                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.description')}</p>
                           <p className="text-sm text-gray-600">
-                            {organization.description || 'No description'}
+                            {organization.description || t('organizations.workspace.settings.noDescription')}
                           </p>
                         </div>
                       </div>

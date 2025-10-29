@@ -1,4 +1,5 @@
-export type RestResponse<T> = {
+ import { apiClient } from '@shared/lib/api'
+ export type RestResponse<T> = {
   apiVersion: string
   statusCode: number
   shortMessage: string
@@ -33,26 +34,34 @@ export const automationFileApi = {
     form.append('file', file)
     form.append('repository_id', repositoryId)
 
-    const res = await fetch(`${BASE}`, { method: 'POST', body: form })
-    const json = await res.json().catch(() => null)
-    if (!res.ok) {
-      const err = new Error(json?.shortMessage || json?.description || `Upload failed: ${res.status}`) as any
-      ;(err.status = res.status), (err.body = json)
+    try {
+      const response = await apiClient.post<AutomationUploadData>(`${BASE}`, form, {
+        // Do NOT set Content-Type for FormData; interceptor will remove it
+      })
+      return response.data as unknown as RestResponse<AutomationUploadData>
+    } catch (e: any) {
+      const status = e?.response?.status ?? e?.response?.data?.statusCode
+      const body = e?.response?.data
+      const err = new Error(body?.shortMessage || body?.description || e?.message || 'Upload failed') as any
+      err.status = status
+      err.body = body
       throw err
     }
-    return json as RestResponse<AutomationUploadData>
   },
 
   getRecent: async (limit = 5): Promise<RestResponse<AutomationRecentItem[]>> => {
-    const url = `${BASE}/recent?limit=${encodeURIComponent(String(limit))}`
-    const res = await fetch(url, { method: 'GET', headers: { Accept: 'application/json' } })
-    const json = await res.json().catch(() => null)
-    if (!res.ok) {
-      const err = new Error(json?.shortMessage || json?.description || `Fetch recent failed: ${res.status}`) as any
-      err.status = res.status
-      err.body = json
+    try {
+      const response = await apiClient.get<AutomationRecentItem[]>(`${BASE}/recent`, {
+        params: { limit }
+      })
+      return response.data as unknown as RestResponse<AutomationRecentItem[]>
+    } catch (e: any) {
+      const status = e?.response?.status ?? e?.response?.data?.statusCode
+      const body = e?.response?.data
+      const err = new Error(body?.shortMessage || body?.description || e?.message || 'Fetch recent failed') as any
+      err.status = status
+      err.body = body
       throw err
     }
-    return json as RestResponse<AutomationRecentItem[]>
   },
 }

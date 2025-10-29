@@ -36,10 +36,31 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleBack = () => {
+    const currentUrl = window.location.href;
+    const referrer = document.referrer;
+
+    const navigateToReferrerOrHome = () => {
+      try {
+        if (referrer && new URL(referrer).origin === window.location.origin) {
+          window.location.href = referrer;
+          return;
+        }
+      } catch (_) {
+        // Ignore URL parsing errors and fall through to home redirect
+      }
+      window.location.href = '/';
+    };
+
     if (window.history.length > 1) {
       window.history.back();
+      // If back navigation has no effect (same URL), fallback quickly
+      setTimeout(() => {
+        if (window.location.href === currentUrl) {
+          navigateToReferrerOrHome();
+        }
+      }, 300);
     } else {
-      window.location.href = '/';
+      navigateToReferrerOrHome();
     }
   };
 

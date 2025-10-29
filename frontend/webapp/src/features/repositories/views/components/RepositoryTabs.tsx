@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 
@@ -17,24 +18,25 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
   organizationCount = 0,
   publicCount = 0,
 }) => {
+  const { t } = useTranslation();
   const tabs = [
     {
       id: 'PERSONAL' as RepositoryType,
-      label: 'Cá nhân',
+      label: t('repositories.tabs.personal.label'),
       count: personalCount,
-      description: 'Kho lưu trữ cá nhân của bạn',
+      description: t('repositories.tabs.personal.description'),
     },
     {
       id: 'ORGANIZATION' as RepositoryType,
-      label: 'Tổ chức',
+      label: t('repositories.tabs.organization.label'),
       count: organizationCount,
-      description: 'Kho lưu trữ của tổ chức',
+      description: t('repositories.tabs.organization.description'),
     },
     {
       id: 'PUBLIC' as RepositoryType,
-      label: 'Công khai',
+      label: t('repositories.tabs.public.label'),
       count: publicCount,
-      description: 'Kho lưu trữ công khai',
+      description: t('repositories.tabs.public.description'),
     },
   ];
 

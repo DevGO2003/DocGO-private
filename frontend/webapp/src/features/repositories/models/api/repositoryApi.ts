@@ -15,7 +15,7 @@ import {
   PaginatedResponse,
 } from '../types/repository.types';
 
-const BASE_PATH = '/api/v1/repository-management-service/v1';
+const BASE_PATH = '/api/v1/repository-management-service';
 
 // Repository API
 const repositoryApi = {
@@ -33,7 +33,7 @@ const repositoryApi = {
     return response.data.data!;
   },
 
-  getMyRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
+  getMyRepositories: async (params?: PaginationParams & { searchTerm?: string }): Promise<PaginatedResponse<Repository>> => {
     const response = await apiClient.get<PaginatedResponse<Repository>>(
       `${BASE_PATH}/repositories/my`,
       { params }
@@ -41,7 +41,7 @@ const repositoryApi = {
     return response.data.data!;
   },
 
-  getPersonalRepositories: async (params?: PaginationParams & { userId?: string }): Promise<PaginatedResponse<Repository>> => {
+  getPersonalRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
     // Align to backend Swagger: personal repos via /repositories/my
     const response = await apiClient.get<PaginatedResponse<Repository>>(
       `${BASE_PATH}/repositories/my`,

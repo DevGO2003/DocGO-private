@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type ViewMode = 'grid' | 'list';
 
@@ -17,13 +18,14 @@ export const DocumentsFilters: React.FC<DocumentsFiltersProps> = ({
   onViewModeChange,
   onRefresh,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Tìm kiếm tài liệu..."
+          placeholder={t('repositories.documentsFilters.searchPlaceholder')}
           className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
         />
         {onRefresh && (
@@ -31,7 +33,7 @@ export const DocumentsFilters: React.FC<DocumentsFiltersProps> = ({
             onClick={onRefresh}
             className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
           >
-            Làm mới
+            {t('repositories.documentsFilters.refresh')}
           </button>
         )}
       </div>
@@ -41,13 +43,13 @@ export const DocumentsFilters: React.FC<DocumentsFiltersProps> = ({
             onClick={() => onViewModeChange('grid')}
             className={`px-3 py-1.5 text-xs ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            Lưới
+            {t('repositories.documentsFilters.grid')}
           </button>
           <button
             onClick={() => onViewModeChange('list')}
             className={`px-3 py-1.5 text-xs border-l border-gray-200 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
           >
-            Bảng
+            {t('repositories.documentsFilters.list')}
           </button>
         </div>
       </div>

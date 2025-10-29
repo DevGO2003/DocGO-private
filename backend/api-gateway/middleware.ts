@@ -21,9 +21,7 @@ const publicRoutes = [
   '/health',
   '/api/docs',
   '/api/swagger.json',
-  '/api/oauth2/test',
-  // DEVELOPMENT: Bypass auth for all API routes
-  '/api'
+  '/api/oauth2/test'
 ]
 
 function isPublicAuthPath(pathname: string): boolean {
@@ -190,6 +188,23 @@ async function handleAuthentication(req: NextRequest): Promise<NextResponse | nu
     // Add user info to headers for downstream services
     const requestHeaders = new Headers(req.headers)
     requestHeaders.set('x-user-token', token)
+
+    // Best-effort: fetch profile and attach identity headers
+    try {
+      const profile = await authService.getProfile(token as any)
+      const p: any = (profile as any)?.data || profile
+      if (p) {
+        if (p.userId || p.id) requestHeaders.set('x-user-id', String(p.userId || p.id))
+        if (p.roles) {
+          const roles = Array.isArray(p.roles) ? p.roles.join(',') : String(p.roles)
+          requestHeaders.set('x-user-roles', roles)
+        }
+        if (p.username || p.sub) requestHeaders.set('x-username', String(p.username || p.sub))
+        if (p.email) requestHeaders.set('x-user-email', String(p.email))
+      }
+    } catch (_) {
+      // ignore profile errors, continue with x-user-token only
+    }
     
     return NextResponse.next({
       request: {
@@ -324,7 +339,7 @@ async function checkServiceHealth(serviceName: string): Promise<boolean> {
 }
 
 export const config = {
-  matcher: ['/health'], // Temporarily disable API matcher to test rewrites
+  matcher: ['/api/:path*', '/health'],
 }
 
 function buildCorsHeaders(req: NextRequest): HeadersInit {
@@ -336,7 +351,7 @@ function buildCorsHeaders(req: NextRequest): HeadersInit {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-User-Token, X-User-Id, X-User-Roles, X-Username, X-User-Email, X-Correlation-Id, X-Actor',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin'

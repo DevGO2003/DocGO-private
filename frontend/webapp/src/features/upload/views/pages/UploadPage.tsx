@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react'
-import { ControlMainLayout } from '@shared/layouts'
 import UploadLayout from '../../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
@@ -66,12 +65,49 @@ export default function UploadPage() {
   }
 
   return (
-    <ControlMainLayout
+    <UploadLayout
       title="Upload tài liệu"
       subtitle="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
       breadcrumbs={[{ label: 'Upload', href: '/upload' }]}
+      extra={(
+        <>
+          {/* Success Modal */}
+          {showSuccess && successInfo && (
+            <UploadSuccessNotification
+              fileName={successInfo.fileName}
+              fileSize={successInfo.fileSize}
+              fileType={successInfo.fileType}
+              onClose={() => setShowSuccess(false)}
+              onUploadMore={() => setShowSuccess(false)}
+              showActions={false}
+            />
+          )}
+
+          {/* Error Modal */}
+          <Modal
+            isOpen={showError}
+            onClose={() => setShowError(false)}
+            title="Tải lên thất bại"
+            size="sm"
+          >
+            <div className="p-4">
+              <p className="text-sm text-gray-700">{errorInfo?.message || 'Đã xảy ra lỗi khi tải tệp lên.'}</p>
+              {errorInfo?.status && (
+                <p className="text-xs text-gray-500 mt-2">Mã lỗi: {errorInfo.status}</p>
+              )}
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => setShowError(false)}
+                  className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </Modal>
+        </>
+      )}
     >
-      <UploadLayout>
         {/* Top: Recent Uploads */}
         <div className="lg:col-span-3">
           <RecentUploadsPanel key={recentRefreshKey} limit={5} />
@@ -218,42 +254,5 @@ export default function UploadPage() {
             </div>
 
       </UploadLayout>
-
-      {/* Success Modal */}
-      {showSuccess && successInfo && (
-        <UploadSuccessNotification
-          fileName={successInfo.fileName}
-          fileSize={successInfo.fileSize}
-          fileType={successInfo.fileType}
-          onClose={() => setShowSuccess(false)}
-          onUploadMore={() => setShowSuccess(false)}
-          showActions={false}
-        />
-      )}
-
-      {/* Error Modal */}
-      <Modal
-        isOpen={showError}
-        onClose={() => setShowError(false)}
-        title="Tải lên thất bại"
-        size="sm"
-      >
-        <div className="p-4">
-          <p className="text-sm text-gray-700">{errorInfo?.message || 'Đã xảy ra lỗi khi tải tệp lên.'}</p>
-          {errorInfo?.status && (
-            <p className="text-xs text-gray-500 mt-2">Mã lỗi: {errorInfo.status}</p>
-          )}
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setShowError(false)}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-    </ControlMainLayout>
   )
 }

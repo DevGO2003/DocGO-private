@@ -43,7 +43,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
 
   return (
     <div className={className || ''}>
-      <Stack gap={8}>
+      <Stack gap="10px">
         <Flex align="center" gap="8px" style={{ flexWrap: 'nowrap' }}>
           <Tabs>
             <TabList>
@@ -60,15 +60,16 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
             />
           </div>
           <div className="flex-shrink-0">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowCreate((v) => !v)}
-              className="min-w-[140px]"
-              style={{ visibility: activeTab === 'personal' ? 'visible' as const : 'hidden' as const }}
-            >
-              Tạo repository
-            </Button>
+            {activeTab === 'personal' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCreate((v) => !v)}
+                className="min-w-[140px]"
+              >
+                Tạo repository
+              </Button>
+            )}
           </div>
         </Flex>
 
@@ -85,7 +86,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
               }
               try {
                 const resp = await createRepo.mutateAsync(payload)
-                const created: any = resp?.id ? resp : resp?.data || resp
+                const created: any = resp
                 const newId = created?.id
                 const newName = created?.name
                 if (newId) {

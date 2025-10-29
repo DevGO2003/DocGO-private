@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
@@ -16,6 +17,7 @@ import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
 
 export const OrganizationList = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -46,21 +48,21 @@ export const OrganizationList = () => {
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
             <Crown className="w-3 h-3" />
-            Owner
+            {t('organizations.list.badges.owner')}
           </div>
         );
       case 'MANAGER':
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
             <UserCog className="w-3 h-3" />
-            Manager
+            {t('organizations.list.badges.manager')}
           </div>
         );
       case 'MEMBER':
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
             <Shield className="w-3 h-3" />
-            Member
+            {t('organizations.list.badges.member')}
           </div>
         );
       default:
@@ -87,20 +89,19 @@ export const OrganizationList = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                My Organizations
+                {t('organizations.list.title')}
               </h1>
               <p className="text-gray-600">
-                Manage your organizations and team collaboration
+                {t('organizations.list.subtitle')}
               </p>
             </div>
             <Button
               variant="outline"
               onClick={handleCreateOrganization}
               className="flex items-center gap-2"
-              animated
             >
               <Plus className="w-5 h-5" />
-              New Organization
+              {t('organizations.list.new')}
             </Button>
           </div>
 
@@ -109,7 +110,7 @@ export const OrganizationList = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
-              placeholder="Search organizations..."
+              placeholder={t('organizations.list.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -118,14 +119,14 @@ export const OrganizationList = () => {
         </motion.div>
 
         {/* Loading */}
-        {isLoading && <LoadingSpinner text="Loading organizations..." />}
+        {isLoading && <LoadingSpinner text={t('organizations.list.loading')} />}
 
         {/* Error */}
         {error && (
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6">
               <p className="text-red-700">
-                Failed to load organizations. Please try again.
+                {t('organizations.list.error')}
               </p>
             </CardContent>
           </Card>
@@ -136,7 +137,7 @@ export const OrganizationList = () => {
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="p-6">
               <p className="text-yellow-700">
-                Invalid response format. Please contact support.
+                {t('organizations.list.invalidResponse')}
               </p>
               <pre className="mt-2 text-xs">{JSON.stringify(data, null, 2)}</pre>
             </CardContent>
@@ -154,19 +155,18 @@ export const OrganizationList = () => {
               <CardContent className="p-12">
                 <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No organizations yet
+                  {t('organizations.list.empty.title')}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Create an organization to start collaborating with your team
+                  {t('organizations.list.empty.desc')}
                 </p>
                 <Button
                   variant="outline"
                   onClick={handleCreateOrganization}
                   className="inline-flex items-center gap-2"
-                  animated
                 >
                   <Plus className="w-5 h-5" />
-                  Create Organization
+                  {t('organizations.list.empty.cta')}
                 </Button>
               </CardContent>
             </Card>
@@ -192,7 +192,7 @@ export const OrganizationList = () => {
                   onClick={() => handleOrganizationClick(org.id)}
                   className="cursor-pointer"
                 >
-                  <Card animated className="h-full">
+                  <Card className="h-full">
                     <CardHeader>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
@@ -203,7 +203,7 @@ export const OrganizationList = () => {
                             {getRoleBadge(org.userRole)}
                           </div>
                           <p className="text-sm text-gray-600 line-clamp-2">
-                            {org.description || 'No description'}
+                            {org.description || t('dashboard.noDescription')}
                           </p>
                         </div>
                         <Building2 className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
@@ -216,7 +216,7 @@ export const OrganizationList = () => {
                           <div className="flex items-center gap-2 text-sm">
                             <Crown className="w-4 h-4 text-yellow-500" />
                             <span className="text-gray-700">
-                              {org.ownerName || 'Owner'}
+                              {org.ownerName || t('organizations.list.ownerLabel')}
                             </span>
                           </div>
                         )}
@@ -225,7 +225,7 @@ export const OrganizationList = () => {
                         <div className="flex items-center gap-2 text-sm">
                           <Users className="w-4 h-4 text-gray-500" />
                           <span className="text-gray-700">
-                            {org.memberCount} members
+                            {t('organizations.list.members', { count: org.memberCount })}
                           </span>
                         </div>
 
@@ -245,12 +245,12 @@ export const OrganizationList = () => {
                             <div className="flex flex-wrap gap-2">
                               {org.settings.isPublic && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  Public
+                                  {t('organizations.list.badges.public')}
                                 </span>
                               )}
                               {org.settings.allowInvitations && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                  Open Invites
+                                  {t('organizations.list.badges.openInvites')}
                                 </span>
                               )}
                             </div>
@@ -270,20 +270,18 @@ export const OrganizationList = () => {
                   variant="outline"
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  animated
                 >
-                  Previous
+                  {t('organizations.list.pagination.prev')}
                 </Button>
                 <span className="text-gray-600">
-                  Page {page + 1} of {data.totalPages}
+                  {t('organizations.list.pagination.pageOf', { page: page + 1, total: data.totalPages })}
                 </span>
                 <Button
                   variant="outline"
                   onClick={() => setPage(Math.min(data.totalPages - 1, page + 1))}
                   disabled={page >= data.totalPages - 1}
-                  animated
                 >
-                  Next
+                  {t('organizations.list.pagination.next')}
                 </Button>
               </div>
             )}

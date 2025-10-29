@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { NotificationBell } from '@shared/components';
+import { NotificationBell, ProgressBar } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { logout } from '@features/auth/models/state/authSlice';
 import { LOGIN_PATH } from '@constants';
@@ -59,7 +59,8 @@ export const Header = ({
   };
 
   return (
-    <header className="bg-white shadow-sm border-b-2 border-gray-200 sticky top-0 z-40">
+    <header className="bg-white shadow-sm border-b-2 border-gray-200 sticky top-0 z-40 relative">
+      <ProgressBar position="top" />
       <div className="mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Menu Toggle */}

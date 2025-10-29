@@ -1,0 +1,471 @@
+{
+  "app": {
+    "title": "DocGO",
+    "loading": "Đang tải..."
+  },
+  "organizations": {
+    "list": {
+      "title": "Tổ chức của tôi",
+      "subtitle": "Quản lý tổ chức và cộng tác nhóm",
+      "new": "Tạo tổ chức",
+      "searchPlaceholder": "Tìm kiếm tổ chức...",
+      "loading": "Đang tải danh sách tổ chức...",
+      "error": "Không thể tải danh sách tổ chức. Vui lòng thử lại.",
+      "invalidResponse": "Định dạng phản hồi không hợp lệ. Vui lòng liên hệ hỗ trợ.",
+      "empty": {
+        "title": "Chưa có tổ chức nào",
+        "desc": "Tạo tổ chức để bắt đầu cộng tác cùng đội ngũ",
+        "cta": "Tạo tổ chức"
+      },
+      "badges": {
+        "owner": "Chủ sở hữu",
+        "manager": "Quản lý",
+        "member": "Thành viên",
+        "public": "Công khai",
+        "openInvites": "Mở lời mời"
+      },
+      "members": "{{count}} thành viên",
+      "ownerLabel": "Chủ sở hữu",
+      "pagination": {
+        "prev": "Trước",
+        "next": "Sau",
+        "pageOf": "Trang {{page}} trên {{total}}"
+      }
+    }
+    ,
+    "detail": {
+      "loading": "Đang tải tổ chức...",
+      "notFound": "Không tìm thấy tổ chức",
+      "backToList": "Quay lại trang Tổ chức",
+      "actions": "Thao tác",
+      "stats": {
+        "members": "Thành viên",
+        "repositories": "Kho tài liệu",
+        "status": "Trạng thái",
+        "active": "Đang hoạt động",
+        "created": "Tạo lúc"
+      },
+      "tabs": {
+        "overview": "Tổng quan",
+        "members": "Thành viên",
+        "repositories": "Kho tài liệu",
+        "settings": "Cài đặt"
+      },
+      "overview": {
+        "title": "Chi tiết tổ chức",
+        "name": "Tên",
+        "description": "Mô tả",
+        "noDescription": "Không có mô tả",
+        "owner": "Chủ sở hữu",
+        "settings": "Thiết lập",
+        "flags": {
+          "public": "Công khai",
+          "openInvitations": "Mở lời mời",
+          "requiresApproval": "Cần phê duyệt"
+        }
+      },
+      "members": {
+        "title": "Thành viên",
+        "invite": "Mời thành viên",
+        "loading": "Đang tải danh sách thành viên...",
+        "none": "Chưa có thành viên",
+        "joined": "Tham gia ngày {{date}}",
+        "remove": "Gỡ"
+      },
+      "repositories": {
+        "title": "Kho tài liệu",
+        "empty": "Chưa có kho nào trong tổ chức này"
+      },
+      "settings": {
+        "title": "Cài đặt tổ chức",
+        "general": "Cài đặt chung",
+        "public": {
+          "label": "Tổ chức công khai",
+          "desc": "Cho phép mọi người xem tổ chức này"
+        },
+        "allowInvitations": {
+          "label": "Cho phép lời mời",
+          "desc": "Thành viên có thể mời người mới"
+        },
+        "requireApproval": {
+          "label": "Cần phê duyệt",
+          "desc": "Thành viên mới cần được phê duyệt trước khi tham gia"
+        },
+        "danger": {
+          "title": "Khu vực nguy hiểm",
+          "delete": "Xóa tổ chức",
+          "desc": "Sau khi xóa, không thể khôi phục tổ chức này",
+          "cta": "Xóa tổ chức"
+        }
+      }
+    },
+    "workspace": {
+      "loading": "Đang tải workspace...",
+      "notFound": "Không tìm thấy tổ chức",
+      "back": "Quay lại",
+      "backToList": "Quay lại trang Tổ chức",
+      "tabs": {
+        "contracts": "Hợp đồng",
+        "pendingApprovals": "Chờ phê duyệt",
+        "reports": "Báo cáo",
+        "members": "Thành viên",
+        "settings": "Cài đặt"
+      },
+      "stats": {
+        "totalContracts": "Tổng số hợp đồng",
+        "pending": "Đang chờ",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối"
+      },
+      "searchContracts": "Tìm kiếm hợp đồng...",
+      "filter": "Lọc",
+      "allContracts": "Tất cả hợp đồng",
+      "updating": "Đang cập nhật...",
+      "loadingContracts": "Đang tải hợp đồng...",
+      "noContracts": "Chưa có hợp đồng",
+      "contractsAppear": "Hợp đồng sẽ hiển thị tại đây khi có sẵn",
+      "pendingApprovalsTitle": "Chờ phê duyệt",
+      "noPending": "Không có hợp đồng nào đang chờ phê duyệt",
+      "reportsTitle": "Phân tích & Báo cáo",
+      "noReports": "Chưa có dữ liệu báo cáo",
+      "membersCard": {
+        "title": "Thành viên nhóm",
+        "manage": "Quản lý thành viên",
+        "desc": "Xem và quản lý các thành viên trong nhóm",
+        "go": "Tới trang Quản lý thành viên"
+      },
+      "settings": {
+        "title": "Cài đặt tổ chức",
+        "general": "Cài đặt chung",
+        "orgName": "Tên tổ chức",
+        "description": "Mô tả",
+        "noDescription": "Không có mô tả"
+      }
+    },
+    "acceptInvitation": {
+      "invalidTitle": "Liên kết không hợp lệ",
+      "invalidDesc": "Liên kết lời mời không hợp lệ hoặc đã hết hạn.",
+      "goToOrganizations": "Tới trang Tổ chức",
+      "error": "Lỗi",
+      "header": {
+        "title": "Lời mời tham gia tổ chức",
+        "subtitle": "Bạn được mời tham gia một tổ chức"
+      },
+      "orgName": "Tên tổ chức",
+      "invitedAs": "Bạn được mời tham gia tổ chức với vai trò {{role}}",
+      "invitedTo": "Mời đến: {{email}}",
+      "note": "Nhấn Chấp nhận để tham gia tổ chức và bắt đầu cộng tác cùng đội ngũ.",
+      "decline": "Từ chối",
+      "declining": "Đang từ chối...",
+      "accept": "Chấp nhận lời mời",
+      "accepting": "Đang chấp nhận..."
+    },
+    "members": {
+      "loading": "Đang tải danh sách thành viên...",
+      "notFound": "Không tìm thấy tổ chức",
+      "backToWorkspace": "Quay lại Workspace",
+      "title": "Thành viên",
+      "manageFor": "Quản lý thành viên cho <strong>{{name}}</strong>",
+      "inviteMember": "Mời thành viên",
+      "teamMembers": "Thành viên nhóm ({{count}})",
+      "aboutRolesTitle": "Về vai trò thành viên",
+      "roles": {
+        "owner": "Chủ sở hữu: Toàn quyền với mọi tính năng và cài đặt của tổ chức",
+        "manager": "Quản lý: Có thể phê duyệt hợp đồng và quản lý nhóm theo quyền được gán",
+        "member": "Thành viên: Có thể tải lên và quản lý hợp đồng của riêng mình"
+      },
+      "backToOrganizations": "Quay lại trang Tổ chức"
+    }
+    ,
+    "tabs": {
+      "personal": {
+        "label": "Cá nhân",
+        "description": "Kho cá nhân của bạn"
+      },
+      "organization": {
+        "label": "Tổ chức",
+        "description": "Kho của tổ chức"
+      },
+      "public": {
+        "label": "Công khai",
+        "description": "Kho công khai"
+      }
+    },
+    "documentsFilters": {
+      "searchPlaceholder": "Tìm kiếm tài liệu...",
+      "refresh": "Làm mới",
+      "grid": "Lưới",
+      "list": "Bảng"
+    }
+    ,
+    "inviteModal": {
+      "successTitle": "Đã gửi lời mời!",
+      "copyLink": "Sao chép liên kết",
+      "done": "Hoàn tất",
+      "successHeaderTitle": "Tạo lời mời thành công!",
+      "successHeaderDesc": "Chia sẻ liên kết này với {{email}} để người nhận chấp nhận lời mời",
+      "invitationLink": "Liên kết lời mời:",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép liên kết lời mời!",
+      "nextSteps": "Các bước tiếp theo:",
+      "steps": {
+        "copy": "Sao chép liên kết lời mời phía trên",
+        "send": "Gửi liên kết cho {{email}} qua email, chat hoặc ứng dụng nhắn tin",
+        "accept": "Người nhận nhấn vào liên kết để chấp nhận và tham gia tổ chức"
+      },
+      "note": "Lưu ý: Hệ thống chưa bật email tự động. Vui lòng gửi liên kết này thủ công cho thành viên được mời.",
+      "dialogTitle": "Mời thành viên",
+      "cancel": "Hủy",
+      "sendInvitation": "Gửi lời mời",
+      "sending": "Đang gửi...",
+      "header": {
+        "title": "Mời thành viên mới",
+        "subtitle": "Gửi email lời mời để tham gia tổ chức của bạn"
+      },
+      "errorTitle": "Lỗi",
+      "emailAddress": "Địa chỉ Email",
+      "emailPlaceholder": "colleague@example.com",
+      "selectRole": "Chọn vai trò",
+      "role": {
+        "member": { "title": "Thành viên", "desc": "Quyền cơ bản - Có thể tải lên và quản lý hợp đồng của riêng mình" },
+        "manager": { "title": "Quản lý", "desc": "Quyền quản lý - Có thể phê duyệt hợp đồng và quản lý nhóm (cần chọn quyền)" }
+      },
+      "managerPermissions": {
+        "title": "Quyền của Quản lý",
+        "subtitle": "Chọn các quyền áp dụng cho quản lý này"
+      },
+      "infoNote": "Thành viên được mời sẽ nhận email kèm liên kết để chấp nhận. Liên kết hết hạn sau 7 ngày.",
+      "errors": {
+        "emailRequired": "Email là bắt buộc",
+        "emailInvalid": "Email không hợp lệ",
+        "permissionsRequired": "Vui lòng chọn ít nhất một quyền cho vai trò Quản lý",
+        "submitFailed": "Gửi lời mời thất bại"
+      }
+    },
+    "createDialog": {
+      "title": "Tạo tổ chức mới",
+      "cancel": "Hủy",
+      "create": "Tạo tổ chức",
+      "creating": "Đang tạo...",
+      "header": {
+        "title": "Chi tiết tổ chức",
+        "subtitle": "Tạo một tổ chức mới để cộng tác cùng đội ngũ"
+      },
+      "errorTitle": "Lỗi",
+      "orgNameLabel": "Tên tổ chức",
+      "orgNamePlaceholder": "ví dụ: Công ty Acme",
+      "descriptionLabel": "Mô tả",
+      "descriptionOptional": "(tùy chọn)",
+      "descriptionPlaceholder": "Mô tả ngắn gọn về tổ chức của bạn...",
+      "descriptionCounter": "{{count}} / 500 ký tự",
+      "note": "Lưu ý: Bạn sẽ là chủ sở hữu của tổ chức này và có thể quản lý tất cả cài đặt sau khi tạo.",
+      "errors": {
+        "nameRequired": "Tên tổ chức là bắt buộc",
+        "nameMin": "Tên tổ chức phải có ít nhất 3 ký tự",
+        "nameMax": "Tên tổ chức phải ít hơn 100 ký tự",
+        "descMax": "Mô tả phải ít hơn 500 ký tự",
+        "authRequired": "Chưa xác thực. Vui lòng đăng nhập lại.",
+        "submitFailed": "Tạo tổ chức thất bại"
+      }
+    }
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "products": "Sản phẩm",
+    "orders": "Đơn hàng",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "repositories": "Kho tài liệu",
+    "organizations": "Tổ chức",
+    "upload": "Tải lên",
+    "analytics": "Phân tích",
+    "documents": "Tài liệu",
+    "users": "Người dùng"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "tabs": {
+      "profile": "Hồ sơ",
+      "security": "Bảo mật",
+      "notifications": "Thông báo",
+      "preferences": "Tùy chọn"
+    },
+    "preferences": {
+      "language": "Ngôn ngữ",
+      "timezone": "Múi giờ",
+      "theme": "Giao diện",
+      "dateFormat": "Định dạng ngày",
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt"
+    }
+  },
+  "repositories": {
+    "list": {
+      "title": "Kho tài liệu của tôi",
+      "subtitle": "Quản lý kho tài liệu và tệp của bạn",
+      "new": "Tạo kho mới",
+      "search": {
+        "personal": "Tìm kiếm kho cá nhân...",
+        "organization": "Tìm kiếm kho tổ chức...",
+        "public": "Tìm kiếm kho công khai..."
+      },
+      "pagination": {
+        "showing": "Hiển thị {{from}} đến {{to}} trong số {{total}} kho",
+        "prev": "Trước",
+        "next": "Sau"
+      }
+    },
+    "detail": {
+      "loading": "Đang tải thông tin repository...",
+      "error": "Không thể tải thông tin repository. Vui lòng thử lại.",
+      "back": "Quay lại",
+      "settings": "Cài đặt",
+      "type": {
+        "organization": "Tổ chức",
+        "personal": "Cá nhân",
+        "public": "Công khai",
+        "private": "Riêng tư"
+      },
+      "updated": "Cập nhật: {{date}}",
+      "info": {
+        "title": "Thông tin Repository",
+        "description": "Mô tả",
+        "noDescription": "Không có mô tả",
+        "owner": "Chủ sở hữu",
+        "organization": "Tổ chức"
+      },
+      "stats": {
+        "title": "Thống kê",
+        "files": "Tệp",
+        "members": "Thành viên",
+        "storage": "Dung lượng"
+      },
+      "tabs": {
+        "files": "Tệp",
+        "members": "Thành viên",
+        "activity": "Hoạt động",
+        "settings": "Cài đặt"
+      },
+      "empty": {
+        "files": {
+          "title": "Chưa có tệp nào",
+          "desc": "Tải lên tệp đầu tiên để bắt đầu",
+          "upload": "Tải lên tệp"
+        },
+        "members": {
+          "title": "Quản lý thành viên",
+          "desc": "Mời thành viên mới để cộng tác trên repository",
+          "invite": "Mời thành viên"
+        },
+        "activity": {
+          "title": "Hoạt động gần đây",
+          "desc": "Chưa có hoạt động nào được ghi lại"
+        },
+        "settings": {
+          "title": "Cài đặt Repository",
+          "desc": "Tùy chỉnh cấu hình và quyền truy cập"
+        }
+      }
+    },
+    "files": {
+      "title": "Danh sách tệp",
+      "subtitle": "Mã repo: {{id}}",
+      "manage": "Quản lý tài liệu",
+      "empty": {
+        "notFound": "Không tìm thấy tài liệu phù hợp.",
+        "clearSearch": "Xóa tìm kiếm"
+      },
+      "table": {
+        "document": "Tài liệu",
+        "status": "Trạng thái",
+        "type": "Loại",
+        "size": "Kích thước",
+        "uploadedAt": "Tải lên lúc",
+        "viewDetail": "Xem chi tiết"
+      },
+      "breadcrumbs": {
+        "repo": "Repo {{id}}",
+        "repository": "Repository",
+        "files": "Tệp"
+      },
+      "loading": "Đang tải danh sách tệp..."
+    }
+  },
+  "profile": {
+    "title": "Hồ sơ của tôi",
+    "manage": "Quản lý thông tin cá nhân của bạn",
+    "edit": "Chỉnh sửa",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "labels": {
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "department": "Phòng ban",
+      "position": "Vị trí"
+    },
+    "placeholders": {
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "email": "email@example.com",
+      "phone": "+84 xxx xxx xxx"
+    },
+    "stats": {
+      "repositories": "Kho mã",
+      "organizations": "Tổ chức"
+    },
+    "account": {
+      "title": "Thông tin tài khoản",
+      "status": "Trạng thái",
+      "role": "Vai trò",
+      "memberSince": "Thành viên từ"
+    },
+    "notSet": "Chưa có"
+  },
+  "upload": {
+    "versioningPanel": {
+      "title": "Tạo phiên bản từ hợp đồng cũ",
+      "subtitle": "• Chọn hợp đồng đã có để tạo phiên bản mới",
+      "disabledNote": "Tính năng đang tạm thời vô hiệu hóa. Sẽ có ở phiên bản sau.",
+      "disabled": "Tạm tắt",
+      "baseId": "ID hợp đồng gốc",
+      "newVersionName": "Tên phiên bản mới (tùy chọn)",
+      "baseIdHelper": "Nhập ID của hợp đồng cần tạo phiên bản mới.",
+      "newVersionNameHelper": "Để trống để hệ thống tự đánh số tiếp theo."
+    }
+  },
+  "sidebar": {
+    "favorites": "Yêu thích",
+    "groups": {
+      "storage": "Kho lưu trữ",
+      "management": "Quản lý",
+      "settings": "Cài đặt"
+    },
+    "tooltips": {
+      "expand": "Mở rộng menu",
+      "collapse": "Thu gọn menu",
+      "editMode": "Chế độ chỉnh sửa",
+      "unpin": "Bỏ yêu thích",
+      "pin": "Thêm vào yêu thích",
+      "editLabel": "Chỉnh sửa nhãn"
+    },
+    "placeholder": {
+      "labelName": "Tên mục"
+    }
+  }
+  ,
+  "notFound": {
+    "code": "404",
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn tìm kiếm không tồn tại hoặc đã được di chuyển.",
+    "goBack": "Quay lại",
+    "goHome": "Về trang chủ"
+  },
+  "unauthorized": {
+    "title": "Từ chối truy cập",
+    "description": "Rất tiếc, bạn không có quyền truy cập trang này. Nếu bạn nghĩ đây là nhầm lẫn, hãy liên hệ quản trị viên.",
+    "goBack": "Quay lại",
+    "goHome": "Về trang chủ"
+  }
+}

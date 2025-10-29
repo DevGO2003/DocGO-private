@@ -129,6 +129,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       headers['Content-Type'] = req.headers['content-type'] as string;
     }
 
+    // Forward identity headers injected by middleware
+    if (req.headers['x-user-token']) {
+      headers['X-User-Token'] = req.headers['x-user-token'] as string;
+    }
+    if (req.headers['x-user-id']) {
+      headers['X-User-Id'] = req.headers['x-user-id'] as string;
+    }
+    if (req.headers['x-user-roles']) {
+      headers['X-User-Roles'] = req.headers['x-user-roles'] as string;
+    }
+    if (req.headers['x-username']) {
+      headers['X-Username'] = req.headers['x-username'] as string;
+    }
+    if (req.headers['x-user-email']) {
+      headers['X-User-Email'] = req.headers['x-user-email'] as string;
+    }
+
     // Forward correlation headers
     if (req.headers['x-correlation-id']) {
       headers['X-Correlation-Id'] = req.headers['x-correlation-id'] as string;

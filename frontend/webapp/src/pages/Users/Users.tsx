@@ -18,7 +18,8 @@ import {
   LoadingSpinner,
 } from '@shared/components';
 import { useAppSelector } from '@store/hooks';
-import { useUsers, useDeleteUser, useUpdateUserStatus, useUpdateUser, User } from '@features/users/api/usersApi';
+import { useUsers, useDeleteUser, useUpdateUser, useBulkUpdateStatus } from '@features/user/models/api/userApi';
+import type { UserProfile } from '@features/user/models/types/user.types';
 
 export const Users = () => {
   const { user: currentUser } = useAppSelector((state) => state.auth);
@@ -26,7 +27,7 @@ export const Users = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -36,13 +37,13 @@ export const Users = () => {
   
   const { data: usersData, isLoading } = useUsers({
     page,
-    limit: 10,
-    search: searchQuery,
-    status: statusFilter,
+    size: 10,
+    searchTerm: searchQuery,
+    status: statusFilter as any,
   });
 
   const deleteUserMutation = useDeleteUser();
-  const updateStatusMutation = useUpdateUserStatus();
+  const updateStatusMutation = useBulkUpdateStatus();
   const updateUserMutation = useUpdateUser();
 
   // Check if current user is admin
@@ -76,7 +77,7 @@ export const Users = () => {
 
   const handleUpdateStatus = async (userId: string, newStatus: string) => {
     try {
-      await updateStatusMutation.mutateAsync({ id: userId, status: newStatus });
+      await updateStatusMutation.mutateAsync({ userIds: [userId], status: newStatus });
       alert('Đã cập nhật trạng thái thành công!');
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -84,7 +85,7 @@ export const Users = () => {
     }
   };
 
-  const handleOpenEditModal = (user: User) => {
+  const handleOpenEditModal = (user: UserProfile) => {
     setEditingUser(user);
     setEditForm({
       firstName: user.firstName || '',
@@ -157,13 +158,12 @@ export const Users = () => {
                 Quản lý người dùng
               </h1>
               <p className="text-gray-600">
-                Tổng số: {usersData?.total || 0} người dùng
+                Tổng số: {usersData?.totalElements || 0} người dùng
               </p>
             </div>
             <Button
               variant="outline"
               className="flex items-center gap-2"
-              animated
             >
               <UserPlus className="w-5 h-5" />
               Thêm người dùng
@@ -178,7 +178,7 @@ export const Users = () => {
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <Card animated>
+          <Card>
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
@@ -215,7 +215,7 @@ export const Users = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card animated>
+          <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -242,7 +242,7 @@ export const Users = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {usersData?.users?.map((user) => (
+                    {usersData?.content?.map((user) => (
                       <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -314,7 +314,15 @@ export const Users = () => {
               {/* Pagination */}
               <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                 <div className="text-sm text-gray-700">
-                  Hiển thị {((page - 1) * 10) + 1} - {Math.min(page * 10, usersData?.total || 0)} của {usersData?.total || 0} kết quả
+                  {(() => {
+                    const pageSize = usersData?.pageSize || 10;
+                    const total = usersData?.totalElements || 0;
+                    const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+                    const to = Math.min(page * pageSize, total);
+                    return (
+                      <>Hiển thị {from} - {to} của {total} kết quả</>
+                    );
+                  })()}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -327,7 +335,7 @@ export const Users = () => {
                   <Button
                     variant="outline"
                     onClick={() => setPage(page + 1)}
-                    disabled={page * 10 >= (usersData?.total || 0)}
+                    disabled={(page * (usersData?.pageSize || 10)) >= (usersData?.totalElements || 0)}
                   >
                     Sau
                   </Button>

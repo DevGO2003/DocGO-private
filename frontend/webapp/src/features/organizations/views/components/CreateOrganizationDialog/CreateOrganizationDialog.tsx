@@ -5,6 +5,7 @@ import { Dialog, Button, Input } from '@shared/components';
 import { useCreateOrganization } from '@features/organizations';
 import type { OrganizationCreateData } from '@features/organizations';
 import type { RootState } from '@store';
+import { useTranslation } from 'react-i18next';
 
 interface CreateOrganizationDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ export const CreateOrganizationDialog = ({
   onClose,
   onSuccess,
 }: CreateOrganizationDialogProps) => {
+  const { t } = useTranslation();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   
   const [formData, setFormData] = useState<Omit<OrganizationCreateData, 'ownerUserId'>>({
@@ -39,15 +41,15 @@ export const CreateOrganizationDialog = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Organization name is required';
+      newErrors.name = t('organizations.createDialog.errors.nameRequired');
     } else if (formData.name.length < 3) {
-      newErrors.name = 'Organization name must be at least 3 characters';
+      newErrors.name = t('organizations.createDialog.errors.nameMin');
     } else if (formData.name.length > 100) {
-      newErrors.name = 'Organization name must be less than 100 characters';
+      newErrors.name = t('organizations.createDialog.errors.nameMax');
     }
 
     if (formData.description && formData.description.length > 500) {
-      newErrors.description = 'Description must be less than 500 characters';
+      newErrors.description = t('organizations.createDialog.errors.descMax');
     }
 
     setErrors(newErrors);
@@ -61,7 +63,7 @@ export const CreateOrganizationDialog = ({
     console.log('🔍 [Create Org] Current user ID:', currentUser?.id);
     
     if (!currentUser?.id) {
-      setErrors({ submit: 'User not authenticated. Please login again.' });
+      setErrors({ submit: t('organizations.createDialog.errors.authRequired') });
       return;
     }
 
@@ -92,11 +94,11 @@ export const CreateOrganizationDialog = ({
         // Extract error message from backend response
         const errorData = error?.response?.data;
         const errorMessage = 
-          errorData?.description || // Backend's detailed error message
+          errorData?.description ||
           errorData?.shortMessage || 
           errorData?.message || 
           error?.message ||
-          'Failed to create organization';
+          t('organizations.createDialog.errors.submitFailed');
         
         setErrors({ submit: errorMessage });
       },
@@ -117,7 +119,7 @@ export const CreateOrganizationDialog = ({
     <Dialog
       open={open}
       onClose={handleClose}
-      title="Create New Organization"
+      title={t('organizations.createDialog.title')}
       maxWidth="md"
       footer={
         <>
@@ -126,14 +128,13 @@ export const CreateOrganizationDialog = ({
             onClick={handleClose}
             disabled={isPending}
           >
-            Cancel
+            {t('organizations.createDialog.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isPending}
-            animated
           >
-            {isPending ? 'Creating...' : 'Create Organization'}
+            {isPending ? t('organizations.createDialog.creating') : t('organizations.createDialog.create')}
           </Button>
         </>
       }
@@ -145,10 +146,8 @@ export const CreateOrganizationDialog = ({
             <Building2 className="w-6 h-6 text-purple-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Organization Details</h3>
-            <p className="text-sm text-gray-600">
-              Create a new organization to collaborate with your team
-            </p>
+            <h3 className="font-semibold text-gray-900">{t('organizations.createDialog.header.title')}</h3>
+            <p className="text-sm text-gray-600">{t('organizations.createDialog.header.subtitle')}</p>
           </div>
         </div>
 
@@ -157,7 +156,7 @@ export const CreateOrganizationDialog = ({
           <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-800">Error</p>
+              <p className="text-sm font-medium text-red-800">{t('organizations.createDialog.errorTitle')}</p>
               <p className="text-sm text-red-700">{errors.submit}</p>
             </div>
           </div>
@@ -166,12 +165,12 @@ export const CreateOrganizationDialog = ({
         {/* Organization Name */}
         <div className="space-y-2">
           <label htmlFor="org-name" className="block text-sm font-medium text-gray-700">
-            Organization Name <span className="text-red-500">*</span>
+            {t('organizations.createDialog.orgNameLabel')} <span className="text-red-500">*</span>
           </label>
           <Input
             id="org-name"
             type="text"
-            placeholder="e.g., Acme Corporation"
+            placeholder={t('organizations.createDialog.orgNamePlaceholder')}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             className={errors.name ? 'border-red-300' : ''}
@@ -185,12 +184,12 @@ export const CreateOrganizationDialog = ({
         {/* Description */}
         <div className="space-y-2">
           <label htmlFor="org-description" className="block text-sm font-medium text-gray-700">
-            Description <span className="text-gray-400">(optional)</span>
+            {t('organizations.createDialog.descriptionLabel')} <span className="text-gray-400">{t('organizations.createDialog.descriptionOptional')}</span>
           </label>
           <textarea
             id="org-description"
             rows={3}
-            placeholder="Brief description of your organization..."
+            placeholder={t('organizations.createDialog.descriptionPlaceholder')}
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${
@@ -202,15 +201,13 @@ export const CreateOrganizationDialog = ({
             <p className="text-sm text-red-600">{errors.description}</p>
           )}
           <p className="text-xs text-gray-500">
-            {formData.description?.length || 0} / 500 characters
+            {t('organizations.createDialog.descriptionCounter', { count: formData.description?.length || 0 })}
           </p>
         </div>
 
         {/* Info Note */}
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> You will be the owner of this organization and can manage all settings after creation.
-          </p>
+          <p className="text-sm text-blue-800">{t('organizations.createDialog.note')}</p>
         </div>
       </div>
     </Dialog>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
 import { Card, CardContent, Button } from '@shared/components';
@@ -6,6 +7,7 @@ import { HOME_PATH } from '@constants';
 
 export const Unauthorized = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
@@ -32,7 +34,7 @@ export const Unauthorized = () => {
               transition={{ delay: 0.3 }}
               className="text-3xl font-bold text-gray-900 mb-3"
             >
-              Access Denied
+              {t('unauthorized.title')}
             </motion.h1>
 
             <motion.p
@@ -41,7 +43,7 @@ export const Unauthorized = () => {
               transition={{ delay: 0.4 }}
               className="text-gray-600 mb-8"
             >
-              Sorry, you don't have permission to access this page. Please contact your administrator if you believe this is an error.
+              {t('unauthorized.description')}
             </motion.p>
 
             <motion.div
@@ -54,19 +56,17 @@ export const Unauthorized = () => {
                 variant="outline"
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2"
-                animated
               >
                 <ArrowLeft className="w-4 h-4" />
-                Go Back
+                {t('unauthorized.goBack')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate(HOME_PATH)}
                 className="flex items-center gap-2"
-                animated
               >
                 <Home className="w-4 h-4" />
-                Go Home
+                {t('unauthorized.goHome')}
               </Button>
             </motion.div>
           </CardContent>

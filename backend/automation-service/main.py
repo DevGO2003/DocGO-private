@@ -9,6 +9,7 @@ import routers
 from contract_router import router as contract_router
 from file_router import router as file_router
 from ocr_router import router as ocr_router
+from router_example import router as debug_router
 # upload_router removed - using file_router endpoint
 import time
 
@@ -75,6 +76,7 @@ app.include_router(contract_router)
 app.include_router(file_router)
 app.include_router(config_router)
 app.include_router(ocr_router)
+app.include_router(debug_router)
 
 # Services are now imported from global_instances to avoid circular imports
 

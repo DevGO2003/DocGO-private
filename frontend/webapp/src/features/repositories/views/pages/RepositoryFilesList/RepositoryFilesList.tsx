@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
@@ -21,6 +22,7 @@ interface RepoFileItem {
 
 export const RepositoryFilesList: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<RepoFileItem[]>([]);
@@ -38,7 +40,7 @@ export const RepositoryFilesList: React.FC = () => {
         setFiles(resp.data.files || []);
       } catch (e: any) {
         if (!isMounted) return;
-        setError(e?.message || 'Không thể tải danh sách tệp');
+        setError(e?.message || t('repositories.files.empty.notFound'));
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -58,21 +60,21 @@ export const RepositoryFilesList: React.FC = () => {
 
   return (
     <ControlMainLayout
-      title="Repository Files"
-      subtitle={id ? `Mã repo: ${id}` : undefined}
+      title={t('repositories.files.title')}
+      subtitle={id ? t('repositories.files.subtitle', { id }) : undefined}
       breadcrumbs={[
-        { label: 'Repositories', href: '/repositories' },
-        { label: id ? `Repo ${id}` : 'Repository', href: id ? `/repositories/${id}` : '/repositories' },
-        { label: 'Files', current: true },
+        { label: t('nav.repositories'), href: '/repositories' },
+        { label: id ? t('repositories.files.breadcrumbs.repo', { id }) : t('repositories.files.breadcrumbs.repository'), href: id ? `/repositories/${id}` : '/repositories' },
+        { label: t('repositories.files.breadcrumbs.files'), current: true },
       ]}
       loading={isLoading}
-      loadingText="Đang tải danh sách tệp..."
+      loadingText={t('repositories.files.loading')}
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header + Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Quản lý tài liệu</CardTitle>
+            <CardTitle>{t('repositories.files.manage')}</CardTitle>
           </CardHeader>
           <CardContent>
             <DocumentsFilters
@@ -95,8 +97,8 @@ export const RepositoryFilesList: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <Text className="text-gray-600 mb-6">Không tìm thấy tài liệu phù hợp.</Text>
-              <Button variant="outline" onClick={() => setSearch('')}>Xóa tìm kiếm</Button>
+              <Text className="text-gray-600 mb-6">{t('repositories.files.empty.notFound')}</Text>
+              <Button variant="outline" onClick={() => setSearch('')}>{t('repositories.files.empty.clearSearch')}</Button>
             </div>
           </div>
         ) : viewMode === 'grid' ? (
@@ -119,7 +121,7 @@ export const RepositoryFilesList: React.FC = () => {
                     className="inline-flex"
                     to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
                   >
-                    <Button variant="outline">Xem chi tiết</Button>
+                    <Button variant="outline">{t('repositories.files.table.viewDetail')}</Button>
                   </Link>
                 }
               />
@@ -130,11 +132,11 @@ export const RepositoryFilesList: React.FC = () => {
             <Table>
               <thead>
                 <TableRow>
-                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tài liệu</Text></TableHeader>
-                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Trạng thái</Text></TableHeader>
-                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Loại</Text></TableHeader>
-                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Kích thước</Text></TableHeader>
-                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tải lên lúc</Text></TableHeader>
+                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">{t('repositories.files.table.document')}</Text></TableHeader>
+                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">{t('repositories.files.table.status')}</Text></TableHeader>
+                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">{t('repositories.files.table.type')}</Text></TableHeader>
+                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">{t('repositories.files.table.size')}</Text></TableHeader>
+                  <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">{t('repositories.files.table.uploadedAt')}</Text></TableHeader>
                   <TableHeader></TableHeader>
                 </TableRow>
               </thead>
@@ -145,12 +147,12 @@ export const RepositoryFilesList: React.FC = () => {
                     <TableCell><Text className="text-sm text-gray-600">{f.status || '-'}</Text></TableCell>
                     <TableCell><Text className="text-sm text-gray-600">{f.contractType || '-'}</Text></TableCell>
                     <TableCell><Text className="text-sm text-gray-600">{(f.fileSize ?? f.size)} bytes</Text></TableCell>
-                    <TableCell><Text className="text-sm text-gray-600">{new Date(f.uploadedAt).toLocaleString('vi-VN')}</Text></TableCell>
+                    <TableCell><Text className="text-sm text-gray-600">{new Date(f.uploadedAt).toLocaleString()}</Text></TableCell>
                     <TableCell>
                       <Link
                         to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
                       >
-                        <Button variant="outline">Xem chi tiết</Button>
+                        <Button variant="outline">{t('repositories.files.table.viewDetail')}</Button>
                       </Link>
                     </TableCell>
                   </TableRow>

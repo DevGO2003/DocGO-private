@@ -22,7 +22,7 @@ export const ForgotPassword = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card animated>
+        <Card>
           <CardHeader>
             <CardTitle className="text-center">
               Reset your password
@@ -48,7 +48,6 @@ export const ForgotPassword = () => {
                 type="submit"
                 variant="outline"
                 className="w-full"
-                animated
               >
                 Send reset link
               </Button>

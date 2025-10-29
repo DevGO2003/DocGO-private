@@ -1,8 +1,19 @@
 import React from 'react'
+import { ControlMainLayout } from '@shared/layouts'
 
 interface UploadLayoutProps {
   children: React.ReactNode
   className?: string
+  title?: string
+  subtitle?: string
+  breadcrumbs?: Array<{ label: string; href?: string; current?: boolean }>
+  headerChildren?: React.ReactNode
+  headerRight?: React.ReactNode
+  showToolbar?: boolean
+  toolbarContent?: React.ReactNode
+  loading?: boolean
+  loadingText?: string
+  extra?: React.ReactNode
 }
 
 /**
@@ -13,18 +24,44 @@ interface UploadLayoutProps {
  * - Left column: Upload Panel, Versioning Panel, System Info Panel
  * - Right column: File Preview Panel (spans 3 rows)
  */
-function UploadLayout({ children, className = '' }: UploadLayoutProps) {
+function UploadLayout({
+  children,
+  className = '',
+  title,
+  subtitle,
+  breadcrumbs,
+  headerChildren,
+  headerRight,
+  showToolbar,
+  toolbarContent,
+  loading,
+  loadingText,
+  extra,
+}: UploadLayoutProps) {
   return (
-    <div
-      className={
-        `grid grid-cols-1 lg:grid-cols-3 gap-[10px] lg:gap-[10px] h-full items-start ` +
-        // Only remove margins for immediate children to keep inner centering (mx-auto) working
-        `[&>*]:m-0 ` +
-        className
-      }
+    <ControlMainLayout
+      title={title}
+      subtitle={subtitle}
+      breadcrumbs={breadcrumbs}
+      headerChildren={headerChildren}
+      headerRight={headerRight}
+      showToolbar={showToolbar}
+      toolbarContent={toolbarContent}
+      loading={loading}
+      loadingText={loadingText}
     >
-      {children}
-    </div>
+      <div
+        className={
+          `grid grid-cols-1 lg:grid-cols-3 gap-[10px] lg:gap-[10px] h-full items-start ` +
+          // Only remove margins for immediate children to keep inner centering (mx-auto) working
+          `[&>*]:m-0 ` +
+          className
+        }
+      >
+        {children}
+      </div>
+      {extra}
+    </ControlMainLayout>
   )
 }
 

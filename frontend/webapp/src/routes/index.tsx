@@ -6,7 +6,10 @@ import { errorRoutes } from './errorRoutes';
 import { LoadingSpinner } from '@shared/components';
 
 const LoadingFallback = () => (
-  <LoadingSpinner fullScreen />
+  // Không dùng fullScreen để tránh phủ toàn màn hình khi route đang lazy load
+  <div className="w-full h-full flex items-center justify-center p-8">
+    <LoadingSpinner />
+  </div>
 );
 
 export const AppRouter = () => {

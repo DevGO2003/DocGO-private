@@ -16,6 +16,18 @@ export const Register = () => {
     confirmPassword: '',
   });
 
+  const onSubmit = (vals: typeof values) => {
+    // Map form values to RegisterData (firstName/lastName optional defaults)
+    handleRegister({
+      username: vals.username,
+      email: vals.email,
+      password: vals.password,
+      confirmPassword: vals.confirmPassword,
+      firstName: '',
+      lastName: '',
+    });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
       <motion.div
@@ -24,7 +36,7 @@ export const Register = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card animated>
+        <Card>
           <CardHeader>
             <CardTitle className="text-center">
               Create your account
@@ -42,7 +54,7 @@ export const Register = () => {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <Input
                 id="username"
                 name="username"
@@ -101,7 +113,6 @@ export const Register = () => {
                 isLoading={isLoading}
                 disabled={isLoading}
                 className="w-full"
-                animated
               >
                 {isLoading ? 'Creating account...' : 'Sign up'}
               </Button>

@@ -1,4 +1,5 @@
 import { useState, useEffect, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -21,6 +22,15 @@ export const MainLayout = ({
 }: MainLayoutProps) => {
   console.log('[MainLayout] Rendering, showHeader:', showHeader);
   
+  const location = useLocation();
+  // Regex patterns cho các trang chỉ muốn ControlMainLayout (không Header/Sidebar)
+  const minimalPatterns = [
+    /^\/upload(\/|$)/,
+  ];
+  const isMinimal = minimalPatterns.some((re) => re.test(location.pathname));
+  const resolvedShowHeader = isMinimal ? false : showHeader;
+  const resolvedShowSidebar = isMinimal ? false : showSidebar;
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed);
   const COLLAPSE_STORAGE_KEY = 'sidebar_collapsed';
@@ -49,7 +59,7 @@ export const MainLayout = ({
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 flex">
       {/* Sidebar */}
-      {showSidebar && (
+      {resolvedShowSidebar && (
         <>
           {/* Mobile overlay */}
           {isSidebarOpen && (
@@ -82,9 +92,9 @@ export const MainLayout = ({
       )}
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col min-w-0 ${showSidebar ? (isCollapsed ? 'ml-16' : 'ml-64') : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${resolvedShowSidebar ? (isCollapsed ? 'ml-16' : 'ml-64') : ''}`}>
         {/* Header */}
-        {showHeader && (
+        {resolvedShowHeader && (
           <Header
             onMenuToggle={handleSidebarToggle}
             showSearch={true}

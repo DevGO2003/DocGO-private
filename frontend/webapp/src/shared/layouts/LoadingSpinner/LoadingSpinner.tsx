@@ -40,12 +40,25 @@ export const LoadingSpinner = ({
     </div>
   );
 
+  // Only allow full-screen overlay when ControlMainLayout exists
   if (fullScreen) {
-    return (
-      <div className={`fixed inset-0 ${transparentBg ? 'bg-transparent' : 'bg-white bg-opacity-90'} flex items-center justify-center z-50`}>
-        {spinnerContent}
-      </div>
-    );
+    const canFullScreen = typeof window !== 'undefined' && typeof document !== 'undefined' && !!document.getElementById('control-main-layout-root');
+    if (canFullScreen) {
+      return (
+        <div className={`fixed inset-0 ${transparentBg ? 'bg-transparent' : 'bg-white bg-opacity-90'} flex items-center justify-center z-50`}>
+          {spinnerContent}
+        </div>
+      );
+    }
+    // Fallback: if overlay requested, use overlay; otherwise render inline
+    if (overlay) {
+      return (
+        <div className={`absolute inset-0 ${transparentBg ? 'bg-transparent' : 'bg-white/60'} flex items-center justify-center z-20`}>
+          {spinnerContent}
+        </div>
+      );
+    }
+    return <div className="flex items-center justify-center p-8">{spinnerContent}</div>;
   }
 
   if (overlay) {

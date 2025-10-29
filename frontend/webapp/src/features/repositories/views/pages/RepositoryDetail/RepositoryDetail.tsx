@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Button,
@@ -28,6 +29,7 @@ export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('files');
+  const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
 
@@ -49,19 +51,21 @@ export const RepositoryDetail: React.FC = () => {
   };
 
   const getRepositoryTypeLabel = (type: RepositoryType) => {
-    return type === 'ORGANIZATION' ? 'Tổ chức' : 'Cá nhân';
+    return type === 'ORGANIZATION'
+      ? t('repositories.detail.type.organization')
+      : t('repositories.detail.type.personal');
   };
 
   return (
     <ControlMainLayout
-      title={repository ? repository.name : 'Repository'}
-      subtitle={repository ? undefined : 'Đang tải thông tin repository'}
+      title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
+      subtitle={repository ? undefined : t('repositories.detail.loading')}
       breadcrumbs={[
-        { label: 'Repositories', href: '/repositories' },
-        repository ? { label: repository.name, current: true } : { label: 'Loading', current: true },
+        { label: t('nav.repositories'), href: '/repositories' },
+        repository ? { label: repository.name, current: true } : { label: t('app.loading'), current: true },
       ]}
       loading={isLoading}
-      loadingText="Đang tải thông tin repository..."
+      loadingText={t('repositories.detail.loading')}
     >
       <div className="max-w-7xl mx-auto">
         {(!repository && !error) ? null : (
@@ -70,7 +74,7 @@ export const RepositoryDetail: React.FC = () => {
             {error && (
               <Card className="border-red-200 bg-red-50 mb-4">
                 <CardContent className="p-4">
-                  <p className="text-red-700">Không thể tải thông tin repository. Vui lòng thử lại.</p>
+                  <p className="text-red-700">{t('repositories.detail.error')}</p>
                 </CardContent>
               </Card>
             )}
@@ -84,7 +88,7 @@ export const RepositoryDetail: React.FC = () => {
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Quay lại
+                  {t('repositories.detail.back')}
                 </Button>
                 <Button
                   variant="outline"
@@ -92,7 +96,7 @@ export const RepositoryDetail: React.FC = () => {
                   className="inline-flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4" />
-                  Cài đặt
+                  {t('repositories.detail.settings')}
                 </Button>
               </div>
 
@@ -115,12 +119,12 @@ export const RepositoryDetail: React.FC = () => {
                   ) : (
                     <Lock className="w-4 h-4 text-gray-500" />
                   ))}
-                  {repository && (repository.isPublic ? 'Công khai' : 'Riêng tư')}
+                  {repository && (repository.isPublic ? t('repositories.detail.type.public') : t('repositories.detail.type.private'))}
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   {repository && (
-                    <>Cập nhật: {new Date(repository.updatedAt).toLocaleDateString('vi-VN')}</>
+                    <>{t('repositories.detail.updated', { date: new Date(repository.updatedAt).toLocaleDateString() })}</>
                   )}
                 </span>
               </div>
@@ -135,20 +139,20 @@ export const RepositoryDetail: React.FC = () => {
                   <div className="lg:col-span-3">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Thông tin Repository</CardTitle>
+                        <CardTitle>{t('repositories.detail.info.title')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Mô tả</h4>
+                            <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.description')}</h4>
                             <p className="text-gray-600">
-                              {repository?.description || 'Không có mô tả'}
+                              {repository?.description || t('repositories.detail.info.noDescription')}
                             </p>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Chủ sở hữu</h4>
+                              <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.owner')}</h4>
                               <p className="text-gray-600">
                                 {repository?.ownerName || repository?.ownerUserId}
                               </p>
@@ -156,7 +160,7 @@ export const RepositoryDetail: React.FC = () => {
 
                             {repository?.organizationId && (
                               <div>
-                                <h4 className="font-medium text-gray-900 mb-2">Tổ chức</h4>
+                                <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.organization')}</h4>
                                 <p className="text-gray-600">
                                   {repository?.organizationName || repository?.organizationId}
                                 </p>
@@ -172,14 +176,14 @@ export const RepositoryDetail: React.FC = () => {
                   <div className="lg:col-span-1">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Thống kê</CardTitle>
+                        <CardTitle>{t('repositories.detail.stats.title')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">Tệp</span>
+                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.files')}</span>
                             </div>
                             <span className="font-medium">{repository?.fileCount ?? '-'}</span>
                           </div>
@@ -187,7 +191,7 @@ export const RepositoryDetail: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Users className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">Thành viên</span>
+                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.members')}</span>
                             </div>
                             <span className="font-medium">{repository?.memberCount ?? '-'}</span>
                           </div>
@@ -195,7 +199,7 @@ export const RepositoryDetail: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <HardDrive className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">Dung lượng</span>
+                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.storage')}</span>
                             </div>
                             <span className="font-medium">{repository ? formatFileSize(repository.totalSize) : '-'}</span>
                           </div>
@@ -219,7 +223,7 @@ export const RepositoryDetail: React.FC = () => {
                     >
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        Tệp
+                        {t('repositories.detail.tabs.files')}
                       </div>
                     </button>
                     <button
@@ -232,7 +236,7 @@ export const RepositoryDetail: React.FC = () => {
                     >
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" />
-                        Thành viên
+                        {t('repositories.detail.tabs.members')}
                       </div>
                     </button>
                     <button
@@ -245,7 +249,7 @@ export const RepositoryDetail: React.FC = () => {
                     >
                       <div className="flex items-center gap-2">
                         <Activity className="w-4 h-4" />
-                        Hoạt động
+                        {t('repositories.detail.tabs.activity')}
                       </div>
                     </button>
                     <button
@@ -258,7 +262,7 @@ export const RepositoryDetail: React.FC = () => {
                     >
                       <div className="flex items-center gap-2">
                         <Settings className="w-4 h-4" />
-                        Cài đặt
+                        {t('repositories.detail.tabs.settings')}
                       </div>
                     </button>
                   </div>
@@ -270,12 +274,12 @@ export const RepositoryDetail: React.FC = () => {
                         <div className="text-center py-8">
                           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Chưa có tệp nào
+                            {t('repositories.detail.empty.files.title')}
                           </h3>
                           <p className="text-gray-600 mb-4">
-                            Tải lên tệp đầu tiên để bắt đầu
+                            {t('repositories.detail.empty.files.desc')}
                           </p>
-                          <Button>Tải lên tệp</Button>
+                          <Button>{t('repositories.detail.empty.files.upload')}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -287,12 +291,12 @@ export const RepositoryDetail: React.FC = () => {
                         <div className="text-center py-8">
                           <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Quản lý thành viên
+                            {t('repositories.detail.empty.members.title')}
                           </h3>
                           <p className="text-gray-600 mb-4">
-                            Mời thành viên mới để cộng tác trên repository
+                            {t('repositories.detail.empty.members.desc')}
                           </p>
-                          <Button>Mời thành viên</Button>
+                          <Button>{t('repositories.detail.empty.members.invite')}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -304,10 +308,10 @@ export const RepositoryDetail: React.FC = () => {
                         <div className="text-center py-8">
                           <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Hoạt động gần đây
+                            {t('repositories.detail.empty.activity.title')}
                           </h3>
                           <p className="text-gray-600">
-                            Chưa có hoạt động nào được ghi lại
+                            {t('repositories.detail.empty.activity.desc')}
                           </p>
                         </div>
                       </CardContent>
@@ -320,10 +324,10 @@ export const RepositoryDetail: React.FC = () => {
                         <div className="text-center py-8">
                           <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Cài đặt Repository
+                            {t('repositories.detail.empty.settings.title')}
                           </h3>
                           <p className="text-gray-600">
-                            Tùy chỉnh cấu hình và quyền truy cập
+                            {t('repositories.detail.empty.settings.desc')}
                           </p>
                         </div>
                       </CardContent>

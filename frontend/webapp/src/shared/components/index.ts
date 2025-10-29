@@ -12,9 +12,11 @@ export * from './UIComponents/Sketch';
 export * from './UIComponents/Text';
 export * from './UIComponents/Flex';
 export * from './UIComponents/Stack';
+export * from './UIComponents/Grid';
 export * from './UIComponents/Table';
 export * from './UIComponents/Tabs/Tabs';
-export * from './Modals/CreateRepositoryModal';
+export * from './UIComponents/Modal/CreateRepositoryModal';
+export * from './UIComponents/ProgressBar';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

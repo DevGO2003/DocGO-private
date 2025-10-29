@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Building2, UserCheck, X, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, Button } from '@shared/components';
@@ -8,6 +9,7 @@ export const AcceptInvitation = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
+  const { t } = useTranslation();
 
   const [error, setError] = useState<string>('');
 
@@ -68,10 +70,10 @@ export const AcceptInvitation = () => {
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
             <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h2>
-            <p className="text-gray-600 mb-6">This invitation link is invalid or expired.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('organizations.acceptInvitation.invalidTitle')}</h2>
+            <p className="text-gray-600 mb-6">{t('organizations.acceptInvitation.invalidDesc')}</p>
             <Button onClick={() => navigate('/organizations')} className="w-full">
-              Go to Organizations
+              {t('organizations.acceptInvitation.goToOrganizations')}
             </Button>
           </CardContent>
         </Card>
@@ -85,10 +87,10 @@ export const AcceptInvitation = () => {
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
             <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('organizations.acceptInvitation.error')}</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <Button onClick={() => navigate('/organizations')} className="w-full">
-              Go to Organizations
+              {t('organizations.acceptInvitation.goToOrganizations')}
             </Button>
           </CardContent>
         </Card>
@@ -103,8 +105,8 @@ export const AcceptInvitation = () => {
           <div className="flex items-center gap-3">
             <Mail className="w-8 h-8" />
             <div>
-              <h1 className="text-2xl font-bold">Organization Invitation</h1>
-              <p className="text-blue-100 mt-1">You've been invited to join an organization</p>
+              <h1 className="text-2xl font-bold">{t('organizations.acceptInvitation.header.title')}</h1>
+              <p className="text-blue-100 mt-1">{t('organizations.acceptInvitation.header.subtitle')}</p>
             </div>
           </div>
         </CardHeader>
@@ -117,16 +119,15 @@ export const AcceptInvitation = () => {
                 <Building2 className="w-12 h-12 text-blue-600 flex-shrink-0" />
                 <div className="flex-1">
                   <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    Organization Name
+                    {t('organizations.acceptInvitation.orgName')}
                   </h2>
                   <p className="text-gray-600 mb-4">
-                    You've been invited to join this organization as a{' '}
-                    <strong className="text-blue-600">Member</strong>
+                    {t('organizations.acceptInvitation.invitedAs', { role: 'Member' })}
                   </p>
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Mail className="w-4 h-4" />
-                    <span>Invited to: {searchParams.get('email') || 'your email'}</span>
+                    <span>{t('organizations.acceptInvitation.invitedTo', { email: searchParams.get('email') || 'your email' })}</span>
                   </div>
                 </div>
               </div>
@@ -134,7 +135,7 @@ export const AcceptInvitation = () => {
 
             {/* Note about invitation details */}
             <div className="text-sm text-gray-500 text-center bg-yellow-50 border border-yellow-200 rounded p-3">
-              Click <strong>Accept</strong> to join this organization and start collaborating with your team.
+              {t('organizations.acceptInvitation.note')}
             </div>
 
             {/* Actions */}
@@ -148,12 +149,12 @@ export const AcceptInvitation = () => {
                 {isDeclining ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Declining...
+                    {t('organizations.acceptInvitation.declining')}
                   </>
                 ) : (
                   <>
                     <X className="w-4 h-4 mr-2" />
-                    Decline
+                    {t('organizations.acceptInvitation.decline')}
                   </>
                 )}
               </Button>
@@ -166,12 +167,12 @@ export const AcceptInvitation = () => {
                 {isAccepting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Accepting...
+                    {t('organizations.acceptInvitation.accepting')}
                   </>
                 ) : (
                   <>
                     <UserCheck className="w-4 h-4 mr-2" />
-                    Accept Invitation
+                    {t('organizations.acceptInvitation.accept')}
                   </>
                 )}
               </Button>

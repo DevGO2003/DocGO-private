@@ -1,5 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@shared/components/Card';
-import { Button } from '@shared/components/Button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button } from '@shared/components';
 import { AuthFormProps } from './AuthForm.types';
 import { authFormStyles } from './AuthForm.styles';
 

@@ -87,8 +87,17 @@ public class RepositoryManagementController {
             @Parameter(description = "ID của user") @RequestParam(required = false) String userId
     ) {
         try {
-            // TODO: Get userId from authentication context
-            String currentUserId = userId != null ? userId : "default-user";
+            // Lấy userId từ SecurityContext nếu không truyền qua query
+            String currentUserId = userId;
+            if (currentUserId == null) {
+                var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                    currentUserId = p.userId;
+                }
+            }
+            if (currentUserId == null) {
+                currentUserId = "anonymous";
+            }
             
             Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
@@ -137,8 +146,17 @@ public class RepositoryManagementController {
             @Parameter(description = "ID của user") @RequestParam(required = false) String userId
     ) {
         try {
-            // TODO: Get userId from authentication context
-            String currentUserId = userId != null ? userId : "default-user";
+            // Lấy userId từ SecurityContext nếu không truyền qua query
+            String currentUserId = userId;
+            if (currentUserId == null) {
+                var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                    currentUserId = p.userId;
+                }
+            }
+            if (currentUserId == null) {
+                currentUserId = "anonymous";
+            }
             
             Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
