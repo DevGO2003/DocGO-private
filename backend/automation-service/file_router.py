@@ -330,8 +330,7 @@ async def complete_upload(request: Request):
         apiVersion="v1",
         statusCode=202,
         shortMessage="Accepted",
-        description="Upload completed. Processing started.
-",
+        description="Upload completed. Processing started.",
         data={
             "fileId": file_id,
             "fileKey": file_key,

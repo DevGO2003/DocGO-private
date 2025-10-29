@@ -50,9 +50,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                // Allow Swagger/OpenAPI endpoints
+                .requestMatchers(
+                    "/docs", 
+                    "/docs/**", 
+                    "/v3/api-docs", 
+                    "/v3/api-docs/**", 
+                    "/swagger-ui.html", 
+                    "/swagger-ui/**"
+                ).permitAll()
+                // Public endpoints
+                .requestMatchers("/", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/healthz").permitAll()
+                .requestMatchers("/health", "/healthz").permitAll()
                 .anyRequest().permitAll()
             )
             .oauth2Login(oauth2 -> oauth2

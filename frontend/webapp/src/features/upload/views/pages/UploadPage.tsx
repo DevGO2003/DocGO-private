@@ -205,9 +205,19 @@ export default function UploadPage() {
                             </Button>
                           </div>
                         </div>
+
+                        {/* New warning card for no repository */}
+                        {selectedFile && !selectedRepositoryId && (
+                          <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
+                            <p className="text-xs text-yellow-800">
+                              Vui lòng chọn kho tài liệu (repository) trước khi tải lên file này.
+                            </p>
+                          </div>
+                        )}
+
                         <Button
                           style={{ width: '100%' }}
-                          variant="outline"
+                          variant="primary"
                           onClick={handleOcrExtract}
                           disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
                         >
@@ -269,8 +279,8 @@ export default function UploadPage() {
                   {selectedFile ? (
                     <>
                       {isOfficeFile(selectedFile) && (
-                        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-                          <p className="text-xs text-amber-800">
+                        <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
+                          <p className="text-xs text-yellow-800">
                             Lưu ý: Đây là bản xem trước tạm thời cho tài liệu văn phòng (Word/Excel/PowerPoint). Định dạng có thể không hiển thị chính xác 100%.
                           </p>
                         </div>
