@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Config } from '../config';
 
 export interface ErrorResponse {
   apiVersion: string;
@@ -133,7 +134,10 @@ export function createErrorResponse(
     };
   }
 
-  return NextResponse.json(response, { status: 200 }); // Always return 200 with statusCode in body
+  return NextResponse.json(response, {
+    status: 200, // Always return 200 with statusCode in body
+    headers: buildCorsHeaders(request)
+  });
 }
 
 export function getShortMessage(statusCode: number): string {
@@ -262,6 +266,24 @@ export function logError(error: ApiError, context: string): void {
     stack: error.stack,
     originalError: error.originalError,
   });
+}
+
+// Build CORS headers consistently with middleware
+function buildCorsHeaders(req: NextRequest): HeadersInit {
+  const origin = req.headers.get('origin') || '';
+  const envOrigins = Config.getCorsOrigins();
+  const isAllowed = origin && envOrigins.some(allowed => allowed === origin);
+  const allowOrigin = isAllowed ? origin : envOrigins[0] || '';
+
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-User-Token, X-User-Id, X-User-Roles, X-Username, X-User-Email, X-Correlation-Id, X-Actor',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin'
+  };
+  return headers;
 }
 
 export default {

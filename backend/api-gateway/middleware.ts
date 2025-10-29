@@ -21,7 +21,9 @@ const publicRoutes = [
   '/health',
   '/api/docs',
   '/api/swagger.json',
-  '/api/oauth2/test'
+  '/api/oauth2/test',
+  // Public repositories
+  '/api/v1/repository-management-service/repositories/public'
 ]
 
 function isPublicAuthPath(pathname: string): boolean {
@@ -62,6 +64,7 @@ export async function middleware(req: NextRequest) {
     
     // Handle health check first
     if (req.nextUrl.pathname === '/health') {
+      const headers = buildCorsHeaders(req)
       return NextResponse.json({
         apiVersion: 'v1',
         statusCode: 200,
@@ -76,7 +79,7 @@ export async function middleware(req: NextRequest) {
         timestamp: new Date().toISOString(),
         requestId: generateRequestId(),
         path: '/health'
-      });
+      }, { headers });
     }
 
     // Execute middleware chain
@@ -92,16 +95,18 @@ export async function middleware(req: NextRequest) {
     for (const handler of handlers) {
       const result = await handler(req);
       if (result instanceof NextResponse) {
-        // If a handler returns a response, stop the chain
+        // If a handler returns a response, ensure CORS headers are attached and stop the chain
+        const cors = buildCorsHeaders(req)
+        Object.entries(cors).forEach(([k, v]) => result.headers.set(k, v as string))
         return result;
       }
     }
     
-    // If no handler returned a response, proceed and attach CORS headers
-    const headers = buildCorsHeaders(req)
-    return NextResponse.next({
-      headers
-    });
+    // If no handler returned a response, proceed and attach CORS headers (response headers)
+    const cors = buildCorsHeaders(req)
+    const res = NextResponse.next()
+    Object.entries(cors).forEach(([k, v]) => res.headers.set(k, v as string))
+    return res
     
   } catch (error) {
     console.error('[Middleware] Error:', error)
@@ -130,9 +135,11 @@ async function handleRateLimit(req: NextRequest): Promise<NextResponse | null> {
       requestId: generateRequestId(),
       path: req.nextUrl.pathname
     })
+    const headers = buildCorsHeaders(req)
+    ;(headers as any)['content-type'] = 'application/json'
     return new NextResponse(body, {
       status: 200,
-      headers: { 'content-type': 'application/json' }
+      headers
     })
   }
   

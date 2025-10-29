@@ -279,7 +279,7 @@
     "organizations": "Tổ chức",
     "upload": "Tải lên",
     "analytics": "Phân tích",
-    "documents": "Tài liệu",
+    "documents": "Tệp",
     "users": "Người dùng"
   },
   "settings": {
@@ -440,7 +440,8 @@
     "groups": {
       "storage": "Kho lưu trữ",
       "management": "Quản lý",
-      "settings": "Cài đặt"
+      "settings": "Cài đặt",
+      "others": "Khác"
     },
     "tooltips": {
       "expand": "Mở rộng menu",
@@ -448,10 +449,20 @@
       "editMode": "Chế độ chỉnh sửa",
       "unpin": "Bỏ yêu thích",
       "pin": "Thêm vào yêu thích",
-      "editLabel": "Chỉnh sửa nhãn"
+      "editLabel": "Chỉnh sửa nhãn",
+      "editGroupLabel": "Chỉnh sửa nhãn nhóm",
+      "manageLabels": "Quản lý nhãn"
     },
     "placeholder": {
-      "labelName": "Tên mục"
+      "labelName": "Tên mục",
+      "groupName": "Tên nhóm"
+    },
+    "labelManager": {
+      "title": "Quản lý nhãn",
+      "addLabel": "Thêm nhãn mới",
+      "add": "Thêm",
+      "availableLabels": "Nhãn có sẵn",
+      "removeLabel": "Xóa nhãn"
     }
   }
   ,

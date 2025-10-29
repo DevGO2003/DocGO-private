@@ -10,6 +10,7 @@ import {
 } from './Card.types';
 import { cardStyles } from './Card.styles';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonFont } from '../Font/CommonFont';
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, children, ...rest }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,14 +49,14 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, children
   };
 
   return (
-    <div ref={setRefs} className={cn('relative', cardStyles.card, className)} {...rest}>
+    <CommonFont ref={setRefs as any} className={cn('relative', cardStyles.card, className)} {...rest}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 pointer-events-none"
         style={{ width: '100%', height: '100%' }}
       />
       {children}
-    </div>
+    </CommonFont>
   );
 });
 Card.displayName = 'Card';

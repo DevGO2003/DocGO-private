@@ -1,35 +1,56 @@
 import React, { useEffect, useRef } from 'react'
 import anime from 'animejs'
-
-interface TabsProps {
-  children: React.ReactNode
-  className?: string
-}
-
-interface TabListProps {
-  children: React.ReactNode
-  className?: string
-}
-
-interface TabProps {
-  value: string
-  activeValue: string
-  onSelect: (val: string) => void
-  children: React.ReactNode
-  disabled?: boolean
-}
+import { cn } from '@shared/lib/utils'
+import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils'
+import { tabsStyles } from './Tabs.styles'
+import { CommonFont } from '../Font/CommonFont'
+import type { TabsProps, TabListProps, TabProps } from './Tabs.types'
 
 export const Tabs: React.FC<TabsProps> = ({ children, className }) => {
-  return (
-    <div className={className}>{children}</div>
-  )
+  return <CommonFont className={cn(tabsStyles.container, className)}>{children}</CommonFont>
 }
 
 export const TabList: React.FC<TabListProps> = ({ children, className }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const drawCanvas = () => {
+    if (!containerRef.current || !canvasRef.current) return
+    const el = containerRef.current
+    const canvas = canvasRef.current
+    const width = el.offsetWidth
+    const height = el.offsetHeight
+    if (width === 0 || height === 0) return
+    canvas.width = width
+    canvas.height = height
+    const rc = createRoughCanvas(canvas)
+    drawRoughRect(rc, 4, 4, width - 8, height - 8, {
+      stroke: '#94a3b8',
+      strokeWidth: 2,
+      roughness: 1.2,
+    })
+  }
+
+  useEffect(() => {
+    drawCanvas()
+    const t = setTimeout(drawCanvas, 120)
+    const onResize = () => drawCanvas()
+    window.addEventListener('resize', onResize)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [className, children])
+
   return (
-    <div className={`inline-flex items-center rounded-lg border border-gray-200 overflow-hidden bg-white ${className || ''}`}>
+    <CommonFont ref={containerRef as any} className={cn(tabsStyles.list, className)}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ width: '100%', height: '100%' }}
+      />
       {children}
-    </div>
+    </CommonFont>
   )
 }
 
@@ -39,9 +60,8 @@ export const Tab: React.FC<TabProps> = ({ value, activeValue, onSelect, children
   const underlineRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const btn = ref.current
     const underline = underlineRef.current
-    if (!btn || !underline) return
+    if (!underline) return
     if (isActive) {
       underline.style.opacity = '0'
       underline.style.transform = 'scaleX(0.6)'
@@ -58,11 +78,11 @@ export const Tab: React.FC<TabProps> = ({ value, activeValue, onSelect, children
       type="button"
       onClick={() => !disabled && onSelect(value)}
       disabled={disabled}
-      className={
-        `relative px-3 py-1.5 text-sm transition-colors ${
-          isActive ? 'bg-gray-100 text-gray-900 font-semibold' : 'bg-white text-gray-700 hover:bg-gray-50'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`
-      }
+      className={cn(
+        tabsStyles.tabBase,
+        isActive ? tabsStyles.tabActive : tabsStyles.tabInactive,
+        disabled && tabsStyles.tabDisabled,
+      )}
     >
       {children}
       <div
@@ -75,7 +95,7 @@ export const Tab: React.FC<TabProps> = ({ value, activeValue, onSelect, children
           height: 2,
           background: '#111827',
           borderRadius: 9999,
-          transformOrigin: 'left center'
+          transformOrigin: 'left center',
         }}
       />
     </button>

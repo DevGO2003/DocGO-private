@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { Config } from '../config';
 
 export interface LoginRequest {
   username: string;
@@ -63,7 +64,8 @@ class AuthService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.AUTHENTICATION_SERVICE_URL || 'http://user-management-service:8001';
+    // Use centralized config to avoid env mismatch between docker/local
+    this.baseURL = Config.getUserManagementServiceUrl();
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,
@@ -75,6 +77,9 @@ class AuthService {
     // Add request interceptor for logging
     this.client.interceptors.request.use(
       (config) => {
+        if (config.baseURL) {
+          console.log(`[AuthService] BaseURL: ${config.baseURL}`);
+        }
         console.log(`[AuthService] ${config.method?.toUpperCase()} ${config.url}`);
         return config;
       },

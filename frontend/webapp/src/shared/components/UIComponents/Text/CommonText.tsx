@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import anime from 'animejs';
+import { CommonFont } from '../Font/CommonFont';
 
 export interface CommonTextProps extends React.HTMLAttributes<HTMLElement> {
   as?: 'p' | 'span' | 'small' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -35,7 +36,7 @@ export const CommonText = forwardRef<HTMLElement, CommonTextProps>(
     const Component = as as any;
 
     return (
-      <div ref={wrapperRef} className="relative inline-block">
+      <CommonFont ref={wrapperRef as any} className="relative inline-block">
         <Component
           ref={setContentRef}
           data-text-content
@@ -44,7 +45,7 @@ export const CommonText = forwardRef<HTMLElement, CommonTextProps>(
         >
           {children}
         </Component>
-      </div>
+      </CommonFont>
     );
   }
 );

@@ -17,6 +17,8 @@ import {
   GripVertical,
   Upload,
 } from 'lucide-react';
+import { NoRecentRepositoryModal } from '../../components/UIComponents/Modal/NoRecentRepositoryModal';
+import { useRecentRepositories } from '../../hooks/useRecentRepositories';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -29,7 +31,7 @@ const NAV_ITEMS = [
   { name: 'repositories', href: '/repositories', icon: Folder },
   { name: 'upload', href: '/upload', icon: Upload },
   { name: 'analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'documents', href: '/documents', icon: FileText },
+  { name: 'documents', href: '/repositories', icon: FileText },
   { name: 'organizations', href: '/organizations', icon: Building2 },
   { name: 'users', href: '/users', icon: Users },
   { name: 'settings', href: '/settings', icon: Settings },
@@ -50,6 +52,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
   const [menuOrder, setMenuOrder] = useState<string[]>([]);
   const [customGroupLabels, setCustomGroupLabels] = useState<Record<string, string>>({});
   const [editingGroupLabel, setEditingGroupLabel] = useState<string | null>(null);
+  const [availableLabels, setAvailableLabels] = useState<string[]>(['storage', 'management', 'settings']);
+  const [itemLabels, setItemLabels] = useState<Record<string, string>>({});
+  const [showLabelManager, setShowLabelManager] = useState(false);
+  const [showNoRecentModal, setShowNoRecentModal] = useState(false);
+  
+  const { navigateToRecentRepository, navigateToRepositories } = useRecentRepositories();
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -62,6 +70,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
       
       const savedGroupLabels = localStorage.getItem('sidebar_custom_group_labels');
       if (savedGroupLabels) setCustomGroupLabels(JSON.parse(savedGroupLabels));
+      
+      const savedAvailableLabels = localStorage.getItem('sidebar_available_labels');
+      if (savedAvailableLabels) setAvailableLabels(JSON.parse(savedAvailableLabels));
+      
+      const savedItemLabels = localStorage.getItem('sidebar_item_labels');
+      if (savedItemLabels) setItemLabels(JSON.parse(savedItemLabels));
       
       const savedOrder = localStorage.getItem(STORAGE_KEYS.MENU_ORDER);
       if (savedOrder) {
@@ -112,6 +126,24 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
       console.error('Failed to save custom group labels:', e);
     }
   }, [customGroupLabels]);
+
+  // Save available labels to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebar_available_labels', JSON.stringify(availableLabels));
+    } catch (e) {
+      console.error('Failed to save available labels:', e);
+    }
+  }, [availableLabels]);
+
+  // Save item labels to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebar_item_labels', JSON.stringify(itemLabels));
+    } catch (e) {
+      console.error('Failed to save item labels:', e);
+    }
+  }, [itemLabels]);
 
   const togglePin = (name: string) => {
     setPinnedItems(prev =>
@@ -184,6 +216,42 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
     setEditingGroupLabel(null);
   };
 
+  const addNewLabel = (labelName: string) => {
+    if (labelName.trim() && !availableLabels.includes(labelName.trim())) {
+      setAvailableLabels(prev => [...prev, labelName.trim()]);
+    }
+  };
+
+  const removeLabel = (labelName: string) => {
+    if (labelName !== 'others') { // Không cho phép xóa label "others"
+      setAvailableLabels(prev => prev.filter(label => label !== labelName));
+      // Di chuyển các item có label này về "others"
+      setItemLabels(prev => {
+        const newLabels = { ...prev };
+        Object.keys(newLabels).forEach(itemName => {
+          if (newLabels[itemName] === labelName) {
+            newLabels[itemName] = 'others';
+          }
+        });
+        return newLabels;
+      });
+    }
+  };
+
+  const assignItemToLabel = (itemName: string, labelName: string) => {
+    setItemLabels(prev => ({ ...prev, [itemName]: labelName }));
+  };
+
+  const handleFilesClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigateToRecentRepository(() => setShowNoRecentModal(true));
+  };
+
+  const handleGoToRepositories = () => {
+    setShowNoRecentModal(false);
+    navigateToRepositories();
+  };
+
   const getItemLabel = (name: string) => {
     switch (name) {
       case 'dashboard': return t('nav.dashboard');
@@ -212,24 +280,36 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
-  // Build navigation groups with localized titles
-  const navigationGroups = [
-    {
-      key: 'storage',
-      title: t('sidebar.groups.storage'),
-      items: NAV_ITEMS.filter(i => ['dashboard','repositories','upload','analytics'].includes(i.name))
-    },
-    {
-      key: 'management',
-      title: t('sidebar.groups.management'),
-      items: NAV_ITEMS.filter(i => ['documents','organizations','users'].includes(i.name))
-    },
-    {
-      key: 'settings',
-      title: t('sidebar.groups.settings'),
-      items: NAV_ITEMS.filter(i => ['settings'].includes(i.name))
-    },
-  ];
+  // Build navigation groups based on labels
+  const buildNavigationGroups = () => {
+    const groups: Array<{key: string, title: string, items: any[]}> = [];
+    
+    // Tạo groups cho các labels có sẵn
+    availableLabels.forEach(labelKey => {
+      const items = NAV_ITEMS.filter(item => itemLabels[item.name] === labelKey);
+      if (items.length > 0) {
+        groups.push({
+          key: labelKey,
+          title: getGroupDisplayLabel(labelKey),
+          items
+        });
+      }
+    });
+    
+    // Thêm nhóm "Others" cho các item không có label
+    const unlabeledItems = NAV_ITEMS.filter(item => !itemLabels[item.name]);
+    if (unlabeledItems.length > 0) {
+      groups.push({
+        key: 'others',
+        title: t('sidebar.groups.others'),
+        items: unlabeledItems
+      });
+    }
+    
+    return groups;
+  };
+
+  const navigationGroups = buildNavigationGroups();
 
   // Get all items and separate into pinned and regular
   const allItems = navigationGroups.flatMap(g => g.items);
@@ -248,16 +328,39 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           {/* Collapse/Expand Button */}
           <button
             onClick={() => onCollapseToggle?.()}
-            className="p-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group relative overflow-hidden"
             title={collapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
           >
-            <span className="text-sm font-bold text-gray-600 group-hover:text-blue-600">
-              {collapsed ? '>' : '<'}
-            </span>
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <svg 
+                className={`w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-transform duration-300 ${
+                  collapsed ? 'rotate-180' : 'rotate-0'
+                }`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </div>
           </button>
           
           {/* Edit Mode Button */}
           {!collapsed && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowLabelManager(!showLabelManager)}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  showLabelManager 
+                    ? 'bg-purple-50 text-purple-600 border border-purple-200' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+                title={t('sidebar.tooltips.manageLabels')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </button>
             <button
               onClick={() => setEditMode(!editMode)}
               className={`p-2 border-2 rounded-lg transition-all duration-200 ${
@@ -269,6 +372,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
             >
               <Edit2 className="h-4 w-4" />
             </button>
+            </div>
           )}
           
           {/* Close Button (Mobile) */}
@@ -280,6 +384,69 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           </button>
         </div>
       </div>
+
+      {/* Label Manager Panel */}
+      {showLabelManager && !collapsed && (
+        <div className="px-4 py-3 bg-purple-50 border-b border-purple-200">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-purple-800">{t('sidebar.labelManager.title')}</h3>
+              <button
+                onClick={() => setShowLabelManager(false)}
+                className="p-1 hover:bg-purple-100 rounded"
+              >
+                <X className="h-4 w-4 text-purple-600" />
+              </button>
+            </div>
+            
+            {/* Add New Label */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder={t('sidebar.labelManager.addLabel')}
+                className="flex-1 px-2 py-1 text-xs border border-purple-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewLabel(e.currentTarget.value);
+                    e.currentTarget.value = '';
+                  }
+                }}
+              />
+              <button
+                onClick={(e) => {
+                  const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                  addNewLabel(input.value);
+                  input.value = '';
+                }}
+                className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700"
+              >
+                {t('sidebar.labelManager.add')}
+              </button>
+            </div>
+            
+            {/* Available Labels */}
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-purple-700">{t('sidebar.labelManager.availableLabels')}</div>
+              <div className="flex flex-wrap gap-1">
+                {availableLabels.map(label => (
+                  <div key={label} className="flex items-center gap-1 px-2 py-1 bg-white border border-purple-200 rounded text-xs">
+                    <span className="text-purple-700">{getGroupDisplayLabel(label)}</span>
+                    {label !== 'others' && (
+                      <button
+                        onClick={() => removeLabel(label)}
+                        className="p-0.5 hover:bg-red-100 rounded"
+                        title={t('sidebar.labelManager.removeLabel')}
+                      >
+                        <X className="h-3 w-3 text-red-500" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className={`flex-1 ${collapsed ? 'px-1 py-2' : 'px-2 py-4'} overflow-y-auto space-y-6`}>
@@ -338,9 +505,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
 
         {/* Regular Menu Groups */}
         <DragDropContext onDragEnd={handleDragEnd}>
-          {navigationGroups.map((group) => (
+        {navigationGroups.map((group) => (
             <div key={group.key} className="space-y-2">
-              {!collapsed && (
+            {!collapsed && (
                 <div className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center justify-between group">
                   {editingGroupLabel === group.key ? (
                     <input
@@ -376,8 +543,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                       <Edit2 className="h-3 w-3 text-gray-400" />
                     </button>
                   )}
-                </div>
-              )}
+              </div>
+            )}
               <Droppable droppableId={group.key}>
                 {(provided: any, snapshot: any) => (
                   <div
@@ -394,10 +561,10 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         return aIndex - bIndex;
                       })
                       .map((item, index) => {
-                        const Icon = item.icon;
-                        const active = isActive(item.href);
+              const Icon = item.icon;
+              const active = isActive(item.href);
 
-                        return (
+              return (
                           <Draggable
                             key={item.name}
                             draggableId={item.name}
@@ -405,85 +572,159 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                             isDragDisabled={!editMode}
                           >
                             {(provided: any, snapshot: any) => (
-                              <motion.div
+                <motion.div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                                 className={`${
                                   snapshot.isDragging ? 'z-50 shadow-lg' : ''
                                 }`}
+                >
+                  {item.name === 'documents' ? (
+                    <button
+                      onClick={handleFilesClick}
+                      className={`
+                        flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all w-full text-left
+                        ${active
+                          ? 'bg-blue-50 text-blue-700 font-medium border-l-4 border-blue-600'
+                          : 'text-gray-700 hover:bg-gray-100'
+                        }
+                        ${collapsed ? 'justify-center' : ''}
+                        ${editMode ? 'cursor-move' : ''}
+                      `}
+                    >
+                      <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">{getDisplayLabel(item.name)}</span>
+                          <div className="flex items-center gap-1">
+                            {editMode && (
+                              <select
+                                value={itemLabels[item.name] || 'others'}
+                                onChange={(e) => assignItemToLabel(item.name, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-1 py-0.5 bg-white"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <Link
-                                  to={item.href}
-                                  className={`
-                                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                                    ${active
-                                      ? 'bg-blue-50 text-blue-700 font-medium border-l-4 border-blue-600'
-                                      : 'text-gray-700 hover:bg-gray-100'
-                                    }
-                                    ${collapsed ? 'justify-center' : ''}
-                                    ${editMode ? 'cursor-move' : ''}
-                                  `}
-                                >
-                                  <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
-                                  {!collapsed && (
-                                    <>
-                                      <span className="flex-1">{getDisplayLabel(item.name)}</span>
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          if (editMode) {
-                                            setEditingLabel(item.name);
-                                          } else {
-                                            togglePin(item.name);
-                                          }
-                                        }}
-                                        className="p-1 hover:bg-gray-200 rounded"
-                                        title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
-                                      >
-                                        {editMode ? (
-                                          <GripVertical className="h-4 w-4 text-gray-400" />
-                                        ) : (
-                                          <Star className="h-4 w-4 text-gray-400" />
-                                        )}
-                                      </button>
-                                    </>
-                                  )}
-                                </Link>
-                                
-                                {/* Edit Mode - Label Input */}
-                                {editMode && editingLabel === item.name && !collapsed && (
-                                  <div className="px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 mt-1">
-                                    <input
-                                      type="text"
-                                      defaultValue={getDisplayLabel(item.name)}
-                                      onBlur={(e) => updateLabel(item.name, e.target.value)}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          updateLabel(item.name, e.currentTarget.value);
-                                        } else if (e.key === 'Escape') {
-                                          setEditingLabel(null);
-                                        }
-                                      }}
-                                      autoFocus
-                                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                      placeholder={t('sidebar.placeholder.labelName')}
-                                    />
-                                  </div>
-                                )}
-                              </motion.div>
+                                {availableLabels.map(label => (
+                                  <option key={label} value={label}>
+                                    {getGroupDisplayLabel(label)}
+                                  </option>
+                                ))}
+                                <option value="others">{t('sidebar.groups.others')}</option>
+                              </select>
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (editMode) {
+                                  setEditingLabel(item.name);
+                                } else {
+                                  togglePin(item.name);
+                                }
+                              }}
+                              className="p-1 hover:bg-gray-200 rounded"
+                              title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                            >
+                              {editMode ? (
+                                <GripVertical className="h-4 w-4 text-gray-400" />
+                              ) : (
+                                <Star className="h-4 w-4 text-gray-400" />
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                  <Link
+                    to={item.href}
+                    className={`
+                      flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
+                      ${active
+                        ? 'bg-blue-50 text-blue-700 font-medium border-l-4 border-blue-600'
+                        : 'text-gray-700 hover:bg-gray-100'
+                      }
+                      ${collapsed ? 'justify-center' : ''}
+                        ${editMode ? 'cursor-move' : ''}
+                    `}
+                  >
+                    <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1">{getDisplayLabel(item.name)}</span>
+                          <div className="flex items-center gap-1">
+                            {editMode && (
+                              <select
+                                value={itemLabels[item.name] || 'others'}
+                                onChange={(e) => assignItemToLabel(item.name, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-1 py-0.5 bg-white"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {availableLabels.map(label => (
+                                  <option key={label} value={label}>
+                                    {getGroupDisplayLabel(label)}
+                                  </option>
+                                ))}
+                                <option value="others">{t('sidebar.groups.others')}</option>
+                              </select>
+                            )}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (editMode) {
+                              setEditingLabel(item.name);
+                            } else {
+                              togglePin(item.name);
+                            }
+                          }}
+                          className="p-1 hover:bg-gray-200 rounded"
+                          title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                        >
+                          {editMode ? (
+                            <GripVertical className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Star className="h-4 w-4 text-gray-400" />
+                          )}
+                        </button>
+                          </div>
+                      </>
+                    )}
+                  </Link>
+                  )}
+                  
+                  {/* Edit Mode - Label Input */}
+                  {editMode && editingLabel === item.name && !collapsed && (
+                    <div className="px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 mt-1">
+                      <input
+                        type="text"
+                        defaultValue={getDisplayLabel(item.name)}
+                        onBlur={(e) => updateLabel(item.name, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            updateLabel(item.name, e.currentTarget.value);
+                          } else if (e.key === 'Escape') {
+                            setEditingLabel(null);
+                          }
+                        }}
+                        autoFocus
+                        className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={t('sidebar.placeholder.labelName')}
+                      />
+                    </div>
+                  )}
+                </motion.div>
                             )}
                           </Draggable>
-                        );
-                      })}
+              );
+            })}
                     {provided.placeholder}
                   </div>
                 )}
               </Droppable>
-            </div>
-          ))}
+          </div>
+        ))}
         </DragDropContext>
       </nav>
 
@@ -495,6 +736,13 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           </div>
         </div>
       )}
+      
+      {/* No Recent Repository Modal */}
+      <NoRecentRepositoryModal
+        isOpen={showNoRecentModal}
+        onClose={() => setShowNoRecentModal(false)}
+        onGoToRepositories={handleGoToRepositories}
+      />
     </div>
   );
 };

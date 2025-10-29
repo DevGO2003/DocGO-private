@@ -11,7 +11,7 @@ console.log('[API Client] Environment:', {
 });
 
 // Create axios instance
-export const apiClient: AxiosInstance = axios.create({
+const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
@@ -105,4 +105,5 @@ apiClient.interceptors.response.use(
   }
 );
 
+export { apiClient };
 export default apiClient;

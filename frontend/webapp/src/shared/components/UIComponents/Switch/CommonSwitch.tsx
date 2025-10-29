@@ -1,6 +1,7 @@
 import { forwardRef, useRef, useEffect, InputHTMLAttributes } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonFont } from '../Font/CommonFont';
 
 interface CommonSwitchProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -68,7 +69,7 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
     }, [checked, className]);
 
     return (
-      <div className="flex items-center space-x-3">
+      <CommonFont className="flex items-center space-x-3">
         <div className="relative inline-flex items-center">
           <input
             ref={ref || switchRef}
@@ -118,7 +119,7 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
             )}
           </label>
         )}
-      </div>
+      </CommonFont>
     );
   }
 );

@@ -1,6 +1,7 @@
 import { forwardRef, LabelHTMLAttributes, useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonFont } from '../Font/CommonFont';
 
 interface CommonLabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   required?: boolean;
@@ -54,7 +55,7 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
     }, [error, className, children]);
 
     return (
-      <div ref={containerRef} className="relative inline-block">
+      <CommonFont ref={containerRef as any} className="relative inline-block">
         <canvas
           ref={canvasRef}
           className="absolute inset-0 pointer-events-none"
@@ -70,7 +71,7 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
           {children}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
-      </div>
+      </CommonFont>
     );
   }
 );

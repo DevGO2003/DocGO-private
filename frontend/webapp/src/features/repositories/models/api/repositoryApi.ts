@@ -236,7 +236,8 @@ export const usePersonalRepositories = (params?: PaginationParams & { userId?: s
 export const useOrganizationRepositories = (params?: PaginationParams & { organizationId?: string }) => {
   return useQuery({
     queryKey: ['organization-repositories', params],
-    queryFn: () => repositoryApi.getOrganizationRepositories({ ...params, organizationId: params?.organizationId || 'org-001' }),
+    queryFn: () => repositoryApi.getOrganizationRepositories(params),
+    enabled: !!params?.organizationId,
   });
 };
 

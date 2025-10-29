@@ -24,8 +24,8 @@ export const MainLayout = ({
   
   const location = useLocation();
   // Regex patterns cho các trang chỉ muốn ControlMainLayout (không Header/Sidebar)
-  const minimalPatterns = [
-    /^\/upload(\/|$)/,
+  const minimalPatterns: RegExp[] = [
+    // Ví dụ: thêm các route tối giản khác tại đây nếu cần
   ];
   const isMinimal = minimalPatterns.some((re) => re.test(location.pathname));
   const resolvedShowHeader = isMinimal ? false : showHeader;

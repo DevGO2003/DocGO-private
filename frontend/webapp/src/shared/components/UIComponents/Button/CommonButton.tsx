@@ -4,6 +4,7 @@ import { ButtonProps } from './Button.types';
 import { buttonVariants } from './Button.styles';
 import { Loader2 } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonFont } from '../Font/CommonFont';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, isLoading, children, disabled, ...props }, ref) => {
@@ -34,7 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }, [disabled, isLoading, className, variant, size]);
 
     return (
-      <div ref={containerRef} className="relative inline-block">
+      <CommonFont ref={containerRef} className="relative inline-block">
         <canvas
           ref={canvasRef}
           className="absolute inset-0 pointer-events-none"
@@ -49,7 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {children}
         </button>
-      </div>
+      </CommonFont>
     );
   }
 );

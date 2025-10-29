@@ -13,7 +13,7 @@
     "organizations": "Organizations",
     "upload": "Upload",
     "analytics": "Analytics",
-    "documents": "Documents",
+    "documents": "Files",
     "users": "Users"
   },
   "settings": {
@@ -456,7 +456,8 @@
     "groups": {
       "storage": "Repositories",
       "management": "Management",
-      "settings": "Settings"
+      "settings": "Settings",
+      "others": "Others"
     },
     "tooltips": {
       "expand": "Expand menu",
@@ -464,10 +465,20 @@
       "editMode": "Edit mode",
       "unpin": "Unpin",
       "pin": "Pin to favorites",
-      "editLabel": "Edit label"
+      "editLabel": "Edit label",
+      "editGroupLabel": "Edit group label",
+      "manageLabels": "Manage labels"
     },
     "placeholder": {
-      "labelName": "Item name"
+      "labelName": "Item name",
+      "groupName": "Group name"
+    },
+    "labelManager": {
+      "title": "Label Manager",
+      "addLabel": "Add new label",
+      "add": "Add",
+      "availableLabels": "Available Labels",
+      "removeLabel": "Remove label"
     }
   },
   "dashboard": {

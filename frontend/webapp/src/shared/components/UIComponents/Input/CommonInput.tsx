@@ -1,6 +1,7 @@
 import { forwardRef, useRef, useEffect, InputHTMLAttributes } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonFont } from '../Font/CommonFont';
 
 interface CommonInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -92,7 +93,7 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
     }, [error]);
 
     return (
-      <div className="w-full space-y-2">
+      <CommonFont className="w-full space-y-2">
         {label && (
           <label
             ref={labelRef}
@@ -128,7 +129,7 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {helperText && !error && (
           <p className="text-sm text-gray-500">{helperText}</p>
         )}
-      </div>
+      </CommonFont>
     );
   }
 );
