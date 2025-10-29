@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import {HeaderPanel} from '../../layouts/HeaderPanel/HeaderPanel'
+import { HeaderControlLayout } from '../../layouts/HeaderControlLayout'
 import { LoadingSpinner } from '@shared/layouts/LoadingSpinner/LoadingSpinner'
 
 interface ControlMainLayoutProps {
@@ -51,9 +51,13 @@ export function ControlMainLayout({
       {/* Header Panel */}
       {(title || subtitle || (breadcrumbs && breadcrumbs.length > 0) || headerChildren || headerRight) && (
         <div className="flex-shrink-0">
-          <HeaderPanel title={title ?? ''} subtitle={subtitle} breadcrumbs={breadcrumbs} right={headerRight}>
-            {headerChildren}
-          </HeaderPanel>
+          <HeaderControlLayout
+            title={title ?? ''}
+            subtitle={subtitle}
+            breadcrumbs={breadcrumbs}
+            rightActions={headerRight}
+            headerChildren={headerChildren}
+          />
         </div>
       )}
 
