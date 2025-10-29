@@ -30,11 +30,11 @@ ENV/
 .venv/
 .env
 
-# Environment Variables
-.env
-.env.local
-.env.production
-.env.staging
+# Environment Variables (allow committing for this project)
+!.env
+!.env.local
+!.env.production
+!.env.staging
 
 # Logs
 *.log

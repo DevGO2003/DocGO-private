@@ -84,11 +84,11 @@ Desktop.ini
 # Linux
 *~
 
-# Environment Variables
-.env
-.env.local
-.env.production
-.env.staging
+# Environment Variables (allow committing for this project)
+!.env
+!.env.local
+!.env.production
+!.env.staging
 
 # Application specific
 application-local.properties

@@ -615,7 +615,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                                 <option value="others">{t('sidebar.groups.others')}</option>
                               </select>
                             )}
-                            <button
+                            <div
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => {
                                 e.preventDefault();
                                 if (editMode) {
@@ -626,13 +628,23 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               }}
                               className="p-1 hover:bg-gray-200 rounded"
                               title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (editMode) {
+                                    setEditingLabel(item.name);
+                                  } else {
+                                    togglePin(item.name);
+                                  }
+                                }
+                              }}
                             >
                               {editMode ? (
                                 <GripVertical className="h-4 w-4 text-gray-400" />
                               ) : (
                                 <Star className="h-4 w-4 text-gray-400" />
                               )}
-                            </button>
+                            </div>
                           </div>
                         </>
                       )}
@@ -670,7 +682,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                                 <option value="others">{t('sidebar.groups.others')}</option>
                               </select>
                             )}
-                        <button
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={(e) => {
                             e.preventDefault();
                             if (editMode) {
@@ -681,13 +695,23 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           }}
                           className="p-1 hover:bg-gray-200 rounded"
                           title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              if (editMode) {
+                                setEditingLabel(item.name);
+                              } else {
+                                togglePin(item.name);
+                              }
+                            }
+                          }}
                         >
                           {editMode ? (
                             <GripVertical className="h-4 w-4 text-gray-400" />
                           ) : (
                             <Star className="h-4 w-4 text-gray-400" />
                           )}
-                        </button>
+                        </div>
                           </div>
                       </>
                     )}

@@ -5,19 +5,25 @@ interface DocxPreviewProps {
 }
 
 export default function DocxPreview({ file }: DocxPreviewProps) {
-  const [content, setContent] = useState<string>('')
+  const [html, setHtml] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadDocx = async () => {
       try {
-        const mammoth = await import('mammoth')
+        const extension = file.name.split('.').pop()?.toLowerCase()
+        if (extension === 'doc') {
+          setHtml('Định dạng .doc chưa được hỗ trợ xem trực tiếp. Vui lòng chuyển sang .docx.')
+          return
+        }
+
+        const mammoth = await import('mammoth/mammoth.browser')
         const arrayBuffer = await file.arrayBuffer()
-        const result = await mammoth.extractRawText({ arrayBuffer })
-        setContent(result.value.substring(0, 50000))
+        const result = await mammoth.convertToHtml({ arrayBuffer })
+        setHtml(result.value)
       } catch (error) {
         console.error('Error loading docx:', error)
-        setContent('Không thể đọc file DOCX. Vui lòng cài đặt thư viện mammoth.')
+        setHtml('Không thể hiển thị file DOCX. Vui lòng thử lại hoặc kiểm tra tệp.')
       } finally {
         setLoading(false)
       }
@@ -43,9 +49,10 @@ export default function DocxPreview({ file }: DocxPreviewProps) {
           </div>
         ) : (
           <div className="prose prose-sm max-w-none">
-            <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono bg-gray-50 p-3 rounded">
-              {content}
-            </pre>
+            <div
+              className="docx-html text-gray-800"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
           </div>
         )}
       </div>

@@ -155,7 +155,6 @@ export const RepositoryList = () => {
       showToolbar={false}
     >
       <RepositoryLayout className="min-h-full">
-        <div className="max-w-7xl mx-auto w-full">
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
@@ -231,7 +230,6 @@ export const RepositoryList = () => {
               </div>
             </div>
           )}
-        </div>
 
         {/* Create Repository Modal */}
         <CreateRepositoryModal

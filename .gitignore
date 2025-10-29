@@ -269,4 +269,20 @@ site/
 ###############################################################################
 
 scripts/temp/
-.cursor/mcp.json
+# ----------------------------------------------------------------------------
+# OVERRIDES: Allow committing certain important config files
+# ----------------------------------------------------------------------------
+
+# Allow committing env files at root and in submodules (use with caution)
+!.env
+!**/.env
+!.env.local
+!**/.env.local
+!.env.production
+!**/.env.production
+!.env.staging
+!**/.env.staging
+
+# Allow committing MCP configuration
+!mcp.json
+!.cursor/mcp.json

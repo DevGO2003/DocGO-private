@@ -122,8 +122,7 @@ const repositoryApi = {
       formData.append('metadata', JSON.stringify(metadataObj));
     }
 
-    // Use automation-service endpoint instead of repository-management-service
-    const response = await apiClient.post<FileItem>('/api/v1/automation-service/files', formData, {
+    const response = await apiClient.post<FileItem>(`${env.apiGatewayUrl}/api/v1/automation-service/files`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

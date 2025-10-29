@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { tokenManager } from './tokenManager';
+import env from '@shared/config/env';
 
 export interface ApiError {
   statusCode: number;
@@ -14,7 +15,7 @@ export class EnhancedApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    this.baseURL = env.apiBaseUrl;
     
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -43,7 +44,7 @@ export class EnhancedApiClient {
           delete config.headers['Content-Type'];
         }
 
-        if (import.meta.env.DEV) {
+        if (env.isDev) {
           console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
             hasAuth: !!token,
             data: config.data
@@ -61,7 +62,7 @@ export class EnhancedApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
-        if (import.meta.env.DEV) {
+        if (env.isDev) {
           console.log(`[API Response] ${response.config.url}:`, {
             status: response.status,
             data: response.data
@@ -128,7 +129,7 @@ export class EnhancedApiClient {
   private handleApiError(error: AxiosError): void {
     const apiError = this.extractApiError(error);
     
-    if (import.meta.env.DEV) {
+    if (env.isDev) {
       console.error('[API Error]', apiError);
     }
 
@@ -180,5 +181,3 @@ export class EnhancedApiClient {
 }
 
 export const enhancedApiClient = new EnhancedApiClient();
-
-

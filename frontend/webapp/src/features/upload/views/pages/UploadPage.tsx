@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import UploadLayout from '../../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
@@ -10,6 +11,7 @@ import { automationFileApi } from '../../models/api/automationFileApi'
 import { Button, Text, Modal } from '@shared/components'
 
 export default function UploadPage() {
+  const location = useLocation()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
@@ -21,10 +23,33 @@ export default function UploadPage() {
   const [selectedRepositoryName, setSelectedRepositoryName] = useState<string>('')
   const [recentRefreshKey, setRecentRefreshKey] = useState<number>(0)
 
+  // Prefill repository from URL query params if present
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const repoId = params.get('repositoryId') || ''
+    const repoName = params.get('repositoryName') || ''
+    if (repoId) setSelectedRepositoryId(repoId)
+    if (repoName) setSelectedRepositoryName(decodeURIComponent(repoName))
+  }, [location.search])
+
   const [showSuccess, setShowSuccess] = useState(false)
   const [successInfo, setSuccessInfo] = useState<{fileName: string; fileSize?: string; fileType?: string} | null>(null)
   const [showError, setShowError] = useState(false)
   const [errorInfo, setErrorInfo] = useState<{ message: string; status?: number } | null>(null)
+
+  const isOfficeFile = (file: File | null) => {
+    if (!file) return false
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    return ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext || '')
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const repoId = params.get('repositoryId') || ''
+    const repoName = params.get('repositoryName') || ''
+    if (repoId) setSelectedRepositoryId(repoId)
+    if (repoName) setSelectedRepositoryName(decodeURIComponent(repoName))
+  }, [location.search])
 
   const handleOcrFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -237,7 +262,16 @@ export default function UploadPage() {
                 </div>
                 <div className="p-4 overflow-visible">
                   {selectedFile ? (
-                    <PreviewFactory file={selectedFile} />
+                    <>
+                      {isOfficeFile(selectedFile) && (
+                        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                          <p className="text-xs text-amber-800">
+                            Lưu ý: Đây là bản xem trước tạm thời cho tài liệu văn phòng (Word/Excel/PowerPoint). Định dạng có thể không hiển thị chính xác 100%.
+                          </p>
+                        </div>
+                      )}
+                      <PreviewFactory file={selectedFile} />
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">

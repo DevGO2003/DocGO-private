@@ -30,6 +30,19 @@ export const config = {
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
+    // Explicit CORS handling to ensure correct headers on proxied responses
+    const origin = (req.headers.origin as string) || process.env.WEB_APP_URL || 'http://localhost:3000';
+    const allowHeaders = 'Content-Type, Authorization, X-Requested-With, X-User-Token, X-User-Id, X-User-Roles, X-Username, X-User-Email, X-Correlation-Id, X-Actor';
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', allowHeaders);
+    res.setHeader('Vary', 'Origin');
+
+    // Handle preflight quickly
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
     // Get the path from req.query.path (Next.js dynamic route parameter)
     const pathArray = req.query.path as string[] || [];
     const fullPath = pathArray.join('/');
@@ -257,7 +270,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const response = await service.request(requestConfig);
 
-    // CORS headers are handled centrally in middleware
+    // Ensure CORS headers on proxied response (override any upstream wildcard)
+    res.setHeader('Access-Control-Allow-Origin', req.headers['origin'] || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-User-Token, X-User-Id, X-User-Roles, X-Username, X-User-Email, X-Correlation-Id, X-Actor');
+
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
 
     logger.info(`✅ Proxy response: ${response.status}`);
       // Send through raw response body to support both JSON and text

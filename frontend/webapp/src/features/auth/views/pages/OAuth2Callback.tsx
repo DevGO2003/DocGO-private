@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials } from '../../models/state/authSlice';
 import { HOME_PATH, LOGIN_PATH } from '@constants';
+import env from '@shared/config/env';
 
 export const OAuth2Callback = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export const OAuth2Callback = () => {
           console.log('[OAuth2Callback] Fetching user info from API...');
           
           // Get user info using the token
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/user-management-service/auth/me`, {
+          const response = await fetch(`${env.apiBaseUrl}/api/v1/user-management-service/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }

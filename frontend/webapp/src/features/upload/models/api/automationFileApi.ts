@@ -1,5 +1,7 @@
  import { apiClient } from '@shared/lib/api'
- export type RestResponse<T> = {
+import env from '@shared/config/env';
+
+export type RestResponse<T> = {
   apiVersion: string
   statusCode: number
   shortMessage: string
@@ -26,17 +28,31 @@ export type AutomationRecentItem = {
   uploadedAt: string
 }
 
-const BASE = '/api/v1/automation-service/files'
+const UPLOAD_ENDPOINT = '/api/v1/automation-service/files/upload'
+const RECENT_ENDPOINT = '/api/v1/automation-service/files/recent'
 
 export const automationFileApi = {
   uploadFile: async (file: File, repositoryId: string): Promise<RestResponse<AutomationUploadData>> => {
     const form = new FormData()
-    form.append('file', file)
+    form.append('file', file, file.name)
+    // Backend expects repository_id (snake_case) as a plain form field
     form.append('repository_id', repositoryId)
+    // Also include camelCase for backward compatibility if server accepts either
+    form.append('repositoryId', repositoryId)
 
     try {
-      const response = await apiClient.post<AutomationUploadData>(`${BASE}`, form, {
-        // Do NOT set Content-Type for FormData; interceptor will remove it
+      if (env.isDev) {
+        try {
+          const dbg: Record<string, any> = {}
+          for (const [k, v] of form.entries()) {
+            dbg[k] = v instanceof File ? `File(${v.name}, ${v.size})` : String(v)
+          }
+          // eslint-disable-next-line no-console
+          console.log('[Upload Debug] FormData entries:', dbg)
+        } catch {}
+      }
+      const response = await apiClient.post<AutomationUploadData>(`${UPLOAD_ENDPOINT}`, form, {
+        transformRequest: [(data) => data],
       })
       return response.data as unknown as RestResponse<AutomationUploadData>
     } catch (e: any) {
@@ -51,7 +67,7 @@ export const automationFileApi = {
 
   getRecent: async (limit = 5): Promise<RestResponse<AutomationRecentItem[]>> => {
     try {
-      const response = await apiClient.get<AutomationRecentItem[]>(`${BASE}/recent`, {
+      const response = await apiClient.get<AutomationRecentItem[]>(`${RECENT_ENDPOINT}`, {
         params: { limit }
       })
       return response.data as unknown as RestResponse<AutomationRecentItem[]>

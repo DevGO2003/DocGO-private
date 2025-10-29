@@ -18,12 +18,12 @@ dist/
 .next/cache/
 
 # ========================
-# Environment Variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Environment Variables (allow committing for this project)
+!.env
+!.env.local
+!.env.development.local
+!.env.test.local
+!.env.production.local
 
 # ========================
 # Logs

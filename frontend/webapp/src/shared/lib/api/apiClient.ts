@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import env from '@shared/config/env';
 
 export interface ApiResponse<T = any> {
   apiVersion: string
@@ -16,11 +17,11 @@ class ApiClient {
   private baseURL: string
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    this.baseURL = env.apiBaseUrl
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 30000,
-      headers: { 'Content-Type': 'application/json' },
+      // Do not set default Content-Type; let axios/browser set appropriately
       withCredentials: true,
     })
     this.setupInterceptors()
@@ -31,8 +32,14 @@ class ApiClient {
       (config: any) => {
         const token = this.getAuthToken()
         if (token) config.headers.Authorization = `Bearer ${token}`
-        if (config.data instanceof FormData) delete config.headers['Content-Type']
-        if (import.meta.env.DEV) console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
+        if (config.data instanceof FormData) {
+          // Remove any Content-Type so the browser can set multipart boundary
+          if (config.headers) {
+            delete (config.headers as any)['Content-Type']
+            delete (config.headers as any)['content-type']
+          }
+        }
+        if (env.isDev) console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
         return config
       },
       (error: any) => Promise.reject(error)
@@ -121,7 +128,7 @@ class ApiClient {
       const validationErrors = responseData.errors.map((e: any) => `${e.field}: ${e.message}`).join(', ')
       message = `Lỗi validation: ${validationErrors}`
     }
-    if (import.meta.env.DEV) console.error('[API Error]', { status: statusCode, message, url: error.config?.url, data: responseData })
+    if (env.isDev) console.error('[API Error]', { status: statusCode, message, url: error.config?.url, data: responseData })
   }
 
   private async handleUnauthorized(): Promise<boolean> {

@@ -56,6 +56,12 @@ export const RepositoryDetail: React.FC = () => {
       : t('repositories.detail.type.personal');
   };
 
+  const goToUploadWithRepo = () => {
+    if (!repository) return;
+    const repoName = encodeURIComponent(repository.name || '');
+    navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
+  };
+
   return (
     <ControlMainLayout
       title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
@@ -67,9 +73,8 @@ export const RepositoryDetail: React.FC = () => {
       loading={isLoading}
       loadingText={t('repositories.detail.loading')}
     >
-      <div className="max-w-7xl mx-auto">
-        {(!repository && !error) ? null : (
-          <div>
+      {(!repository && !error) ? null : (
+        <div>
             {/* Optional error banner */}
             {error && (
               <Card className="border-red-200 bg-red-50 mb-4">
@@ -279,7 +284,7 @@ export const RepositoryDetail: React.FC = () => {
                           <p className="text-gray-600 mb-4">
                             {t('repositories.detail.empty.files.desc')}
                           </p>
-                          <Button>{t('repositories.detail.empty.files.upload')}</Button>
+                          <Button onClick={goToUploadWithRepo}>{t('repositories.detail.empty.files.upload')}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -336,9 +341,8 @@ export const RepositoryDetail: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </ControlMainLayout>
   );
 };

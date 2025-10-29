@@ -1,6 +1,7 @@
 import { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { store } from '@features/auth/models/store';
 import { logout, setTokens } from '@features/auth/models/state/authSlice';
+import env from '@shared/config/env';
 
 export interface TokenRefreshResponse {
   accessToken: string;
@@ -92,7 +93,7 @@ export class TokenManager {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/user-management-service/auth/refresh`, {
+      const response = await fetch(`${env.apiBaseUrl}/api/v1/user-management-service/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,5 +145,3 @@ export class TokenManager {
 }
 
 export const tokenManager = TokenManager.getInstance();
-
-

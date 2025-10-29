@@ -12,19 +12,9 @@ interface RepositoryLayoutProps {
  * - Reset margin cho phần tử con trực tiếp để tránh lệch layout
  * - Không can thiệp vào padding nội bộ của components
  */
-function RepositoryLayout({ children, className = '' }: RepositoryLayoutProps) {
-  return (
-    <div
-      className={
-        `h-full w-full ` +
-        // Reset margin cho immediate children, giữ nguyên centering bên trong
-        `[&>*]:m-0 ` +
-        className
-      }
-    >
-      {children}
-    </div>
-  )
+function RepositoryLayout({ children }: RepositoryLayoutProps) {
+  // Trả về fragment để không tạo ra DOM node trung gian giữa ControlMainLayout và nội dung
+  return <>{children}</>
 }
 
 export default RepositoryLayout
