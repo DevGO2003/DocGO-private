@@ -63,6 +63,48 @@ export function authMiddleware(request: NextRequest): NextResponse | null {
   }
 }
 
+// Authorization middleware
+export function authzMiddleware(request: NextRequest): NextResponse | null {
+  const pathname = request.nextUrl.pathname;
+  const userRole = request.headers.get('x-user-role');
+  
+  // Parse roles (can be array or single string)
+  let roles: string[] = [];
+  try {
+    const roleData = userRole ? JSON.parse(userRole) : [];
+    roles = Array.isArray(roleData) ? roleData : [roleData];
+  } catch {
+    roles = userRole ? [userRole] : [];
+  }
+  
+  logger.info(`🔒 Authorization check: path=${pathname}, roles=${JSON.stringify(roles)}`);
+  
+  // Check if user has permission for this endpoint
+  const hasPermission = roles.some(role => {
+    switch (role) {
+      case 'admin':
+        return true; // Admin has access to everything
+      case 'user':
+      case 'employee':
+        return pathname.includes('/repositories/my') || pathname.includes('/repositories/public');
+      case 'viewer':
+        return pathname.includes('/repositories/public');
+      default:
+        return false;
+    }
+  });
+  
+  if (!hasPermission) {
+    logger.warn(`🚫 Access denied: path=${pathname}, roles=${JSON.stringify(roles)}`);
+    return NextResponse.json(
+      { error: 'Access denied' },
+      { status: 403 }
+    );
+  }
+  
+  return null;
+}
+
 // Logging middleware
 export function loggingMiddleware(request: NextRequest): void {
   const startTime = Date.now();
@@ -199,6 +241,10 @@ export function applyMiddleware(request: NextRequest): NextResponse | null {
     if (isProtectedRoute(request.nextUrl.pathname)) {
       const authResponse = authMiddleware(request);
       if (authResponse) return authResponse;
+      
+      // Apply authorization after authentication
+      const authzResponse = authzMiddleware(request);
+      if (authzResponse) return authzResponse;
     }
     
     return null;
@@ -209,11 +255,19 @@ export function applyMiddleware(request: NextRequest): NextResponse | null {
 
 // Check if route requires authentication
 function isProtectedRoute(pathname: string): boolean {
-  const protectedRoutes = [
-    '/api/v1/user-management-service/users',
-    '/api/v1/user-management-service/approvals',
-    '/api/v1/user-management-service/auth'
+  const publicRoutes = [
+    '/api/v1/health',
+    '/api/v1/auth/login',
+    '/api/v1/auth/register',
+    '/api/v1/auth/refresh',
+    '/api/v1/repository-management-service/repositories/public'
   ];
   
-  return protectedRoutes.some(route => pathname.startsWith(route));
+  // If it's a public route, don't require authentication
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    return false;
+  }
+  
+  // All other API routes require authentication
+  return pathname.startsWith('/api/v1/');
 }

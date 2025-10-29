@@ -221,4 +221,18 @@ public class RepositoryServiceImpl implements IRepositoryService {
         repositoryRepository.save(repo);
         log.info("Removed permission for user: {} on repository: {}", userId, repositoryId);
     }
+
+    @Override
+    public Page<RepositoryDTO> getPublicRepositories(Pageable pageable) {
+        log.info("Getting public repositories with pagination: {}", pageable);
+        Page<RepositoryEntity> entities = repositoryRepository.findByIsPublicTrueAndIsDeletedFalse(pageable);
+        return entities.map(RepositoryDTO::fromEntity);
+    }
+
+    @Override
+    public Page<RepositoryDTO> searchPublicRepositories(String searchTerm, Pageable pageable) {
+        log.info("Searching public repositories with term: {} and pagination: {}", searchTerm, pageable);
+        Page<RepositoryEntity> entities = repositoryRepository.searchPublicRepositories(searchTerm, pageable);
+        return entities.map(RepositoryDTO::fromEntity);
+    }
 }

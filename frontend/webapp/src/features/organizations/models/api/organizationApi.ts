@@ -258,9 +258,10 @@ export const useMyPendingInvitations = () => {
   return useQuery({
     queryKey: ['my-pending-invitations'],
     queryFn: () => organizationApi.getMyPendingInvitations(),
-    refetchInterval: 15000, // Refresh every 15 seconds (faster!)
-    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    refetchInterval: false, // Disable auto-refresh
+    refetchOnWindowFocus: false, // Disable auto-refresh on focus
     retry: 1, // Retry once if failed
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 };
 

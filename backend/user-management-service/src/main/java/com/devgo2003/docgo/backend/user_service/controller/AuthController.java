@@ -293,6 +293,53 @@ public class AuthController {
                 .build());
     }
 
+    @GetMapping("/validate")
+    @Operation(summary = "Validate token")
+    public ResponseEntity<RestResponse<Map<String, Object>>> validate(@RequestHeader(name = "Authorization", required = false) String authorization) {
+        String requestId = UUID.randomUUID().toString();
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(RestResponse.<Map<String, Object>>builder()
+                    .apiVersion("v1")
+                    .statusCode(401)
+                    .shortMessage("Unauthorized")
+                    .description("Thiếu Authorization Bearer token")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(requestId)
+                    .path("/api/v1/user-management-service/auth/validate")
+                    .build());
+        }
+
+        String token = authorization.substring(7);
+        try {
+            var claims = jwtUtil.parseClaims(token);
+            Map<String, Object> data = new HashMap<>();
+            data.put("valid", true);
+            data.put("subject", claims.getSubject());
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                    .apiVersion("v1")
+                    .statusCode(200)
+                    .shortMessage("Success")
+                    .description("Token hợp lệ")
+                    .data(data)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(requestId)
+                    .path("/api/v1/user-management-service/auth/validate")
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(RestResponse.<Map<String, Object>>builder()
+                    .apiVersion("v1")
+                    .statusCode(401)
+                    .shortMessage("Unauthorized")
+                    .description("Token không hợp lệ")
+                    .data(null)
+                    .timestamp(ZonedDateTime.now())
+                    .requestId(requestId)
+                    .path("/api/v1/user-management-service/auth/validate")
+                    .build());
+        }
+    }
+
     @GetMapping("/test-auth")
     @Operation(summary = "Test authentication")
     public ResponseEntity<RestResponse<Map<String, Object>>> testAuth(@RequestHeader(name = "Authorization", required = false) String authorization) {

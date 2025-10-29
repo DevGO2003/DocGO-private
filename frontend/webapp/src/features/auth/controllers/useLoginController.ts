@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import { useLogin } from '../models/api/authApi';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials, setLoading, setError } from '../models/state/authSlice';
@@ -10,7 +11,7 @@ export const useLoginController = () => {
   const dispatch = useAppDispatch();
   const loginMutation = useLogin();
 
-  const handleLogin = async (credentials: LoginCredentials) => {
+  const handleLogin = useCallback(async (credentials: LoginCredentials) => {
     console.log('[LoginController] Starting login process...');
     dispatch(setLoading(true));
     dispatch(setError(null));
@@ -56,7 +57,7 @@ export const useLoginController = () => {
     } finally {
       dispatch(setLoading(false));
     }
-  };
+  }, [loginMutation, dispatch, navigate]);
 
   return {
     handleLogin,

@@ -2,6 +2,8 @@ package com.devgo2003.docgo.repository_service.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -32,22 +34,47 @@ public class GatewayUserAuthenticationFilter extends AbstractPreAuthenticatedPro
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        String rolesHeader = request.getHeader("X-User-Roles");
-        List<SimpleGrantedAuthority> authorities = rolesHeader == null ? List.of()
-            : Arrays.stream(rolesHeader.split(","))
-                .map(String::trim)
-                .filter(r -> !r.isEmpty())
-                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase()))
-                .collect(Collectors.toList());
-
-        GatewayUserPrincipal principal = (GatewayUserPrincipal) authResult.getPrincipal();
-        Authentication authentication = new AbstractAuthenticationToken(authorities) {
-            @Override public Object getCredentials() { return authResult.getCredentials(); }
-            @Override public Object getPrincipal() { return principal; }
-        };
-        authentication.setAuthenticated(true);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        
+        System.out.println("DEBUG: doFilter called");
+        
+        // Get user info from headers
+        String userId = httpRequest.getHeader("X-User-Id");
+        String username = httpRequest.getHeader("X-Username");
+        String email = httpRequest.getHeader("X-User-Email");
+        String rolesHeader = httpRequest.getHeader("X-User-Roles");
+        
+        System.out.println("DEBUG: Headers - userId=" + userId + ", username=" + username + ", roles=" + rolesHeader);
+        
+        if (userId != null && !userId.trim().isEmpty()) {
+            // Parse roles
+            List<SimpleGrantedAuthority> authorities = List.of();
+            if (rolesHeader != null && !rolesHeader.trim().isEmpty()) {
+                String[] roles = rolesHeader.split(",");
+                authorities = Arrays.stream(roles)
+                    .map(String::trim)
+                    .filter(r -> !r.isEmpty())
+                    .map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase()))
+                    .collect(Collectors.toList());
+            }
+            
+            System.out.println("DEBUG: Authorities = " + authorities);
+            
+            // Create authentication
+            GatewayUserPrincipal principal = new GatewayUserPrincipal(userId, username, email);
+            Authentication authentication = new AbstractAuthenticationToken(authorities) {
+                @Override public Object getCredentials() { return "N/A"; }
+                @Override public Object getPrincipal() { return principal; }
+            };
+            authentication.setAuthenticated(true);
+            
+            // Set in security context
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("DEBUG: Authentication set in context");
+        }
+        
         chain.doFilter(request, response);
     }
 

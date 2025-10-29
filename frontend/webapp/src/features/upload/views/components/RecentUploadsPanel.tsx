@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { automationFileApi, AutomationRecentItem } from '../../models/api/automationFileApi'
 import { Text, Button, Card, CardContent } from '@shared/components'
@@ -12,6 +13,7 @@ interface RecentUploadsPanelProps {
 
 const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, className }) => {
   const nav = useNavigate()
+  const { t } = useTranslation()
   const [items, setItems] = useState<AutomationRecentItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +29,7 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
       })
       .catch((e) => {
         if (!mounted) return
-        setError(e?.message || 'Không thể tải danh sách uploads gần đây')
+        setError(e?.message || t('uploads.recent.error.loadRecent'))
       })
       .finally(() => {
         if (!mounted) return
@@ -56,8 +58,8 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
       <CardContent style={{ paddingTop: 24 }}>
         <Stack gap="10px">
           <Flex align="center" justify="between">
-            <Text as="h3" className="text-base font-semibold text-gray-900">Uploads gần đây</Text>
-            {loading && <Text as="span" className="text-xs text-gray-500">Đang tải...</Text>}
+            <Text as="h3" className="text-base font-semibold text-gray-900">{t('uploads.recent.title')}</Text>
+            {loading && <Text as="span" className="text-xs text-gray-500">{t('uploads.recent.loading')}</Text>}
           </Flex>
 
           {error && (
@@ -65,7 +67,7 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
           )}
 
           {(!items || items.length === 0) ? (
-            <Text as="p" className="text-sm text-gray-600">Chưa có dữ liệu</Text>
+            <Text as="p" className="text-sm text-gray-600">{t('uploads.recent.empty')}</Text>
           ) : (
             <Stack gap={0}>
               {items.map((it) => (
@@ -77,9 +79,9 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
                     </p>
                   </div>
                   <Flex align="center" gap={8}>
-                    <Button variant="outline" size="sm" onClick={() => openDetail(it.repositoryId, it.fileId)}>Chi tiết</Button>
-                    <Button variant="outline" size="sm" onClick={() => openRepo(it.repositoryId)}>Repository</Button>
-                    <Button variant="default" size="sm" onClick={() => openPreview(it.repositoryId, it.fileId)}>Preview</Button>
+                    <Button variant="outline" size="sm" onClick={() => openDetail(it.repositoryId, it.fileId)}>{t('uploads.recent.actions.detail')}</Button>
+                    <Button variant="outline" size="sm" onClick={() => openRepo(it.repositoryId)}>{t('uploads.recent.actions.repository')}</Button>
+                    <Button variant="default" size="sm" onClick={() => openPreview(it.repositoryId, it.fileId)}>{t('uploads.recent.actions.preview')}</Button>
                   </Flex>
                 </Flex>
               ))}

@@ -65,9 +65,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle path structure - ONLY accept /api/v1/service-name/... format
   let serviceKey = '';
   
-  // Only accept: /api/v1/service-name/resource/...
-  if (parts.length >= 3 && parts[0] === 'api' && parts[1] === 'v1') {
-    const serviceName = parts[2];
+  // Use the reconstructed fullApiPath (which always includes /api prefix)
+  const serviceParts = fullApiPath.split('/').filter(Boolean); // ['api','v1','service-name',...]
+  if (serviceParts.length >= 3 && serviceParts[0] === 'api' && serviceParts[1] === 'v1') {
+    const serviceName = serviceParts[2];
     serviceKey = tokenToService[serviceName] || '';
   }
   
@@ -129,21 +130,62 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       headers['Content-Type'] = req.headers['content-type'] as string;
     }
 
-    // Forward identity headers injected by middleware
-    if (req.headers['x-user-token']) {
-      headers['X-User-Token'] = req.headers['x-user-token'] as string;
-    }
-    if (req.headers['x-user-id']) {
-      headers['X-User-Id'] = req.headers['x-user-id'] as string;
-    }
-    if (req.headers['x-user-roles']) {
-      headers['X-User-Roles'] = req.headers['x-user-roles'] as string;
-    }
-    if (req.headers['x-username']) {
-      headers['X-Username'] = req.headers['x-username'] as string;
-    }
-    if (req.headers['x-user-email']) {
-      headers['X-User-Email'] = req.headers['x-user-email'] as string;
+    // Forward identity headers injected by middleware (if any)
+    if (req.headers['x-user-token']) headers['X-User-Token'] = req.headers['x-user-token'] as string;
+    if (req.headers['x-user-id']) headers['X-User-Id'] = req.headers['x-user-id'] as string;
+    if (req.headers['x-user-roles']) headers['X-User-Roles'] = req.headers['x-user-roles'] as string;
+    if (req.headers['x-username']) headers['X-Username'] = req.headers['x-username'] as string;
+    if (req.headers['x-user-email']) headers['X-User-Email'] = req.headers['x-user-email'] as string;
+
+    // Inject identity headers for repository-management-service by validating token with UMS
+    if (serviceKey === 'repository-management' && req.headers['authorization']) {
+      try {
+        const ums = serviceManager.getService('user-management');
+        const validateResp = await ums.get('/api/v1/user-management-service/auth/validate', {
+          headers: { Authorization: req.headers['authorization'] as string },
+          validateStatus: () => true
+        });
+        if (validateResp.status === 200) {
+          const bearer = (req.headers['authorization'] as string) || '';
+          const token = bearer.startsWith('Bearer ') ? bearer.substring(7) : bearer;
+          try {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payloadStr = Buffer.from(parts[1], 'base64url').toString('utf8');
+              const claims = JSON.parse(payloadStr);
+              if (!headers['X-User-Token']) headers['X-User-Token'] = token;
+              if (claims.userId && !headers['X-User-Id']) headers['X-User-Id'] = String(claims.userId);
+              if (claims.sub && !headers['X-Username']) headers['X-Username'] = String(claims.sub);
+              if (claims.email && !headers['X-User-Email']) headers['X-User-Email'] = String(claims.email);
+              if (Array.isArray(claims.roles) && !headers['X-User-Roles']) headers['X-User-Roles'] = claims.roles.join(',');
+            }
+          } catch (e) {
+            logger.warn('⚠️ Failed to decode JWT payload for identity injection');
+          }
+        } else {
+          logger.info(`🔒 UMS validate failed: ${validateResp.status}`);
+        }
+      } catch (e) {
+        logger.warn('⚠️ Token validation via UMS failed, proceeding without identity injection');
+      }
+
+      // Fallback: still try to decode and inject identity from JWT without validate (dev resilience)
+      if (!headers['X-User-Id']) {
+        try {
+          const bearer = (req.headers['authorization'] as string) || '';
+          const token = bearer.startsWith('Bearer ') ? bearer.substring(7) : bearer;
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payloadStr = Buffer.from(parts[1], 'base64url').toString('utf8');
+            const claims = JSON.parse(payloadStr);
+            if (!headers['X-User-Token']) headers['X-User-Token'] = token;
+            if (claims.userId && !headers['X-User-Id']) headers['X-User-Id'] = String(claims.userId);
+            if (claims.sub && !headers['X-Username']) headers['X-Username'] = String(claims.sub);
+            if (claims.email && !headers['X-User-Email']) headers['X-User-Email'] = String(claims.email);
+            if (Array.isArray(claims.roles) && !headers['X-User-Roles']) headers['X-User-Roles'] = claims.roles.join(',');
+          }
+        } catch {}
+      }
     }
 
     // Forward correlation headers

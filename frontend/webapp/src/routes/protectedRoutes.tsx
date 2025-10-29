@@ -1,7 +1,8 @@
 import { Route } from 'react-router-dom';
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ProtectedRoute } from '@shared/components';
-import { MainLayout } from '@shared/layouts';
+import { MainLayout, ControlMainLayout } from '@shared/layouts';
 import { 
   Dashboard,
   RepositoryList,
@@ -23,7 +24,9 @@ export const protectedRoutes = (
     element={
       <ProtectedRoute>
         <MainLayout>
-          <Outlet />
+          <Suspense fallback={<ControlMainLayout loading loadingText="Đang tải trang..." />}> 
+            <Outlet />
+          </Suspense>
         </MainLayout>
       </ProtectedRoute>
     }

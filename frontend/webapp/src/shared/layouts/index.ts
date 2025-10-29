@@ -4,3 +4,4 @@ export * from './HeaderControlLayout';
 export * from './UploadHeaderLayout';
 export * from './DashboardHeaderLayout';
 export * from './RepositoryHeaderLayout';
+export * from './OrganizationHeaderLayout';

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
 import { ArrowRight, X } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
@@ -14,6 +15,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
   onClose,
   onGoToRepositories,
 }) => {
+  const { t } = useTranslation();
   const backdropRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +37,8 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
       stroke: '#374151',
       strokeWidth: 3,
       roughness: 2.5,
-      fill: '#f9fafb',
+      fill: '#ffffff',
+      fillStyle: 'solid',
     });
   };
 
@@ -164,7 +167,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-md bg-transparent overflow-hidden"
+        className="relative w-full max-w-md bg-white overflow-hidden"
         style={{ fontFamily: '"Kalam", "Comic Sans MS", cursive' }}
       >
         <canvas
@@ -184,7 +187,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                 transform: 'rotate(-1deg)'
               }}
             >
-              📁 Chưa có repository gần đây
+              {t('modals.noRecentRepository.title')}
             </h2>
             <button
               onClick={onClose}
@@ -220,8 +223,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                   textShadow: '1px 1px 0px rgba(0,0,0,0.05)'
                 }}
               >
-                Bạn chưa mở repository nào gần đây.<br/>
-                Để xem files, bạn cần chọn một repository! ✨
+                {t('modals.noRecentRepository.desc')}
               </p>
             </div>
             
@@ -259,7 +261,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                   textShadow: '1px 1px 0px rgba(0,0,0,0.1)'
                 }}
               >
-                🤔 Bạn có muốn chuyển đến trang danh sách repositories không?
+                {t('modals.noRecentRepository.question')}
               </p>
             </div>
           </div>
@@ -279,7 +281,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                 className="absolute inset-0 pointer-events-none"
                 style={{ width: '100%', height: '100%' }}
               />
-              <span className="relative">❌ Hủy</span>
+              <span className="relative">{t('modals.noRecentRepository.cancel')}</span>
             </button>
             
             {/* Go to Repositories Button */}
@@ -292,7 +294,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                 className="absolute inset-0 pointer-events-none"
                 style={{ width: '100%', height: '100%' }}
               />
-              <span className="relative">🚀 Chuyển đến Repositories</span>
+              <span className="relative">{t('modals.noRecentRepository.goToRepos')}</span>
               <ArrowRight className="h-5 w-5" />
             </button>
           </div>

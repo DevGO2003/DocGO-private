@@ -42,8 +42,8 @@ export const RepositoryDetail: React.FC = () => {
     console.log('Open repository settings');
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+  const formatFileSize = (bytes: number | null | undefined) => {
+    if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -123,7 +123,7 @@ export const RepositoryDetail: React.FC = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {repository && (
+                  {repository && repository.updatedAt && (
                     <>{t('repositories.detail.updated', { date: new Date(repository.updatedAt).toLocaleDateString() })}</>
                   )}
                 </span>
@@ -154,7 +154,7 @@ export const RepositoryDetail: React.FC = () => {
                             <div>
                               <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.owner')}</h4>
                               <p className="text-gray-600">
-                                {repository?.ownerName || repository?.ownerUserId}
+                                {repository?.ownerName || repository?.ownerUserId || 'Không có'}
                               </p>
                             </div>
 
@@ -162,7 +162,7 @@ export const RepositoryDetail: React.FC = () => {
                               <div>
                                 <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.organization')}</h4>
                                 <p className="text-gray-600">
-                                  {repository?.organizationName || repository?.organizationId}
+                                  {repository?.organizationName || repository?.organizationId || 'Không có'}
                                 </p>
                               </div>
                             )}
@@ -185,7 +185,7 @@ export const RepositoryDetail: React.FC = () => {
                               <FileText className="w-4 h-4 text-gray-500" />
                               <span className="text-sm text-gray-600">{t('repositories.detail.stats.files')}</span>
                             </div>
-                            <span className="font-medium">{repository?.fileCount ?? '-'}</span>
+                            <span className="font-medium">{repository?.fileCount ?? 0}</span>
                           </div>
 
                           <div className="flex items-center justify-between">
@@ -193,7 +193,7 @@ export const RepositoryDetail: React.FC = () => {
                               <Users className="w-4 h-4 text-gray-500" />
                               <span className="text-sm text-gray-600">{t('repositories.detail.stats.members')}</span>
                             </div>
-                            <span className="font-medium">{repository?.memberCount ?? '-'}</span>
+                            <span className="font-medium">{repository?.memberCount ?? 0}</span>
                           </div>
 
                           <div className="flex items-center justify-between">

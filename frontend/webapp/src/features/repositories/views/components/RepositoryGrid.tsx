@@ -38,8 +38,8 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+  const formatFileSize = (bytes: number | null | undefined) => {
+    if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -171,13 +171,13 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                     <div className="flex items-center gap-2 text-sm">
                       <FileText className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-700">
-                        {repo.fileCount} tệp
+                        {repo.fileCount || 0} tệp
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Users className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-700">
-                        {repo.memberCount} thành viên
+                        {repo.memberCount || 0} thành viên
                       </span>
                     </div>
                   </div>
@@ -194,7 +194,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Chủ sở hữu:</span>
                     <span className="font-medium text-gray-900">
-                      {repo.ownerName || repo.ownerUserId}
+                      {repo.ownerName || repo.ownerUserId || 'Không có'}
                     </span>
                   </div>
 
@@ -202,7 +202,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Clock className="w-3 h-3" />
-                      Cập nhật: {new Date(repo.updatedAt).toLocaleDateString('vi-VN')}
+                      Cập nhật: {repo.updatedAt ? new Date(repo.updatedAt).toLocaleDateString('vi-VN') : 'Không có'}
                     </div>
                   </div>
                 </div>

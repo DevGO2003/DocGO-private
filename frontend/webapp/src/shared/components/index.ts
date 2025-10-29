@@ -28,3 +28,4 @@ export * from '../layouts/HeaderControlLayout';
 export * from '../layouts/UploadHeaderLayout';
 export * from '../layouts/DashboardHeaderLayout';
 export * from '../layouts/RepositoryHeaderLayout';
+export * from '../layouts/OrganizationHeaderLayout';

@@ -108,4 +108,20 @@ public interface RepositoryRepository extends MongoRepository<RepositoryEntity, 
         RepositoryEntity.RepositoryType type,
         String organizationId
     );
+
+    // Find public repositories
+    Page<RepositoryEntity> findByIsPublicTrueAndIsDeletedFalse(Pageable pageable);
+
+    // Search public repositories
+    @Query("{ " +
+           "$and: [ " +
+           "{ 'isPublic': true }, " +
+           "{ 'isDeleted': false }, " +
+           "{ $or: [ " +
+           "{ 'name': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'description': { $regex: ?0, $options: 'i' } } " +
+           "] } " +
+           "] " +
+           "}")
+    Page<RepositoryEntity> searchPublicRepositories(String searchTerm, Pageable pageable);
 }

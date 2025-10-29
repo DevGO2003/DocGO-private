@@ -272,3 +272,4 @@ logger.info('Permission check', {
 - [Spring Security Documentation](https://spring.io/projects/spring-security)
 - [React Security Best Practices](https://reactjs.org/docs/security.html)
 
+

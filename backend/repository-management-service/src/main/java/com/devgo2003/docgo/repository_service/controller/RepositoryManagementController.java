@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.validation.Valid;
 import java.time.Instant;
@@ -244,6 +245,52 @@ public class RepositoryManagementController {
         }
     }
 
+    @GetMapping("/public")
+    @Operation(summary = "Lấy danh sách repositories công khai")
+    public ResponseEntity<RestResponse<Page<RepositoryDTO>>> getPublicRepositories(
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "12") int size,
+            @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
+            @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm
+    ) {
+        try {
+            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            
+            Page<RepositoryDTO> repositories;
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                repositories = repositoryService.searchPublicRepositories(searchTerm, pageable);
+            } else {
+                repositories = repositoryService.getPublicRepositories(pageable);
+            }
+
+            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã lấy danh sách repositories công khai thành công")
+                .data(repositories)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/public")
+                .build());
+
+        } catch (Exception e) {
+            log.error("Error getting public repositories", e);
+            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi lấy danh sách repositories công khai: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/public")
+                .build());
+        }
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Lấy chi tiết repository theo ID")
     public ResponseEntity<RestResponse<RepositoryDTO>> getRepository(
@@ -291,8 +338,28 @@ public class RepositoryManagementController {
     @Operation(summary = "Tạo repository mới")
     public ResponseEntity<RestResponse<RepositoryDTO>> createRepository(
             @Valid @RequestBody RepositoryEntity repository) {
-        
         try {
+            // Lấy userId từ SecurityContext (được Gateway tiêm qua X-User-Id)
+            String currentUserId = null;
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                currentUserId = p.userId;
+            }
+
+            // Gán ownerUserId nếu body không truyền
+            if (repository.getOwnerUserId() == null || repository.getOwnerUserId().isBlank()) {
+                repository.setOwnerUserId(currentUserId);
+            }
+
+            // Suy ra type nếu thiếu
+            if (repository.getType() == null) {
+                if (repository.getOrganizationId() != null && !repository.getOrganizationId().isBlank()) {
+                    repository.setType(RepositoryEntity.RepositoryType.ORGANIZATION);
+                } else {
+                    repository.setType(RepositoryEntity.RepositoryType.PERSONAL);
+                }
+            }
+
             // Validate repository name uniqueness
             if (repository.isPersonal() && repositoryService.existsByName(repository.getName(), repository.getOwnerUserId())) {
                 return ResponseEntity.badRequest().body(RestResponse.<RepositoryDTO>builder()
@@ -321,7 +388,7 @@ public class RepositoryManagementController {
             }
 
             RepositoryDTO created = repositoryService.createRepository(repository);
-            
+
             return ResponseEntity.status(201).body(RestResponse.<RepositoryDTO>builder()
                 .apiVersion("v1")
                 .statusCode(201)
@@ -332,7 +399,6 @@ public class RepositoryManagementController {
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/repository-management-service/repositories")
                 .build());
-
         } catch (Exception e) {
             log.error("Error creating repository", e);
             return ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLoginController } from './useLoginController'
 import { LoginCredentials } from '../models/types/auth.types'
 
@@ -14,10 +14,45 @@ import { LoginCredentials } from '../models/types/auth.types'
  */
 export const useAutoLogin = () => {
   const { handleLogin } = useLoginController()
+  const ranRef = useRef(false)
 
   useEffect(() => {
+    if (ranRef.current) return
+    ranRef.current = true
+
     const loadAndLogin = async () => {
       try {
+        // Skip if not on login/auth routes
+        if (typeof window !== 'undefined') {
+          const path = window.location.pathname
+          if (!(path === '/login' || path.startsWith('/auth'))) {
+            return
+          }
+        }
+
+        // Prevent multiple attempts per session
+        if (typeof window !== 'undefined' && sessionStorage.getItem('auto_login_done') === '1') {
+          return
+        }
+
+        // If already authenticated, skip
+        if (typeof window !== 'undefined') {
+          try {
+            const saved = localStorage.getItem('docgo_auth_v1')
+            if (saved) {
+              const parsed = JSON.parse(saved)
+              const exp = parsed?.tokenData?.expiresAt
+              if (exp && Date.now() < exp) {
+                return
+              }
+            }
+            const token = localStorage.getItem('auth_token')
+            if (token) {
+              return
+            }
+          } catch {}
+        }
+
         // Fetch account.txt từ public folder
         const response = await fetch('/account.txt')
         
@@ -36,6 +71,10 @@ export const useAutoLogin = () => {
         }
       } catch (error) {
         console.error('[AutoLogin] Error loading account.txt:', error)
+      } finally {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('auto_login_done', '1')
+        }
       }
     }
 

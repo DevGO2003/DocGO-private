@@ -3,6 +3,97 @@
     "title": "DocGO",
     "loading": "Loading..."
   },
+  "modals": {
+    "noRecentRepository": {
+      "title": "📁 No recent repositories",
+      "desc": "You haven't opened any repository recently. To view files, please select a repository! ✨",
+      "question": "🤔 Do you want to go to the repositories list?",
+      "cancel": "❌ Cancel",
+      "goToRepos": "🚀 Go to Repositories"
+    }
+  },
+  "uploads": {
+    "recent": {
+      "title": "Recent Uploads",
+      "loading": "Loading...",
+      "empty": "No data yet",
+      "error": {
+        "loadRecent": "Failed to load recent uploads"
+      },
+      "actions": {
+        "detail": "Detail",
+        "repository": "Repository",
+        "preview": "Preview"
+      }
+    }
+  },
+  "usersPage": {
+    "forbidden": {
+      "title": "Access denied",
+      "desc": "You do not have permission to access this page. Only Admin can manage users."
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this user?"
+    },
+    "toast": {
+      "deleteSuccess": "User deleted successfully!",
+      "deleteFail": "Failed to delete user!",
+      "statusSuccess": "Status updated successfully!",
+      "statusFail": "Failed to update status!"
+    },
+    "header": {
+      "title": "User Management",
+      "summary": "Total: {{count}} users",
+      "add": "Add user"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, email...",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    },
+    "table": {
+      "user": "User",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "tooltips": {
+      "lock": "Lock account",
+      "unlock": "Unlock",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "loading": "Loading users...",
+    "pagination": {
+      "display": "Showing {{from}} - {{to}} of {{total}} results",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "editModal": {
+      "title": "Edit user information",
+      "firstName": "First name",
+      "firstNamePh": "Enter first name",
+      "lastName": "Last name",
+      "lastNamePh": "Enter last name",
+      "email": "Email",
+      "emailPh": "email@example.com",
+      "phone": "Phone",
+      "phonePh": "+84...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "cancel": "Cancel"
+    },
+    "badges": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "deleted": "Deleted"
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "products": "Products",

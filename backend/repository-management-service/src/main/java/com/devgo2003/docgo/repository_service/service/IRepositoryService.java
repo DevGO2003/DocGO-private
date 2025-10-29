@@ -25,6 +25,8 @@ public interface IRepositoryService {
     Page<RepositoryDTO> searchRepositories(String searchTerm, Pageable pageable);
     Page<RepositoryDTO> searchPersonalRepositories(String searchTerm, String userId, Pageable pageable);
     Page<RepositoryDTO> searchOrganizationRepositories(String searchTerm, String organizationId, Pageable pageable);
+    Page<RepositoryDTO> getPublicRepositories(Pageable pageable);
+    Page<RepositoryDTO> searchPublicRepositories(String searchTerm, Pageable pageable);
 
     // Utility operations
     boolean existsByName(String name, String ownerUserId);

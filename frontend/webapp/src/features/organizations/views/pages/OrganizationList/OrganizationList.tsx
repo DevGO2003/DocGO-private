@@ -11,6 +11,7 @@ import {
   Button,
   Input,
   LoadingSpinner,
+  OrganizationHeaderLayout,
 } from '@shared/components';
 import { useMyOrganizations, CreateOrganizationDialog } from '@/features/organizations';
 import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
@@ -80,43 +81,29 @@ export const OrganizationList = () => {
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
         <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                {t('organizations.list.title')}
-              </h1>
-              <p className="text-gray-600">
-                {t('organizations.list.subtitle')}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={handleCreateOrganization}
-              className="flex items-center gap-2"
-            >
+        {/* Header (use OrganizationHeaderLayout) */}
+        <OrganizationHeaderLayout
+          title={t('organizations.list.title')}
+          subtitle={t('organizations.list.subtitle')}
+          orgActions={(
+            <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
               <Plus className="w-5 h-5" />
               {t('organizations.list.new')}
             </Button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              type="text"
-              placeholder={t('organizations.list.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </motion.div>
+          )}
+          filters={(
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                type="text"
+                placeholder={t('organizations.list.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          )}
+        />
 
         {/* Loading */}
         {isLoading && <LoadingSpinner text={t('organizations.list.loading')} />}

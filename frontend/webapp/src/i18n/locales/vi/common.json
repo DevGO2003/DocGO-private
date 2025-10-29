@@ -3,6 +3,97 @@
     "title": "DocGO",
     "loading": "Đang tải..."
   },
+  "modals": {
+    "noRecentRepository": {
+      "title": "📁 Chưa có repository gần đây",
+      "desc": "Bạn chưa mở repository nào gần đây. Để xem files, bạn cần chọn một repository! ✨",
+      "question": "🤔 Bạn có muốn chuyển đến trang danh sách repositories không?",
+      "cancel": "❌ Hủy",
+      "goToRepos": "🚀 Chuyển đến Repositories"
+    }
+  },
+  "uploads": {
+    "recent": {
+      "title": "Uploads gần đây",
+      "loading": "Đang tải...",
+      "empty": "Chưa có dữ liệu",
+      "error": {
+        "loadRecent": "Không thể tải danh sách uploads gần đây"
+      },
+      "actions": {
+        "detail": "Chi tiết",
+        "repository": "Repository",
+        "preview": "Preview"
+      }
+    }
+  },
+  "usersPage": {
+    "forbidden": {
+      "title": "Truy cập bị từ chối",
+      "desc": "Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý người dùng."
+    },
+    "confirm": {
+      "delete": "Bạn có chắc chắn muốn xóa người dùng này?"
+    },
+    "toast": {
+      "deleteSuccess": "Đã xóa người dùng thành công!",
+      "deleteFail": "Xóa người dùng thất bại!",
+      "statusSuccess": "Đã cập nhật trạng thái thành công!",
+      "statusFail": "Cập nhật trạng thái thất bại!"
+    },
+    "header": {
+      "title": "Quản lý người dùng",
+      "summary": "Tổng số: {{count}} người dùng",
+      "add": "Thêm người dùng"
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm kiếm theo tên, email...",
+      "allStatuses": "Tất cả trạng thái",
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động",
+      "suspended": "Bị khóa"
+    },
+    "table": {
+      "user": "Người dùng",
+      "email": "Email",
+      "role": "Vai trò",
+      "status": "Trạng thái",
+      "createdAt": "Ngày tạo",
+      "actions": "Hành động"
+    },
+    "tooltips": {
+      "lock": "Khóa tài khoản",
+      "unlock": "Mở khóa",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa"
+    },
+    "loading": "Đang tải danh sách người dùng...",
+    "pagination": {
+      "display": "Hiển thị {{from}} - {{to}} của {{total}} kết quả",
+      "prev": "Trước",
+      "next": "Sau"
+    },
+    "editModal": {
+      "title": "Chỉnh sửa thông tin người dùng",
+      "firstName": "Tên",
+      "firstNamePh": "Nhập tên",
+      "lastName": "Họ",
+      "lastNamePh": "Nhập họ",
+      "email": "Email",
+      "emailPh": "email@example.com",
+      "phone": "Số điện thoại",
+      "phonePh": "+84...",
+      "save": "Lưu thay đổi",
+      "saving": "Đang lưu...",
+      "cancel": "Hủy"
+    },
+    "badges": {
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động",
+      "suspended": "Bị khóa",
+      "deleted": "Đã xóa"
+    }
+  },
   "organizations": {
     "list": {
       "title": "Tổ chức của tôi",
