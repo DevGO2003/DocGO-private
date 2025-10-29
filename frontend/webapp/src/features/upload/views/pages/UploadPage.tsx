@@ -9,6 +9,8 @@ import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
 import { automationFileApi } from '../../models/api/automationFileApi'
 import { Button, Text, Modal } from '@shared/components'
+import UploadProgress from '@/components/UploadProgress'  // Adjust path
+import { toast } from 'react-toastify'
 
 export default function UploadPage() {
   const location = useLocation()
@@ -36,6 +38,11 @@ export default function UploadPage() {
   const [successInfo, setSuccessInfo] = useState<{fileName: string; fileSize?: string; fileType?: string} | null>(null)
   const [showError, setShowError] = useState(false)
   const [errorInfo, setErrorInfo] = useState<{ message: string; status?: number } | null>(null)
+
+  // Add states
+  const [showProgress, setShowProgress] = useState(false)
+  const [correlationId, setCorrelationId] = useState('')
+  const [uploadLoading, setUploadLoading] = useState(false)  // Rename from ocrLoading
 
   const isOfficeFile = (file: File | null) => {
     if (!file) return false
@@ -67,17 +74,24 @@ export default function UploadPage() {
       return
     }
 
-    setOcrLoading(true)
+    setUploadLoading(true)
     try {
-      await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
+      const response = await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
       const name = selectedFile.name
       const sizeStr = `${(selectedFile.size / 1024).toFixed(2)} KB`
       const type = selectedFile.type
 
+      toast.success('Upload thành công! Đang xử lý background...')
       setSuccessInfo({ fileName: name, fileSize: sizeStr, fileType: type })
       setShowSuccess(true)
       setSelectedFile(null)
       setRecentRefreshKey((k) => k + 1)
+      
+      // Handle async processing
+      if (response.status === 202) {
+        setCorrelationId(response.data.correlationId)
+        setShowProgress(true)
+      }
     } catch (err: any) {
       const message = err?.body?.description || err?.message || 'Tải lên thất bại'
       const status = err?.status || undefined
@@ -85,7 +99,7 @@ export default function UploadPage() {
       setShowError(true)
       console.error('Upload error:', err)
     } finally {
-      setOcrLoading(false)
+      setUploadLoading(false)
     }
   }
 
@@ -219,9 +233,9 @@ export default function UploadPage() {
                           style={{ width: '100%' }}
                           variant="primary"
                           onClick={handleOcrExtract}
-                          disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
+                          disabled={!selectedFile || !selectedRepositoryId || uploadLoading}
                         >
-                          {ocrLoading ? (
+                          {uploadLoading ? (
                             <>
                               {/* TODO: Replace svg spinner by <LoadingSpinner/> */}
                               Đang upload...
@@ -233,7 +247,7 @@ export default function UploadPage() {
                             </>
                           )}
                         </Button>
-                        {ocrLoading && (
+                        {uploadLoading && (
                           <p className="text-xs text-gray-500 mt-2">
                             Quá trình upload có thể diễn ra rất lâu, bạn có thể đi nấu mỳ trong lúc đợi :&gt;
                           </p>
@@ -301,6 +315,20 @@ export default function UploadPage() {
                 </div>
               </div>
             </div>
+
+            {showProgress && correlationId && (
+              <UploadProgress 
+                correlationId={correlationId} 
+                onComplete={(result) => {
+                  setShowProgress(false)
+                  toast.success('Xử lý hoàn tất!')
+                }} 
+                onError={(error) => {
+                  setShowProgress(false)
+                  toast.error(`Lỗi xử lý: ${error}`)
+                }} 
+              />
+            )}
 
       </UploadLayout>
   )

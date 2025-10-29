@@ -13,157 +13,94 @@ from services.websocket_manager import WebSocketManager
 from services.file_api_builder import build_file_api_payload
 from datetime import datetime, timezone
 import httpx
+import json
+from aiokafka import AIOKafkaConsumer
+from config import Config
+import uuid
+from services.progress_manager import progress_manager
+from services.websocket_manager import websocket_manager
+from services.ai_processing_service import AIProcessingService
+from services.audit_service import AuditService
+from services.kafka_publisher_v3 import KafkaPublisherV3
 
 logger = logging.getLogger(__name__)
 
-class AsyncDocumentProcessor:
+class AsyncUploadProcessor:
     def __init__(self):
         self.ocr_service = OCRService()
-        self.ai_service = AutomationService()
-        self.file_service = FileStorageService()
-        self.websocket_manager = WebSocketManager()
-        # Import global event_service instance
-        # from global_instances import event_service  # DISABLED - Requires Redis
-        # self.event_service = event_service  # DISABLED - Requires Redis
-        self.event_service = None  # DISABLED - Requires Redis
+        self.ai_service = AIProcessingService()
+        self.audit_service = AuditService()
+        self.publisher = KafkaPublisherV3()
+        self.consumer = AIOKafkaConsumer(
+            'upload-processing-queue',
+            bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
+            group_id='automation-upload-processors',
+            value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+            auto_offset_reset='earliest'
+        )
     
-    async def process_document_async(self, document_data: Dict[str, Any]):
-        """Process document asynchronously"""
-        document_id = document_data.get("documentId")
-        file_url = document_data.get("fileUrl")
-        filename = document_data.get("filename")
-        content_type = document_data.get("contentType")
-        file_size = document_data.get("fileSize", 0)
+    async def start_consumer(self):
+        await self.consumer.start()
+    
+    async def stop_consumer(self):
+        await self.consumer.stop()
+    
+    async def process_upload_event(self, event):
+        correlation_id = event.get('correlationId', str(uuid.uuid4()))
+        file_id = event['fileId']
+        repo_id = event.get('repository_id')
+        user_id = event.get('user_id')
         
         try:
-            # Notify start
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "PROCESSING",
-                "message": "Starting OCR processing...",
-                "progress": 20
+            # Init progress
+            await progress_manager.set_progress(correlation_id, 0, "Starting processing")
+            await websocket_manager.broadcast_progress(correlation_id, 0, "Starting processing", "Bắt đầu xử lý file")
+            
+            # Step 1: OCR/Extract (25%)
+            logger.info(f"OCR for {file_id}")
+            ocr_result = await self.ocr_service.extract(file_id)
+            await progress_manager.set_progress(correlation_id, 25, "OCR completed")
+            await websocket_manager.broadcast_progress(correlation_id, 25, "OCR completed", "Trích xuất văn bản hoàn tất")
+            
+            # Step 2: AI Analysis (50%)
+            analysis = await self.ai_service.analyze(ocr_result, repo_id)
+            await progress_manager.set_progress(correlation_id, 50, "AI analysis done")
+            await websocket_manager.broadcast_progress(correlation_id, 50, "AI analysis done", "Phân tích AI hoàn tất")
+            
+            # Step 3: Contract Summary if needed (75%)
+            if analysis.get('isContract'):
+                summary = await self.ai_service.generate_summary(ocr_result)
+                await progress_manager.set_progress(correlation_id, 75, "Summary generated")
+                await websocket_manager.broadcast_progress(correlation_id, 75, "Summary generated", "Tạo tóm tắt hợp đồng")
+            
+            # Step 4: Audit & Complete (100%)
+            await self.audit_service.log_upload(file_id, user_id, repo_id)
+            await progress_manager.set_progress(correlation_id, 100, "Completed")
+            await websocket_manager.broadcast_progress(correlation_id, 100, "Completed", "Xử lý hoàn tất thành công")
+            
+            # Publish done event
+            await self.publisher.publish('file-processed', {
+                'fileId': file_id,
+                'status': 'completed',
+                'analysis': analysis,
+                'correlationId': correlation_id
             })
-            
-            # 1) Download file for OCR
-            async with httpx.AsyncClient(timeout=60) as client:
-                response = await client.get(file_url)
-                file_content = response.content
-            
-            # 2) Run OCR
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "PROCESSING", 
-                "message": "Running OCR...",
-                "progress": 40
-            })
-            
-            ocr_text = self.ocr_service.extract_text_from_file(file_content, content_type)
-            
-            # 3) Run AI classification
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "PROCESSING",
-                "message": "Running AI classification...", 
-                "progress": 60
-            })
-            
-            classification_result = self.ai_service.classify_document(ocr_text, filename)
-            is_contract = bool(classification_result.get("isContract", False))
-            
-            # 4) Run contract processing if needed
-            summary_result = None
-            contract_metadata = None
-            if is_contract:
-                await self.websocket_manager.broadcast_progress(document_id, {
-                    "status": "PROCESSING",
-                    "message": "Processing contract details...",
-                    "progress": 80
-                })
-                
-                summary_result = self.ai_service.generate_contract_summary(ocr_text, filename)
-                if summary_result:
-                    contract_metadata = {
-                        "effectiveDate": summary_result.get("effectiveDate"),
-                        "expiryDate": summary_result.get("expiryDate"),
-                        "totalValue": summary_result.get("totalValue"),
-                        "currency": summary_result.get("currency", "VND")
-                    }
-            
-            # 5) Build final payload
-            overview_document_type = "CONTRACT" if is_contract else "GENERAL"
-            now_iso = datetime.now(timezone.utc).isoformat()
-            
-            api_doc_payload = build_file_api_payload(
-                file_id=document_id,
-                file_url=file_url,
-                filename=filename,
-                content_type=content_type,
-                size=file_size,
-                ocr_text=ocr_text,
-                classification_result=classification_result,
-                overview_document_type=overview_document_type,
-                contract_metadata=contract_metadata,
-                summary_result=summary_result,
-                now_iso=now_iso,
-            )
-            
-            # 6) Update File Management Service
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "PROCESSING",
-                "message": "Saving to database...",
-                "progress": 90
-            })
-            
-            try:
-                file_mgmt_url = "http://localhost:8002"
-                async with httpx.AsyncClient(timeout=60) as client:
-                    resp = await client.put(
-                        f"{file_mgmt_url}/api/v1/file-storage-asset-service/files/{document_id}",
-                        json=api_doc_payload
-                    )
-                    if resp.status_code >= 400:
-                        raise Exception(f"File Management update failed: {resp.text}")
-            except Exception as e:
-                logger.warning(f"File Management Service not available: {e}")
-            
-            # 7) Notify completion
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "COMPLETED",
-                "message": "Document processing completed successfully!",
-                "progress": 100,
-                "result": {
-                    "classificationResult": classification_result,
-                    "summaryResult": summary_result,
-                    "isContract": is_contract,
-                    "contractMetadata": contract_metadata
-                }
-            })
-            
-            # 8) Publish completion event
-            # DISABLED - Requires Redis
-            # await self.event_service.publish_event({
-            #     "eventType": "DocumentProcessed",
-            #     "documentId": document_id,
-            #     "status": "COMPLETED",
-            #     "isContract": is_contract,
-            #     "classificationResult": classification_result
-            # })
             
         except Exception as e:
-            logger.error(f"Async processing failed for {document_id}: {e}")
-            
-            # Notify error
-            await self.websocket_manager.broadcast_progress(document_id, {
-                "status": "ERROR",
-                "message": f"Processing failed: {str(e)}",
-                "progress": 0,
-                "error": str(e)
-            })
-            
+            error_msg = f"Error processing {file_id}: {str(e)}"
+            logger.error(error_msg)
+            await progress_manager.set_progress(correlation_id, -1, "Error")
+            await websocket_manager.broadcast_progress(correlation_id, -1, "Error", error_msg)
             # Publish error event
-            # DISABLED - Requires Redis
-            # await self.event_service.publish_event({
-            #     "eventType": "DocumentProcessingFailed",
-            #     "documentId": document_id,
-            #     "error": str(e)
-            # })
+            await self.publisher.publish('processing-failed', {'fileId': file_id, 'error': str(e), 'correlationId': correlation_id})
+    
+    async def run(self):
+        await self.start_consumer()
+        try:
+            async for msg in self.consumer:
+                await self.process_upload_event(msg.value)
+        finally:
+            await self.stop_consumer()
 
-# Global processor instance
-async_processor = AsyncDocumentProcessor()
+# Global instance
+upload_processor = AsyncUploadProcessor()
