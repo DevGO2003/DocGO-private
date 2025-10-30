@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@shared/components';
+import { Checkbox } from '@shared/components';
 
 export interface GeneralFileItem {
   fileId: string;

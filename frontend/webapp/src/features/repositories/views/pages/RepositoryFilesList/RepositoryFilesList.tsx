@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text, Tabs, TabsList, TabsTrigger, Checkbox } from '@shared/components';
+import { Button, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text, Tabs, TabList, Tab, Checkbox } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import { fileAPI } from '@features/upload/services/file-api';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
 import { ControlMainLayout } from '@shared/layouts';
-import TableSettings from './TableSettings'; // Create new or assume
-import { tagAPI } from '@features/tags/services/tag-api'; // Assume or create stub
-import { useCallback } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shared/components'; // Assume shared Tooltip
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@shared/components'; // For confirms
+import TableSettings from './TableSettings';
+import { tagAPI } from '@features/tags/services/tag-api';
+// TODO: Add Tooltip and AlertDialog components to @shared/components
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shared/components';
+// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@shared/components';
 import { repositoryAPI } from '@features/repositories/services/repository-api'; // Assume repositoryAPI
 
 interface RepoFileItem {
@@ -183,7 +183,10 @@ export const RepositoryFilesList: React.FC = () => {
         ...params,
       };
       const resp = await fileAPI.getRepositoryFiles(id || '', { ...fetchParams, signal: abortControllerRef.current.signal });
-      const newFiles = resp.data.files || [];
+      const newFiles = (resp.data.files || []).map((f: any) => ({
+        ...f,
+        totalValue: f.totalValue ?? undefined, // Convert null to undefined
+      }));
       setTotalPages(resp.data.totalPages || 0);
       setHasMore(newFiles.length === pageSize && currentPage < totalPages - 1);
       if (append) {
@@ -211,12 +214,10 @@ export const RepositoryFilesList: React.FC = () => {
   };
 
   useEffect(() => {
-    let isMounted = true;
     if (id) {
       setCurrentPage(0);
       fetchFiles(false); // Initial load
     }
-    return () => { isMounted = false; };
   }, [id]);
 
   useEffect(() => {
@@ -281,15 +282,15 @@ export const RepositoryFilesList: React.FC = () => {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header + Filters */}
         <div className="mb-4">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'all' | 'contract')}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="all" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <Tabs activeValue={activeTab} onSelect={(v) => setActiveTab(v as 'all' | 'contract')}>
+            <TabList className="grid w-full grid-cols-2">
+              <Tab value="all" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                 {t('repositories.files.tabs.all')}
-              </TabsTrigger>
-              <TabsTrigger value="contract" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              </Tab>
+              <Tab value="contract" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                 {t('repositories.files.tabs.contract')}
-              </TabsTrigger>
-            </TabsList>
+              </Tab>
+            </TabList>
           </Tabs>
         </div>
         <Card>
@@ -434,14 +435,7 @@ export const RepositoryFilesList: React.FC = () => {
                             {col.key === 'document' ? f.fileName :
                              col.key === 'contractNumber' ? f.contractNumber || '-' :
                              col.key === 'status' ? (
-                               <TooltipProvider>
-                                 <Tooltip>
-                                   <TooltipTrigger asChild>
-                                     <span className={`px-2 py-1 rounded text-xs bg-blue-100 text-blue-800`}>{f.status}</span>
-                                   </TooltipTrigger>
-                                   <TooltipContent>{t(`status.${f.status}.tooltip`)}</TooltipContent>
-                                 </Tooltip>
-                               </TooltipProvider>
+                               <span className={`px-2 py-1 rounded text-xs bg-blue-100 text-blue-800`} title={t(`status.${f.status}.tooltip`)}>{f.status}</span>
                              ) :
                              col.key === 'type' ? f.contractType || '-' :
                              col.key === 'totalValue' ? <Text>{f.totalValue ? `${f.totalValue.toLocaleString()} ${f.currency}` : '-'}</Text> :
@@ -454,14 +448,7 @@ export const RepositoryFilesList: React.FC = () => {
                              ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || '-'}</Text> :
                              col.key === 'effectiveDate' ? <Text>{f.effectiveDate ? new Date(f.effectiveDate).toLocaleDateString() : '-'}</Text> :
                              col.key === 'riskLevel' ? (
-                               <TooltipProvider>
-                                 <Tooltip>
-                                   <TooltipTrigger asChild>
-                                     <span className={`px-2 py-1 rounded text-xs ${f.riskLevel === 'LOW' ? 'bg-green-100 text-green-800' : f.riskLevel === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>{f.riskLevel}</span>
-                                   </TooltipTrigger>
-                                   <TooltipContent>{t(`riskLevel.${f.riskLevel}.tooltip`)}</TooltipContent>
-                                 </Tooltip>
-                               </TooltipProvider>
+                               <span className={`px-2 py-1 rounded text-xs ${f.riskLevel === 'LOW' ? 'bg-green-100 text-green-800' : f.riskLevel === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
                              ) :
                              col.key === 'reminders' ? <Text>{f.reminders?.length || 0}</Text> : '-'}
                           </Text>
@@ -493,22 +480,15 @@ export const RepositoryFilesList: React.FC = () => {
             onClose={() => setShowTableSettings(false)} 
           />
         )}
+        {/* TODO: Implement AlertDialog when component is available */}
         {selectedFiles.length > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" onClick={() => {/* no-op, trigger dialog */}}>Delete Selected</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete {selectedFiles.length} files?</AlertDialogTitle>
-                <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => {/* API delete */}}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <p className="text-sm text-gray-700 mb-2">Delete {selectedFiles.length} files?</p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setSelectedFiles([])}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {/* TODO: API delete */}}>Delete</Button>
+            </div>
+          </div>
         )}
       </div>
     </ControlMainLayout>

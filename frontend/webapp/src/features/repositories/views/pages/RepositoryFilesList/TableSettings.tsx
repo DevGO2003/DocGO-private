@@ -60,3 +60,5 @@ export const TableSettings: React.FC<TableSettingsProps> = ({ columns, onColumns
   );
 };
 
+export default TableSettings;
+

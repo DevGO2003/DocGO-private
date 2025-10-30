@@ -17,7 +17,8 @@ export * from './UIComponents/Table';
 export * from './UIComponents/Tabs/Tabs';
 export * from './UIComponents/Modal/CreateRepositoryModal';
 export * from './UIComponents/ProgressBar';
-export * from './UIComponents/Font/CommonFont';
+export * from './UIComponents/Checkbox';
+export * from './UIComponents/Font';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';
