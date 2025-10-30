@@ -1,5 +1,5 @@
 param(
-    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\.cursor\documents\.docx\hop-dong-xay-dung.docx",
+    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\documents\.docx\luu-ban-nhap-tu-dong-2.docx",
     [string]$LogDir = ".\logs"
 )
 
