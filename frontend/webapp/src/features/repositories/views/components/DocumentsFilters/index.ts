@@ -1,1 +1,0 @@
-export { DocumentsFilters } from './DocumentsFilters';

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { REPOSITORY_ROUTES, buildPath } from '@shared/constants/routes'
 import UploadLayout from '../../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
@@ -9,9 +10,11 @@ import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
 import { automationFileApi } from '../../models/api/automationFileApi'
 import { Button, Text, Modal } from '@shared/components'
+import env from '@shared/config/env';
 
 export default function UploadPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
@@ -33,7 +36,14 @@ export default function UploadPage() {
   }, [location.search])
 
   const [showSuccess, setShowSuccess] = useState(false)
-  const [successInfo, setSuccessInfo] = useState<{fileName: string; fileSize?: string; fileType?: string} | null>(null)
+  const [successInfo, setSuccessInfo] = useState<{
+    fileName: string
+    fileSize?: string
+    fileType?: string
+    fileId?: string
+    fileUrl?: string
+    repositoryId?: string
+  } | null>(null)
   const [showError, setShowError] = useState(false)
   const [errorInfo, setErrorInfo] = useState<{ message: string; status?: number } | null>(null)
 
@@ -69,12 +79,20 @@ export default function UploadPage() {
 
     setOcrLoading(true)
     try {
-      await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
+      const response = await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
       const name = selectedFile.name
       const sizeStr = `${(selectedFile.size / 1024).toFixed(2)} KB`
       const type = selectedFile.type
+      const uploadData = response.data
 
-      setSuccessInfo({ fileName: name, fileSize: sizeStr, fileType: type })
+      setSuccessInfo({
+        fileName: name,
+        fileSize: sizeStr,
+        fileType: type,
+        fileId: uploadData?.fileId,
+        fileUrl: uploadData?.fileUrl,
+        repositoryId: selectedRepositoryId,
+      })
       setShowSuccess(true)
       setSelectedFile(null)
       setRecentRefreshKey((k) => k + 1)
@@ -104,7 +122,36 @@ export default function UploadPage() {
               fileType={successInfo.fileType}
               onClose={() => setShowSuccess(false)}
               onUploadMore={() => setShowSuccess(false)}
-              showActions={false}
+              onViewDetails={() => {
+                if (successInfo.fileId && successInfo.repositoryId) {
+                  navigate(buildPath(REPOSITORY_ROUTES.FILE_DETAIL, {
+                    id: successInfo.repositoryId,
+                    fileId: successInfo.fileId,
+                  }))
+                  setShowSuccess(false)
+                }
+              }}
+              onViewFile={async () => {
+                if (!successInfo?.fileId) return;
+                try {
+                  const response = await fetch(`${env.apiGatewayUrl}/api/storage/files/${successInfo.fileId}/signed-url`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}), // or { disposition: 'inline' } if needed for preview
+                  });
+                  if (!response.ok) throw new Error('Failed to get signed URL');
+                  const { data } = await response.json();
+                  if (data?.signedUrl) {
+                    window.open(data.signedUrl, '_blank');
+                  }
+                } catch (error) {
+                  console.error('Error opening file preview:', error);
+                  // Optional: alert or toast error
+                }
+              }}
+              showActions={true}
             />
           )}
 
@@ -205,19 +252,9 @@ export default function UploadPage() {
                             </Button>
                           </div>
                         </div>
-
-                        {/* New warning card for no repository */}
-                        {selectedFile && !selectedRepositoryId && (
-                          <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
-                            <p className="text-xs text-yellow-800">
-                              Vui lòng chọn kho tài liệu (repository) trước khi tải lên file này.
-                            </p>
-                          </div>
-                        )}
-
                         <Button
                           style={{ width: '100%' }}
-                          variant="primary"
+                          variant="outline"
                           onClick={handleOcrExtract}
                           disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
                         >
@@ -279,8 +316,8 @@ export default function UploadPage() {
                   {selectedFile ? (
                     <>
                       {isOfficeFile(selectedFile) && (
-                        <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
-                          <p className="text-xs text-yellow-800">
+                        <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                          <p className="text-xs text-amber-800">
                             Lưu ý: Đây là bản xem trước tạm thời cho tài liệu văn phòng (Word/Excel/PowerPoint). Định dạng có thể không hiển thị chính xác 100%.
                           </p>
                         </div>

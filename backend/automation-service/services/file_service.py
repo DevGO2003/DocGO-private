@@ -78,12 +78,8 @@ class FileStorageService:
                         ContentType=file.content_type or "application/octet-stream"
                     )
 
-                    # Generate presigned URL for download (valid for 1 hour)
-                    file_url = s3_client.generate_presigned_url(
-                        'get_object',
-                        Params={'Bucket': self.s3_bucket, 'Key': s3_key},
-                        ExpiresIn=3600  # 1 hour
-                    )
+                    # Use API endpoint instead of presigned URL to prevent direct client access to S3
+                    file_url = f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
                     status = "uploaded_s3"
                     message = "File đã được upload S3 thành công"
                 except Exception as s3_error:
