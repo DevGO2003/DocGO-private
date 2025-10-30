@@ -60,7 +60,8 @@ public class AuthController {
                     .build());
         }
 
-        AuthResponse result = authService.login(username, password);
+        Boolean rememberMe = request.getRememberMe() != null ? request.getRememberMe() : false;
+        AuthResponse result = authService.login(username, password, rememberMe);
         if (result.isSuccess()) {
             return ResponseEntity.ok(RestResponse.<AuthResponse>builder()
                     .apiVersion("v1")

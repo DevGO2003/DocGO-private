@@ -46,6 +46,8 @@ export interface OrganizationMember {
   userId: string;
   username: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   role: MemberRole;
   status: MemberStatus;
   joinedAt: string;

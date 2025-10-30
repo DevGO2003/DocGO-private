@@ -800,4 +800,50 @@ public void validateUserMembership(String userId, String organizationId) {
     }
 }
 
+/**
+ * Get organization members with pagination
+ */
+public Page<OrganizationMembershipResponse> getOrganizationMembers(String organizationId, Pageable pageable) {
+    log.info("Getting members of organization: {} with pagination", organizationId);
+    
+    // Get organization to check owner
+    Organization organization = organizationRepository.findById(organizationId)
+        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
+    
+    // Get memberships from repository
+    Page<OrganizationMembership> memberships = membershipRepository.findByOrganizationId(organizationId, pageable);
+    
+    log.info("Found {} members for organization: {}", memberships.getTotalElements(), organizationId);
+    
+    // Map to response with user info
+    return memberships.map(membership -> {
+        OrganizationMembershipResponse response = OrganizationMembershipResponse.fromEntity(membership);
+        
+        // Determine correct role - check if user is owner first
+        String correctRole;
+        if (organization.getOwnerUserId().equals(membership.getUserId())) {
+            correctRole = "OWNER";
+            log.debug("User {} is OWNER of organization {}", membership.getUserId(), organizationId);
+        } else if (Boolean.TRUE.equals(membership.getIsAdmin()) || 
+                   (organization.getAdminUserIds() != null && organization.getAdminUserIds().contains(membership.getUserId()))) {
+            correctRole = "ADMIN";
+            log.debug("User {} is ADMIN of organization {}", membership.getUserId(), organizationId);
+        } else {
+            correctRole = membership.getSimpleRole() != null ? membership.getSimpleRole() : "MEMBER";
+            log.debug("User {} is {} of organization {}", membership.getUserId(), correctRole, organizationId);
+        }
+        response.setRole(correctRole);
+        
+        // Add user information
+        userRepository.findById(membership.getUserId()).ifPresent(user -> {
+            response.setUsername(user.getUsername());
+            response.setEmail(user.getEmail());
+            response.setFirstName(user.getFirstName());
+            response.setLastName(user.getLastName());
+        });
+        
+        return response;
+    });
+}
+
 }

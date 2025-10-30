@@ -599,8 +599,9 @@ public class OrganizationController {
         
         log.info("[OrganizationController] Getting members of organization: {}", id);
         
-        // TODO: Implement getMembers method in OrganizationService
-        Page<OrganizationMembershipResponse> members = Page.empty();
+        Page<OrganizationMembershipResponse> members = organizationService.getOrganizationMembers(id, pageable);
+        
+        log.info("[OrganizationController] Returning {} members for organization: {}", members.getTotalElements(), id);
         
         return ResponseEntity.ok(RestResponse.<Page<OrganizationMembershipResponse>>builder()
             .statusCode(200)

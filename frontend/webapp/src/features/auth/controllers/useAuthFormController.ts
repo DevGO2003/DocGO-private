@@ -11,8 +11,9 @@ export const useAuthFormController = <T extends Record<string, any>>(initialValu
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    setValues((prev) => ({ ...prev, [name]: newValue }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));

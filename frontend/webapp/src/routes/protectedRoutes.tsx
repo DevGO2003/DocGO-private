@@ -15,6 +15,7 @@ import {
   OrganizationMembers,
   Profile,
   Settings,
+  Users,
   UploadPage,
 } from './routeComponents';
 import { PROTECTED_ROUTES } from './routeConfig';
@@ -52,5 +53,6 @@ export const protectedRoutes = (
     {/* User Routes */}
     <Route path={PROTECTED_ROUTES.PROFILE} element={<Profile />} />
     <Route path={PROTECTED_ROUTES.SETTINGS} element={<Settings />} />
+    <Route path={PROTECTED_ROUTES.USERS} element={<Users />} />
   </Route>
 );

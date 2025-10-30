@@ -70,10 +70,14 @@ const organizationApi = {
 
   // Members
   getOrganizationMembers: async (orgId: string, params?: PaginationParams): Promise<PaginatedResponse<OrganizationMember>> => {
+    console.log('[API] getOrganizationMembers - Request:', { orgId, params });
     const response = await apiClient.get<PaginatedResponse<OrganizationMember>>(
       `${BASE_PATH}/organizations/${orgId}/members`,
       { params }
     );
+    console.log('[API] getOrganizationMembers - Response:', response.data);
+    console.log('[API] getOrganizationMembers - Data:', response.data.data);
+    console.log('[API] getOrganizationMembers - Content:', response.data.data?.content);
     return response.data.data!;
   },
 

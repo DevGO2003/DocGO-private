@@ -67,6 +67,7 @@ export const USER_ROUTES = {
   PROFILE: '/profile',
   SETTINGS: '/settings',
   EDIT_PROFILE: '/profile/edit',
+  USERS: '/users',
 } as const;
 
 // ============================================
@@ -206,5 +207,6 @@ export const ORGANIZATION_MEMBERS_PATH = ORGANIZATION_ROUTES.MEMBERS;
 export const ACCEPT_INVITATION_PATH = ORGANIZATION_ROUTES.ACCEPT_INVITATION;
 export const PROFILE_PATH = USER_ROUTES.PROFILE;
 export const SETTINGS_PATH = USER_ROUTES.SETTINGS;
+export const USERS_PATH = USER_ROUTES.USERS;
 export const NOT_FOUND_PATH = ERROR_ROUTES.NOT_FOUND;
 export const UNAUTHORIZED_PATH = ERROR_ROUTES.UNAUTHORIZED;

@@ -9,7 +9,8 @@ const authApi = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     console.log('[AuthAPI] Login request:', {
       username: credentials.username,
-      password: '***'
+      password: '***',
+      rememberMe: credentials.rememberMe
     });
     
     const response = await apiClient.post<AuthResponse>(
