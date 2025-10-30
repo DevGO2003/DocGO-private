@@ -89,18 +89,18 @@ export default function SwaggerPage() {
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },
-    'File Management Service': {
+    'Repository Management Service': {
       port: 8002,
       container: 'repository-management-service',
-      description: 'Quản lý tài liệu, workflow, approval processes',
+      description: 'Quản lý kho lưu trữ tài liệu, versions, tags, comments, approvals',
       technology: 'Spring Boot',
-      icon: '📄',
+      icon: '📁',
       color: '#4facfe',
       endpoints: [
-        { method: 'GET', path: '/api/v1/repository-management-service/documents', description: 'List documents' },
-        { method: 'POST', path: '/api/v1/repository-management-service/documents', description: 'Create document' },
-        { method: 'GET', path: '/api/v1/repository-management-service/documents/{id}', description: 'Get document' },
-        { method: 'PUT', path: '/api/v1/repository-management-service/documents/{id}', description: 'Update document' },
+        { method: 'GET', path: '/api/v1/repository-management-service/files', description: 'List files' },
+        { method: 'POST', path: '/api/v1/repository-management-service/files', description: 'Create file' },
+        { method: 'GET', path: '/api/v1/repository-management-service/files/{id}', description: 'Get file' },
+        { method: 'PUT', path: '/api/v1/repository-management-service/files/{id}', description: 'Update file' },
         { method: 'GET', path: '/docs', description: 'Swagger UI' }
       ]
     },
@@ -179,8 +179,8 @@ export default function SwaggerPage() {
       specUrl = '/api/swagger.json';
     } else if (selectedService === 'User Management Service') {
       specUrl = '/api/docs/user-management';
-    } else if (selectedService === 'File Management Service') {
-      specUrl = '/api/docs/file-management';
+    } else if (selectedService === 'Repository Management Service') {
+      specUrl = '/api/docs/repository-management';
     } else if (selectedService === 'Automation Service') {
       specUrl = '/api/docs/automation';
     } else {
@@ -245,7 +245,7 @@ export default function SwaggerPage() {
                 <div className="service-card-header">
                   <span className="service-icon">{(serviceInfo as any).icon}</span>
                   <h3>{serviceName}</h3>
-                    </div>
+                </div>
                 <div className="service-card-body">
                   <p className="service-description">{(serviceInfo as any).description}</p>
                   <div className="service-meta">
@@ -263,25 +263,25 @@ export default function SwaggerPage() {
                   >
                     📖 Xem Docs
                   </button>
-                    </div>
-                  </div>
-            ))}
+                </div>
               </div>
-              
+            ))}
+          </div>
+          
           {error && (
             <div className="error-message">
               ⚠️ {error}
-                    </div>
+            </div>
           )}
-              </div>
-              
+        </div>
+        
         {/* API Documentation Section */}
         <div id="api-documentation" className="api-documentation-section">
           <div className="api-section-header">
             <h2>📚 API Documentation - {selectedService}</h2>
             <p>Chi tiết API endpoints và schemas cho {selectedService}</p>
-              </div>
-              
+          </div>
+          
           {/* Service Status Notice - Tạm thời tắt để Contract Management Service hoạt động bình thường */}
           {false && (
             <div className="service-status-notice">

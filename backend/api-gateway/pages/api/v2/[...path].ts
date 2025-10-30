@@ -15,7 +15,7 @@ import logger from '@/lib/logger';
  *       ### 🔹 Đầu vào
  *       🛣️ **service-name** (bắt buộc, path)
  *       Loại: string
- *       Mô tả: Tên của microservice (user-management, file-management, automation)
+ *       Mô tả: Tên của microservice (user-management, repository-management, automation)
  *       
  *       🛣️ **path** (bắt buộc, path)
  *       Loại: string
@@ -38,7 +38,7 @@ import logger from '@/lib/logger';
  *       
  *       ### 🔗 Available Services
  *       - `user-management` - User Profile & Management
- *       - `file-management` - File & Workflow Management
+ *       - `repository-management` - Repository & Document Management
  *       - `automation` - AI Document Processing
  *       
  *     tags: [Enhanced API Gateway]
@@ -303,7 +303,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         apiVersion: 'v1',
         statusCode: 404,
         shortMessage: 'Service Not Found',
-        description: `Service '${serviceName}' not found. Available services: user-management, file-management, automation`,
+        description: `Service '${serviceName}' not found. Available services: user-management, repository-management, automation`,
         data: null,
         timestamp: new Date().toISOString(),
         requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

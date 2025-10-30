@@ -122,7 +122,12 @@ const repositoryApi = {
       formData.append('metadata', JSON.stringify(metadataObj));
     }
 
-    const response = await apiClient.post<FileItem>(`${env.apiGatewayUrl}/api/v1/automation-service/files`, formData, {
+    // Extract repositoryId from metadata if exists and append as repository_id (required by /api/files/upload)
+    if (repositoryId) {
+      formData.append('repository_id', repositoryId);
+    }
+    
+    const response = await apiClient.post<FileItem>(`${env.apiGatewayUrl}/api/files/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

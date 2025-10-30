@@ -141,7 +141,7 @@ Tất cả API đều trả về response theo format chuẩn:
   "data": {...},
   "timestamp": "2025-08-23T10:00:00Z",
   "requestId": "uuid-string",
-  "path": "/api/v1/file-management-service/contracts"
+  "path": "/api/v1/repository-management-service/contracts"
 }
 ```
 
@@ -202,7 +202,7 @@ mvn test
 
 ### Health Check
 ```
-GET http://localhost:8002/api/v1/file-management-service/health
+GET http://localhost:8002/api/v1/repository-management-service/health
 ```
 
 ### Metrics
@@ -242,7 +242,7 @@ mvn test
 
 ### Health Check
 ```
-GET /api/v1/file-management-service/health
+GET /api/v1/repository-management-service/health
 ```
 
 ### Monitoring
@@ -272,7 +272,7 @@ GET /actuator/metrics
 
 ## Liên hệ
 
-- **Service**: Document Management Service
+- **Service**: Repository Management Service
 - **Port**: 8002
-- **Base URL**: `/api/v1/file-management-service`
+- **Base URL**: `/api/v1/repository-management-service`
 - **Documentation**: `/docs`

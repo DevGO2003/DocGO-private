@@ -4,7 +4,7 @@ import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import { Link } from 'react-router-dom';
 import { Table, TableHeader, TableRow, TableCell, Text, TableContainer } from '@shared/components';
 
-export interface DocumentsTableItem {
+export interface FilesTableItem {
   fileId: string;
   fileName: string;
   status?: string;
@@ -13,14 +13,14 @@ export interface DocumentsTableItem {
   uploadedAt?: string;
 }
 
-export const DocumentsTable: React.FC<{ items: DocumentsTableItem[]; repositoryId: string }>
+export const FilesTable: React.FC<{ items: FilesTableItem[]; repositoryId: string }>
   = ({ items, repositoryId }) => {
   return (
     <TableContainer>
       <Table>
         <thead>
           <TableRow>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tài liệu</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">File</Text></TableHeader>
             <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Trạng thái</Text></TableHeader>
             <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Loại</Text></TableHeader>
             <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Kích thước</Text></TableHeader>
@@ -50,3 +50,4 @@ export const DocumentsTable: React.FC<{ items: DocumentsTableItem[]; repositoryI
     </TableContainer>
   );
 }
+

@@ -1,6 +1,5 @@
 import { ReactNode, useState, Suspense } from 'react'
 import { HeaderControlLayout } from '../../layouts/HeaderControlLayout'
-import { LoadingSpinner } from '@shared/layouts/LoadingSpinner/LoadingSpinner'
 
 interface ControlMainLayoutProps {
   children: ReactNode
@@ -96,10 +95,6 @@ export function ControlMainLayout({
             children
           )}
         </Suspense>
-
-        {loading && (
-          <LoadingSpinner fullScreen transparentBg text={loadingText} />
-        )}
       </div>
 
       {/* Floating Toolbar Panel */}

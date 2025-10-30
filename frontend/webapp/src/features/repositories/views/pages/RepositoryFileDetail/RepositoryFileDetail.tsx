@@ -4,10 +4,9 @@ import { Button, Card, CardContent } from '@shared/components';
 import { Flex, Text } from '@shared/components';
 import { ControlMainLayout } from '@shared/layouts';
 import { fileAPI } from '@features/upload/services/file-api';
-import { DetailHeader } from '@features/repositories/views/components/DocumentDetail/DetailHeader';
-import { MainTabsNav } from '@features/repositories/views/components/DocumentDetail/MainTabsNav';
-import { SubTabsNav } from '@features/repositories/views/components/DocumentDetail/SubTabsNav';
-import { DocumentDetailTabs } from '@features/repositories/views/components/DocumentDetail/DocumentDetailTabs';
+import { MainTabsNav } from '@features/repositories/views/components/FileDetail/MainTabsNav';
+import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
+import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 
 interface FileDetailData {
   fileId: string;
@@ -25,8 +24,8 @@ export const RepositoryFileDetail: React.FC = () => {
   const [file, setFile] = useState<FileDetailData | null>(null);
   const [documentData, setDocumentData] = useState<any>(null);
   const [contractSummary, setContractSummary] = useState<any>(null);
-  const [activeMainTab, setActiveMainTab] = useState<string>('contracts');
-  const [activeSubTab, setActiveSubTab] = useState<string>('basic-info');
+  const [activeMainTab, setActiveMainTab] = useState<string>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<string>('details');
 
   useEffect(() => {
     let isMounted = true;
@@ -84,6 +83,19 @@ export const RepositoryFileDetail: React.FC = () => {
       ]}
       loading={isLoading}
       loadingText="Đang tải chi tiết tệp..."
+      headerRight={
+        <div className="w-full">
+          <Flex wrap gap={2.5} align="center" justify="end">
+            <Button variant="outline">Chỉnh sửa</Button>
+            <Button variant="outline">Gửi duyệt</Button>
+            <Button variant="outline">Tạo phiên bản</Button>
+            <Button variant="outline">Gửi ký</Button>
+            <Button variant="outline">Tải PDF</Button>
+            <Button variant="outline">Bình luận</Button>
+            <Button variant="destructive">Xóa</Button>
+          </Flex>
+        </div>
+      }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {error && (
@@ -108,49 +120,26 @@ export const RepositoryFileDetail: React.FC = () => {
         )}
         {file && (
           <>
-            <DetailHeader
-              title={documentData?.title || file.fileName}
-              subtitle={`Mã: ${file.fileId} · Loại: ${documentData?.contractType ?? 'GENERAL'} · Trạng thái: ${documentData?.status ?? 'ACTIVE'}`}
-              breadcrumbs={[
-                { label: 'Repositories', href: '/repositories' },
-                { label: `Repo ${id}`, href: `/repositories/${id}` },
-                { label: 'Files', href: `/repositories/${id}/files` },
-                { label: 'Chi tiết', current: true },
-              ]}
-              right={
-                <div className="w-full">
-                  <Flex wrap gap={8} align="center" justify="end">
-                    <Button variant="outline">Chỉnh sửa</Button>
-                    <Button variant="outline">Gửi duyệt</Button>
-                    <Button variant="outline">Tạo phiên bản</Button>
-                    <Button variant="outline">Gửi ký</Button>
-                    <Button variant="outline">Tải PDF</Button>
-                    <Button variant="outline">Bình luận</Button>
-                    <Button variant="destructive">Xóa</Button>
-                  </Flex>
-                </div>
-              }
-            />
-
-            <div className="mt-2">
+            <div className="mt-0">
               <MainTabsNav
                 activeMainTab={activeMainTab}
-                onChange={(tabId) => {
+                onChange={(tabId: string) => {
                   setActiveMainTab(tabId);
-                  if (tabId === 'contracts') setActiveSubTab('basic-info');
+                  if (tabId === 'contracts') setActiveSubTab('contract-overview');
                   else if (tabId === 'overview') setActiveSubTab('details');
                   else if (tabId === 'comments') setActiveSubTab('comments-list');
                 }}
+                fileData={documentData}
               />
               <SubTabsNav
                 activeMainTab={activeMainTab}
                 activeSubTab={activeSubTab}
-                onChange={(tabId) => setActiveSubTab(tabId)}
+                onChange={(tabId: string) => setActiveSubTab(tabId)}
               />
             </div>
 
-            <DocumentDetailTabs
-              documentData={documentData}
+            <FileDetailTabs
+              fileData={documentData}
               contractSummary={contractSummary}
               activeMainTab={activeMainTab}
               activeSubTab={activeSubTab}
