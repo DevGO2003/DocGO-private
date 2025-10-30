@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableRow, TableCell, TableContainer, Text, Tabs, TabList, Tab, Checkbox } from '@shared/components';
+import { Button } from '@shared/components/UIComponents/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@shared/components/UIComponents/Card';
+import { Table, TableHeader, TableRow, TableCell, TableContainer } from '@shared/components/UIComponents/Table';
+import { Text } from '@shared/components/UIComponents/Text';
+import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
+import { Checkbox } from '@shared/components/UIComponents/Checkbox';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import { fileAPI } from '@features/upload/services/file-api';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
@@ -28,8 +33,6 @@ interface RepoFileItem {
   parties?: { name: string; role: string }[];
   totalValue?: number;
   currency?: string;
-  effectiveDate?: string;
-  expiryDate?: string;
   riskLevel?: string;
   reminders?: any[];
   documentType?: string;
@@ -54,10 +57,8 @@ export const RepositoryFilesList: React.FC = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'contract'>('all');
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [allFiles, setAllFiles] = useState<RepoFileItem[]>([]); // Accumulate all loaded files
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [tableColumns, setTableColumns] = useState([
     { key: 'checkbox', label: '', visible: true },
@@ -70,7 +71,6 @@ export const RepositoryFilesList: React.FC = () => {
     { key: 'uploadedAt', label: t('repositories.files.table.uploadedAt'), visible: true },
     { key: 'actions', label: '', visible: true },
     { key: 'parties', label: 'Parties', visible: false },
-    { key: 'effectiveDate', label: 'Effective Date', visible: false },
     { key: 'riskLevel', label: 'Risk', visible: true },
     { key: 'reminders', label: 'Reminders', visible: false },
   ]);
@@ -154,9 +154,6 @@ export const RepositoryFilesList: React.FC = () => {
       if (sortBy === 'totalValue') {
         aVal = (a as any).totalValue || 0;
         bVal = (b as any).totalValue || 0;
-      } else if (sortBy === 'effectiveDate') {
-        aVal = new Date((a as any).effectiveDate || 0).getTime();
-        bVal = new Date((b as any).effectiveDate || 0).getTime();
       }
       if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
@@ -173,7 +170,6 @@ export const RepositoryFilesList: React.FC = () => {
       setError(null);
       const fetchParams = {
         page: currentPage,
-        size: pageSize,
         sortBy,
         sortDirection,
         status: status !== 'ALL' ? status : undefined,
@@ -188,7 +184,7 @@ export const RepositoryFilesList: React.FC = () => {
         totalValue: f.totalValue ?? undefined, // Convert null to undefined
       }));
       setTotalPages(resp.data.totalPages || 0);
-      setHasMore(newFiles.length === pageSize && currentPage < totalPages - 1);
+      setHasMore(newFiles.length === 10 && currentPage < totalPages - 1);
       if (append) {
         setFiles(prev => [...prev, ...newFiles]);
       } else {
@@ -282,14 +278,14 @@ export const RepositoryFilesList: React.FC = () => {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header + Filters */}
         <div className="mb-4">
-          <Tabs activeValue={activeTab} onSelect={(v) => setActiveTab(v as 'all' | 'contract')}>
-            <TabList className="grid w-full grid-cols-2">
-              <Tab value="all" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <Tabs>
+            <TabList>
+              <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                 {t('repositories.files.tabs.all')}
-              </Tab>
-              <Tab value="contract" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              </CommonTab>
+              <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                 {t('repositories.files.tabs.contract')}
-              </Tab>
+              </CommonTab>
             </TabList>
           </Tabs>
         </div>
@@ -337,7 +333,9 @@ export const RepositoryFilesList: React.FC = () => {
             {/* Skeleton placeholders, e.g., 3-6 */}
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <Card className="h-48 bg-gray-100 rounded-lg" /> {/* For grid */}
+                <Card>
+                  <div className="h-48 bg-gray-100 rounded-lg" />
+                </Card> {/* For grid */}
                 {/* Or table row skeleton for list */}
               </div>
             ))}
@@ -378,8 +376,6 @@ export const RepositoryFilesList: React.FC = () => {
                   uploadedAt: f.uploadedAt,
                   totalValue: f.totalValue,
                   currency: f.currency,
-                  effectiveDate: f.effectiveDate,
-                  expiryDate: f.expiryDate,
                   riskLevel: f.riskLevel,
                   reminders: f.reminders,
                   parties: f.parties,
@@ -393,7 +389,7 @@ export const RepositoryFilesList: React.FC = () => {
                   </Link>
                 }
                 isSelected={selectedFiles.includes(f.fileId)}
-                onSelect={(checked) => toggleSelectFile(f.fileId, checked)}
+                onSelect={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
               />
             ))}
           </div>
@@ -405,7 +401,7 @@ export const RepositoryFilesList: React.FC = () => {
                   <TableHeader>
                     <Checkbox 
                       checked={selectedFiles.length === filtered.length && filtered.length > 0}
-                      onCheckedChange={(checked) => selectAll(checked as boolean)}
+                      onCheckedChange={(checked: boolean) => selectAll(checked)}
                       indeterminate={selectedFiles.length > 0 && selectedFiles.length < filtered.length}
                     />
                   </TableHeader>
@@ -425,7 +421,7 @@ export const RepositoryFilesList: React.FC = () => {
                     <TableCell>
                       <Checkbox 
                         checked={selectedFiles.includes(f.fileId)}
-                        onCheckedChange={(checked) => toggleSelectFile(f.fileId, checked as boolean)}
+                        onCheckedChange={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
                       />
                     </TableCell>
                     {tableColumns.filter(col => col.visible).map(col => (
@@ -446,7 +442,6 @@ export const RepositoryFilesList: React.FC = () => {
                                  <Button variant="outline" size="sm">{t('viewDetail')}</Button>
                                </Link>
                              ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || '-'}</Text> :
-                             col.key === 'effectiveDate' ? <Text>{f.effectiveDate ? new Date(f.effectiveDate).toLocaleDateString() : '-'}</Text> :
                              col.key === 'riskLevel' ? (
                                <span className={`px-2 py-1 rounded text-xs ${f.riskLevel === 'LOW' ? 'bg-green-100 text-green-800' : f.riskLevel === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
                              ) :
@@ -469,12 +464,13 @@ export const RepositoryFilesList: React.FC = () => {
               disabled={isLoading}
               className="px-6 py-3"
             >
-              {isLoading ? t('loading') : t('showMore', { count: pageSize })}
+              {isLoading ? t('loading') : t('showMore', { count: 10 })}
             </Button>
           </div>
         )}
         {showTableSettings && (
           <TableSettings 
+            isOpen={showTableSettings}
             columns={tableColumns} 
             onColumnsChange={setTableColumns} 
             onClose={() => setShowTableSettings(false)} 

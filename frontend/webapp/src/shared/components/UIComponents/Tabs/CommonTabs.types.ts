@@ -10,10 +10,11 @@ export interface TabListProps {
   className?: string;
 }
 
-export interface TabProps {
+export interface CommonTabProps {
   value: string;
   activeValue: string;
   onSelect: (val: string) => void;
   children: React.ReactNode;
   disabled?: boolean;
+  className?: string; // Added to fix prop type errors
 }

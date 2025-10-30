@@ -16,6 +16,8 @@ interface ControlMainLayoutProps {
   loadingText?: string
   headerChildren?: ReactNode
   headerRight?: ReactNode
+  primaryTabs?: React.ReactNode
+  secondaryTabs?: React.ReactNode
 }
 
 /**
@@ -42,6 +44,8 @@ export function ControlMainLayout({
   loadingText = '',
   headerChildren,
   headerRight,
+  primaryTabs,
+  secondaryTabs,
 }: ControlMainLayoutProps) {
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState(false)
 
@@ -56,6 +60,8 @@ export function ControlMainLayout({
             breadcrumbs={breadcrumbs}
             rightActions={headerRight}
             headerChildren={headerChildren}
+            primaryTabs={primaryTabs}
+            secondaryTabs={secondaryTabs}
           />
         </div>
       )}

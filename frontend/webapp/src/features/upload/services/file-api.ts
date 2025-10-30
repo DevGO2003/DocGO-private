@@ -42,18 +42,18 @@ export const fileAPI = {
   // Get repository files with pagination support
   getRepositoryFiles: async (repositoryId: string, params: PaginationParams = {}) => {
   // ... existing params logic (mock ignores for now)
-  const now = Date.now();
+    const now = Date.now();
   const mockFiles = [
-    {
-      fileId: `${repositoryId}-file-001`,
-      fileName: `Hợp đồng mua bán #${repositoryId}`,
-      size: 1536,
-      uploadedAt: new Date(now - 1000 * 60 * 60).toISOString(),
-      status: 'ACTIVE',
-      contractType: 'PURCHASE',
-      tags: ['legal', 'priority'],
-      fileType: 'pdf',
-      fileSize: 1536,
+      {
+        fileId: `${repositoryId}-file-001`,
+        fileName: `Hợp đồng mua bán #${repositoryId}`,
+        size: 1536,
+        uploadedAt: new Date(now - 1000 * 60 * 60).toISOString(),
+        status: 'ACTIVE',
+        contractType: 'PURCHASE',
+        tags: ['legal', 'priority'],
+        fileType: 'pdf',
+        fileSize: 1536,
       contractNumber: 'HD-001',
       parties: [{ name: 'Công ty A', role: 'Buyer' }, { name: 'Công ty B', role: 'Seller' }],
       totalValue: 1000000,
@@ -63,18 +63,18 @@ export const fileAPI = {
       riskLevel: 'LOW',
       reminders: [{ title: 'Review in 30 days', due: new Date(now + 1000 * 60 * 60 * 24 * 30).toISOString() }],
       documentType: 'CONTRACT',
-    },
+      },
     // Add similar for other files
-    {
-      fileId: `${repositoryId}-file-002`,
-      fileName: `Báo cáo tài chính ${repositoryId}`,
-      size: 24576,
-      uploadedAt: new Date(now - 1000 * 60 * 30).toISOString(),
-      status: 'PENDING_REVIEW',
-      contractType: 'REPORT',
-      tags: ['finance'],
-      fileType: 'pdf',
-      fileSize: 24576,
+      {
+        fileId: `${repositoryId}-file-002`,
+        fileName: `Báo cáo tài chính ${repositoryId}`,
+        size: 24576,
+        uploadedAt: new Date(now - 1000 * 60 * 30).toISOString(),
+        status: 'PENDING_REVIEW',
+        contractType: 'REPORT',
+        tags: ['finance'],
+        fileType: 'pdf',
+        fileSize: 24576,
       contractNumber: 'BC-002',
       parties: [],
       totalValue: null,
@@ -95,13 +95,13 @@ export const fileAPI = {
   const end = start + size;
   const paginatedFiles = mockFiles.slice(start, end);
 
-  return {
-    data: {
+    return {
+      data: {
       files: paginatedFiles,
       totalPages: Math.ceil(mockFiles.length / size),
       totalElements: mockFiles.length,
-    },
-  };
+      },
+    };
   },
 
   // Get file list

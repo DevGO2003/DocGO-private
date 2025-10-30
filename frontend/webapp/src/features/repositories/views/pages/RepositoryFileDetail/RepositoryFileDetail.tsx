@@ -35,21 +35,71 @@ export const RepositoryFileDetail: React.FC = () => {
         setError(null);
         const resp = await fileAPI.getFileDetails(fileId || '');
         if (!isMounted) return;
-        const basic = resp.data as FileDetailData;
+        const apiData = resp.data;
+        const basic = apiData as FileDetailData;
         setFile(basic);
-        // Map to documentData structure expected by tabs (mock fields)
+        
+        // Map API data to full structure expected by tabs (like src-old)
         const mapped = {
           id: basic.fileId,
           title: basic.fileName,
-          description: '',
-          status: 'ACTIVE',
-          contractType: 'GENERAL',
-          tags: [],
-          parties: [],
-          content: '',
+          description: (apiData as any)?.description || '',
+          status: (apiData as any)?.status || 'ACTIVE',
+          contractType: (apiData as any)?.contractType || 'GENERAL',
+          tags: (apiData as any)?.tags || [],
+          parties: (apiData as any)?.contract?.parties || [],
+          effectiveDate: (apiData as any)?.contract?.effectiveDate || null,
+          expiryDate: (apiData as any)?.contract?.expiryDate || null,
+          totalValue: (apiData as any)?.contract?.totalValue || null,
+          currency: (apiData as any)?.contract?.currency || 'VND',
+          project: (apiData as any)?.contract?.project || null,
+          department: (apiData as any)?.contract?.department || null,
+          priority: (apiData as any)?.contract?.priority || null,
+          confidentiality: (apiData as any)?.contract?.confidentiality || null,
+          summary: (apiData as any)?.contract?.summary || '',
+          paymentDetails: {
+            totalValue: (apiData as any)?.contract?.totalValue || null,
+            currency: (apiData as any)?.contract?.currency || 'VND',
+            schedule: (apiData as any)?.contract?.payment?.schedule || [],
+            paymentMethod: (apiData as any)?.contract?.payment?.method || '',
+          },
+          keyClauses: (apiData as any)?.contract?.clauses?.key || [],
+          unfavorableClauses: (apiData as any)?.contract?.clauses?.unfavorable || [],
+          reminders: (apiData as any)?.contract?.reminders || [],
+          riskAssessment: {
+            riskLevel: (apiData as any)?.contract?.risk?.riskLevel || null,
+            riskFactors: (apiData as any)?.contract?.risk?.factors || [],
+            mitigationMeasures: (apiData as any)?.contract?.risk?.mitigations || [],
+          },
+          complianceStatus: {
+            status: (apiData as any)?.contract?.compliance?.status || null,
+            issues: (apiData as any)?.contract?.compliance?.issues || [],
+            recommendations: (apiData as any)?.contract?.compliance?.recommendations || [],
+          },
+          content: (apiData as any)?.content?.plaintext || '',
+          ocrContent: (apiData as any)?.content?.ocr || '',
+          authorNotes: (apiData as any)?.notes || [],
+          history: (apiData as any)?.history || [],
+          permissions: (apiData as any)?.permissions || [],
           fileSystemMetadata: {
-            originalFilename: basic.fileName,
-            originalFileSize: basic.size,
+            dateModified: (apiData as any)?.metadata?.fileSystem?.dateModified || null,
+            dateAdded: (apiData as any)?.metadata?.fileSystem?.dateAdded || null,
+            mediaFilename: (apiData as any)?.metadata?.fileSystem?.mediaFilename || '',
+            originalFilename: (apiData as any)?.metadata?.fileSystem?.originalFilename || basic.fileName,
+            originalMD5: (apiData as any)?.metadata?.fileSystem?.originalMD5 || '',
+            originalFileSize: (apiData as any)?.metadata?.fileSystem?.originalFileSize || basic.size,
+            originalMimeType: (apiData as any)?.metadata?.fileSystem?.originalMimeType || null,
+            archiveMD5: (apiData as any)?.metadata?.fileSystem?.archiveMD5 || '',
+            archiveFileSize: (apiData as any)?.metadata?.fileSystem?.archiveFileSize || null,
+          },
+          originalDocumentMetadata: {
+            dcFormat: (apiData as any)?.metadata?.originalDocument?.dcFormat || null,
+            dcTitle: (apiData as any)?.metadata?.originalDocument?.dcTitle || basic.fileName,
+            dcCreator: (apiData as any)?.metadata?.originalDocument?.dcCreator || null,
+            dcDescription: (apiData as any)?.metadata?.originalDocument?.dcDescription || '',
+            xmpCreateDate: (apiData as any)?.metadata?.originalDocument?.xmpCreateDate || null,
+            xmpCreatorTool: (apiData as any)?.metadata?.originalDocument?.xmpCreatorTool || null,
+            xmpModifyDate: (apiData as any)?.metadata?.originalDocument?.xmpModifyDate || null,
           },
         };
         setDocumentData(mapped);
@@ -96,6 +146,29 @@ export const RepositoryFileDetail: React.FC = () => {
           </Flex>
         </div>
       }
+      primaryTabs={
+        <MainTabsNav
+          activeMainTab={activeMainTab}
+          onChange={(tabId: string) => {
+            if (!isLoading) {
+              setActiveMainTab(tabId);
+              if (tabId === 'contracts') setActiveSubTab('contract-overview');
+              else if (tabId === 'overview') setActiveSubTab('details');
+              else if (tabId === 'comments') setActiveSubTab('comments-list');
+            }
+          }}
+          fileData={documentData}
+          loading={isLoading}
+        />
+      }
+      secondaryTabs={
+        <SubTabsNav
+          activeMainTab={activeMainTab}
+          activeSubTab={activeSubTab}
+          onChange={(tabId: string) => !isLoading && setActiveSubTab(tabId)}
+          loading={isLoading}
+        />
+      }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {error && (
@@ -119,32 +192,12 @@ export const RepositoryFileDetail: React.FC = () => {
           </Card>
         )}
         {file && (
-          <>
-            <div className="mt-0">
-              <MainTabsNav
-                activeMainTab={activeMainTab}
-                onChange={(tabId: string) => {
-                  setActiveMainTab(tabId);
-                  if (tabId === 'contracts') setActiveSubTab('contract-overview');
-                  else if (tabId === 'overview') setActiveSubTab('details');
-                  else if (tabId === 'comments') setActiveSubTab('comments-list');
-                }}
-                fileData={documentData}
-              />
-              <SubTabsNav
-                activeMainTab={activeMainTab}
-                activeSubTab={activeSubTab}
-                onChange={(tabId: string) => setActiveSubTab(tabId)}
-              />
-            </div>
-
-            <FileDetailTabs
-              fileData={documentData}
-              contractSummary={contractSummary}
-              activeMainTab={activeMainTab}
-              activeSubTab={activeSubTab}
-            />
-          </>
+          <FileDetailTabs
+            fileData={documentData}
+            contractSummary={contractSummary}
+            activeMainTab={activeMainTab}
+            activeSubTab={activeSubTab}
+          />
         )}
       </div>
     </ControlMainLayout>

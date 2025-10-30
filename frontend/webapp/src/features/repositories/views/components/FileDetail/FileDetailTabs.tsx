@@ -1,38 +1,27 @@
-// Full adapted content from original FileDetailTabs.tsx
-
 'use client'
 
-import React from 'react'
-import { FileTextIcon, InformationCircleIcon, BuildingOfficeIcon, TagIcon, CpuChipIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, Cog6ToothIcon, FileIcon, FolderIcon, ClockIcon, ShieldCheckIcon, CurrencyDollarIcon, BellIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { FileText, Info, Building2, Tag, DollarSign, Bell, AlertTriangle, Folder, File, MessageCircle } from 'lucide-react'
 
-// Assume contract sub-components are in ./contract/ or adjust paths
-// For now, use placeholders or import if exist; to avoid errors, comment out unused and use basic divs for demo
-// import { CommentsMainTab } from './CommentsMainTab'
-// import { ContractOverviewTab } from './contract/ContractOverviewTab'
-// ... other imports - for full, add them
+// Contract tab components
+import { ContractOverviewTab } from './contract/ContractOverviewTab'
+import { PartiesTab } from './contract/PartiesTab'
+import { PaymentTab } from './contract/PaymentTab'
+import { ClausesTab } from './contract/ClausesTab'
+import { RiskTab } from './contract/RiskTab'
+import { RemindersTab } from './contract/RemindersTab'
+import { ComplianceTab } from './contract/ComplianceTab'
 
-// Placeholder components for missing ones
-const CommentsMainTab = () => <div>Comments for file</div>;
-const ContractOverviewTab = ({ data }: { data: any }) => <div>Contract Overview for {data?.title || 'File'}</div>;
-// Add similar placeholders for all: PartiesTab, PaymentTab, etc. as () => <div>Placeholder Tab</div>
-// For overview tabs: DetailsTab, ContentTab, etc.
+// Overview tab components
+import { DetailsTab } from './overview/DetailsTab'
+import { ContentTab } from './overview/ContentTab'
+import { OCRTab } from './overview/OCRTab'
+import { MetadataTab } from './overview/MetadataTab'
+import { NotesTab } from './overview/NotesTab'
+import { HistoryTab } from './overview/HistoryTab'
+import { PermissionsTab } from './overview/PermissionsTab'
 
-const PartiesTab = () => <div>Parties</div>;
-const PaymentTab = () => <div>Payment</div>;
-const ClausesTab = () => <div>Clauses</div>;
-const RiskTab = () => <div>Risk</div>;
-const RemindersTab = () => <div>Reminders</div>;
-const ComplianceTab = () => <div>Compliance</div>;
-const ClassificationTab = () => <div>Classification</div>;
-const AIAnalysisTab = () => <div>AI Analysis</div>;
-const WorkflowTab = () => <div>Workflow</div>;
-const DetailsTab = ({ fileData }: { fileData: any }) => <div>Details for {fileData?.title}</div>;
-const ContentTab = ({ fileData }: { fileData: any }) => <div>Content for {fileData?.title}</div>;
-const OCRTab = ({ fileData }: { fileData: any }) => <div>OCR for {fileData?.title}</div>;
-const MetadataTab = ({ fileData }: { fileData: any }) => <div>Metadata for {fileData?.title}</div>;
-const NotesTab = ({ fileData }: { fileData: any }) => <div>Notes for {fileData?.title}</div>;
-const HistoryTab = ({ fileData }: { fileData: any }) => <div>History for {fileData?.title}</div>;
-const PermissionsTab = ({ fileData }: { fileData: any }) => <div>Permissions for {fileData?.title}</div>;
+// Placeholder for comments
+const CommentsMainTab = () => <div className="p-4 text-gray-500">Chức năng bình luận đang được phát triển</div>
 
 interface FileDetailTabsProps {
   fileData: any
@@ -45,41 +34,48 @@ export const mainTabs = [
   {
     id: 'overview',
     name: 'Tổng quan',
-    icon: FolderIcon,
+    icon: Folder,
     description: 'Chi tiết file và metadata'
   },
   {
     id: 'contracts',
     name: 'Hợp đồng',
-    icon: FileIcon,
+    icon: File,
     description: 'Quản lý hợp đồng và thông tin nếu file là hợp đồng'
   },
   {
     id: 'comments',
     name: 'Bình luận',
-    icon: ChatBubbleLeftRightIcon,
+    icon: MessageCircle,
     description: 'Thảo luận và hoạt động'
   }
 ];
 
 // contractSubTabs - for files that are contracts
 export const contractSubTabs = [
-  { id: 'contract-overview', name: 'Tổng quan HĐ', icon: InformationCircleIcon, description: 'Thông tin cơ bản file hợp đồng' },
-  { id: 'parties', name: 'Các bên', icon: BuildingOfficeIcon, description: 'Thông tin các bên' },
-  // ... all from original, but file-focused
-  // Full list as in original
+  { id: 'contract-overview', name: 'Tổng quan HĐ', icon: Info, description: 'Thông tin cơ bản hợp đồng' },
+  { id: 'parties', name: 'Các bên', icon: Building2, description: 'Thông tin các bên' },
+  { id: 'payment', name: 'Thanh toán', icon: DollarSign, description: 'Lịch thanh toán' },
+  { id: 'clauses', name: 'Điều khoản', icon: FileText, description: 'Điều khoản chính và bất lợi' },
+  { id: 'risk', name: 'Rủi ro', icon: AlertTriangle, description: 'Phân tích rủi ro' },
+  { id: 'reminders', name: 'Nhắc nhở', icon: Bell, description: 'Nhắc nhở và mốc quan trọng' },
+  { id: 'compliance', name: 'Tuân thủ', icon: Tag, description: 'Trạng thái tuân thủ' },
 ];
 
 // fileDetailSubTabs - for file overview tabs
 export const fileDetailSubTabs = [
-  { id: 'details', name: 'Chi tiết', icon: InformationCircleIcon, description: 'Thông tin chi tiết file' },
-  { id: 'content', name: 'Nội dung', icon: FileTextIcon, description: 'Nội dung file' },
-  // ... full list
+  { id: 'details', name: 'Chi tiết', icon: Info, description: 'Thông tin chi tiết file' },
+  { id: 'content', name: 'Nội dung', icon: FileText, description: 'Nội dung file' },
+  { id: 'ocr', name: 'Nội dung OCR', icon: FileText, description: 'Văn bản OCR' },
+  { id: 'metadata', name: 'Siêu dữ liệu', icon: Tag, description: 'Metadata file' },
+  { id: 'notes', name: 'Ghi chú', icon: MessageCircle, description: 'Ghi chú' },
+  { id: 'history', name: 'Lịch sử', icon: Info, description: 'Lịch sử thay đổi' },
+  { id: 'permissions', name: 'Quyền hạn', icon: Tag, description: 'Quyền truy cập' },
 ];
 
 // commentsSubTabs same
 export const commentsSubTabs = [
-  { id: 'comments-list', name: 'Bình luận', icon: ChatBubbleLeftRightIcon, description: 'Danh sách bình luận' }
+  { id: 'comments-list', name: 'Bình luận', icon: MessageCircle, description: 'Danh sách bình luận' }
 ];
 
 export function getSubTabsFor(mainTabId: string) {
@@ -119,19 +115,26 @@ export function FileDetailTabs({ fileData, onTabChange, contractSummary, activeM
       }
     }
     
-    // Contracts sub tabs - conditional
-    if (activeMainTab === 'contracts' && fileData?.type === 'contract') {
+    // Contracts sub tabs
+    if (activeMainTab === 'contracts') {
       switch (activeSubTab) {
         case 'contract-overview':
           return <ContractOverviewTab data={fileData} />
         case 'parties':
           return <PartiesTab data={fileData} />
-        // ... all cases
+        case 'payment':
+          return <PaymentTab data={fileData} />
+        case 'clauses':
+          return <ClausesTab data={fileData} />
+        case 'risk':
+          return <RiskTab data={fileData} />
+        case 'reminders':
+          return <RemindersTab data={fileData} />
+        case 'compliance':
+          return <ComplianceTab data={fileData} />
         default:
-          return <div>Contract tab for file</div>
+          return null
       }
-    } else if (activeMainTab === 'contracts') {
-      return <div>File không phải hợp đồng</div>
     }
 
     // Comments

@@ -57,32 +57,32 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
         </div>
       )}
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="font-medium text-gray-900 truncate" title={item.fileName}>{item.fileName}</div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              {item.status && (
-                <span className={`px-2 py-0.5 rounded-lg text-xs border ${badgeClass(item.status)}`}>{item.status}</span>
-              )}
-              {item.contractType && (
-                <span className="px-2 py-0.5 rounded-lg text-xs border border-gray-200 text-gray-600">{item.contractType}</span>
-              )}
-              {item.tags?.slice(0, 3).map(tag => (
-                <span key={tag} className="px-2 py-0.5 rounded-lg text-xs bg-indigo-50 text-indigo-700">#{tag}</span>
-              ))}
-            </div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="font-medium text-gray-900 truncate" title={item.fileName}>{item.fileName}</div>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            {item.status && (
+              <span className={`px-2 py-0.5 rounded-lg text-xs border ${badgeClass(item.status)}`}>{item.status}</span>
+            )}
+            {item.contractType && (
+              <span className="px-2 py-0.5 rounded-lg text-xs border border-gray-200 text-gray-600">{item.contractType}</span>
+            )}
+            {item.tags?.slice(0, 3).map(tag => (
+              <span key={tag} className="px-2 py-0.5 rounded-lg text-xs bg-indigo-50 text-indigo-700">#{tag}</span>
+            ))}
+          </div>
             <div className="mt-2 space-y-1 text-xs text-gray-500">
               {item.totalValue && <div>Value: {item.totalValue.toLocaleString()} {item.currency}</div>}
               {item.parties && <div>Parties: {item.parties.map(p => p.name).join(', ')}</div>}
               {item.riskLevel && <span className={`px-1 py-0.5 rounded text-xs ${item.riskLevel === 'LOW' ? 'bg-green-100' : 'bg-yellow-100'}`}>{item.riskLevel}</span>}
               {item.reminders && <div>Reminders: {item.reminders.length}</div>}
             </div>
-            <div className="mt-2 text-xs text-gray-500">
-              {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString('vi-VN') : ''}
-            </div>
+          <div className="mt-2 text-xs text-gray-500">
+            {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString('vi-VN') : ''}
           </div>
-          {right}
         </div>
+        {right}
+      </div>
       </CardContent>
     </Card>
   );

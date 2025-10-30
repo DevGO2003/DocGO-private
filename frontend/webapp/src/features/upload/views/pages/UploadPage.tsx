@@ -10,7 +10,7 @@ import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
 import { automationFileApi } from '../../models/api/automationFileApi'
 import { Button, Text, Modal } from '@shared/components'
-import { env } from '@shared/config/env'; // Assume path to env
+import env from '@shared/config/env';
 
 export default function UploadPage() {
   const location = useLocation()

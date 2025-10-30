@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react'
 import anime from 'animejs'
 import { cn } from '@shared/lib/utils'
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils'
-import { tabsStyles } from './Tabs.styles'
+import { tabsStyles } from './CommonTabs.styles'
 import { CommonFont } from '../Font/CommonFont'
-import type { TabsProps, TabListProps, TabProps } from './Tabs.types'
+import type { TabsProps, TabListProps, CommonTabProps } from './CommonTabs.types'
 
 export const Tabs: React.FC<TabsProps> = ({ children, className }) => {
   return <CommonFont className={cn(tabsStyles.container, className)}>{children}</CommonFont>
@@ -54,23 +54,9 @@ export const TabList: React.FC<TabListProps> = ({ children, className }) => {
   )
 }
 
-export const Tab: React.FC<TabProps> = ({ value, activeValue, onSelect, children, disabled }) => {
+export const CommonTab: React.FC<CommonTabProps> = ({ value, activeValue, onSelect, children, disabled }) => {
   const isActive = value === activeValue
   const ref = useRef<HTMLButtonElement>(null)
-  const underlineRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const underline = underlineRef.current
-    if (!underline) return
-    if (isActive) {
-      underline.style.opacity = '0'
-      underline.style.transform = 'scaleX(0.6)'
-      anime({ targets: underline, opacity: 1, scaleX: 1, duration: 250, easing: 'easeOutQuad' })
-    } else {
-      underline.style.opacity = '0'
-      underline.style.transform = 'scaleX(0.6)'
-    }
-  }, [isActive])
 
   return (
     <button
@@ -85,19 +71,6 @@ export const Tab: React.FC<TabProps> = ({ value, activeValue, onSelect, children
       )}
     >
       {children}
-      <div
-        ref={underlineRef}
-        style={{
-          position: 'absolute',
-          left: 8,
-          right: 8,
-          bottom: 4,
-          height: 2,
-          background: '#111827',
-          borderRadius: 9999,
-          transformOrigin: 'left center',
-        }}
-      />
     </button>
   )
 }
