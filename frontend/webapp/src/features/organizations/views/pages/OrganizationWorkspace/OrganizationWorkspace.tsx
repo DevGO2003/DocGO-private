@@ -26,6 +26,7 @@ import {
   LoadingSpinner,
 } from '@shared/components';
 import { useOrganization } from '@/features/organizations';
+import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
 import { useOrganizationContracts } from '@features/repositories/models/api/repositoryApi';
 // import { UploadContractDialog } from '@features/contract'; // Temporarily disabled
 import { ORGANIZATIONS_PATH } from '@constants';
@@ -50,6 +51,20 @@ export const OrganizationWorkspace = () => {
     page: 0,
     size: 20,
   });
+
+  // Fetch organization members
+  const { 
+    data: membersData, 
+    isLoading: membersLoading 
+  } = useOrganizationMembers(id!, {
+    page: 0,
+    size: 50,
+  });
+
+  // Debug logging
+  console.log('[OrganizationWorkspace] Members Data:', membersData);
+  console.log('[OrganizationWorkspace] Members Content:', membersData?.content);
+  console.log('[OrganizationWorkspace] Members Loading:', membersLoading);
 
   // Calculate stats from real data
   const contracts = contractsData?.content || [];
@@ -350,34 +365,74 @@ export const OrganizationWorkspace = () => {
           {/* Members Tab */}
           {activeTab === 'members' && (
             <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>{t('organizations.workspace.membersCard.title')}</CardTitle>
-                      <Button 
-                        variant="outline" 
-                        className="flex items-center gap-2"
-                        onClick={() => navigate(`/organizations/${id}/members`)}
-                      >
-                        <Users className="w-4 h-4" />
-                        {t('organizations.workspace.membersCard.manage')}
-                      </Button>
-                    </div>
-                  </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">
-                    {t('organizations.workspace.membersCard.desc')}
-                  </p>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    {t('organizations.workspace.membersCard.title')}
+                  </CardTitle>
                   <Button 
                     variant="outline" 
-                    className="inline-flex items-center gap-2"
+                    className="flex items-center gap-2"
                     onClick={() => navigate(`/organizations/${id}/members`)}
                   >
-                    <Users className="w-4 h-4" />
-                    {t('organizations.workspace.membersCard.go')}
+                    <Settings className="w-4 h-4" />
+                    {t('organizations.workspace.membersCard.manage')}
                   </Button>
                 </div>
+              </CardHeader>
+              <CardContent>
+                {membersLoading ? (
+                  <div className="text-center py-12">
+                    <LoadingSpinner text="Đang tải danh sách thành viên..." />
+                  </div>
+                ) : membersData?.content && membersData.content.length > 0 ? (
+                  <div className="space-y-3">
+                    {membersData.content.map((member) => (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold">
+                              {member.username?.charAt(0).toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{member.username}</p>
+                            <p className="text-sm text-gray-600">{member.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                            {member.role || 'Member'}
+                          </span>
+                          {member.createdAt && (
+                            <span className="text-xs text-gray-500">
+                              {new Date(member.createdAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-4">
+                      Chưa có thành viên nào trong tổ chức
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="inline-flex items-center gap-2"
+                      onClick={() => navigate(`/organizations/${id}/members`)}
+                    >
+                      <Users className="w-4 h-4" />
+                      Quản lý thành viên
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

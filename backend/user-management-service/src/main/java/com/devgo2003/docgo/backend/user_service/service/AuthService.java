@@ -63,7 +63,7 @@ public class AuthService {
         return new AuthResponse(true, "User registered successfully", accessToken, refreshToken, userInfo, accessTokenTtlSeconds, "Bearer");
     }
 
-    public AuthResponse login(String username, String password) {
+    public AuthResponse login(String username, String password, Boolean rememberMe) {
         return userRepository.findByUsername(username)
                 .map(user -> {
                     // Check if user is suspended or deleted
@@ -89,7 +89,19 @@ public class AuthService {
                             "roles", user.getRoleIds(),
                             "tokenVersion", "1"
                         ));
-                        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+                        
+                        // Generate refresh token with custom TTL if rememberMe is true
+                        // Remember me: 24 hours (86400 seconds)
+                        // Default: use configured value from application.properties
+                        String refreshToken;
+                        if (Boolean.TRUE.equals(rememberMe)) {
+                            refreshToken = jwtUtil.generateRefreshToken(user.getUsername(), 86400L); // 24 hours
+                            log.info("Login with Remember Me enabled - refresh token valid for 24 hours");
+                        } else {
+                            refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+                            log.info("Login with Remember Me disabled - using default refresh token TTL");
+                        }
+                        
                         return new AuthResponse(true, "Login successful", accessToken, refreshToken, userInfo, accessTokenTtlSeconds, "Bearer");
                     } else {
                         // Increment failed login attempts

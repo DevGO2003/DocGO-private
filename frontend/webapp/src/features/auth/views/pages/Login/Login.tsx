@@ -18,6 +18,7 @@ export const Login = () => {
   const { values, errors, handleChange, handleBlur, handleSubmit } = useAuthFormController({
     username: '',
     password: '',
+    rememberMe: false,
   });
 
   return (
@@ -72,6 +73,20 @@ export const Login = () => {
                 placeholder="Enter your password"
                 autoComplete="current-password"
               />
+
+              <div className="flex items-center">
+                <input
+                  id="rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  checked={values.rememberMe}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                />
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900 cursor-pointer">
+                  Remember me
+                </label>
+              </div>
 
               <Button
                 type="submit"

@@ -4,6 +4,7 @@ import { Button } from '@shared/components';
 import { RoleBadge, PermissionBadge } from '@/features/organizations';
 import type { OrganizationMember, MemberRole } from '@/features/organizations';
 import { useRemoveMember } from '@/features/organizations';
+import { formatDate } from '@shared/utils/dateFormatter';
 
 interface MemberTableProps {
   members: OrganizationMember[];
@@ -71,7 +72,7 @@ export const MemberTable = ({
 
   return (
     <>
-      <div className="overflow-hidden border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border border-gray-200 rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -110,13 +111,15 @@ export const MemberTable = ({
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                         <span className="text-white font-semibold">
-                          {member.username.charAt(0).toUpperCase()}
+                          {(member.firstName?.charAt(0) || member.username.charAt(0)).toUpperCase()}
                         </span>
                       </div>
                       <div className="ml-4">
                         <div className="flex items-center gap-2">
                           <div className="text-sm font-medium text-gray-900">
-                            {member.username}
+                            {member.firstName && member.lastName
+                              ? `${member.firstName} ${member.lastName}`
+                              : member.firstName || member.lastName || member.username}
                           </div>
                           {isCurrentUser && (
                             <span className="text-xs text-blue-600 font-medium">(You)</span>
@@ -162,7 +165,7 @@ export const MemberTable = ({
 
                   {/* Joined Date */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(member.joinedAt).toLocaleDateString()}
+                    {formatDate(member.joinedAt)}
                   </td>
 
                   {/* Actions */}
@@ -181,11 +184,18 @@ export const MemberTable = ({
                             <>
                               {/* Backdrop */}
                               <div
-                                className="fixed inset-0 z-10"
+                                className="fixed inset-0 z-[100]"
                                 onClick={() => setOpenMenuId(null)}
                               />
-                              {/* Menu */}
-                              <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+                              {/* Menu - Fixed position to avoid being cut off */}
+                              <div 
+                                className="fixed w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-[101]"
+                                style={{
+                                  top: '50%',
+                                  left: '50%',
+                                  transform: 'translate(-50%, -50%)'
+                                }}
+                              >
                                 <div className="py-1">
                                   {onEditMember && (
                                     <button
@@ -239,8 +249,11 @@ export const MemberTable = ({
                   Remove Member
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Are you sure you want to remove <strong>{memberToRemove.username}</strong> from
-                  this organization? This action cannot be undone.
+                  Are you sure you want to remove <strong>
+                    {memberToRemove.firstName && memberToRemove.lastName
+                      ? `${memberToRemove.firstName} ${memberToRemove.lastName}`
+                      : memberToRemove.firstName || memberToRemove.lastName || memberToRemove.username}
+                  </strong> from this organization? This action cannot be undone.
                 </p>
                 <div className="flex gap-3 justify-end">
                   <Button

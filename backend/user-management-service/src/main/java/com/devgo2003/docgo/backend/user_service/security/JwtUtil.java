@@ -43,6 +43,16 @@ public class JwtUtil {
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+    
+    public String generateRefreshToken(String subject, long customTtlSeconds) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusSeconds(customTtlSeconds)))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
 
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
