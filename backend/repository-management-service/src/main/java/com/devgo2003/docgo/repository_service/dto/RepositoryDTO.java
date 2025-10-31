@@ -37,6 +37,7 @@ public class RepositoryDTO {
     private Integer memberCount;
     private String ownerName;
     private String organizationName;
+    private List<Map<String, Object>> files;  // Top 5 newest files
 
     // Static factory methods
     public static RepositoryDTO fromEntity(RepositoryEntity entity) {

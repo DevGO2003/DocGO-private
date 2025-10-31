@@ -8,6 +8,8 @@ import { MainTabsNav } from '@features/repositories/views/components/FileDetail/
 import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
+import { Edit, Save, X, Send, Download, MessageCircle, Trash2, FileCheck, FilePlus } from 'lucide-react';
+import { updateFileDetails, deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
 
 interface FileDetailData {
   fileId: string;
@@ -28,6 +30,9 @@ export const RepositoryFileDetail: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('details');
   const [notFound, setNotFound] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [editedData, setEditedData] = useState<any>(null);
 
   useEffect(() => {
     // Kiểm tra repository ID có hợp lệ không
@@ -92,8 +97,15 @@ export const RepositoryFileDetail: React.FC = () => {
             issues: (apiData as any)?.contract?.compliance?.issues || [],
             recommendations: (apiData as any)?.contract?.compliance?.recommendations || [],
           },
-          content: (apiData as any)?.content?.plaintext || '',
-          ocrContent: (apiData as any)?.content?.ocr || '',
+          content: (apiData as any)?.content?.ocr?.text || '',
+          ocr: {
+            engine: (apiData as any)?.content?.ocr?.engine || (apiData as any)?.ocrEngine || null,
+            confidence: (apiData as any)?.content?.ocr?.confidence ?? (apiData as any)?.ocrConfidence ?? null,
+            processedAt: (apiData as any)?.content?.ocr?.processedAt || null,
+            processingTime: (apiData as any)?.content?.ocr?.processingTime ?? null,
+            status: (apiData as any)?.content?.ocr?.status || (apiData as any)?.ocrStatus || null,
+            error: (apiData as any)?.content?.ocr?.error || null,
+          },
           authorNotes: (apiData as any)?.notes || [],
           history: (apiData as any)?.history || [],
           permissions: (apiData as any)?.permissions || [],
@@ -153,6 +165,66 @@ export const RepositoryFileDetail: React.FC = () => {
     navigate('/repositories/' + (id ?? ''));
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedData(documentData);
+  };
+
+  const handleSave = async () => {
+    if (!editedData || !fileId) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Extract data to update
+      const updateData = {
+        title: editedData.overview?.title,
+        documentType: editedData.overview?.documentType,
+        status: editedData.overview?.status,
+        tags: editedData.overview?.tags,
+        archiveSerial: editedData.overview?.archiveSerial,
+        dateCreated: editedData.overview?.dateCreated,
+      };
+      
+      // Call API to update
+      await updateFileDetails(fileId, updateData);
+      
+      // Refresh data
+      const resp = await fetchFileById(fileId);
+      if (resp && (resp as any).data) {
+        const apiData = (resp as any).data;
+        setDocumentData(apiData);
+      }
+      
+      setIsEditing(false);
+      setIsDirty(false);
+      setEditedData(null);
+      
+      // Show success message (you can use toast/notification here)
+      console.log('Lưu thành công!');
+    } catch (e: any) {
+      setError(e?.message || 'Không thể lưu thay đổi');
+      console.error('Save error:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveAndClose = async () => {
+    await handleSave();
+    handleBack();
+  };
+
+  const handleDiscard = () => {
+    if (isDirty && !window.confirm('Bạn có muốn hủy các thay đổi?')) {
+      return;
+    }
+    setIsEditing(false);
+    setIsDirty(false);
+    setEditedData(null);
+  };
+
   return (
     <ControlMainLayout
       title={documentData?.title || file?.fileName || 'Chi tiết tài liệu'}
@@ -168,13 +240,43 @@ export const RepositoryFileDetail: React.FC = () => {
       headerRight={
         <div className="w-full">
           <Flex wrap gap={2.5} align="center" justify="end">
-            <Button variant="outline">Chỉnh sửa</Button>
-            <Button variant="outline">Gửi duyệt</Button>
-            <Button variant="outline">Tạo phiên bản</Button>
-            <Button variant="outline">Gửi ký</Button>
-            <Button variant="outline">Tải PDF</Button>
-            <Button variant="outline">Bình luận</Button>
-            <Button variant="destructive">Xóa</Button>
+            {isEditing ? (
+              <>
+                <Button variant="outline" onClick={handleDiscard}>
+                  <X className="w-4 h-4 mr-2" /> Hủy
+                </Button>
+                <Button variant="outline" onClick={handleSaveAndClose}>
+                  <Save className="w-4 h-4 mr-2" /> Lưu & Đóng
+                </Button>
+                <Button onClick={handleSave}>
+                  <Save className="w-4 h-4 mr-2" /> Lưu
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={handleEdit}>
+                  <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
+                </Button>
+                <Button variant="outline">
+                  <FileCheck className="w-4 h-4 mr-2" /> Gửi duyệt
+                </Button>
+                <Button variant="outline">
+                  <FilePlus className="w-4 h-4 mr-2" /> Tạo phiên bản
+                </Button>
+                <Button variant="outline">
+                  <Send className="w-4 h-4 mr-2" /> Gửi ký
+                </Button>
+                <Button variant="outline">
+                  <Download className="w-4 h-4 mr-2" /> Tải PDF
+                </Button>
+                <Button variant="outline">
+                  <MessageCircle className="w-4 h-4 mr-2" /> Bình luận
+                </Button>
+                <Button variant="destructive">
+                  <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                </Button>
+              </>
+            )}
           </Flex>
         </div>
       }
@@ -226,9 +328,13 @@ export const RepositoryFileDetail: React.FC = () => {
         {file && (
           <FileDetailTabs
             fileData={documentData}
-            contractSummary={contractSummary}
             activeMainTab={activeMainTab}
             activeSubTab={activeSubTab}
+            isEditing={isEditing}
+            onDataChange={(newData) => {
+              setEditedData(newData);
+              setIsDirty(true);
+            }}
           />
         )}
       </div>

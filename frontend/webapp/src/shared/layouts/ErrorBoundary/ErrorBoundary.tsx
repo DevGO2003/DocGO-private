@@ -40,30 +40,17 @@ class ErrorBoundaryBase extends Component<Props, State> {
     const currentUrl = window.location.href;
     const referrer = document.referrer;
 
-    const goHome = () => { window.location.replace('/'); };
-    const goReferrer = () => {
-      try {
-        if (referrer) {
-          const ref = new URL(referrer);
-          if (ref.origin === window.location.origin && ref.href !== currentUrl) {
-            window.location.assign(ref.href);
-            return true;
-          }
+    try {
+      if (referrer) {
+        const ref = new URL(referrer);
+        if (ref.origin === window.location.origin && ref.href !== currentUrl) {
+          window.location.replace(ref.href);
+          return;
         }
-      } catch {}
-      return false;
-    };
+      }
+    } catch {}
 
-    if (window.history.length > 1) {
-      window.history.go(-1);
-      setTimeout(() => {
-        if (window.location.href === currentUrl) {
-          if (!goReferrer()) goHome();
-        }
-      }, 300);
-    } else {
-      if (!goReferrer()) goHome();
-    }
+    window.location.replace('/');
   };
 
   render() {

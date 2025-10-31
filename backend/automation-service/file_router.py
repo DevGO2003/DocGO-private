@@ -179,10 +179,16 @@ async def get_all_files(
 
 
 @router.get("/recent", summary="Top uploads gần đây", response_model=RestResponse[List[dict]])
-async def get_recent_uploads(limit: int = Query(5)):
+async def get_recent_uploads(request: Request, limit: int = Query(5), user_id: Optional[str] = Query(None)):
     try:
         # Get most recent items first
         items = list(RECENT_UPLOADS)
+        # Optional filter by userId (query param has priority, then header)
+        header_user = request.headers.get("X-User-Id") or request.headers.get("x-user-id")
+        filter_user = user_id or header_user
+        if filter_user:
+            items = [it for it in items if it.get("userId") == filter_user]
+        
         if not items:
             return RestResponse(
                 apiVersion="v1",
@@ -563,6 +569,10 @@ async def upload_document(
         size = int(request.headers.get("content-length") or 0)
         sync_mode = True  # TEMPORARILY: Always use sync processing (was: size < 2 * 1024 * 1024)
         
+        # Determine user id from gateway headers (fallback to system)
+        user_id_header = request.headers.get("X-User-Id") or request.headers.get("x-user-id")
+        user_id = user_id_header or "system"
+        
         # Read file content for MIME type detection
         print(f"[DEBUG_READ1] Reading file for MIME detection...")
         file_content = await file.read()
@@ -589,7 +599,7 @@ async def upload_document(
             "eventVersion": "v1",
             "eventType": "FILE_UPLOAD_STARTED",
             "correlationId": correlation_id,
-            "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+            "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
             "data": {
                 "fileName": file.filename,
                 "fileSize": size,
@@ -609,7 +619,7 @@ async def upload_document(
             
             upload_result = await retry_async(
                 file_service.upload_file,
-                file, folder="files", user_id="system",
+                file, folder="files", user_id=user_id,
                 max_retries=3,
                 backoff_factor=2.0,
                 exceptions=(Exception,),
@@ -630,13 +640,15 @@ async def upload_document(
                 "eventVersion": "v1",
                 "eventType": "FILE_UPLOAD_COMPLETED",
                 "correlationId": correlation_id,
-                "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
                     "fileId": file_id,
                     "fileUrl": file_url,
                     "fileName": file.filename,
                     "fileSize": size,
-                    "contentType": file.content_type
+                    "contentType": file.content_type,
+                    "repositoryId": repository_id,
+                    "ownerUserId": user_id
                 },
                 "metadata": {"source": "automation-service", "serviceVersion": "1.0.0"}
             })
@@ -649,6 +661,7 @@ async def upload_document(
                 "contentType": detected_mime_type,
                 "fileUrl": file_url,
                 "repositoryId": repository_id,
+                "userId": user_id,
                 "uploadedAt": now_iso,
             })
             
@@ -778,9 +791,9 @@ async def upload_document(
                 },
                 "audit": {
                     "createdAt": _now_iso(),
-                    "createdBy": "system",
+                    "createdBy": user_id,
                     "updatedAt": _now_iso(),
-                    "updatedBy": "system",
+                    "updatedBy": user_id,
                     "isDeleted": False,
                     "version": 1
                 }
@@ -807,7 +820,7 @@ async def upload_document(
                 "contractType": (summary_result_val or {}).get("contractType"),
                 "category": category_local,
                 "tags": [],
-                "ownerUserId": "system",
+                "ownerUserId": user_id,
                 "new": True
             }
 
@@ -875,7 +888,7 @@ async def upload_document(
                         "version": 1,
                         "versionTag": "1.0.0",
                         "changedAt": now_local,
-                        "changedBy": "system",
+                        "changedBy": user_id,
                         "changeType": "CREATE",
                         "storage": {"s3": {"versionId": None}, "local": {"revision": None}}
                     }
@@ -898,9 +911,9 @@ async def upload_document(
 
             audit_block = {
                 "createdAt": now_local,
-                "createdBy": "system",
+                "createdBy": user_id,
                 "updatedAt": now_local,
-                "updatedBy": "system",
+                "updatedBy": user_id,
                 "deletedAt": None,
                 "deletedBy": None,
                 "isDeleted": False,
@@ -999,7 +1012,7 @@ async def upload_document(
                 "eventVersion": "v1",
                 "eventType": "FILE_CONTENT_EXTRACTED",
                 "correlationId": correlation_id,
-                "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
                     "documentId": file_id,
                     "fileName": file.filename,
@@ -1072,7 +1085,7 @@ async def upload_document(
                     "eventVersion": "v1",
                     "eventType": "CONTRACT_SUMMARY_GENERATED",
                     "correlationId": correlation_id,
-                    "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                    "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                     "data": {
                         "documentId": file_id,
                         "fileName": file.filename,
@@ -1175,13 +1188,14 @@ async def upload_document(
                         "timestamp": now_iso,
                         "source": "automation-service",
                         "correlationId": correlation_id,
-                        "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                        "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
                             "fileId": file_id,
                             "fileName": file.filename,
                             "mimeType": detected_mime_type,
                             "size": size,
-                            "ownerUserId": "system",
+                            "ownerUserId": user_id,
+                            "repositoryId": repository_id,  # Thêm repository ID để link file với repository
                             "storage": storage_block,
                             "file": {
                                 "id": file_id,
@@ -1263,33 +1277,23 @@ async def upload_document(
                         "timestamp": now_iso,
                         "source": "automation-service",
                         "correlationId": correlation_id,
-                        "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                        "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                         "data": {
                             "fileId": file_id,
                             "title": file.filename,
-                            "plaintext": safe_plaintext,  # Raw text (filtered)
-                            "extractedText": safe_extracted_text,  # Cleaned text (filtered)
-                            # Phase 1: remove summary/keyTerms/sections
+                            # Chỉ giữ ocr.text - loại bỏ plaintext và extractedText dư thừa
                             "ocr": {
-                                "text": safe_plaintext if file.content_type.lower() != "application/json" else None,  # Use filtered version (None for binary)
+                                "text": safe_plaintext if file.content_type.lower() != "application/json" else None,  # Text nội dung (filtered binary)
                                 "status": "COMPLETED" if plaintext_text else "SKIPPED",  # COMPLETED, FAILED, PROCESSING, SKIPPED
                                 "engine": "TESSERACT",  # GEMINI_VISION, TESSERACT, TESSERACT_FALLBACK, PADDLEOCR
-                                "confidence": 1.0 if plaintext_text else 0.0,  # Enhanced field
-                                "processedAt": now_iso,  # Enhanced field
-                                "processingTime": 0.0,  # Enhanced field
-                                # Phase 1: merge extraction fields into ocr
-                                "method": "DIRECT",
-                                "extractedAt": now_iso,
-                                "characterCount": len(plaintext_text) if plaintext_text else 0,
-                                "wordCount": len(plaintext_text.split()) if plaintext_text else 0,
-                                "error": None,  # Enhanced field
-                                "metadata": None  # Should come from actual OCR metadata, not fake data
+                                "confidence": 1.0 if plaintext_text else 0.0,
+                                "processedAt": now_iso,
+                                "processingTime": 0.0,
+                                "error": None
                             },
-                            # Phase 1: remove extraction object; summarization -> aiSummarization removed
                             "jsonContent": json_content_text,
                             "jsonAnalysisStatus": "PARSED" if json_content_text else None,
-                            "classification": enhanced_classification,
-                            "processing": {"status": "COMPLETED", "error": None}  # COMPLETED, PROCESSING, FAILED
+                            "classification": enhanced_classification
                         },
                         "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                     }
@@ -1462,7 +1466,7 @@ async def upload_document(
                             "timestamp": now_iso,
                             "source": "automation-service",
                             "correlationId": correlation_id,
-                            "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                            "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                             "data": contract_metadata,
                             "metadata": {"serviceVersion": "1.0.0", "region": "VN"}
                         }
@@ -1517,7 +1521,7 @@ async def upload_document(
                 "eventVersion": "v1",
                 "eventType": "FILE_CONTENT_EXTRACTED",
                 "correlationId": correlation_id,
-                "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+                "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
                 "data": {
                     "documentId": file_id,
                     "fileName": file.filename,
@@ -1601,7 +1605,7 @@ async def upload_document(
             "eventVersion": "v1",
             "eventType": "file.metadata.recorded",
             "correlationId": correlation_id,
-            "actor": {"userId": "system", "userRole": "system", "ip": request.client.host if request.client else None},
+            "actor": {"userId": user_id, "userRole": "system", "ip": request.client.host if request.client else None},
             "data": {
                 "documentId": None,
                 "fileName": file.filename,

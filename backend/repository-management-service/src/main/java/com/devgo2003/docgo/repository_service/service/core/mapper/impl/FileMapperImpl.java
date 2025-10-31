@@ -31,18 +31,50 @@ public class FileMapperImpl implements IFileMapper {
             return null;
         }
 
+        // Loại bỏ plaintext và extractedText dư thừa khỏi content
+        Map<String, Object> cleanedContent = cleanContentMap(entity.getContent());
+
+        // Determine userId: overview.ownerUserId > entity.ownerUserId > audit.createdBy
+        String ownerUserId = entity.getOverview() != null ? getString(entity.getOverview(), "ownerUserId") : null;
+        String entityOwner = entity.getOwnerUserId();
+        String createdBy = entity.getAudit() != null ? String.valueOf(entity.getAudit().getOrDefault("createdBy", null)) : null;
+        String userId = (ownerUserId != null && !ownerUserId.isEmpty())
+                ? ownerUserId
+                : ((entityOwner != null && !entityOwner.isEmpty()) ? entityOwner : createdBy);
+
         return FullFileResponseDto.builder()
                 .id(entity.getId())
+                .repositoryId(entity.getRepositoryId())
+                .userId(userId)
                 .overview(mapOverview(entity.getOverview()))
                 // Keep complex sections as Map - no type conversion needed
                 .metadata(entity.getMetadata())
-                .content(entity.getContent())
+                .content(cleanedContent)  // Sử dụng cleaned content (chỉ có ocr.text)
                 .contract(entity.getContract())
                 .storage(entity.getStorage())
                 .security(entity.getSecurity())
                 .versioning(entity.getVersioning())
                 .audit(entity.getAudit())
                 .build();
+    }
+    
+    /**
+     * Loại bỏ plaintext và extractedText dư thừa, chỉ giữ ocr.text
+     */
+    private Map<String, Object> cleanContentMap(Map<String, Object> content) {
+        if (content == null) {
+            return null;
+        }
+        
+        // Tạo bản sao để không modify original map
+        Map<String, Object> cleaned = new java.util.HashMap<>(content);
+        
+        // Loại bỏ plaintext và extractedText (dư thừa)
+        cleaned.remove("plaintext");
+        cleaned.remove("extractedText");
+        
+        // Giữ lại ocr.text và các trường khác
+        return cleaned;
     }
 
     @Override

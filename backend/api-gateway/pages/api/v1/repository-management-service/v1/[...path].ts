@@ -26,6 +26,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   
   logger.info(`🔄 Repository Management Service Proxy: ${method} ${fullPath}`);
 
+  // Check Authorization header (required for all non-public endpoints)
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.toString().startsWith('Bearer ')) {
+    logger.warn(`❌ Missing or invalid Authorization header for ${fullPath}`);
+    return res.status(401).json({
+      apiVersion: 'v1',
+      statusCode: 401,
+      shortMessage: 'Unauthorized',
+      description: 'Missing or invalid authorization header',
+      data: null,
+      timestamp: new Date().toISOString(),
+      requestId: req.headers['x-request-id'] || 'unknown',
+      path: fullPath
+    });
+  }
+
   // Get repository-management service
   const service = serviceManager.getService('repository-management');
   if (!service) {
@@ -42,7 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       'Content-Type': 'application/json; charset=utf-8'
     };
 
-    // Forward critical headers
+    // Forward critical headers (Authorization is required and already checked)
     if (req.headers['authorization']) {
       headers['Authorization'] = req.headers['authorization'] as string;
     }
@@ -51,6 +67,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
     if (req.headers['x-actor']) {
       headers['X-Actor'] = req.headers['x-actor'] as string;
+    }
+    // Forward identity headers set by middleware authentication
+    if (req.headers['x-user-token']) {
+      headers['X-User-Token'] = String(req.headers['x-user-token']);
+    }
+    if (req.headers['x-user-id']) {
+      headers['X-User-Id'] = String(req.headers['x-user-id']);
+    }
+    if (req.headers['x-user-roles']) {
+      headers['X-User-Roles'] = String(req.headers['x-user-roles']);
+    }
+    if (req.headers['x-username']) {
+      headers['X-Username'] = String(req.headers['x-username']);
+    }
+    if (req.headers['x-user-email']) {
+      headers['X-User-Email'] = String(req.headers['x-user-email']);
     }
 
     // Sanitize query params

@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -292,22 +293,41 @@ public class RepositoryManagementController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Lấy chi tiết repository theo ID")
+    @Operation(summary = "Lấy chi tiết repository theo ID (kèm top 5 files mới nhất)")
     public ResponseEntity<RestResponse<RepositoryDTO>> getRepository(
             @Parameter(description = "ID của repository cần lấy") @PathVariable String id) {
         
         try {
             return repositoryService.getRepositoryById(id)
-                .map(repository -> ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
-                    .apiVersion("v1")
-                    .statusCode(200)
-                    .shortMessage("Success")
-                    .description("Đã lấy thông tin repository thành công")
-                    .data(repository)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/repositories/" + id)
-                    .build()))
+                .map(repository -> {
+                    // Lấy top 5 files mới nhất theo updatedAt
+                    List<Map<String, Object>> topFiles = new java.util.ArrayList<>();
+                    if (repository.getFiles() != null && !repository.getFiles().isEmpty()) {
+                        topFiles = repository.getFiles().stream()
+                            .sorted((f1, f2) -> {
+                                Object t1 = f1.get("updatedAt");
+                                Object t2 = f2.get("updatedAt");
+                                if (t1 != null && t2 != null) {
+                                    return ((Comparable) t2).compareTo(t1);  // Descending
+                                }
+                                return 0;
+                            })
+                            .limit(5)
+                            .collect(java.util.stream.Collectors.toList());
+                    }
+                    repository.setFiles(topFiles);
+                    
+                    return ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("Đã lấy thông tin repository thành công")
+                        .data(repository)
+                        .timestamp(Instant.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path("/api/v1/repository-management-service/repositories/" + id)
+                        .build());
+                })
                 .orElse(ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
                     .apiVersion("v1")
                     .statusCode(404)
@@ -507,6 +527,72 @@ public class RepositoryManagementController {
                 .timestamp(Instant.now())
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/repository-management-service/repositories/" + id)
+                .build());
+        }
+    }
+
+    @GetMapping("/{repositoryId}/files/{fileId}")
+    @Operation(summary = "Lấy chi tiết file trong repository (validate repositoryId)")
+    public ResponseEntity<RestResponse<RepositoryDTO>> getFileInRepository(
+            @Parameter(description = "ID của repository") @PathVariable String repositoryId,
+            @Parameter(description = "ID của file") @PathVariable String fileId) {
+        
+        try {
+            // Lấy repository
+            return repositoryService.getRepositoryById(repositoryId)
+                .map(repository -> {
+                    // Kiểm tra file có thuộc repository này không
+                    if (repository.getFiles() != null) {
+                        boolean fileExists = repository.getFiles().stream()
+                            .anyMatch(f -> fileId.equals(f.get("id")));
+                        
+                        if (!fileExists) {
+                            return ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
+                                .apiVersion("v1")
+                                .statusCode(404)
+                                .shortMessage("Not Found")
+                                .description("File không thuộc repository này")
+                                .data(null)
+                                .timestamp(Instant.now())
+                                .requestId(UUID.randomUUID().toString())
+                                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files/" + fileId)
+                                .build());
+                        }
+                    }
+                    
+                    return ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
+                        .apiVersion("v1")
+                        .statusCode(200)
+                        .shortMessage("Success")
+                        .description("File hợp lệ trong repository")
+                        .data(repository)
+                        .timestamp(Instant.now())
+                        .requestId(UUID.randomUUID().toString())
+                        .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files/" + fileId)
+                        .build());
+                })
+                .orElse(ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
+                    .apiVersion("v1")
+                    .statusCode(404)
+                    .shortMessage("Not Found")
+                    .description("Repository không tồn tại")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files/" + fileId)
+                    .build()));
+
+        } catch (Exception e) {
+            log.error("Error validating file in repository: {} - {}", repositoryId, fileId, e);
+            return ResponseEntity.ok(RestResponse.<RepositoryDTO>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi kiểm tra file: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files/" + fileId)
                 .build());
         }
     }

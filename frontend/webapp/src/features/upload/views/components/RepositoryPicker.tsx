@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react'
 import { useMyRepositories, useCreateRepository } from '@features/repositories/models/api/repositoryApi'
 import { useMyOrganizations } from '@features/organizations'
 import { useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi'
-import { Flex, Stack, Button, Text, Tabs, TabList, CommonTab } from '@shared/components'
+import { Flex, Stack, Button, Text } from '@shared/components'
+import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs'
 
 interface RepositoryPickerProps {
   value?: string

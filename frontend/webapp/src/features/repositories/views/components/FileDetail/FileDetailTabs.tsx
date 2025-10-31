@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText, Info, Building2, Tag, DollarSign, Bell, AlertTriangle, Folder, File, MessageCircle } from 'lucide-react'
+import { FileText, Info, Building2, Tag, DollarSign, Bell, AlertTriangle, Folder, File, MessageCircle, Shield, Database, GitBranch, FileCheck } from 'lucide-react'
 
 // Contract tab components
 import { ContractOverviewTab } from './contract/ContractOverviewTab'
@@ -19,14 +19,18 @@ import { MetadataTab } from './overview/MetadataTab'
 import { NotesTab } from './overview/NotesTab'
 import { HistoryTab } from './overview/HistoryTab'
 import { PermissionsTab } from './overview/PermissionsTab'
+import { AuditTab } from './overview/AuditTab'
+import { SecurityTab } from './overview/SecurityTab'
+import { StorageTab } from './overview/StorageTab'
+import { VersioningTab } from './overview/VersioningTab'
 
 // Placeholder for comments
 const CommentsMainTab = () => <div className="p-4 text-gray-500">Chức năng bình luận đang được phát triển</div>
 
 interface FileDetailTabsProps {
   fileData: any
-  onTabChange?: (tabId: string) => void
-  contractSummary?: any
+  isEditing?: boolean
+  onDataChange?: (newData: any) => void
 }
 
 // mainTabs - File focused
@@ -68,6 +72,10 @@ export const fileDetailSubTabs = [
   { id: 'content', name: 'Nội dung', icon: FileText, description: 'Nội dung file' },
   { id: 'ocr', name: 'Nội dung OCR', icon: FileText, description: 'Văn bản OCR' },
   { id: 'metadata', name: 'Siêu dữ liệu', icon: Tag, description: 'Metadata file' },
+  { id: 'audit', name: 'Kiểm toán', icon: FileCheck, description: 'Lịch sử kiểm toán' },
+  { id: 'security', name: 'Bảo mật', icon: Shield, description: 'Bảo mật file' },
+  { id: 'storage', name: 'Lưu trữ', icon: Database, description: 'Thông tin lưu trữ' },
+  { id: 'versioning', name: 'Phiên bản', icon: GitBranch, description: 'Quản lý versions' },
   { id: 'notes', name: 'Ghi chú', icon: MessageCircle, description: 'Ghi chú' },
   { id: 'history', name: 'Lịch sử', icon: Info, description: 'Lịch sử thay đổi' },
   { id: 'permissions', name: 'Quyền hạn', icon: Tag, description: 'Quyền truy cập' },
@@ -84,7 +92,7 @@ export function getSubTabsFor(mainTabId: string) {
   return commentsSubTabs;
 }
 
-export function FileDetailTabs({ fileData, onTabChange, contractSummary, activeMainTab = 'overview', activeSubTab = 'details' }: FileDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
+export function FileDetailTabs({ fileData, activeMainTab = 'overview', activeSubTab = 'details' }: FileDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
   if (!fileData) return null;
 
   const renderSubTabContent = () => {
@@ -104,6 +112,14 @@ export function FileDetailTabs({ fileData, onTabChange, contractSummary, activeM
           return <OCRTab fileData={fileData} />
         case 'metadata':
           return <MetadataTab fileData={fileData} />
+        case 'audit':
+          return <AuditTab fileData={fileData} />
+        case 'security':
+          return <SecurityTab fileData={fileData} />
+        case 'storage':
+          return <StorageTab fileData={fileData} />
+        case 'versioning':
+          return <VersioningTab fileData={fileData} />
         case 'notes':
           return <NotesTab fileData={fileData} />
         case 'history':

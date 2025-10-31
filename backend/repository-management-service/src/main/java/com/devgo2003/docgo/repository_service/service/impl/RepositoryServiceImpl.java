@@ -2,16 +2,21 @@ package com.devgo2003.docgo.repository_service.service.impl;
 
 import com.devgo2003.docgo.repository_service.dto.RepositoryDTO;
 import com.devgo2003.docgo.repository_service.entity.RepositoryEntity;
+import com.devgo2003.docgo.repository_service.entity.FileEntity;
 import com.devgo2003.docgo.repository_service.repository.RepositoryRepository;
+import com.devgo2003.docgo.repository_service.repository.FileRepository;
 import com.devgo2003.docgo.repository_service.service.IRepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +26,7 @@ import java.util.UUID;
 public class RepositoryServiceImpl implements IRepositoryService {
 
     private final RepositoryRepository repositoryRepository;
+    private final FileRepository fileRepository;
 
     @Override
     public Page<RepositoryDTO> getAllRepositories(Pageable pageable) {
@@ -60,7 +66,35 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Optional<RepositoryDTO> getRepositoryById(String id) {
         log.info("Getting repository by id: {}", id);
         return repositoryRepository.findByIdAndIsDeletedFalse(id)
-            .map(RepositoryDTO::fromEntity);
+            .map(repo -> {
+                RepositoryDTO dto = RepositoryDTO.fromEntity(repo);
+                
+                // Lấy top 5 files mới nhất theo updatedAt
+                try {
+                    Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "updatedAt"));
+                    Page<FileEntity> filesPage = fileRepository.findByRepositoryIdAndIsDeletedFalse(id, pageable);
+                    
+                    List<Map<String, Object>> topFiles = filesPage.getContent().stream()
+                        .map(file -> {
+                            Map<String, Object> fileMap = new java.util.HashMap<>();
+                            fileMap.put("id", file.getId());
+                            fileMap.put("name", file.getOverview() != null ? file.getOverview().get("title") : "Unknown");
+                            fileMap.put("updatedAt", file.getUpdatedAt());
+                            fileMap.put("createdAt", file.getCreatedAt());
+                            fileMap.put("size", file.getMetadata() != null ? file.getMetadata().get("file.size") : null);
+                            fileMap.put("contentType", file.getOverview() != null ? file.getOverview().get("contentType") : null);
+                            return fileMap;
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+                    
+                    dto.setFiles(topFiles);
+                } catch (Exception e) {
+                    log.warn("Failed to load files for repository {}: {}", id, e.getMessage());
+                    dto.setFiles(new java.util.ArrayList<>());
+                }
+                
+                return dto;
+            });
     }
 
     @Override

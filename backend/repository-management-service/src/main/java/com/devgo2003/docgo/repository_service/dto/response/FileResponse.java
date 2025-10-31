@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -33,9 +32,9 @@ public class FileResponse {
     private String mimeType;
     private Long size;
     
-    // Timestamps
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    // Timestamps (ISO-8601 String with timezone)
+    private String createdAt;
+    private String updatedAt;
     private String createdBy;
     private String updatedBy;
     

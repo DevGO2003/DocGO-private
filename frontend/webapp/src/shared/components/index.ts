@@ -20,6 +20,7 @@ export * from './UIComponents/ProgressBar';
 export * from './UIComponents/Checkbox';
 export * from './UIComponents/Font';
 export * from './UIComponents/Icon';
+export * from './UIComponents/PreviewPanel';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

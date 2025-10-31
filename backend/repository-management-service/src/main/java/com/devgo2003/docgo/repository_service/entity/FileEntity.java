@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -22,6 +21,13 @@ import java.util.ArrayList;
 public class FileEntity {
     @Id
     private String id;  // UUID v7 format
+    
+    @Field
+    private String repositoryId;  // Reference to repository
+    
+    @Field
+    @Builder.Default
+    private Boolean isDeleted = false;  // Soft delete flag
     
     // ==================== 8 MAIN SECTIONS (v3 Schema) ====================
     
@@ -107,6 +113,31 @@ public class FileEntity {
     public String getRegion() { return (String) overview.get("region"); }
     public void setRegion(String region) { overview.put("region", region); }
     
+    public String getArchiveSerial() { return (String) overview.get("archiveSerial"); }
+    public void setArchiveSerial(String archiveSerial) { overview.put("archiveSerial", archiveSerial); }
+    
+    @SuppressWarnings("unchecked")
+    public List<String> getTags() { 
+        Object tags = overview.get("tags");
+        if (tags instanceof List) {
+            return (List<String>) tags;
+        }
+        return new ArrayList<>();
+    }
+    public void setTags(List<String> tags) { overview.put("tags", tags); }
+    
+    public String getCorrespondentId() { return (String) overview.get("correspondentId"); }
+    public void setCorrespondentId(String correspondentId) { overview.put("correspondentId", correspondentId); }
+    
+    public String getStoragePath() { return (String) overview.get("storagePath"); }
+    public void setStoragePath(String storagePath) { overview.put("storagePath", storagePath); }
+    
+    public String getDateCreated() { return (String) overview.get("dateCreated"); }
+    public void setDateCreated(String dateCreated) { overview.put("dateCreated", dateCreated); }
+    
+    public String getDescription() { return (String) overview.get("description"); }
+    public void setDescription(String description) { overview.put("description", description); }
+    
     // Metadata helpers
     @SuppressWarnings("unchecked")
     public String getMimeType() { 
@@ -141,27 +172,23 @@ public class FileEntity {
     public void setExtractedText(String extractedText) { content.put("extractedText", extractedText); }
     
     // Audit helpers
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         Object value = audit.get("createdAt");
-        if (value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof String) return LocalDateTime.parse((String) value);
-        return null;
+        return value != null ? String.valueOf(value) : null;
     }
-    public void setCreatedAt(LocalDateTime createdAt) { 
-        audit.put("createdAt", createdAt != null ? createdAt.toString() : null); 
+    public void setCreatedAt(String createdAt) { 
+        audit.put("createdAt", createdAt); 
     }
     
     public String getCreatedBy() { return (String) audit.get("createdBy"); }
     public void setCreatedBy(String createdBy) { audit.put("createdBy", createdBy); }
     
-    public LocalDateTime getUpdatedAt() {
+    public String getUpdatedAt() {
         Object value = audit.get("updatedAt");
-        if (value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof String) return LocalDateTime.parse((String) value);
-        return null;
+        return value != null ? String.valueOf(value) : null;
     }
-    public void setUpdatedAt(LocalDateTime updatedAt) { 
-        audit.put("updatedAt", updatedAt != null ? updatedAt.toString() : null); 
+    public void setUpdatedAt(String updatedAt) { 
+        audit.put("updatedAt", updatedAt); 
     }
     
     public String getUpdatedBy() { return (String) audit.get("updatedBy"); }

@@ -19,6 +19,8 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FullFileResponseDto {
     private String id;
+    private String repositoryId;
+    private String userId;
     
     // Simple section - typed DTO
     private OverviewDto overview;

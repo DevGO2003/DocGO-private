@@ -467,7 +467,9 @@
       "manage": "Document Management",
       "empty": {
         "notFound": "No matching documents found.",
-        "clearSearch": "Clear search"
+        "clearSearch": "Clear search",
+        "refreshing": "Refreshing...",
+        "refresh": "Refresh"
       },
       "table": {
         "document": "Document",
@@ -482,7 +484,39 @@
         "repository": "Repository",
         "files": "Files"
       },
-      "loading": "Loading files..."
+      "loading": "Loading files...",
+      "tabs": {
+        "all": "All files",
+        "contract": "Contract files"
+      },
+      "filters": {
+        "search": "Search documents...",
+        "sortBy": "Sort by",
+        "sortDirection": "Order",
+        "refresh": "Refresh",
+        "showAdvanced": "Show advanced",
+        "hideAdvanced": "Hide advanced",
+        "classification": "Classification",
+        "fileType": "File type",
+        "timeRange": "Time range",
+        "reset": "Reset",
+        "viewGrid": "Grid",
+        "viewList": "List",
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "sortOptions": {
+          "createdAt": "Created date",
+          "fileName": "Name",
+          "status": "Status",
+          "totalValue": "Value",
+          "uploadedAt": "Upload date"
+        },
+        "sortDirections": {
+          "asc": "Ascending",
+          "desc": "Descending"
+        }
+      }
     }
   },
   "notFound": {

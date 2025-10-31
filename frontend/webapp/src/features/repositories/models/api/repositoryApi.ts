@@ -14,6 +14,8 @@ import {
   PaginationParams,
   PaginatedResponse,
 } from '../types/repository.types';
+import type { FileUnion } from '../types/file.types';
+import { mapFileApiToUiDocument } from '../../services/mappers/file-mapper';
 
 const BASE_PATH = '/api/v1/repository-management-service';
 
@@ -114,9 +116,9 @@ const repositoryApi = {
     return response.data.data!;
   },
 
-  getFileById: async (id: string): Promise<FileItem> => {
-    const response = await apiClient.get<FileItem>(`${BASE_PATH}/files/${id}`);
-    return response.data.data!;
+  getFileById: async (id: string): Promise<FileUnion> => {
+    const response = await apiClient.get<any>(`${BASE_PATH}/files/${id}`);
+    return mapFileApiToUiDocument(response.data.data as any);
   },
 
   uploadFile: async ({ file, repositoryId, tags, metadata }: FileUploadData): Promise<FileItem> => {
@@ -134,12 +136,13 @@ const repositoryApi = {
       formData.append('metadata', JSON.stringify(metadataObj));
     }
 
-    // Extract repositoryId from metadata if exists and append as repository_id (required by /api/files/upload)
+    // Append repository_id for automation-service upload API
     if (repositoryId) {
       formData.append('repository_id', repositoryId);
     }
     
-    const response = await apiClient.post<FileItem>(`${BASE_PATH}/files/upload`, formData, {
+    // Use Automation Service endpoint through API Gateway
+    const response = await apiClient.post<FileItem>(`/api/v1/automation-service/files`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

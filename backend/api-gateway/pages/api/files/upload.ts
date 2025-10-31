@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import formidable from 'formidable'
 import fs from 'fs'
 import path from 'path'
+import jwt from 'jsonwebtoken'
 
 export const config = {
   api: {
@@ -90,8 +91,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       formData.append('repository_id', String(repositoryId))
     }
 
-    // Get user ID from header
-    const userId = req.headers['x-user-id'] as string || 'system'
+    // Get user ID from JWT token or header
+    let userId = 'system'
+    const authHeader = req.headers.authorization as string
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      try {
+        // Decode JWT without verification (gateway already validated it)
+        const decoded: any = jwt.decode(token)
+        if (decoded && (decoded.userId || decoded.sub || decoded.id)) {
+          userId = decoded.userId || decoded.sub || decoded.id
+        }
+      } catch (e) {
+        // Fallback to header if JWT decode fails
+        userId = req.headers['x-user-id'] as string || 'system'
+      }
+    } else {
+      // Fallback to x-user-id header
+      userId = req.headers['x-user-id'] as string || 'system'
+    }
 
     // Add query parameters for Automation Service
     const folder = Array.isArray(fields.folder) ? fields.folder[0] : fields.folder || 'documents'

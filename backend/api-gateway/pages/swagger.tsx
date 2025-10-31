@@ -199,6 +199,23 @@ export default function SwaggerPage() {
       }
     }, 10000);
 
+    // Override fetch để thêm Authorization header
+    const originalFetch = window.fetch;
+    window.fetch = function(...args: any[]) {
+      const token = localStorage.getItem('authToken');
+      if (token && typeof args[1] === 'object') {
+        args[1].headers = args[1].headers || {};
+        args[1].headers['Authorization'] = `Bearer ${token}`;
+      } else if (token) {
+        args[1] = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+      }
+      return originalFetch.apply(this, args);
+    };
+
     fetch(specUrl)
       .then(async r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -208,15 +225,22 @@ export default function SwaggerPage() {
         setSpec(json);
         setIsLoadingSpec(false);
         clearTimeout(timeout);
+        // Restore original fetch
+        window.fetch = originalFetch;
       })
       .catch(e => {
         setError(`Không tải được spec từ ${selectedService}: ${e.message}`);
         setIsLoadingSpec(false);
         setSwaggerUIError(true);
         clearTimeout(timeout);
+        // Restore original fetch
+        window.fetch = originalFetch;
       });
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      window.fetch = originalFetch;
+    };
   }, [selectedService, serviceConnectionMapping]);
 
   return (
@@ -294,6 +318,46 @@ export default function SwaggerPage() {
             </div>
           )}
 
+          {/* Authorization Token Input */}
+          <div className="auth-token-section">
+            <label htmlFor="auth-token">🔐 Bearer Token:</label>
+            <input 
+              id="auth-token"
+              type="password" 
+              placeholder="Nhập JWT token của bạn"
+              onChange={(e) => {
+                localStorage.setItem('authToken', e.target.value);
+                console.log('Token saved to localStorage');
+              }}
+              defaultValue={typeof window !== 'undefined' ? localStorage.getItem('authToken') || '' : ''}
+              className="auth-token-input"
+            />
+            <button 
+              onClick={() => {
+                const token = (document.getElementById('auth-token') as HTMLInputElement)?.value;
+                if (token) {
+                  localStorage.setItem('authToken', token);
+                  alert('✅ Token đã được lưu! Tất cả request sẽ tự động thêm Authorization header.');
+                } else {
+                  alert('⚠️ Vui lòng nhập token');
+                }
+              }}
+              className="auth-token-btn"
+            >
+              💾 Lưu Token
+            </button>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('authToken');
+                (document.getElementById('auth-token') as HTMLInputElement).value = '';
+                alert('✅ Token đã bị xóa');
+              }}
+              className="auth-token-clear-btn"
+            >
+              🗑️ Xóa Token
+            </button>
+          </div>
+
           {/* Swagger UI */}
           <div className="swagger-ui-container">
             {isLoadingSpec ? (
@@ -324,21 +388,6 @@ export default function SwaggerPage() {
                 showExtensions={true}
                 showCommonExtensions={true}
                 tryItOutEnabled={true}
-                onComplete={() => {
-                  console.log('Swagger UI loaded successfully');
-                  setSwaggerUIError(false);
-                }}
-                onFailure={(error: any) => {
-                  console.error('Swagger UI failed to load:', error);
-                  setSwaggerUIError(true);
-                }}
-                requestInterceptor={(request: any) => {
-                  return request;
-                }}
-                responseInterceptor={(response: any) => {
-                  console.log('Swagger Response:', response);
-                  return response;
-                }}
               />
             )}
           </div>
@@ -615,6 +664,77 @@ export default function SwaggerPage() {
         .endpoint-description {
           color: #666;
           font-size: 0.9rem;
+        }
+
+        /* Authorization Token Section */
+        .auth-token-section {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 15px;
+          background: #f0f7ff;
+          border: 1px solid #b3d9ff;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+        }
+
+        .auth-token-section label {
+          font-weight: 600;
+          color: #333;
+          white-space: nowrap;
+        }
+
+        .auth-token-input {
+          flex: 1;
+          min-width: 250px;
+          padding: 8px 12px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-family: 'Courier New', monospace;
+        }
+
+        .auth-token-input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-token-btn {
+          background: #667eea;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .auth-token-btn:hover {
+          background: #5568d3;
+          transform: translateY(-2px);
+          box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-token-clear-btn {
+          background: #f44336;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .auth-token-clear-btn:hover {
+          background: #d32f2f;
+          transform: translateY(-2px);
+          box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
         }
 
         /* Swagger UI Container */

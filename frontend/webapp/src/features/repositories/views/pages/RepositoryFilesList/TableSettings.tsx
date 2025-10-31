@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@shared/components'; // Assume shared Dialog
+import { Dialog } from '@shared/components';
 import { Checkbox } from '@shared/components';
 import { Button } from '@shared/components';
 
@@ -35,27 +35,28 @@ export const TableSettings: React.FC<TableSettingsProps> = ({ columns, onColumns
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Table Settings</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {localColumns.map(col => (
-            <div key={col.key} className="flex items-center justify-between">
-              <span>{col.label}</span>
-              <Checkbox 
-                checked={col.visible} 
-                onCheckedChange={() => handleToggleColumn(col.key)}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      title="Table Settings"
+      footer={
+        <>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSave}>Save</Button>
-        </div>
-      </DialogContent>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {localColumns.map(col => (
+          <div key={col.key} className="flex items-center justify-between">
+            <span>{col.label}</span>
+            <Checkbox 
+              checked={col.visible} 
+              onCheckedChange={() => handleToggleColumn(col.key)}
+            />
+          </div>
+        ))}
+      </div>
     </Dialog>
   );
 };
