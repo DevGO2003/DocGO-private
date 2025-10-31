@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { formatDate } from '@shared/utils/dateFormatter';
 import { motion } from 'framer-motion';
 import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
 import {
@@ -221,7 +222,7 @@ export const OrganizationList = () => {
                           <div className="flex items-center gap-1 text-gray-500">
                             <Calendar className="w-3 h-3" />
                             <span>
-                              {new Date(org.createdAt).toLocaleDateString()}
+                              {formatDate(org.createdAt)}
                             </span>
                           </div>
                         </div>

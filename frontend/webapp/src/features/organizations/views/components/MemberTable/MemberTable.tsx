@@ -4,6 +4,7 @@ import { Button } from '@shared/components';
 import { RoleBadge, PermissionBadge } from '@/features/organizations';
 import type { OrganizationMember, MemberRole } from '@/features/organizations';
 import { useRemoveMember } from '@/features/organizations';
+import { formatDate } from '@shared/utils/dateFormatter';
 
 interface MemberTableProps {
   members: OrganizationMember[];
@@ -164,7 +165,7 @@ export const MemberTable = ({
 
                   {/* Joined Date */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(member.joinedAt).toLocaleDateString()}
+                    {formatDate(member.joinedAt)}
                   </td>
 
                   {/* Actions */}
