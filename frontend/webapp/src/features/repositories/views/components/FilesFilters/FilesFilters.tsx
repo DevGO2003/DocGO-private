@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components'; // Assume shared Select
+import { Select } from '@shared/components'; // CommonSelect as Select
 // Import MultiSelect if available, else use checkboxes for tags
 
 export type ViewMode = 'grid' | 'list';
@@ -93,17 +93,16 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
             <label className="text-xs font-medium text-gray-700 mb-1 block">
               {t('status')}
             </label>
-            <Select value={status} onValueChange={onStatusChange}>
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder={t('allStatus')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">{t('allStatus')}</SelectItem>
-                <SelectItem value="DRAFT">{t('draft')}</SelectItem>
-                <SelectItem value="ACTIVE">{t('active')}</SelectItem>
-                {/* Add more statuses */}
-              </SelectContent>
-            </Select>
+            <Select
+              value={status}
+              onChange={(e) => onStatusChange(e.target.value)}
+              className="text-sm"
+              options={[
+                { value: 'ALL', label: t('allStatus') },
+                { value: 'DRAFT', label: t('draft') },
+                { value: 'ACTIVE', label: t('active') },
+              ]}
+            />
           </div>
 
           {/* Type Dropdown */}
@@ -111,16 +110,15 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
             <label className="text-xs font-medium text-gray-700 mb-1 block">
               {t('type')}
             </label>
-            <Select value={type} onValueChange={onTypeChange}>
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder={t('allTypes')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">{t('allTypes')}</SelectItem>
-                <SelectItem value="CONTRACT">{t('contract')}</SelectItem>
-                {/* Add more types */}
-              </SelectContent>
-            </Select>
+            <Select
+              value={type}
+              onChange={(e) => onTypeChange(e.target.value)}
+              className="text-sm"
+              options={[
+                { value: 'ALL', label: t('allTypes') },
+                { value: 'CONTRACT', label: t('contract') },
+              ]}
+            />
           </div>
 
           {/* Tags Multi-Select (Simple checkboxes for now) */}
@@ -147,25 +145,24 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
 
           {/* Sort */}
           <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={onSortByChange}>
-              <SelectTrigger className="w-24">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="createdAt">Created At</SelectItem>
-                <SelectItem value="title">Title</SelectItem>
-                {/* Add more */}
-              </SelectContent>
-            </Select>
-            <Select value={sortDirection} onValueChange={onSortDirectionChange as any}>
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="asc">Asc</SelectItem>
-                <SelectItem value="desc">Desc</SelectItem>
-              </SelectContent>
-            </Select>
+            <Select
+              value={sortBy}
+              onChange={(e) => onSortByChange(e.target.value)}
+              className="w-24"
+              options={[
+                { value: 'createdAt', label: 'Created At' },
+                { value: 'title', label: 'Title' },
+              ]}
+            />
+            <Select
+              value={sortDirection}
+              onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
+              className="w-20"
+              options={[
+                { value: 'asc', label: 'Asc' },
+                { value: 'desc', label: 'Desc' },
+              ]}
+            />
           </div>
         </div>
       )}
