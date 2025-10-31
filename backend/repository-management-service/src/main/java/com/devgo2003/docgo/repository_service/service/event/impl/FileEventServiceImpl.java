@@ -373,6 +373,10 @@ public class FileEventServiceImpl implements IFileEventService {
             FileEntity entity = fileRepository.findById(fileId).orElse(new FileEntity());
             entity.setId(fileId);
             
+            // Map repositoryId từ event
+            entity.setRepositoryId(asString(data.get("repositoryId")));
+            entity.setIsDeleted(false);  // Mark as not deleted
+            
             // Map basic file information
             entity.setName(asString(data.get("name")));
             entity.setContentType(asString(data.get("contentType")));
@@ -570,10 +574,7 @@ public class FileEventServiceImpl implements IFileEventService {
             FileEntity entity = fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("FileEntity not found for fileId: " + fileId));
             
-            // Map content information
-            entity.setPlaintext(asString(data.get("plaintext")));
-            entity.setExtractedText(asString(data.get("extractedText")));
-            entity.setSummary(asString(data.get("summary")));
+            // Không lưu plaintext và extractedText nữa - chỉ dùng ocr.text
             
             // Map title and JSON content
             String title = asString(data.get("title"));

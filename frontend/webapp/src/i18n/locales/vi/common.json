@@ -464,7 +464,9 @@
       "manage": "Quản lý tài liệu",
       "empty": {
         "notFound": "Không tìm thấy tài liệu phù hợp.",
-        "clearSearch": "Xóa tìm kiếm"
+        "clearSearch": "Xóa tìm kiếm",
+        "refreshing": "Đang làm mới...",
+        "refresh": "Làm mới"
       },
       "table": {
         "document": "Tài liệu",
@@ -479,7 +481,39 @@
         "repository": "Repository",
         "files": "Tệp"
       },
-      "loading": "Đang tải danh sách tệp..."
+      "loading": "Đang tải danh sách tệp...",
+      "tabs": {
+        "all": "Tất cả file",
+        "contract": "File hợp đồng"
+      },
+      "filters": {
+        "search": "Tìm kiếm tài liệu...",
+        "sortBy": "Sắp xếp theo",
+        "sortDirection": "Thứ tự",
+        "refresh": "Làm mới",
+        "showAdvanced": "Hiển thị nâng cao",
+        "hideAdvanced": "Ẩn nâng cao",
+        "classification": "Phân loại",
+        "fileType": "Loại file",
+        "timeRange": "Thời gian",
+        "reset": "Đặt lại",
+        "viewGrid": "Lưới",
+        "viewList": "Bảng",
+        "add": "Thêm",
+        "edit": "Sửa",
+        "delete": "Xóa",
+        "sortOptions": {
+          "createdAt": "Ngày tạo",
+          "fileName": "Tên",
+          "status": "Trạng thái",
+          "totalValue": "Giá trị",
+          "uploadedAt": "Ngày tải lên"
+        },
+        "sortDirections": {
+          "asc": "Tăng dần",
+          "desc": "Giảm dần"
+        }
+      }
     }
   },
   "profile": {

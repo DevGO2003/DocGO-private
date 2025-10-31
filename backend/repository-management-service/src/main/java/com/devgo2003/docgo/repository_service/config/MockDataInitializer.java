@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -47,8 +46,8 @@ public class MockDataInitializer {
         FileEntity file = new FileEntity();
         
         // Basic fields
-        file.setCreatedAt(LocalDateTime.now());
-        file.setUpdatedAt(LocalDateTime.now());
+        file.setCreatedAt(java.time.Instant.now().toString());
+        file.setUpdatedAt(java.time.Instant.now().toString());
         
         // Overview section
         Map<String, Object> overview = new HashMap<>();

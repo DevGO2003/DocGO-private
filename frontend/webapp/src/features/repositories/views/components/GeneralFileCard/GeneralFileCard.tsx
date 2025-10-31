@@ -1,4 +1,6 @@
 import React from 'react';
+import { Card, CardContent } from '@shared/components';
+import { Checkbox } from '@shared/components';
 
 export interface GeneralFileItem {
   fileId: string;
@@ -9,6 +11,11 @@ export interface GeneralFileItem {
   fileType?: string;
   fileSize?: number;
   uploadedAt?: string;
+  totalValue?: number;
+  currency?: string;
+  parties?: { name: string }[];
+  riskLevel?: string;
+  reminders?: string[];
 }
 
 const badgeClass = (status?: string) => {
@@ -30,10 +37,26 @@ const badgeClass = (status?: string) => {
   }
 };
 
-export const GeneralFileCard: React.FC<{ item: GeneralFileItem; right?: React.ReactNode }>
-  = ({ item, right }) => {
+interface GeneralFileCardProps {
+  item: GeneralFileItem;
+  right?: React.ReactNode;
+  isSelected?: boolean;
+  onSelect?: (checked: boolean) => void;
+}
+
+export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect }) => {
   return (
-    <div className="border rounded-xl p-4 hover:shadow-md transition bg-white">
+    <Card className="relative group">
+      {isSelected !== undefined && onSelect && (
+        <div className="absolute top-2 left-2 z-10">
+          <Checkbox 
+            checked={isSelected} 
+            onCheckedChange={onSelect}
+            className="border-2 border-white shadow-md"
+          />
+        </div>
+      )}
+      <CardContent className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="font-medium text-gray-900 truncate" title={item.fileName}>{item.fileName}</div>
@@ -48,12 +71,19 @@ export const GeneralFileCard: React.FC<{ item: GeneralFileItem; right?: React.Re
               <span key={tag} className="px-2 py-0.5 rounded-lg text-xs bg-indigo-50 text-indigo-700">#{tag}</span>
             ))}
           </div>
+            <div className="mt-2 space-y-1 text-xs text-gray-500">
+              {item.totalValue && <div>Value: {item.totalValue.toLocaleString()} {item.currency}</div>}
+              {item.parties && <div>Parties: {item.parties.map(p => p.name).join(', ')}</div>}
+              {item.riskLevel && <span className={`px-1 py-0.5 rounded text-xs ${item.riskLevel === 'LOW' ? 'bg-green-100' : 'bg-yellow-100'}`}>{item.riskLevel}</span>}
+              {item.reminders && <div>Reminders: {item.reminders.length}</div>}
+            </div>
           <div className="mt-2 text-xs text-gray-500">
             {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString('vi-VN') : ''}
           </div>
         </div>
         {right}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

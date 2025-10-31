@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { REPOSITORY_ROUTES, buildPath } from '@shared/constants/routes'
 import UploadLayout from '../../layouts/UploadLayout'
 import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
@@ -8,10 +9,13 @@ import UploadSuccessNotification from '../components/UploadSuccessNotification'
 import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
 import { automationFileApi } from '../../models/api/automationFileApi'
-import { Button, Text, Modal } from '@shared/components'
+import { Button, Text, Modal, PreviewPanel } from '@shared/components'
+import env from '@shared/config/env';
+import { uploadBus } from '@shared/lib/upload/uploadBus'
 
 export default function UploadPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
@@ -33,15 +37,25 @@ export default function UploadPage() {
   }, [location.search])
 
   const [showSuccess, setShowSuccess] = useState(false)
-  const [successInfo, setSuccessInfo] = useState<{fileName: string; fileSize?: string; fileType?: string} | null>(null)
+  const [successInfo, setSuccessInfo] = useState<{
+    fileName: string
+    fileSize?: string
+    fileType?: string
+    fileId?: string
+    fileUrl?: string
+    repositoryId?: string
+  } | null>(null)
   const [showError, setShowError] = useState(false)
   const [errorInfo, setErrorInfo] = useState<{ message: string; status?: number } | null>(null)
 
-  const isOfficeFile = (file: File | null) => {
-    if (!file) return false
-    const ext = file.name.split('.').pop()?.toLowerCase()
-    return ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext || '')
-  }
+  // Consume files from global drop (set first file similar to selecting in panel)
+  useEffect(() => {
+    const pending = uploadBus.consumePendingFiles()
+    if (pending && pending.length > 0) {
+      setSelectedFile(pending[0])
+    }
+  }, [location.key])
+
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -69,12 +83,20 @@ export default function UploadPage() {
 
     setOcrLoading(true)
     try {
-      await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
+      const response = await automationFileApi.uploadFile(selectedFile, selectedRepositoryId)
       const name = selectedFile.name
       const sizeStr = `${(selectedFile.size / 1024).toFixed(2)} KB`
       const type = selectedFile.type
+      const uploadData = response.data
 
-      setSuccessInfo({ fileName: name, fileSize: sizeStr, fileType: type })
+      setSuccessInfo({
+        fileName: name,
+        fileSize: sizeStr,
+        fileType: type,
+        fileId: uploadData?.fileId,
+        fileUrl: uploadData?.fileUrl,
+        repositoryId: selectedRepositoryId,
+      })
       setShowSuccess(true)
       setSelectedFile(null)
       setRecentRefreshKey((k) => k + 1)
@@ -104,7 +126,36 @@ export default function UploadPage() {
               fileType={successInfo.fileType}
               onClose={() => setShowSuccess(false)}
               onUploadMore={() => setShowSuccess(false)}
-              showActions={false}
+              onViewDetails={() => {
+                if (successInfo.fileId && successInfo.repositoryId) {
+                  navigate(buildPath(REPOSITORY_ROUTES.FILE_DETAIL, {
+                    id: successInfo.repositoryId,
+                    fileId: successInfo.fileId,
+                  }))
+                  setShowSuccess(false)
+                }
+              }}
+              onViewFile={async () => {
+                if (!successInfo?.fileId) return;
+                try {
+                  const response = await fetch(`${env.apiGatewayUrl}/api/storage/files/${successInfo.fileId}/signed-url`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}), // or { disposition: 'inline' } if needed for preview
+                  });
+                  if (!response.ok) throw new Error('Failed to get signed URL');
+                  const { data } = await response.json();
+                  if (data?.signedUrl) {
+                    window.open(data.signedUrl, '_blank');
+                  }
+                } catch (error) {
+                  console.error('Error opening file preview:', error);
+                  // Optional: alert or toast error
+                }
+              }}
+              showActions={true}
             />
           )}
 
@@ -205,45 +256,40 @@ export default function UploadPage() {
                             </Button>
                           </div>
                         </div>
-
-                        {/* New warning card for no repository */}
-                        {selectedFile && !selectedRepositoryId && (
-                          <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
-                            <p className="text-xs text-yellow-800">
-                              Vui lòng chọn kho tài liệu (repository) trước khi tải lên file này.
-                            </p>
-                          </div>
-                        )}
-
                         <Button
                           style={{ width: '100%' }}
-                          variant="primary"
+                          variant="outline"
                           onClick={handleOcrExtract}
                           disabled={!selectedFile || !selectedRepositoryId || ocrLoading}
+                          className="inline-flex items-center justify-center"
                         >
                           {ocrLoading ? (
                             <>
-                              {/* TODO: Replace svg spinner by <LoadingSpinner/> */}
-                              Đang upload...
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Đang tải lên...
                             </>
                           ) : (
                             <>
-                              {/* TODO: Replace svg icon by <IconUpload /> */}
                               Xác nhận tải tệp lên
                             </>
                           )}
                         </Button>
-                        {ocrLoading && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            Quá trình upload có thể diễn ra rất lâu, bạn có thể đi nấu mỳ trong lúc đợi :&gt;
-                          </p>
+                        {!selectedRepositoryId && (
+                          <p className="text-xs text-red-600 mt-2">Vui lòng chọn repository trước khi tải lên.</p>
                         )}
+                        <p className="text-xs text-gray-500 mt-2">
+                          Lưu ý: Sẽ mất vài phút để tải và phân tích file.
+                        </p>
                       </div>
                     ) : (
                       <div className="text-center py-4">
                         {/* TODO: Refactor icon & text layout bằng UI Kit */}
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
                           <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
@@ -269,37 +315,14 @@ export default function UploadPage() {
 
             {/* Right Column: File Preview */}
             <div className="lg:col-span-2 lg:row-span-3">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col w-full h-full">
-                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {selectedFile ? `Preview: ${selectedFile.name}` : 'Chọn file để xem trước'}
-                  </p>
-                </div>
-                <div className="p-4 overflow-visible">
-                  {selectedFile ? (
-                    <>
-                      {isOfficeFile(selectedFile) && (
-                        <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2">
-                          <p className="text-xs text-yellow-800">
-                            Lưu ý: Đây là bản xem trước tạm thời cho tài liệu văn phòng (Word/Excel/PowerPoint). Định dạng có thể không hiển thị chính xác 100%.
-                          </p>
-                        </div>
-                      )}
-                      <PreviewFactory file={selectedFile} />
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="text-center">
-                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-gray-500 font-medium">Chọn file để xem trước</p>
-                        <p className="text-sm text-gray-400 mt-1">Hỗ trợ PDF, hình ảnh, tài liệu, Excel, audio, video</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PreviewPanel
+                selectedFile={selectedFile}
+                placeholder="Chọn file để xem trước"
+                supportedFormats="Hỗ trợ PDF, hình ảnh, tài liệu, Excel, audio, video"
+                showOfficeWarning={true}
+              >
+                {selectedFile && <PreviewFactory file={selectedFile} />}
+              </PreviewPanel>
             </div>
 
       </UploadLayout>

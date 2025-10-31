@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react'
 import { useMyRepositories, useCreateRepository } from '@features/repositories/models/api/repositoryApi'
 import { useMyOrganizations } from '@features/organizations'
 import { useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi'
-import { Flex, Stack, Button, Text, Tabs, TabList, Tab } from '@shared/components'
+import { Flex, Stack, Button, Text } from '@shared/components'
+import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs'
 
 interface RepositoryPickerProps {
   value?: string
@@ -47,8 +48,8 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
         <Flex align="center" gap="8px" style={{ flexWrap: 'nowrap' }}>
           <Tabs>
             <TabList>
-              <Tab value="personal" activeValue={activeTab} onSelect={(v) => setActiveTab((v as 'personal' | 'orgs'))}>Cá nhân</Tab>
-              <Tab value="orgs" activeValue={activeTab} onSelect={(v) => setActiveTab((v as 'personal' | 'orgs'))}>Tổ chức</Tab>
+              <CommonTab value="personal" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'personal' | 'orgs')}>Cá nhân</CommonTab>
+              <CommonTab value="orgs" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'personal' | 'orgs')}>Tổ chức</CommonTab>
             </TabList>
           </Tabs>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -91,7 +92,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
                 const newName = created?.name
                 if (newId) {
                   onChange(newId, newName || '')
-                  setJustCreatedRepo({ id: newId, name: newName || newRepoName, description: created?.description })
+                  setJustCreatedRepo({ id: newId, name: newName || '', description: created?.description })
                   setSearch('')
                 }
                 setNewRepoName('')

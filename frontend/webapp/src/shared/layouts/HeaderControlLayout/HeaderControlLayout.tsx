@@ -1,9 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Replaced next/navigation
 import type { HeaderControlLayoutProps, Breadcrumb } from './types';
 import { CommonFont } from '@shared/components';
 
 function Breadcrumbs({ items }: { items?: Breadcrumb[] }) {
+  const navigate = useNavigate(); // React Router equivalent
+  
   if (!items || items.length === 0) return null;
+  
+  const handleCurrentClick = () => {
+    window.location.reload(); // Equivalent to refresh - reloads the page/component
+    // If refetch needed without full reload, pass onRefresh prop from parent
+  };
+
   return (
     <nav aria-label="Breadcrumb" className="flex items-center text-sm">
       <ol className="flex items-center gap-2">
@@ -15,7 +24,15 @@ function Breadcrumbs({ items }: { items?: Breadcrumb[] }) {
                 {b.label}
               </a>
             ) : (
-              <span className={`font-medium ${b.current ? 'text-gray-500' : 'text-gray-900'}`}>{b.label}</span>
+              <button
+                onClick={handleCurrentClick}
+                className={`font-medium cursor-pointer hover:text-indigo-600 transition-colors ${
+                  b.current ? 'text-gray-500' : 'text-gray-900'
+                }`}
+                aria-label={`Reload ${b.label}`}
+              >
+                {b.label}
+              </button>
             )}
           </li>
         ))}

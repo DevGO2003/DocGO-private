@@ -4,6 +4,7 @@ import { publicRoutes } from './publicRoutes';
 import { protectedRoutes } from './protectedRoutes';
 import { errorRoutes } from './errorRoutes';
 import { LoadingSpinner } from '@shared/components';
+import GlobalDropzone from '@shared/components/GlobalDropzone';
 
 const LoadingFallback = () => (
   // Không dùng fullScreen để tránh phủ toàn màn hình khi route đang lazy load
@@ -16,6 +17,7 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
+        <GlobalDropzone />
         <Routes>
           {/* Public routes */}
           {publicRoutes}

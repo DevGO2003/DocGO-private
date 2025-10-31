@@ -153,9 +153,9 @@ public class RepositoryController {
                 .build();
             
             // Set audit information
-            fileEntity.setCreatedAt(java.time.LocalDateTime.now());
+            fileEntity.setCreatedAt(java.time.Instant.now().toString());
             fileEntity.setCreatedBy(request.getOwnerUserId());
-            fileEntity.setUpdatedAt(java.time.LocalDateTime.now());
+            fileEntity.setUpdatedAt(java.time.Instant.now().toString());
             fileEntity.setUpdatedBy(request.getOwnerUserId());
             fileEntity.setIsDeleted(false);
             
@@ -224,7 +224,7 @@ public class RepositoryController {
             
             // Update file with new data
             updateFileFromRequest(existingFile, request);
-            existingFile.setUpdatedAt(java.time.LocalDateTime.now());
+            existingFile.setUpdatedAt(java.time.Instant.now().toString());
             existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
             
             // Save updated file
@@ -302,7 +302,7 @@ public class RepositoryController {
             
             // Perform soft delete
             existingFile.setIsDeleted(true);
-            existingFile.setUpdatedAt(java.time.LocalDateTime.now());
+            existingFile.setUpdatedAt(java.time.Instant.now().toString());
             existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
             fileService.updateFile(id, existingFile);
             
@@ -375,7 +375,7 @@ public class RepositoryController {
             
             // Restore file
             existingFile.setIsDeleted(false);
-            existingFile.setUpdatedAt(java.time.LocalDateTime.now());
+            existingFile.setUpdatedAt(java.time.Instant.now().toString());
             existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
             FileEntity restoredFile = fileService.updateFile(id, existingFile);
             

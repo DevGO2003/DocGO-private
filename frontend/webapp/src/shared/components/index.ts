@@ -14,10 +14,13 @@ export * from './UIComponents/Flex';
 export * from './UIComponents/Stack';
 export * from './UIComponents/Grid';
 export * from './UIComponents/Table';
-export * from './UIComponents/Tabs/Tabs';
+export * from './UIComponents/Tabs/CommonTabs';
 export * from './UIComponents/Modal/CreateRepositoryModal';
 export * from './UIComponents/ProgressBar';
-export * from './UIComponents/Font/CommonFont';
+export * from './UIComponents/Checkbox';
+export * from './UIComponents/Font';
+export * from './UIComponents/Icon';
+export * from './UIComponents/PreviewPanel';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

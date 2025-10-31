@@ -14,6 +14,8 @@ import {
   PaginationParams,
   PaginatedResponse,
 } from '../types/repository.types';
+import type { FileUnion } from '../types/file.types';
+import { mapFileApiToUiDocument } from '../../services/mappers/file-mapper';
 
 const BASE_PATH = '/api/v1/repository-management-service';
 
@@ -102,9 +104,21 @@ const repositoryApi = {
     return response.data.data!;
   },
 
-  getFileById: async (id: string): Promise<FileItem> => {
-    const response = await apiClient.get<FileItem>(`${BASE_PATH}/files/${id}`);
+  // Files by Repository
+  getRepositoryFiles: async (
+    repositoryId: string,
+    params?: PaginationParams & { searchTerm?: string; status?: string; type?: string; tags?: string[] }
+  ): Promise<PaginatedResponse<FileItem>> => {
+    const response = await apiClient.get<PaginatedResponse<FileItem>>(
+      `${BASE_PATH}/repositories/${repositoryId}/files`,
+      { params }
+    );
     return response.data.data!;
+  },
+
+  getFileById: async (id: string): Promise<FileUnion> => {
+    const response = await apiClient.get<any>(`${BASE_PATH}/files/${id}`);
+    return mapFileApiToUiDocument(response.data.data as any);
   },
 
   uploadFile: async ({ file, repositoryId, tags, metadata }: FileUploadData): Promise<FileItem> => {
@@ -122,7 +136,13 @@ const repositoryApi = {
       formData.append('metadata', JSON.stringify(metadataObj));
     }
 
-    const response = await apiClient.post<FileItem>(`${env.apiGatewayUrl}/api/v1/automation-service/files`, formData, {
+    // Append repository_id for automation-service upload API
+    if (repositoryId) {
+      formData.append('repository_id', repositoryId);
+    }
+    
+    // Use Automation Service endpoint through API Gateway
+    const response = await apiClient.post<FileItem>(`/api/v1/automation-service/files`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -298,6 +318,14 @@ export const useFiles = (params?: PaginationParams) => {
   return useQuery({
     queryKey: ['files', params],
     queryFn: () => repositoryApi.getAllFiles(params),
+  });
+};
+
+export const useRepositoryFiles = (repositoryId: string, params?: PaginationParams & { searchTerm?: string; status?: string; type?: string; tags?: string[] }) => {
+  return useQuery({
+    queryKey: ['repository-files', repositoryId, params],
+    queryFn: () => repositoryApi.getRepositoryFiles(repositoryId, params),
+    enabled: !!repositoryId,
   });
 };
 

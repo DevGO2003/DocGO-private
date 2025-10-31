@@ -13,4 +13,5 @@ public interface FileRepository extends MongoRepository<FileEntity, String> {
     List<FileEntity> findByDocumentType(String documentType);
     List<FileEntity> findByOwnerUserId(String ownerUserId);
     Page<FileEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<FileEntity> findByRepositoryIdAndIsDeletedFalse(String repositoryId, Pageable pageable);
 }

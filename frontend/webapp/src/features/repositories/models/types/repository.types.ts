@@ -21,6 +21,17 @@ export interface Repository {
   metadata?: Record<string, any>;
   settings?: RepositorySettings;
   permissions?: RepositoryPermission[];
+  files?: RepositoryFileItem[]; // List of files in repository
+}
+
+// Simple file item for repository file list
+export interface RepositoryFileItem {
+  id: string;
+  name: string;
+  contentType?: string;
+  size?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RepositorySettings {

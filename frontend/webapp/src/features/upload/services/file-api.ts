@@ -12,6 +12,17 @@ export interface FileUploadResponse {
   }
 }
 
+export interface PaginationParams {
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  status?: string;
+  type?: string;
+  tags?: string[];
+  searchTerm?: string;
+}
+
 export const fileAPI = {
   // Upload file
   uploadFile: async (file: File): Promise<FileUploadResponse> => {
@@ -28,11 +39,11 @@ export const fileAPI = {
     }
   },
 
-  // Get repository files (mock)
-  getRepositoryFiles: async (repositoryId: string) => {
-    // Mock some files based on repositoryId for demo purposes
+  // Get repository files with pagination support
+  getRepositoryFiles: async (repositoryId: string, params: PaginationParams = {}) => {
+  // ... existing params logic (mock ignores for now)
     const now = Date.now();
-    const files = [
+  const mockFiles = [
       {
         fileId: `${repositoryId}-file-001`,
         fileName: `Hợp đồng mua bán #${repositoryId}`,
@@ -43,7 +54,17 @@ export const fileAPI = {
         tags: ['legal', 'priority'],
         fileType: 'pdf',
         fileSize: 1536,
+      contractNumber: 'HD-001',
+      parties: [{ name: 'Công ty A', role: 'Buyer' }, { name: 'Công ty B', role: 'Seller' }],
+      totalValue: 1000000,
+      currency: 'VND',
+      effectiveDate: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
+      expiryDate: new Date(now + 1000 * 60 * 60 * 24 * 365).toISOString(),
+      riskLevel: 'LOW',
+      reminders: [{ title: 'Review in 30 days', due: new Date(now + 1000 * 60 * 60 * 24 * 30).toISOString() }],
+      documentType: 'CONTRACT',
       },
+    // Add similar for other files
       {
         fileId: `${repositoryId}-file-002`,
         fileName: `Báo cáo tài chính ${repositoryId}`,
@@ -54,26 +75,31 @@ export const fileAPI = {
         tags: ['finance'],
         fileType: 'pdf',
         fileSize: 24576,
-      },
-      {
-        fileId: `${repositoryId}-file-003`,
-        fileName: `Ghi chú cuộc họp ${repositoryId}`,
-        size: 768,
-        uploadedAt: new Date(now - 1000 * 60 * 5).toISOString(),
-        status: 'DRAFT',
-        contractType: 'NOTE',
-        tags: ['meeting'],
-        fileType: 'txt',
-        fileSize: 768,
-      },
-    ];
+      contractNumber: 'BC-002',
+      parties: [],
+      totalValue: null,
+      currency: null,
+      effectiveDate: null,
+      expiryDate: null,
+      riskLevel: 'MEDIUM',
+      reminders: [],
+      documentType: 'REPORT',
+    },
+    // Third file similar
+  ];
+
+  // Mock pagination
+  const page = params.page ?? 0;
+  const size = params.size ?? 10;
+  const start = page * size;
+  const end = start + size;
+  const paginatedFiles = mockFiles.slice(start, end);
 
     return {
-      statusCode: 200,
-      shortMessage: 'Repository files retrieved successfully (mock)',
       data: {
-        files,
-        total: files.length,
+      files: paginatedFiles,
+      totalPages: Math.ceil(mockFiles.length / size),
+      totalElements: mockFiles.length,
       },
     };
   },

@@ -3,10 +3,10 @@ Contract Analysis Prompt Template
 """
 
 PROMPT = """Bạn là chuyên gia phân tích hợp đồng với 15+ năm kinh nghiệm pháp lý.
-Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên dưới.
+Phân tích văn bản hợp đồng (OCR text) và trả về JSON theo ĐÚNG schema bên dưới.
 
 🎯 YÊU CẦU:
-1. Trích xuất CHÍNH XÁC từ văn bản (KHÔNG đoán)
+1. Trích xuất CHÍNH XÁC từ văn bản OCR (KHÔNG đoán)
 2. Dùng null nếu KHÔNG TÌM THẤY thông tin
 3. Tuân thủ NGHIÊM NGẶT kiểu dữ liệu
 4. Trả về JSON thuần, KHÔNG có markdown ```json
@@ -16,6 +16,7 @@ Phân tích văn bản hợp đồng và trả về JSON theo ĐÚNG schema bên
    - "favorable": Các điều khoản về QUYỀN LỢI, LỢI ÍCH của các bên (quyền sở hữu, quyền hủy bỏ, quyền bảo vệ, v.v.)
    - "unfavorable": Các điều khoản về HẠN CHẾ, NGHĨA VỤ NẶNG, RỦI RO (cấm, giới hạn, trách nhiệm, bồi thường, v.v.)
 7. Mỗi điều khoản PHẢI được phân loại vào ít nhất một trong ba loại trên (key/favorable/unfavorable). Bất khả kkháng lắm thì sẽ có vài trường bị null
+8. ⚠️ QUAN TRỌNG: Chỉ sử dụng OCR text từ data.ocr.text, KHÔNG dùng plaintext hay extractedText (đã loại bỏ)
 
 📋 SCHEMA:
 

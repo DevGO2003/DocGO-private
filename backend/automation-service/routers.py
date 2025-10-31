@@ -72,7 +72,15 @@ async def documents_progress_ws(websocket: WebSocket, document_id: str):
         await websocket_manager.disconnect(websocket, document_id)
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), 'results')
-os.makedirs(RESULTS_DIR, exist_ok=True)
+try:
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+except FileExistsError:
+    # Directory already exists as a file, remove it and create directory
+    if os.path.isfile(RESULTS_DIR):
+        os.remove(RESULTS_DIR)
+        os.makedirs(RESULTS_DIR, exist_ok=True)
+except Exception as e:
+    print(f"Warning: Could not create results directory: {e}")
 
 
 def read_docx(file_path: str) -> str:
