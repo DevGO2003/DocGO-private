@@ -1,44 +1,21 @@
 import type { FileApiResponse } from '../types'
+import { apiClient } from '@shared/lib/api/apiClient'
 
-const BASE_URL = '/api' // API Gateway endpoint
-
-export async function fetchFileById(id: string, init?: RequestInit): Promise<FileApiResponse> {
-  const url = `${BASE_URL}/v1/repository-management-service/files/${encodeURIComponent(id)}`
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    ...init,
-  })
-  if (!res.ok) {
-    throw new Error(`Fetch file failed: ${res.status} ${res.statusText}`)
-  }
-  return res.json()
+export async function fetchFileById(id: string): Promise<FileApiResponse> {
+  const url = `/api/v1/repository-management-service/files/${encodeURIComponent(id)}`
+  const res = await apiClient.get<FileApiResponse>(url)
+  return res.data as unknown as FileApiResponse
 }
 
-export async function uploadFile(file: File, init?: RequestInit): Promise<FileApiResponse> {
+export async function uploadFile(file: File): Promise<FileApiResponse> {
   const formData = new FormData()
   formData.append('file', file)
-
-  const url = `${BASE_URL}/v1/repository-management-service/files/upload`
-  const res = await fetch(url, {
-    method: 'POST',
-    body: formData,
-    ...init,
-  })
-  if (!res.ok) {
-    throw new Error(`Upload file failed: ${res.status} ${res.statusText}`)
-  }
-  return res.json()
+  const url = `/api/v1/repository-management-service/files/upload`
+  const res = await apiClient.post<FileApiResponse>(url, formData)
+  return res.data as unknown as FileApiResponse
 }
 
-export async function deleteFile(id: string, init?: RequestInit): Promise<void> {
-  const url = `${BASE_URL}/v1/repository-management-service/files/${encodeURIComponent(id)}`
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers: { Accept: 'application/json' },
-    ...init,
-  })
-  if (!res.ok) {
-    throw new Error(`Delete file failed: ${res.status} ${res.statusText}`)
-  }
+export async function deleteFile(id: string): Promise<void> {
+  const url = `/api/v1/repository-management-service/files/${encodeURIComponent(id)}`
+  await apiClient.delete<void>(url)
 }

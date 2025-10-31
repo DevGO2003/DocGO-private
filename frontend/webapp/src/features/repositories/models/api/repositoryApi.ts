@@ -102,6 +102,18 @@ const repositoryApi = {
     return response.data.data!;
   },
 
+  // Files by Repository
+  getRepositoryFiles: async (
+    repositoryId: string,
+    params?: PaginationParams & { searchTerm?: string; status?: string; type?: string; tags?: string[] }
+  ): Promise<PaginatedResponse<FileItem>> => {
+    const response = await apiClient.get<PaginatedResponse<FileItem>>(
+      `${BASE_PATH}/repositories/${repositoryId}/files`,
+      { params }
+    );
+    return response.data.data!;
+  },
+
   getFileById: async (id: string): Promise<FileItem> => {
     const response = await apiClient.get<FileItem>(`${BASE_PATH}/files/${id}`);
     return response.data.data!;
@@ -127,7 +139,7 @@ const repositoryApi = {
       formData.append('repository_id', repositoryId);
     }
     
-    const response = await apiClient.post<FileItem>(`${env.apiGatewayUrl}/api/files/upload`, formData, {
+    const response = await apiClient.post<FileItem>(`${BASE_PATH}/files/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -303,6 +315,14 @@ export const useFiles = (params?: PaginationParams) => {
   return useQuery({
     queryKey: ['files', params],
     queryFn: () => repositoryApi.getAllFiles(params),
+  });
+};
+
+export const useRepositoryFiles = (repositoryId: string, params?: PaginationParams & { searchTerm?: string; status?: string; type?: string; tags?: string[] }) => {
+  return useQuery({
+    queryKey: ['repository-files', repositoryId, params],
+    queryFn: () => repositoryApi.getRepositoryFiles(repositoryId, params),
+    enabled: !!repositoryId,
   });
 };
 

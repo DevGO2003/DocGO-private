@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent } from '@shared/components';
 import { Flex, Text } from '@shared/components';
 import { ControlMainLayout } from '@shared/layouts';
-import { fileAPI } from '@features/upload/services/file-api';
+import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { MainTabsNav } from '@features/repositories/views/components/FileDetail/MainTabsNav';
 import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
+import { NOT_FOUND_PATH } from '@constants';
 
 interface FileDetailData {
   fileId: string;
@@ -26,23 +27,38 @@ export const RepositoryFileDetail: React.FC = () => {
   const [contractSummary, setContractSummary] = useState<any>(null);
   const [activeMainTab, setActiveMainTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('details');
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    // Kiểm tra repository ID có hợp lệ không
+    if (!id || !fileId) {
+      setNotFound(true);
+      return;
+    }
+
     let isMounted = true;
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const resp = await fileAPI.getFileDetails(fileId || '');
+        const resp = await fetchFileById(fileId || '');
         if (!isMounted) return;
-        const apiData = resp.data;
+        
+        // Kiểm tra xem file có tồn tại không
+        if (!resp || !(resp as any).data) {
+          setNotFound(true);
+          return;
+        }
+        
+        const apiData = (resp as any).data;
         const basic = apiData as FileDetailData;
         setFile(basic);
         
         // Map API data to full structure expected by tabs (like src-old)
         const mapped = {
-          id: basic.fileId,
+          id: (apiData as any)?.id ?? basic.fileId,
           title: basic.fileName,
+          overview: (apiData as any)?.overview ?? undefined,
           description: (apiData as any)?.description || '',
           status: (apiData as any)?.status || 'ACTIVE',
           contractType: (apiData as any)?.contractType || 'GENERAL',
@@ -106,7 +122,16 @@ export const RepositoryFileDetail: React.FC = () => {
         setContractSummary(null);
       } catch (e: any) {
         if (!isMounted) return;
-        setError(e?.message || 'Không thể tải chi tiết tệp');
+        // Nếu lỗi 404 hoặc file không tồn tại, redirect sang trang 404
+        if (
+          e?.response?.status === 404 ||
+          e?.response?.data?.statusCode === 404 ||
+          e?.message?.includes('404')
+        ) {
+          setNotFound(true);
+        } else {
+          setError(e?.message || 'Không thể tải chi tiết tệp');
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -115,7 +140,14 @@ export const RepositoryFileDetail: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [fileId]);
+  }, [fileId, id]);
+
+  // Redirect sang 404 nếu repository hoặc file không tồn tại
+  useEffect(() => {
+    if (notFound) {
+      navigate(NOT_FOUND_PATH, { replace: true });
+    }
+  }, [notFound, navigate]);
 
   const handleBack = () => {
     navigate('/repositories/' + (id ?? ''));

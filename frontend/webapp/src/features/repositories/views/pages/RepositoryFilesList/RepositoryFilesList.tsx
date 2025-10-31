@@ -8,7 +8,7 @@ import { Text } from '@shared/components/UIComponents/Text';
 import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
 import { Checkbox } from '@shared/components/UIComponents/Checkbox';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
-import { fileAPI } from '@features/upload/services/file-api';
+import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
 import { ControlMainLayout } from '@shared/layouts';
@@ -17,7 +17,7 @@ import { tagAPI } from '@features/tags/services/tag-api';
 // TODO: Add Tooltip and AlertDialog components to @shared/components
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shared/components';
 // import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@shared/components';
-import { repositoryAPI } from '@features/repositories/services/repository-api'; // Assume repositoryAPI
+// Use real repository API
 
 interface RepoFileItem {
   fileId: string;
@@ -178,13 +178,14 @@ export const RepositoryFilesList: React.FC = () => {
         searchTerm: debouncedSearch || undefined,
         ...params,
       };
-      const resp = await fileAPI.getRepositoryFiles(id || '', { ...fetchParams, signal: abortControllerRef.current.signal });
-      const newFiles = (resp.data.files || []).map((f: any) => ({
+      const resp = await repositoryApi.getRepositoryFiles(id || '', fetchParams);
+      const pageContent = resp?.content || [];
+      const newFiles = pageContent.map((f: any) => ({
         ...f,
         totalValue: f.totalValue ?? undefined, // Convert null to undefined
       }));
-      setTotalPages(resp.data.totalPages || 0);
-      setHasMore(newFiles.length === 10 && currentPage < totalPages - 1);
+      setTotalPages(resp.totalPages || 0);
+      setHasMore((resp.currentPage ?? 0) < (resp.totalPages ?? 0) - 1);
       if (append) {
         setFiles(prev => [...prev, ...newFiles]);
       } else {
@@ -247,8 +248,8 @@ export const RepositoryFilesList: React.FC = () => {
     const fetchRepoName = async () => {
       if (id) {
         try {
-          const resp = await repositoryAPI.getRepository(id); // Assume API
-          setRepoName(resp.data.name || id);
+          const repo = await repositoryApi.getRepositoryById(id);
+          setRepoName((repo as any)?.name || id);
         } catch (e) {
           console.error('Failed to fetch repo name');
         }

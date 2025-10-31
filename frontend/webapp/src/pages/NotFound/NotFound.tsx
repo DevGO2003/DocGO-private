@@ -52,7 +52,7 @@ export const NotFound = () => {
               transition={{ delay: 0.5 }}
               className="text-gray-600 mb-8"
             >
-              {t('notFound.description')}
+              Trang không tìm thấy hoặc đối tượng không tồn tại hoặc đã xóa.
             </motion.p>
 
             <motion.div

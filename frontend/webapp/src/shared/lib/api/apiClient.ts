@@ -15,6 +15,8 @@ export interface ApiResponse<T = any> {
 class ApiClient {
   private client: AxiosInstance
   private baseURL: string
+  private isRefreshing: boolean = false
+  private refreshPromise: Promise<boolean> | null = null
 
   constructor() {
     this.baseURL = env.apiBaseUrl
@@ -120,19 +122,61 @@ class ApiClient {
     const responseData = error.response?.data
     let message = 'Đã xảy ra lỗi'
     let statusCode = status || 500
-    if (responseData) {
-      if (responseData.statusCode) statusCode = responseData.statusCode
-      message = responseData.description || responseData.message || message
+
+    // Chuẩn hoá payload lỗi về ApiResponse nếu payload không theo chuẩn
+    const isStandard = responseData && typeof responseData === 'object' && 'statusCode' in responseData && 'apiVersion' in responseData
+    if (!isStandard) {
+      const shortMessage = (responseData?.shortMessage) || (responseData?.error) || 'Error'
+      const description = (responseData?.description) || (responseData?.message) || 'Unexpected error'
+      const normalized: ApiResponse = {
+        apiVersion: 'v1',
+        statusCode: statusCode,
+        shortMessage: String(shortMessage),
+        description: String(description),
+        data: null,
+        timestamp: new Date().toISOString(),
+        requestId: error.response?.headers?.['x-request-id'] || error.response?.data?.requestId || '',
+        path: error.config?.url || ''
+      }
+      if (error.response) {
+        error.response.data = normalized
+      }
     }
-    if (responseData?.errors && Array.isArray(responseData.errors)) {
-      const validationErrors = responseData.errors.map((e: any) => `${e.field}: ${e.message}`).join(', ')
+
+    const effective = (error.response?.data as ApiResponse) || responseData
+    if (effective) {
+      if ((effective as any).statusCode) statusCode = (effective as any).statusCode as number
+      message = (effective as any).description || (effective as any).message || message
+    }
+    if ((effective as any)?.errors && Array.isArray((effective as any).errors)) {
+      const validationErrors = (effective as any).errors.map((e: any) => `${e.field}: ${e.message}`).join(', ')
       message = `Lỗi validation: ${validationErrors}`
     }
-    if (env.isDev) console.error('[API Error]', { status: statusCode, message, url: error.config?.url, data: responseData })
+    if (env.isDev) console.error('[API Error]', { status: statusCode, message, url: error.config?.url, data: effective })
   }
 
   private async handleUnauthorized(): Promise<boolean> {
-    if (typeof window === 'undefined') return false
+    if (typeof window === 'undefined' || typeof document === 'undefined') return false
+    // Chỉ refresh khi tab đang hiển thị
+    if (document.visibilityState !== 'visible') {
+      await this.waitForVisibility()
+    }
+
+    // Hợp nhất các lần refresh đồng thời
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+    this.isRefreshing = true
+    this.refreshPromise = this.doTokenRefresh()
+    try {
+      return await this.refreshPromise
+    } finally {
+      this.isRefreshing = false
+      this.refreshPromise = null
+    }
+  }
+
+  private async doTokenRefresh(): Promise<boolean> {
     try {
       const refreshToken = localStorage.getItem('refresh_token')
       if (!refreshToken) { this.logout(); return false }
@@ -160,6 +204,20 @@ class ApiClient {
       this.logout()
     }
     return false
+  }
+
+  private async waitForVisibility(): Promise<void> {
+    if (typeof document === 'undefined') return
+    if (document.visibilityState === 'visible') return
+    await new Promise<void>((resolve) => {
+      const onChange = () => {
+        if (document.visibilityState === 'visible') {
+          document.removeEventListener('visibilitychange', onChange)
+          resolve()
+        }
+      }
+      document.addEventListener('visibilitychange', onChange, { once: true })
+    })
   }
 
   private logout() {

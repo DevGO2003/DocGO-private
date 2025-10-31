@@ -1,5 +1,5 @@
 param(
-    [string]$FilePath = "P:\DevGO2003\DocGO-private-new\documents\.docx\luu-ban-nhap-tu-dong-2.docx",
+    [string]$FilePath = ".\documents\.docx\hop-dong-xay-dung.docx",
     [string]$LogDir = ".\logs"
 )
 
@@ -31,41 +31,40 @@ $fileItem = Get-Item $FilePath
 try {
     $repositoryId = "repo-" + [guid]::NewGuid().ToString().Substring(0, 8)
     
-    # Use Invoke-WebRequest with multipart/form-data
-    $fileContent = [System.IO.File]::ReadAllBytes($fileItem.FullName)
-    $boundary = [System.Guid]::NewGuid().ToString()
-    $LF = "`r`n"
-    
-    $bodyLines = New-Object System.Collections.ArrayList
-    [void]$bodyLines.Add("--$boundary")
-    [void]$bodyLines.Add("Content-Disposition: form-data; name=`"file`"; filename=`"$($fileItem.Name)`"")
-    [void]$bodyLines.Add("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    [void]$bodyLines.Add("")
-    [void]$bodyLines.Add([System.Text.Encoding]::GetEncoding("iso-8859-1").GetString($fileContent))
-    [void]$bodyLines.Add("--$boundary")
-    [void]$bodyLines.Add("Content-Disposition: form-data; name=`"repository_id`"")
-    [void]$bodyLines.Add("")
-    [void]$bodyLines.Add($repositoryId)
-    [void]$bodyLines.Add("--$boundary--")
-    
-    $bodyString = $bodyLines -join $LF
-    $bodyBytes = [System.Text.Encoding]::GetEncoding("iso-8859-1").GetBytes($bodyString)
-    
-    $headers = @{
-        "Content-Type" = "multipart/form-data; boundary=$boundary"
-    }
-    
     try {
-        $response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $bodyBytes -ContentType "multipart/form-data; boundary=$boundary"
-    }
-    catch {
-        # Try alternative method with simpler approach
-        Write-Log "Trying alternative upload method..." "Yellow"
-        $form = @{
-            file = Get-Item $FilePath
+        $response = Invoke-RestMethod -Uri $uri -Method Post -Form @{
+            file = $fileItem
             repository_id = $repositoryId
         }
-        $response = Invoke-RestMethod -Uri $uri -Method Post -Form $form
+    }
+    catch {
+        # Try alternative method with multipart/form-data
+        Write-Log "Trying alternative upload method..." "Yellow"
+        
+        $boundary = [System.Guid]::NewGuid().ToString()
+        $LF = "`r`n"
+        
+        $fileBytes = [System.IO.File]::ReadAllBytes($FilePath)
+        $fileName = [System.IO.Path]::GetFileName($FilePath)
+        
+        $bodyLines = (
+            "--$boundary",
+            "Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"",
+            "Content-Type: application/octet-stream$LF",
+            [System.Text.Encoding]::GetEncoding("iso-8859-1").GetString($fileBytes),
+            "--$boundary",
+            "Content-Disposition: form-data; name=`"repository_id`"$LF",
+            $repositoryId,
+            "--$boundary--$LF"
+        ) -join $LF
+        
+        $bodyBytes = [System.Text.Encoding]::GetEncoding("iso-8859-1").GetBytes($bodyLines)
+        
+        $headers = @{
+            "Content-Type" = "multipart/form-data; boundary=$boundary"
+        }
+        
+        $response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $bodyBytes
     }
     
     Write-Log "[SUCCESS] Upload completed!" "Green"
@@ -77,8 +76,6 @@ try {
     $fileId = $response.data.fileId
     
     Write-Log "Event processing..." "Yellow"
-    Write-Log "Waiting 5 seconds for background processing..." "Gray"
-    Start-Sleep -Seconds 5
     Write-Log "" "White"
     
     Write-Log "[3] Checking automation service logs..." "Yellow"

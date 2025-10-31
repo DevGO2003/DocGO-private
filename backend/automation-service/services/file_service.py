@@ -31,7 +31,15 @@ class FileStorageService:
         self.max_file_size = int(os.getenv("MAX_FILE_SIZE", "104857600"))  # 100MB default
         
         # Ensure upload directory exists
-        os.makedirs(self.upload_directory, exist_ok=True)
+        try:
+            os.makedirs(self.upload_directory, exist_ok=True)
+        except FileExistsError:
+            # Directory already exists as a file, remove it and create directory
+            if os.path.isfile(self.upload_directory):
+                os.remove(self.upload_directory)
+                os.makedirs(self.upload_directory, exist_ok=True)
+        except Exception as e:
+            print(f"Warning: Could not create upload directory: {e}")
     
     def upload_file(self, file: UploadFile, folder: Optional[str] = None, user_id: Optional[str] = None) -> FileUploadResponse:
         
@@ -78,8 +86,12 @@ class FileStorageService:
                         ContentType=file.content_type or "application/octet-stream"
                     )
 
-                    # Use API endpoint instead of presigned URL to prevent direct client access to S3
-                    file_url = f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
+                    # Generate presigned URL for download (valid for 1 hour)
+                    file_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': self.s3_bucket, 'Key': s3_key},
+                        ExpiresIn=3600  # 1 hour
+                    )
                     status = "uploaded_s3"
                     message = "File đã được upload S3 thành công"
                 except Exception as s3_error:

@@ -1,7 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { withTranslation, type WithTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@shared/components';
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -12,7 +13,7 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryBase extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
@@ -39,28 +40,29 @@ export class ErrorBoundary extends Component<Props, State> {
     const currentUrl = window.location.href;
     const referrer = document.referrer;
 
-    const navigateToReferrerOrHome = () => {
+    const goHome = () => { window.location.replace('/'); };
+    const goReferrer = () => {
       try {
-        if (referrer && new URL(referrer).origin === window.location.origin) {
-          window.location.href = referrer;
-          return;
+        if (referrer) {
+          const ref = new URL(referrer);
+          if (ref.origin === window.location.origin && ref.href !== currentUrl) {
+            window.location.assign(ref.href);
+            return true;
+          }
         }
-      } catch (_) {
-        // Ignore URL parsing errors and fall through to home redirect
-      }
-      window.location.href = '/';
+      } catch {}
+      return false;
     };
 
     if (window.history.length > 1) {
-      window.history.back();
-      // If back navigation has no effect (same URL), fallback quickly
+      window.history.go(-1);
       setTimeout(() => {
         if (window.location.href === currentUrl) {
-          navigateToReferrerOrHome();
+          if (!goReferrer()) goHome();
         }
       }, 300);
     } else {
-      navigateToReferrerOrHome();
+      if (!goReferrer()) goHome();
     }
   };
 
@@ -74,18 +76,18 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
           <Card className="max-w-2xl w-full">
             <CardHeader>
-              <CardTitle className="text-red-600">⚠️ Something went wrong</CardTitle>
+              <CardTitle className="text-red-600">⚠️ {this.props.t('errorBoundary.title', 'Something went wrong')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <p className="text-gray-700">
-                  We're sorry, but something unexpected happened. Please try refreshing the page.
+                  {this.props.t('errorBoundary.message', "We're sorry, but something unexpected happened. Please try refreshing the page.")}
                 </p>
                 
                 {this.state.error && (
                   <details className="bg-gray-100 p-4 rounded-lg">
                     <summary className="cursor-pointer font-semibold text-gray-900 mb-2">
-                      Error Details
+                      {this.props.t('errorBoundary.details', 'Error Details')}
                     </summary>
                     <pre className="text-xs text-gray-700 overflow-auto">
                       {this.state.error.toString()}
@@ -99,19 +101,19 @@ export class ErrorBoundary extends Component<Props, State> {
                     variant="outline" 
                     onClick={this.handleBack}
                   >
-                    Quay lại
+                    {this.props.t('errorBoundary.back', 'Quay lại')}
                   </Button>
                   <Button 
                     variant="outline" 
                     onClick={this.handleReset}
                   >
-                    Go to Home
+                    {this.props.t('errorBoundary.home', 'Về trang chủ')}
                   </Button>
                   <Button 
                     variant="outline" 
                     onClick={() => window.location.reload()}
                   >
-                    Reload Page
+                    {this.props.t('errorBoundary.reload', 'Tải lại trang')}
                   </Button>
                 </div>
               </div>
@@ -124,3 +126,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryBase);

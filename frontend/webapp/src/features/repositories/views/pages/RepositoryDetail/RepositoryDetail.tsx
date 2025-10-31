@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useRepository } from '@features/repositories/models/api/repositoryApi';
 import { RepositoryType } from '@features/repositories/models/types';
+import { NOT_FOUND_PATH } from '@constants';
 
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +33,16 @@ export const RepositoryDetail: React.FC = () => {
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
+
+  // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
+  useEffect(() => {
+    if (!isLoading && !id) {
+      navigate(NOT_FOUND_PATH, { replace: true });
+    }
+    if (!isLoading && error) {
+      navigate(NOT_FOUND_PATH, { replace: true });
+    }
+  }, [isLoading, id, error, navigate]);
 
   const handleBack = () => {
     navigate('/repositories');
