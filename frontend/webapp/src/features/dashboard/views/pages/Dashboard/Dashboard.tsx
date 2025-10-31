@@ -11,7 +11,6 @@ import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
 import { Card, CardContent, CardHeader, CardTitle, Button, Text, LoadingSpinner } from '@shared/components';
-import { ControlMainLayout } from '@shared/layouts';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
 export const Dashboard = () => {
@@ -99,12 +98,11 @@ export const Dashboard = () => {
   };
 
   return (
-    <ControlMainLayout
+    <DashboardLayout
       title={t('dashboard.title')}
       subtitle={t('dashboard.subtitle')}
       breadcrumbs={[{ label: t('nav.dashboard'), href: '/dashboard', current: true }]}
     >
-      <DashboardLayout>
         {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -360,7 +358,6 @@ export const Dashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
-      </DashboardLayout>
-    </ControlMainLayout>
+    </DashboardLayout>
   );
 };

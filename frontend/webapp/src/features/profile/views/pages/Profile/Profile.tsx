@@ -11,7 +11,7 @@ import {
   Input,
 } from '@shared/components';
 
-import { ControlMainLayout } from '@shared/layouts';
+import ProfileLayout from '../../../layouts/ProfileLayout';
 import { useAppSelector } from '@store/hooks';
 import { useUpdateProfile } from '@features/auth';
 
@@ -59,7 +59,7 @@ export const Profile = () => {
   };
 
   return (
-    <ControlMainLayout
+    <ProfileLayout
       title={t('profile.title')}
       breadcrumbs={[{ label: t('nav.profile'), href: '/profile', current: true }]}
       loading={!user}
@@ -313,6 +313,6 @@ export const Profile = () => {
           </div>
         </div>
       )}
-    </ControlMainLayout>
+    </ProfileLayout>
   );
 }

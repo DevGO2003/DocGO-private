@@ -16,7 +16,6 @@ import type { RepositoryCreateData } from '@features/repositories/models/types/r
 import { useCreateRepository } from '@features/repositories/models/api/repositoryApi';
 import { REPOSITORY_DETAIL_PATH } from '@shared/constants';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
-import { ControlMainLayout } from '@shared/layouts';
 
 export const RepositoryList = () => {
   const navigate = useNavigate();
@@ -127,7 +126,7 @@ export const RepositoryList = () => {
   };
 
   return (
-    <ControlMainLayout
+    <RepositoryLayout
       title={t('repositories.list.title')}
       subtitle={t('repositories.list.subtitle')}
       breadcrumbs={[{ label: t('nav.repositories'), href: '/repositories', current: true }]}
@@ -153,8 +152,8 @@ export const RepositoryList = () => {
         ) : null
       }
       showToolbar={false}
+      className="min-h-full"
     >
-      <RepositoryLayout className="min-h-full">
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
@@ -238,8 +237,7 @@ export const RepositoryList = () => {
           onSubmit={handleCreateSubmit}
           isLoading={isCreating}
         />
-      </RepositoryLayout>
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 };
 

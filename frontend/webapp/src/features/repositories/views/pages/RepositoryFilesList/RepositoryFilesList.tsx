@@ -11,7 +11,7 @@ import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
-import { ControlMainLayout } from '@shared/layouts';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import TableSettings from './TableSettings';
 import { tagAPI } from '@features/tags/services/tag-api';
 // TODO: Add Tooltip and AlertDialog components to @shared/components
@@ -265,7 +265,7 @@ export const RepositoryFilesList: React.FC = () => {
   };
 
   return (
-    <ControlMainLayout
+    <RepositoryLayout
       title={t('repositories.files.title')}
       subtitle={id ? t('repositories.files.subtitle', { id }) : undefined}
       breadcrumbs={[
@@ -488,6 +488,6 @@ export const RepositoryFilesList: React.FC = () => {
           </div>
         )}
       </div>
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 }

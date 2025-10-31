@@ -1,7 +1,7 @@
 import React from 'react'
 import { ControlMainLayout } from '@shared/layouts'
 
-interface DashboardLayoutProps {
+interface SettingsLayoutProps {
   children: React.ReactNode
   className?: string
   title?: string
@@ -17,13 +17,13 @@ interface DashboardLayoutProps {
 }
 
 /**
- * DashboardLayout - Extends ControlMainLayout for dashboard feature
- *
+ * SettingsLayout - Extends ControlMainLayout for settings feature
+ * 
  * Structure:
- * - Flexible container for dashboard content
- * - Supports custom grid layouts for stats and widgets
+ * - Flexible container for settings content
+ * - Supports custom layouts for settings tabs and forms
  */
-function DashboardLayout({
+function SettingsLayout({
   children,
   className = '',
   title,
@@ -36,7 +36,7 @@ function DashboardLayout({
   loading,
   loadingText,
   extra,
-}: DashboardLayoutProps) {
+}: SettingsLayoutProps) {
   return (
     <ControlMainLayout
       title={title}
@@ -57,6 +57,5 @@ function DashboardLayout({
   )
 }
 
-export default DashboardLayout
-
+export default SettingsLayout
 

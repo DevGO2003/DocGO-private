@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
+import {
   Button,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from '@shared/components';
-import { ControlMainLayout } from '@shared/layouts';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
   ArrowLeft, 
   Settings, 
@@ -74,7 +74,7 @@ export const RepositoryDetail: React.FC = () => {
   };
 
   return (
-    <ControlMainLayout
+    <RepositoryLayout
       title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
       subtitle={repository ? undefined : t('repositories.detail.loading')}
       breadcrumbs={[
@@ -389,6 +389,6 @@ export const RepositoryDetail: React.FC = () => {
             )}
         </div>
       )}
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 };

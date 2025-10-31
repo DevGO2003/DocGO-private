@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent } from '@shared/components';
 import { Flex, Text } from '@shared/components';
-import { ControlMainLayout } from '@shared/layouts';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { MainTabsNav } from '@features/repositories/views/components/FileDetail/MainTabsNav';
 import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
@@ -226,7 +226,7 @@ export const RepositoryFileDetail: React.FC = () => {
   };
 
   return (
-    <ControlMainLayout
+    <RepositoryLayout
       title={documentData?.title || file?.fileName || 'Chi tiết tài liệu'}
       subtitle={file ? `Mã: ${file.fileId}` : undefined}
       breadcrumbs={[
@@ -338,6 +338,6 @@ export const RepositoryFileDetail: React.FC = () => {
           />
         )}
       </div>
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 }

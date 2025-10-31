@@ -19,7 +19,7 @@ import {
   Button,
   Input,
 } from '@shared/components';
-import { ControlMainLayout } from '@shared/layouts';
+import SettingsLayout from '../../layouts/SettingsLayout';
 import { useAppSelector } from '@store/hooks';
 import { useUpdateProfile, useChangePassword } from '@features/auth';
 
@@ -101,7 +101,7 @@ export const Settings = () => {
   };
 
   return (
-    <ControlMainLayout
+    <SettingsLayout
       title={t('settings.title')}
       breadcrumbs={[{ label: t('nav.settings'), href: '/settings', current: true }]}
       loading={!user}
@@ -451,7 +451,7 @@ export const Settings = () => {
           </motion.div>
         </div>
       </div>
-    </ControlMainLayout>
+    </SettingsLayout>
   );
 };
 

@@ -13,6 +13,7 @@ import {
 import { useSelector } from 'react-redux';
 import type { RootState } from '@store';
 import { ORGANIZATIONS_PATH } from '@constants';
+import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 export const OrganizationMembers = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,7 +65,24 @@ export const OrganizationMembers = () => {
   }
 
   return (
-    <>
+    <OrganizationLayout
+      title={organization?.name || ''}
+      subtitle={t('organizations.members.subtitle')}
+      breadcrumbs={[
+        { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
+        { label: organization?.name || '', href: `/organizations/${id}/workspace` },
+        { label: t('organizations.members.title'), current: true },
+      ]}
+      headerRight={(
+        <Button
+          onClick={() => setIsInviteModalOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="w-4 h-4" />
+          {t('organizations.members.inviteMember')}
+        </Button>
+      )}
+    >
       {/* Invite Member Modal */}
       <InviteMemberModal
         open={isInviteModalOpen}
@@ -75,38 +93,7 @@ export const OrganizationMembers = () => {
         }}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Header */}
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/organizations/${id}/workspace`)}
-              className="flex items-center gap-2 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {t('organizations.members.backToWorkspace')}
-            </Button>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{t('organizations.members.title')}</h1>
-                <p className="text-gray-600 mt-1">
-                  {t('organizations.members.manageFor', { name: organization.name })}
-                </p>
-              </div>
-
-              {canInviteMembers && (
-                <Button
-                  onClick={() => setIsInviteModalOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <UserPlus className="w-5 h-5" />
-                  {t('organizations.members.inviteMember')}
-                </Button>
-              )}
-            </div>
-          </div>
+      <div className="space-y-6">
 
           {/* Members Card */}
           <Card>
@@ -150,6 +137,6 @@ export const OrganizationMembers = () => {
           </div>
         </div>
       </div>
-    </>
+    </OrganizationLayout>
   );
 };

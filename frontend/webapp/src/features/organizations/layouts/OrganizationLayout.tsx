@@ -1,7 +1,7 @@
 import React from 'react'
 import { ControlMainLayout } from '@shared/layouts'
 
-interface DashboardLayoutProps {
+interface OrganizationLayoutProps {
   children: React.ReactNode
   className?: string
   title?: string
@@ -14,16 +14,19 @@ interface DashboardLayoutProps {
   loading?: boolean
   loadingText?: string
   extra?: React.ReactNode
+  primaryTabs?: React.ReactNode
+  secondaryTabs?: React.ReactNode
 }
 
 /**
- * DashboardLayout - Extends ControlMainLayout for dashboard feature
- *
+ * OrganizationLayout - Extends ControlMainLayout for organization feature
+ * 
  * Structure:
- * - Flexible container for dashboard content
- * - Supports custom grid layouts for stats and widgets
+ * - Flexible container for organization content
+ * - Supports custom layouts for organization lists, details, workspace, and members
+ * - Supports primary and secondary tabs for navigation
  */
-function DashboardLayout({
+function OrganizationLayout({
   children,
   className = '',
   title,
@@ -36,7 +39,9 @@ function DashboardLayout({
   loading,
   loadingText,
   extra,
-}: DashboardLayoutProps) {
+  primaryTabs,
+  secondaryTabs,
+}: OrganizationLayoutProps) {
   return (
     <ControlMainLayout
       title={title}
@@ -48,6 +53,8 @@ function DashboardLayout({
       toolbarContent={toolbarContent}
       loading={loading}
       loadingText={loadingText}
+      primaryTabs={primaryTabs}
+      secondaryTabs={secondaryTabs}
     >
       <div className={`w-full h-full ${className}`}>
         {children}
@@ -57,6 +64,5 @@ function DashboardLayout({
   )
 }
 
-export default DashboardLayout
-
+export default OrganizationLayout
 

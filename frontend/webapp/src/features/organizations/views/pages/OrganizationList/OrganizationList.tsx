@@ -16,6 +16,7 @@ import {
 } from '@shared/components';
 import { useMyOrganizations, CreateOrganizationDialog } from '@/features/organizations';
 import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
+import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 export const OrganizationList = () => {
   const navigate = useNavigate();
@@ -73,38 +74,37 @@ export const OrganizationList = () => {
   };
 
   return (
-    <>
+    <OrganizationLayout
+      title={t('organizations.list.title')}
+      subtitle={t('organizations.list.subtitle')}
+      breadcrumbs={[
+        { label: t('organizations.list.title'), current: true },
+      ]}
+      headerRight={(
+        <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
+          <Plus className="w-5 h-5" />
+          {t('organizations.list.new')}
+        </Button>
+      )}
+    >
       {/* Create Organization Dialog */}
       <CreateOrganizationDialog
         open={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-        <div className="max-w-7xl mx-auto">
-        {/* Header (use OrganizationHeaderLayout) */}
-        <OrganizationHeaderLayout
-          title={t('organizations.list.title')}
-          subtitle={t('organizations.list.subtitle')}
-          orgActions={(
-            <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              {t('organizations.list.new')}
-            </Button>
-          )}
-          filters={(
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                type="text"
-                placeholder={t('organizations.list.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          )}
-        />
+      <div className="space-y-6">
+        {/* Search Filter */}
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            type="text"
+            placeholder={t('organizations.list.searchPlaceholder')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
 
         {/* Loading */}
         {isLoading && <LoadingSpinner text={t('organizations.list.loading')} />}
@@ -275,8 +275,7 @@ export const OrganizationList = () => {
             )}
           </>
         )}
-        </div>
       </div>
-    </>
+    </OrganizationLayout>
   );
 };

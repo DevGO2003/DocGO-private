@@ -30,6 +30,7 @@ import { useOrganizationMembers } from '@features/organizations/models/api/organ
 import { useOrganizationContracts } from '@features/repositories/models/api/repositoryApi';
 // import { UploadContractDialog } from '@features/contract'; // Temporarily disabled
 import { ORGANIZATIONS_PATH } from '@constants';
+import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 type WorkspaceTab = 'contracts' | 'pending-approvals' | 'reports' | 'members' | 'settings';
 
@@ -107,39 +108,15 @@ export const OrganizationWorkspace = () => {
   }
 
   return (
-    <>
-      {/* Temporarily disabled - Upload Contract Dialog */}
-      {/* <UploadContractDialog
-        open={isUploadDialogOpen}
-        onClose={() => setIsUploadDialogOpen(false)}
-        organizationId={id!}
-        onSuccess={() => {
-          console.log('✅ [Workspace] Contract uploaded successfully!');
-          console.log('🔄 [Workspace] Manually triggering refetch...');
-          
-          // Force refetch contracts
-          refetchContracts().then(() => {
-            console.log('✅ [Workspace] Refetch completed!');
-          });
-          
-          // Switch to contracts tab if not already there
-          setActiveTab('contracts');
-        }}
-      /> */}
-
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate(ORGANIZATIONS_PATH)}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {t('organizations.workspace.back')}
-            </Button>
+    <OrganizationLayout
+      title={organization?.name || ''}
+      subtitle={t('organizations.workspace.subtitle')}
+      breadcrumbs={[
+        { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
+        { label: organization?.name || '', current: true },
+      ]}
+      headerRight={(
+        <div className="flex items-center gap-2">
             {/* Temporarily disabled - Upload Contract feature */}
             {/* <Button
               variant="outline"
@@ -149,20 +126,29 @@ export const OrganizationWorkspace = () => {
               <Upload className="w-4 h-4" />
               Upload Contract
             </Button> */}
-          </div>
+        </div>
+      )}
+    >
+      {/* Temporarily disabled - Upload Contract Dialog */}
+      {/* <UploadContractDialog
+        open={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        organizationId={id!}
+        onSuccess={() => {
+          console.log('✅ [Workspace] Contract uploaded successfully!');
+          console.log('🔄 [Workspace] Manually triggering refetch...');
 
-          {/* Organization Info */}
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-3xl text-white font-bold">
-                {organization.name.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{organization.name}</h1>
-              <p className="text-gray-600">{organization.description || t('organizations.workspace.settings.noDescription')}</p>
-            </div>
-          </div>
+          // Force refetch contracts
+          refetchContracts().then(() => {
+            console.log('✅ [Workspace] Refetch completed!');
+          });
+
+          // Switch to contracts tab if not already there
+          setActiveTab('contracts');
+        }}
+      /> */}
+
+      <div className="space-y-6">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
@@ -470,7 +456,6 @@ export const OrganizationWorkspace = () => {
           )}
         </motion.div>
       </div>
-      </div>
-    </>
+    </OrganizationLayout>
   );
 };
