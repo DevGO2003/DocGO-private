@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
-import { Button, Input, CreateRepositoryModal } from '@shared/components';
+import { Button, Input } from '@shared/components';
+import { CreateRepositoryModal } from '@features/repositories/views/components/CreateRepositoryModal';
 import {
   usePersonalRepositories,
   useOrganizationRepositories,
@@ -85,9 +86,11 @@ export const RepositoryList = () => {
   };
 
   const handleCreateSubmit = async (data: RepositoryCreateData) => {
+    console.log('[RepositoryList] Creating repository with data:', data);
     setIsCreating(true);
     try {
-      await createRepo.mutateAsync(data);
+      const result = await createRepo.mutateAsync(data);
+      console.log('[RepositoryList] Repository created successfully:', result);
       setIsCreateModalOpen(false);
       // Force refetch ngay tab hiện tại để hiển thị repo mới
       if (activeTab === 'PERSONAL') {
@@ -100,8 +103,15 @@ export const RepositoryList = () => {
         await queryClient.invalidateQueries({ queryKey: ['public-repositories'] });
         await queryClient.refetchQueries({ queryKey: ['public-repositories'] });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create repository:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+        config: error?.config
+      });
+      alert(`Lỗi khi tạo repository: ${error?.response?.data?.description || error?.message || 'Unknown error'}`);
     } finally {
       setIsCreating(false);
     }

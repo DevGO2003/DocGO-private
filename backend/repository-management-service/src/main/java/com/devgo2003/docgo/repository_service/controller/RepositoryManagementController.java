@@ -197,27 +197,46 @@ public class RepositoryManagementController {
     }
 
     @GetMapping("/organization")
-    @Operation(summary = "Lấy danh sách repositories tổ chức")
+    @Operation(summary = "Lấy danh sách repositories tổ chức mà user tham gia")
     public ResponseEntity<RestResponse<Page<RepositoryDTO>>> getOrganizationRepositories(
             @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "12") int size,
             @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
-            @Parameter(description = "ID của tổ chức") @RequestParam(required = false) String organizationId
+            @Parameter(description = "ID của tổ chức (optional)") @RequestParam(required = false) String organizationId
     ) {
         try {
-            // TODO: Get organizationId from user context or default
-            String currentOrgId = organizationId != null ? organizationId : "default-org";
+            // Lấy userId từ SecurityContext
+            String currentUserId = null;
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                currentUserId = p.userId;
+            }
+            if (currentUserId == null) {
+                currentUserId = "anonymous";
+            }
             
             Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
             
             Page<RepositoryDTO> repositories;
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                repositories = repositoryService.searchOrganizationRepositories(searchTerm, currentOrgId, pageable);
+            
+            // Nếu có organizationId cụ thể, lấy repos của org đó
+            if (organizationId != null && !organizationId.isEmpty()) {
+                if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                    repositories = repositoryService.searchOrganizationRepositories(searchTerm, organizationId, pageable);
+                } else {
+                    repositories = repositoryService.getOrganizationRepositories(organizationId, pageable);
+                }
             } else {
-                repositories = repositoryService.getOrganizationRepositories(currentOrgId, pageable);
+                // Nếu không có organizationId, lấy TẤT CẢ repos ORGANIZATION mà user là owner
+                // (tạm thời dùng cách này, sau có thể cải thiện bằng cách gọi organization-service để lấy danh sách org của user)
+                if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                    repositories = repositoryService.searchUserOrganizationRepositories(searchTerm, currentUserId, pageable);
+                } else {
+                    repositories = repositoryService.getUserOrganizationRepositories(currentUserId, pageable);
+                }
             }
 
             return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()

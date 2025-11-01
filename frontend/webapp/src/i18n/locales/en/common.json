@@ -228,8 +228,9 @@
         "contracts": "Contracts",
         "pendingApprovals": "Pending Approvals",
         "reports": "Reports",
+        "repositories": "Repositories",
         "members": "Members",
-        "settings": "Settings"
+        "settings": "Information"
       },
       "stats": {
         "totalContracts": "Total Contracts",
@@ -248,6 +249,10 @@
       "noPending": "No contracts pending approval",
       "reportsTitle": "Analytics & Reports",
       "noReports": "No data available for reports",
+      "repositoriesTitle": "Organization Repositories",
+      "noRepositories": "No repositories yet",
+      "repositoriesDesc": "Repositories will appear here",
+      "viewRepository": "View details",
       "membersCard": {
         "title": "Team Members",
         "manage": "Manage Members",
@@ -255,11 +260,19 @@
         "go": "Go to Members Management"
       },
       "settings": {
-        "title": "Organization Settings",
-        "general": "General Settings",
+        "title": "Organization Information",
+        "general": "General Information",
         "orgName": "Organization Name",
         "description": "Description",
-        "noDescription": "No description"
+        "noDescription": "No description",
+        "orgId": "Organization ID",
+        "createdAt": "Created At",
+        "updatedAt": "Last Updated",
+        "owner": "Owner",
+        "memberCount": "Member Count",
+        "visibility": "Visibility",
+        "public": "Public",
+        "private": "Private"
       }
     },
     "acceptInvitation": {

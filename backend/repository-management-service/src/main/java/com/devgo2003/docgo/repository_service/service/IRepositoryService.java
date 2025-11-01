@@ -15,6 +15,7 @@ public interface IRepositoryService {
     Page<RepositoryDTO> getMyRepositories(String userId, Pageable pageable);
     Page<RepositoryDTO> getPersonalRepositories(String userId, Pageable pageable);
     Page<RepositoryDTO> getOrganizationRepositories(String organizationId, Pageable pageable);
+    Page<RepositoryDTO> getUserOrganizationRepositories(String userId, Pageable pageable);
     Optional<RepositoryDTO> getRepositoryById(String id);
     RepositoryDTO createRepository(RepositoryEntity repository);
     RepositoryDTO updateRepository(String id, RepositoryEntity repository);
@@ -25,6 +26,7 @@ public interface IRepositoryService {
     Page<RepositoryDTO> searchRepositories(String searchTerm, Pageable pageable);
     Page<RepositoryDTO> searchPersonalRepositories(String searchTerm, String userId, Pageable pageable);
     Page<RepositoryDTO> searchOrganizationRepositories(String searchTerm, String organizationId, Pageable pageable);
+    Page<RepositoryDTO> searchUserOrganizationRepositories(String searchTerm, String userId, Pageable pageable);
     Page<RepositoryDTO> getPublicRepositories(Pageable pageable);
     Page<RepositoryDTO> searchPublicRepositories(String searchTerm, Pageable pageable);
 

@@ -9,6 +9,7 @@ import {
   CommonModal as Modal,
 } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
+import { useMyOrganizations } from '@features/organizations/models/api/organizationApi';
 
 interface CreateRepositoryModalProps {
   isOpen: boolean;
@@ -39,6 +40,9 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof RepositoryCreateData, string>>>({});
+  
+  // Fetch user's organizations
+  const { data: organizationsData } = useMyOrganizations({ page: 0, size: 100 });
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof RepositoryCreateData, string>> = {};
@@ -66,8 +70,13 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    console.log('[CreateRepositoryModal] Form data before validation:', formData);
+    
     if (validateForm()) {
+      console.log('[CreateRepositoryModal] Form validated, submitting:', formData);
       onSubmit(formData);
+    } else {
+      console.log('[CreateRepositoryModal] Form validation failed, errors:', errors);
     }
   };
 
@@ -150,18 +159,26 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
           {formData.type === 'ORGANIZATION' && (
             <div className="space-y-2">
               <Label htmlFor="organizationId" className="text-sm font-medium text-gray-700">
-                Tổ chức
+                Tổ chức <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={formData.organizationId || ''}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('organizationId', e.target.value)}
                 options={[
-                  { value: 'org1', label: 'Công ty ABC' },
-                  { value: 'org2', label: 'Tổ chức XYZ' },
+                  { value: '', label: '-- Chọn tổ chức --' },
+                  ...(organizationsData?.content || []).map(org => ({
+                    value: org.id,
+                    label: org.name
+                  }))
                 ]}
               />
               {errors.organizationId && (
                 <p className="text-sm text-red-600">{errors.organizationId}</p>
+              )}
+              {organizationsData?.content?.length === 0 && (
+                <p className="text-sm text-amber-600">
+                  Bạn chưa có tổ chức nào. Hãy tạo hoặc tham gia một tổ chức trước.
+                </p>
               )}
             </div>
           )}

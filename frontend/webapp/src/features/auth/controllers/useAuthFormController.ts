@@ -29,6 +29,11 @@ export const useAuthFormController = <T extends Record<string, any>>(initialValu
   const validateField = (name: string, value: any) => {
     let error = '';
 
+    // Skip validation for optional fields
+    if (name === 'rememberMe') {
+      return true;
+    }
+
     if (name === 'email') {
       error = validateEmail(value) || '';
     } else if (name === 'password') {
@@ -37,7 +42,9 @@ export const useAuthFormController = <T extends Record<string, any>>(initialValu
       error = validatePassword(value, username) || '';
     } else if (name === 'confirmPassword' && 'password' in values) {
       error = value !== values.password ? 'Passwords do not match' : '';
-    } else if (!value) {
+    } else if (name === 'username' && !value) {
+      error = 'Username is required';
+    } else if (!value && name !== 'rememberMe') {
       error = 'This field is required';
     }
 

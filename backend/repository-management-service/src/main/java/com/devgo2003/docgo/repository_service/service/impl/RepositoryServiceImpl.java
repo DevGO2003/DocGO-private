@@ -63,6 +63,15 @@ public class RepositoryServiceImpl implements IRepositoryService {
     }
 
     @Override
+    public Page<RepositoryDTO> getUserOrganizationRepositories(String userId, Pageable pageable) {
+        log.info("Getting all organization repositories for user: {} with pagination: {}", userId, pageable);
+        Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
+            RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
+        );
+        return entities.map(RepositoryDTO::fromEntity);
+    }
+
+    @Override
     public Optional<RepositoryDTO> getRepositoryById(String id) {
         log.info("Getting repository by id: {}", id);
         return repositoryRepository.findByIdAndIsDeletedFalse(id)
@@ -189,6 +198,13 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Page<RepositoryDTO> searchOrganizationRepositories(String searchTerm, String organizationId, Pageable pageable) {
         log.info("Searching organization repositories for org: {} with term: {}", organizationId, searchTerm);
         Page<RepositoryEntity> entities = repositoryRepository.searchOrganizationRepositories(searchTerm, organizationId, pageable);
+        return entities.map(RepositoryDTO::fromEntity);
+    }
+
+    @Override
+    public Page<RepositoryDTO> searchUserOrganizationRepositories(String searchTerm, String userId, Pageable pageable) {
+        log.info("Searching all organization repositories for user: {} with term: {}", userId, searchTerm);
+        Page<RepositoryEntity> entities = repositoryRepository.searchUserOrganizationRepositories(searchTerm, userId, pageable);
         return entities.map(RepositoryDTO::fromEntity);
     }
 

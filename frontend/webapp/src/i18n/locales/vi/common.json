@@ -199,8 +199,9 @@
         "contracts": "Hợp đồng",
         "pendingApprovals": "Chờ phê duyệt",
         "reports": "Báo cáo",
+        "repositories": "Kho tài liệu",
         "members": "Thành viên",
-        "settings": "Cài đặt"
+        "settings": "Thông tin"
       },
       "stats": {
         "totalContracts": "Tổng số hợp đồng",
@@ -219,6 +220,10 @@
       "noPending": "Không có hợp đồng nào đang chờ phê duyệt",
       "reportsTitle": "Phân tích & Báo cáo",
       "noReports": "Chưa có dữ liệu báo cáo",
+      "repositoriesTitle": "Kho tài liệu của tổ chức",
+      "noRepositories": "Chưa có kho tài liệu nào",
+      "repositoriesDesc": "Các kho tài liệu sẽ hiển thị tại đây",
+      "viewRepository": "Xem chi tiết",
       "membersCard": {
         "title": "Thành viên nhóm",
         "manage": "Quản lý thành viên",
@@ -226,11 +231,19 @@
         "go": "Tới trang Quản lý thành viên"
       },
       "settings": {
-        "title": "Cài đặt tổ chức",
-        "general": "Cài đặt chung",
+        "title": "Thông tin tổ chức",
+        "general": "Thông tin chung",
         "orgName": "Tên tổ chức",
         "description": "Mô tả",
-        "noDescription": "Không có mô tả"
+        "noDescription": "Không có mô tả",
+        "orgId": "Mã tổ chức",
+        "createdAt": "Ngày tạo",
+        "updatedAt": "Cập nhật gần nhất",
+        "owner": "Chủ sở hữu",
+        "memberCount": "Số lượng thành viên",
+        "visibility": "Chế độ hiển thị",
+        "public": "Công khai",
+        "private": "Riêng tư"
       }
     },
     "acceptInvitation": {

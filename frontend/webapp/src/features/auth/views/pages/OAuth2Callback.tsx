@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '@store/hooks';
-import { setCredentials } from '../../models/state/authSlice';
+import { setCredentials, setTokens, setUser } from '../../models/state/authSlice';
 import { HOME_PATH, LOGIN_PATH } from '@constants';
 import env from '@shared/config/env';
 
@@ -57,17 +57,40 @@ export const OAuth2Callback = () => {
             console.log('[OAuth2Callback] API response data:', result);
             
             if (result.data && result.data.user) {
-              // Store user info and token in Redux
-              console.log('[OAuth2Callback] Setting credentials in Redux:', result.data.user);
-              dispatch(setCredentials({ 
-                user: result.data.user, 
-                token: result.data.token || token 
-              }));
+              // Extract token data from response
+              const accessToken = result.data.token || token;
+              const refresh = result.data.refreshToken || refreshToken;
+              const expiresIn = result.data.expiresIn || 900; // Default 15 minutes
+              
+              console.log('[OAuth2Callback] Token info:', { 
+                hasAccessToken: !!accessToken, 
+                hasRefreshToken: !!refresh,
+                expiresIn 
+              });
 
-              // Store refresh token if available
-              if (result.data.refreshToken) {
-                localStorage.setItem('refreshToken', result.data.refreshToken);
+              // Store tokens with expiration info in Redux
+              if (refresh) {
+                dispatch(setTokens({
+                  accessToken,
+                  refreshToken: refresh,
+                  expiresIn
+                }));
+              } else {
+                // Fallback if no refresh token
+                dispatch(setCredentials({ 
+                  user: result.data.user, 
+                  token: accessToken,
+                  tokenData: {
+                    accessToken,
+                    refreshToken: refresh || '',
+                    expiresAt: Date.now() + (expiresIn * 1000),
+                    tokenType: 'Bearer'
+                  }
+                }));
               }
+
+              // Store user info
+              dispatch(setUser(result.data.user));
 
               console.log('[OAuth2Callback] Login successful, redirecting to home...');
               // Redirect to home
