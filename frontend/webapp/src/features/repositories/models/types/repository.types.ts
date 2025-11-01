@@ -54,7 +54,9 @@ export interface RepositoryPermission {
 export interface RepositoryCreateData {
   name: string;
   description?: string;
-  isPublic?: boolean;
+  type: RepositoryType;
+  isPublic: boolean;
+  organizationId?: string;
   tags?: string[];
 }
 

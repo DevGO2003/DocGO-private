@@ -13,9 +13,14 @@ import {
   Settings,
   BarChart3,
   AlertCircle,
-  TrendingUp,
   Search,
   File as FileIcon,
+  Info,
+  Calendar,
+  Eye,
+  EyeOff,
+  Crown,
+  Folder,
 } from 'lucide-react';
 import {
   Card,
@@ -32,12 +37,12 @@ import {
 } from '@shared/components';
 import { useOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
-import { useOrganizationContracts } from '@features/repositories/models/api/repositoryApi';
+import { useOrganizationContracts, useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi';
 // import { UploadContractDialog } from '@features/contract'; // Temporarily disabled
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
-type WorkspaceTab = 'contracts' | 'pending-approvals' | 'reports' | 'members' | 'settings';
+type WorkspaceTab = 'contracts' | 'pending-approvals' | 'reports' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,10 +74,21 @@ export const OrganizationWorkspace = () => {
     size: 50,
   });
 
+  // Fetch organization repositories
+  const { 
+    data: repositoriesData, 
+    isLoading: repositoriesLoading 
+  } = useOrganizationRepositories({
+    organizationId: id,
+    page: 0,
+    size: 20,
+  });
+
   // Debug logging
   console.log('[OrganizationWorkspace] Members Data:', membersData);
   console.log('[OrganizationWorkspace] Members Content:', membersData?.content);
   console.log('[OrganizationWorkspace] Members Loading:', membersLoading);
+  console.log('[OrganizationWorkspace] Repositories Data:', repositoriesData);
 
   // Calculate stats from real data
   const contracts = contractsData?.content || [];
@@ -87,6 +103,7 @@ export const OrganizationWorkspace = () => {
     { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
     { id: 'pending-approvals' as WorkspaceTab, label: t('organizations.workspace.tabs.pendingApprovals'), icon: Clock },
     { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: BarChart3 },
+    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: Folder },
     { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: Users },
     { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
   ];
@@ -375,6 +392,73 @@ export const OrganizationWorkspace = () => {
                 </Card>
               )}
 
+          {/* Repositories Tab */}
+          {activeTab === 'repositories' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Folder className="w-5 h-5" />
+                  {t('organizations.workspace.repositoriesTitle')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {repositoriesLoading ? (
+                  <div className="text-center py-12">
+                    <LoadingSpinner text="Đang tải danh sách kho tài liệu..." />
+                  </div>
+                ) : repositoriesData?.content && repositoriesData.content.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {repositoriesData.content.map((repo) => (
+                      <motion.div
+                        key={repo.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer bg-gradient-to-br from-gray-50 to-white"
+                        onClick={() => navigate(`/repositories/${repo.id}`)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Folder className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 truncate">{repo.name}</h4>
+                            {repo.description && (
+                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                {repo.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2">
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                repo.type === 'ORGANIZATION' 
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : repo.type === 'PERSONAL'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-purple-100 text-purple-700'
+                              }`}>
+                                {repo.type}
+                              </span>
+                              {repo.isPublic && (
+                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                  <Eye className="w-3 h-3" />
+                                  Công khai
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">{t('organizations.workspace.noRepositories')}</p>
+                    <p className="text-sm text-gray-500">{t('organizations.workspace.repositoriesDesc')}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Members Tab */}
           {activeTab === 'members' && (
             <Card>
@@ -421,11 +505,6 @@ export const OrganizationWorkspace = () => {
                           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                             {member.role || 'Member'}
                           </span>
-                          {member.createdAt && (
-                            <span className="text-xs text-gray-500">
-                              {new Date(member.createdAt).toLocaleDateString()}
-                            </span>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -450,31 +529,117 @@ export const OrganizationWorkspace = () => {
             </Card>
           )}
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Now displays full organization information */}
           {activeTab === 'settings' && (
             <Card>
               <CardHeader>
-                <CardTitle>{t('organizations.workspace.settings.title')}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  {t('organizations.workspace.settings.title')}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('organizations.workspace.settings.general')}</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      {t('organizations.workspace.settings.general')}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Organization Name */}
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <FileText className="w-5 h-5 text-blue-600 mt-1" />
+                        <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.orgName')}</p>
-                          <p className="text-sm text-gray-600">{organization.name}</p>
+                          <p className="text-sm text-gray-700 mt-1">{organization.name}</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div>
+
+                      {/* Description */}
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 md:col-span-2">
+                        <FileText className="w-5 h-5 text-green-600 mt-1" />
+                        <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.description')}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-700 mt-1">
                             {organization.description || t('organizations.workspace.settings.noDescription')}
                           </p>
                         </div>
                       </div>
+
+                      {/* Owner */}
+                      {organization.owner && (
+                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
+                          <Crown className="w-5 h-5 text-yellow-600 mt-1" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.owner')}</p>
+                            <p className="text-sm text-gray-700 mt-1">{organization.owner.username || organization.owner.email}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Member Count */}
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+                        <Users className="w-5 h-5 text-indigo-600 mt-1" />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.memberCount')}</p>
+                          <p className="text-sm text-gray-700 mt-1">{membersData?.totalElements || 0} thành viên</p>
+                        </div>
+                      </div>
+
+                      {/* Visibility */}
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg border border-pink-200">
+                        {organization.isPublic ? (
+                          <Eye className="w-5 h-5 text-pink-600 mt-1" />
+                        ) : (
+                          <EyeOff className="w-5 h-5 text-pink-600 mt-1" />
+                        )}
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.visibility')}</p>
+                          <p className="text-sm text-gray-700 mt-1">
+                            {organization.isPublic 
+                              ? t('organizations.workspace.settings.public')
+                              : t('organizations.workspace.settings.private')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Created At */}
+                      {organization.createdAt && (
+                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg border border-teal-200">
+                          <Calendar className="w-5 h-5 text-teal-600 mt-1" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.createdAt')}</p>
+                            <p className="text-sm text-gray-700 mt-1">
+                              {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Updated At */}
+                      {organization.updatedAt && (
+                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                          <Calendar className="w-5 h-5 text-orange-600 mt-1" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.updatedAt')}</p>
+                            <p className="text-sm text-gray-700 mt-1">
+                              {new Date(organization.updatedAt).toLocaleDateString('vi-VN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

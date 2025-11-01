@@ -20,12 +20,21 @@ const authApi = {
     
     console.log('[AuthAPI] Login response:', {
       statusCode: response.data.statusCode,
-      hasData: !!response.data.data
+      hasData: !!response.data.data,
+      fullResponse: response.data
     });
     
     if (!response.data.data) {
+      console.error('[AuthAPI] No data in response:', response.data);
       throw new Error(response.data.description || 'Đăng nhập thất bại');
     }
+    
+    console.log('[AuthAPI] Login data:', {
+      hasAccessToken: !!response.data.data.accessToken,
+      hasUser: !!response.data.data.user,
+      hasToken: !!(response.data.data as any).token,
+      data: response.data.data
+    });
     
     return response.data.data;
   },

@@ -22,7 +22,8 @@ export const useLoginController = () => {
       console.log('[LoginController] Login API response:', {
         hasAccessToken: !!authResponse.accessToken,
         hasUser: !!authResponse.user,
-        expiresIn: authResponse.expiresIn
+        expiresIn: authResponse.expiresIn,
+        fullResponse: authResponse
       });
 
       if (authResponse.accessToken && authResponse.user) {
@@ -45,7 +46,11 @@ export const useLoginController = () => {
         console.log('[LoginController] Navigating to dashboard...');
         navigate(DASHBOARD_PATH);
       } else {
-        console.error('[LoginController] Invalid response - missing token or user');
+        console.error('[LoginController] Invalid response - missing token or user', {
+          hasAccessToken: !!authResponse.accessToken,
+          hasUser: !!authResponse.user,
+          authResponse
+        });
         dispatch(setError('Invalid response from server'));
       }
     } catch (error: any) {
