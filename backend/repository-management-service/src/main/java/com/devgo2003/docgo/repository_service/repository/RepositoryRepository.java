@@ -108,6 +108,30 @@ public interface RepositoryRepository extends MongoRepository<RepositoryEntity, 
            "}")
     Page<RepositoryEntity> searchUserOrganizationRepositories(String searchTerm, String userId, Pageable pageable);
 
+    // Find organization repositories by list of organizationIds
+    @Query("{ " +
+           "$and: [ " +
+           "{ 'type': 'ORGANIZATION' }, " +
+           "{ 'organizationId': { $in: ?0 } }, " +
+           "{ 'isDeleted': false } " +
+           "] " +
+           "}")
+    Page<RepositoryEntity> findByTypeOrganizationAndOrganizationIdIn(List<String> organizationIds, Pageable pageable);
+
+    // Search organization repositories by list of organizationIds
+    @Query("{ " +
+           "$and: [ " +
+           "{ 'type': 'ORGANIZATION' }, " +
+           "{ 'organizationId': { $in: ?1 } }, " +
+           "{ $or: [ " +
+           "{ 'name': { $regex: ?0, $options: 'i' } }, " +
+           "{ 'description': { $regex: ?0, $options: 'i' } } " +
+           "] }, " +
+           "{ 'isDeleted': false } " +
+           "] " +
+           "}")
+    Page<RepositoryEntity> searchOrganizationRepositoriesByIds(String searchTerm, List<String> organizationIds, Pageable pageable);
+
     // Count repositories by type
     long countByTypeAndIsDeletedFalse(RepositoryEntity.RepositoryType type);
 

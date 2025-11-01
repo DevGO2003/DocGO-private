@@ -15,18 +15,34 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class RepositoryServiceImpl implements IRepositoryService {
 
     private final RepositoryRepository repositoryRepository;
     private final FileRepository fileRepository;
+    private final RestTemplate restTemplate;
+    
+    @Value("${user.management.service.url:http://localhost:8001}")
+    private String userManagementServiceUrl;
+    
+    public RepositoryServiceImpl(RepositoryRepository repositoryRepository, 
+                                  FileRepository fileRepository,
+                                  RestTemplate restTemplate) {
+        this.repositoryRepository = repositoryRepository;
+        this.fileRepository = fileRepository;
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public Page<RepositoryDTO> getAllRepositories(Pageable pageable) {
@@ -65,10 +81,56 @@ public class RepositoryServiceImpl implements IRepositoryService {
     @Override
     public Page<RepositoryDTO> getUserOrganizationRepositories(String userId, Pageable pageable) {
         log.info("Getting all organization repositories for user: {} with pagination: {}", userId, pageable);
-        Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
-            RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
-        );
-        return entities.map(RepositoryDTO::fromEntity);
+        
+        try {
+            // Call user-management-service để lấy danh sách organizations của user
+            List<String> organizationIds = getUserOrganizationIds(userId);
+            
+            if (organizationIds.isEmpty()) {
+                log.info("User {} has no organizations", userId);
+                return Page.empty(pageable);
+            }
+            
+            log.info("User {} belongs to {} organizations", userId, organizationIds.size());
+            
+            // Query repos thuộc các organizations này
+            Page<RepositoryEntity> entities = repositoryRepository.findByTypeOrganizationAndOrganizationIdIn(
+                organizationIds, pageable
+            );
+            return entities.map(RepositoryDTO::fromEntity);
+        } catch (Exception e) {
+            log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
+            // Fallback: lấy repos mà user là owner
+            log.info("Fallback to owner-based query");
+            Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
+                RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
+            );
+            return entities.map(RepositoryDTO::fromEntity);
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<String> getUserOrganizationIds(String userId) {
+        try {
+            String url = userManagementServiceUrl + "/api/v1/users/" + userId + "/organizations?page=0&size=100";
+            log.info("Calling user-management-service: {}", url);
+            
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response != null && response.containsKey("data")) {
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+                if (data != null && data.containsKey("content")) {
+                    List<Map<String, Object>> organizations = (List<Map<String, Object>>) data.get("content");
+                    return organizations.stream()
+                        .map(org -> (String) org.get("id"))
+                        .filter(id -> id != null)
+                        .collect(Collectors.toList());
+                }
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Failed to fetch user organizations: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -204,8 +266,30 @@ public class RepositoryServiceImpl implements IRepositoryService {
     @Override
     public Page<RepositoryDTO> searchUserOrganizationRepositories(String searchTerm, String userId, Pageable pageable) {
         log.info("Searching all organization repositories for user: {} with term: {}", userId, searchTerm);
-        Page<RepositoryEntity> entities = repositoryRepository.searchUserOrganizationRepositories(searchTerm, userId, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        
+        try {
+            // Call user-management-service để lấy danh sách organizations của user
+            List<String> organizationIds = getUserOrganizationIds(userId);
+            
+            if (organizationIds.isEmpty()) {
+                log.info("User {} has no organizations", userId);
+                return Page.empty(pageable);
+            }
+            
+            log.info("User {} belongs to {} organizations", userId, organizationIds.size());
+            
+            // Search repos thuộc các organizations này
+            Page<RepositoryEntity> entities = repositoryRepository.searchOrganizationRepositoriesByIds(
+                searchTerm, organizationIds, pageable
+            );
+            return entities.map(RepositoryDTO::fromEntity);
+        } catch (Exception e) {
+            log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
+            // Fallback: search repos mà user là owner
+            log.info("Fallback to owner-based search");
+            Page<RepositoryEntity> entities = repositoryRepository.searchUserOrganizationRepositories(searchTerm, userId, pageable);
+            return entities.map(RepositoryDTO::fromEntity);
+        }
     }
 
     @Override

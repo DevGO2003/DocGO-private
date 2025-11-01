@@ -92,16 +92,36 @@ export const RepositoryList = () => {
       const result = await createRepo.mutateAsync(data);
       console.log('[RepositoryList] Repository created successfully:', result);
       setIsCreateModalOpen(false);
-      // Force refetch ngay tab hiện tại để hiển thị repo mới
-      if (activeTab === 'PERSONAL') {
+      
+      // Invalidate query theo TYPE của repo vừa tạo
+      console.log('[RepositoryList] Repo type:', data.type, 'Current tab:', activeTab);
+      
+      if (data.type === 'PERSONAL') {
+        console.log('[RepositoryList] Invalidating PERSONAL repositories');
         await queryClient.invalidateQueries({ queryKey: ['personal-repositories'] });
         await queryClient.refetchQueries({ queryKey: ['personal-repositories'] });
-      } else if (activeTab === 'ORGANIZATION') {
+        // Chuyển sang tab Personal nếu đang ở tab khác
+        if (activeTab !== 'PERSONAL') {
+          console.log('[RepositoryList] Switching to PERSONAL tab');
+          setActiveTab('PERSONAL');
+        }
+      } else if (data.type === 'ORGANIZATION') {
+        console.log('[RepositoryList] Invalidating ORGANIZATION repositories');
         await queryClient.invalidateQueries({ queryKey: ['organization-repositories'] });
         await queryClient.refetchQueries({ queryKey: ['organization-repositories'] });
+        // Chuyển sang tab Organization nếu đang ở tab khác
+        if (activeTab !== 'ORGANIZATION') {
+          console.log('[RepositoryList] Switching to ORGANIZATION tab');
+          setActiveTab('ORGANIZATION');
+        }
       } else {
+        console.log('[RepositoryList] Invalidating PUBLIC repositories');
         await queryClient.invalidateQueries({ queryKey: ['public-repositories'] });
         await queryClient.refetchQueries({ queryKey: ['public-repositories'] });
+        if (activeTab !== 'PUBLIC') {
+          console.log('[RepositoryList] Switching to PUBLIC tab');
+          setActiveTab('PUBLIC');
+        }
       }
     } catch (error: any) {
       console.error('Failed to create repository:', error);

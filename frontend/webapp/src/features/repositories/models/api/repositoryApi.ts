@@ -256,7 +256,7 @@ export const useOrganizationRepositories = (params?: PaginationParams & { organi
   return useQuery({
     queryKey: ['organization-repositories', params],
     queryFn: () => repositoryApi.getOrganizationRepositories(params),
-    enabled: !!params?.organizationId,
+    // Luôn enable - backend sẽ tự động lấy repos của tất cả orgs mà user tham gia
   });
 };
 
