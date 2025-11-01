@@ -73,12 +73,12 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
               <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
             )}
           </div>
-          <div className="min-w-0 flex-1 flex items-start gap-2 justify-end">
+          <div className="min-w-0 flex-1 flex items-start gap-2">
             {headerChildren && (
               <div className="flex items-center gap-2 flex-1">{headerChildren}</div>
             )}
             {rightActions && (
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">{rightActions}</div>
+              <div className="flex items-center gap-2 flex-shrink-0">{rightActions}</div>
             )}
           </div>
         </div>

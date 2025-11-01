@@ -92,7 +92,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         </div>
         <Select
           value={sortBy}
-          onChange={(e) => onSortByChange(e.target.value)}
+          onValueChange={onSortByChange}
           className="h-[28px] min-w-[130px] text-xs"
           options={[
             { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
@@ -104,7 +104,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         />
         <Select
           value={sortDirection}
-          onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
+          onValueChange={(val) => onSortDirectionChange(val as SortDirection)}
           className="h-[28px] min-w-[110px] text-xs"
           options={[
             { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
@@ -128,6 +128,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
               variant="outline"
               size="sm"
               onClick={(e)=>{ setOpenTags(true); setAnchorTags(e.currentTarget); }}
+              className="h-[28px] text-xs"
             >
               {t('repositories.files.filters.classification')}
             </Button>
@@ -135,6 +136,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
               variant="outline"
               size="sm"
               onClick={(e)=>{ setOpenTypes(true); setAnchorTypes(e.currentTarget); }}
+              className="h-[28px] text-xs"
             >
               {t('repositories.files.filters.fileType')}
             </Button>
@@ -142,6 +144,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
               variant="outline"
               size="sm"
               onClick={(e)=>{ setOpenTime(true); setAnchorTime(e.currentTarget); }}
+              className="h-[28px] text-xs"
             >
               {t('repositories.files.filters.timeRange')}
             </Button>
@@ -149,6 +152,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
               variant="outline"
               size="sm"
               onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }}
+              className="h-[28px] text-xs"
             >
               {t('repositories.files.filters.reset')}
             </Button>
@@ -178,9 +182,9 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
 
       {/* Row 3: Actions */}
       <div className="mt-[5px] flex items-center gap-[5px] justify-end">
-        <Button variant="outline" size="sm" onClick={()=>setOpenAdd(true)}>{t('repositories.files.filters.add')}</Button>
-        <Button variant="outline" size="sm">{t('repositories.files.filters.edit')}</Button>
-        <Button variant="destructive" size="sm">{t('repositories.files.filters.delete')}</Button>
+        <Button variant="outline" size="sm" onClick={()=>setOpenAdd(true)} className="h-[28px] text-xs">{t('repositories.files.filters.add')}</Button>
+        <Button variant="outline" size="sm" className="h-[28px] text-xs">{t('repositories.files.filters.edit')}</Button>
+        <Button variant="destructive" size="sm" className="h-[28px] text-xs">{t('repositories.files.filters.delete')}</Button>
       </div>
 
       {/* Modals */}
