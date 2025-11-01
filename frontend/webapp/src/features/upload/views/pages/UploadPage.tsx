@@ -204,12 +204,12 @@ export default function UploadPage() {
                 <p className="text-xs text-gray-500 mt-2">Mã lỗi: {errorInfo.status}</p>
               )}
               <div className="mt-4 flex justify-end">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setShowError(false)}
-                  className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
                 >
                   Đóng
-                </button>
+                </Button>
               </div>
             </div>
           </Modal>

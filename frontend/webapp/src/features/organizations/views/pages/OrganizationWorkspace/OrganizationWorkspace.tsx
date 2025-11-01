@@ -31,6 +31,9 @@ import {
   Input,
   LoadingSpinner,
   RefreshButton,
+  Tabs,
+  TabList,
+  CommonTab,
 } from '@shared/components';
 import { useOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
@@ -248,25 +251,25 @@ export const OrganizationWorkspace = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b border-gray-200 -mb-px">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 font-medium transition-all ${
-                    activeTab === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          <Tabs className="border-b border-gray-200">
+            <TabList className="flex gap-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <CommonTab
+                    key={tab.id}
+                    value={tab.id}
+                    activeValue={activeTab}
+                    onSelect={() => setActiveTab(tab.id)}
+                    className="flex items-center gap-2 px-4 py-3"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </CommonTab>
+                );
+              })}
+            </TabList>
+          </Tabs>
       </div>
 
       {/* Content */}

@@ -20,6 +20,11 @@ import {
   Button,
   Input,
   RefreshButton,
+  Tabs,
+  TabList,
+  CommonTab,
+  Checkbox,
+  Select,
 } from '@shared/components';
 import SettingsLayout from '../../layouts/SettingsLayout';
 import { useAppSelector } from '@store/hooks';
@@ -159,25 +164,25 @@ export const Settings = () => {
           >
             <Card>
               <CardContent className="p-4">
-                <nav className="space-y-1">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                          activeTab === tab.id
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </nav>
+                <Tabs>
+                  <TabList className="space-y-1">
+                    {tabs.map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <CommonTab
+                          key={tab.id}
+                          value={tab.id}
+                          activeValue={activeTab}
+                          onSelect={() => setActiveTab(tab.id)}
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg"
+                        >
+                          <Icon className="w-5 h-5" />
+                          {tab.label}
+                        </CommonTab>
+                      );
+                    })}
+                  </TabList>
+                </Tabs>
               </CardContent>
             </Card>
           </motion.div>
@@ -298,17 +303,19 @@ export const Settings = () => {
                               }
                               placeholder="Nhập mật khẩu mới"
                             />
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
+                              size="sm"
                               onClick={() => setShowNewPassword(!showNewPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 h-auto p-1"
                             >
                               {showNewPassword ? (
                                 <EyeOff className="w-5 h-5" />
                               ) : (
                                 <Eye className="w-5 h-5" />
                               )}
-                            </button>
+                            </Button>
                           </div>
                         </div>
 
@@ -370,16 +377,14 @@ export const Settings = () => {
                             Receive notifications for this category
                           </p>
                         </div>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={value}
-                          onChange={(e) =>
+                          onCheckedChange={(checked) =>
                             setNotificationSettings({
                               ...notificationSettings,
-                              [key]: e.target.checked,
+                              [key]: checked,
                             })
                           }
-                          className="w-5 h-5 text-blue-600 rounded"
                         />
                       </div>
                     ))}
@@ -400,7 +405,7 @@ export const Settings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t('settings.preferences.language')}
                       </label>
-                      <select
+                      <Select
                         value={preferenceSettings.language}
                         onChange={(e) => {
                           const lang = e.target.value;
@@ -410,18 +415,18 @@ export const Settings = () => {
                           });
                           void i18n.changeLanguage(lang);
                         }}
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="en">{t('settings.preferences.english')}</option>
-                        <option value="vi">{t('settings.preferences.vietnamese')}</option>
-                      </select>
+                        options={[
+                          { value: 'en', label: t('settings.preferences.english') },
+                          { value: 'vi', label: t('settings.preferences.vietnamese') },
+                        ]}
+                      />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t('settings.preferences.timezone')}
                       </label>
-                      <select
+                      <Select
                         value={preferenceSettings.timezone}
                         onChange={(e) =>
                           setPreferenceSettings({
@@ -429,19 +434,19 @@ export const Settings = () => {
                             timezone: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="UTC+7">UTC+7 (Bangkok, Hanoi)</option>
-                        <option value="UTC">UTC (London)</option>
-                        <option value="UTC-5">UTC-5 (New York)</option>
-                      </select>
+                        options={[
+                          { value: 'UTC+7', label: 'UTC+7 (Bangkok, Hanoi)' },
+                          { value: 'UTC', label: 'UTC (London)' },
+                          { value: 'UTC-5', label: 'UTC-5 (New York)' },
+                        ]}
+                      />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t('settings.preferences.theme')}
                       </label>
-                      <select
+                      <Select
                         value={preferenceSettings.theme}
                         onChange={(e) =>
                           setPreferenceSettings({
@@ -449,19 +454,19 @@ export const Settings = () => {
                             theme: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                        <option value="auto">Auto</option>
-                      </select>
+                        options={[
+                          { value: 'light', label: 'Light' },
+                          { value: 'dark', label: 'Dark' },
+                          { value: 'auto', label: 'Auto' },
+                        ]}
+                      />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t('settings.preferences.dateFormat')}
                       </label>
-                      <select
+                      <Select
                         value={preferenceSettings.dateFormat}
                         onChange={(e) =>
                           setPreferenceSettings({
@@ -469,12 +474,12 @@ export const Settings = () => {
                             dateFormat: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                      </select>
+                        options={[
+                          { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+                          { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+                          { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+                        ]}
+                      />
                     </div>
                   </div>
                 </CardContent>

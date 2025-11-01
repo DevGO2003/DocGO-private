@@ -9,6 +9,9 @@ import {
   CardTitle,
   CardContent,
   RefreshButton,
+  Tabs,
+  TabList,
+  CommonTab,
 } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
@@ -252,60 +255,54 @@ export const RepositoryDetail: React.FC = () => {
                 {/* Content Section */}
                 <div className="mt-8">
                   {/* Tabs Navigation */}
-                  <div className="flex gap-4 border-b border-gray-200 mb-6">
-                    <button
-                      onClick={() => setActiveTab('files')}
-                      className={`pb-3 px-4 border-b-2 transition-colors ${
-                        activeTab === 'files'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
-                        {t('repositories.detail.tabs.files')}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('members')}
-                      className={`pb-3 px-4 border-b-2 transition-colors ${
-                        activeTab === 'members'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {t('repositories.detail.tabs.members')}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('activity')}
-                      className={`pb-3 px-4 border-b-2 transition-colors ${
-                        activeTab === 'activity'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4" />
-                        {t('repositories.detail.tabs.activity')}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('settings')}
-                      className={`pb-3 px-4 border-b-2 transition-colors ${
-                        activeTab === 'settings'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        {t('repositories.detail.tabs.settings')}
-                      </div>
-                    </button>
-                  </div>
+                  <Tabs className="border-b border-gray-200 mb-6">
+                    <TabList className="flex gap-4">
+                      <CommonTab
+                        value="files"
+                        activeValue={activeTab}
+                        onSelect={() => setActiveTab('files')}
+                        className="pb-3 px-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          {t('repositories.detail.tabs.files')}
+                        </div>
+                      </CommonTab>
+                      <CommonTab
+                        value="members"
+                        activeValue={activeTab}
+                        onSelect={() => setActiveTab('members')}
+                        className="pb-3 px-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {t('repositories.detail.tabs.members')}
+                        </div>
+                      </CommonTab>
+                      <CommonTab
+                        value="activity"
+                        activeValue={activeTab}
+                        onSelect={() => setActiveTab('activity')}
+                        className="pb-3 px-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4" />
+                          {t('repositories.detail.tabs.activity')}
+                        </div>
+                      </CommonTab>
+                      <CommonTab
+                        value="settings"
+                        activeValue={activeTab}
+                        onSelect={() => setActiveTab('settings')}
+                        className="pb-3 px-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Settings className="w-4 h-4" />
+                          {t('repositories.detail.tabs.settings')}
+                        </div>
+                      </CommonTab>
+                    </TabList>
+                  </Tabs>
 
                   {/* Tab Content */}
                   {activeTab === 'files' && (

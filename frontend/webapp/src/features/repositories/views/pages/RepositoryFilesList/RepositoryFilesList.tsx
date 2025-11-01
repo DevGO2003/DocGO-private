@@ -1,12 +1,24 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Button, RefreshButton } from '@shared/components';
-import { Card, CardHeader, CardTitle, CardContent } from '@shared/components/UIComponents/Card';
-import { Table, TableHeader, TableRow, TableCell, TableContainer } from '@shared/components/UIComponents/Table';
-import { Text } from '@shared/components/UIComponents/Text';
-import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
-import { Checkbox } from '@shared/components/UIComponents/Checkbox';
+import {
+  Button,
+  RefreshButton,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Table,
+  TableHeader,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Text,
+  Tabs,
+  TabList,
+  CommonTab,
+  Checkbox,
+} from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
