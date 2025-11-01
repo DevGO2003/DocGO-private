@@ -16,6 +16,7 @@ interface RepositoryLayoutProps {
   extra?: React.ReactNode
   primaryTabs?: React.ReactNode
   secondaryTabs?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -41,6 +42,7 @@ function RepositoryLayout({
   extra,
   primaryTabs,
   secondaryTabs,
+  onRefresh,
 }: RepositoryLayoutProps) {
   return (
     <ControlMainLayout
@@ -55,6 +57,7 @@ function RepositoryLayout({
       loadingText={loadingText}
       primaryTabs={primaryTabs}
       secondaryTabs={secondaryTabs}
+      onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>
         {children}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { User, Mail, Phone, Briefcase, Building2, Calendar, Edit2, Save } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardHeader,
@@ -9,6 +10,7 @@ import {
   CardContent,
   Button,
   Input,
+  RefreshButton,
 } from '@shared/components';
 
 import ProfileLayout from '../../../layouts/ProfileLayout';
@@ -18,7 +20,9 @@ import { useUpdateProfile } from '@features/auth';
 export const Profile = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const updateProfileMutation = useUpdateProfile();
 
   const [formData, setFormData] = useState({
@@ -58,12 +62,42 @@ export const Profile = () => {
     setIsEditing(false);
   };
 
+  const handleRefresh = async () => {
+    console.log('[Profile] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate user-related queries if any
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
+
+      // Reset form data to current user state
+      setFormData({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        department: user?.department || '',
+        position: user?.position || '',
+      });
+
+      console.log('[Profile] Refresh completed');
+    } catch (error) {
+      console.error('[Profile] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <ProfileLayout
       title={t('profile.title')}
-      breadcrumbs={[{ label: t('nav.profile'), href: '/profile', current: true }]}
+      breadcrumbs={[{ label: t('nav.profile'), current: true }]}
       loading={!user}
       loadingText={t('app.loading')}
+      onRefresh={handleRefresh}
+      headerRight={
+        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+      }
     >
       {user && (
         <div className="max-w-4xl mx-auto p-6">

@@ -38,6 +38,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
+    public Page<FileEntity> getFilesByOwnerUserId(String ownerUserId, Pageable pageable) {
+        return fileRepository.findByOwnerUserIdAndIsDeletedFalse(ownerUserId, pageable);
+    }
+
+    @Override
     public Optional<FileEntity> getFileById(String id) {
         return fileRepository.findById(id);
     }

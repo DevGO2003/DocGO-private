@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom'; // Replaced next/navigation
 import type { HeaderControlLayoutProps, Breadcrumb } from './types';
 import { CommonFont } from '@shared/components';
 
-function Breadcrumbs({ items }: { items?: Breadcrumb[] }) {
+function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: () => void }) {
   const navigate = useNavigate(); // React Router equivalent
-  
+
   if (!items || items.length === 0) return null;
-  
+
   const handleCurrentClick = () => {
-    window.location.reload(); // Equivalent to refresh - reloads the page/component
-    // If refetch needed without full reload, pass onRefresh prop from parent
+    // Use onRefresh if provided, otherwise fallback to window.location.reload()
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
@@ -51,6 +55,7 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
   headerChildren,
   children,
   className,
+  onRefresh,
 }) => {
   return (
     <CommonFont className={`w-full rounded-2xl border bg-white ${className || ''}`}>
@@ -58,7 +63,7 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="mb-2">
-              <Breadcrumbs items={breadcrumbs} />
+              <Breadcrumbs items={breadcrumbs} onRefresh={onRefresh} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-900">
               {title}

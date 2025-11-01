@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   User,
   Lock,
@@ -18,6 +19,7 @@ import {
   CardContent,
   Button,
   Input,
+  RefreshButton,
 } from '@shared/components';
 import SettingsLayout from '../../layouts/SettingsLayout';
 import { useAppSelector } from '@store/hooks';
@@ -28,8 +30,10 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'preferences';
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
@@ -100,12 +104,40 @@ export const Settings = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    console.log('[Settings] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate user-related queries
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
+
+      // Reset form data to current user state
+      setProfileData({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+      });
+
+      console.log('[Settings] Refresh completed');
+    } catch (error) {
+      console.error('[Settings] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <SettingsLayout
       title={t('settings.title')}
-      breadcrumbs={[{ label: t('nav.settings'), href: '/settings', current: true }]}
+      breadcrumbs={[{ label: t('nav.settings'), current: true }]}
       loading={!user}
       loadingText={t('app.loading')}
+      onRefresh={handleRefresh}
+      headerRight={
+        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+      }
     >
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}

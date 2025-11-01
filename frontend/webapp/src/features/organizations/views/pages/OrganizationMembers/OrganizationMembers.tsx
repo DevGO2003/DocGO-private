@@ -135,7 +135,6 @@ export const OrganizationMembers = () => {
               </li>
             </ul>
           </div>
-        </div>
       </div>
     </OrganizationLayout>
   );

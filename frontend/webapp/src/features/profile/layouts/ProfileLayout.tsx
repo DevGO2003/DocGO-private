@@ -14,6 +14,7 @@ interface ProfileLayoutProps {
   loading?: boolean
   loadingText?: string
   extra?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -36,6 +37,7 @@ function ProfileLayout({
   loading,
   loadingText,
   extra,
+  onRefresh,
 }: ProfileLayoutProps) {
   return (
     <ControlMainLayout
@@ -48,6 +50,7 @@ function ProfileLayout({
       toolbarContent={toolbarContent}
       loading={loading}
       loadingText={loadingText}
+      onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>
         {children}

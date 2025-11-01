@@ -165,6 +165,7 @@ export interface PaginationParams {
   sortDirection?: 'asc' | 'desc';
   searchTerm?: string;
   includeDeleted?: boolean;
+  userId?: string; // Filter by user ID (for files owned by user)
 }
 
 export interface PaginatedResponse<T> {

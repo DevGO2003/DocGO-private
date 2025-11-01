@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
-import { Button, Input, CreateRepositoryModal } from '@shared/components';
+import { Button, Input, CreateRepositoryModal, RefreshButton } from '@shared/components';
 import {
   usePersonalRepositories,
   useOrganizationRepositories,
@@ -26,6 +26,7 @@ export const RepositoryList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const createRepo = useCreateRepository();
   const size = 12;
 
@@ -125,11 +126,38 @@ export const RepositoryList = () => {
     setPage(newPage);
   };
 
+  const handleRefresh = async () => {
+    console.log('[RepositoryList] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate all repository queries
+      await queryClient.invalidateQueries({ queryKey: ['personal-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['public-repositories'] });
+
+      // Refetch current tab
+      if (activeTab === 'PERSONAL') {
+        await queryClient.refetchQueries({ queryKey: ['personal-repositories'] });
+      } else if (activeTab === 'ORGANIZATION') {
+        await queryClient.refetchQueries({ queryKey: ['organization-repositories'] });
+      } else {
+        await queryClient.refetchQueries({ queryKey: ['public-repositories'] });
+      }
+
+      console.log('[RepositoryList] Refresh completed');
+    } catch (error) {
+      console.error('[RepositoryList] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <RepositoryLayout
       title={t('repositories.list.title')}
       subtitle={t('repositories.list.subtitle')}
-      breadcrumbs={[{ label: t('nav.repositories'), href: '/repositories', current: true }]}
+      breadcrumbs={[{ label: t('nav.repositories'), current: true }]}
+      onRefresh={handleRefresh}
       headerChildren={
         <RepositoryTabs
           activeTab={activeTab}
@@ -140,16 +168,19 @@ export const RepositoryList = () => {
         />
       }
       headerRight={
-        activeTab !== 'PUBLIC' ? (
-          <Button
-            variant="outline"
-            onClick={handleCreateRepository}
-            className="inline-flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            {t('repositories.list.new')}
-          </Button>
-        ) : null
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          {activeTab !== 'PUBLIC' && (
+            <Button
+              variant="outline"
+              onClick={handleCreateRepository}
+              className="inline-flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              {t('repositories.list.new')}
+            </Button>
+          )}
+        </div>
       }
       showToolbar={false}
       className="min-h-full"

@@ -225,7 +225,6 @@ export const OrganizationWorkspace = () => {
               );
             })}
           </div>
-        </div>
       </div>
 
       {/* Content */}

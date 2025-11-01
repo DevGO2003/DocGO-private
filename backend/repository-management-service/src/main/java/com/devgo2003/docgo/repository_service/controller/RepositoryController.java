@@ -45,12 +45,20 @@ public class RepositoryController {
             @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
-            @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId
+            @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId,
+            @Parameter(description = "ID của user để lọc files theo owner") @RequestParam(required = false) String userId
     ) {
         try {
             Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            Page<FileEntity> files = fileService.getAllFiles(pageable);
+
+            // Filter by userId if provided
+            Page<FileEntity> files;
+            if (userId != null && !userId.trim().isEmpty()) {
+                files = fileService.getFilesByOwnerUserId(userId, pageable);
+            } else {
+                files = fileService.getAllFiles(pageable);
+            }
             
             return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
                 .apiVersion("v1")

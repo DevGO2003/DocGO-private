@@ -14,6 +14,7 @@ interface SettingsLayoutProps {
   loading?: boolean
   loadingText?: string
   extra?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -36,6 +37,7 @@ function SettingsLayout({
   loading,
   loadingText,
   extra,
+  onRefresh,
 }: SettingsLayoutProps) {
   return (
     <ControlMainLayout
@@ -48,6 +50,7 @@ function SettingsLayout({
       toolbarContent={toolbarContent}
       loading={loading}
       loadingText={loadingText}
+      onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>
         {children}

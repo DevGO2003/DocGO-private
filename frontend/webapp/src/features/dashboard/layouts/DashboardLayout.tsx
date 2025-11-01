@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
   loading?: boolean
   loadingText?: string
   extra?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -36,6 +37,7 @@ function DashboardLayout({
   loading,
   loadingText,
   extra,
+  onRefresh,
 }: DashboardLayoutProps) {
   return (
     <ControlMainLayout
@@ -48,6 +50,7 @@ function DashboardLayout({
       toolbarContent={toolbarContent}
       loading={loading}
       loadingText={loadingText}
+      onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>
         {children}

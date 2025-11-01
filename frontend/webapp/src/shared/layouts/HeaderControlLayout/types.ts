@@ -16,6 +16,7 @@ export interface HeaderControlLayoutProps {
   headerChildren?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
+  onRefresh?: () => void;
 }
 
 export interface UploadHeaderLayoutProps extends HeaderControlLayoutProps {

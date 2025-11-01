@@ -2,32 +2,63 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppSelector } from '@store/hooks';
-import { 
-  useMyRepositories, 
-  useFiles 
+import {
+  useMyRepositories,
+  useFiles
 } from '@features/repositories';
 import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
-import { Card, CardContent, CardHeader, CardTitle, Button, Text, LoadingSpinner } from '@shared/components';
+import { Card, CardContent, CardHeader, CardTitle, Button, Text, LoadingSpinner, RefreshButton } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
-  
+
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAppSelector((state) => state.auth);
   const { t } = useTranslation();
   const [page] = useState(0);
   const [size] = useState(5);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Temporarily disable API calls for testing
+  // Get current user ID for filtering
+  const userId = user?.id;
+
+  // Fetch data - these hooks already filter by current user (useMyRepositories, useMyOrganizations)
   const { data: repositories, isLoading: reposLoading } = useMyRepositories({ page, size });
-  const { data: files, isLoading: filesLoading } = useFiles({ page, size });
+  // Filter files by userId using API parameter
+  const { data: files, isLoading: filesLoading } = useFiles({ page, size, userId });
   const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
 
   console.log('[Dashboard] User:', user);
+  console.log('[Dashboard] User ID:', userId);
+
+  // Handle refresh - invalidate and refetch all dashboard queries
+  const handleRefresh = async () => {
+    console.log('[Dashboard] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate all dashboard-related queries
+      await queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['files'] });
+      await queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
+
+      // Refetch all queries
+      await queryClient.refetchQueries({ queryKey: ['my-repositories'] });
+      await queryClient.refetchQueries({ queryKey: ['files'] });
+      await queryClient.refetchQueries({ queryKey: ['my-organizations'] });
+
+      console.log('[Dashboard] Refresh completed');
+    } catch (error) {
+      console.error('[Dashboard] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const stats = [
     {
@@ -101,7 +132,11 @@ export const Dashboard = () => {
     <DashboardLayout
       title={t('dashboard.title')}
       subtitle={t('dashboard.subtitle')}
-      breadcrumbs={[{ label: t('nav.dashboard'), href: '/dashboard', current: true }]}
+      breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
+      onRefresh={handleRefresh}
+      headerRight={
+        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+      }
     >
         {/* Welcome Header */}
         <motion.div

@@ -18,6 +18,7 @@ interface ControlMainLayoutProps {
   headerRight?: ReactNode
   primaryTabs?: React.ReactNode
   secondaryTabs?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -46,8 +47,19 @@ export function ControlMainLayout({
   headerRight,
   primaryTabs,
   secondaryTabs,
+  onRefresh,
 }: ControlMainLayoutProps) {
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState(false)
+  const [contentKey, setContentKey] = useState(0)
+
+  // Handle refresh: call onRefresh if provided, otherwise remount content
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh()
+    } else {
+      setContentKey((k) => k + 1)
+    }
+  }
 
   return (
     <div id="control-main-layout-root" className="flex flex-col h-full w-full relative gap-2.5">
@@ -62,12 +74,13 @@ export function ControlMainLayout({
             headerChildren={headerChildren}
             primaryTabs={primaryTabs}
             secondaryTabs={secondaryTabs}
+            onRefresh={handleRefresh}
           />
         </div>
       )}
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto relative">
+      <div key={contentKey} className="flex-1 overflow-y-auto relative">
         <Suspense
           fallback={
             <div className="space-y-4 p-4">

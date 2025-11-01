@@ -14,6 +14,7 @@ interface UploadLayoutProps {
   loading?: boolean
   loadingText?: string
   extra?: React.ReactNode
+  onRefresh?: () => void
 }
 
 /**
@@ -37,6 +38,7 @@ function UploadLayout({
   loading,
   loadingText,
   extra,
+  onRefresh,
 }: UploadLayoutProps) {
   return (
     <ControlMainLayout
@@ -49,6 +51,7 @@ function UploadLayout({
       toolbarContent={toolbarContent}
       loading={loading}
       loadingText={loadingText}
+      onRefresh={onRefresh}
     >
       <div
         className={
