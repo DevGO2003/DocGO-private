@@ -9,15 +9,18 @@ import UploadSuccessNotification from '../components/UploadSuccessNotification'
 import RepositoryPicker from '../components/RepositoryPicker'
 import RecentUploadsPanel from '../components/RecentUploadsPanel'
 import { automationFileApi } from '../../models/api/automationFileApi'
-import { Button, Text, Modal, PreviewPanel } from '@shared/components'
+import { Button, Text, Modal, PreviewPanel, RefreshButton } from '@shared/components'
 import env from '@shared/config/env';
 import { uploadBus } from '@shared/lib/upload/uploadBus'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function UploadPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
   const [baseContractId, setBaseContractId] = useState('')
   const [newVersionName, setNewVersionName] = useState('')
@@ -111,11 +114,40 @@ export default function UploadPage() {
     }
   }
 
+  const handleRefresh = async () => {
+    console.log('[UploadPage] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Reset form state
+      setSelectedFile(null);
+      setCreateFromOldVersion(false);
+      setBaseContractId('');
+      setNewVersionName('');
+
+      // Invalidate and refetch queries
+      await queryClient.invalidateQueries({ queryKey: ['files'] });
+      await queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+      await queryClient.refetchQueries({ queryKey: ['files'] });
+      await queryClient.refetchQueries({ queryKey: ['my-repositories'] });
+
+      // Refresh recent uploads panel
+      setRecentRefreshKey(prev => prev + 1);
+
+      console.log('[UploadPage] Refresh completed');
+    } catch (error) {
+      console.error('[UploadPage] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <UploadLayout
       title="Upload tài liệu"
       subtitle="Sử dụng AI để trích xuất nội dung từ tài liệu hợp đồng một cách chính xác"
       breadcrumbs={[{ label: 'Upload', href: '/upload' }]}
+      onRefresh={handleRefresh}
+      headerRight={<RefreshButton onClick={handleRefresh} loading={isRefreshing} />}
       extra={(
         <>
           {/* Success Modal */}
