@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@shared/components';
+import { Tabs, TabList, CommonTab } from '@shared/components';
 
 interface Props {
   activeMainTab: string;
@@ -36,20 +36,21 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
   const subTabs = subTabsMap[activeMainTab] ?? [];
 
   return (
-    <div className="flex gap-2 mb-4">
-      {subTabs.map(t => (
-        <Button
-          key={t.id}
-          variant={activeSubTab === t.id ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => !loading && onChange(t.id)}
-          disabled={loading}
-          className={activeSubTab === t.id ? 'bg-indigo-600 text-white hover:bg-indigo-700' : ''}
-        >
-          {loading ? <span className="inline-block w-16 h-4 bg-gray-200 animate-pulse rounded"></span> : t.label}
-        </Button>
-      ))}
-    </div>
+    <Tabs className="mb-4">
+      <TabList>
+        {subTabs.map(t => (
+          <CommonTab
+            key={t.id}
+            value={t.id}
+            activeValue={activeSubTab}
+            onSelect={() => !loading && onChange(t.id)}
+            disabled={loading}
+          >
+            {loading ? <span className="inline-block w-16 h-4 bg-gray-200 animate-pulse rounded"></span> : t.label}
+          </CommonTab>
+        ))}
+      </TabList>
+    </Tabs>
   );
 };
 

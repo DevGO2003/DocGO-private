@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select } from '@shared/components'; // CommonSelect as Select
+import { Select, Input, Button } from '@shared/components';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
 import AddFileChoiceModal from '@shared/components/UIComponents/Modal/AddFileChoiceModal';
-// Import MultiSelect if available, else use checkboxes for tags
 
 export type ViewMode = 'grid' | 'list';
 export type SortDirection = 'asc' | 'desc';
@@ -83,73 +82,95 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
           <div className="relative">
             {/* Simple icon placeholder */}
             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔎</span>
-            <input
+            <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t('repositories.files.filters.search')}
-              className="w-full rounded-lg border border-gray-300 pl-7 pr-2 h-[28px] text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="pl-7 h-[28px] text-xs"
             />
           </div>
         </div>
-        <select
+        <Select
           value={sortBy}
           onChange={(e) => onSortByChange(e.target.value)}
-          className="h-[28px] px-2 pr-6 py-0 leading-[1.1] min-w-[130px] rounded-lg border border-indigo-300 text-xs text-indigo-700 bg-white hover:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="createdAt">{t('repositories.files.filters.sortOptions.createdAt')}</option>
-          <option value="title">{t('repositories.files.filters.sortOptions.fileName')}</option>
-          <option value="status">{t('repositories.files.filters.sortOptions.status')}</option>
-          <option value="totalValue">{t('repositories.files.filters.sortOptions.totalValue')}</option>
-          <option value="uploadedAt">{t('repositories.files.filters.sortOptions.uploadedAt')}</option>
-        </select>
-        <select
+          className="h-[28px] min-w-[130px] text-xs"
+          options={[
+            { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
+            { value: 'title', label: t('repositories.files.filters.sortOptions.fileName') },
+            { value: 'status', label: t('repositories.files.filters.sortOptions.status') },
+            { value: 'totalValue', label: t('repositories.files.filters.sortOptions.totalValue') },
+            { value: 'uploadedAt', label: t('repositories.files.filters.sortOptions.uploadedAt') },
+          ]}
+        />
+        <Select
           value={sortDirection}
           onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
-          className="h-[28px] px-2 pr-6 py-0 leading-[1.1] min-w-[110px] rounded-lg border border-indigo-300 text-xs text-indigo-700 bg-white hover:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="asc">{t('repositories.files.filters.sortDirections.asc')}</option>
-          <option value="desc">{t('repositories.files.filters.sortDirections.desc')}</option>
-        </select>
+          className="h-[28px] min-w-[110px] text-xs"
+          options={[
+            { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
+            { value: 'desc', label: t('repositories.files.filters.sortDirections.desc') },
+          ]}
+        />
       </div>
 
       {/* Row 2: Advanced toggle + filter triggers + reset + view toggle */}
       <div className="flex items-center gap-[5px] w-full mt-[5px]">
-        <button onClick={onToggleAdvanced} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap">
+        <Button
+          variant="ghost"
+          onClick={onToggleAdvanced}
+          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap h-auto p-0"
+        >
           {showAdvanced ? t('repositories.files.filters.hideAdvanced') : t('repositories.files.filters.showAdvanced')}
-        </button>
+        </Button>
         {showAdvanced && (
           <div className="ml-auto flex items-center gap-[5px]">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={(e)=>{ setOpenTags(true); setAnchorTags(e.currentTarget); }}
-              className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"
             >
               {t('repositories.files.filters.classification')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={(e)=>{ setOpenTypes(true); setAnchorTypes(e.currentTarget); }}
-              className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"
             >
               {t('repositories.files.filters.fileType')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={(e)=>{ setOpenTime(true); setAnchorTime(e.currentTarget); }}
-              className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"
             >
               {t('repositories.files.filters.timeRange')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }}
-              className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50"
             >
               {t('repositories.files.filters.reset')}
-            </button>
+            </Button>
             <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-              <button onClick={() => onViewModeChange('grid')} className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title={t('repositories.files.filters.viewGrid')}>
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('grid')}
+                className="p-1.5 rounded-none border-0 h-auto"
+                title={t('repositories.files.filters.viewGrid')}
+              >
                 {t('repositories.files.filters.viewGrid')}
-              </button>
-              <button onClick={() => onViewModeChange('list')} className={`p-1.5 transition-colors border-l border-gray-300 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`} title={t('repositories.files.filters.viewList')}>
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => onViewModeChange('list')}
+                className="p-1.5 rounded-none border-0 border-l h-auto"
+                title={t('repositories.files.filters.viewList')}
+              >
                 {t('repositories.files.filters.viewList')}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -157,9 +178,9 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
 
       {/* Row 3: Actions */}
       <div className="mt-[5px] flex items-center gap-[5px] justify-end">
-        <button onClick={()=>setOpenAdd(true)} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">{t('repositories.files.filters.add')}</button>
-        <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">{t('repositories.files.filters.edit')}</button>
-        <button className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-rose-300 text-xs text-rose-700 hover:bg-rose-50">{t('repositories.files.filters.delete')}</button>
+        <Button variant="outline" size="sm" onClick={()=>setOpenAdd(true)}>{t('repositories.files.filters.add')}</Button>
+        <Button variant="outline" size="sm">{t('repositories.files.filters.edit')}</Button>
+        <Button variant="destructive" size="sm">{t('repositories.files.filters.delete')}</Button>
       </div>
 
       {/* Modals */}

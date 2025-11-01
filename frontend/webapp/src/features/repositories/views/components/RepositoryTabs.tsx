@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { Tabs, TabList, CommonTab } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 
 interface RepositoryTabsProps {
@@ -41,22 +42,15 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
   ];
 
   return (
-    <div className="border-b border-gray-200">
-      <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+    <Tabs className="border-b border-gray-200">
+      <TabList className="-mb-px flex space-x-8">
         {tabs.map((tab) => (
-          <button
+          <CommonTab
             key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`
-              group relative min-w-0 flex-1 overflow-hidden py-4 px-6 text-center text-sm font-medium
-              transition-all duration-200 ease-in-out
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              ${
-                activeTab === tab.id
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent'
-              }
-            `}
+            value={tab.id}
+            activeValue={activeTab}
+            onSelect={() => onTabChange(tab.id)}
+            className="group relative min-w-0 flex-1 overflow-hidden py-4 px-6 text-center"
           >
             <div className="flex items-center justify-center space-x-2">
               <span className="font-medium">{tab.label}</span>
@@ -94,9 +88,9 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
                 }}
               />
             )}
-          </button>
+          </CommonTab>
         ))}
-      </nav>
-    </div>
+      </TabList>
+    </Tabs>
   );
 };

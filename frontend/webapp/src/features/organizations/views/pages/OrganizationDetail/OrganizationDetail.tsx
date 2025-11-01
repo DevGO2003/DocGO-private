@@ -21,6 +21,10 @@ import {
   Button,
   LoadingSpinner,
   RefreshButton,
+  Tabs,
+  TabList,
+  CommonTab,
+  Checkbox,
 } from '@shared/components';
 import {
   useOrganization,
@@ -229,25 +233,25 @@ export const OrganizationDetail = () => {
           transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <div className="flex gap-2 border-b border-gray-200">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          <Tabs className="border-b border-gray-200">
+            <TabList className="flex gap-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <CommonTab
+                    key={tab.id}
+                    value={tab.id}
+                    activeValue={activeTab}
+                    onSelect={() => setActiveTab(tab.id)}
+                    className="flex items-center gap-2 px-4 py-3"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </CommonTab>
+                );
+              })}
+            </TabList>
+          </Tabs>
         </motion.div>
 
         {/* Tab Content */}
@@ -421,11 +425,9 @@ export const OrganizationDetail = () => {
                           <p className="font-medium text-gray-900">{t('organizations.detail.settings.public.label')}</p>
                           <p className="text-sm text-gray-600">{t('organizations.detail.settings.public.desc')}</p>
                         </div>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={organization.settings?.isPublic}
-                          className="w-5 h-5"
-                          readOnly
+                          disabled
                         />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -433,11 +435,9 @@ export const OrganizationDetail = () => {
                           <p className="font-medium text-gray-900">{t('organizations.detail.settings.allowInvitations.label')}</p>
                           <p className="text-sm text-gray-600">{t('organizations.detail.settings.allowInvitations.desc')}</p>
                         </div>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={organization.settings?.allowInvitations}
-                          className="w-5 h-5"
-                          readOnly
+                          disabled
                         />
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -445,11 +445,9 @@ export const OrganizationDetail = () => {
                           <p className="font-medium text-gray-900">{t('organizations.detail.settings.requireApproval.label')}</p>
                           <p className="text-sm text-gray-600">{t('organizations.detail.settings.requireApproval.desc')}</p>
                         </div>
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={organization.settings?.requireApproval}
-                          className="w-5 h-5"
-                          readOnly
+                          disabled
                         />
                       </div>
                     </div>

@@ -11,6 +11,7 @@ import {
   Button,
   Input,
   RefreshButton,
+  Label,
 } from '@shared/components';
 
 import ProfileLayout from '../../../layouts/ProfileLayout';
@@ -204,10 +205,10 @@ export const Profile = () => {
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <User className="w-4 h-4" />
                           {t('profile.labels.firstName')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="firstName"
@@ -220,10 +221,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <User className="w-4 h-4" />
                           {t('profile.labels.lastName')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="lastName"
@@ -240,10 +241,10 @@ export const Profile = () => {
                     {/* Contact Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <Mail className="w-4 h-4" />
                           {t('profile.labels.email')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="email"
@@ -257,10 +258,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <Phone className="w-4 h-4" />
                           {t('profile.labels.phone')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="phone"
@@ -278,10 +279,10 @@ export const Profile = () => {
                     {/* Work Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <Building2 className="w-4 h-4" />
                           {t('profile.labels.department')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="department"
@@ -294,10 +295,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <Label className="flex items-center gap-2 mb-2">
                           <Briefcase className="w-4 h-4" />
                           {t('profile.labels.position')}
-                        </label>
+                        </Label>
                         {isEditing ? (
                           <Input
                             name="position"
