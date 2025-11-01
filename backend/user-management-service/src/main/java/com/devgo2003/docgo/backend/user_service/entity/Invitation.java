@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Document(collection = "invitations")
@@ -29,7 +30,13 @@ public class Invitation {
     private String email;
 
     @Field("role_ids")
-    private Set<String> roleIds;
+    private Set<String> roleIds; // Legacy - deprecated
+
+    @Field("role")
+    private String role; // OWNER, ADMIN, MANAGER, MEMBER
+
+    @Field("permissions")
+    private List<String> permissions; // Direct permissions
 
     @Field("status")
     @Builder.Default

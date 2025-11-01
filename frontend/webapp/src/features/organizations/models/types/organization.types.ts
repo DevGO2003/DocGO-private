@@ -49,6 +49,7 @@ export interface OrganizationMember {
   firstName?: string;
   lastName?: string;
   role: MemberRole;
+  permissions?: ManagerPermission[]; // Permissions list for MANAGER role
   status: MemberStatus;
   joinedAt: string;
 }

@@ -214,12 +214,14 @@ public class OrganizationService {
                 .id(UUID.randomUUID().toString())
                 .organizationId(savedOrganization.getId())
                 .userId(request.getOwnerUserId())
+                .role("OWNER")
                 .isAdmin(true)
                 .status(OrganizationMembership.MembershipStatus.ACTIVE)
                 .permissions(List.of("all"))
+                .joinedAt(LocalDateTime.now())
                 .build();
         membershipRepository.save(ownerMembership);
-        log.info("Created owner membership for user: {}", request.getOwnerUserId());
+        log.info("Created owner membership with role OWNER and joinedAt for user: {}", request.getOwnerUserId());
         
         // Khởi tạo dữ liệu mặc định
         initializeDefaultData(savedOrganization.getId());
@@ -391,6 +393,8 @@ public class OrganizationService {
                 .organizationId(orgId)
                 .email(request.getEmail())
                 .roleIds(request.getRoleIds())
+                .role(request.getRole())
+                .permissions(request.getPermissions())
                 .status(Invitation.InvitationStatus.PENDING)
                 .invitedBy(currentUserId)
                 .expiresAt(LocalDateTime.now().plusDays(7))
@@ -406,6 +410,8 @@ public class OrganizationService {
                 .organizationId(orgId)
                 .userId(user.map(User::getId).orElse(null))
                 .roleIds(request.getRoleIds())
+                .role(request.getRole())
+                .permissions(request.getPermissions())
                 .status(OrganizationMembership.MembershipStatus.PENDING)
                 .invitedBy(currentUserId)
                 .invitedAt(LocalDateTime.now())
@@ -466,11 +472,31 @@ public class OrganizationService {
             throw new UnauthorizedOrganizationAccessException("Không có quyền cập nhật thành viên");
         }
 
+        // Prevent updating owner role
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tổ chức"));
+        
+        if (organization.getOwnerUserId().equals(userId)) {
+            throw new InvalidOrganizationOperationException("Không thể thay đổi role của Owner");
+        }
+
         OrganizationMembership membership = membershipRepository
                 .findByOrganizationIdAndUserId(orgId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thành viên"));
 
-        if (request.getRoleIds() != null) {
+        // Update new role and permissions
+        if (request.getRole() != null) {
+            membership.setRole(request.getRole());
+            log.info("Updated role to: {}", request.getRole());
+        }
+        
+        if (request.getPermissions() != null) {
+            membership.setPermissions(request.getPermissions());
+            log.info("Updated permissions to: {}", request.getPermissions());
+        }
+        
+        // Fallback to legacy fields if new fields not provided
+        if (request.getRole() == null && request.getRoleIds() != null) {
             membership.setRoleIds(request.getRoleIds());
         }
         if (request.getIsAdmin() != null) {
@@ -478,6 +504,7 @@ public class OrganizationService {
         }
 
         membershipRepository.save(membership);
+        log.info("Successfully updated member {} in organization {}", userId, orgId);
     }
 
     public void removeMember(String orgId, String userId, String currentUserId) {
@@ -698,11 +725,12 @@ public List<com.devgo2003.docgo.backend.user_service.dto.UserOrganizationRespons
 /**
  * Accept invitation
  */
-public OrganizationMembershipResponse acceptInvitation(String token, String userId) {
-    log.info("User {} accepting invitation with token: {}", userId, token);
+public OrganizationMembershipResponse acceptInvitation(String tokenOrId, String userId) {
+    log.info("User {} accepting invitation with token/ID: {}", userId, tokenOrId);
     
-    // Find invitation by token
-    Invitation invitation = invitationRepository.findByToken(token)
+    // Find invitation by ID first, then by token
+    Invitation invitation = invitationRepository.findById(tokenOrId)
+        .or(() -> invitationRepository.findByToken(tokenOrId))
         .orElseThrow(() -> new ResourceNotFoundException("Lời mời không tồn tại hoặc đã hết hạn"));
     
     // Check invitation status and expiry
@@ -737,6 +765,8 @@ public OrganizationMembershipResponse acceptInvitation(String token, String user
         .organizationId(invitation.getOrganizationId())
         .userId(userId)
         .roleIds(invitation.getRoleIds())
+        .role(invitation.getRole())
+        .permissions(invitation.getPermissions())
         .status(OrganizationMembership.MembershipStatus.ACTIVE)
         .invitedBy(invitation.getInvitedBy())
         .invitedAt(invitation.getCreatedAt())
@@ -760,11 +790,12 @@ public OrganizationMembershipResponse acceptInvitation(String token, String user
 /**
  * Reject invitation
  */
-public void rejectInvitation(String token, String userId) {
-    log.info("User {} rejecting invitation with token: {}", userId, token);
+public void rejectInvitation(String tokenOrId, String userId) {
+    log.info("User {} rejecting invitation with token/ID: {}", userId, tokenOrId);
     
-    // Find invitation by token
-    Invitation invitation = invitationRepository.findByToken(token)
+    // Find invitation by ID first, then by token
+    Invitation invitation = invitationRepository.findById(tokenOrId)
+        .or(() -> invitationRepository.findByToken(tokenOrId))
         .orElseThrow(() -> new ResourceNotFoundException("Lời mời không tồn tại"));
     
     // Get user by ID
@@ -819,20 +850,26 @@ public Page<OrganizationMembershipResponse> getOrganizationMembers(String organi
     return memberships.map(membership -> {
         OrganizationMembershipResponse response = OrganizationMembershipResponse.fromEntity(membership);
         
-        // Determine correct role - check if user is owner first
-        String correctRole;
-        if (organization.getOwnerUserId().equals(membership.getUserId())) {
-            correctRole = "OWNER";
-            log.debug("User {} is OWNER of organization {}", membership.getUserId(), organizationId);
-        } else if (Boolean.TRUE.equals(membership.getIsAdmin()) || 
-                   (organization.getAdminUserIds() != null && organization.getAdminUserIds().contains(membership.getUserId()))) {
-            correctRole = "ADMIN";
-            log.debug("User {} is ADMIN of organization {}", membership.getUserId(), organizationId);
+        // Use role from membership if available, otherwise determine based on ownership
+        String correctRole = membership.getRole(); // Use actual role from DB
+        
+        if (correctRole == null || correctRole.isEmpty()) {
+            // Fallback to legacy logic only if role is not set
+            if (organization.getOwnerUserId().equals(membership.getUserId())) {
+                correctRole = "OWNER";
+                log.debug("User {} is OWNER of organization {} (legacy detection)", membership.getUserId(), organizationId);
+            } else if (Boolean.TRUE.equals(membership.getIsAdmin()) || 
+                       (organization.getAdminUserIds() != null && organization.getAdminUserIds().contains(membership.getUserId()))) {
+                correctRole = "ADMIN";
+                log.debug("User {} is ADMIN of organization {} (legacy detection)", membership.getUserId(), organizationId);
+            } else {
+                correctRole = membership.getSimpleRole() != null ? membership.getSimpleRole() : "MEMBER";
+                log.debug("User {} is {} of organization {} (legacy detection)", membership.getUserId(), correctRole, organizationId);
+            }
+            response.setRole(correctRole);
         } else {
-            correctRole = membership.getSimpleRole() != null ? membership.getSimpleRole() : "MEMBER";
-            log.debug("User {} is {} of organization {}", membership.getUserId(), correctRole, organizationId);
+            log.debug("User {} has role {} from membership data", membership.getUserId(), correctRole);
         }
-        response.setRole(correctRole);
         
         // Add user information
         userRepository.findById(membership.getUserId()).ifPresent(user -> {

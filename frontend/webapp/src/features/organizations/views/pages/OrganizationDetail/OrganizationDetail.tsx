@@ -33,6 +33,7 @@ import {
 } from '@/features/organizations';
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
+import { MemberManagementModal } from '../../components/MemberManagementModal';
 
 type TabType = 'overview' | 'members' | 'repositories' | 'settings';
 
@@ -42,6 +43,8 @@ export const OrganizationDetail = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const { t } = useTranslation();
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
@@ -67,6 +70,20 @@ export const OrganizationDetail = () => {
       console.error('Failed to remove member:', error);
     }
   };
+
+  const handleManageMember = (member: any) => {
+    setSelectedMember(member);
+    setIsManageModalOpen(true);
+  };
+
+  const handleUpdateMember = async (memberId: string, data: { role: string; permissions: string[] }) => {
+    console.log('Updating member:', memberId, data);
+    // TODO: Call API to update member role and permissions
+    await queryClient.invalidateQueries({ queryKey: ['organization-members', id] });
+    alert(`Updated member ${memberId}!\nRole: ${data.role}\nPermissions: ${data.permissions.join(', ')}`);
+  };
+
+  const isCurrentUserOwner = true; // TODO: Check if current user is owner from auth context
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -367,14 +384,26 @@ export const OrganizationDetail = () => {
                           <p className="text-sm text-gray-500">
                             {t('organizations.detail.members.joined', { date: new Date(member.joinedAt).toLocaleDateString() })}
                           </p>
-                          {member.role !== 'OWNER' && (
-                            <Button
-                              variant="outline"
-                              onClick={() => handleRemoveMember(member.id)}
-                              className="text-red-600 hover:text-red-700 text-sm"
-                            >
-                              {t('organizations.detail.members.remove')}
-                            </Button>
+                          {isCurrentUserOwner && (
+                            <>
+                              <Button
+                                variant="outline"
+                                onClick={() => handleManageMember(member)}
+                                className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                              >
+                                <Shield className="w-3 h-3" />
+                                Quản lý
+                              </Button>
+                              {member.role !== 'OWNER' && (
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleRemoveMember(member.id)}
+                                  className="text-red-600 hover:text-red-700 text-sm"
+                                >
+                                  {t('organizations.detail.members.remove')}
+                                </Button>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
@@ -469,6 +498,20 @@ export const OrganizationDetail = () => {
           )}
         </motion.div>
       </div>
+
+      {/* Member Management Modal */}
+      {selectedMember && (
+        <MemberManagementModal
+          isOpen={isManageModalOpen}
+          onClose={() => {
+            setIsManageModalOpen(false);
+            setSelectedMember(null);
+          }}
+          member={selectedMember}
+          onUpdateMember={handleUpdateMember}
+          isCurrentUserOwner={isCurrentUserOwner}
+        />
+      )}
     </OrganizationLayout>
   );
 };

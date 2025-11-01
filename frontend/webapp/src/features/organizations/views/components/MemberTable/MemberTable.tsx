@@ -137,11 +137,13 @@ export const MemberTable = ({
 
                   {/* Permissions */}
                   <td className="px-6 py-4">
-                    {member.role === 'MANAGER' ? (
+                    {member.role === 'OWNER' ? (
+                      <span className="text-xs text-purple-600 font-medium">All Permissions</span>
+                    ) : member.role === 'MANAGER' && member.permissions && member.permissions.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {/* TODO: Display actual permissions when available from backend */}
-                        <PermissionBadge permission="approve:legal" />
-                        <PermissionBadge permission="member:invite" />
+                        {member.permissions.map((permission) => (
+                          <PermissionBadge key={permission} permission={permission} />
+                        ))}
                       </div>
                     ) : (
                       <span className="text-sm text-gray-400">-</span>

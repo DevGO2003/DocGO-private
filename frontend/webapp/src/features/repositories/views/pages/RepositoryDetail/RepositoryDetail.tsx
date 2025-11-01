@@ -9,9 +9,6 @@ import {
   CardTitle,
   CardContent,
   RefreshButton,
-  Tabs,
-  TabList,
-  CommonTab,
 } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
@@ -30,6 +27,7 @@ import {
 import { useRepository } from '@features/repositories/models/api/repositoryApi';
 import { RepositoryType } from '@features/repositories/models/types';
 import { NOT_FOUND_PATH } from '@constants';
+import { RepositoryDetailTabs } from '../../components/RepositoryDetailTabs';
 
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -255,54 +253,10 @@ export const RepositoryDetail: React.FC = () => {
                 {/* Content Section */}
                 <div className="mt-8">
                   {/* Tabs Navigation */}
-                  <Tabs className="border-b border-gray-200 mb-6">
-                    <TabList className="flex gap-4">
-                      <CommonTab
-                        value="files"
-                        activeValue={activeTab}
-                        onSelect={() => setActiveTab('files')}
-                        className="pb-3 px-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          {t('repositories.detail.tabs.files')}
-                        </div>
-                      </CommonTab>
-                      <CommonTab
-                        value="members"
-                        activeValue={activeTab}
-                        onSelect={() => setActiveTab('members')}
-                        className="pb-3 px-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          {t('repositories.detail.tabs.members')}
-                        </div>
-                      </CommonTab>
-                      <CommonTab
-                        value="activity"
-                        activeValue={activeTab}
-                        onSelect={() => setActiveTab('activity')}
-                        className="pb-3 px-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Activity className="w-4 h-4" />
-                          {t('repositories.detail.tabs.activity')}
-                        </div>
-                      </CommonTab>
-                      <CommonTab
-                        value="settings"
-                        activeValue={activeTab}
-                        onSelect={() => setActiveTab('settings')}
-                        className="pb-3 px-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          {t('repositories.detail.tabs.settings')}
-                        </div>
-                      </CommonTab>
-                    </TabList>
-                  </Tabs>
+                  <RepositoryDetailTabs
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                  />
 
                   {/* Tab Content */}
                   {activeTab === 'files' && (

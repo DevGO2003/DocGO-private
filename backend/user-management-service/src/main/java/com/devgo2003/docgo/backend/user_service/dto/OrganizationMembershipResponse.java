@@ -4,6 +4,7 @@ import com.devgo2003.docgo.backend.user_service.entity.OrganizationMembership;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 import java.time.LocalDateTime;
 
@@ -28,6 +29,7 @@ public class OrganizationMembershipResponse {
     private String firstName;
     private String lastName;
     private String role; // Simple role string for display
+    private List<String> permissions; // Direct permissions list
 
     public static OrganizationMembershipResponse fromEntity(OrganizationMembership membership) {
         if (membership == null) {
@@ -44,7 +46,8 @@ public class OrganizationMembershipResponse {
                 .invitedAt(membership.getInvitedAt())
                 .joinedAt(membership.getJoinedAt())
                 .createdAt(membership.getCreatedAt())
-                .role(membership.getSimpleRole())
+                .role(membership.getRole() != null ? membership.getRole() : membership.getSimpleRole())
+                .permissions(membership.getPermissions())
                 .build();
     }
 }
