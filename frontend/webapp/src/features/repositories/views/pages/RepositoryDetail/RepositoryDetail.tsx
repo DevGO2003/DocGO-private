@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
+  RefreshButton,
 } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
@@ -29,7 +31,9 @@ import { NOT_FOUND_PATH } from '@constants';
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('files');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
@@ -73,6 +77,22 @@ export const RepositoryDetail: React.FC = () => {
     navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
   };
 
+  const handleRefresh = async () => {
+    console.log('[RepositoryDetail] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate repository detail query
+      await queryClient.invalidateQueries({ queryKey: ['repository', id] });
+      await queryClient.refetchQueries({ queryKey: ['repository', id] });
+
+      console.log('[RepositoryDetail] Refresh completed');
+    } catch (error) {
+      console.error('[RepositoryDetail] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <RepositoryLayout
       title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
@@ -83,6 +103,10 @@ export const RepositoryDetail: React.FC = () => {
       ]}
       loading={isLoading}
       loadingText={t('repositories.detail.loading')}
+      onRefresh={handleRefresh}
+      headerRight={
+        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+      }
     >
       {(!repository && !error) ? null : (
         <div>

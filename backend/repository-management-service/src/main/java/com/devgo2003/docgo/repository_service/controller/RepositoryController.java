@@ -48,41 +48,27 @@ public class RepositoryController {
             @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId,
             @Parameter(description = "ID của user để lọc files theo owner") @RequestParam(required = false) String userId
     ) {
-        try {
-            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-            // Filter by userId if provided
-            Page<FileEntity> files;
-            if (userId != null && !userId.trim().isEmpty()) {
-                files = fileService.getFilesByOwnerUserId(userId, pageable);
-            } else {
-                files = fileService.getAllFiles(pageable);
-            }
-            
-            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách files thành công")
-                .data(files)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files")
-                .build());
-                
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy danh sách files: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files")
-                .build());
+        // Filter by userId if provided
+        Page<FileEntity> files;
+        if (userId != null && !userId.trim().isEmpty()) {
+            files = fileService.getFilesByOwnerUserId(userId, pageable);
+        } else {
+            files = fileService.getAllFiles(pageable);
         }
+        
+        return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách files thành công")
+            .data(files)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files")
+            .build());
     }
 
     @GetMapping("/{id}")
@@ -91,44 +77,21 @@ public class RepositoryController {
             @Parameter(description = "ID của file cần lấy") 
             @PathVariable String id) {
         
-        try {
-            FullFileResponseDto fileDto = fileService.getFileDtoById(id).orElse(null);
-            if (fileDto == null) {
-                return ResponseEntity.ok(RestResponse.<FullFileResponseDto>builder()
-                    .apiVersion("v1")
-                    .statusCode(404)
-                    .shortMessage("Not Found")
-                    .description("Không tìm thấy file với ID: " + id)
-                    .data(null)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/files/" + id)
-                    .build());
-            }
-            
-            return ResponseEntity.ok(RestResponse.<FullFileResponseDto>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy thông tin file thành công")
-                .data(fileDto)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
-                
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<FullFileResponseDto>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy thông tin file: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
+        FullFileResponseDto fileDto = fileService.getFileDtoById(id).orElse(null);
+        if (fileDto == null) {
+            throw new FileNotFoundException("Không tìm thấy file với ID: " + id);
         }
+        
+        return ResponseEntity.ok(RestResponse.<FullFileResponseDto>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy thông tin file thành công")
+            .data(fileDto)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files/" + id)
+            .build());
     }
 
     @PostMapping
@@ -136,66 +99,43 @@ public class RepositoryController {
     public ResponseEntity<RestResponse<FileResponse>> createFile(
             @Valid @RequestBody FileCreateRequest request) {
         
-        try {
-            // Validate request
-            List<String> validationErrors = validationService.validateFileCreation(request);
-            if (!validationErrors.isEmpty()) {
-                return ResponseEntity.badRequest().body(RestResponse.<FileResponse>builder()
-                    .apiVersion("v1")
-                    .statusCode(400)
-                    .shortMessage("Bad Request")
-                    .description("Dữ liệu đầu vào không hợp lệ: " + String.join(", ", validationErrors))
-                    .data(null)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/files")
-                    .build());
-            }
-            
-            // Create file entity from request
-            FileEntity fileEntity = FileEntity.builder()
-                .overview(createOverviewFromRequest(request))
-                .metadata(request.getMetadata() != null ? request.getMetadata() : new java.util.HashMap<>())
-                .storage(request.getStorage() != null ? request.getStorage() : new java.util.HashMap<>())
-                .security(request.getSecurity() != null ? request.getSecurity() : new java.util.HashMap<>())
-                .build();
-            
-            // Set audit information
-            fileEntity.setCreatedAt(java.time.Instant.now().toString());
-            fileEntity.setCreatedBy(request.getOwnerUserId());
-            fileEntity.setUpdatedAt(java.time.Instant.now().toString());
-            fileEntity.setUpdatedBy(request.getOwnerUserId());
-            fileEntity.setIsDeleted(false);
-            
-            // Save file
-            FileEntity savedFile = fileService.createFile(fileEntity);
-            
-            // Convert to response DTO
-            FileResponse response = convertToFileResponse(savedFile);
-            
-            return ResponseEntity.status(201).body(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(201)
-                .shortMessage("Created")
-                .description("Đã tạo file thành công")
-                .data(response)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files")
-                .build());
-                
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi tạo file: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files")
-                .build());
+        // Validate request
+        List<String> validationErrors = validationService.validateFileCreation(request);
+        if (!validationErrors.isEmpty()) {
+            throw new IllegalArgumentException("Dữ liệu đầu vào không hợp lệ: " + String.join(", ", validationErrors));
         }
+        
+        // Create file entity from request
+        FileEntity fileEntity = FileEntity.builder()
+            .overview(createOverviewFromRequest(request))
+            .metadata(request.getMetadata() != null ? request.getMetadata() : new java.util.HashMap<>())
+            .storage(request.getStorage() != null ? request.getStorage() : new java.util.HashMap<>())
+            .security(request.getSecurity() != null ? request.getSecurity() : new java.util.HashMap<>())
+            .build();
+        
+        // Set audit information
+        fileEntity.setCreatedAt(java.time.Instant.now().toString());
+        fileEntity.setCreatedBy(request.getOwnerUserId());
+        fileEntity.setUpdatedAt(java.time.Instant.now().toString());
+        fileEntity.setUpdatedBy(request.getOwnerUserId());
+        fileEntity.setIsDeleted(false);
+        
+        // Save file
+        FileEntity savedFile = fileService.createFile(fileEntity);
+        
+        // Convert to response DTO
+        FileResponse response = convertToFileResponse(savedFile);
+        
+        return ResponseEntity.status(201).body(RestResponse.<FileResponse>builder()
+            .apiVersion("v1")
+            .statusCode(201)
+            .shortMessage("Created")
+            .description("Đã tạo file thành công")
+            .data(response)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files")
+            .build());
     }
 
     @PutMapping("/{id}")
@@ -205,76 +145,42 @@ public class RepositoryController {
             @PathVariable String id,
             @Valid @RequestBody FileUpdateRequest request) {
         
-        try {
-            // Validate file ID
-            if (!validationService.isValidFileId(id)) {
-                throw new FileNotFoundException("Invalid file ID format: " + id);
-            }
-            
-            // Get existing file
-            FileEntity existingFile = fileService.getFileById(id)
-                .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
-            
-            // Validate update request
-            List<String> validationErrors = validationService.validateFileUpdate(request, existingFile);
-            if (!validationErrors.isEmpty()) {
-                return ResponseEntity.badRequest().body(RestResponse.<FileResponse>builder()
-                    .apiVersion("v1")
-                    .statusCode(400)
-                    .shortMessage("Bad Request")
-                    .description("Dữ liệu đầu vào không hợp lệ: " + String.join(", ", validationErrors))
-                    .data(null)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/files/" + id)
-                    .build());
-            }
-            
-            // Update file with new data
-            updateFileFromRequest(existingFile, request);
-            existingFile.setUpdatedAt(java.time.Instant.now().toString());
-            existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
-            
-            // Save updated file
-            FileEntity updatedFile = fileService.updateFile(id, existingFile);
-            
-            // Convert to response DTO
-            FileResponse response = convertToFileResponse(updatedFile);
-            
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã cập nhật file thành công")
-                .data(response)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
-                
-        } catch (FileNotFoundException e) {
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description(e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi cập nhật file: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
+        // Validate file ID
+        if (!validationService.isValidFileId(id)) {
+            throw new FileNotFoundException("Invalid file ID format: " + id);
         }
+        
+        // Get existing file
+        FileEntity existingFile = fileService.getFileById(id)
+            .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
+        
+        // Validate update request
+        List<String> validationErrors = validationService.validateFileUpdate(request, existingFile);
+        if (!validationErrors.isEmpty()) {
+            throw new IllegalArgumentException("Dữ liệu đầu vào không hợp lệ: " + String.join(", ", validationErrors));
+        }
+        
+        // Update file with new data
+        updateFileFromRequest(existingFile, request);
+        existingFile.setUpdatedAt(java.time.Instant.now().toString());
+        existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
+        
+        // Save updated file
+        FileEntity updatedFile = fileService.updateFile(id, existingFile);
+        
+        // Convert to response DTO
+        FileResponse response = convertToFileResponse(updatedFile);
+        
+        return ResponseEntity.ok(RestResponse.<FileResponse>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã cập nhật file thành công")
+            .data(response)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files/" + id)
+            .build());
     }
 
     @DeleteMapping("/{id}")
@@ -283,71 +189,37 @@ public class RepositoryController {
             @Parameter(description = "ID của file cần xóa") 
             @PathVariable String id) {
         
-        try {
-            // Validate file ID
-            if (!validationService.isValidFileId(id)) {
-                throw new FileNotFoundException("Invalid file ID format: " + id);
-            }
-            
-            // Get existing file
-            FileEntity existingFile = fileService.getFileById(id)
-                .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
-            
-            // Validate file status for deletion
-            List<String> validationErrors = validationService.validateFileStatus(existingFile, "DELETE");
-            if (!validationErrors.isEmpty()) {
-                return ResponseEntity.badRequest().body(RestResponse.<Void>builder()
-                    .apiVersion("v1")
-                    .statusCode(400)
-                    .shortMessage("Bad Request")
-                    .description("Không thể xóa file: " + String.join(", ", validationErrors))
-                    .data(null)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/files/" + id)
-                    .build());
-            }
-            
-            // Perform soft delete
-            existingFile.setIsDeleted(true);
-            existingFile.setUpdatedAt(java.time.Instant.now().toString());
-            existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
-            fileService.updateFile(id, existingFile);
-            
-            return ResponseEntity.ok(RestResponse.<Void>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã xóa file thành công")
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
-                
-        } catch (FileNotFoundException e) {
-            return ResponseEntity.ok(RestResponse.<Void>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description(e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<Void>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi xóa file: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id)
-                .build());
+        // Validate file ID
+        if (!validationService.isValidFileId(id)) {
+            throw new FileNotFoundException("Invalid file ID format: " + id);
         }
+        
+        // Get existing file
+        FileEntity existingFile = fileService.getFileById(id)
+            .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
+        
+        // Validate file status for deletion
+        List<String> validationErrors = validationService.validateFileStatus(existingFile, "DELETE");
+        if (!validationErrors.isEmpty()) {
+            throw new IllegalArgumentException("Không thể xóa file: " + String.join(", ", validationErrors));
+        }
+        
+        // Perform soft delete
+        existingFile.setIsDeleted(true);
+        existingFile.setUpdatedAt(java.time.Instant.now().toString());
+        existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
+        fileService.updateFile(id, existingFile);
+        
+        return ResponseEntity.ok(RestResponse.<Void>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã xóa file thành công")
+            .data(null)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files/" + id)
+            .build());
     }
 
     @PutMapping("/{id}/restore")
@@ -356,74 +228,40 @@ public class RepositoryController {
             @Parameter(description = "ID của file cần khôi phục") 
             @PathVariable String id) {
         
-        try {
-            // Validate file ID
-            if (!validationService.isValidFileId(id)) {
-                throw new FileNotFoundException("Invalid file ID format: " + id);
-            }
-            
-            // Get existing file
-            FileEntity existingFile = fileService.getFileById(id)
-                .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
-            
-            // Validate file status for restoration
-            List<String> validationErrors = validationService.validateFileStatus(existingFile, "RESTORE");
-            if (!validationErrors.isEmpty()) {
-                return ResponseEntity.badRequest().body(RestResponse.<FileResponse>builder()
-                    .apiVersion("v1")
-                    .statusCode(400)
-                    .shortMessage("Bad Request")
-                    .description("Không thể khôi phục file: " + String.join(", ", validationErrors))
-                    .data(null)
-                    .timestamp(Instant.now())
-                    .requestId(UUID.randomUUID().toString())
-                    .path("/api/v1/repository-management-service/files/" + id + "/restore")
-                    .build());
-            }
-            
-            // Restore file
-            existingFile.setIsDeleted(false);
-            existingFile.setUpdatedAt(java.time.Instant.now().toString());
-            existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
-            FileEntity restoredFile = fileService.updateFile(id, existingFile);
-            
-            // Convert to response DTO
-            FileResponse response = convertToFileResponse(restoredFile);
-            
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã khôi phục file thành công")
-                .data(response)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id + "/restore")
-                .build());
-                
-        } catch (FileNotFoundException e) {
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(404)
-                .shortMessage("Not Found")
-                .description(e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id + "/restore")
-                .build());
-        } catch (Exception e) {
-            return ResponseEntity.ok(RestResponse.<FileResponse>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi khôi phục file: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/files/" + id + "/restore")
-                .build());
+        // Validate file ID
+        if (!validationService.isValidFileId(id)) {
+            throw new FileNotFoundException("Invalid file ID format: " + id);
         }
+        
+        // Get existing file
+        FileEntity existingFile = fileService.getFileById(id)
+            .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
+        
+        // Validate file status for restoration
+        List<String> validationErrors = validationService.validateFileStatus(existingFile, "RESTORE");
+        if (!validationErrors.isEmpty()) {
+            throw new IllegalArgumentException("Không thể khôi phục file: " + String.join(", ", validationErrors));
+        }
+        
+        // Restore file
+        existingFile.setIsDeleted(false);
+        existingFile.setUpdatedAt(java.time.Instant.now().toString());
+        existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
+        FileEntity restoredFile = fileService.updateFile(id, existingFile);
+        
+        // Convert to response DTO
+        FileResponse response = convertToFileResponse(restoredFile);
+        
+        return ResponseEntity.ok(RestResponse.<FileResponse>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã khôi phục file thành công")
+            .data(response)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/files/" + id + "/restore")
+            .build());
     }
 
     // ==================== HELPER METHODS ====================

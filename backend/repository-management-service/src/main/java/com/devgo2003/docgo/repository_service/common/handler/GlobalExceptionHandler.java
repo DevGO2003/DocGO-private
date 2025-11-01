@@ -11,7 +11,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,10 +149,18 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Get current request path (simplified)
-     * In real implementation, this would be injected from HttpServletRequest
+     * Get current request path from HttpServletRequest
      */
     private String getCurrentPath() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                return request.getRequestURI();
+            }
+        } catch (Exception e) {
+            log.debug("Could not get request path", e);
+        }
         return "/api/v1/repository-management-service";
     }
 }

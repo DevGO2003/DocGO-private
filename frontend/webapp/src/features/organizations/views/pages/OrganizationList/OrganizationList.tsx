@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@shared/utils/dateFormatter';
 import { motion } from 'framer-motion';
 import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
@@ -13,6 +14,7 @@ import {
   Input,
   LoadingSpinner,
   OrganizationHeaderLayout,
+  RefreshButton,
 } from '@shared/components';
 import { useMyOrganizations, CreateOrganizationDialog } from '@/features/organizations';
 import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
@@ -20,10 +22,12 @@ import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 export const OrganizationList = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const size = 12;
 
   const { data, isLoading, error } = useMyOrganizations({
@@ -45,7 +49,7 @@ export const OrganizationList = () => {
 
   const getRoleBadge = (role?: string) => {
     if (!role) return null;
-    
+
     switch (role.toUpperCase()) {
       case 'OWNER':
         return (
@@ -73,6 +77,21 @@ export const OrganizationList = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    console.log('[OrganizationList] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
+      await queryClient.refetchQueries({ queryKey: ['my-organizations'] });
+
+      console.log('[OrganizationList] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationList] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <OrganizationLayout
       title={t('organizations.list.title')}
@@ -80,11 +99,15 @@ export const OrganizationList = () => {
       breadcrumbs={[
         { label: t('organizations.list.title'), current: true },
       ]}
+      onRefresh={handleRefresh}
       headerRight={(
-        <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          {t('organizations.list.new')}
-        </Button>
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            {t('organizations.list.new')}
+          </Button>
+        </div>
       )}
     >
       {/* Create Organization Dialog */}

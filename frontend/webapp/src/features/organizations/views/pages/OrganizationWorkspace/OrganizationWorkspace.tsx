@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -24,6 +25,7 @@ import {
   Button,
   Input,
   LoadingSpinner,
+  RefreshButton,
 } from '@shared/components';
 import { useOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
@@ -37,8 +39,10 @@ type WorkspaceTab = 'contracts' | 'pending-approvals' | 'reports' | 'members' | 
 export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('contracts');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false); // Temporarily disabled
 
   const { data: organization, isLoading } = useOrganization(id!);
@@ -84,6 +88,25 @@ export const OrganizationWorkspace = () => {
     { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
   ];
 
+  const handleRefresh = async () => {
+    console.log('[OrganizationWorkspace] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['organization', id] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-contracts', id] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization-contracts', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization-members', id] });
+
+      console.log('[OrganizationWorkspace] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationWorkspace] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner text={t('organizations.workspace.loading')} fullScreen />;
   }
@@ -115,8 +138,10 @@ export const OrganizationWorkspace = () => {
         { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
         { label: organization?.name || '', current: true },
       ]}
+      onRefresh={handleRefresh}
       headerRight={(
         <div className="flex items-center gap-2">
+            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
             {/* Temporarily disabled - Upload Contract feature */}
             {/* <Button
               variant="outline"

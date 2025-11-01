@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -19,6 +20,7 @@ import {
   CardContent,
   Button,
   LoadingSpinner,
+  RefreshButton,
 } from '@shared/components';
 import {
   useOrganization,
@@ -33,7 +35,9 @@ type TabType = 'overview' | 'members' | 'repositories' | 'settings';
 export const OrganizationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useTranslation();
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
@@ -86,6 +90,23 @@ export const OrganizationDetail = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    console.log('[OrganizationDetail] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['organization', id] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization-members', id] });
+
+      console.log('[OrganizationDetail] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationDetail] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (orgLoading) {
     return <LoadingSpinner text={t('organizations.detail.loading')} fullScreen />;
   }
@@ -117,14 +138,18 @@ export const OrganizationDetail = () => {
         { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
         { label: organization.name, current: true },
       ]}
+      onRefresh={handleRefresh}
       headerRight={(
-        <Button
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <MoreVertical className="w-4 h-4" />
-          {t('organizations.detail.actions')}
-        </Button>
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <MoreVertical className="w-4 h-4" />
+            {t('organizations.detail.actions')}
+          </Button>
+        </div>
       )}
     >
       <div className="space-y-6">

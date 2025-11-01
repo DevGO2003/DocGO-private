@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { UserPlus, ArrowLeft, Users as UsersIcon } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner } from '@shared/components';
+import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner, RefreshButton } from '@shared/components';
 import {
   MemberTable,
   InviteMemberModal,
@@ -18,9 +19,11 @@ import OrganizationLayout from '../../../layouts/OrganizationLayout';
 export const OrganizationMembers = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
   const {
@@ -41,6 +44,23 @@ export const OrganizationMembers = () => {
   console.log('🔍 [Members Page] Your role:', currentUserRole);
   console.log('🔍 [Members Page] Can invite members?', canInviteMembers);
   console.log('🔍 [Members Page] Members count:', members.length);
+
+  const handleRefresh = async () => {
+    console.log('[OrganizationMembers] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['organization', id] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization-members', id] });
+
+      console.log('[OrganizationMembers] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationMembers] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   if (isLoading) {
     return <LoadingSpinner text={t('organizations.members.loading')} fullScreen />;
@@ -73,14 +93,18 @@ export const OrganizationMembers = () => {
         { label: organization?.name || '', href: `/organizations/${id}/workspace` },
         { label: t('organizations.members.title'), current: true },
       ]}
+      onRefresh={handleRefresh}
       headerRight={(
-        <Button
-          onClick={() => setIsInviteModalOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <UserPlus className="w-4 h-4" />
-          {t('organizations.members.inviteMember')}
-        </Button>
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          <Button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            {t('organizations.members.inviteMember')}
+          </Button>
+        </div>
       )}
     >
       {/* Invite Member Modal */}
