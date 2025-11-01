@@ -8,6 +8,7 @@ import {
   CommonSwitch as Switch,
   CommonModal as Modal,
 } from '@shared/components';
+import { User, Building2 } from 'lucide-react';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 import { useMyOrganizations } from '@features/organizations/models/api/organizationApi';
 
@@ -139,28 +140,97 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
     >
       <form id="create-repo-form" onSubmit={handleSubmit}>
         <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="type" className="text-sm font-medium text-gray-700">
-              Loại Repository
+          {/* Repository Type Selection */}
+          <div className="space-y-3">
+            <Label htmlFor="type" className="text-sm font-medium text-gray-900">
+              Chọn loại Repository <span className="text-red-500">*</span>
             </Label>
-            <Select
-              value={formData.type}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('type', e.target.value as RepositoryType)}
-              options={[
-                { value: 'PERSONAL', label: 'Cá nhân' },
-                { value: 'ORGANIZATION', label: 'Tổ chức' },
-              ]}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              {/* Personal Option */}
+              <button
+                type="button"
+                onClick={() => handleInputChange('type', 'PERSONAL')}
+                className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.type === 'PERSONAL'
+                    ? 'border-blue-600 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                    formData.type === 'PERSONAL' ? 'bg-blue-100' : 'bg-gray-100'
+                  }`}>
+                    <User className={`w-5 h-5 ${
+                      formData.type === 'PERSONAL' ? 'text-blue-600' : 'text-gray-400'
+                    }`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className={`font-semibold ${
+                      formData.type === 'PERSONAL' ? 'text-blue-900' : 'text-gray-900'
+                    }`}>
+                      Cá nhân
+                    </div>
+                    <div className="text-xs text-gray-600 mt-0.5">
+                      Repository của riêng bạn
+                    </div>
+                  </div>
+                  {formData.type === 'PERSONAL' && (
+                    <div className="absolute top-2 right-2">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+              </button>
+
+              {/* Organization Option */}
+              <button
+                type="button"
+                onClick={() => handleInputChange('type', 'ORGANIZATION')}
+                className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                  formData.type === 'ORGANIZATION'
+                    ? 'border-green-600 bg-green-50'
+                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                    formData.type === 'ORGANIZATION' ? 'bg-green-100' : 'bg-gray-100'
+                  }`}>
+                    <Building2 className={`w-5 h-5 ${
+                      formData.type === 'ORGANIZATION' ? 'text-green-600' : 'text-gray-400'
+                    }`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className={`font-semibold ${
+                      formData.type === 'ORGANIZATION' ? 'text-green-900' : 'text-gray-900'
+                    }`}>
+                      Tổ chức
+                    </div>
+                    <div className="text-xs text-gray-600 mt-0.5">
+                      Thuộc về một tổ chức
+                    </div>
+                  </div>
+                  {formData.type === 'ORGANIZATION' && (
+                    <div className="absolute top-2 right-2">
+                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+              </button>
+            </div>
             {errors.type && (
               <p className="text-sm text-red-600">{errors.type}</p>
             )}
           </div>
 
           {formData.type === 'ORGANIZATION' && (
-            <div className="space-y-2">
-              <Label htmlFor="organizationId" className="text-sm font-medium text-gray-700">
-                Tổ chức <span className="text-red-500">*</span>
-              </Label>
+            <div className="space-y-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-green-600" />
+                <Label htmlFor="organizationId" className="text-sm font-medium text-gray-900">
+                  Chọn tổ chức <span className="text-red-500">*</span>
+                </Label>
+              </div>
               <Select
                 value={formData.organizationId || ''}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('organizationId', e.target.value)}
@@ -171,13 +241,21 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     label: org.name
                   }))
                 ]}
+                className="bg-white"
               />
               {errors.organizationId && (
                 <p className="text-sm text-red-600">{errors.organizationId}</p>
               )}
               {organizationsData?.content?.length === 0 && (
-                <p className="text-sm text-amber-600">
-                  Bạn chưa có tổ chức nào. Hãy tạo hoặc tham gia một tổ chức trước.
+                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md mt-2">
+                  <div className="text-amber-600 text-sm">
+                    ⚠️ Bạn chưa có tổ chức nào. Hãy tạo hoặc tham gia một tổ chức trước.
+                  </div>
+                </div>
+              )}
+              {organizationsData?.content && organizationsData.content.length > 0 && (
+                <p className="text-xs text-gray-600 mt-2">
+                  Đã tìm thấy {organizationsData.content.length} tổ chức mà bạn tham gia
                 </p>
               )}
             </div>

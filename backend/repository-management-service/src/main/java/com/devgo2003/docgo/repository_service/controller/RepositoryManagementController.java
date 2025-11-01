@@ -161,38 +161,37 @@ public class RepositoryManagementController {
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
             @Parameter(description = "ID của tổ chức (optional)") @RequestParam(required = false) String organizationId
     ) {
-        try {
-            // Lấy userId từ SecurityContext
-            String currentUserId = null;
-            var auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
-                currentUserId = p.userId;
-            }
-            if (currentUserId == null) {
-                currentUserId = "anonymous";
-            }
-            
-            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            
-            Page<RepositoryDTO> repositories;
-            
-            // Nếu có organizationId cụ thể, lấy repos của org đó
-            if (organizationId != null && !organizationId.isEmpty()) {
-                if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                    repositories = repositoryService.searchOrganizationRepositories(searchTerm, organizationId, pageable);
-                } else {
-                    repositories = repositoryService.getOrganizationRepositories(organizationId, pageable);
-                }
+        // Lấy userId từ SecurityContext
+        String currentUserId = null;
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+            currentUserId = p.userId;
+        }
+        if (currentUserId == null) {
+            currentUserId = "anonymous";
+        }
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        Page<RepositoryDTO> repositories;
+        
+        // Nếu có organizationId cụ thể, lấy repos của org đó
+        if (organizationId != null && !organizationId.isEmpty()) {
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                repositories = repositoryService.searchOrganizationRepositories(searchTerm, organizationId, pageable);
             } else {
-                // Nếu không có organizationId, lấy TẤT CẢ repos ORGANIZATION mà user là owner
-                // (tạm thời dùng cách này, sau có thể cải thiện bằng cách gọi organization-service để lấy danh sách org của user)
-                if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                    repositories = repositoryService.searchUserOrganizationRepositories(searchTerm, currentUserId, pageable);
-                } else {
-                    repositories = repositoryService.getUserOrganizationRepositories(currentUserId, pageable);
-                }
+                repositories = repositoryService.getOrganizationRepositories(organizationId, pageable);
             }
+        } else {
+            // Nếu không có organizationId, lấy TẤT CẢ repos ORGANIZATION mà user là owner
+            // (tạm thời dùng cách này, sau có thể cải thiện bằng cách gọi organization-service để lấy danh sách org của user)
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                repositories = repositoryService.searchUserOrganizationRepositories(searchTerm, currentUserId, pageable);
+            } else {
+                repositories = repositoryService.getUserOrganizationRepositories(currentUserId, pageable);
+            }
+        }
 
         return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
             .apiVersion("v1")

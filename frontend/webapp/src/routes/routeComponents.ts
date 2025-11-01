@@ -29,9 +29,6 @@ export const AcceptInvitation = lazy(() => import('@features/organizations/views
 export const Profile = lazy(() => import('@features/profile/views/pages').then(m => ({ default: m.Profile })));
 export const Settings = lazy(() => import('@features/settings/views/pages/Settings').then(m => ({ default: m.Settings })));
 
-// Users
-export const Users = lazy(() => import('@pages/Users').then(m => ({ default: m.Users })));
-
 // Upload
 export const UploadPage = lazy(() =>
   import('@features/upload/views/pages/UploadPage').then(m => ({ default: (m as any).UploadPage ?? m.default }))

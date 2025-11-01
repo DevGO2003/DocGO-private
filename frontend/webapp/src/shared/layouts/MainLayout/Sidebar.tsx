@@ -33,7 +33,6 @@ const NAV_ITEMS = [
   // { name: 'analytics', href: '/analytics', icon: BarChart3 }, // Removed as per requirement
   { name: 'documents', href: '/repositories', icon: FileText },
   { name: 'organizations', href: '/organizations', icon: Building2 },
-  { name: 'users', href: '/users', icon: Users },
   { name: 'settings', href: '/settings', icon: Settings },
 ];
 

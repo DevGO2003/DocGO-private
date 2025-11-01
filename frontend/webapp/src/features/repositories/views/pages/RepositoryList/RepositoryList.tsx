@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
-import { Button, Input, CreateRepositoryModal, RefreshButton } from '@shared/components';
+import { Button, Input, RefreshButton } from '@shared/components';
 import {
   usePersonalRepositories,
   useOrganizationRepositories,
@@ -12,6 +12,7 @@ import {
 } from '@features/repositories';
 import { RepositoryTabs } from '@features/repositories/views/components/RepositoryTabs';
 import { RepositoryGrid } from '@features/repositories/views/components/RepositoryGrid';
+import { CreateRepositoryModal } from '@features/repositories/views/components/CreateRepositoryModal';
 import type { RepositoryCreateData } from '@features/repositories/models/types/repository.types';
 import { useCreateRepository } from '@features/repositories/models/api/repositoryApi';
 import { REPOSITORY_DETAIL_PATH } from '@shared/constants';
