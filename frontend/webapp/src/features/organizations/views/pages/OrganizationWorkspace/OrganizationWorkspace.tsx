@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
   FileText,
   Clock,
   CheckCircle,
@@ -42,7 +41,7 @@ import { useOrganizationContracts, useOrganizationRepositories } from '@features
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
-type WorkspaceTab = 'contracts' | 'pending-approvals' | 'reports' | 'repositories' | 'members' | 'settings';
+type WorkspaceTab = 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
@@ -100,9 +99,8 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
-    { id: 'pending-approvals' as WorkspaceTab, label: t('organizations.workspace.tabs.pendingApprovals'), icon: Clock },
     { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: BarChart3 },
+    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
     { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: Folder },
     { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: Users },
     { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
@@ -195,8 +193,8 @@ export const OrganizationWorkspace = () => {
 
       <div className="space-y-6">
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          {/* Stats Cards - Moved to Reports Tab */}
+          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
@@ -248,7 +246,7 @@ export const OrganizationWorkspace = () => {
                 <XCircle className="w-10 h-10 text-red-500" />
               </div>
             </motion.div>
-          </div>
+          </div> */}
 
           {/* Tabs */}
           <Tabs className="border-b border-gray-200">
@@ -280,6 +278,97 @@ export const OrganizationWorkspace = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Reports Tab */}
+          {activeTab === 'reports' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {/* Tổng số hợp đồng */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
+                      <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
+                    </div>
+                    <FileText className="w-10 h-10 text-blue-500" />
+                  </div>
+                </motion.div>
+
+                {/* Đang chờ */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
+                      <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
+                    </div>
+                    <Clock className="w-10 h-10 text-yellow-500" />
+                  </div>
+                </motion.div>
+
+                {/* Đã duyệt */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
+                      <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
+                    </div>
+                    <CheckCircle className="w-10 h-10 text-green-500" />
+                  </div>
+                </motion.div>
+
+                {/* Đã từ chối */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
+                      <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
+                    </div>
+                    <XCircle className="w-10 h-10 text-red-500" />
+                  </div>
+                </motion.div>
+
+                {/* Tổng số file - MỚI */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-purple-700 font-medium">Tổng số file</p>
+                      <p className="text-3xl font-bold text-purple-900">{contractsData?.totalElements || 0}</p>
+                    </div>
+                    <FileIcon className="w-10 h-10 text-purple-500" />
+                  </div>
+                </motion.div>
+
+                {/* Tổng số repository - MỚI */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-indigo-700 font-medium">Tổng số repository</p>
+                      <p className="text-3xl font-bold text-indigo-900">{repositoriesData?.totalElements || 0}</p>
+                    </div>
+                    <Folder className="w-10 h-10 text-indigo-500" />
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          )}
+
           {/* Contracts Tab */}
           {activeTab === 'contracts' && (
             <div className="space-y-6">
@@ -297,6 +386,14 @@ export const OrganizationWorkspace = () => {
                         className="pl-10"
                       />
                     </div>
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
+                      className="flex items-center gap-2"
+                    >
+                      <Folder className="w-4 h-4" />
+                      Mở danh sách kho
+                    </Button>
                     <Button variant="outline">
                       {t('organizations.workspace.filter')}
                     </Button>
@@ -373,33 +470,25 @@ export const OrganizationWorkspace = () => {
               </Card>
             </div>
           )}
-          
-              {/* Pending Approvals Tab */}
-              {activeTab === 'pending-approvals' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" />
-                      {t('organizations.workspace.pendingApprovalsTitle')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">{t('organizations.workspace.noPending')}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
           {/* Repositories Tab */}
           {activeTab === 'repositories' && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Folder className="w-5 h-5" />
-                  {t('organizations.workspace.repositoriesTitle')}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Folder className="w-5 h-5" />
+                    {t('organizations.workspace.repositoriesTitle')}
+                  </CardTitle>
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
+                    className="flex items-center gap-2"
+                  >
+                    <Folder className="w-4 h-4" />
+                    Mở danh sách kho
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {repositoriesLoading ? (

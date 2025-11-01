@@ -5,8 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   RefreshButton,
   Tabs,
@@ -15,17 +13,10 @@ import {
 } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
-  ArrowLeft, 
-  Settings, 
+  Info,
   Users, 
   FileText, 
-  Activity,
-  Building,
-  User,
-  Lock,
-  Globe,
-  Calendar,
-  HardDrive
+  Activity
 } from 'lucide-react';
 import { useRepository } from '@features/repositories/models/api/repositoryApi';
 import { RepositoryType } from '@features/repositories/models/types';
@@ -35,7 +26,7 @@ export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('files');
+  const [activeTab, setActiveTab] = useState('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useTranslation();
 
@@ -53,11 +44,6 @@ export const RepositoryDetail: React.FC = () => {
 
   const handleBack = () => {
     navigate('/repositories');
-  };
-
-  const handleSettings = () => {
-    // TODO: Open settings modal or navigate to settings page
-    console.log('Open repository settings');
   };
 
   const formatFileSize = (bytes: number | null | undefined) => {
@@ -122,141 +108,23 @@ export const RepositoryDetail: React.FC = () => {
               </Card>
             )}
 
-            {/* Header */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  {t('repositories.detail.back')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleSettings}
-                  className="inline-flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4" />
-                  {t('repositories.detail.settings')}
-                </Button>
-              </div>
-
-              {repository && (
-                <div className="flex items-center gap-3 mb-2">
-                  {repository.type === 'ORGANIZATION' ? (
-                    <Building className="w-8 h-8 text-purple-500" />
-                  ) : (
-                    <User className="w-8 h-8 text-blue-500" />
-                  )}
-                  <h1 className="text-3xl font-bold text-gray-900">{repository.name}</h1>
-                </div>
-              )}
-
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                {repository && <span>{getRepositoryTypeLabel(repository.type)}</span>}
-                <span className="flex items-center gap-1">
-                  {repository && (repository.isPublic ? (
-                    <Globe className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Lock className="w-4 h-4 text-gray-500" />
-                  ))}
-                  {repository && (repository.isPublic ? t('repositories.detail.type.public') : t('repositories.detail.type.private'))}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {repository && repository.updatedAt && (
-                    <>{t('repositories.detail.updated', { date: new Date(repository.updatedAt).toLocaleDateString() })}</>
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {/* Primary Content */}
+            {/* Content Section */}
             {repository && (
               <div>
-                {/* Repository Info */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                  {/* Main Info */}
-                  <div className="lg:col-span-3">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t('repositories.detail.info.title')}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.description')}</h4>
-                            <p className="text-gray-600">
-                              {repository?.description || t('repositories.detail.info.noDescription')}
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.owner')}</h4>
-                              <p className="text-gray-600">
-                                {repository?.ownerName || repository?.ownerUserId || 'Không có'}
-                              </p>
-                            </div>
-
-                            {repository?.organizationId && (
-                              <div>
-                                <h4 className="font-medium text-gray-900 mb-2">{t('repositories.detail.info.organization')}</h4>
-                                <p className="text-gray-600">
-                                  {repository?.organizationName || repository?.organizationId || 'Không có'}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Stats Sidebar */}
-                  <div className="lg:col-span-1">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t('repositories.detail.stats.title')}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.files')}</span>
-                            </div>
-                            <span className="font-medium">{repository?.fileCount ?? 0}</span>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Users className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.members')}</span>
-                            </div>
-                            <span className="font-medium">{repository?.memberCount ?? 0}</span>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <HardDrive className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">{t('repositories.detail.stats.storage')}</span>
-                            </div>
-                            <span className="font-medium">{repository ? formatFileSize(repository.totalSize) : '-'}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="mt-8">
                   {/* Tabs Navigation */}
                   <Tabs className="border-b border-gray-200 mb-6">
                     <TabList className="flex gap-4">
+                      <CommonTab
+                        value="info"
+                        activeValue={activeTab}
+                        onSelect={() => setActiveTab('info')}
+                        className="pb-3 px-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Info className="w-4 h-4" />
+                          Thông tin
+                        </div>
+                      </CommonTab>
                       <CommonTab
                         value="files"
                         activeValue={activeTab}
@@ -282,29 +150,51 @@ export const RepositoryDetail: React.FC = () => {
                       <CommonTab
                         value="activity"
                         activeValue={activeTab}
-                        onSelect={() => setActiveTab('activity')}
-                        className="pb-3 px-4"
+                        onSelect={() => {}}
+                        className="pb-3 px-4 opacity-50 cursor-not-allowed"
+                        disabled
+                        title="Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có"
                       >
                         <div className="flex items-center gap-2">
                           <Activity className="w-4 h-4" />
                           {t('repositories.detail.tabs.activity')}
                         </div>
                       </CommonTab>
-                      <CommonTab
-                        value="settings"
-                        activeValue={activeTab}
-                        onSelect={() => setActiveTab('settings')}
-                        className="pb-3 px-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          {t('repositories.detail.tabs.settings')}
-                        </div>
-                      </CommonTab>
                     </TabList>
                   </Tabs>
 
                   {/* Tab Content */}
+                  {activeTab === 'info' && (
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Mô tả</h4>
+                            <p className="text-gray-600">
+                              {repository?.description || 'Không có mô tả'}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-medium text-gray-900 mb-2">Chủ sở hữu</h4>
+                              <p className="text-gray-600">
+                                {repository?.ownerName || 'Chưa có thông tin'}
+                              </p>
+                            </div>
+                            {repository?.organizationId && (
+                              <div>
+                                <h4 className="font-medium text-gray-900 mb-2">Tổ chức</h4>
+                                <p className="text-gray-600">
+                                  {repository?.organizationName || 'Không có'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {activeTab === 'files' && (
                     <Card>
                       <CardContent className="p-6">
@@ -390,21 +280,6 @@ export const RepositoryDetail: React.FC = () => {
                     </Card>
                   )}
 
-                  {activeTab === 'settings' && (
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="text-center py-8">
-                          <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            {t('repositories.detail.empty.settings.title')}
-                          </h3>
-                          <p className="text-gray-600">
-                            {t('repositories.detail.empty.settings.desc')}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </div>
             )}

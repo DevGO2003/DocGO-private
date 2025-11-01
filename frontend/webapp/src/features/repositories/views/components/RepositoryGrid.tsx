@@ -194,7 +194,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Chủ sở hữu:</span>
                     <span className="font-medium text-gray-900">
-                      {repo.ownerName || repo.ownerUserId || 'Không có'}
+                      {repo.ownerName || 'Chưa có thông tin'}
                     </span>
                   </div>
 

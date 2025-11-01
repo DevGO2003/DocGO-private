@@ -361,7 +361,7 @@ export const RepositoryFilesList: React.FC = () => {
                 </svg>
               </div>
               <Text className="text-gray-600 mb-6">{t('repositories.files.empty.notFound')}</Text>
-              <Button variant="outline" onClick={() => setSearch('')}>{t('repositories.files.empty.clearSearch')}</Button>
+              <Button variant="outline" onClick={() => { setSearch(''); refreshFiles(); }}>{t('repositories.files.empty.clearSearchAndRefresh')}</Button>
             </div>
           </div>
         ) : viewMode === 'grid' ? (
@@ -466,7 +466,7 @@ export const RepositoryFilesList: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-        {hasMore && (
+        {hasMore && filtered.length > 0 && (
           <div className="flex justify-center mt-6">
             <Button 
               onClick={loadMore} 

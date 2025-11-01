@@ -11,7 +11,6 @@ import {
   Button,
   Input,
   RefreshButton,
-  Label,
 } from '@shared/components';
 
 import ProfileLayout from '../../../layouts/ProfileLayout';
@@ -136,11 +135,6 @@ export const Profile = () => {
                     </h2>
                     <p className="text-gray-600 mb-2">@{user.username}</p>
 
-                    {/* Role Badge */}
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {user.role}
-                    </span>
-
                     {/* Stats */}
                     <div className="mt-6 pt-6 border-t border-gray-200">
                       <div className="grid grid-cols-2 gap-4 text-center">
@@ -205,10 +199,10 @@ export const Profile = () => {
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <User className="w-4 h-4" />
                           {t('profile.labels.firstName')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="firstName"
@@ -221,10 +215,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <User className="w-4 h-4" />
                           {t('profile.labels.lastName')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="lastName"
@@ -241,10 +235,10 @@ export const Profile = () => {
                     {/* Contact Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <Mail className="w-4 h-4" />
                           {t('profile.labels.email')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="email"
@@ -258,10 +252,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <Phone className="w-4 h-4" />
                           {t('profile.labels.phone')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="phone"
@@ -279,10 +273,10 @@ export const Profile = () => {
                     {/* Work Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <Building2 className="w-4 h-4" />
                           {t('profile.labels.department')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="department"
@@ -295,10 +289,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <Label className="flex items-center gap-2 mb-2">
+                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                           <Briefcase className="w-4 h-4" />
                           {t('profile.labels.position')}
-                        </Label>
+                        </label>
                         {isEditing ? (
                           <Input
                             name="position"
@@ -325,12 +319,6 @@ export const Profile = () => {
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">{t('profile.account.role')}</span>
-                          <span className="text-sm font-medium text-gray-900">
-                            {user.role}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
                           <span className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4" />
                             {t('profile.account.memberSince')}
@@ -339,6 +327,16 @@ export const Profile = () => {
                             {new Date(user.createdAt).toLocaleDateString()}
                           </span>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* TODO: Kho mã và Tổ chức - Chưa có API */}
+                    <div className="pt-6 border-t border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Kho mã và Tổ chức
+                      </h3>
+                      <div className="text-sm text-gray-500 italic">
+                        API đang được phát triển
                       </div>
                     </div>
                   </div>

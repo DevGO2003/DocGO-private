@@ -445,6 +445,7 @@
         "storage": "Dung lượng"
       },
       "tabs": {
+        "info": "Thông tin",
         "files": "Tệp",
         "members": "Thành viên",
         "activity": "Hoạt động",
@@ -478,8 +479,15 @@
       "empty": {
         "notFound": "Không tìm thấy tài liệu phù hợp.",
         "clearSearch": "Xóa tìm kiếm",
+        "clearSearchAndRefresh": "Xóa tìm kiếm và làm mới",
         "refreshing": "Đang làm mới...",
         "refresh": "Làm mới"
+      },
+      "confirmDelete": "Xóa {{count}} file?",
+      "permissions": {
+        "upload": "Tải lên",
+        "view": "Xem",
+        "delete": "Xóa"
       },
       "table": {
         "document": "Tài liệu",

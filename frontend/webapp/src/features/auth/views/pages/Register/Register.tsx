@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
+import { useRef, useEffect } from 'react';
+import anime from 'animejs';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont } from '@shared/components';
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useRegisterController } from '../../../controllers/useRegisterController';
 import { useAppSelector } from '@store/hooks';
@@ -28,14 +29,36 @@ export const Register = () => {
     });
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      anime({
+        targets: containerRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 500,
+        easing: 'easeOutQuad',
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (error && errorRef.current) {
+      anime({
+        targets: errorRef.current,
+        opacity: [0, 1],
+        maxHeight: [0, 100],
+        duration: 300,
+        easing: 'easeOutQuad',
+      });
+    }
+  }, [error]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+    <CommonFont className="min-h-screen flex items-center justify-center py-12 px-4" style={{ background: 'linear-gradient(to bottom right, #dbeafe, #faf5ff)' }}>
+      <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">
@@ -45,13 +68,9 @@ export const Register = () => {
 
           <CardContent>
             {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm"
-              >
+              <div ref={errorRef} className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -118,11 +137,7 @@ export const Register = () => {
               </Button>
             </form>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 text-center"
+            <div className="mt-6 text-center"
             >
               <div className="text-sm text-gray-600">
                 Already have an account?{' '}
@@ -133,10 +148,10 @@ export const Register = () => {
                   Sign in
                 </Link>
               </div>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </div>
+      </div>
+    </CommonFont>
   );
 };

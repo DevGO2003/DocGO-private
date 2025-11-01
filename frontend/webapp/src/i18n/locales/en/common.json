@@ -468,29 +468,14 @@
         "description": "Public repositories"
       }
     },
-    "documentsFilters": {
-      "searchPlaceholder": "Search documents...",
-      "refresh": "Refresh",
-      "grid": "Grid",
-      "list": "List"
-    },
     "files": {
-      "title": "Repository Files",
-      "subtitle": "Repo ID: {{id}}",
       "manage": "Document Management",
       "empty": {
         "notFound": "No matching documents found.",
         "clearSearch": "Clear search",
+        "clearSearchAndRefresh": "Clear search and refresh",
         "refreshing": "Refreshing...",
         "refresh": "Refresh"
-      },
-      "table": {
-        "document": "Document",
-        "status": "Status",
-        "type": "Type",
-        "size": "Size",
-        "uploadedAt": "Uploaded At",
-        "viewDetail": "View Detail"
       },
       "breadcrumbs": {
         "repo": "Repo {{id}}",

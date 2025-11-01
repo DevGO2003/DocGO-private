@@ -13,6 +13,7 @@ import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants'
 // removed unused type imports
 import { Card, CardContent, CardHeader, CardTitle, Button, Text, LoadingSpinner, RefreshButton } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import PanelSelector from '../../../components/PanelSelector';
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
@@ -24,6 +25,21 @@ export const Dashboard = () => {
   const [page] = useState(0);
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Panel management state
+  const [panels, setPanels] = useState([
+    { id: 'stats', label: 'Thống kê', visible: true },
+    { id: 'repositories', label: 'Repositories gần đây', visible: true },
+    { id: 'files', label: 'Files gần đây', visible: true },
+    { id: 'organizations', label: 'Tổ chức', visible: true },
+    { id: 'quickActions', label: 'Hành động nhanh', visible: true },
+  ]);
+  
+  const togglePanel = (id: string) => {
+    setPanels(prev => prev.map(p => 
+      p.id === id ? { ...p, visible: !p.visible } : p
+    ));
+  };
 
   // Get current user ID for filtering
   const userId = user?.id;
@@ -135,7 +151,13 @@ export const Dashboard = () => {
       breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
       onRefresh={handleRefresh}
       headerRight={
-        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <div className="flex items-center gap-2">
+          <PanelSelector
+            panels={panels.map(p => ({ id: p.id, label: p.label, visible: p.visible }))}
+            onToggle={togglePanel}
+          />
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        </div>
       }
     >
         {/* Welcome Header */}

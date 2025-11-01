@@ -75,8 +75,8 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur rounded-lg p-[0px] w-full">
-      {/* Row 1: Search + Sort + SortDir + Refresh (compact) */}
+    <>
+      {/* Row 1: Search + Sort + SortDir (compact) */}
       <div className="flex items-center gap-[5px] w-full">
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
@@ -222,7 +222,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         onUpload={() => { setOpenAdd(false); }}
         onClose={()=>setOpenAdd(false)}
       />
-    </div>
+    </>
   );
 };
 
