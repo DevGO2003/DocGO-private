@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardContent } from '@shared/components';
+import { useQueryClient } from '@tanstack/react-query';
+import { Button, Card, CardContent, RefreshButton } from '@shared/components';
 import { Flex, Text } from '@shared/components';
-import { ControlMainLayout } from '@shared/layouts';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { MainTabsNav } from '@features/repositories/views/components/FileDetail/MainTabsNav';
 import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
@@ -21,6 +22,7 @@ interface FileDetailData {
 export const RepositoryFileDetail: React.FC = () => {
   const { id, fileId } = useParams<{ id: string; fileId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +35,7 @@ export const RepositoryFileDetail: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [editedData, setEditedData] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     // Kiểm tra repository ID có hợp lệ không
@@ -225,8 +228,74 @@ export const RepositoryFileDetail: React.FC = () => {
     setEditedData(null);
   };
 
+  const handleRefresh = async () => {
+    console.log('[RepositoryFileDetail] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      // Invalidate file detail query
+      await queryClient.invalidateQueries({ queryKey: ['file', fileId] });
+
+      // Refetch data manually
+      const resp = await fetchFileById(fileId || '');
+      if (resp && (resp as any).data) {
+        const apiData = (resp as any).data;
+        const basic = apiData as FileDetailData;
+        setFile(basic);
+
+        // Re-map data
+        const mapped = {
+          id: (apiData as any)?.id ?? basic.fileId,
+          title: basic.fileName,
+          overview: (apiData as any)?.overview ?? undefined,
+          description: (apiData as any)?.description || '',
+          status: (apiData as any)?.status || 'ACTIVE',
+          contractType: (apiData as any)?.contractType || 'GENERAL',
+          tags: (apiData as any)?.tags || [],
+          parties: (apiData as any)?.contract?.parties || [],
+          effectiveDate: (apiData as any)?.contract?.effectiveDate || null,
+          expiryDate: (apiData as any)?.contract?.expiryDate || null,
+          totalValue: (apiData as any)?.contract?.totalValue || null,
+          currency: (apiData as any)?.contract?.currency || 'VND',
+          project: (apiData as any)?.contract?.project || null,
+          department: (apiData as any)?.contract?.department || null,
+          priority: (apiData as any)?.contract?.priority || null,
+          confidentiality: (apiData as any)?.contract?.confidentiality || null,
+          summary: (apiData as any)?.contract?.summary || '',
+          paymentDetails: {
+            totalValue: (apiData as any)?.contract?.totalValue || null,
+            currency: (apiData as any)?.contract?.currency || 'VND',
+            schedule: (apiData as any)?.contract?.payment?.schedule || [],
+            paymentMethod: (apiData as any)?.contract?.payment?.method || '',
+          },
+          keyClauses: (apiData as any)?.contract?.clauses?.key || [],
+          unfavorableClauses: (apiData as any)?.contract?.clauses?.unfavorable || [],
+          reminders: (apiData as any)?.contract?.reminders || [],
+          riskAssessment: {
+            riskLevel: (apiData as any)?.contract?.risk?.riskLevel || null,
+            riskFactors: (apiData as any)?.contract?.risk?.factors || [],
+            mitigationMeasures: (apiData as any)?.contract?.risk?.mitigations || [],
+          },
+          complianceStatus: {
+            status: (apiData as any)?.contract?.compliance?.status || null,
+            issues: (apiData as any)?.contract?.compliance?.issues || [],
+            recommendations: (apiData as any)?.contract?.compliance?.recommendations || [],
+          },
+          content: (apiData as any)?.content?.ocr?.text || '',
+        };
+        setDocumentData(mapped);
+        setContractSummary(mapped);
+      }
+
+      console.log('[RepositoryFileDetail] Refresh completed');
+    } catch (error) {
+      console.error('[RepositoryFileDetail] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
-    <ControlMainLayout
+    <RepositoryLayout
       title={documentData?.title || file?.fileName || 'Chi tiết tài liệu'}
       subtitle={file ? `Mã: ${file.fileId}` : undefined}
       breadcrumbs={[
@@ -237,9 +306,11 @@ export const RepositoryFileDetail: React.FC = () => {
       ]}
       loading={isLoading}
       loadingText="Đang tải chi tiết tệp..."
+      onRefresh={handleRefresh}
       headerRight={
         <div className="w-full">
           <Flex wrap gap={2.5} align="center" justify="end">
+            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
             {isEditing ? (
               <>
                 <Button variant="outline" onClick={handleDiscard}>
@@ -338,6 +409,6 @@ export const RepositoryFileDetail: React.FC = () => {
           />
         )}
       </div>
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 }

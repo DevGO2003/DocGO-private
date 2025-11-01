@@ -14,7 +14,6 @@ interface FilesFiltersProps {
   onSearchChange: (v: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (m: ViewMode) => void;
-  onRefresh?: () => void;
   // New props
   status: string;
   onStatusChange: (v: string) => void;
@@ -39,7 +38,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSearchChange,
   viewMode,
   onViewModeChange,
-  onRefresh,
   status,
   onStatusChange,
   type,
@@ -112,9 +110,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
           <option value="asc">{t('repositories.files.filters.sortDirections.asc')}</option>
           <option value="desc">{t('repositories.files.filters.sortDirections.desc')}</option>
         </select>
-        {onRefresh && (
-          <button onClick={onRefresh} className="inline-flex items-center gap-1 px-2 h-[28px] rounded-lg border border-indigo-300 text-xs text-indigo-700 hover:bg-indigo-50">↻ {t('repositories.files.filters.refresh')}</button>
-        )}
       </div>
 
       {/* Row 2: Advanced toggle + filter triggers + reset + view toggle */}

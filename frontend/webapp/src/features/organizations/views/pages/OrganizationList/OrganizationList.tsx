@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@shared/utils/dateFormatter';
 import { motion } from 'framer-motion';
 import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
@@ -13,16 +14,20 @@ import {
   Input,
   LoadingSpinner,
   OrganizationHeaderLayout,
+  RefreshButton,
 } from '@shared/components';
 import { useMyOrganizations, CreateOrganizationDialog } from '@/features/organizations';
 import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
+import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 export const OrganizationList = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const size = 12;
 
   const { data, isLoading, error } = useMyOrganizations({
@@ -44,7 +49,7 @@ export const OrganizationList = () => {
 
   const getRoleBadge = (role?: string) => {
     if (!role) return null;
-    
+
     switch (role.toUpperCase()) {
       case 'OWNER':
         return (
@@ -72,39 +77,57 @@ export const OrganizationList = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    console.log('[OrganizationList] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['my-organizations'] });
+      await queryClient.refetchQueries({ queryKey: ['my-organizations'] });
+
+      console.log('[OrganizationList] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationList] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
-    <>
+    <OrganizationLayout
+      title={t('organizations.list.title')}
+      subtitle={t('organizations.list.subtitle')}
+      breadcrumbs={[
+        { label: t('organizations.list.title'), current: true },
+      ]}
+      onRefresh={handleRefresh}
+      headerRight={(
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            {t('organizations.list.new')}
+          </Button>
+        </div>
+      )}
+    >
       {/* Create Organization Dialog */}
       <CreateOrganizationDialog
         open={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-        <div className="max-w-7xl mx-auto">
-        {/* Header (use OrganizationHeaderLayout) */}
-        <OrganizationHeaderLayout
-          title={t('organizations.list.title')}
-          subtitle={t('organizations.list.subtitle')}
-          orgActions={(
-            <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              {t('organizations.list.new')}
-            </Button>
-          )}
-          filters={(
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                type="text"
-                placeholder={t('organizations.list.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          )}
-        />
+      <div className="space-y-6">
+        {/* Search Filter */}
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            type="text"
+            placeholder={t('organizations.list.searchPlaceholder')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
 
         {/* Loading */}
         {isLoading && <LoadingSpinner text={t('organizations.list.loading')} />}
@@ -275,8 +298,7 @@ export const OrganizationList = () => {
             )}
           </>
         )}
-        </div>
       </div>
-    </>
+    </OrganizationLayout>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@shared/components/UIComponents/Button';
+import { Button, RefreshButton } from '@shared/components';
 import { Card, CardHeader, CardTitle, CardContent } from '@shared/components/UIComponents/Card';
 import { Table, TableHeader, TableRow, TableCell, TableContainer } from '@shared/components/UIComponents/Table';
 import { Text } from '@shared/components/UIComponents/Text';
@@ -11,7 +11,7 @@ import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
-import { ControlMainLayout } from '@shared/layouts';
+import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import TableSettings from './TableSettings';
 import { tagAPI } from '@features/tags/services/tag-api';
 // TODO: Add Tooltip and AlertDialog components to @shared/components
@@ -265,9 +265,9 @@ export const RepositoryFilesList: React.FC = () => {
   };
 
   return (
-    <ControlMainLayout
-      title={t('repositories.files.title')}
-      subtitle={id ? t('repositories.files.subtitle', { id }) : undefined}
+    <RepositoryLayout
+      title={t('repositories.files.breadcrumbs.files')}
+      subtitle={id ? `Mã repo: ${id}` : undefined}
       breadcrumbs={[
         { label: t('nav.repositories'), href: '/repositories' },
         { label: repoName || id || t('repositories.files.breadcrumbs.repository'), href: `/repositories/${id}` },
@@ -275,51 +275,48 @@ export const RepositoryFilesList: React.FC = () => {
       ]}
       loading={isLoading}
       loadingText={t('repositories.files.loading')}
+      onRefresh={refreshFiles}
+      secondaryTabs={
+        <Tabs>
+          <TabList>
+            <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              {t('repositories.files.tabs.all')}
+            </CommonTab>
+            <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              {t('repositories.files.tabs.contract')}
+            </CommonTab>
+          </TabList>
+        </Tabs>
+      }
+      headerChildren={
+        <FilesFilters
+          search={search}
+          onSearchChange={setSearch}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          status={status}
+          onStatusChange={setStatus}
+          type={type}
+          onTypeChange={setType}
+          availableTags={availableTags}
+          tagsLoading={tagsLoading}
+          tagsError={tagsError}
+          selectedTags={selectedTags}
+          onToggleTag={toggleTag}
+          onRetryTags={retryTags}
+          sortBy={sortBy}
+          onSortByChange={handleSortByChange}
+          sortDirection={sortDirection}
+          onSortDirectionChange={handleSortDirectionChange}
+          showAdvanced={showAdvanced}
+          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+        />
+      }
+      headerRight={
+        <RefreshButton onClick={refreshFiles} loading={refreshing} />
+      }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* Header + Filters */}
-        <div className="mb-4">
-          <Tabs>
-            <TabList>
-              <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-                {t('repositories.files.tabs.all')}
-              </CommonTab>
-              <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-                {t('repositories.files.tabs.contract')}
-              </CommonTab>
-            </TabList>
-          </Tabs>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('repositories.files.manage')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FilesFilters
-              search={search}
-              onSearchChange={setSearch}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              onRefresh={refreshFiles}
-              status={status}
-              onStatusChange={setStatus}
-              type={type}
-              onTypeChange={setType}
-              availableTags={availableTags}
-              tagsLoading={tagsLoading}
-              tagsError={tagsError}
-              selectedTags={selectedTags}
-              onToggleTag={toggleTag}
-              onRetryTags={retryTags}
-              sortBy={sortBy}
-              onSortByChange={handleSortByChange}
-              sortDirection={sortDirection}
-              onSortDirectionChange={handleSortDirectionChange}
-              showAdvanced={showAdvanced}
-              onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-            />
-          </CardContent>
-        </Card>
 
         {/* Content */}
         {error && (
@@ -488,6 +485,6 @@ export const RepositoryFilesList: React.FC = () => {
           </div>
         )}
       </div>
-    </ControlMainLayout>
+    </RepositoryLayout>
   );
 }

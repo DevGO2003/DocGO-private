@@ -5,3 +5,6 @@ export * from './UploadHeaderLayout';
 export * from './DashboardHeaderLayout';
 export * from './RepositoryHeaderLayout';
 export * from './OrganizationHeaderLayout';
+
+// New Header Layouts (Design System)
+export * from './HeaderLayouts';

@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom'; // Replaced next/navigation
 import type { HeaderControlLayoutProps, Breadcrumb } from './types';
 import { CommonFont } from '@shared/components';
 
-function Breadcrumbs({ items }: { items?: Breadcrumb[] }) {
+function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: () => void }) {
   const navigate = useNavigate(); // React Router equivalent
-  
+
   if (!items || items.length === 0) return null;
-  
+
   const handleCurrentClick = () => {
-    window.location.reload(); // Equivalent to refresh - reloads the page/component
-    // If refetch needed without full reload, pass onRefresh prop from parent
+    // Use onRefresh if provided, otherwise fallback to window.location.reload()
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
@@ -51,14 +55,16 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
   headerChildren,
   children,
   className,
+  onRefresh,
 }) => {
   return (
     <CommonFont className={`w-full rounded-2xl border bg-white ${className || ''}`}>
       <div className="px-6 py-4 border-b">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
+        {/* Top row: Left (breadcrumbs + title + subtitle) | Right (headerChildren + rightActions) */}
+        <div className="flex items-start gap-4 mb-3">
+          <div className="min-w-0 flex-none max-w-[40%]">
             <div className="mb-2">
-              <Breadcrumbs items={breadcrumbs} />
+              <Breadcrumbs items={breadcrumbs} onRefresh={onRefresh} />
             </div>
             <h1 className="text-2xl font-semibold text-gray-900">
               {title}
@@ -66,22 +72,29 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
             {subtitle && (
               <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
             )}
+          </div>
+          <div className="min-w-0 flex-1 flex items-start gap-2">
             {headerChildren && (
-              <div className="mt-2">{headerChildren}</div>
+              <div className="flex items-center gap-2 flex-1">{headerChildren}</div>
+            )}
+            {rightActions && (
+              <div className="flex items-center gap-2 flex-shrink-0">{rightActions}</div>
             )}
           </div>
-          {rightActions && (
-            <div className="flex items-center gap-2">{rightActions}</div>
-          )}
         </div>
-      </div>
 
-      {(primaryTabs || secondaryTabs) && (
-        <div className="px-6 py-3 border-b">
-          {primaryTabs}
-          {secondaryTabs && <div className="mt-2">{secondaryTabs}</div>}
-        </div>
-      )}
+        {/* Tabs row: Below subtitle */}
+        {secondaryTabs && (
+          <div className="mt-3">
+            {secondaryTabs}
+          </div>
+        )}
+        {primaryTabs && (
+          <div className="mt-3">
+            {primaryTabs}
+          </div>
+        )}
+      </div>
 
       {children && <div className="px-6 py-4">{children}</div>}
     </CommonFont>

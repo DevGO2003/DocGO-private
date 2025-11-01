@@ -41,41 +41,26 @@ public class RepositoryManagementController {
             @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm
     ) {
-        try {
-            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            
-            Page<RepositoryDTO> repositories;
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                repositories = repositoryService.searchRepositories(searchTerm, pageable);
-            } else {
-                repositories = repositoryService.getAllRepositories(pageable);
-            }
-
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách repositories thành công")
-                .data(repositories)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories")
-                .build());
-
-        } catch (Exception e) {
-            log.error("Error getting all repositories", e);
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy danh sách repositories: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories")
-                .build());
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        Page<RepositoryDTO> repositories;
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            repositories = repositoryService.searchRepositories(searchTerm, pageable);
+        } else {
+            repositories = repositoryService.getAllRepositories(pageable);
         }
+
+        return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách repositories thành công")
+            .data(repositories)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/repositories")
+            .build());
     }
 
     @GetMapping("/my")
@@ -88,53 +73,38 @@ public class RepositoryManagementController {
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
             @Parameter(description = "ID của user") @RequestParam(required = false) String userId
     ) {
-        try {
-            // Lấy userId từ SecurityContext nếu không truyền qua query
-            String currentUserId = userId;
-            if (currentUserId == null) {
-                var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
-                    currentUserId = p.userId;
-                }
+        // Lấy userId từ SecurityContext nếu không truyền qua query
+        String currentUserId = userId;
+        if (currentUserId == null) {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                currentUserId = p.userId;
             }
-            if (currentUserId == null) {
-                currentUserId = "anonymous";
-            }
-            
-            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            
-            Page<RepositoryDTO> repositories;
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                repositories = repositoryService.searchPersonalRepositories(searchTerm, currentUserId, pageable);
-            } else {
-                repositories = repositoryService.getMyRepositories(currentUserId, pageable);
-            }
-
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách repositories của tôi thành công")
-                .data(repositories)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/my")
-                .build());
-
-        } catch (Exception e) {
-            log.error("Error getting my repositories", e);
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy danh sách repositories của tôi: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/my")
-                .build());
         }
+        if (currentUserId == null) {
+            currentUserId = "anonymous";
+        }
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        Page<RepositoryDTO> repositories;
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            repositories = repositoryService.searchPersonalRepositories(searchTerm, currentUserId, pageable);
+        } else {
+            repositories = repositoryService.getMyRepositories(currentUserId, pageable);
+        }
+
+        return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách repositories của tôi thành công")
+            .data(repositories)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/repositories/my")
+            .build());
     }
 
     @GetMapping("/personal")
@@ -147,53 +117,38 @@ public class RepositoryManagementController {
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
             @Parameter(description = "ID của user") @RequestParam(required = false) String userId
     ) {
-        try {
-            // Lấy userId từ SecurityContext nếu không truyền qua query
-            String currentUserId = userId;
-            if (currentUserId == null) {
-                var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
-                    currentUserId = p.userId;
-                }
+        // Lấy userId từ SecurityContext nếu không truyền qua query
+        String currentUserId = userId;
+        if (currentUserId == null) {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.repository_service.security.GatewayUserAuthenticationFilter.GatewayUserPrincipal p) {
+                currentUserId = p.userId;
             }
-            if (currentUserId == null) {
-                currentUserId = "anonymous";
-            }
-            
-            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-            
-            Page<RepositoryDTO> repositories;
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                repositories = repositoryService.searchPersonalRepositories(searchTerm, currentUserId, pageable);
-            } else {
-                repositories = repositoryService.getPersonalRepositories(currentUserId, pageable);
-            }
-
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách repositories cá nhân thành công")
-                .data(repositories)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/personal")
-                .build());
-
-        } catch (Exception e) {
-            log.error("Error getting personal repositories", e);
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy danh sách repositories cá nhân: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/personal")
-                .build());
         }
+        if (currentUserId == null) {
+            currentUserId = "anonymous";
+        }
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        Page<RepositoryDTO> repositories;
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            repositories = repositoryService.searchPersonalRepositories(searchTerm, currentUserId, pageable);
+        } else {
+            repositories = repositoryService.getPersonalRepositories(currentUserId, pageable);
+        }
+
+        return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách repositories cá nhân thành công")
+            .data(repositories)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/repositories/personal")
+            .build());
     }
 
     @GetMapping("/organization")
@@ -239,30 +194,16 @@ public class RepositoryManagementController {
                 }
             }
 
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(200)
-                .shortMessage("Success")
-                .description("Đã lấy danh sách repositories tổ chức thành công")
-                .data(repositories)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/organization")
-                .build());
-
-        } catch (Exception e) {
-            log.error("Error getting organization repositories", e);
-            return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
-                .apiVersion("v1")
-                .statusCode(500)
-                .shortMessage("Internal Server Error")
-                .description("Lỗi khi lấy danh sách repositories tổ chức: " + e.getMessage())
-                .data(null)
-                .timestamp(Instant.now())
-                .requestId(UUID.randomUUID().toString())
-                .path("/api/v1/repository-management-service/repositories/organization")
-                .build());
-        }
+        return ResponseEntity.ok(RestResponse.<Page<RepositoryDTO>>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Đã lấy danh sách repositories tổ chức thành công")
+            .data(repositories)
+            .timestamp(Instant.now())
+            .requestId(UUID.randomUUID().toString())
+            .path("/api/v1/repository-management-service/repositories/organization")
+            .build());
     }
 
     @GetMapping("/public")

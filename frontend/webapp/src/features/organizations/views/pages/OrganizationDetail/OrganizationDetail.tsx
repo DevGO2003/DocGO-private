@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -19,6 +20,7 @@ import {
   CardContent,
   Button,
   LoadingSpinner,
+  RefreshButton,
 } from '@shared/components';
 import {
   useOrganization,
@@ -26,13 +28,16 @@ import {
   useRemoveMember,
 } from '@/features/organizations';
 import { ORGANIZATIONS_PATH } from '@constants';
+import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 type TabType = 'overview' | 'members' | 'repositories' | 'settings';
 
 export const OrganizationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useTranslation();
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
@@ -85,6 +90,23 @@ export const OrganizationDetail = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    console.log('[OrganizationDetail] Refreshing data...');
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['organization', id] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization', id] });
+      await queryClient.refetchQueries({ queryKey: ['organization-members', id] });
+
+      console.log('[OrganizationDetail] Refresh completed');
+    } catch (error) {
+      console.error('[OrganizationDetail] Refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (orgLoading) {
     return <LoadingSpinner text={t('organizations.detail.loading')} fullScreen />;
   }
@@ -109,46 +131,28 @@ export const OrganizationDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+    <OrganizationLayout
+      title={organization.name}
+      subtitle={organization.description || 'No description'}
+      breadcrumbs={[
+        { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
+        { label: organization.name, current: true },
+      ]}
+      onRefresh={handleRefresh}
+      headerRight={(
+        <div className="flex gap-2">
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
           <Button
             variant="outline"
-            onClick={() => navigate(ORGANIZATIONS_PATH)}
-            className="mb-4 flex items-center gap-2"
+            className="flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            {t('organizations.detail.backToList')}
+            <MoreVertical className="w-4 h-4" />
+            {t('organizations.detail.actions')}
           </Button>
-
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl text-white font-bold">
-                    {organization.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                {organization.name}
-              </h1>
-              <p className="text-gray-600">
-                {organization.description || 'No description'}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <MoreVertical className="w-4 h-4" />
-              {t('organizations.detail.actions')}
-            </Button>
-          </div>
-        </motion.div>
+        </div>
+      )}
+    >
+      <div className="space-y-6">
 
         {/* Stats Cards */}
         <motion.div
@@ -467,6 +471,6 @@ export const OrganizationDetail = () => {
           )}
         </motion.div>
       </div>
-    </div>
+    </OrganizationLayout>
   );
 };
