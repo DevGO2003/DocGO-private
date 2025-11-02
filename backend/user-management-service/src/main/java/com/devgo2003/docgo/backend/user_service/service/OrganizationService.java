@@ -6,12 +6,14 @@ import com.devgo2003.docgo.backend.user_service.repository.*;
 import com.devgo2003.docgo.backend.user_service.common.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -35,6 +37,10 @@ public class OrganizationService {
     private final OrganizationPermissionService permissionService;
     private final OrganizationRoleService roleService;
     private final WorkflowService workflowService;
+    private final RestTemplate restTemplate;
+    
+    @Value("${repository.service.url:http://localhost:8003}")
+    private String repositoryServiceUrl;
 
     public Page<OrganizationResponse> getAllOrganizations(int pageNumber, int pageSize, String sortBy, String sortDirection) {
         log.info("Getting all organizations - page: {}, size: {}, sortBy: {}, sortDirection: {}", 
@@ -276,16 +282,45 @@ public class OrganizationService {
     }
 
     public boolean deleteOrganization(String id) {
-        log.info("Soft deleting organization with id: {}", id);
+        log.info("Hard deleting organization with id: {}", id);
+        log.info("Repository Service URL: {}", repositoryServiceUrl);
 
         return organizationRepository.findById(id)
-                .filter(org -> org.getDeletedAt() == null)
                 .map(organization -> {
-                    organization.setStatus(Organization.OrganizationStatus.DELETED);
-                    organization.setDeletedAt(LocalDateTime.now());
+                    // 1. Delete all repositories of this organization
+                    try {
+                        String url = repositoryServiceUrl + 
+                            "/api/v1/repository-management-service/repositories/organization/" + 
+                            id + "/delete-all";
+                        log.info("🔗 Calling repository service to delete repos: {}", url);
+                        restTemplate.delete(url);
+                        log.info("✅ Successfully deleted all repositories for organization: {}", id);
+                    } catch (Exception e) {
+                        log.error("⚠️ Failed to delete repositories for org {}: {}", id, e.getMessage(), e);
+                        // Continue with organization deletion even if repository deletion fails
+                    }
                     
-                    organizationRepository.save(organization);
-                    log.info("Soft deleted organization with id: {}", id);
+                    // 2. Delete all memberships
+                    try {
+                        List<OrganizationMembership> memberships = membershipRepository.findByOrganizationId(id);
+                        membershipRepository.deleteAll(memberships);
+                        log.info("✅ Deleted {} memberships for organization: {}", memberships.size(), id);
+                    } catch (Exception e) {
+                        log.error("⚠️ Failed to delete memberships for org {}: {}", id, e.getMessage());
+                    }
+                    
+                    // 3. Delete all invitations
+                    try {
+                        List<Invitation> invitations = invitationRepository.findByOrganizationId(id);
+                        invitationRepository.deleteAll(invitations);
+                        log.info("✅ Deleted {} invitations for organization: {}", invitations.size(), id);
+                    } catch (Exception e) {
+                        log.error("⚠️ Failed to delete invitations for org {}: {}", id, e.getMessage());
+                    }
+                    
+                    // 4. Hard delete organization itself
+                    organizationRepository.delete(organization);
+                    log.info("✅ Hard deleted organization: {} (id: {})", organization.getName(), id);
                     return true;
                 })
                 .orElse(false);

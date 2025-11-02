@@ -40,4 +40,7 @@ public interface IRepositoryService {
     boolean hasPermission(String repositoryId, String userId, String permission);
     void addPermission(String repositoryId, String userId, String role, List<String> permissions);
     void removePermission(String repositoryId, String userId);
+    
+    // Cascade delete operations
+    void hardDeleteAllByOrganization(String organizationId);
 }
