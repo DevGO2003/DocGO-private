@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppSelector } from '@store/hooks';
 import {
@@ -194,24 +193,6 @@ export const Dashboard = () => {
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-    },
-  };
-
   const NumberCounter = ({ value }: { value: number }) => {
     const [display, setDisplay] = useState(0);
     const target = typeof value === 'number' ? value : 0;
@@ -252,28 +233,19 @@ export const Dashboard = () => {
       }
     >
         {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <div className="mb-8 animate-fade-in">
           <Text as="h1" className="text-4xl font-bold text-gray-900 mb-2">
             {t('dashboard.welcome', { name: user?.firstName || user?.username || '' })}
           </Text>
           <Text as="p" className="text-gray-600">
             {t('dashboard.whatsHappening')}
           </Text>
-        </motion.div>
+        </div>
 
         {/* Stats Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02, rotate: 0.2 }}>
+            <div key={index} className="transition-transform hover:scale-[1.02]">
               <Card className="h-full">
                 <CardContent className="p-6">
                   <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
@@ -294,9 +266,9 @@ export const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* WindowPanels Container */}
         <div className="relative" style={{ minHeight: '1200px' }}>
@@ -318,10 +290,9 @@ export const Dashboard = () => {
               {!reposLoading && repositories && repositories.content.length > 0 ? (
                 <div className="space-y-3">
                     {repositories.content.slice(0, 5).map((repo) => (
-                      <motion.div
+                      <div
                         key={repo.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer"
                         onClick={() => navigate(`${REPOSITORIES_PATH}/${repo.id}`)}
                       >
                         <div className="flex items-center justify-between">
@@ -333,7 +304,7 @@ export const Dashboard = () => {
                             {new Date(repo.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                 </div>
               ) : !reposLoading ? (
@@ -368,10 +339,9 @@ export const Dashboard = () => {
               {!filesLoading && files && files.content.length > 0 ? (
                 <div className="space-y-3">
                     {files.content.slice(0, 5).map((file) => (
-                      <motion.div
+                      <div
                         key={file.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
@@ -386,7 +356,7 @@ export const Dashboard = () => {
                             {new Date(file.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                 </div>
               ) : !filesLoading ? (
@@ -424,10 +394,9 @@ export const Dashboard = () => {
                   </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {organizations.content.map((org) => (
-                    <motion.div
+                    <div
                       key={org.id}
-                      whileHover={{ scale: 1.05 }}
-                      className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg cursor-pointer border-2 border-blue-200"
+                      className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg cursor-pointer border-2 border-blue-200 transition-transform hover:scale-105"
                       onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
                     >
                       <Text as="h4" className="font-bold text-gray-900 mb-1">{org.name}</Text>
@@ -437,7 +406,7 @@ export const Dashboard = () => {
                       <div className="flex items-center text-xs text-gray-500">
                         <Text as="span" className="text-gray-500">{t('dashboard.members', { count: org.memberCount })}</Text>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
                 </>

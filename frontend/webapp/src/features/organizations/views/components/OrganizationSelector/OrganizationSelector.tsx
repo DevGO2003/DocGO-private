@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, ChevronDown, Check, Plus, Crown, UserCog, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useMyOrganizations } from '@features/organizations';
 import { ORGANIZATIONS_PATH, ORGANIZATION_WORKSPACE_PATH } from '@constants';
 import { Organization } from '@features/organizations/models/types/organization.types';
@@ -53,11 +52,11 @@ export const OrganizationSelector = ({
   const getRoleIcon = (role?: string) => {
     switch (role?.toUpperCase()) {
       case 'OWNER':
-        return <Crown className="w-3 h-3 text-purple-600" />;
+        return <CommonIcon name="crown" className="w-3 h-3 text-purple-600" />;
       case 'MANAGER':
-        return <UserCog className="w-3 h-3 text-blue-600" />;
+        return <CommonIcon name="user-cog" className="w-3 h-3 text-blue-600" />;
       case 'MEMBER':
-        return <Shield className="w-3 h-3 text-green-600" />;
+        return <CommonIcon name="shield" className="w-3 h-3 text-green-600" />;
       default:
         return null;
     }
@@ -104,11 +103,11 @@ export const OrganizationSelector = ({
           </>
         ) : (
           <>
-            <Building2 className="w-5 h-5 text-gray-500" />
+            <CommonIcon name="building" className="w-5 h-5 text-gray-500" />
             <span className="flex-1 text-sm text-gray-700">Select Organization</span>
           </>
         )}
-        <ChevronDown
+        <CommonIcon name="chevron-down" 
           className={`w-4 h-4 text-gray-500 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
@@ -116,14 +115,8 @@ export const OrganizationSelector = ({
       </button>
 
       {/* Dropdown Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-full min-w-[280px] bg-white rounded-lg shadow-xl border-2 border-gray-200 overflow-hidden z-50"
+              {isOpen && (
+          <div className="absolute top-full left-0 mt-2 w-full min-w-[280px] bg-white rounded-lg shadow-xl border-2 border-gray-200 overflow-hidden z-50 animate-fade-in"
           >
             {/* Organizations List */}
             <div className="max-h-80 overflow-y-auto">
@@ -153,7 +146,7 @@ export const OrganizationSelector = ({
                       </div>
                     </div>
                     {org.id === currentOrganizationId && (
-                      <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <CommonIcon name="check" className="w-5 h-5 text-blue-600 flex-shrink-0" />
                     )}
                   </button>
                 ))
@@ -172,12 +165,11 @@ export const OrganizationSelector = ({
               onClick={handleCreateNew}
               className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 transition-colors text-blue-600 font-medium"
             >
-              <Plus className="w-4 h-4" />
+              <CommonIcon name="plus" className="w-4 h-4" />
               Create New Organization
             </button>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-    </div>
+          </div>
   );
 };

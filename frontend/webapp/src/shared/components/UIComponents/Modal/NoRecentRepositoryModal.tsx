@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
-import { ArrowRight, X } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface NoRecentRepositoryModalProps {
   isOpen: boolean;
@@ -295,7 +295,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                 style={{ width: '100%', height: '100%' }}
               />
               <span className="relative">{t('modals.noRecentRepository.goToRepos')}</span>
-              <ArrowRight className="h-5 w-5" />
+              <CommonIcon name="arrow-right" size={16} />
             </button>
           </div>
         </div>

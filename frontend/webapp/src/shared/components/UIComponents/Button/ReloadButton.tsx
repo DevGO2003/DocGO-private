@@ -1,7 +1,7 @@
 import React from 'react';
-import { RotateCw } from 'lucide-react';
 import { Button } from './CommonButton';
 import { ButtonProps } from './Button.types';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface ReloadButtonProps extends Omit<ButtonProps, 'isLoading' | 'children'> {
   loading?: boolean;
@@ -48,7 +48,7 @@ export const ReloadButton: React.FC<ReloadButtonProps> = ({
       className={`inline-flex items-center gap-2 ${className}`}
       {...props}
     >
-      <RotateCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+      <CommonIcon name="rotate-cw" size={16} className={loading ? 'animate-spin' : ''} />
       {showLabel && <span>{label}</span>}
     </Button>
   );

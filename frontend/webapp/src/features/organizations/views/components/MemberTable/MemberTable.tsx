@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreVertical, Trash2, Edit, Shield, AlertCircle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button } from '@shared/components';
 import { RoleBadge, PermissionBadge } from '@/features/organizations';
 import type { OrganizationMember, MemberRole } from '@/features/organizations';
@@ -63,7 +63,7 @@ export const MemberTable = ({
   if (members.length === 0) {
     return (
       <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-        <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <CommonIcon name="shield" size={16} className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <p className="text-gray-600 mb-2">No members yet</p>
         <p className="text-sm text-gray-500">Invite team members to get started</p>
       </div>
@@ -179,7 +179,7 @@ export const MemberTable = ({
                             onClick={() => setOpenMenuId(openMenuId === member.id ? null : member.id)}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <MoreVertical className="w-4 h-4 text-gray-600" />
+                            <CommonIcon name="more-vertical" size={16} className="w-4 h-4 text-gray-600" />
                           </button>
 
                           {openMenuId === member.id && (
@@ -207,7 +207,7 @@ export const MemberTable = ({
                                       }}
                                       className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     >
-                                      <Edit className="w-4 h-4" />
+                                      <CommonIcon name="edit" size={16} />
                                       Edit Member
                                     </button>
                                   )}
@@ -218,7 +218,7 @@ export const MemberTable = ({
                                     }}
                                     className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <CommonIcon name="trash" size={16} />
                                     Remove Member
                                   </button>
                                 </div>
@@ -244,7 +244,7 @@ export const MemberTable = ({
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 p-3 bg-red-100 rounded-lg">
-                <AlertCircle className="w-6 h-6 text-red-600" />
+                <CommonIcon name="alert-circle" size={16} className="w-6 h-6 text-red-600" />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">

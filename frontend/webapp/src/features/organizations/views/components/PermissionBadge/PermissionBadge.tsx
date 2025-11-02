@@ -1,5 +1,6 @@
-import { Scale, DollarSign, Briefcase, UserPlus, Settings } from 'lucide-react';
 import { ManagerPermission } from '@/features/organizations';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+import { IconName } from '@shared/components/UIComponents/Icon/Icon.types';
 
 interface PermissionBadgeProps {
   permission: ManagerPermission;
@@ -7,64 +8,57 @@ interface PermissionBadgeProps {
 }
 
 export const PermissionBadge = ({ permission, size = 'sm' }: PermissionBadgeProps) => {
-  const getPermissionConfig = () => {
+  const getConfig = () => {
     switch (permission) {
-      case 'approve:legal':
+      case ManagerPermission.LEGAL:
         return {
-          label: 'Legal Approval',
-          icon: Scale,
-          bgColor: 'bg-green-50',
-          textColor: 'text-green-700',
+          label: 'Legal',
+          icon: 'scale' as IconName,
+          color: 'text-purple-700',
+          bg: 'bg-purple-100',
         };
-      case 'approve:finance':
+      case ManagerPermission.FINANCE:
         return {
-          label: 'Finance Approval',
-          icon: DollarSign,
-          bgColor: 'bg-yellow-50',
-          textColor: 'text-yellow-700',
+          label: 'Finance',
+          icon: 'dollar-sign' as IconName,
+          color: 'text-green-700',
+          bg: 'bg-green-100',
         };
-      case 'approve:executive':
+      case ManagerPermission.HR:
         return {
-          label: 'Executive Approval',
-          icon: Briefcase,
-          bgColor: 'bg-red-50',
-          textColor: 'text-red-700',
+          label: 'HR',
+          icon: 'briefcase' as IconName,
+          color: 'text-blue-700',
+          bg: 'bg-blue-100',
         };
-      case 'member:invite':
+      case ManagerPermission.INVITE_MEMBERS:
         return {
           label: 'Invite Members',
-          icon: UserPlus,
-          bgColor: 'bg-blue-50',
-          textColor: 'text-blue-700',
+          icon: 'user-plus' as IconName,
+          color: 'text-indigo-700',
+          bg: 'bg-indigo-100',
         };
-      case 'org:settings':
-        return {
-          label: 'Manage Settings',
-          icon: Settings,
-          bgColor: 'bg-purple-50',
-          textColor: 'text-purple-700',
-        };
+      case ManagerPermission.MANAGE_SETTINGS:
       default:
         return {
-          label: permission,
-          icon: Settings,
-          bgColor: 'bg-gray-50',
-          textColor: 'text-gray-700',
+          label: 'Settings',
+          icon: 'settings' as IconName,
+          color: 'text-gray-700',
+          bg: 'bg-gray-100',
         };
     }
   };
 
-  const config = getPermissionConfig();
-  const Icon = config.icon;
+  const config = getConfig();
 
   const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm';
-  const iconSize = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
+  const iconSize = size === 'sm' ? 12 : 16;
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md font-medium ${config.bgColor} ${config.textColor} ${sizeClasses}`}
+      className={`inline-flex items-center gap-1 rounded-md font-medium ${config.bg} ${config.color} ${sizeClasses}`}
     >
-      <Icon className={iconSize} />
+      <CommonIcon name={config.icon} size={iconSize} />
       {config.label}
     </span>
   );

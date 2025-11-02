@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Building2, AlertCircle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Dialog, Button, Input } from '@shared/components';
 import { useCreateOrganization } from '@features/organizations';
 import type { OrganizationCreateData } from '@features/organizations';
@@ -143,7 +143,7 @@ export const CreateOrganizationDialog = ({
         {/* Icon Header */}
         <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
           <div className="p-3 bg-purple-100 rounded-lg">
-            <Building2 className="w-6 h-6 text-purple-600" />
+            <CommonIcon name="building" size={24} />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{t('organizations.createDialog.header.title')}</h3>
@@ -154,7 +154,7 @@ export const CreateOrganizationDialog = ({
         {/* Submit Error */}
         {errors.submit && (
           <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <CommonIcon name="alert-circle" size={16} />
             <div>
               <p className="text-sm font-medium text-red-800">{t('organizations.createDialog.errorTitle')}</p>
               <p className="text-sm text-red-700">{errors.submit}</p>

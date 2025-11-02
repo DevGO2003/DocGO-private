@@ -1,4 +1,15 @@
-export type IconName = 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'smile' | 'chevron-right' | 'chevron-left' | 'chevron-up' | 'chevron-down' | 'close' | 'edit' | 'delete' | 'download' | 'upload' | 'search' | 'settings' | 'home' | 'arrow-left';
+export type IconName = 
+  | 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'smile' 
+  | 'chevron-right' | 'chevron-left' | 'chevron-up' | 'chevron-down' 
+  | 'close' | 'edit' | 'delete' | 'download' | 'upload' | 'search' | 'settings' | 'home'
+  | 'arrow-left' | 'arrow-right'
+  | 'loading' | 'refresh' | 'bell' | 'check' | 'building' | 'clock'
+  | 'x' | 'rotate-cw'
+  | 'users' | 'chart' | 'file-text' | 'edit-2' | 'grip'
+  | 'menu' | 'logout' | 'grid'
+  | 'user-plus' | 'user-check' | 'user-cog' | 'trash' | 'plus' | 'minus'
+  | 'mail' | 'lock' | 'shield' | 'alert-circle' | 'calendar' | 'crown'
+  | 'eye-off' | 'more-vertical' | 'scale' | 'dollar-sign' | 'briefcase';
 
 export interface CommonIconProps {
   name: IconName;

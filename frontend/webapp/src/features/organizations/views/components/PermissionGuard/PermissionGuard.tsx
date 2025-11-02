@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 import { ManagerPermission, MemberRole } from '@/features/organizations/models/types';
 
@@ -55,7 +55,7 @@ export const PermissionGuard = ({
 const AccessDenied = () => (
   <Card className="border-red-200 bg-red-50">
     <CardContent className="p-8 text-center">
-      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+      <CommonIcon name="alert-circle" size={64} color="#ef4444" className="mx-auto mb-4" />
       <h3 className="text-xl font-semibold text-red-900 mb-2">Access Denied</h3>
       <p className="text-red-700">
         You don't have permission to access this feature.

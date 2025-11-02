@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@shared/components';
 import { getAvailableLayouts, getLayoutPreference } from '@shared/lib/panelLayoutManager';
-import { LayoutGrid, RotateCcw, ChevronDown } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface LayoutSelectorProps {
   onLayoutChange: (layoutName: string) => void;
@@ -22,9 +22,9 @@ export function LayoutSelector({ onLayoutChange, onReset }: LayoutSelectorProps)
           className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
           title="Chọn bố cục"
         >
-          <LayoutGrid size={16} className="text-slate-600" />
+          <CommonIcon name="grid" size={16} color="#475569" />
           <span className="text-sm font-medium text-slate-700">Bố cục</span>
-          <ChevronDown size={16} className="text-slate-400" />
+          <CommonIcon name="chevron-down" size={16} color="#94a3b8" />
         </button>
 
         {isOpen && (
@@ -54,7 +54,7 @@ export function LayoutSelector({ onLayoutChange, onReset }: LayoutSelectorProps)
         className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
         title="Đặt lại bố cục về mặc định"
       >
-        <RotateCcw size={16} className="text-slate-600" />
+        <CommonIcon name="rotate-cw" size={16} color="#475569" />
         <span className="text-sm font-medium text-slate-700">Đặt lại</span>
       </button>
     </div>

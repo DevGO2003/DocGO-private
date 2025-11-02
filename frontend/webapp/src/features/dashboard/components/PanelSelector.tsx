@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { Button } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface PanelOption {
   id: string;
@@ -24,7 +24,7 @@ export const PanelSelector: React.FC<PanelSelectorProps> = ({ panels, onToggle }
         className="flex items-center gap-2"
       >
         Quản lý Panel
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <CommonIcon name="chevron-down" size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
       {isOpen && (

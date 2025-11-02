@@ -3,7 +3,7 @@ import {
   Button,
   Checkbox,
 } from '@shared/components';
-import { Shield, Lock, X } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface MemberManagementModalProps {
   isOpen: boolean;
@@ -89,7 +89,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-blue-600" />
+              <CommonIcon name="shield" size={20} color="#2563eb" />
               Quản lý thành viên: {member.userName}
             </h2>
             <p className="text-sm text-gray-600 mt-1">Set role và cấp quyền persistent cho thành viên</p>
@@ -98,7 +98,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <X className="w-6 h-6" />
+            <CommonIcon name="x" size={16} />
           </button>
         </div>
 
@@ -107,7 +107,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
           {/* Role Selection */}
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600" />
+              <CommonIcon name="shield" size={16} />
               Role
             </label>
             <select
@@ -124,7 +124,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
             </select>
             {member.role === 'OWNER' && (
               <p className="text-xs text-amber-600 flex items-center gap-1">
-                <Lock className="w-3 h-3" />
+                <CommonIcon name="lock" size={16} />
                 Không thể thay đổi role của Owner
               </p>
             )}
@@ -134,7 +134,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
           {selectedRole === 'MANAGER' && (
             <div className="space-y-3">
               <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-green-600" />
+                <CommonIcon name="lock" size={16} color="#16a34a" />
                 Manager Permissions
               </label>
               <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">

@@ -2,24 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import {
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Users,
-  Settings,
-  BarChart3,
-  AlertCircle,
-  File as FileIcon,
-  Info,
-  Calendar,
-  Eye,
-  EyeOff,
-  Crown,
-  Folder,
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   Card,
   CardHeader,
@@ -100,11 +83,11 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: BarChart3 },
-    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
-    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: Folder },
-    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: Users },
-    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
+    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: <CommonIcon name="chart" /> },
+    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: <CommonIcon name="file-text" /> },
+    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: <CommonIcon name="folder" /> },
+    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: <CommonIcon name="users" /> },
+    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: <CommonIcon name="settings" /> },
   ];
 
   const handleRefresh = async () => {
@@ -135,7 +118,7 @@ export const OrganizationWorkspace = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <CommonIcon name="alert-circle" className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <p className="text-gray-700 mb-4">{t('organizations.workspace.notFound')}</p>
             <Button
               variant="outline"
@@ -205,7 +188,7 @@ export const OrganizationWorkspace = () => {
                   <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
                   <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
                 </div>
-                <FileText className="w-10 h-10 text-blue-500" />
+                <CommonIcon name="file-text" className="w-10 h-10 text-blue-500" />
               </div>
             </motion.div>
 
@@ -218,7 +201,7 @@ export const OrganizationWorkspace = () => {
                   <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
                   <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
                 </div>
-                <Clock className="w-10 h-10 text-yellow-500" />
+                <CommonIcon name="clock" className="w-10 h-10 text-yellow-500" />
               </div>
             </motion.div>
 
@@ -231,7 +214,7 @@ export const OrganizationWorkspace = () => {
                   <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
                   <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
                 </div>
-                <CheckCircle className="w-10 h-10 text-green-500" />
+                <CommonIcon name="check" className="w-10 h-10 text-green-500" />
               </div>
             </motion.div>
 
@@ -244,7 +227,7 @@ export const OrganizationWorkspace = () => {
                   <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
                   <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
                 </div>
-                <XCircle className="w-10 h-10 text-red-500" />
+                <CommonIcon name="x" className="w-10 h-10 text-red-500" />
               </div>
             </motion.div>
           </div> */}
@@ -293,7 +276,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
                       <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
                     </div>
-                    <FileText className="w-10 h-10 text-blue-500" />
+                    <CommonIcon name="file-text" className="w-10 h-10 text-blue-500" />
                   </div>
                 </motion.div>
 
@@ -307,7 +290,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
                       <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
                     </div>
-                    <Clock className="w-10 h-10 text-yellow-500" />
+                    <CommonIcon name="clock" className="w-10 h-10 text-yellow-500" />
                   </div>
                 </motion.div>
 
@@ -321,7 +304,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
                       <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
                     </div>
-                    <CheckCircle className="w-10 h-10 text-green-500" />
+                    <CommonIcon name="check" className="w-10 h-10 text-green-500" />
                   </div>
                 </motion.div>
 
@@ -335,7 +318,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
                       <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
                     </div>
-                    <XCircle className="w-10 h-10 text-red-500" />
+                    <CommonIcon name="x" className="w-10 h-10 text-red-500" />
                   </div>
                 </motion.div>
 
@@ -349,7 +332,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-purple-700 font-medium">Tổng số file</p>
                       <p className="text-3xl font-bold text-purple-900">{stats.totalFiles}</p>
                     </div>
-                    <FileIcon className="w-10 h-10 text-purple-500" />
+                    <CommonIcon name="file" className="w-10 h-10 text-purple-500" />
                   </div>
                 </motion.div>
 
@@ -363,7 +346,7 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-indigo-700 font-medium">Tổng số repository</p>
                       <p className="text-3xl font-bold text-indigo-900">{stats.totalRepositories}</p>
                     </div>
-                    <Folder className="w-10 h-10 text-indigo-500" />
+                    <CommonIcon name="folder" className="w-10 h-10 text-indigo-500" />
                   </div>
                 </motion.div>
               </div>
@@ -391,7 +374,7 @@ export const OrganizationWorkspace = () => {
                         onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
                         className="flex items-center gap-2"
                       >
-                        <Folder className="w-4 h-4" />
+                        <CommonIcon name="folder" className="w-4 h-4" />
                         Mở danh sách kho
                       </Button>
                     </div>
@@ -404,7 +387,7 @@ export const OrganizationWorkspace = () => {
                     </div>
                   ) : contracts.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <CommonIcon name="file-text" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600 mb-4">{t('organizations.workspace.noContracts')}</p>
                       <p className="text-sm text-gray-500">{t('organizations.workspace.contractsAppear')}</p>
                     </div>
@@ -420,7 +403,7 @@ export const OrganizationWorkspace = () => {
                   >
                   <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-1" />
+                  <CommonIcon name="alert-circle" className="w-5 h-5 text-yellow-600 mt-1" />
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">{contract.title}</h4>
                     {contract.content && (
@@ -452,7 +435,7 @@ export const OrganizationWorkspace = () => {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-3 flex-1">
-                                <FileIcon className="w-5 h-5 text-blue-600 mt-1" />
+                                <CommonIcon name="file" className="w-5 h-5 text-blue-600 mt-1" />
                                 <div className="flex-1">
                                   <h4 className="font-medium text-gray-900">{contract.title}</h4>
                                   {contract.content && (
@@ -491,7 +474,7 @@ export const OrganizationWorkspace = () => {
                             onClick={() => setShowAllContracts(true)}
                             className="flex items-center gap-2"
                           >
-                            <Folder className="w-4 h-4" />
+                            <CommonIcon name="folder" className="w-4 h-4" />
                             Mở danh sách kho ({contracts.length} hợp đồng)
                           </Button>
                         </div>
@@ -509,7 +492,7 @@ export const OrganizationWorkspace = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Folder className="w-5 h-5" />
+                    <CommonIcon name="folder" size={20} />
                     {t('organizations.workspace.repositoriesTitle')}
                   </CardTitle>
                   <Button 
@@ -517,7 +500,7 @@ export const OrganizationWorkspace = () => {
                     onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
                     className="flex items-center gap-2"
                   >
-                    <Folder className="w-4 h-4" />
+                    <CommonIcon name="folder" className="w-4 h-4" />
                     Mở danh sách kho
                   </Button>
                 </div>
@@ -538,7 +521,7 @@ export const OrganizationWorkspace = () => {
                       >
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Folder className="w-6 h-6 text-white" />
+                            <CommonIcon name="folder" className="w-6 h-6 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-gray-900 truncate">{repo.name}</h4>
@@ -577,7 +560,7 @@ export const OrganizationWorkspace = () => {
                     onClick={() => setShowAllRepositories(true)}
                     className="flex items-center gap-2"
                     >
-                    <Folder className="w-4 h-4" />
+                    <CommonIcon name="folder" className="w-4 h-4" />
                     Mở danh sách kho ({repositoriesData.content.length} repository)
                     </Button>
                     </div>
@@ -585,7 +568,7 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <CommonIcon name="folder" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">{t('organizations.workspace.noRepositories')}</p>
                     <p className="text-sm text-gray-500">{t('organizations.workspace.repositoriesDesc')}</p>
                   </div>
@@ -600,7 +583,7 @@ export const OrganizationWorkspace = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
+                    <CommonIcon name="users" className="w-5 h-5" />
                     {t('organizations.workspace.membersCard.title')}
                   </CardTitle>
                   <Button 
@@ -608,7 +591,7 @@ export const OrganizationWorkspace = () => {
                     className="flex items-center gap-2"
                     onClick={() => navigate(`/organizations/${id}/members`)}
                   >
-                    <Settings className="w-4 h-4" />
+                    <CommonIcon name="settings" className="w-4 h-4" />
                     {t('organizations.workspace.membersCard.manage')}
                   </Button>
                 </div>
@@ -646,7 +629,7 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <CommonIcon name="users" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-4">
                       Chưa có thành viên nào trong tổ chức
                     </p>
@@ -655,7 +638,7 @@ export const OrganizationWorkspace = () => {
                       className="inline-flex items-center gap-2"
                       onClick={() => navigate(`/organizations/${id}/members`)}
                     >
-                      <Users className="w-4 h-4" />
+                      <CommonIcon name="users" className="w-4 h-4" />
                       Quản lý thành viên
                     </Button>
                   </div>
@@ -669,7 +652,7 @@ export const OrganizationWorkspace = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Info className="w-5 h-5" />
+                  <CommonIcon name="info" className="w-5 h-5" />
                   {t('organizations.workspace.settings.title')}
                 </CardTitle>
               </CardHeader>
@@ -677,13 +660,13 @@ export const OrganizationWorkspace = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
+                      <CommonIcon name="settings" className="w-5 h-5" />
                       {t('organizations.workspace.settings.general')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Organization Name */}
                       <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                        <FileText className="w-5 h-5 text-blue-600 mt-1" />
+                        <CommonIcon name="file-text" className="w-5 h-5 text-blue-600 mt-1" />
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.orgName')}</p>
                           <p className="text-sm text-gray-700 mt-1">{organization.name}</p>
@@ -692,7 +675,7 @@ export const OrganizationWorkspace = () => {
 
                       {/* Description */}
                       <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 md:col-span-2">
-                        <FileText className="w-5 h-5 text-green-600 mt-1" />
+                        <CommonIcon name="file-text" className="w-5 h-5 text-green-600 mt-1" />
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.description')}</p>
                           <p className="text-sm text-gray-700 mt-1">
@@ -704,7 +687,7 @@ export const OrganizationWorkspace = () => {
                       {/* Owner */}
                       {organization.owner && (
                         <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-                          <Crown className="w-5 h-5 text-yellow-600 mt-1" />
+                          <CommonIcon name="crown" className="w-5 h-5 text-yellow-600 mt-1" />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{t('organizations.workspace.settings.owner')}</p>
                             <p className="text-sm text-gray-700 mt-1">{organization.owner.username || organization.owner.email}</p>
@@ -714,7 +697,7 @@ export const OrganizationWorkspace = () => {
 
                       {/* Member Count */}
                       <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
-                        <Users className="w-5 h-5 text-indigo-600 mt-1" />
+                        <CommonIcon name="users" className="w-5 h-5 text-indigo-600 mt-1" />
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.memberCount')}</p>
                           <p className="text-sm text-gray-700 mt-1">{membersData?.totalElements || 0} thành viên</p>
@@ -726,7 +709,7 @@ export const OrganizationWorkspace = () => {
                         {organization.isPublic ? (
                           <Eye className="w-5 h-5 text-pink-600 mt-1" />
                         ) : (
-                          <EyeOff className="w-5 h-5 text-pink-600 mt-1" />
+                          <CommonIcon name="eye-off" className="w-5 h-5 text-pink-600 mt-1" />
                         )}
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">{t('organizations.workspace.settings.visibility')}</p>
@@ -741,7 +724,7 @@ export const OrganizationWorkspace = () => {
                       {/* Created At */}
                       {organization.createdAt && (
                         <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg border border-teal-200">
-                          <Calendar className="w-5 h-5 text-teal-600 mt-1" />
+                          <CommonIcon name="calendar" className="w-5 h-5 text-teal-600 mt-1" />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{t('organizations.workspace.settings.createdAt')}</p>
                             <p className="text-sm text-gray-700 mt-1">
@@ -760,7 +743,7 @@ export const OrganizationWorkspace = () => {
                       {/* Updated At */}
                       {organization.updatedAt && (
                         <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                          <Calendar className="w-5 h-5 text-orange-600 mt-1" />
+                          <CommonIcon name="calendar" className="w-5 h-5 text-orange-600 mt-1" />
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{t('organizations.workspace.settings.updatedAt')}</p>
                             <p className="text-sm text-gray-700 mt-1">

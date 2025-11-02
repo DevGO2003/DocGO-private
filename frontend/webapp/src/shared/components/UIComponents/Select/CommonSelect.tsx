@@ -1,7 +1,7 @@
 import { forwardRef, useRef, useEffect, useState, SelectHTMLAttributes } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
-import { ChevronDown } from 'lucide-react';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface CommonSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -140,11 +140,9 @@ export const CommonSelect = forwardRef<HTMLSelectElement, CommonSelectProps>(
               </option>
             ))}
           </select>
-          <ChevronDown
-            data-chevron
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-600"
-            size={20}
-          />
+          <div data-chevron className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-600">
+            <CommonIcon name="chevron-down" size={20} />
+          </div>
         </div>
         {error && (
           <p

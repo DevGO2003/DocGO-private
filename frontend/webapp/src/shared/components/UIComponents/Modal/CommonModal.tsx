@@ -1,7 +1,7 @@
 import { forwardRef, ReactNode, useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { X } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface CommonModalProps {
   isOpen: boolean;
@@ -142,7 +142,7 @@ export const CommonModal = forwardRef<HTMLDivElement, CommonModalProps>(
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <X size={24} />
+                <CommonIcon name="x" size={20} />
               </button>
             </div>
           )}

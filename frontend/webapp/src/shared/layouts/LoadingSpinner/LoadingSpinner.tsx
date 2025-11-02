@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -23,19 +22,13 @@ export const LoadingSpinner = ({
 
   const spinnerContent = (
     <div className="flex flex-col items-center justify-center gap-4">
-      <motion.div
-        className={`${sizeClasses[size]} border-4 border-blue-200 border-t-blue-600 rounded-full`}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+      <div
+        className={`${sizeClasses[size]} border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin`}
       />
       {text && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-gray-600 font-medium"
-        >
+        <p className="text-gray-600 font-medium animate-fade-in">
           {text}
-        </motion.p>
+        </p>
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { UserPlus, ArrowLeft, Users as UsersIcon, Trash2 } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner, RefreshButton, Dialog } from '@shared/components';
 import {
   MemberTable,
@@ -160,7 +160,7 @@ export const OrganizationMembers = () => {
               onClick={() => setIsInviteModalOpen(true)}
               className="flex items-center gap-2"
             >
-              <UserPlus className="w-4 h-4" />
+              <CommonIcon name="user-plus" size={20} />
               {t('organizations.members.inviteMember')}
             </Button>
           )}
@@ -170,7 +170,7 @@ export const OrganizationMembers = () => {
               variant="outline"
               className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
             >
-              <Trash2 className="w-4 h-4" />
+              <CommonIcon name="arrow-left" size={20} />
               Xóa tổ chức
             </Button>
           )}
@@ -194,7 +194,7 @@ export const OrganizationMembers = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <UsersIcon className="w-5 h-5" />
+                  <CommonIcon name="users" size={20} />
                   {t('organizations.members.teamMembers', { count: members.length })}
                 </CardTitle>
               </div>

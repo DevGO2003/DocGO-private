@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@shared/utils/dateFormatter';
-import { motion } from 'framer-motion';
-import { Plus, Search, Building2, Users, Crown, Calendar, Shield, UserCog } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   Card,
   CardHeader,
@@ -54,21 +53,21 @@ export const OrganizationList = () => {
       case 'OWNER':
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
-            <Crown className="w-3 h-3" />
+            <CommonIcon name="crown" size={16} />
             {t('organizations.list.badges.owner')}
           </div>
         );
       case 'MANAGER':
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-            <UserCog className="w-3 h-3" />
+            <CommonIcon name="user-cog" size={20} />
             {t('organizations.list.badges.manager')}
           </div>
         );
       case 'MEMBER':
         return (
           <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-            <Shield className="w-3 h-3" />
+            <CommonIcon name="shield" size={20} />
             {t('organizations.list.badges.member')}
           </div>
         );
@@ -104,7 +103,7 @@ export const OrganizationList = () => {
         <div className="flex gap-2">
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
           <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
-            <Plus className="w-5 h-5" />
+            <CommonIcon name="plus" size={20} />
             {t('organizations.list.new')}
           </Button>
         </div>
@@ -119,7 +118,7 @@ export const OrganizationList = () => {
       <div className="space-y-6">
         {/* Search Filter */}
         <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <CommonIcon name="search" size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
             placeholder={t('organizations.list.searchPlaceholder')}
@@ -157,14 +156,11 @@ export const OrganizationList = () => {
 
         {/* Empty State */}
         {!isLoading && !error && data && data.content && data.content.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16"
+          <div className="text-center py-16 animate-fade-in"
           >
             <Card>
               <CardContent className="p-12">
-                <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <CommonIcon name="building" size={64} className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {t('organizations.list.empty.title')}
                 </h3>
@@ -176,32 +172,25 @@ export const OrganizationList = () => {
                   onClick={handleCreateOrganization}
                   className="inline-flex items-center gap-2"
                 >
-                  <Plus className="w-5 h-5" />
+                  <CommonIcon name="plus" size={20} />
                   {t('organizations.list.empty.cta')}
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         )}
 
         {/* Organizations Grid */}
         {!isLoading && !error && data && data.content && data.content.length > 0 && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.05 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
             >
               {data.content.map((org, index) => (
-                <motion.div
+                <div
                   key={org.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02 }}
+                  className="transition-all hover:scale-105 animate-fade-in cursor-pointer"
+                  style={{ animationDelay: `${index * 50}ms` }}
                   onClick={() => handleOrganizationClick(org.id)}
-                  className="cursor-pointer"
                 >
                   <Card className="h-full">
                     <CardHeader>
@@ -217,7 +206,7 @@ export const OrganizationList = () => {
                             {org.description || t('dashboard.noDescription')}
                           </p>
                         </div>
-                        <Building2 className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
+                        <CommonIcon name="building" size={32} className="text-purple-500 flex-shrink-0 ml-2" />
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -225,7 +214,7 @@ export const OrganizationList = () => {
                         {/* Owner Badge */}
                         {org.owner && (
                           <div className="flex items-center gap-2 text-sm">
-                            <Crown className="w-4 h-4 text-yellow-500" />
+                            <CommonIcon name="crown" size={16} className="text-yellow-500" />
                             <span className="text-gray-700">
                               {org.ownerName || t('organizations.list.ownerLabel')}
                             </span>
@@ -234,7 +223,7 @@ export const OrganizationList = () => {
 
                         {/* Members Count */}
                         <div className="flex items-center gap-2 text-sm">
-                          <Users className="w-4 h-4 text-gray-500" />
+                          <CommonIcon name="users" size={16} className="text-gray-500" />
                           <span className="text-gray-700">
                             {t('organizations.list.members', { count: org.memberCount })}
                           </span>
@@ -243,7 +232,7 @@ export const OrganizationList = () => {
                         {/* Created Date */}
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-1 text-gray-500">
-                            <Calendar className="w-3 h-3" />
+                            <CommonIcon name="calendar" size={16} />
                             <span>
                               {formatDate(org.createdAt)}
                             </span>
@@ -270,9 +259,9 @@ export const OrganizationList = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
             {/* Pagination */}
             {data.totalPages > 1 && (

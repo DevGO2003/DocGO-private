@@ -1,6 +1,6 @@
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
 import { Button } from '../Button';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface RefreshButtonProps {
   onClick?: () => void;
@@ -20,9 +20,8 @@ export const RefreshButton: React.FC<RefreshButtonProps> = ({
       disabled={loading}
       className={`flex items-center gap-2 ${className}`}
     >
-      <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+      <CommonIcon name="refresh" size={16} className={loading ? 'animate-spin' : ''} />
       Làm mới
     </Button>
   );
 };
-
