@@ -60,6 +60,8 @@ public class SecurityConfig {
                     "/health"
                 ).permitAll()
                 .requestMatchers("/api/v1/repository-management-service/repositories/public").permitAll()
+                // Allow internal service calls (cascade delete from user-management-service)
+                .requestMatchers("/api/v1/repository-management-service/repositories/organization/*/delete-all").permitAll()
                 .requestMatchers("/api/v1/repository-management-service/repositories/my").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
                 .requestMatchers("/api/v1/repository-management-service/repositories/**").hasAnyRole("USER", "EMPLOYEE", "ADMIN")
                 .anyRequest().authenticated()

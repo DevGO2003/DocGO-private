@@ -555,4 +555,39 @@ public class RepositoryManagementController {
                 .build());
         }
     }
+
+    @DeleteMapping("/organization/{organizationId}/delete-all")
+    @Operation(summary = "Xóa tất cả repositories của organization (cascade delete)")
+    public ResponseEntity<RestResponse<Void>> deleteAllByOrganization(
+            @Parameter(description = "ID của organization") @PathVariable String organizationId
+    ) {
+        log.info("Deleting all repositories for organization: {}", organizationId);
+        
+        try {
+            repositoryService.hardDeleteAllByOrganization(organizationId);
+            
+            return ResponseEntity.ok(RestResponse.<Void>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã xóa tất cả repositories của organization")
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/organization/" + organizationId + "/delete-all")
+                .build());
+        } catch (Exception e) {
+            log.error("Error deleting repositories for organization: {}", organizationId, e);
+            return ResponseEntity.ok(RestResponse.<Void>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi xóa repositories: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/organization/" + organizationId + "/delete-all")
+                .build());
+        }
+    }
 }

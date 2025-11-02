@@ -369,4 +369,21 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.searchPublicRepositories(searchTerm, pageable);
         return entities.map(RepositoryDTO::fromEntity);
     }
+
+    @Override
+    public void hardDeleteAllByOrganization(String organizationId) {
+        log.info("Hard deleting all repositories for organization: {}", organizationId);
+        
+        // Find all repositories of this organization (including deleted ones)
+        List<RepositoryEntity> repositories = repositoryRepository.findByOrganizationId(organizationId);
+        
+        if (repositories.isEmpty()) {
+            log.info("No repositories found for organization: {}", organizationId);
+            return;
+        }
+        
+        // Hard delete all repositories
+        repositoryRepository.deleteAll(repositories);
+        log.info("Hard deleted {} repositories for organization: {}", repositories.size(), organizationId);
+    }
 }
