@@ -21,6 +21,7 @@ import {
 import { useRepository } from '@features/repositories/models/api/repositoryApi';
 import { RepositoryType } from '@features/repositories/models/types';
 import { NOT_FOUND_PATH } from '@constants';
+import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
 
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ export const RepositoryDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
@@ -42,22 +44,12 @@ export const RepositoryDetail: React.FC = () => {
     }
   }, [isLoading, id, error, navigate]);
 
-  const handleBack = () => {
-    navigate('/repositories');
-  };
-
   const formatFileSize = (bytes: number | null | undefined) => {
     if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const getRepositoryTypeLabel = (type: RepositoryType) => {
-    return type === 'ORGANIZATION'
-      ? t('repositories.detail.type.organization')
-      : t('repositories.detail.type.personal');
   };
 
   const goToUploadWithRepo = () => {
@@ -153,9 +145,8 @@ export const RepositoryDetail: React.FC = () => {
                         onSelect={() => {}}
                         className="pb-3 px-4 opacity-50 cursor-not-allowed"
                         disabled
-                        title="Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có"
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2" title="Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có">
                           <Activity className="w-4 h-4" />
                           {t('repositories.detail.tabs.activity')}
                         </div>
@@ -258,7 +249,9 @@ export const RepositoryDetail: React.FC = () => {
                           <p className="text-gray-600 mb-4">
                             {t('repositories.detail.empty.members.desc')}
                           </p>
-                          <Button>{t('repositories.detail.empty.members.invite')}</Button>
+                          <Button onClick={() => setShowInviteModal(true)}>
+                            {t('repositories.detail.empty.members.invite')}
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -279,11 +272,20 @@ export const RepositoryDetail: React.FC = () => {
                       </CardContent>
                     </Card>
                   )}
-
-                </div>
               </div>
             )}
         </div>
+      )}
+
+      {/* Invite Member Modal */}
+      {repository && (
+        <InviteRepositoryMemberModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          repositoryId={repository.id}
+          repositoryType={repository.type}
+          repositoryName={repository.name}
+        />
       )}
     </RepositoryLayout>
   );

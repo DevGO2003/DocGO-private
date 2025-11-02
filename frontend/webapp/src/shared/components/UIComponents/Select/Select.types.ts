@@ -5,5 +5,4 @@ export interface CommonSelectProps extends SelectHTMLAttributes<HTMLSelectElemen
   error?: string;
   helperText?: string;
   options: Array<{ value: string; label: string }>;
-  onValueChange?: (value: string) => void;
 }

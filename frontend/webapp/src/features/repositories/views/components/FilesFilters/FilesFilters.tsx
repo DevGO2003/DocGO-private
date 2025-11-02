@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, Input, Button } from '@shared/components';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
@@ -37,16 +37,16 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSearchChange,
   viewMode,
   onViewModeChange,
-  status,
-  onStatusChange,
+  // status,
+  // onStatusChange,
   type,
   onTypeChange,
   availableTags,
-  tagsLoading,
-  tagsError,
+  // tagsLoading,
+  // tagsError,
   selectedTags,
   onToggleTag,
-  onRetryTags,
+  // onRetryTags,
   sortBy,
   onSortByChange,
   sortDirection,
@@ -92,7 +92,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         </div>
         <Select
           value={sortBy}
-          onValueChange={onSortByChange}
+          onChange={(e) => onSortByChange(e.target.value)}
           className="h-[28px] min-w-[130px] text-xs"
           options={[
             { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
@@ -104,7 +104,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         />
         <Select
           value={sortDirection}
-          onValueChange={(val) => onSortDirectionChange(val as SortDirection)}
+          onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
           className="h-[28px] min-w-[110px] text-xs"
           options={[
             { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
@@ -151,7 +151,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { onSearchChange(''); onStatusChange('ALL'); onTypeChange('ALL'); }}
+              onClick={() => { onSearchChange(''); onTypeChange('ALL'); }}
               className="h-[28px] text-xs"
             >
               {t('repositories.files.filters.reset')}
