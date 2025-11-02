@@ -2,19 +2,22 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { UserPlus, ArrowLeft, Users as UsersIcon } from 'lucide-react';
-import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner, RefreshButton } from '@shared/components';
+import { UserPlus, ArrowLeft, Users as UsersIcon, Trash2 } from 'lucide-react';
+import { Button, Card, CardHeader, CardTitle, CardContent, LoadingSpinner, RefreshButton, Dialog } from '@shared/components';
 import {
   MemberTable,
   InviteMemberModal,
   useOrganization,
   useOrganizationMembers,
+  useDeleteOrganization,
+  useUpdateMember,
   MemberRole,
 } from '@/features/organizations';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@store';
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
+import { MemberManagementModal } from '../../components/MemberManagementModal';
 
 export const OrganizationMembers = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +27,9 @@ export const OrganizationMembers = () => {
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
   const {
@@ -31,6 +37,8 @@ export const OrganizationMembers = () => {
     isLoading: membersLoading,
     refetch: refetchMembers,
   } = useOrganizationMembers(id!, { page: 0, size: 50 });
+  const { mutate: deleteOrganization, isPending: isDeleting } = useDeleteOrganization();
+  const { mutate: updateMember, isPending: isUpdating } = useUpdateMember();
 
   const members = membersData?.content || [];
   const isLoading = orgLoading || membersLoading;
@@ -38,6 +46,7 @@ export const OrganizationMembers = () => {
   // Get current user's role in this organization
   const currentUserRole = organization?.userRole || MemberRole.MEMBER;
   const canInviteMembers = currentUserRole === MemberRole.OWNER || currentUserRole === MemberRole.MANAGER;
+  const isCurrentUserOwner = currentUserRole === MemberRole.OWNER;
 
   // Debug logs
   console.log('🔍 [Members Page] Organization:', organization?.name);
@@ -60,6 +69,55 @@ export const OrganizationMembers = () => {
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const handleManageMember = (member: any) => {
+    setSelectedMember(member);
+    setIsManageModalOpen(true);
+  };
+
+  const handleUpdateMember = async (memberId: string, data: { role: string; permissions: string[] }) => {
+    if (!id) return;
+    
+    console.log('Updating member:', memberId, 'Data:', data);
+    
+    updateMember(
+      {
+        orgId: id,
+        memberId: memberId,
+        data: {
+          role: data.role as any,
+          permissions: data.permissions as any,
+        },
+      },
+      {
+        onSuccess: () => {
+          console.log('✅ Member updated successfully');
+          setIsManageModalOpen(false);
+          setSelectedMember(null);
+          refetchMembers();
+        },
+        onError: (error: any) => {
+          console.error('❌ Failed to update member:', error);
+          alert('Failed to update member. Please try again.');
+        },
+      }
+    );
+  };
+
+  const handleDeleteOrganization = () => {
+    if (!id) return;
+    
+    deleteOrganization(id, {
+      onSuccess: () => {
+        console.log('✅ Organization deleted successfully');
+        navigate(ORGANIZATIONS_PATH);
+      },
+      onError: (error: any) => {
+        console.error('❌ Failed to delete organization:', error);
+        alert('Failed to delete organization. Please try again.');
+      },
+    });
   };
 
   if (isLoading) {
@@ -97,13 +155,25 @@ export const OrganizationMembers = () => {
       headerRight={(
         <div className="flex gap-2">
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
-          <Button
-            onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="w-4 h-4" />
-            {t('organizations.members.inviteMember')}
-          </Button>
+          {canInviteMembers && (
+            <Button
+              onClick={() => setIsInviteModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              {t('organizations.members.inviteMember')}
+            </Button>
+          )}
+          {isCurrentUserOwner && (
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              variant="outline"
+              className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+            >
+              <Trash2 className="w-4 h-4" />
+              Xóa tổ chức
+            </Button>
+          )}
         </div>
       )}
     >
@@ -136,6 +206,7 @@ export const OrganizationMembers = () => {
                 currentUserId={currentUser?.id || ''}
                 currentUserRole={currentUserRole as MemberRole}
                 isLoading={membersLoading}
+                onEditMember={handleManageMember}
                 onRefresh={() => refetchMembers()}
               />
             </CardContent>
@@ -160,6 +231,57 @@ export const OrganizationMembers = () => {
             </ul>
           </div>
       </div>
+
+      {/* Member Management Modal */}
+      {selectedMember && (
+        <MemberManagementModal
+          isOpen={isManageModalOpen}
+          onClose={() => {
+            setIsManageModalOpen(false);
+            setSelectedMember(null);
+          }}
+          member={{
+            id: selectedMember.userId,
+            userName: selectedMember.username || `${selectedMember.firstName} ${selectedMember.lastName}`,
+            role: selectedMember.role,
+            permissions: selectedMember.permissions || [],
+          }}
+          onUpdateMember={handleUpdateMember}
+          isCurrentUserOwner={isCurrentUserOwner}
+        />
+      )}
+
+      {/* Delete Organization Confirmation Dialog */}
+      <Dialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Xác nhận xóa tổ chức"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            Bạn có chắc chắn muốn xóa tổ chức <strong>{organization?.name}</strong>?
+          </p>
+          <p className="text-sm text-red-600">
+            ⚠️ Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến tổ chức sẽ bị xóa vĩnh viễn.
+          </p>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleDeleteOrganization}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? 'Đang xóa...' : 'Xóa tổ chức'}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </OrganizationLayout>
   );
 };

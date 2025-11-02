@@ -31,12 +31,14 @@ export const NotificationBell = () => {
     };
   }, [isOpen]);
 
-  const handleAccept = (token: string) => {
+  const handleAccept = (invitationIdOrToken: string) => {
+    console.log('🔄 Accepting invitation with ID/Token:', invitationIdOrToken);
     acceptInvitation(
-      { token },
+      { token: invitationIdOrToken },
       {
         onSuccess: () => {
           console.log('✅ Invitation accepted from notification');
+          refetch(); // Refresh the list
         },
         onError: (error: any) => {
           console.error('❌ Failed to accept invitation:', error);
@@ -46,12 +48,14 @@ export const NotificationBell = () => {
     );
   };
 
-  const handleDecline = (token: string) => {
+  const handleDecline = (invitationIdOrToken: string) => {
+    console.log('🔄 Declining invitation with ID/Token:', invitationIdOrToken);
     declineInvitation(
-      { token },
+      { token: invitationIdOrToken },
       {
         onSuccess: () => {
           console.log('✅ Invitation declined from notification');
+          refetch(); // Refresh the list
         },
         onError: (error: any) => {
           console.error('❌ Failed to decline invitation:', error);
@@ -157,7 +161,7 @@ export const NotificationBell = () => {
                         {/* Action Buttons */}
                         <div className="flex gap-2 mt-3">
                           <Button
-                            onClick={() => handleAccept(invitation.token)}
+                            onClick={() => handleAccept(invitation.token || invitation.id)}
                             disabled={isAccepting || isDeclining}
                             className="flex-1 py-1 px-2 text-xs h-8"
                           >
@@ -175,7 +179,7 @@ export const NotificationBell = () => {
                           </Button>
 
                           <Button
-                            onClick={() => handleDecline(invitation.token)}
+                            onClick={() => handleDecline(invitation.token || invitation.id)}
                             disabled={isAccepting || isDeclining}
                             variant="outline"
                             className="flex-1 py-1 px-2 text-xs h-8"

@@ -30,13 +30,16 @@ public class OrganizationMembership {
     private String userId;
 
     @Field("role_ids")
-    private Set<String> roleIds;
+    private Set<String> roleIds; // Legacy - deprecated
+
+    @Field("role")
+    private String role; // OWNER, ADMIN, MANAGER, MEMBER
 
     @Field("simple_role")
-    private String simpleRole;
+    private String simpleRole; // Legacy - deprecated
 
     @Field("permissions")
-    private List<String> permissions;
+    private List<String> permissions; // Direct permissions list
 
     @Field("status")
     @Builder.Default
