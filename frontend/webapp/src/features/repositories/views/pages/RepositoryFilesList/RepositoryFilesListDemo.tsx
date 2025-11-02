@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileListHeader } from '@shared/layouts/HeaderLayouts';
-import type { ViewMode, FilterState } from '@shared/layouts/HeaderLayouts';
+import { FileListHeader } from '@features/repositories/layouts';
+import type { ViewMode, FilterState } from '@features/repositories/layouts';
 
 /**
  * Demo page showing FileListHeader usage

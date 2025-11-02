@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
+import { useRef, useEffect } from 'react';
+import anime from 'animejs';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont, Checkbox, Label } from '@shared/components';
 import { useAuthFormController } from '../../../controllers/useAuthFormController';
 import { useLoginController } from '../../../controllers/useLoginController';
 import { useGoogleLogin } from '../../../controllers/useGoogleLogin';
@@ -21,14 +22,36 @@ export const Login = () => {
     rememberMe: false,
   });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      anime({
+        targets: containerRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 500,
+        easing: 'easeOutQuad',
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (error && errorRef.current) {
+      anime({
+        targets: errorRef.current,
+        opacity: [0, 1],
+        maxHeight: [0, 100],
+        duration: 300,
+        easing: 'easeOutQuad',
+      });
+    }
+  }, [error]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+    <CommonFont className="min-h-screen flex items-center justify-center py-12 px-4" style={{ background: 'linear-gradient(to bottom right, #dbeafe, #faf5ff)' }}>
+      <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">
@@ -38,13 +61,9 @@ export const Login = () => {
 
           <CardContent>
             {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm"
-              >
+              <div ref={errorRef} className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
@@ -74,18 +93,16 @@ export const Login = () => {
                 autoComplete="current-password"
               />
 
-              <div className="flex items-center">
-                <input
+              <div className="flex items-center gap-2">
+                <Checkbox
                   id="rememberMe"
                   name="rememberMe"
-                  type="checkbox"
                   checked={values.rememberMe}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                  onCheckedChange={(checked) => handleChange({ target: { name: 'rememberMe', type: 'checkbox', checked } } as any)}
                 />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900 cursor-pointer">
+                <Label htmlFor="rememberMe" className="text-sm cursor-pointer">
                   Remember me
-                </label>
+                </Label>
               </div>
 
               <Button
@@ -139,12 +156,7 @@ export const Login = () => {
               {isGoogleLoading ? 'Connecting...' : 'Sign in with Google'}
             </Button>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 text-center space-y-3"
-            >
+            <div className="mt-6 text-center space-y-3">
               <Link
                 to={FORGOT_PASSWORD_PATH}
                 className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
@@ -160,10 +172,10 @@ export const Login = () => {
                   Sign up
                 </Link>
               </div>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </div>
+      </div>
+    </CommonFont>
   );
 };

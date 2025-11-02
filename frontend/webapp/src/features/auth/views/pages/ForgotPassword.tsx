@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@shared/components';
+import { useRef, useEffect } from 'react';
+import anime from 'animejs';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont } from '@shared/components';
 import { useAuthFormController } from '../../controllers/useAuthFormController';
 import { LOGIN_PATH } from '@constants';
 
@@ -14,14 +15,23 @@ export const ForgotPassword = () => {
     // Implement forgot password logic
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      anime({
+        targets: containerRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 500,
+        easing: 'easeOutQuad',
+      });
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+    <CommonFont className="min-h-screen flex items-center justify-center py-12 px-4" style={{ background: 'linear-gradient(to bottom right, #dbeafe, #faf5ff)' }}>
+      <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">
@@ -53,22 +63,17 @@ export const ForgotPassword = () => {
               </Button>
             </form>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 text-center"
-            >
+            <div className="mt-6 text-center">
               <Link
                 to={LOGIN_PATH}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Back to sign in
               </Link>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </div>
+      </div>
+    </CommonFont>
   );
 };

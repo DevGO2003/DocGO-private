@@ -62,21 +62,59 @@ class ApiClient {
       },
       async (error: any) => {
         const originalRequest = error.config
-        const isUnauthorized = error.response?.status === 401 || error.response?.data?.statusCode === 401
-        const isForbidden = error.response?.status === 403 || error.response?.data?.statusCode === 403
+        const responseData = error.response?.data
+        
+        // Extract error message from various response formats
+        const errorMessage = (
+          responseData?.description || 
+          responseData?.shortMessage || 
+          responseData?.message || 
+          ''
+        ).toLowerCase()
+        
+        // Check for authorization header errors
+        const isAuthHeaderError = errorMessage.includes('missing') || 
+                                 errorMessage.includes('invalid authorization') ||
+                                 errorMessage.includes('authorization header')
+        
+        // Check for 401/403 status
+        const isUnauthorized = error.response?.status === 401 || 
+                              error.response?.data?.statusCode === 401 ||
+                              isAuthHeaderError
+        const isForbidden = error.response?.status === 403 || 
+                           error.response?.data?.statusCode === 403
+        
+        // Auto retry with refresh token
         if ((isUnauthorized || isForbidden) && !originalRequest._retry) {
           originalRequest._retry = true
+          
+          if (env.isDev) {
+            console.log('[API] Authorization error detected, attempting token refresh...', {
+              isAuthHeaderError,
+              status: error.response?.status,
+              statusCode: responseData?.statusCode,
+              message: errorMessage
+            })
+          }
+          
           try {
             const refreshSuccess = await this.handleUnauthorized()
             if (refreshSuccess) {
               const newToken = this.getAuthToken()
               if (newToken) {
                 originalRequest.headers.Authorization = `Bearer ${newToken}`
+                if (env.isDev) {
+                  console.log('[API] Token refreshed successfully, retrying request...', originalRequest.url)
+                }
                 return this.client(originalRequest)
               }
             }
           } catch (retryError) {
             console.error('[API] Request retry failed:', retryError)
+            // Logout user if refresh token also fails
+            if (typeof window !== 'undefined' && window.location) {
+              window.location.href = '/auth/login'
+            }
           }
         }
         this.handleApiError(error)
@@ -238,3 +276,4 @@ class ApiClient {
 
 export const apiClient = new ApiClient()
 export { ApiClient }
+export default apiClient

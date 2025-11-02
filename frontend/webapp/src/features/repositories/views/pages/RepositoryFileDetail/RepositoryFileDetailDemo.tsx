@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileDetailHeader } from '@shared/layouts/HeaderLayouts';
-import type { FileData } from '@shared/layouts/HeaderLayouts';
+import { FileDetailHeader } from '@features/repositories/layouts';
+import type { FileData } from '@features/repositories/layouts';
 
 /**
  * Demo page showing FileDetailHeader usage

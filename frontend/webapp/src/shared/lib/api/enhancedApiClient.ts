@@ -83,12 +83,18 @@ export class EnhancedApiClient {
         if (this.isAuthenticationError(error) && !originalRequest._retry) {
           originalRequest._retry = true;
           
+          console.log('[API] Authorization error detected, attempting token refresh...', {
+            url: error.config?.url,
+            status: error.response?.status,
+            statusCode: (error.response?.data as any)?.statusCode
+          });
+          
           try {
-            console.log('[API] Attempting token refresh...');
             const newToken = await tokenManager.refreshToken();
             
             if (newToken && originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              console.log('[API] Token refreshed successfully, retrying request...', originalRequest.url);
               return this.client(originalRequest);
             }
           } catch (refreshError) {
@@ -107,10 +113,25 @@ export class EnhancedApiClient {
 
   private isAuthenticationError(error: AxiosError): boolean {
     const status = error.response?.status;
-    const statusCode = error.response?.data?.statusCode;
+    const responseData = error.response?.data as any;
+    const statusCode = responseData?.statusCode;
+    
+    // Extract error message from various response formats
+    const errorMessage = (
+      responseData?.description || 
+      responseData?.shortMessage || 
+      responseData?.message || 
+      ''
+    ).toLowerCase();
+    
+    // Check for authorization header errors
+    const isAuthHeaderError = errorMessage.includes('missing') || 
+                             errorMessage.includes('invalid authorization') ||
+                             errorMessage.includes('authorization header');
     
     return status === 401 || statusCode === 401 || 
-           status === 403 || statusCode === 403;
+           status === 403 || statusCode === 403 ||
+           isAuthHeaderError;
   }
 
   private handleAuthenticationFailure(): void {

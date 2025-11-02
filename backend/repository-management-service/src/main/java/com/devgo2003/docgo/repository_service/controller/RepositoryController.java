@@ -46,18 +46,15 @@ public class RepositoryController {
             @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection,
             @Parameter(description = "Từ khóa tìm kiếm") @RequestParam(required = false) String searchTerm,
             @Parameter(description = "ID của repository để lọc") @RequestParam(required = false) String repositoryId,
-            @Parameter(description = "ID của user để lọc files theo owner") @RequestParam(required = false) String userId
+            @Parameter(description = "ID của user để lọc files theo owner") @RequestParam(required = false) String userId,
+                    @Parameter(description = "Loại document để lọc (CONTRACT, INVOICE, etc.)") @RequestParam(required = false) String documentType,
+            @Parameter(description = "ID của organization để lọc") @RequestParam(required = false) String organizationId
     ) {
         Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        // Filter by userId if provided
-        Page<FileEntity> files;
-        if (userId != null && !userId.trim().isEmpty()) {
-            files = fileService.getFilesByOwnerUserId(userId, pageable);
-        } else {
-            files = fileService.getAllFiles(pageable);
-        }
+        // Use combined filters
+        Page<FileEntity> files = fileService.getFilesWithFilters(documentType, organizationId, userId, pageable);
         
         return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
             .apiVersion("v1")

@@ -35,5 +35,5 @@ export const UploadPage = lazy(() =>
 );
 
 // Error pages
-export const NotFound = lazy(() => import('@pages').then(m => ({ default: m.NotFound })));
-export const Unauthorized = lazy(() => import('@pages').then(m => ({ default: m.Unauthorized })));
+export const NotFound = lazy(() => import('@pages/NotFound').then(m => ({ default: m.NotFound })));
+export const Unauthorized = lazy(() => import('@pages/Unauthorized').then(m => ({ default: m.Unauthorized })));

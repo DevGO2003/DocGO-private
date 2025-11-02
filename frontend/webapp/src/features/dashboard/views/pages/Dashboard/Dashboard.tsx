@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,8 +11,18 @@ import {
 import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
-import { Card, CardContent, CardHeader, CardTitle, Button, Text, LoadingSpinner, RefreshButton } from '@shared/components';
+import { Card, CardContent, Button, Text, RefreshButton, WindowPanel } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import PanelSelector from '../../../components/PanelSelector';
+
+// Panel state type
+interface PanelState {
+  id: string;
+  label: string;
+  visible: boolean;
+  minimized: boolean;
+  position: { x: number; y: number };
+}
 
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
@@ -24,6 +34,65 @@ export const Dashboard = () => {
   const [page] = useState(0);
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Load panel state from localStorage or use defaults
+  const loadPanelState = (): PanelState[] => {
+    const saved = localStorage.getItem('dashboard-panels');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved panel state:', e);
+      }
+    }
+    
+    // Default positions
+    return [
+      { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
+      { id: 'repositories', label: 'Repositories gần đây', visible: true, minimized: false, position: { x: 20, y: 0 } },
+      { id: 'files', label: 'Files gần đây', visible: true, minimized: false, position: { x: 560, y: 0 } },
+      { id: 'organizations', label: 'Tổ chức', visible: true, minimized: false, position: { x: 20, y: 420 } },
+      { id: 'quickActions', label: 'Hành động nhanh', visible: true, minimized: false, position: { x: 20, y: 890 } },
+    ];
+  };
+  
+  // Panel management state
+  const [panels, setPanels] = useState<PanelState[]>(loadPanelState);
+
+  // Save to localStorage whenever panels change
+  useEffect(() => {
+    localStorage.setItem('dashboard-panels', JSON.stringify(panels));
+  }, [panels]);
+  
+  const togglePanel = (id: string) => {
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
+      p.id === id ? { ...p, visible: !p.visible } : p
+    ));
+  };
+
+  const minimizePanel = (id: string, minimized: boolean) => {
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
+      p.id === id ? { ...p, minimized } : p
+    ));
+  };
+
+  const closePanel = (id: string) => {
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
+      p.id === id ? { ...p, visible: false } : p
+    ));
+  };
+
+  const updatePanelPosition = (id: string, x: number, y: number) => {
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
+      p.id === id ? { ...p, position: { x, y } } : p
+    ));
+  };
+
+  // Reset to default positions
+  const resetPanelPositions = () => {
+    setPanels(loadPanelState());
+    localStorage.removeItem('dashboard-panels');
+  };
 
   // Get current user ID for filtering
   const userId = user?.id;
@@ -135,7 +204,21 @@ export const Dashboard = () => {
       breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
       onRefresh={handleRefresh}
       headerRight={
-        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetPanelPositions}
+            title="Đặt lại vị trí mặc định"
+          >
+            🔄 Reset
+          </Button>
+          <PanelSelector
+            panels={panels.map((p: PanelState) => ({ id: p.id, label: p.label, visible: p.visible }))}
+            onToggle={togglePanel}
+          />
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        </div>
       }
     >
         {/* Welcome Header */}
@@ -185,22 +268,25 @@ export const Dashboard = () => {
           ))}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Recent Repositories */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('dashboard.recentRepositories')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {reposLoading ? (
-                  <div className="py-6"><LoadingSpinner /></div>
-                ) : repositories && repositories.content.length > 0 ? (
-                  <div className="space-y-3">
+        {/* WindowPanels Container */}
+        <div className="relative" style={{ minHeight: '1200px' }}>
+          {/* Recent Repositories Panel */}
+          {panels.find(p => p.id === 'repositories')?.visible && (
+            <WindowPanel
+              id="repositories"
+              title={t('dashboard.recentRepositories')}
+              defaultWidth={500}
+              defaultHeight={400}
+              minimized={panels.find(p => p.id === 'repositories')?.minimized}
+              visible={panels.find(p => p.id === 'repositories')?.visible}
+              position={panels.find(p => p.id === 'repositories')?.position || { x: 0, y: 0 }}
+              onMinimize={(min) => minimizePanel('repositories', min)}
+              onClose={() => closePanel('repositories')}
+              onPositionChange={updatePanelPosition}
+              loading={reposLoading}
+            >
+              {!reposLoading && repositories && repositories.content.length > 0 ? (
+                <div className="space-y-3">
                     {repositories.content.slice(0, 5).map((repo) => (
                       <motion.div
                         key={repo.id}
@@ -219,37 +305,38 @@ export const Dashboard = () => {
                         </div>
                       </motion.div>
                     ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Text as="p" className="text-gray-500 mb-4">{t('dashboard.noRepositories')}</Text>
-                    <Button
-                      variant="default"
-                      onClick={() => navigate(REPOSITORIES_PATH)}
-                    >
-                      {t('dashboard.createRepository')}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+                </div>
+              ) : !reposLoading ? (
+                <div className="text-center py-8">
+                  <Text as="p" className="text-gray-500 mb-4">{t('dashboard.noRepositories')}</Text>
+                  <Button
+                    variant="default"
+                    onClick={() => navigate(REPOSITORIES_PATH)}
+                  >
+                    {t('dashboard.createRepository')}
+                  </Button>
+                </div>
+              ) : null}
+            </WindowPanel>
+          )}
 
-          {/* Recent Files */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('dashboard.recentFiles')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {filesLoading ? (
-                  <div className="py-6"><LoadingSpinner /></div>
-                ) : files && files.content.length > 0 ? (
-                  <div className="space-y-3">
+          {/* Recent Files Panel */}
+          {panels.find(p => p.id === 'files')?.visible && (
+            <WindowPanel
+              id="files"
+              title={t('dashboard.recentFiles')}
+              defaultWidth={500}
+              defaultHeight={400}
+              minimized={panels.find(p => p.id === 'files')?.minimized}
+              visible={panels.find(p => p.id === 'files')?.visible}
+              position={panels.find(p => p.id === 'files')?.position || { x: 520, y: 0 }}
+              onMinimize={(min) => minimizePanel('files', min)}
+              onClose={() => closePanel('files')}
+              onPositionChange={updatePanelPosition}
+              loading={filesLoading}
+            >
+              {!filesLoading && files && files.content.length > 0 ? (
+                <div className="space-y-3">
                     {files.content.slice(0, 5).map((file) => (
                       <motion.div
                         key={file.id}
@@ -271,39 +358,40 @@ export const Dashboard = () => {
                         </div>
                       </motion.div>
                     ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Text as="p" className="text-gray-500">{t('dashboard.noFiles')}</Text>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+                </div>
+              ) : !filesLoading ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Text as="p" className="text-gray-500">{t('dashboard.noFiles')}</Text>
+                </div>
+              ) : null}
+            </WindowPanel>
+          )}
 
-        {/* Organizations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>My Organizations</CardTitle>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(ORGANIZATIONS_PATH)}
-                >
-                  {t('dashboard.viewAll')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {orgsLoading ? (
-                <div className="py-6"><LoadingSpinner /></div>
-              ) : organizations && organizations.content.length > 0 ? (
+          {/* Organizations Panel */}
+          {panels.find(p => p.id === 'organizations')?.visible && (
+            <WindowPanel
+              id="organizations"
+              title="My Organizations"
+              defaultWidth={1040}
+              defaultHeight={450}
+              minimized={panels.find(p => p.id === 'organizations')?.minimized}
+              visible={panels.find(p => p.id === 'organizations')?.visible}
+              position={panels.find(p => p.id === 'organizations')?.position || { x: 0, y: 420 }}
+              onMinimize={(min) => minimizePanel('organizations', min)}
+              onClose={() => closePanel('organizations')}
+              onPositionChange={updatePanelPosition}
+              loading={orgsLoading}
+            >
+              {!orgsLoading && organizations && organizations.content.length > 0 ? (
+                <>
+                  <div className="flex justify-end mb-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate(ORGANIZATIONS_PATH)}
+                    >
+                      {t('dashboard.viewAll')}
+                    </Button>
+                  </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {organizations.content.map((org) => (
                     <motion.div
@@ -322,7 +410,8 @@ export const Dashboard = () => {
                     </motion.div>
                   ))}
                 </div>
-              ) : (
+                </>
+              ) : !orgsLoading ? (
                 <div className="text-center py-8">
                   <Text as="p" className="text-gray-500 mb-4">{t('dashboard.notInOrganization')}</Text>
                   <Button
@@ -332,23 +421,24 @@ export const Dashboard = () => {
                     {t('dashboard.joinOrganization')}
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+              ) : null}
+            </WindowPanel>
+          )}
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mt-8"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('dashboard.quickActions')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Quick Actions Panel */}
+          {panels.find(p => p.id === 'quickActions')?.visible && (
+            <WindowPanel
+              id="quickActions"
+              title={t('dashboard.quickActions')}
+              defaultWidth={1040}
+              defaultHeight={300}
+              minimized={panels.find(p => p.id === 'quickActions')?.minimized}
+              visible={panels.find(p => p.id === 'quickActions')?.visible}
+              position={panels.find(p => p.id === 'quickActions')?.position || { x: 0, y: 890 }}
+              onMinimize={(min) => minimizePanel('quickActions', min)}
+              onClose={() => closePanel('quickActions')}
+              onPositionChange={updatePanelPosition}
+            >
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Button
                   variant="outline"
@@ -390,9 +480,9 @@ export const Dashboard = () => {
                   </div>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </WindowPanel>
+          )}
+        </div>
     </DashboardLayout>
   );
 };

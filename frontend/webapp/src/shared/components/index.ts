@@ -22,6 +22,7 @@ export * from './UIComponents/Font';
 export * from './UIComponents/Icon';
 export * from './UIComponents/PreviewPanel';
 export * from './UIComponents/RefreshButton';
+export * from './UIComponents/Panel';
 
 // Export Utility components
 export * from '../layouts/LoadingSpinner';

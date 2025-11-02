@@ -1,66 +1,61 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { useRef, useEffect } from 'react';
+import anime from 'animejs';
 import { FileQuestion, ArrowLeft, Home } from 'lucide-react';
-import { Card, CardContent, Button } from '@shared/components';
+import { Card, CardContent, Button, CommonFont, CommonText } from '@shared/components';
 import { HOME_PATH } from '@constants';
 
 export const NotFound = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      anime({
+        targets: containerRef.current,
+        opacity: [0, 1],
+        scale: [0.9, 1],
+        duration: 500,
+        easing: 'easeOutQuad',
+      });
+    }
+    if (iconRef.current) {
+      anime({
+        targets: iconRef.current,
+        scale: [0, 1],
+        delay: 200,
+        duration: 400,
+        easing: 'easeOutBack',
+      });
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+    <CommonFont className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, #f9fafb, #f3f4f6)' }}>
+      <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring' }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6"
-            >
+            <div ref={iconRef} className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
               <FileQuestion className="w-12 h-12 text-blue-600" />
-            </motion.div>
+            </div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-6xl font-bold text-gray-900 mb-3"
-            >
+            <CommonText as="h1" className="text-6xl font-bold text-gray-900 mb-3">
               {t('notFound.code')}
-            </motion.h1>
+            </CommonText>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-2xl font-semibold text-gray-900 mb-3"
-            >
+            <CommonText as="h2" className="text-2xl font-semibold text-gray-900 mb-3">
               {t('notFound.title')}
-            </motion.h2>
+            </CommonText>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-gray-600 mb-8"
-            >
+            <CommonText as="p" className="text-gray-600 mb-8">
               Trang không tìm thấy hoặc đối tượng không tồn tại hoặc đã xóa.
-            </motion.p>
+            </CommonText>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 variant="outline"
                 onClick={() => navigate(-1)}
@@ -77,10 +72,10 @@ export const NotFound = () => {
                 <Home className="w-4 h-4" />
                 {t('notFound.goHome')}
               </Button>
-            </motion.div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </div>
+      </div>
+    </CommonFont>
   );
 };
