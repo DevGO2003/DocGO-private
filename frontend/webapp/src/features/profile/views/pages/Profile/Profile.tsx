@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { User, Mail, Phone, Briefcase, Building2, Calendar, Edit2, Save } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Button,
-  Input,
-  RefreshButton,
+Card,
+CardHeader,
+CardTitle,
+CardContent,
+Button,
+Input,
+RefreshButton,
+  CommonLabel,
 } from '@shared/components';
 
 import ProfileLayout from '../../../layouts/ProfileLayout';
@@ -199,10 +200,10 @@ export const Profile = () => {
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <User className="w-4 h-4" />
-                          {t('profile.labels.firstName')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <User className="w-4 h-4" />
+                        {t('profile.labels.firstName')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="firstName"
@@ -215,10 +216,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <User className="w-4 h-4" />
-                          {t('profile.labels.lastName')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <User className="w-4 h-4" />
+                        {t('profile.labels.lastName')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="lastName"
@@ -235,10 +236,10 @@ export const Profile = () => {
                     {/* Contact Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <Mail className="w-4 h-4" />
-                          {t('profile.labels.email')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <Mail className="w-4 h-4" />
+                        {t('profile.labels.email')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="email"
@@ -252,10 +253,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <Phone className="w-4 h-4" />
-                          {t('profile.labels.phone')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <Phone className="w-4 h-4" />
+                        {t('profile.labels.phone')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="phone"
@@ -273,10 +274,10 @@ export const Profile = () => {
                     {/* Work Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <Building2 className="w-4 h-4" />
-                          {t('profile.labels.department')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <Building2 className="w-4 h-4" />
+                        {t('profile.labels.department')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="department"
@@ -289,10 +290,10 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <label className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
-                          <Briefcase className="w-4 h-4" />
-                          {t('profile.labels.position')}
-                        </label>
+                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <Briefcase className="w-4 h-4" />
+                        {t('profile.labels.position')}
+                        </CommonLabel>
                         {isEditing ? (
                           <Input
                             name="position"

@@ -18,7 +18,7 @@ import {
   FileText, 
   Activity
 } from 'lucide-react';
-import { useRepository } from '@features/repositories/models/api/repositoryApi';
+import { useRepository, useRepositoryMembers, useRepositoryActivity } from '@features/repositories/models/api/repositoryApi';
 import { RepositoryType } from '@features/repositories/models/types';
 import { NOT_FOUND_PATH } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
@@ -33,6 +33,8 @@ export const RepositoryDetail: React.FC = () => {
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
+  const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
+  const { data: activityData, isLoading: activityLoading } = useRepositoryActivity(id || '');
 
   // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
   useEffect(() => {
@@ -241,20 +243,44 @@ export const RepositoryDetail: React.FC = () => {
                   {activeTab === 'members' && (
                     <Card>
                       <CardContent className="p-6">
-                        <div className="text-center py-8">
-                          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            {t('repositories.detail.empty.members.title')}
-                          </h3>
-                          <p className="text-gray-600 mb-4">
-                            {t('repositories.detail.empty.members.desc')}
-                          </p>
-                          <Button onClick={() => setShowInviteModal(true)}>
-                            {t('repositories.detail.empty.members.invite')}
+                        {membersLoading ? (
+                          <div className="text-center py-8">Loading members...</div>
+                        ) : membersData?.content && membersData.content.length > 0 ? (
+                          <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-medium text-gray-900">Members</h3>
+                             <Button onClick={() => setShowInviteModal(true)}>
+                          {t('repositories.detail.empty.members.invite')}
                           </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                            </div>
+                          {membersData.content.map((member: any) => (
+                        <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                    <p className="font-medium text-gray-900">{member.username}</p>
+                  <p className="text-sm text-gray-600">{member.email}</p>
+                  </div>
+                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                  {member.role}
+                  </span>
+                  </div>
+                  ))}
+                  </div>
+                  ) : (
+                  <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {t('repositories.detail.empty.members.title')}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                  {t('repositories.detail.empty.members.desc')}
+                  </p>
+                  <Button onClick={() => setShowInviteModal(true)}>
+                  {t('repositories.detail.empty.members.invite')}
+                  </Button>
+                  </div>
+                  )}
+                  </CardContent>
+                  </Card>
                   )}
 
                   {activeTab === 'activity' && (

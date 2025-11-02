@@ -43,6 +43,42 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
+    public Page<FileEntity> getFilesByDocumentType(String documentType, Pageable pageable) {
+        return fileRepository.findByDocumentTypeAndIsDeletedFalse(documentType, pageable);
+    }
+
+    @Override
+    public Page<FileEntity> getFilesByOrganizationId(String organizationId, Pageable pageable) {
+        return fileRepository.findByOrganizationIdAndIsDeletedFalse(organizationId, pageable);
+    }
+
+    @Override
+    public Page<FileEntity> getFilesWithFilters(String documentType, String organizationId, String userId, Pageable pageable) {
+        if (documentType != null && !documentType.trim().isEmpty() &&
+            organizationId != null && !organizationId.trim().isEmpty() &&
+            userId != null && !userId.trim().isEmpty()) {
+            return fileRepository.findByDocumentTypeAndOrganizationIdAndOwnerUserIdAndIsDeletedFalse(documentType, organizationId, userId, pageable);
+        } else if (documentType != null && !documentType.trim().isEmpty() &&
+                   organizationId != null && !organizationId.trim().isEmpty()) {
+            return fileRepository.findByDocumentTypeAndOrganizationIdAndIsDeletedFalse(documentType, organizationId, pageable);
+        } else if (documentType != null && !documentType.trim().isEmpty() &&
+                   userId != null && !userId.trim().isEmpty()) {
+            return fileRepository.findByDocumentTypeAndOwnerUserIdAndIsDeletedFalse(documentType, userId, pageable);
+        } else if (organizationId != null && !organizationId.trim().isEmpty() &&
+                   userId != null && !userId.trim().isEmpty()) {
+            return fileRepository.findByOrganizationIdAndOwnerUserIdAndIsDeletedFalse(organizationId, userId, pageable);
+        } else if (documentType != null && !documentType.trim().isEmpty()) {
+            return getFilesByDocumentType(documentType, pageable);
+        } else if (organizationId != null && !organizationId.trim().isEmpty()) {
+            return getFilesByOrganizationId(organizationId, pageable);
+        } else if (userId != null && !userId.trim().isEmpty()) {
+            return getFilesByOwnerUserId(userId, pageable);
+        } else {
+            return getAllFiles(pageable);
+        }
+    }
+
+    @Override
     public Optional<FileEntity> getFileById(String id) {
         return fileRepository.findById(id);
     }

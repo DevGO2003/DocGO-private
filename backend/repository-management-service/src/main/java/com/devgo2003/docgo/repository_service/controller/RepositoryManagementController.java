@@ -251,6 +251,123 @@ public class RepositoryManagementController {
         }
     }
 
+    @GetMapping("/{id}/members")
+    @Operation(summary = "Lấy danh sách members của repository")
+    public ResponseEntity<RestResponse<Map<String, Object>>> getRepositoryMembers(
+            @Parameter(description = "ID của repository") @PathVariable String id,
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "20") int size
+    ) {
+        try {
+            // For now, return mock data since repository members functionality might not be fully implemented
+            // In a real implementation, this would query repository members from database
+            var members = new java.util.ArrayList<Map<String, Object>>();
+            var member = new java.util.HashMap<String, Object>();
+            member.put("id", "1");
+            member.put("userId", "current-user-id");
+            member.put("username", "current-user");
+            member.put("email", "user@example.com");
+            member.put("role", "OWNER");
+            member.put("joinedAt", java.time.Instant.now().toString());
+            member.put("status", "ACTIVE");
+            members.add(member);
+
+            var result = new java.util.HashMap<String, Object>();
+            result.put("content", members);
+            result.put("totalElements", members.size());
+            result.put("totalPages", 1);
+            result.put("size", size);
+            result.put("number", page);
+            result.put("first", true);
+            result.put("last", true);
+
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Repository members retrieved successfully")
+                .data(result)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + id + "/members")
+                .build());
+
+        } catch (Exception e) {
+            log.error("Error getting repository members", e);
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Failed to retrieve repository members: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + id + "/members")
+                .build());
+        }
+    }
+
+    @GetMapping("/{id}/activity")
+    @Operation(summary = "Lấy activity log của repository")
+    public ResponseEntity<RestResponse<Map<String, Object>>> getRepositoryActivity(
+            @Parameter(description = "ID của repository") @PathVariable String id,
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection
+    ) {
+        try {
+            // For now, return mock data since repository activity functionality might not be fully implemented
+            // In a real implementation, this would query activity logs from database
+            var activities = new java.util.ArrayList<Map<String, Object>>();
+            var activity = new java.util.HashMap<String, Object>();
+            activity.put("id", "1");
+            activity.put("type", "REPOSITORY_CREATED");
+            activity.put("description", "Repository was created");
+            activity.put("actor", "System");
+            activity.put("actorId", "system");
+            activity.put("createdAt", java.time.Instant.now().toString());
+            var metadata = new java.util.HashMap<String, Object>();
+            metadata.put("repositoryId", id);
+            metadata.put("repositoryName", "Sample Repository");
+            activity.put("metadata", metadata);
+            activities.add(activity);
+
+            var result = new java.util.HashMap<String, Object>();
+            result.put("content", activities);
+            result.put("totalElements", activities.size());
+            result.put("totalPages", 1);
+            result.put("size", size);
+            result.put("number", page);
+            result.put("first", true);
+            result.put("last", true);
+
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Repository activity retrieved successfully")
+                .data(result)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + id + "/activity")
+                .build());
+
+        } catch (Exception e) {
+            log.error("Error getting repository activity", e);
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Failed to retrieve repository activity: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + id + "/activity")
+                .build());
+        }
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Lấy chi tiết repository theo ID (kèm top 5 files mới nhất)")
     public ResponseEntity<RestResponse<RepositoryDTO>> getRepository(

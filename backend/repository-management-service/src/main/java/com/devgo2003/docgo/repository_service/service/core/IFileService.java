@@ -23,9 +23,24 @@ public interface IFileService {
     Page<FileEntity> getAllFiles(Pageable pageable);
 
     /**
-     * Get files by owner user ID with pagination
-     */
+    * Get files by owner user ID with pagination
+    */
     Page<FileEntity> getFilesByOwnerUserId(String ownerUserId, Pageable pageable);
+
+    /**
+     * Get files by document type with pagination
+     */
+    Page<FileEntity> getFilesByDocumentType(String documentType, Pageable pageable);
+
+    /**
+     * Get files by organization ID with pagination
+     */
+    Page<FileEntity> getFilesByOrganizationId(String organizationId, Pageable pageable);
+
+    /**
+     * Get files with multiple filters
+     */
+    Page<FileEntity> getFilesWithFilters(String documentType, String organizationId, String userId, Pageable pageable);
 
     /**
      * Get file by ID

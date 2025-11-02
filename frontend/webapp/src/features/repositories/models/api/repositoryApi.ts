@@ -162,16 +162,33 @@ const repositoryApi = {
   },
 
   // Contracts
-  getAllContracts: async (params?: PaginationParams): Promise<PaginatedResponse<Contract>> => {
+  getAllContracts: async (params?: PaginationParams & { organizationId?: string }): Promise<PaginatedResponse<Contract>> => {
+    const queryParams = { ...params };
+    if (params?.organizationId) {
+      queryParams.documentType = 'CONTRACT';
+      queryParams.organizationId = params.organizationId;
+    } else {
+      queryParams.documentType = 'CONTRACT';
+    }
     const response = await apiClient.get<PaginatedResponse<Contract>>(
-      `${BASE_PATH}/contracts`,
-      { params }
+      `/api/v1/repository-management-service/files`,
+      { params: queryParams }
     );
     return response.data.data!;
   },
 
   getContractById: async (id: string): Promise<Contract> => {
     const response = await apiClient.get<Contract>(`${BASE_PATH}/contracts/${id}`);
+    return response.data.data!;
+  },
+
+  getRepositoryMembers: async (repositoryId: string, params?: PaginationParams) => {
+    const response = await apiClient.get(`/api/v1/repository-management-service/repositories/${repositoryId}/members`, { params });
+    return response.data.data!;
+  },
+
+  getRepositoryActivity: async (repositoryId: string, params?: PaginationParams) => {
+    const response = await apiClient.get(`/api/v1/repository-management-service/repositories/${repositoryId}/activity`, { params });
     return response.data.data!;
   },
 
@@ -381,6 +398,22 @@ export const useContract = (id: string) => {
     queryKey: ['contract', id],
     queryFn: () => repositoryApi.getContractById(id),
     enabled: !!id,
+  });
+};
+
+export const useRepositoryMembers = (repositoryId: string, params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['repository-members', repositoryId, params],
+    queryFn: () => repositoryApi.getRepositoryMembers(repositoryId, params),
+    enabled: !!repositoryId,
+  });
+};
+
+export const useRepositoryActivity = (repositoryId: string, params?: PaginationParams) => {
+  return useQuery({
+    queryKey: ['repository-activity', repositoryId, params],
+    queryFn: () => repositoryApi.getRepositoryActivity(repositoryId, params),
+    enabled: !!repositoryId,
   });
 };
 

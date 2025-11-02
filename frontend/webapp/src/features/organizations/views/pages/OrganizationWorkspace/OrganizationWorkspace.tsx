@@ -50,6 +50,8 @@ export const OrganizationWorkspace = () => {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('contracts');
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAllContracts, setShowAllContracts] = useState(false);
+  const [showAllRepositories, setShowAllRepositories] = useState(false);
   // const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false); // Temporarily disabled
 
   const { data: organization, isLoading } = useOrganization(id!);
@@ -96,6 +98,8 @@ export const OrganizationWorkspace = () => {
     pendingApprovals: contracts.filter(c => c.status === 'PENDING_APPROVAL').length,
     approved: contracts.filter(c => c.status === 'APPROVED').length,
     rejected: contracts.filter(c => c.status === 'REJECTED').length,
+    totalFiles: contractsData?.totalElements || 0, // Use contracts count as proxy for files
+    totalRepositories: repositoriesData?.totalElements || 0,
   };
 
   const tabs = [
@@ -346,7 +350,7 @@ export const OrganizationWorkspace = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-purple-700 font-medium">Tổng số file</p>
-                      <p className="text-3xl font-bold text-purple-900">{contractsData?.totalElements || 0}</p>
+                      <p className="text-3xl font-bold text-purple-900">{stats.totalFiles}</p>
                     </div>
                     <FileIcon className="w-10 h-10 text-purple-500" />
                   </div>
@@ -360,7 +364,7 @@ export const OrganizationWorkspace = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-indigo-700 font-medium">Tổng số repository</p>
-                      <p className="text-3xl font-bold text-indigo-900">{repositoriesData?.totalElements || 0}</p>
+                      <p className="text-3xl font-bold text-indigo-900">{stats.totalRepositories}</p>
                     </div>
                     <Folder className="w-10 h-10 text-indigo-500" />
                   </div>
@@ -426,44 +430,96 @@ export const OrganizationWorkspace = () => {
                       <p className="text-sm text-gray-500">{t('organizations.workspace.contractsAppear')}</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {contracts.map((contract) => (
-                        <div
-                          key={contract.id}
-                          className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3 flex-1">
-                              <FileIcon className="w-5 h-5 text-blue-600 mt-1" />
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900">{contract.title}</h4>
-                                {contract.content && (
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                  <span>{contract.type}</span>
-                                  <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
+                  <div className="space-y-3">
+                  {/* Hiển thị chờ phê duyệt trước */}
+                  {contracts
+                  .filter(c => c.status === 'PENDING_APPROVAL')
+                  .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .slice(0, showAllContracts ? undefined : 10)
+                  .map((contract) => (
+                  <div
+                  key={contract.id}
+                  className="p-4 border-2 border-yellow-200 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+                  >
+                  <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3 flex-1">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-1" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{contract.title}</h4>
+                    {contract.content && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
+                      </p>
+                      )}
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                          <span>{contract.type}</span>
+                        <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  </div>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                  {contract.status}
+                  </span>
+                  </div>
+                  </div>
+                  ))}
+
+                  {/* Hiển thị các hợp đồng khác */}
+                  {contracts
+                  .filter(c => c.status !== 'PENDING_APPROVAL')
+                    .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
+                      .slice(0, showAllContracts ? undefined : 10)
+                        .map((contract) => (
+                          <div
+                            key={contract.id}
+                            className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3 flex-1">
+                                <FileIcon className="w-5 h-5 text-blue-600 mt-1" />
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">{contract.title}</h4>
+                                  {contract.content && (
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                    <span>{contract.type}</span>
+                                    <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  contract.status === 'APPROVED'
+                                    ? 'bg-green-100 text-green-700'
+                                    : contract.status === 'PENDING_APPROVAL'
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : contract.status === 'REJECTED'
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {contract.status}
+                              </span>
                             </div>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                contract.status === 'APPROVED'
-                                  ? 'bg-green-100 text-green-700'
-                                  : contract.status === 'PENDING_APPROVAL'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : contract.status === 'REJECTED'
-                                  ? 'bg-red-100 text-red-700'
-                                  : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {contract.status}
-                            </span>
                           </div>
+                        ))}
+
+                      {/* Show More Button */}
+                      {!showAllContracts && (contracts.filter(c => c.status === 'PENDING_APPROVAL').length > 10 || contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10) && (
+                        <div className="flex justify-center mt-6">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowAllContracts(true)}
+                            className="flex items-center gap-2"
+                          >
+                            <Folder className="w-4 h-4" />
+                            Mở danh sách kho ({contracts.length} hợp đồng)
+                          </Button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -496,8 +552,8 @@ export const OrganizationWorkspace = () => {
                     <LoadingSpinner text="Đang tải danh sách kho tài liệu..." />
                   </div>
                 ) : repositoriesData?.content && repositoriesData.content.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {repositoriesData.content.map((repo) => (
+                <div className="space-y-4">
+                {(showAllRepositories ? repositoriesData.content : repositoriesData.content.slice(0, 10)).map((repo) => (
                       <motion.div
                         key={repo.id}
                         whileHover={{ scale: 1.02 }}
@@ -536,6 +592,20 @@ export const OrganizationWorkspace = () => {
                         </div>
                       </motion.div>
                     ))}
+
+                    {/* Show More Button for Repositories */}
+                    {!showAllRepositories && repositoriesData.content.length > 10 && (
+                    <div className="flex justify-center mt-6">
+                    <Button
+                    variant="outline"
+                    onClick={() => setShowAllRepositories(true)}
+                    className="flex items-center gap-2"
+                    >
+                    <Folder className="w-4 h-4" />
+                    Mở danh sách kho ({repositoriesData.content.length} repository)
+                    </Button>
+                    </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12">

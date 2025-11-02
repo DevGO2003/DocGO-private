@@ -47,10 +47,13 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!panelRef.current) return;
-    const rect = panelRef.current.getBoundingClientRect();
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Calculate offset from current position (not from rect)
     setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
     });
     setIsDragging(true);
   };
@@ -94,7 +97,9 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
 
   if (!visible) return null;
 
-  const height = minimized ? 200 : defaultHeight;
+  // Minimize giảm 50% cả width và height
+  const width = minimized ? Math.floor(defaultWidth / 2) : defaultWidth;
+  const height = minimized ? Math.floor(defaultHeight / 2) : defaultHeight;
 
   return (
     <div
@@ -103,9 +108,10 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: `${defaultWidth}px`,
+        width: `${width}px`,
         height: `${height}px`,
         cursor: isDragging ? 'grabbing' : 'default',
+        transition: 'width 0.2s ease, height 0.2s ease', // Smooth resize
       }}
     >
       <CommonPanel
@@ -117,6 +123,7 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
               onMouseDown={handleMouseDown}
               className="p-1 hover:bg-gray-100 rounded cursor-grab active:cursor-grabbing"
               title="Di chuyển"
+              type="button"
             >
               <GripVertical className="w-4 h-4 text-gray-500" />
             </button>
@@ -125,6 +132,7 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
               onClick={handleMinimize}
               className="p-1 hover:bg-gray-100 rounded"
               title={minimized ? "Mở rộng" : "Thu nhỏ"}
+              type="button"
             >
               <Minus className="w-4 h-4 text-gray-500" />
             </button>
@@ -133,6 +141,7 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
               onClick={handleClose}
               className="p-1 hover:bg-red-100 rounded"
               title="Đóng"
+              type="button"
             >
               <X className="w-4 h-4 text-gray-500" />
             </button>
@@ -141,13 +150,15 @@ export const WindowPanel: React.FC<WindowPanelProps> = ({
         footer={footer}
         loading={loading}
       >
-        {minimized ? (
-          <div className="text-sm text-gray-500 text-center py-8">
-            Panel đã được thu nhỏ
-          </div>
-        ) : (
-          children
-        )}
+        <div 
+          className="transition-all duration-200"
+          style={{ 
+            height: '100%',
+            overflow: 'auto'
+          }}
+        >
+          {children}
+        </div>
       </CommonPanel>
     </div>
   );

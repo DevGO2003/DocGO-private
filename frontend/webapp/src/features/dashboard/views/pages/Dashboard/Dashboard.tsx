@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -15,6 +15,15 @@ import { Card, CardContent, Button, Text, RefreshButton, WindowPanel } from '@sh
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import PanelSelector from '../../../components/PanelSelector';
 
+// Panel state type
+interface PanelState {
+  id: string;
+  label: string;
+  visible: boolean;
+  minimized: boolean;
+  position: { x: number; y: number };
+}
+
 export const Dashboard = () => {
   console.log('[Dashboard] Rendering...');
 
@@ -26,37 +35,63 @@ export const Dashboard = () => {
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  // Load panel state from localStorage or use defaults
+  const loadPanelState = (): PanelState[] => {
+    const saved = localStorage.getItem('dashboard-panels');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved panel state:', e);
+      }
+    }
+    
+    // Default positions
+    return [
+      { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
+      { id: 'repositories', label: 'Repositories gần đây', visible: true, minimized: false, position: { x: 20, y: 0 } },
+      { id: 'files', label: 'Files gần đây', visible: true, minimized: false, position: { x: 560, y: 0 } },
+      { id: 'organizations', label: 'Tổ chức', visible: true, minimized: false, position: { x: 20, y: 420 } },
+      { id: 'quickActions', label: 'Hành động nhanh', visible: true, minimized: false, position: { x: 20, y: 890 } },
+    ];
+  };
+  
   // Panel management state
-  const [panels, setPanels] = useState([
-    { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
-    { id: 'repositories', label: 'Repositories gần đây', visible: true, minimized: false, position: { x: 0, y: 0 } },
-    { id: 'files', label: 'Files gần đây', visible: true, minimized: false, position: { x: 0, y: 0 } },
-    { id: 'organizations', label: 'Tổ chức', visible: true, minimized: false, position: { x: 0, y: 0 } },
-    { id: 'quickActions', label: 'Hành động nhanh', visible: true, minimized: false, position: { x: 0, y: 0 } },
-  ]);
+  const [panels, setPanels] = useState<PanelState[]>(loadPanelState);
+
+  // Save to localStorage whenever panels change
+  useEffect(() => {
+    localStorage.setItem('dashboard-panels', JSON.stringify(panels));
+  }, [panels]);
   
   const togglePanel = (id: string) => {
-    setPanels(prev => prev.map(p => 
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
       p.id === id ? { ...p, visible: !p.visible } : p
     ));
   };
 
   const minimizePanel = (id: string, minimized: boolean) => {
-    setPanels(prev => prev.map(p => 
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
       p.id === id ? { ...p, minimized } : p
     ));
   };
 
   const closePanel = (id: string) => {
-    setPanels(prev => prev.map(p => 
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
       p.id === id ? { ...p, visible: false } : p
     ));
   };
 
   const updatePanelPosition = (id: string, x: number, y: number) => {
-    setPanels(prev => prev.map(p => 
+    setPanels((prev: PanelState[]) => prev.map((p: PanelState) => 
       p.id === id ? { ...p, position: { x, y } } : p
     ));
+  };
+
+  // Reset to default positions
+  const resetPanelPositions = () => {
+    setPanels(loadPanelState());
+    localStorage.removeItem('dashboard-panels');
   };
 
   // Get current user ID for filtering
@@ -170,8 +205,16 @@ export const Dashboard = () => {
       onRefresh={handleRefresh}
       headerRight={
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetPanelPositions}
+            title="Đặt lại vị trí mặc định"
+          >
+            🔄 Reset
+          </Button>
           <PanelSelector
-            panels={panels.map(p => ({ id: p.id, label: p.label, visible: p.visible }))}
+            panels={panels.map((p: PanelState) => ({ id: p.id, label: p.label, visible: p.visible }))}
             onToggle={togglePanel}
           />
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
