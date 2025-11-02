@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { User, Mail, Phone, Briefcase, Building2, Calendar, Edit2, Save } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-Card,
-CardHeader,
-CardTitle,
-CardContent,
-Button,
-Input,
-RefreshButton,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Input,
+  RefreshButton,
   CommonLabel,
 } from '@shared/components';
 
@@ -104,20 +103,20 @@ export const Profile = () => {
       {user && (
         <div className="max-w-4xl mx-auto p-6">
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
+            // initial={{ opacity: 0, y: -20 }}
+            // animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('profile.title')}</h1>
             <p className="text-gray-600">{t('profile.manage')}</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Profile Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <div
+              // initial={{ opacity: 0, x: -20 }}
+              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
               <Card>
@@ -153,12 +152,12 @@ export const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div
 
             {/* Details Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <div
+              // initial={{ opacity: 0, x: 20 }}
+              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-2"
             >
               <Card>
@@ -344,7 +343,7 @@ export const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
       )}

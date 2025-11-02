@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { X, Save, SaveAll } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface EditModeActionsProps {
   onCancel: () => void;
@@ -22,7 +22,7 @@ export const EditModeActions: React.FC<EditModeActionsProps> = ({
         onClick={onCancel}
         className="inline-flex items-center gap-2"
       >
-        <X className="w-4 h-4" />
+        <CommonIcon name="x" size={16} />
         <span className="hidden md:inline">Hủy</span>
       </Button>
 
@@ -33,7 +33,7 @@ export const EditModeActions: React.FC<EditModeActionsProps> = ({
         onClick={onSaveAndClose}
         className="inline-flex items-center gap-2"
       >
-        <SaveAll className="w-4 h-4" />
+        <CommonIcon name="save" size={16} />
         <span className="hidden md:inline">Lưu & Đóng</span>
       </Button>
 
@@ -44,7 +44,7 @@ export const EditModeActions: React.FC<EditModeActionsProps> = ({
         onClick={onSave}
         className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
       >
-        <Save className="w-4 h-4" />
+        <CommonIcon name="save" size={16} />
         <span className="hidden md:inline">Lưu</span>
       </Button>
     </>

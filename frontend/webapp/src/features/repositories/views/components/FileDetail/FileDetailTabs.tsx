@@ -1,7 +1,5 @@
 'use client'
 
-import { FileText, Info, Building2, Tag, DollarSign, Bell, AlertTriangle, Folder, File, MessageCircle, Shield, Database, GitBranch, FileCheck } from 'lucide-react'
-
 // Contract tab components
 import { ContractOverviewTab } from './contract/ContractOverviewTab'
 import { PartiesTab } from './contract/PartiesTab'
@@ -38,52 +36,52 @@ export const mainTabs = [
   {
     id: 'overview',
     name: 'Tổng quan',
-    icon: Folder,
+    icon: 'folder',
     description: 'Chi tiết file và metadata'
   },
   {
     id: 'contracts',
     name: 'Hợp đồng',
-    icon: File,
+    icon: 'file',
     description: 'Quản lý hợp đồng và thông tin nếu file là hợp đồng'
   },
   {
     id: 'comments',
     name: 'Bình luận',
-    icon: MessageCircle,
+    icon: 'message',
     description: 'Thảo luận và hoạt động'
   }
 ];
 
 // contractSubTabs - for files that are contracts
 export const contractSubTabs = [
-  { id: 'contract-overview', name: 'Tổng quan HĐ', icon: Info, description: 'Thông tin cơ bản hợp đồng' },
-  { id: 'parties', name: 'Các bên', icon: Building2, description: 'Thông tin các bên' },
-  { id: 'payment', name: 'Thanh toán', icon: DollarSign, description: 'Lịch thanh toán' },
-  { id: 'clauses', name: 'Điều khoản', icon: FileText, description: 'Điều khoản chính và bất lợi' },
-  { id: 'risk', name: 'Rủi ro', icon: AlertTriangle, description: 'Phân tích rủi ro' },
-  { id: 'reminders', name: 'Nhắc nhở', icon: Bell, description: 'Nhắc nhở và mốc quan trọng' },
-  { id: 'compliance', name: 'Tuân thủ', icon: Tag, description: 'Trạng thái tuân thủ' },
+  { id: 'contract-overview', name: 'Tổng quan HĐ', icon: 'info', description: 'Thông tin cơ bản hợp đồng' },
+  { id: 'parties', name: 'Các bên', icon: 'building', description: 'Thông tin các bên' },
+  { id: 'payment', name: 'Thanh toán', icon: 'dollar-sign', description: 'Lịch thanh toán' },
+  { id: 'clauses', name: 'Điều khoản', icon: 'file-text', description: 'Điều khoản chính và bất lợi' },
+  { id: 'risk', name: 'Rủi ro', icon: 'alert-circle', description: 'Phân tích rủi ro' },
+  { id: 'reminders', name: 'Nhắc nhở', icon: 'bell', description: 'Nhắc nhở và mốc quan trọng' },
+  { id: 'compliance', name: 'Tuân thủ', icon: 'tag', description: 'Trạng thái tuân thủ' },
 ];
 
 // fileDetailSubTabs - for file overview tabs
 export const fileDetailSubTabs = [
-  { id: 'details', name: 'Chi tiết', icon: Info, description: 'Thông tin chi tiết file' },
-  { id: 'content', name: 'Nội dung', icon: FileText, description: 'Nội dung file' },
-  { id: 'ocr', name: 'Nội dung OCR', icon: FileText, description: 'Văn bản OCR' },
-  { id: 'metadata', name: 'Siêu dữ liệu', icon: Tag, description: 'Metadata file' },
-  { id: 'audit', name: 'Kiểm toán', icon: FileCheck, description: 'Lịch sử kiểm toán' },
-  { id: 'security', name: 'Bảo mật', icon: Shield, description: 'Bảo mật file' },
-  { id: 'storage', name: 'Lưu trữ', icon: Database, description: 'Thông tin lưu trữ' },
-  { id: 'versioning', name: 'Phiên bản', icon: GitBranch, description: 'Quản lý versions' },
-  { id: 'notes', name: 'Ghi chú', icon: MessageCircle, description: 'Ghi chú' },
-  { id: 'history', name: 'Lịch sử', icon: Info, description: 'Lịch sử thay đổi' },
-  { id: 'permissions', name: 'Quyền hạn', icon: Tag, description: 'Quyền truy cập' },
+  { id: 'details', name: 'Chi tiết', icon: 'info', description: 'Thông tin chi tiết file' },
+  { id: 'content', name: 'Nội dung', icon: 'file-text', description: 'Nội dung file' },
+  { id: 'ocr', name: 'Nội dung OCR', icon: 'file-text', description: 'Văn bản OCR' },
+  { id: 'metadata', name: 'Siêu dữ liệu', icon: 'tag', description: 'Metadata file' },
+  { id: 'audit', name: 'Kiểm toán', icon: 'check', description: 'Lịch sử kiểm toán' },
+  { id: 'security', name: 'Bảo mật', icon: 'shield', description: 'Bảo mật file' },
+  { id: 'storage', name: 'Lưu trữ', icon: 'folder', description: 'Thông tin lưu trữ' },
+  { id: 'versioning', name: 'Phiên bản', icon: 'file', description: 'Quản lý versions' },
+  { id: 'notes', name: 'Ghi chú', icon: 'message', description: 'Ghi chú' },
+  { id: 'history', name: 'Lịch sử', icon: 'clock', description: 'Lịch sử thay đổi' },
+  { id: 'permissions', name: 'Quyền hạn', icon: 'lock', description: 'Quyền truy cập' },
 ];
 
 // commentsSubTabs same
 export const commentsSubTabs = [
-  { id: 'comments-list', name: 'Bình luận', icon: MessageCircle, description: 'Danh sách bình luận' }
+  { id: 'comments-list', name: 'Bình luận', icon: 'message', description: 'Danh sách bình luận' }
 ];
 
 export function getSubTabsFor(mainTabId: string) {

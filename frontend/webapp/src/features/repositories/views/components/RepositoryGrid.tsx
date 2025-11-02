@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -9,7 +8,7 @@ import {
   Button,
   LoadingSpinner,
 } from '@shared/components';
-import { Plus, FolderOpen, Users, FileText, Clock, Building, User } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Repository } from '@features/repositories/models/types/repository.types';
 
 interface RepositoryGridProps {
@@ -48,9 +47,9 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
   const getRepositoryIcon = (type: string) => {
     return type === 'ORGANIZATION' ? (
-      <Building className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
+      <CommonIcon name="building" className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
     ) : (
-      <User className="w-8 h-8 text-blue-500 flex-shrink-0 ml-2" />
+      <CommonIcon name="user" className="w-8 h-8 text-blue-500 flex-shrink-0 ml-2" />
     );
   };
 
@@ -86,14 +85,10 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
   if (repositories.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-16"
-      >
+      <div className="text-center py-16 animate-fade-in">
         <Card>
           <CardContent className="p-12">
-            <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <CommonIcon name="folder" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Không có repository nào
             </h3>
@@ -106,33 +101,24 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                 onClick={onCreateRepository}
                 className="inline-flex items-center gap-2"
               >
-                <Plus className="w-5 h-5" />
+                <CommonIcon name="plus" className="w-5 h-5" />
                 Tạo Repository
               </Button>
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   }
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ staggerChildren: 0.05 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-      >
-        {repositories.map((repo, index) => (
-          <motion.div
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
+        {repositories.map((repo) => (
+          <div
             key={repo.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{ scale: 1.02 }}
             onClick={() => handleRepositoryClick(repo.id)}
-            className="cursor-pointer"
+            className="cursor-pointer transition-transform hover:scale-105"
           >
             <Card className="h-full">
               <CardHeader>
@@ -169,13 +155,13 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <FileText className="w-4 h-4 text-gray-500" />
+                      <CommonIcon name="file-text" className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-700">
                         {repo.fileCount || 0} tệp
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Users className="w-4 h-4 text-gray-500" />
+                      <CommonIcon name="users" className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-700">
                         {repo.memberCount || 0} thành viên
                       </span>
@@ -201,16 +187,16 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   {/* Updated Time */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
+                      <CommonIcon name="clock" className="w-3 h-3" />
                       Cập nhật: {repo.updatedAt ? new Date(repo.updatedAt).toLocaleDateString('vi-VN') : 'Không có'}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </>
   );
 };

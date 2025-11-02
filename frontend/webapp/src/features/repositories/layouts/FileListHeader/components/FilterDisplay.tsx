@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { X } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import type { FilterState } from '../FileListHeader.types';
 
 interface FilterDisplayProps {
@@ -37,7 +37,7 @@ export const FilterDisplay: React.FC<FilterDisplayProps> = ({
             onClick={onClearFilters}
             className="hover:bg-blue-200 rounded-full p-0.5"
           >
-            <X className="w-3 h-3" />
+            <CommonIcon name="x" size={12} />
           </button>
         </span>
       ))}

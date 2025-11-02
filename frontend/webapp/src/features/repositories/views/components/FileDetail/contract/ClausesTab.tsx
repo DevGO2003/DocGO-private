@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface ClausesTabProps {
@@ -40,7 +40,7 @@ export function ClausesTab({ data }: ClausesTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CommonIcon name="check" className="w-4 h-4 text-green-600" />
               <h3 className="text-sm font-semibold text-gray-900">
                 Điều khoản chính ({clauses.length})
               </h3>
@@ -102,7 +102,7 @@ export function ClausesTab({ data }: ClausesTabProps) {
         <Card className="border-red-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
+              <CommonIcon name="alert-circle" className="w-4 h-4 text-red-600" />
               <h3 className="text-sm font-semibold text-red-900">
                 Điều khoản bất lợi ({unfavorable.length})
               </h3>

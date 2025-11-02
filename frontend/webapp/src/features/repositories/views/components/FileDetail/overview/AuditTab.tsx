@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { Activity, User, Trash2, Eye } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface AuditTabProps {
   fileData: any;
@@ -16,13 +16,13 @@ export function AuditTab({ fileData }: AuditTabProps) {
   const getActionIcon = (action: string) => {
     switch (action?.toLowerCase()) {
       case 'create':
-        return <Eye className="w-4 h-4" />;
+        return <CommonIcon name="user" className="w-4 h-4" />;
       case 'delete':
-        return <Trash2 className="w-4 h-4" />;
+        return <CommonIcon name="trash" className="w-4 h-4" />;
       case 'update':
-        return <Activity className="w-4 h-4" />;
+        return <CommonIcon name="clock" className="w-4 h-4" />;
       default:
-        return <User className="w-4 h-4" />;
+        return <CommonIcon name="user" className="w-4 h-4" />;
     }
   };
 
@@ -45,7 +45,7 @@ export function AuditTab({ fileData }: AuditTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Activity className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="clock" className="w-5 h-5 mr-2 text-indigo-600" />
             Thông tin kiểm toán
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,7 +109,7 @@ export function AuditTab({ fileData }: AuditTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Activity className="w-5 h-5 mr-2 text-purple-600" />
+              <CommonIcon name="clock" className="w-5 h-5 mr-2 text-purple-600" />
               Lịch sử kiểm toán ({history.length})
             </h3>
             <div className="space-y-4">

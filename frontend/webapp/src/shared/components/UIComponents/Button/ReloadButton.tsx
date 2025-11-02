@@ -13,7 +13,7 @@ interface ReloadButtonProps extends Omit<ButtonProps, 'isLoading' | 'children'> 
  * ReloadButton Component
  * 
  * Specialized button for reload/refresh actions with:
- * - Rotating icon (RotateCw from lucide-react)
+ * - Rotating icon (rotate-cw from CommonIcon)
  * - Spinner animation when loading
  * - Optional label text
  * - Inherits all CommonButton features (rough canvas, variants, etc.)

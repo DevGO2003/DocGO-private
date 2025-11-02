@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { HardDrive, Cloud, Database } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface StorageTabProps {
   fileData: any;
@@ -24,7 +24,7 @@ export function StorageTab({ fileData }: StorageTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <HardDrive className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="folder" className="w-5 h-5 mr-2 text-indigo-600" />
             Loại lưu trữ
           </h3>
           <div className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
@@ -38,7 +38,7 @@ export function StorageTab({ fileData }: StorageTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Cloud className="w-5 h-5 mr-2 text-blue-600" />
+              <CommonIcon name="upload" className="w-5 h-5 mr-2 text-blue-600" />
               Amazon S3
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,7 +108,7 @@ export function StorageTab({ fileData }: StorageTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Database className="w-5 h-5 mr-2 text-green-600" />
+              <CommonIcon name="folder" className="w-5 h-5 mr-2 text-green-600" />
               Lưu trữ cục bộ
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

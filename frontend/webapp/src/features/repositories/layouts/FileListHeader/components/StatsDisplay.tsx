@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, FilePlus, Loader } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface StatsDisplayProps {
   totalFiles: number;
@@ -15,20 +15,20 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   return (
     <div className="flex items-center gap-4 text-sm text-gray-600">
       <div className="flex items-center gap-1">
-        <FileText className="w-4 h-4" />
+        <CommonIcon name="file-text" size={16} />
         <span>Tổng: <strong>{totalFiles}</strong></span>
       </div>
       
       {newFiles !== undefined && newFiles > 0 && (
         <div className="flex items-center gap-1 text-green-600">
-          <FilePlus className="w-4 h-4" />
+          <CommonIcon name="plus" size={16} />
           <span>Mới: <strong>{newFiles}</strong></span>
         </div>
       )}
       
       {processingFiles !== undefined && processingFiles > 0 && (
         <div className="flex items-center gap-1 text-blue-600">
-          <Loader className="w-4 h-4 animate-spin" />
+          <CommonIcon name="loading" size={16} className="animate-spin" />
           <span>Đang xử lý: <strong>{processingFiles}</strong></span>
         </div>
       )}

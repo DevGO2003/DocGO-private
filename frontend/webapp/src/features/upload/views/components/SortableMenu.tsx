@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { GripVertical, Save } from 'lucide-react'
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon'
 
 export interface MenuItem {
   id: string
@@ -56,7 +56,7 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
           onClick={() => setIsEditing(!isEditing)}
           className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          <GripVertical className="w-4 h-4" />
+          <CommonIcon name="grip-vertical" size={16} />
           {isEditing ? 'Done' : 'Sort'}
         </button>
       </div>
@@ -83,7 +83,7 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
                           snapshot.isDragging ? 'border-blue-500 shadow-lg' : 'border-gray-200'
                         }`}
                       >
-                        <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <CommonIcon name="grip-vertical" size={16} className="text-gray-400 flex-shrink-0" />
                         {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
                         <span className="text-sm text-gray-700 flex-1">{item.label}</span>
                       </div>
@@ -116,7 +116,7 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
           disabled={isSaving}
           className="w-full mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          <Save className="w-4 h-4" />
+          <CommonIcon name="save" size={16} />
           {isSaving ? 'Saving...' : 'Save Order'}
         </button>
       )}

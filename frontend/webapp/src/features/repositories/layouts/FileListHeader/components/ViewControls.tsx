@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { Grid3x3, List, Rows, ChevronDown } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import type { ViewMode } from '../FileListHeader.types';
 
 interface ViewControlsProps {
@@ -27,7 +27,7 @@ export const ViewControls: React.FC<ViewControlsProps> = ({
           className="p-2"
           title="Grid view"
         >
-          <Grid3x3 className="w-4 h-4" />
+          <CommonIcon name="grid" size={16} />
         </Button>
       )}
 
@@ -40,7 +40,7 @@ export const ViewControls: React.FC<ViewControlsProps> = ({
           className="p-2"
           title="List view"
         >
-          <List className="w-4 h-4" />
+          <CommonIcon name="list" size={16} />
         </Button>
       )}
 
@@ -53,7 +53,7 @@ export const ViewControls: React.FC<ViewControlsProps> = ({
           className="p-2"
           title="Compact view"
         >
-          <Rows className="w-4 h-4" />
+          <CommonIcon name="list" size={16} />
         </Button>
       )}
 
@@ -66,7 +66,7 @@ export const ViewControls: React.FC<ViewControlsProps> = ({
           className="inline-flex items-center gap-1 px-2"
         >
           <span className="text-xs">Sắp xếp</span>
-          <ChevronDown className="w-3 h-3" />
+          <CommonIcon name="chevron-down" size={12} />
         </Button>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { ScanText } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface OCRTabProps {
   fileData: any;
@@ -14,7 +14,7 @@ export function OCRTab({ fileData }: OCRTabProps) {
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <ScanText className="w-5 h-5 mr-2 text-indigo-600" />
+          <CommonIcon name="file-text" className="w-5 h-5 mr-2 text-indigo-600" />
           Nội dung OCR
         </h3>
         {ocrMeta && (

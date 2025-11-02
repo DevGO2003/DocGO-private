@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { GitBranch, Clock, CheckCircle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface VersioningTabProps {
   fileData: any;
@@ -20,7 +20,7 @@ export function VersioningTab({ fileData }: VersioningTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <GitBranch className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="file" className="w-5 h-5 mr-2 text-indigo-600" />
             Thông tin phiên bản
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -55,7 +55,7 @@ export function VersioningTab({ fileData }: VersioningTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-blue-600" />
+              <CommonIcon name="clock" className="w-5 h-5 mr-2 text-blue-600" />
               Thay đổi gần nhất
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -101,7 +101,7 @@ export function VersioningTab({ fileData }: VersioningTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+              <CommonIcon name="check" className="w-5 h-5 mr-2 text-green-600" />
               Lịch sử phiên bản
             </h3>
             <div className="space-y-3">

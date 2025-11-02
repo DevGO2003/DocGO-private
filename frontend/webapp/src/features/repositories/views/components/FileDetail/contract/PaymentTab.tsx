@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface PaymentScheduleItem {
   milestone: string;
@@ -52,6 +53,7 @@ export function PaymentTab({ data }: PaymentTabProps) {
             <div className="text-right">
               <p className="text-xs text-gray-500">Tổng giá trị</p>
               <p className="text-lg font-bold text-green-600">
+                <CommonIcon name="dollar-sign" />
                 {formatCurrency(payment.totalValue, payment.currency || data?.currency)}
               </p>
             </div>
@@ -82,6 +84,7 @@ export function PaymentTab({ data }: PaymentTabProps) {
                   <td className="py-2 px-2 text-gray-900">{item.milestone}</td>
                   <td className="py-2 px-2 text-right font-semibold text-gray-900">{item.percentage}%</td>
                   <td className="py-2 px-2 text-right font-semibold text-gray-900">
+                    <CommonIcon name="dollar-sign" />
                     {formatCurrency(item.amount, payment.currency || data?.currency)}
                   </td>
                   <td className="py-2 px-2 text-center text-gray-700">{formatDate(item.dueDate)}</td>
@@ -91,6 +94,7 @@ export function PaymentTab({ data }: PaymentTabProps) {
                         statusColors[item.status] || 'bg-gray-100 text-gray-800'
                       }`}
                     >
+                      <CommonIcon name="clock" />
                       {item.status}
                     </span>
                   </td>

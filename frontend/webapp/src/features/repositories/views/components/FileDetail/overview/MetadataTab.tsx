@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { Database } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface MetadataTabProps {
   fileData: any;
@@ -15,7 +15,7 @@ export function MetadataTab({ fileData }: MetadataTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Database className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="folder" className="w-5 h-5 mr-2 text-indigo-600" />
             Thông tin File System
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

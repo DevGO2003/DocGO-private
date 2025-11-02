@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Card } from '@shared/components';
-import { Users, Shield, Trash2, Plus } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   useRepositoryPermissions,
   useUpdatePermission,
@@ -52,12 +52,12 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Shield className="w-5 h-5" />
+          <CommonIcon name="shield" className="w-5 h-5" />
           Quản lý quyền truy cập
         </h3>
         {isOwner && onAddMember && (
           <Button onClick={onAddMember}>
-            <Plus className="w-4 h-4 mr-2" />
+            <CommonIcon name="plus" className="w-4 h-4 mr-2" />
             Thêm thành viên
           </Button>
         )}
@@ -70,7 +70,7 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-gray-400" />
+                    <CommonIcon name="users" className="w-5 h-5 text-gray-400" />
                     <div>
                       <p className="font-medium text-gray-900">
                         {perm.userName || perm.userId}
@@ -121,7 +121,7 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
                     size="sm"
                     onClick={() => handleRemoveUser(perm.userId)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <CommonIcon name="trash" className="w-4 h-4" />
                   </Button>
                 )}
               </div>
@@ -130,11 +130,11 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
         </div>
       ) : (
         <Card className="p-6 text-center">
-          <Users className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+          <CommonIcon name="users" className="w-12 h-12 text-gray-400 mx-auto mb-2" />
           <p className="text-gray-600">Chưa có thành viên nào</p>
           {isOwner && onAddMember && (
             <Button className="mt-4" onClick={onAddMember}>
-              <Plus className="w-4 h-4 mr-2" />
+              <CommonIcon name="plus" className="w-4 h-4 mr-2" />
               Thêm thành viên đầu tiên
             </Button>
           )}

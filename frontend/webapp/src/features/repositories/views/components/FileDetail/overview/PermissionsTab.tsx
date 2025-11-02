@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { Lock } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface PermissionsTabProps {
   fileData: any;
@@ -12,7 +12,7 @@ export function PermissionsTab({ fileData }: PermissionsTabProps) {
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Lock className="w-5 h-5 mr-2 text-indigo-600" />
+          <CommonIcon name="lock" className="w-5 h-5 mr-2 text-indigo-600" />
           Quyền truy cập
         </h3>
         {permissions.length > 0 ? (

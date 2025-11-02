@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { StickyNote } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface NotesTabProps {
   fileData: any;
@@ -12,7 +12,7 @@ export function NotesTab({ fileData }: NotesTabProps) {
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <StickyNote className="w-5 h-5 mr-2 text-indigo-600" />
+          <CommonIcon name="file-text" className="w-5 h-5 mr-2 text-indigo-600" />
           Ghi chú
         </h3>
         {notes.length > 0 ? (

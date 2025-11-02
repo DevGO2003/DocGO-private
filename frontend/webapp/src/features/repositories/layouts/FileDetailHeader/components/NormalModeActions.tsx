@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { Edit, Send, Copy, FileSignature, Download, MessageSquare, Trash2, MoreVertical } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface NormalModeActionsProps {
   onEdit: () => void;
@@ -32,7 +32,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
         onClick={onEdit}
         className="inline-flex items-center gap-2"
       >
-        <Edit className="w-4 h-4" />
+        <CommonIcon name="edit" size={16} />
         <span className="hidden md:inline">Chỉnh sửa</span>
       </Button>
 
@@ -44,7 +44,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onSubmit}
           className="inline-flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50"
         >
-          <Send className="w-4 h-4" />
+          <CommonIcon name="send" size={16} />
           <span className="hidden md:inline">Gửi duyệt</span>
         </Button>
       )}
@@ -57,7 +57,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onCreateVersion}
           className="inline-flex items-center gap-2"
         >
-          <Copy className="w-4 h-4" />
+          <CommonIcon name="copy" size={16} />
           <span className="hidden md:inline">Tạo phiên bản</span>
         </Button>
       )}
@@ -70,7 +70,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onSendForSignature}
           className="inline-flex items-center gap-2 border-purple-300 text-purple-700 hover:bg-purple-50"
         >
-          <FileSignature className="w-4 h-4" />
+          <CommonIcon name="file-text" size={16} />
           <span className="hidden md:inline">Gửi ký</span>
         </Button>
       )}
@@ -83,7 +83,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onDownload}
           className="inline-flex items-center gap-2"
         >
-          <Download className="w-4 h-4" />
+          <CommonIcon name="download" size={16} />
           <span className="hidden md:inline">Tải xuống</span>
         </Button>
       )}
@@ -96,7 +96,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onComment}
           className="inline-flex items-center gap-2"
         >
-          <MessageSquare className="w-4 h-4" />
+          <CommonIcon name="message" size={16} />
           <span className="hidden md:inline">Bình luận</span>
         </Button>
       )}
@@ -108,7 +108,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
         onClick={onDelete}
         className="inline-flex items-center gap-2"
       >
-        <Trash2 className="w-4 h-4" />
+        <CommonIcon name="trash" size={16} />
         <span className="hidden md:inline">Xóa</span>
       </Button>
 
@@ -120,7 +120,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={() => onMore('menu')}
           className="inline-flex items-center gap-2"
         >
-          <MoreVertical className="w-4 h-4" />
+          <CommonIcon name="more-vertical" size={16} />
         </Button>
       )}
     </>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PreviewPanel } from '@shared/components';
-import { FileText, AlertCircle, Loader2 } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useFileDownload } from '@features/repositories/models/api/repositoryApi';
 
 interface ContentTabProps {
@@ -61,7 +61,7 @@ export function ContentTab({ fileData }: ContentTabProps) {
         {/* Show loading */}
         {showLoading && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <CommonIcon name="loading" className="w-8 h-8 text-blue-600 animate-spin" />
             <p className="text-sm text-gray-600">Đang tải file...</p>
           </div>
         )}
@@ -71,7 +71,7 @@ export function ContentTab({ fileData }: ContentTabProps) {
         <div className="space-y-4">
           {/* Info banner */}
           <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <CommonIcon name="alert-circle" className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800">
               <p className="font-medium mb-1">
                 {downloadError ? 'Không thể tải file' : 'Preview tạm thời'}
@@ -88,7 +88,7 @@ export function ContentTab({ fileData }: ContentTabProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-indigo-600" />
+                <CommonIcon name="file-text" className="w-4 h-4 text-indigo-600" />
                 Nội dung đã trích xuất
               </h4>
               <span className="text-xs text-gray-500">

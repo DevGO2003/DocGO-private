@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Check, X, Building2, Clock, RefreshCw } from 'lucide-react';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
 import { Button } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Invitation } from '@features/organizations/models/types/organization.types';
 
 export const NotificationBell = () => {
@@ -87,7 +87,7 @@ export const NotificationBell = () => {
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
+        <CommonIcon name="bell" size={24} />
         {pendingCount > 0 && (
           <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
             {pendingCount}
@@ -114,7 +114,7 @@ export const NotificationBell = () => {
               className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
               title="Refresh notifications"
             >
-              <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <CommonIcon name="rotate-cw" size={16} className={isFetching ? 'animate-spin' : ''} />
             </button>
           </div>
 
@@ -127,7 +127,7 @@ export const NotificationBell = () => {
               </div>
             ) : pendingCount === 0 ? (
               <div className="px-4 py-8 text-center text-gray-500">
-                <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <CommonIcon name="bell" size={48} className="mx-auto mb-2 opacity-50" />
                 <p>No pending invitations</p>
               </div>
             ) : (
@@ -139,7 +139,7 @@ export const NotificationBell = () => {
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-blue-600" />
+                        <CommonIcon name="building" size={20} className="text-blue-600" />
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -154,7 +154,7 @@ export const NotificationBell = () => {
                         </p>
 
                         <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
+                          <CommonIcon name="clock" size={12} />
                           <span>{formatDate(invitation.createdAt)}</span>
                         </div>
 
@@ -172,7 +172,7 @@ export const NotificationBell = () => {
                               </>
                             ) : (
                               <>
-                                <Check className="w-3 h-3 mr-1" />
+                                <CommonIcon name="check" size={12} className="mr-1" />
                                 Accept
                               </>
                             )}
@@ -191,7 +191,7 @@ export const NotificationBell = () => {
                               </>
                             ) : (
                               <>
-                                <X className="w-3 h-3 mr-1" />
+                                <CommonIcon name="x" size={12} className="mr-1" />
                                 Decline
                               </>
                             )}

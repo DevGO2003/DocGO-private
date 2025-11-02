@@ -8,7 +8,7 @@ import {
   CommonSwitch as Switch,
   CommonModal as Modal,
 } from '@shared/components';
-import { User, Building2 } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 import { useMyOrganizations } from '@features/organizations/models/api/organizationApi';
 
@@ -126,6 +126,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
             <Button form="create-repo-form" type="submit" disabled={isLoading} className="min-w-[120px]">
               {isLoading ? (
                 <div className="flex items-center gap-2">
+                  <CommonIcon name="user" size={16} />
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Đang tạo...
                 </div>
@@ -160,7 +161,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                     formData.type === 'PERSONAL' ? 'bg-blue-100' : 'bg-gray-100'
                   }`}>
-                    <User className={`w-5 h-5 ${
+                    <CommonIcon name="user" size={20} className={`w-5 h-5 ${
                       formData.type === 'PERSONAL' ? 'text-blue-600' : 'text-gray-400'
                     }`} />
                   </div>
@@ -196,7 +197,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                     formData.type === 'ORGANIZATION' ? 'bg-green-100' : 'bg-gray-100'
                   }`}>
-                    <Building2 className={`w-5 h-5 ${
+                    <CommonIcon name="building" size={20} className={`w-5 h-5 ${
                       formData.type === 'ORGANIZATION' ? 'text-green-600' : 'text-gray-400'
                     }`} />
                   </div>
@@ -226,7 +227,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
           {formData.type === 'ORGANIZATION' && (
             <div className="space-y-2 p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center gap-2 mb-3">
-                <Building2 className="w-4 h-4 text-green-600" />
+                <CommonIcon name="building" size={16} className="text-green-600" />
                 <Label htmlFor="organizationId" className="text-sm font-medium text-gray-900">
                   Chọn tổ chức <span className="text-red-500">*</span>
                 </Label>

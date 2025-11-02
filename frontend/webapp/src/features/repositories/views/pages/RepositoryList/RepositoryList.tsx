@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Input, RefreshButton } from '@shared/components';
 import {
   usePersonalRepositories,
@@ -206,7 +206,7 @@ export const RepositoryList = () => {
               onClick={handleCreateRepository}
               className="inline-flex items-center gap-2"
             >
-              <Plus className="w-5 h-5" />
+              <CommonIcon name="plus" className="w-5 h-5" />
               {t('repositories.list.new')}
             </Button>
           )}
@@ -218,7 +218,7 @@ export const RepositoryList = () => {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <CommonIcon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 type="text"
                 placeholder={

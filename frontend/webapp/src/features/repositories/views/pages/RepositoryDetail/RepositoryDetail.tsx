@@ -4,11 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, RefreshButton, Card } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
-import { 
-  Users, 
-  FileText, 
-  Activity
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
 import { NOT_FOUND_PATH } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
@@ -211,7 +207,7 @@ export const RepositoryDetail: React.FC = () => {
                                   onClick={() => navigate(`/repositories/${repository.id}/files/${file.id}`)}
                                 >
                                   <div className="flex items-center gap-3">
-                                    <FileText className="w-5 h-5 text-blue-500" />
+                                    <CommonIcon name="file-text" className="w-5 h-5 text-blue-500" />
                                     <div>
                                       <h4 className="font-medium text-gray-900">{file.name}</h4>
                                       <p className="text-sm text-gray-500">
@@ -228,7 +224,7 @@ export const RepositoryDetail: React.FC = () => {
                           </div>
                         ) : (
                           <div className="text-center py-8">
-                            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <CommonIcon name="file-text" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                               {t('repositories.detail.empty.files.title')}
                             </h3>
@@ -267,7 +263,7 @@ export const RepositoryDetail: React.FC = () => {
                   </div>
                   ) : (
                   <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <CommonIcon name="users" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                   {t('repositories.detail.empty.members.title')}
                   </h3>
@@ -285,7 +281,7 @@ export const RepositoryDetail: React.FC = () => {
                   {activeTab === 'activity' && (
                     <Card className="p-6">
                         <div className="text-center py-8">
-                          <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <CommonIcon name="clock" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
                             {t('repositories.detail.empty.activity.title')}
                           </h3>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, DollarSign, Briefcase, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface ContractOverviewTabProps {
@@ -40,7 +40,7 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
         <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Calendar className="w-4 h-4 text-indigo-600" />
+              <CommonIcon name="calendar" className="w-4 h-4 text-indigo-600" />
               <h3 className="text-sm font-semibold text-gray-900">Thời hạn hợp đồng</h3>
             </div>
             <div className="space-y-2">
@@ -59,7 +59,7 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
         <Card className="bg-gradient-to-br from-green-50 to-white border-green-100">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="w-4 h-4 text-green-600" />
+              <CommonIcon name="dollar-sign" className="w-4 h-4 text-green-600" />
               <h3 className="text-sm font-semibold text-gray-900">Giá trị hợp đồng</h3>
             </div>
             <div className="text-center py-2">
@@ -78,7 +78,7 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Briefcase className="w-4 h-4 text-blue-600" />
+                <CommonIcon name="briefcase" className="w-4 h-4 text-blue-600" />
                 <h3 className="text-sm font-semibold text-gray-900">Thông tin dự án</h3>
               </div>
               <div className="space-y-2">
@@ -95,7 +95,7 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-4 h-4 text-purple-600" />
+                <CommonIcon name="shield" className="w-4 h-4 text-purple-600" />
                 <h3 className="text-sm font-semibold text-gray-900">Phân loại</h3>
               </div>
               <div className="space-y-2">

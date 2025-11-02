@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileData } from '../FileDetailHeader.types';
-import { FileText, User, Calendar, HardDrive } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface MetadataDisplayProps {
   file: FileData;
@@ -24,7 +24,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Code */}
       {file.code && (
         <div className="flex items-center gap-2 text-gray-600">
-          <FileText className="w-4 h-4" />
+          <CommonIcon name="file-text" size={16} />
           <span className="font-medium">Mã:</span>
           <span>{file.code}</span>
         </div>
@@ -33,7 +33,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Type */}
       {file.type && (
         <div className="flex items-center gap-2 text-gray-600">
-          <FileText className="w-4 h-4" />
+          <CommonIcon name="file-text" size={16} />
           <span className="font-medium">Loại:</span>
           <span>{file.type}</span>
         </div>
@@ -42,7 +42,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Owner */}
       {file.owner && (
         <div className="flex items-center gap-2 text-gray-600">
-          <User className="w-4 h-4" />
+          <CommonIcon name="user" size={16} />
           <span className="font-medium">Chủ sở hữu:</span>
           <span>{file.owner}</span>
         </div>
@@ -51,7 +51,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Created Date */}
       {file.createdAt && (
         <div className="flex items-center gap-2 text-gray-600">
-          <Calendar className="w-4 h-4" />
+          <CommonIcon name="calendar" size={16} />
           <span className="font-medium">Ngày tạo:</span>
           <span>{formatDate(file.createdAt)}</span>
         </div>
@@ -60,7 +60,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Size */}
       {file.size && (
         <div className="flex items-center gap-2 text-gray-600">
-          <HardDrive className="w-4 h-4" />
+          <CommonIcon name="folder" size={16} />
           <span className="font-medium">Kích thước:</span>
           <span>{formatSize(file.size)}</span>
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Info, FileText, Users, Activity } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
 
 interface RepositoryDetailTabsProps {
@@ -18,27 +18,27 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
     {
       id: 'overview',
       label: t('repositories.detail.tabs.overview', { defaultValue: 'Tổng quan' }),
-      icon: Info,
+      icon: <CommonIcon name="info" />,
       disabled: false,
     },
     {
       id: 'files',
       label: t('repositories.detail.tabs.files'),
-      icon: FileText,
+      icon: <CommonIcon name="file-text" />,
       disabled: false,
     },
     {
       id: 'members',
       label: t('repositories.detail.tabs.members'),
-      icon: Users,
+      icon: <CommonIcon name="users" />,
       disabled: false,
     },
     {
       id: 'activity',
       label: t('repositories.detail.tabs.activity'),
-      icon: Activity,
+      icon: <CommonIcon name="clock" />,
       disabled: true,
-      tooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
+      tooltip: 'Tạm thởi chưa có, tương lai các phiên bản kế tiếp sẽ có',
     },
   ];
 

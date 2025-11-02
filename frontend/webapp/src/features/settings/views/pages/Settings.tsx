@@ -1,17 +1,7 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  User,
-  Lock,
-  Bell,
-  Globe,
-  Shield,
-  Eye,
-  EyeOff,
-  Save,
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   Card,
   CardHeader,
@@ -146,20 +136,20 @@ export const Settings = () => {
     >
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
+          // initial={{ opacity: 0, y: -20 }}
+          // animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
           <p className="text-gray-600">Manage your account settings and preferences</p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+          <div
+            // initial={{ opacity: 0, x: -20 }}
+            // animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-1"
           >
             <Card>
@@ -185,14 +175,14 @@ export const Settings = () => {
                 </Tabs>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Content */}
-          <motion.div
+          <div
             key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            // initial={{ opacity: 0, x: 20 }}
+            // animate={{ opacity: 1, x: 0 }}
+            // transition={{ duration: 0.3 }}
             className="lg:col-span-3"
           >
             {/* Profile Tab */}
@@ -500,7 +490,7 @@ export const Settings = () => {
                 </CardContent>
               </Card>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
     </SettingsLayout>

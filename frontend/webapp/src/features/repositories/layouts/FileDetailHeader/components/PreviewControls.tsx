@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface PreviewControlsProps {
   currentPage?: number;
@@ -54,7 +54,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           disabled={currentPage <= 1}
           className="p-1"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <CommonIcon name="chevron-left" size={16} />
         </Button>
         
         <span className="text-sm text-gray-700 px-2 min-w-[60px] text-center">
@@ -68,7 +68,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           disabled={currentPage >= totalPages}
           className="p-1"
         >
-          <ChevronRight className="w-4 h-4" />
+          <CommonIcon name="chevron-right" size={16} />
         </Button>
       </div>
 
@@ -84,7 +84,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           disabled={zoom <= 50}
           className="p-1"
         >
-          <ZoomOut className="w-4 h-4" />
+          <CommonIcon name="minus" size={16} />
         </Button>
         
         <span className="text-sm text-gray-700 px-2 min-w-[50px] text-center">
@@ -98,7 +98,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           disabled={zoom >= 200}
           className="p-1"
         >
-          <ZoomIn className="w-4 h-4" />
+          <CommonIcon name="plus" size={16} />
         </Button>
       </div>
     </div>

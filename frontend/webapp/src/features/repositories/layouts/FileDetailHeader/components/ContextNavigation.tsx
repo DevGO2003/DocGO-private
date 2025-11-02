@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@shared/components';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface ContextNavigationProps {
   onPrevFile?: () => void;
@@ -30,7 +30,7 @@ export const ContextNavigation: React.FC<ContextNavigationProps> = ({
         disabled={!hasPrev}
         className="inline-flex items-center gap-1"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <CommonIcon name="chevron-left" size={16} />
         <span className="hidden md:inline">File trước</span>
       </Button>
 
@@ -50,7 +50,7 @@ export const ContextNavigation: React.FC<ContextNavigationProps> = ({
         className="inline-flex items-center gap-1"
       >
         <span className="hidden md:inline">File kế tiếp</span>
-        <ChevronRight className="w-4 h-4" />
+        <CommonIcon name="chevron-right" size={16} />
       </Button>
     </div>
   );

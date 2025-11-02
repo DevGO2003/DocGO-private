@@ -1,5 +1,5 @@
 import { Card, CardContent, Text, Input, Select, Button } from '@shared/components';
-import { Tag, Folder, User, Calendar, Plus, MoreVertical, ChevronDown } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useState } from 'react';
 
 interface DetailsTabProps {
@@ -56,7 +56,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
             {/* ID - Read only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <Folder className="w-4 h-4 mr-2 text-indigo-600" />
+                <CommonIcon name="folder" className="w-4 h-4 mr-2 text-indigo-600" />
                 ID
               </label>
               <Text className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">{id}</Text>
@@ -65,7 +65,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
             {/* Title - Editable */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <Tag className="w-4 h-4 mr-2 text-indigo-600" />
+                <CommonIcon name="tag" className="w-4 h-4 mr-2 text-indigo-600" />
                 Tiêu đề
               </label>
               {isEditing ? (
@@ -126,7 +126,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                     className="flex-1"
                   />
                   <Button variant="outline" className="px-3">
-                    <Calendar className="w-4 h-4" />
+                    <CommonIcon name="calendar" className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
@@ -139,7 +139,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
             {/* Document Type - Dropdown */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <User className="w-4 h-4 mr-2 text-indigo-600" />
+                <CommonIcon name="user" className="w-4 h-4 mr-2 text-indigo-600" />
                 Loại tài liệu
               </label>
               {isEditing ? (
@@ -158,7 +158,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                     ))}
                   </Select>
                   <Button variant="outline" className="px-3">
-                    <Plus className="w-4 h-4" />
+                    <CommonIcon name="plus" className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
@@ -204,10 +204,10 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                     className="flex-1"
                   />
                   <Button variant="outline" className="px-3">
-                    <ChevronDown className="w-4 h-4" />
+                    <CommonIcon name="chevron-down" className="w-4 h-4" />
                   </Button>
                   <Button variant="outline" className="px-3">
-                    <Plus className="w-4 h-4" />
+                    <CommonIcon name="plus" className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
@@ -229,7 +229,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                     className="flex-1"
                   />
                   <Button variant="outline" className="px-3">
-                    <ChevronDown className="w-4 h-4" />
+                    <CommonIcon name="chevron-down" className="w-4 h-4" />
                   </Button>
                 </div>
               ) : (
@@ -253,7 +253,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   <div className="flex gap-2">
                     <Input placeholder="Thêm tag..." className="flex-1" />
                     <Button variant="outline" className="px-3">
-                      <Plus className="w-4 h-4" />
+                      <CommonIcon name="plus" className="w-4 h-4" />
                     </Button>
                   </div>
                   {tags.length > 0 && (

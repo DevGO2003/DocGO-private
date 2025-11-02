@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface Party {
   id: string;
@@ -29,6 +30,7 @@ export function PartiesTab({ data }: PartiesTabProps) {
   if (parties.length === 0) {
     return (
       <div className="text-center text-gray-500 py-8">
+        <CommonIcon name="user" />
         Không có thông tin các bên tham gia
       </div>
     );
@@ -45,7 +47,7 @@ export function PartiesTab({ data }: PartiesTabProps) {
     <Card>
       <CardContent className="p-4">
         <h3 className="text-sm font-semibold mb-3 text-gray-900">
-          Các bên tham gia ({parties.length})
+          <CommonIcon name="users" /> Các bên tham gia ({parties.length})
         </h3>
         
         <div className="space-y-3">
@@ -75,12 +77,14 @@ export function PartiesTab({ data }: PartiesTabProps) {
                       <div>
                         <span className="text-gray-500">Email:</span>
                         <p className="font-medium text-gray-900">{party.contact.email}</p>
+                        <CommonIcon name="mail" />
                       </div>
                     )}
                     {party.contact.phone && (
                       <div>
                         <span className="text-gray-500">Điện thoại:</span>
                         <p className="font-medium text-gray-900">{party.contact.phone}</p>
+                        <CommonIcon name="phone" />
                       </div>
                     )}
                     {party.contact.address && (

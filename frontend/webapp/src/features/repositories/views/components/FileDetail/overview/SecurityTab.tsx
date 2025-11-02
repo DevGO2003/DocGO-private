@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { Lock, Eye, Share2, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface SecurityTabProps {
   fileData: any;
@@ -16,7 +16,7 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Eye className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="user" className="w-5 h-5 mr-2 text-indigo-600" />
             Mức độ truy cập
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -49,7 +49,7 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Lock className="w-5 h-5 mr-2 text-green-600" />
+              <CommonIcon name="lock" className="w-5 h-5 mr-2 text-green-600" />
               Mã hóa
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +79,7 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Share2 className="w-5 h-5 mr-2 text-blue-600" />
+              <CommonIcon name="send" className="w-5 h-5 mr-2 text-blue-600" />
               Chia sẻ với ({sharedWith.length})
             </h3>
             <div className="space-y-3">
@@ -104,7 +104,7 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Shield className="w-5 h-5 mr-2 text-purple-600" />
+              <CommonIcon name="shield" className="w-5 h-5 mr-2 text-purple-600" />
               Quyền hạn
             </h3>
             <div className="space-y-2">

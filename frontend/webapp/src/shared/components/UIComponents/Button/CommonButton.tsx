@@ -42,7 +42,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           style={{ width: '100%', height: '100%' }}
         />
         <button
-          className={cn(buttonVariants({ variant, size, className }))}
+          className={buttonVariants({ variant, size, className })}
           ref={ref}
           disabled={disabled || isLoading}
           {...props}

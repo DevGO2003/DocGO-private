@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface RemindersTabProps {
@@ -59,7 +59,7 @@ export function RemindersTab({ data }: RemindersTabProps) {
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <Bell className="w-6 h-6" />
+                <CommonIcon name="alert-circle" className="w-6 h-6" />
                 <div>
                   <span className="text-xs font-medium opacity-75">
                     {typeLabels[reminder.type] || reminder.type}

@@ -1,5 +1,5 @@
-import { AlertTriangle, Shield } from 'lucide-react';
 import { Card, CardContent } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface RiskTabProps {
   data: any;
@@ -51,7 +51,7 @@ export function RiskTab({ data }: RiskTabProps) {
         >
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-8 h-8" />
+              <CommonIcon name="alert-circle" className="w-8 h-8" />
               <div>
                 <h3 className="text-xl font-bold">Mức rủi ro tổng thể</h3>
                 <p className="text-2xl font-bold mt-1">{risk.riskLevel}</p>
@@ -131,7 +131,7 @@ export function RiskTab({ data }: RiskTabProps) {
         <Card className="border-green-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-6 h-6 text-green-600" />
+              <CommonIcon name="shield" className="w-6 h-6 text-green-600" />
               <h3 className="text-lg font-semibold">
                 Biện pháp giảm thiểu rủi ro ({risk.mitigationMeasures.length})
               </h3>

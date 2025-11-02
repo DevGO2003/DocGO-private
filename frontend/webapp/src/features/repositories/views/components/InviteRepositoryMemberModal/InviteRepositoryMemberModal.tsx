@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Copy, Check, UserPlus, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types';
 
@@ -71,7 +71,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-indigo-600" />
+              <CommonIcon name="user-plus" className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
@@ -84,7 +84,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <CommonIcon name="x" className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
@@ -130,12 +130,12 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   >
                     {copied ? (
                       <>
-                        <Check className="w-4 h-4 mr-2 text-green-600" />
+                        <CommonIcon name="check" className="w-4 h-4 mr-2 text-green-600" />
                         Đã sao
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4 mr-2" />
+                        <CommonIcon name="copy" className="w-4 h-4 mr-2" />
                         Sao chép
                       </>
                     )}
@@ -205,7 +205,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               {/* Permissions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  <Shield className="w-4 h-4 inline mr-2" />
+                  <CommonIcon name="shield" className="w-4 h-4 inline mr-2" />
                   Quyền hạn
                 </label>
                 <div className="space-y-3 bg-gray-50 rounded-lg p-4">

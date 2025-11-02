@@ -1,4 +1,4 @@
-import { ShieldCheck, AlertCircle, Lightbulb } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface ComplianceTabProps {
@@ -39,7 +39,7 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
         >
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-8 h-8" />
+              <CommonIcon name="shield" className="w-8 h-8" />
               <div>
                 <h3 className="text-xl font-bold">Trạng thái tuân thủ</h3>
                 <p className="text-2xl font-bold mt-1">
@@ -56,7 +56,7 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
         <Card className="border-red-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <CommonIcon name="alert-circle" className="w-6 h-6 text-red-600" />
               <h3 className="text-lg font-semibold text-red-900">
                 Vấn đề tuân thủ ({compliance.issues.length})
               </h3>
@@ -88,7 +88,7 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
         <Card className="border-blue-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="w-6 h-6 text-blue-600" />
+              <CommonIcon name="alert-circle" className="w-6 h-6 text-blue-600" />
               <h3 className="text-lg font-semibold text-blue-900">
                 Khuyến nghị ({compliance.recommendations.length})
               </h3>
