@@ -2,7 +2,9 @@ package com.devgo2003.docgo.repository_service.service.core.impl;
 
 import com.devgo2003.docgo.repository_service.dto.FullFileResponseDto;
 import com.devgo2003.docgo.repository_service.entity.FileEntity;
+import com.devgo2003.docgo.repository_service.entity.RepositoryEntity;
 import com.devgo2003.docgo.repository_service.repository.FileRepository;
+import com.devgo2003.docgo.repository_service.repository.RepositoryRepository;
 import com.devgo2003.docgo.repository_service.service.core.IFileService;
 import com.devgo2003.docgo.repository_service.service.core.mapper.IFileMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * FileServiceImpl - File Service Implementation
@@ -24,11 +28,13 @@ import java.util.Optional;
 public class FileServiceImpl implements IFileService {
 
     private final FileRepository fileRepository;
+    private final RepositoryRepository repositoryRepository;
     private final IFileMapper fileMapper;
 
     @Autowired
-    public FileServiceImpl(FileRepository fileRepository, IFileMapper fileMapper) {
+    public FileServiceImpl(FileRepository fileRepository, RepositoryRepository repositoryRepository, IFileMapper fileMapper) {
         this.fileRepository = fileRepository;
+        this.repositoryRepository = repositoryRepository;
         this.fileMapper = fileMapper;
     }
 
@@ -49,24 +55,56 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public Page<FileEntity> getFilesByOrganizationId(String organizationId, Pageable pageable) {
-        return fileRepository.findByOrganizationIdAndIsDeletedFalse(organizationId, pageable);
+        // Get all repositories for this organization
+        Page<RepositoryEntity> repositories = repositoryRepository.findByTypeAndOrganizationIdAndIsDeletedFalse(
+            RepositoryEntity.RepositoryType.ORGANIZATION, organizationId, Pageable.unpaged()
+        );
+        
+        // Extract repository IDs
+        List<String> repositoryIds = repositories.getContent().stream()
+            .map(RepositoryEntity::getId)
+            .collect(Collectors.toList());
+        
+        if (repositoryIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        
+        // Get files from those repositories
+        return fileRepository.findByRepositoryIdInAndIsDeletedFalse(repositoryIds, pageable);
     }
 
     @Override
     public Page<FileEntity> getFilesWithFilters(String documentType, String organizationId, String userId, Pageable pageable) {
+        List<String> repositoryIds = null;
+        
+        // If organizationId is provided, get repository IDs first
+        if (organizationId != null && !organizationId.trim().isEmpty()) {
+            Page<RepositoryEntity> repositories = repositoryRepository.findByTypeAndOrganizationIdAndIsDeletedFalse(
+                RepositoryEntity.RepositoryType.ORGANIZATION, organizationId, Pageable.unpaged()
+            );
+            repositoryIds = repositories.getContent().stream()
+                .map(RepositoryEntity::getId)
+                .collect(Collectors.toList());
+            
+            if (repositoryIds.isEmpty()) {
+                return Page.empty(pageable);
+            }
+        }
+        
+        // Apply filters
         if (documentType != null && !documentType.trim().isEmpty() &&
             organizationId != null && !organizationId.trim().isEmpty() &&
             userId != null && !userId.trim().isEmpty()) {
-            return fileRepository.findByDocumentTypeAndOrganizationIdAndOwnerUserIdAndIsDeletedFalse(documentType, organizationId, userId, pageable);
+            return fileRepository.findByDocumentTypeAndOwnerUserIdAndRepositoryIdInAndIsDeletedFalse(documentType, userId, repositoryIds, pageable);
         } else if (documentType != null && !documentType.trim().isEmpty() &&
                    organizationId != null && !organizationId.trim().isEmpty()) {
-            return fileRepository.findByDocumentTypeAndOrganizationIdAndIsDeletedFalse(documentType, organizationId, pageable);
+            return fileRepository.findByDocumentTypeAndRepositoryIdInAndIsDeletedFalse(documentType, repositoryIds, pageable);
         } else if (documentType != null && !documentType.trim().isEmpty() &&
                    userId != null && !userId.trim().isEmpty()) {
             return fileRepository.findByDocumentTypeAndOwnerUserIdAndIsDeletedFalse(documentType, userId, pageable);
         } else if (organizationId != null && !organizationId.trim().isEmpty() &&
                    userId != null && !userId.trim().isEmpty()) {
-            return fileRepository.findByOrganizationIdAndOwnerUserIdAndIsDeletedFalse(organizationId, userId, pageable);
+            return fileRepository.findByOwnerUserIdAndRepositoryIdInAndIsDeletedFalse(userId, repositoryIds, pageable);
         } else if (documentType != null && !documentType.trim().isEmpty()) {
             return getFilesByDocumentType(documentType, pageable);
         } else if (organizationId != null && !organizationId.trim().isEmpty()) {

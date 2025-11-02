@@ -195,11 +195,14 @@ public class FileEntity {
     public void setUpdatedBy(String updatedBy) { audit.put("updatedBy", updatedBy); }
     
     public Boolean getIsDeleted() {
-        Object value = audit.get("isDeleted");
-        if (value instanceof Boolean) return (Boolean) value;
-        return false;
+        // Use the field directly for Spring Data MongoDB queries
+        return isDeleted != null ? isDeleted : false;
     }
-    public void setIsDeleted(Boolean isDeleted) { audit.put("isDeleted", isDeleted); }
+    public void setIsDeleted(Boolean isDeleted) { 
+        this.isDeleted = isDeleted;
+        // Also update audit for consistency
+        audit.put("isDeleted", isDeleted); 
+    }
     
     // Metadata file helpers (for backward compatibility)
     @SuppressWarnings("unchecked")
