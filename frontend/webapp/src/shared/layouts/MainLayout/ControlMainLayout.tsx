@@ -5,6 +5,7 @@ interface ControlMainLayoutProps {
   children: ReactNode
   title?: string
   subtitle?: string
+  description?: string // ✅ REQUIRED khi có title - Mô tả nội dung trang
   breadcrumbs?: Array<{
     label: string
     href?: string
@@ -38,6 +39,7 @@ export function ControlMainLayout({
   children,
   title,
   subtitle,
+  description = '',
   breadcrumbs,
   showToolbar = false,
   toolbarContent,
@@ -69,6 +71,7 @@ export function ControlMainLayout({
           <HeaderControlLayout
             title={title ?? ''}
             subtitle={subtitle}
+            description={description || 'Không có mô tả'}
             breadcrumbs={breadcrumbs}
             rightActions={headerRight}
             headerChildren={headerChildren}

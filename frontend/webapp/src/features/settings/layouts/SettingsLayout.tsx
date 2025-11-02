@@ -6,6 +6,7 @@ interface SettingsLayoutProps {
   className?: string
   title?: string
   subtitle?: string
+  description?: string
   breadcrumbs?: Array<{ label: string; href?: string; current?: boolean }>
   headerChildren?: React.ReactNode
   headerRight?: React.ReactNode
@@ -29,6 +30,7 @@ function SettingsLayout({
   className = '',
   title,
   subtitle,
+  description = '',
   breadcrumbs,
   headerChildren,
   headerRight,
@@ -43,6 +45,7 @@ function SettingsLayout({
     <ControlMainLayout
       title={title}
       subtitle={subtitle}
+      description={description}
       breadcrumbs={breadcrumbs}
       headerChildren={headerChildren}
       headerRight={headerRight}

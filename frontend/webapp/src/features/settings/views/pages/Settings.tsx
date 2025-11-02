@@ -422,8 +422,11 @@ export const Settings = () => {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div
+                      className="relative"
+                      title={t('settings.comingSoon')}
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
                         {t('settings.preferences.timezone')}
                       </label>
                       <Select
@@ -434,16 +437,21 @@ export const Settings = () => {
                             timezone: e.target.value,
                           })
                         }
+                        disabled
                         options={[
                           { value: 'UTC+7', label: 'UTC+7 (Bangkok, Hanoi)' },
                           { value: 'UTC', label: 'UTC (London)' },
                           { value: 'UTC-5', label: 'UTC-5 (New York)' },
                         ]}
+                        className="cursor-not-allowed opacity-60"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div
+                      className="relative"
+                      title={t('settings.comingSoon')}
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
                         {t('settings.preferences.theme')}
                       </label>
                       <Select
@@ -454,16 +462,21 @@ export const Settings = () => {
                             theme: e.target.value,
                           })
                         }
+                        disabled
                         options={[
                           { value: 'light', label: 'Light' },
                           { value: 'dark', label: 'Dark' },
                           { value: 'auto', label: 'Auto' },
                         ]}
+                        className="cursor-not-allowed opacity-60"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div
+                      className="relative"
+                      title={t('settings.comingSoon')}
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
                         {t('settings.preferences.dateFormat')}
                       </label>
                       <Select
@@ -474,11 +487,13 @@ export const Settings = () => {
                             dateFormat: e.target.value,
                           })
                         }
+                        disabled
                         options={[
                           { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
                           { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
                           { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
                         ]}
+                        className="cursor-not-allowed opacity-60"
                       />
                     </div>
                   </div>

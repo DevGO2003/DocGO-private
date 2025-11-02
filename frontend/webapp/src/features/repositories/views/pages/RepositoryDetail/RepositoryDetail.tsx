@@ -2,21 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  Button,
-  Card,
-  CardContent,
-  RefreshButton,
-} from '@shared/components';
+import { Button, RefreshButton, Card } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { 
-  Info,
   Users, 
   FileText, 
   Activity
 } from 'lucide-react';
-import { useRepository, useRepositoryMembers, useRepositoryActivity } from '@features/repositories/models/api/repositoryApi';
-import { RepositoryType } from '@features/repositories/models/types';
+import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
 import { NOT_FOUND_PATH } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
 import { RepositoryDetailTabs } from '../../components/RepositoryDetailTabs';
@@ -25,14 +18,13 @@ export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
   const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
-  const { data: activityData, isLoading: activityLoading } = useRepositoryActivity(id || '');
 
   // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
   useEffect(() => {
@@ -77,7 +69,7 @@ export const RepositoryDetail: React.FC = () => {
   return (
     <RepositoryLayout
       title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
-      subtitle={repository ? undefined : t('repositories.detail.loading')}
+      description={repository ? repository.description : undefined}
       breadcrumbs={[
         { label: t('nav.repositories'), href: '/repositories' },
         repository ? { label: repository.name, current: true } : { label: t('app.loading'), current: true },
@@ -93,10 +85,8 @@ export const RepositoryDetail: React.FC = () => {
         <div>
             {/* Optional error banner */}
             {error && (
-              <Card className="border-red-200 bg-red-50 mb-4">
-                <CardContent className="p-4">
-                  <p className="text-red-700">{t('repositories.detail.error')}</p>
-                </CardContent>
+              <Card className="border-red-200 bg-red-50 mb-4 p-4">
+                <p className="text-red-700">{t('repositories.detail.error')}</p>
               </Card>
             )}
 
@@ -110,40 +100,99 @@ export const RepositoryDetail: React.FC = () => {
                   />
 
                   {/* Tab Content */}
-                  {activeTab === 'info' && (
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="space-y-6">
+                  {activeTab === 'overview' && (
+                    <Card className="p-6">
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Mô tả</h4>
-                            <p className="text-gray-600">
-                              {repository?.description || 'Không có mô tả'}
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Tên Repository</h4>
+                            <p className="text-base text-gray-900 font-medium">
+                              {repository?.name}
                             </p>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Chủ sở hữu</h4>
-                              <p className="text-gray-600">
-                                {repository?.ownerName || 'Chưa có thông tin'}
-                              </p>
-                            </div>
-                            {repository?.organizationId && (
-                              <div>
-                                <h4 className="font-medium text-gray-900 mb-2">Tổ chức</h4>
-                                <p className="text-gray-600">
-                                  {repository?.organizationName || 'Không có'}
-                                </p>
-                              </div>
-                            )}
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Loại</h4>
+                            <p className="text-base text-gray-900">
+                              {repository?.type === 'PERSONAL' ? 'Cá nhân' : 'Tổ chức'}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Trạng thái</h4>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              repository?.isPublic
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {repository?.isPublic ? 'Công khai' : 'Riêng tư'}
+                            </span>
                           </div>
                         </div>
-                      </CardContent>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-500 mb-2">Mô tả</h4>
+                          <p className="text-gray-700">
+                            {repository?.description || 'Không có mô tả'}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-2">Chủ sở hữu</h4>
+                            <p className="text-gray-900">
+                              {repository?.ownerName || 'Chưa có thông tin'}
+                            </p>
+                          </div>
+                          {repository?.organizationId && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-500 mb-2">Tổ chức</h4>
+                              <p className="text-gray-900">
+                                {repository?.organizationName || 'Không có'}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Số lượng file</h4>
+                            <p className="text-2xl font-semibold text-gray-900">
+                              {repository?.fileCount || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Số thành viên</h4>
+                            <p className="text-2xl font-semibold text-gray-900">
+                              {repository?.memberCount || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Dung lượng</h4>
+                            <p className="text-2xl font-semibold text-gray-900">
+                              {formatFileSize(repository?.totalSize)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Ngày tạo</h4>
+                            <p className="text-gray-900">
+                              {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : '-'}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">Cập nhật lần cuối</h4>
+                            <p className="text-gray-900">
+                              {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </Card>
                   )}
 
                   {activeTab === 'files' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         {repository.files && repository.files.length > 0 ? (
                           <div>
                             <div className="flex items-center justify-between mb-4">
@@ -189,13 +238,11 @@ export const RepositoryDetail: React.FC = () => {
                             <Button onClick={goToUploadWithRepo}>{t('repositories.detail.empty.files.upload')}</Button>
                           </div>
                         )}
-                      </CardContent>
                     </Card>
                   )}
 
                   {activeTab === 'members' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         {membersLoading ? (
                           <div className="text-center py-8">Loading members...</div>
                         ) : membersData?.content && membersData.content.length > 0 ? (
@@ -232,13 +279,11 @@ export const RepositoryDetail: React.FC = () => {
                   </Button>
                   </div>
                   )}
-                  </CardContent>
-                  </Card>
+                    </Card>
                   )}
 
                   {activeTab === 'activity' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         <div className="text-center py-8">
                           <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -248,7 +293,6 @@ export const RepositoryDetail: React.FC = () => {
                             {t('repositories.detail.empty.activity.desc')}
                           </p>
                         </div>
-                      </CardContent>
                     </Card>
                   )}
               </div>

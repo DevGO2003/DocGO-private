@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
-  RefreshButton,
   Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
   Table,
   TableHeader,
   TableRow,
@@ -75,16 +71,16 @@ export const RepositoryFilesList: React.FC = () => {
   const [tableColumns, setTableColumns] = useState([
     { key: 'checkbox', label: '', visible: true },
     { key: 'document', label: t('repositories.files.table.document'), visible: true },
-    { key: 'contractNumber', label: 'Mã HĐ', visible: false }, // New
+    { key: 'contractNumber', label: t('repositories.files.table.contractNumber'), visible: false },
     { key: 'status', label: t('repositories.files.table.status'), visible: true },
     { key: 'type', label: t('repositories.files.table.type'), visible: true },
-    { key: 'totalValue', label: 'Giá trị', visible: false }, // New
+    { key: 'totalValue', label: t('repositories.files.table.totalValue'), visible: false },
     { key: 'size', label: t('repositories.files.table.size'), visible: true },
     { key: 'uploadedAt', label: t('repositories.files.table.uploadedAt'), visible: true },
     { key: 'actions', label: '', visible: true },
-    { key: 'parties', label: 'Parties', visible: false },
-    { key: 'riskLevel', label: 'Risk', visible: true },
-    { key: 'reminders', label: 'Reminders', visible: false },
+    { key: 'parties', label: t('repositories.files.table.parties'), visible: false },
+    { key: 'riskLevel', label: t('repositories.files.table.riskLevel'), visible: true },
+    { key: 'reminders', label: t('repositories.files.table.reminders'), visible: false },
   ]);
   const [showTableSettings, setShowTableSettings] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -322,10 +318,9 @@ export const RepositoryFilesList: React.FC = () => {
           onSortDirectionChange={handleSortDirectionChange}
           showAdvanced={showAdvanced}
           onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+          onRefresh={refreshFiles}
+          refreshing={refreshing}
         />
-      }
-      headerRight={
-        <RefreshButton onClick={refreshFiles} loading={refreshing} />
       }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -368,8 +363,8 @@ export const RepositoryFilesList: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedFiles.length > 0 && (
               <div className="col-span-full flex gap-2 p-2 bg-blue-50 rounded">
-                <Text>{selectedFiles.length} selected</Text>
-                <Button variant="outline" size="sm" onClick={() => selectAll(false)}>Clear</Button>
+                <Text>{t('repositories.files.selected', { count: selectedFiles.length })}</Text>
+                <Button variant="outline" size="sm" onClick={() => selectAll(false)}>{t('repositories.files.clear')}</Button>
               </div>
             )}
             {filtered.map((f) => (
@@ -466,7 +461,7 @@ export const RepositoryFilesList: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-        {hasMore && filtered.length > 0 && (
+        {hasMore && filtered.length > 0 && totalPages > 1 && (
           <div className="flex justify-center mt-6">
             <Button 
               onClick={loadMore} 
@@ -474,7 +469,7 @@ export const RepositoryFilesList: React.FC = () => {
               disabled={isLoading}
               className="px-6 py-3"
             >
-              {isLoading ? t('loading') : t('showMore', { count: 10 })}
+              {isLoading ? t('repositories.files.loading') : t('repositories.files.showMore')}
             </Button>
           </div>
         )}
@@ -489,10 +484,10 @@ export const RepositoryFilesList: React.FC = () => {
         {/* TODO: Implement AlertDialog when component is available */}
         {selectedFiles.length > 0 && (
           <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-            <p className="text-sm text-gray-700 mb-2">Delete {selectedFiles.length} files?</p>
+            <p className="text-sm text-gray-700 mb-2">{t('repositories.files.deleteConfirm', { count: selectedFiles.length })}</p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setSelectedFiles([])}>Cancel</Button>
-              <Button variant="destructive" onClick={() => {/* TODO: API delete */}}>Delete</Button>
+              <Button variant="outline" onClick={() => setSelectedFiles([])}>{t('common.cancel')}</Button>
+              <Button variant="destructive" onClick={() => {/* TODO: API delete */}}>{t('common.delete')}</Button>
             </div>
           </div>
         )}

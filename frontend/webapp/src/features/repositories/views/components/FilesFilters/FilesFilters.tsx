@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select, Input, Button } from '@shared/components';
+import { Select, Input, Button, RefreshButton } from '@shared/components';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
 import AddFileChoiceModal from '@shared/components/UIComponents/Modal/AddFileChoiceModal';
@@ -30,6 +30,9 @@ interface FilesFiltersProps {
   onSortDirectionChange: (d: SortDirection) => void;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
+  // Refresh
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export const FilesFilters: React.FC<FilesFiltersProps> = ({
@@ -53,6 +56,8 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSortDirectionChange,
   showAdvanced,
   onToggleAdvanced,
+  onRefresh,
+  refreshing,
 }) => {
   const { t } = useTranslation();
 
@@ -176,6 +181,9 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
                 {t('repositories.files.filters.viewList')}
               </Button>
             </div>
+            {onRefresh && (
+              <RefreshButton onClick={onRefresh} loading={refreshing} className="h-[28px]" />
+            )}
           </div>
         )}
       </div>

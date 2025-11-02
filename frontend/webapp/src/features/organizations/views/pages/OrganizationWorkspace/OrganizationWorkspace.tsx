@@ -12,7 +12,6 @@ import {
   Settings,
   BarChart3,
   AlertCircle,
-  Search,
   File as FileIcon,
   Info,
   Calendar,
@@ -27,7 +26,6 @@ import {
   CardTitle,
   CardContent,
   Button,
-  Input,
   LoadingSpinner,
   RefreshButton,
   Tabs,
@@ -47,8 +45,7 @@ export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('contracts');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('reports');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
@@ -155,7 +152,7 @@ export const OrganizationWorkspace = () => {
   return (
     <OrganizationLayout
       title={organization?.name || ''}
-      subtitle={t('organizations.workspace.subtitle')}
+      subtitle={organization?.createdAt ? `${t('organizations.workspace.subtitle')} • Ngày tạo: ${new Date(organization.createdAt).toLocaleDateString('vi-VN')}` : t('organizations.workspace.subtitle')}
       breadcrumbs={[
         { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
         { label: organization?.name || '', current: true },
@@ -376,46 +373,28 @@ export const OrganizationWorkspace = () => {
           {/* Contracts Tab */}
           {activeTab === 'contracts' && (
             <div className="space-y-6">
-              {/* Search and Filter */}
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Input
-                        type="text"
-                        placeholder={t('organizations.workspace.searchContracts')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    <Button 
-                      variant="outline"
-                      onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
-                      className="flex items-center gap-2"
-                    >
-                      <Folder className="w-4 h-4" />
-                      Mở danh sách kho
-                    </Button>
-                    <Button variant="outline">
-                      {t('organizations.workspace.filter')}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Contracts List */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>{t('organizations.workspace.allContracts')}</CardTitle>
-                    {contractsFetching && !contractsLoading && (
-                      <span className="text-sm text-blue-600 flex items-center gap-2">
-                        <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-                        {t('organizations.workspace.updating')}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {contractsFetching && !contractsLoading && (
+                        <span className="text-sm text-blue-600 flex items-center gap-2">
+                          <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+                          {t('organizations.workspace.updating')}
+                        </span>
+                      )}
+                      <Button 
+                        variant="outline"
+                        onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
+                        className="flex items-center gap-2"
+                      >
+                        <Folder className="w-4 h-4" />
+                        Mở danh sách kho
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -431,11 +410,9 @@ export const OrganizationWorkspace = () => {
                     </div>
                   ) : (
                   <div className="space-y-3">
-                  {/* Hiển thị chờ phê duyệt trước */}
+                  {/* Hiển thị TẤT CẢ chờ phê duyệt trước - KHÔNG GIỚI HẠN */}
                   {contracts
                   .filter(c => c.status === 'PENDING_APPROVAL')
-                  .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .slice(0, showAllContracts ? undefined : 10)
                   .map((contract) => (
                   <div
                   key={contract.id}
@@ -464,10 +441,9 @@ export const OrganizationWorkspace = () => {
                   </div>
                   ))}
 
-                  {/* Hiển thị các hợp đồng khác */}
+                  {/* Hiển thị các hợp đồng khác - GIỚI HẠN 10 */}
                   {contracts
                   .filter(c => c.status !== 'PENDING_APPROVAL')
-                    .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
                       .slice(0, showAllContracts ? undefined : 10)
                         .map((contract) => (
                           <div
@@ -507,8 +483,8 @@ export const OrganizationWorkspace = () => {
                           </div>
                         ))}
 
-                      {/* Show More Button */}
-                      {!showAllContracts && (contracts.filter(c => c.status === 'PENDING_APPROVAL').length > 10 || contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10) && (
+                      {/* Show More Button - chỉ cho contracts không phải PENDING */}
+                      {!showAllContracts && contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10 && (
                         <div className="flex justify-center mt-6">
                           <Button
                             variant="outline"

@@ -6,8 +6,9 @@ import { CommonIcon } from '../Icon/CommonIcon';
 import anime from 'animejs';
 
 interface HeaderPanelProps {
-  title: string;
-  subtitle: string; // ✅ REQUIRED - không optional
+  title: string; // ✅ REQUIRED - Tiêu đề chính
+  subtitle?: string; // Phụ đề (ví dụ: "Mã: ABC123")
+  description: string; // ✅ REQUIRED - Mô tả nội dung trang
   breadcrumbs?: Array<{
     label: string;
     href?: string;
@@ -23,7 +24,8 @@ interface HeaderPanelProps {
 
 function HeaderPanel({
   title,
-  subtitle, // ✅ Required
+  subtitle,
+  description, // ✅ Required
   breadcrumbs,
   children,
   right,
@@ -68,7 +70,7 @@ function HeaderPanel({
     }
     
     return () => clearTimeout(t);
-  }, [title, subtitle, className]);
+  }, [title, subtitle, description, className]);
 
   return (
     <CommonFont
@@ -122,9 +124,16 @@ function HeaderPanel({
               {title}
             </CommonText>
             
-            {/* Subtitle - REQUIRED */}
+            {/* Subtitle - Optional */}
+            {subtitle && (
+              <CommonText as="p" className="text-gray-500 text-xs font-medium mb-1">
+                {subtitle}
+              </CommonText>
+            )}
+            
+            {/* Description - REQUIRED */}
             <CommonText as="p" className="text-gray-600 text-sm mb-2">
-              {subtitle}
+              {description}
             </CommonText>
 
             {children && <div className="mt-2">{children}</div>}

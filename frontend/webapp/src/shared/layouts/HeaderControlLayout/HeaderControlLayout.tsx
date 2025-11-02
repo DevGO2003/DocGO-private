@@ -48,6 +48,7 @@ function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: (
 export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
   title,
   subtitle,
+  description,
   breadcrumbs,
   rightActions,
   primaryTabs,
@@ -70,10 +71,11 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
               {title}
             </h1>
             {subtitle && (
-              <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">{subtitle}</p>
             )}
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
-          <div className="min-w-0 flex-1 flex items-start gap-2">
+          <div className="min-w-0 flex-1 flex items-start justify-end gap-2">
             {headerChildren && (
               <div className="flex items-center gap-2 flex-1">{headerChildren}</div>
             )}

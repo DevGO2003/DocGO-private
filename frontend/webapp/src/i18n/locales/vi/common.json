@@ -401,7 +401,8 @@
       "dateFormat": "Định dạng ngày",
       "english": "Tiếng Anh",
       "vietnamese": "Tiếng Việt"
-    }
+    },
+    "comingSoon": "Sẽ có trong các phiên bản kế tiếp"
   },
   "repositories": {
     "list": {
@@ -612,6 +613,12 @@
     }
   }
   ,
+  "panel": {
+    "minimize": "Thu nhỏ",
+    "expand": "Mở rộng",
+    "close": "Đóng",
+    "clickToExpand": "Click để mở rộng..."
+  },
   "notFound": {
     "code": "404",
     "title": "Không tìm thấy trang",

@@ -194,3 +194,42 @@ export interface RepositoryState {
     total: number;
   };
 }
+
+// Permission & Invite System Types
+export interface RepositoryPermissionDTO {
+  userId: string;
+  userName?: string;
+  role: 'OWNER' | 'ADMIN' | 'EDITOR' | 'CONTRIBUTOR' | 'VIEWER' | 'CUSTOM';
+  permissions: string[]; // ['UPLOAD', 'VIEW', 'DELETE']
+  grantedBy: string;
+  grantedByName?: string;
+  grantedAt: string;
+}
+
+export interface RepositoryInvite {
+  id: string;
+  token: string;
+  inviteLink: string;
+  repositoryId: string;
+  repositoryName: string;
+  invitedBy: string;
+  inviterName?: string;
+  createdAt: string;
+  expiresAt: string;
+  isExpired: boolean;
+  isUsed: boolean;
+  usedBy?: string;
+  usedAt?: string;
+}
+
+export interface PermissionOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export const PERMISSION_OPTIONS: PermissionOption[] = [
+  { value: 'VIEW', label: 'Xem', description: 'Có thể xem files trong repository' },
+  { value: 'UPLOAD', label: 'Tải lên', description: 'Có thể upload files mới' },
+  { value: 'DELETE', label: 'Xóa', description: 'Có thể xóa files' },
+];

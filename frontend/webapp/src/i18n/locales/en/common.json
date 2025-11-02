@@ -122,7 +122,8 @@
       "dateFormat": "Date Format",
       "english": "English",
       "vietnamese": "Vietnamese"
-    }
+    },
+    "comingSoon": "Coming soon in future versions"
   },
   "organizations": {
     "list": {
@@ -516,6 +517,12 @@
         }
       }
     }
+  },
+  "panel": {
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "close": "Close",
+    "clickToExpand": "Click to expand..."
   },
   "notFound": {
     "code": "404",

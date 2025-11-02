@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Users, Activity, Settings } from 'lucide-react';
+import { Info, FileText, Users, Activity } from 'lucide-react';
+import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
 
 interface RepositoryDetailTabsProps {
   activeTab: string;
@@ -15,57 +16,63 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
   
   const tabs = [
     {
+      id: 'overview',
+      label: t('repositories.detail.tabs.overview', { defaultValue: 'Tổng quan' }),
+      icon: Info,
+      disabled: false,
+    },
+    {
       id: 'files',
       label: t('repositories.detail.tabs.files'),
       icon: FileText,
+      disabled: false,
     },
     {
       id: 'members',
       label: t('repositories.detail.tabs.members'),
       icon: Users,
+      disabled: false,
     },
     {
       id: 'activity',
       label: t('repositories.detail.tabs.activity'),
       icon: Activity,
-    },
-    {
-      id: 'settings',
-      label: t('repositories.detail.tabs.settings'),
-      icon: Settings,
+      disabled: true,
+      tooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
     },
   ];
 
   return (
-    <div className="border-b border-gray-200 bg-white mb-6">
-      <div className="flex space-x-1">
+    <Tabs>
+      <TabList className="border-b border-gray-200 bg-white mb-6">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
+          const tabContent = (
+            <CommonTab
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`
-                group relative flex items-center gap-2
-                px-6 py-3 text-sm font-medium transition-all duration-200
-                border-b-2 hover:bg-gray-50
-                ${
-                  isActive
-                    ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                }
-              `}
+              value={tab.id}
+              activeValue={activeTab}
+              onSelect={(value) => !tab.disabled && onTabChange(value)}
+              disabled={tab.disabled}
+              className="flex items-center gap-2 px-6 py-3"
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-              <span className={`font-semibold ${isActive ? 'text-blue-700' : 'text-gray-700'}`}>
-                {tab.label}
-              </span>
-            </button>
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </CommonTab>
           );
+          
+          // Wrap disabled tabs with tooltip
+          if (tab.disabled && tab.tooltip) {
+            return (
+              <div key={tab.id} title={tab.tooltip} className="inline-block cursor-not-allowed">
+                {tabContent}
+              </div>
+            );
+          }
+          
+          return tabContent;
         })}
-      </div>
-    </div>
+      </TabList>
+    </Tabs>
   );
 };

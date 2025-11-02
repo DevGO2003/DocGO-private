@@ -92,6 +92,7 @@ export const Profile = () => {
   return (
     <ProfileLayout
       title={t('profile.title')}
+      description="Quản lý thông tin cá nhân và cài đặt tài khoản"
       breadcrumbs={[{ label: t('nav.profile'), current: true }]}
       loading={!user}
       loadingText={t('app.loading')}
@@ -200,7 +201,7 @@ export const Profile = () => {
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <User className="w-4 h-4" />
                         {t('profile.labels.firstName')}
                         </CommonLabel>
@@ -216,7 +217,7 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <User className="w-4 h-4" />
                         {t('profile.labels.lastName')}
                         </CommonLabel>
@@ -236,7 +237,7 @@ export const Profile = () => {
                     {/* Contact Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <Mail className="w-4 h-4" />
                         {t('profile.labels.email')}
                         </CommonLabel>
@@ -253,7 +254,7 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <Phone className="w-4 h-4" />
                         {t('profile.labels.phone')}
                         </CommonLabel>
@@ -274,7 +275,7 @@ export const Profile = () => {
                     {/* Work Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <Building2 className="w-4 h-4" />
                         {t('profile.labels.department')}
                         </CommonLabel>
@@ -290,7 +291,7 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
                         <Briefcase className="w-4 h-4" />
                         {t('profile.labels.position')}
                         </CommonLabel>

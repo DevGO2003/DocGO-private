@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { PreviewPanel } from '@shared/components';
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, Loader2 } from 'lucide-react';
+import { useFileDownload } from '@features/repositories/models/api/repositoryApi';
 
 interface ContentTabProps {
   fileData: any;
@@ -9,15 +11,46 @@ export function ContentTab({ fileData }: ContentTabProps) {
   const content = fileData?.content || '';
   const fileName = fileData?.title || fileData?.overview?.title || 'document';
   const mimeType = fileData?.fileSystemMetadata?.originalMimeType || fileData?.metadata?.mimeType;
-
-  // TODO: Khi có storage URL từ backend, tạo File object để preview
-  // const fileUrl = fileData?.storage?.s3Url || fileData?.storage?.previewUrl;
-  // const mockFile = fileUrl ? await fetch(fileUrl).then(r => r.blob()).then(b => new File([b], fileName)) : null;
+  const fileId = fileData?.id;
+  
+  const [fileObject, setFileObject] = useState<File | null>(null);
+  const [isCreatingFile, setIsCreatingFile] = useState(false);
+  
+  // Download file blob từ backend
+  const { data: fileBlob, isLoading: isDownloading, isError: downloadError } = useFileDownload(fileId, {
+    enabled: !!fileId && !fileObject, // Chỉ download nếu chưa có fileObject
+  });
+  
+  // Tạo File object từ Blob
+  useEffect(() => {
+    if (fileBlob && !fileObject && !isCreatingFile) {
+      setIsCreatingFile(true);
+      try {
+        const file = new File([fileBlob], fileName, {
+          type: mimeType || 'application/octet-stream',
+        });
+        setFileObject(file);
+        console.log('[ContentTab] File object created:', {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        });
+      } catch (error) {
+        console.error('[ContentTab] Failed to create File object:', error);
+      } finally {
+        setIsCreatingFile(false);
+      }
+    }
+  }, [fileBlob, fileObject, fileName, mimeType, isCreatingFile]);
+  
+  // Show loading while downloading
+  const showLoading = isDownloading || isCreatingFile;
+  const showFallback = !fileObject || downloadError;
 
   return (
     <div className="h-[calc(100vh-300px)] min-h-[600px]">
       <PreviewPanel
-        selectedFile={null}
+        selectedFile={fileObject}
         title={`Preview: ${fileName}`}
         placeholder="File preview"
         supportedFormats="Hỗ trợ PDF, hình ảnh, tài liệu Word, Excel, audio, video"
@@ -25,14 +58,29 @@ export function ContentTab({ fileData }: ContentTabProps) {
         containerClassName="h-full"
         className="h-full overflow-auto"
       >
-        {/* Temporary: Show extracted text until storage URL is available */}
+        {/* Show loading */}
+        {showLoading && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <p className="text-sm text-gray-600">Đang tải file...</p>
+          </div>
+        )}
+        
+        {/* Fallback: Show extracted text if file download failed or not available */}
+        {!showLoading && showFallback && (
         <div className="space-y-4">
           {/* Info banner */}
           <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">Preview tạm thời</p>
-              <p>Hiện đang hiển thị nội dung văn bản đã trích xuất. Preview file thực tế (PDF, hình ảnh, v.v.) sẽ có sẵn khi backend cung cấp storage URL.</p>
+              <p className="font-medium mb-1">
+                {downloadError ? 'Không thể tải file' : 'Preview tạm thời'}
+              </p>
+              <p>
+                {downloadError 
+                  ? 'Hiển thị nội dung văn bản đã trích xuất thay thế.'
+                  : 'Hiện đang hiển thị nội dung văn bản đã trích xuất.'}
+              </p>
             </div>
           </div>
 
@@ -59,6 +107,7 @@ export function ContentTab({ fileData }: ContentTabProps) {
             </div>
           </div>
         </div>
+        )}
       </PreviewPanel>
     </div>
   );

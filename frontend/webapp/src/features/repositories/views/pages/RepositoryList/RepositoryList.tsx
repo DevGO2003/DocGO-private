@@ -185,7 +185,7 @@ export const RepositoryList = () => {
   return (
     <RepositoryLayout
       title={t('repositories.list.title')}
-      subtitle={t('repositories.list.subtitle')}
+      description="Quản lý kho lưu trữ tài liệu cá nhân, tổ chức và công khai"
       breadcrumbs={[{ label: t('nav.repositories'), current: true }]}
       onRefresh={handleRefresh}
       headerChildren={

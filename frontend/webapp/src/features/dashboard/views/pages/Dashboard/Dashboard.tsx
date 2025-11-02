@@ -14,6 +14,13 @@ import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants'
 import { Card, CardContent, Button, Text, RefreshButton, WindowPanel } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import PanelSelector from '../../../components/PanelSelector';
+import LayoutSelector from '../../components/LayoutSelector';
+import {
+  getLayoutPreference,
+  getSavedLayout,
+  resetLayout as resetLayoutPreference,
+  switchLayout,
+} from '@shared/lib/panelLayoutManager';
 
 // Panel state type
 interface PanelState {
@@ -35,7 +42,7 @@ export const Dashboard = () => {
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Load panel state from localStorage or use defaults
+  // Load panel state from localStorage or use defaults from layout manager
   const loadPanelState = (): PanelState[] => {
     const saved = localStorage.getItem('dashboard-panels');
     if (saved) {
@@ -46,14 +53,18 @@ export const Dashboard = () => {
       }
     }
     
-    // Default positions
-    return [
-      { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
-      { id: 'repositories', label: 'Repositories gần đây', visible: true, minimized: false, position: { x: 20, y: 0 } },
-      { id: 'files', label: 'Files gần đây', visible: true, minimized: false, position: { x: 560, y: 0 } },
-      { id: 'organizations', label: 'Tổ chức', visible: true, minimized: false, position: { x: 20, y: 420 } },
-      { id: 'quickActions', label: 'Hành động nhanh', visible: true, minimized: false, position: { x: 20, y: 890 } },
-    ];
+    // Load from layout preference
+    const layoutName = getLayoutPreference();
+    const layout = getSavedLayout(layoutName);
+    
+    // Convert layout config to panel state
+    return layout.panels.map((panel) => ({
+      id: panel.id,
+      label: panel.label,
+      visible: true,
+      minimized: false,
+      position: panel.position,
+    }));
   };
   
   // Panel management state
@@ -88,10 +99,33 @@ export const Dashboard = () => {
     ));
   };
 
-  // Reset to default positions
-  const resetPanelPositions = () => {
-    setPanels(loadPanelState());
-    localStorage.removeItem('dashboard-panels');
+  // Reset layout to default
+  const handleResetLayout = () => {
+    if (window.confirm('Bạn có chắc muốn đặt lại bố cục về mặc định?')) {
+      resetLayoutPreference();
+      const layout = getSavedLayout('grid2x2');
+      const newPanels = layout.panels.map((panel) => ({
+        id: panel.id,
+        label: panel.label,
+        visible: true,
+        minimized: false,
+        position: panel.position,
+      }));
+      setPanels(newPanels);
+    }
+  };
+
+  // Switch layout
+  const handleSwitchLayout = (layoutName: string) => {
+    const layout = switchLayout(layoutName);
+    const newPanels = layout.panels.map((panel) => ({
+      id: panel.id,
+      label: panel.label,
+      visible: true,
+      minimized: false,
+      position: panel.position,
+    }));
+    setPanels(newPanels);
   };
 
   // Get current user ID for filtering
@@ -200,19 +234,15 @@ export const Dashboard = () => {
   return (
     <DashboardLayout
       title={t('dashboard.title')}
-      subtitle={t('dashboard.subtitle')}
+      description="Tổng quan hoạt động và thống kê hệ thống của bạn"
       breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
       onRefresh={handleRefresh}
       headerRight={
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetPanelPositions}
-            title="Đặt lại vị trí mặc định"
-          >
-            🔄 Reset
-          </Button>
+          <LayoutSelector
+            onLayoutChange={handleSwitchLayout}
+            onReset={handleResetLayout}
+          />
           <PanelSelector
             panels={panels.map((p: PanelState) => ({ id: p.id, label: p.label, visible: p.visible }))}
             onToggle={togglePanel}
