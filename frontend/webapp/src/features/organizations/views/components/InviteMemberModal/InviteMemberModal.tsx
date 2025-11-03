@@ -193,7 +193,7 @@ export const InviteMemberModal = ({
                 type="text"
                 value={invitationLink}
                 readOnly
-                className="flex-1 px-3 py-2 border rounded-lg text-sm" style={{ borderColor: '#d1d5db' } style={{ backgroundColor: '#ffffff' }
+                className="flex-1 px-3 py-2 border rounded-lg text-sm" style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff' }}
                 onClick={(e) => e.currentTarget.select()}
               />
               <Button onClick={handleCopyLink}>{t('organizations.inviteModal.copy')}</Button>
@@ -269,7 +269,7 @@ export const InviteMemberModal = ({
             {t('organizations.inviteModal.emailAddress')} <span style={{ color: '#ef4444' }} >*</span>
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
+            <CommonIcon name="mail" className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
             <Input
               id="invite-email"
               type="email"
@@ -303,7 +303,7 @@ export const InviteMemberModal = ({
                   setSelectedRole(e.target.value as MemberRole);
                   setSelectedPermissions([]); // Clear permissions when changing role
                 }}
-                className="mt-1" style={{ color: '#2563eb' }
+                className="mt-1" style={{ color: '#2563eb' }}
                 disabled={isPending}
               />
               <div className="flex-1">
@@ -320,7 +320,7 @@ export const InviteMemberModal = ({
                 value={MemberRole.MANAGER}
                 checked={selectedRole === MemberRole.MANAGER}
                 onChange={(e) => setSelectedRole(e.target.value as MemberRole)}
-                className="mt-1" style={{ color: '#2563eb' }
+                className="mt-1" style={{ color: '#2563eb' }}
                 disabled={isPending}
               />
               <div className="flex-1">
@@ -345,12 +345,12 @@ export const InviteMemberModal = ({
               {MANAGER_PERMISSIONS.map((perm) => (
                 <label
                   key={perm.value}
-                  className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover: transition-colors" style={{ borderColor: '#93c5fd', backgroundColor: '#ffffff' }} >
+                  className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:border-blue-300 transition-colors" style={{ borderColor: '#93c5fd', backgroundColor: '#ffffff' }} >
                   <input
                     type="checkbox"
                     checked={selectedPermissions.includes(perm.value)}
                     onChange={() => togglePermission(perm.value)}
-                    className="mt-1 rounded" style={{ color: '#2563eb' }
+                    className="mt-1 rounded" style={{ color: '#2563eb' }}
                     disabled={isPending}
                   />
                   <div className="flex-1">
@@ -369,7 +369,7 @@ export const InviteMemberModal = ({
         {/* Instructions */}
         <div className="border rounded-lg p-4" style={{ borderColor: '#fef08a', backgroundColor: '#fefce8' }} >
           <h4 className="font-medium mb-2 flex items-center gap-2" style={{ color: '#111827' }} >
-            <AlertCircle style={{ color: '#ca8a04' }} />
+            <CommonIcon name="alert-circle" style={{ color: '#ca8a04' }} />
             {t('organizations.inviteModal.nextSteps')}
           </h4>
           <ol className="space-y-1 text-sm" style={{ color: '#374151' }} >

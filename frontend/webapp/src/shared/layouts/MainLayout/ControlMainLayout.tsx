@@ -1,4 +1,4 @@
-﻿import { ReactNode, useState, Suspense } from 'react'
+import { ReactNode, useState, Suspense } from 'react'
 import { HeaderControlLayout } from '../../layouts/HeaderControlLayout'
 
 interface ControlMainLayoutProps {
@@ -44,7 +44,6 @@ export function ControlMainLayout({
   showToolbar = false,
   toolbarContent,
   loading = false,
-  loadingText = '',
   headerChildren,
   headerRight,
   primaryTabs,
@@ -137,11 +136,11 @@ export function ControlMainLayout({
               title={isToolbarCollapsed ? 'Mở rộng' : 'Thu nhỏ'}
             >
               {isToolbarCollapsed ? (
-                <svg style={{ color: '#4b5563' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ color: '#4b5563' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg style={{ color: '#4b5563' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ color: '#4b5563' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                 </svg>
               )}

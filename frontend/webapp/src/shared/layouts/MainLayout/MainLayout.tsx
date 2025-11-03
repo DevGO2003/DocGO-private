@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -63,16 +63,18 @@ export const MainLayout = ({
           {/* Mobile overlay */}
           {isSidebarOpen && (
             <div
-              className="fixed z-40 lg:hidden transition-opacity duration-300" style={{ backgroundColor: '#4b5563' }
+              className="fixed z-40 lg:hidden transition-opacity duration-300"
+              style={{ backgroundColor: '#4b5563', opacity: isSidebarOpen ? 0.75 : 0 }}
               onClick={() => setIsSidebarOpen(false)}
-              style={{ opacity: isSidebarOpen ? 0.75 : 0 }}
             />
           )}
           
           {/* Sidebar */}
           <div
-            className="fixed left-0 z-50 transition-all duration-300" style={{ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
+            className="fixed left-0 z-50 transition-all duration-300"
             style={{
+              backgroundColor: '#ffffff',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
               transform: `translateX(${isSidebarOpen || window.innerWidth >= 1024 ? '0' : '-256px'})`,
               width: isCollapsed && window.innerWidth >= 1024 ? '64px' : '256px'
             }}

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Checkbox,
@@ -96,7 +96,9 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="hover: transition-colors" style={{ color: '#4b5563', color: '#9ca3af' }} >
+            className="hover:text-gray-400 transition-colors"
+            style={{ color: '#9ca3af' }}
+          >
             <CommonIcon name="x" size={16} />
           </button>
         </div>
@@ -112,7 +114,8 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
             <select
               value={selectedRole}
               onChange={(e) => handleRoleChange(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:" style={{ borderColor: '#d1d5db', borderColor: '#3b82f6' }
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              style={{ borderColor: '#d1d5db' }}
               disabled={member.role === 'OWNER'}
             >
               {AVAILABLE_ROLES.map((role) => (
@@ -140,7 +143,9 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
                 {AVAILABLE_PERMISSIONS.map((permission) => (
                   <div
                     key={permission.id}
-                    className="flex items-start gap-3 p-3 border rounded-lg hover: transition-colors" style={{ borderColor: '#e5e7eb', borderColor: '#93c5fd', backgroundColor: '#ffffff' }} >
+                    className="flex items-start gap-3 p-3 border rounded-lg hover:border-blue-300 transition-colors"
+                    style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
+                  >
                     <Checkbox
                       checked={selectedPermissions.includes(permission.id)}
                       onCheckedChange={() => handlePermissionToggle(permission.id)}

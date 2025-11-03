@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import anime from 'animejs';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { CommonIcon } from '../../components/UIComponents/Icon/CommonIcon';
 import { NoRecentRepositoryModal } from '../../components/UIComponents/Modal/NoRecentRepositoryModal';
@@ -306,8 +305,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
       {/* Logo */}
       <div className="flex h-16 items-center px-4 justify-between border-b-2" style={{ borderColor: '#e5e7eb' }} >
         <div className="flex items-center gap-2">
-          <CommonIcon name="file-text" size={20} style={{ color: '#2563eb' }} />
-          {!collapsed && <span className="text-xl font-bold" style={{ color: '#111827' }} >{t('app.title')}</span>}
+          <CommonIcon name="file-text" size={20} />
+          {!collapsed && <span className="text-xl font-bold" style={{ color: '#111827' }}>{t('app.title')}</span>}
         </div>
         
         <div className="flex items-center gap-2">
@@ -353,7 +352,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           {/* Close Button (Mobile) */}
           <button
             onClick={onClose}
-            className="lg:hidden p-2 border-2 rounded-lg hover: hover: transition-all duration-200" style={{ borderColor: '#d1d5db', color: '#4b5563', borderColor: '#9ca3af', color: '#9ca3af' }} >
+            className="lg:hidden p-2 border-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+            style={{ borderColor: '#d1d5db', color: '#4b5563' }}
+          >
             <CommonIcon name="x" size={20} />
           </button>
         </div>
@@ -477,7 +478,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
         {navigationGroups.map((group) => (
             <div key={group.key} className="space-y-2">
             {!collapsed && (
-                <div className="px-2 text-xs font-semibold uppercase tracking-wide flex items-center justify-between" style={{ color: '#6b7280' }} >
+                <div className="px-2 text-xs font-semibold uppercase tracking-wide flex items-center justify-between" style={{ color: '#6b7280' }}>
                   {editingGroupLabel === group.key ? (
                     <input
                       type="text"

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -312,8 +312,7 @@ export const OrganizationWorkspace = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {/* Tổng số hợp đồng */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
                 >
                   <div className="flex items-center justify-between">
@@ -326,8 +325,7 @@ export const OrganizationWorkspace = () => {
                 </div>
 
                 {/* Đang chờ */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
                 >
                   <div className="flex items-center justify-between">
@@ -340,8 +338,7 @@ export const OrganizationWorkspace = () => {
                 </div>
 
                 {/* Đã duyệt */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
                 >
                   <div className="flex items-center justify-between">
@@ -555,12 +552,12 @@ export const OrganizationWorkspace = () => {
                 {(showAllRepositories ? repositoriesData.content : repositoriesData.content.slice(0, 10)).map((repo) => (
                       <div
                         key={repo.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer" style={{ borderColor: '#e5e7eb' } style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
+                        className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer"
+                        style={{ borderColor: '#e5e7eb', backgroundImage: 'linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%)' }}
                         onClick={() => navigate(`/repositories/${repo.id}`)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                          <div className="h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundImage: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)' }}>
                             <CommonIcon name="folder" style={{ color: '#ffffff' }} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -761,13 +758,13 @@ export const OrganizationWorkspace = () => {
                       </div>
 
                       {/* Created At */}
-                      {organization.createdAt && (
-                        <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                      {organization?.createdAt && (
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={{ backgroundImage: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' }}>
                           <CommonIcon name="calendar" className="w-5 h-5 text-teal-600 mt-1" />
                           <div className="flex-1">
-                            <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.createdAt')}</p>
-                            <p className="text-sm mt-1" style={{ color: '#374151' }} >
-                              {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
+                            <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.createdAt')}</p>
+                            <p className="text-sm mt-1" style={{ color: '#374151' }}>
+                              {new Date(organization?.createdAt || '').toLocaleDateString('vi-VN', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
