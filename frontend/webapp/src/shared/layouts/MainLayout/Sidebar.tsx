@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import anime from 'animejs';
@@ -378,7 +378,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
               <input
                 type="text"
                 placeholder={t('sidebar.labelManager.addLabel')}
-                className="flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-500" style={{ borderColor: '#d8b4fe' }
+                className="flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                style={{ borderColor: '#d8b4fe' }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     addNewLabel(e.currentTarget.value);
@@ -490,12 +491,14 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         }
                       }}
                       autoFocus
-                      className="w-full px-1 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500" style={{ borderColor: '#d1d5db' } style={{ backgroundColor: '#ffffff' }
+                      className="w-full px-1 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff' }}
                       placeholder={t('sidebar.placeholder.groupName')}
                     />
                   ) : (
                     <span 
-                      className="cursor-pointer hover:" style={{ color: '#374151' }
+                      className="cursor-pointer hover:bg-gray-100"
+                      style={{ color: '#374151' }}
                       onClick={() => editMode && setEditingGroupLabel(group.key)}
                       title={editMode ? t('sidebar.tooltips.editGroupLabel') : ''}
                     >
@@ -569,7 +572,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               <select
                                 value={itemLabels[item.name] || 'others'}
                                 onChange={(e) => assignItemToLabel(item.name, e.target.value)}
-                                className="text-xs border rounded px-1 py-0.5" style={{ borderColor: '#d1d5db' } style={{ backgroundColor: '#ffffff' }
+                                className="text-xs border rounded px-1 py-0.5"
+                                style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff' }}
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {availableLabels.map(label => (
@@ -636,7 +640,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               <select
                                 value={itemLabels[item.name] || 'others'}
                                 onChange={(e) => assignItemToLabel(item.name, e.target.value)}
-                                className="text-xs border rounded px-1 py-0.5" style={{ borderColor: '#d1d5db' } style={{ backgroundColor: '#ffffff' }
+                                className="text-xs border rounded px-1 py-0.5"
+                                style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff' }}
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {availableLabels.map(label => (
@@ -698,7 +703,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           }
                         }}
                         autoFocus
-                        className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: '#93c5fd' }
+                        className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        style={{ borderColor: '#93c5fd' }}
                         placeholder={t('sidebar.placeholder.labelName')}
                       />
                     </div>
