@@ -2,17 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft,
-  Users,
-  Settings,
-  FolderOpen,
-  Shield,
-  Crown,
-  Calendar,
-  MoreVertical,
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   Card,
   CardHeader,
@@ -35,31 +25,34 @@ import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 import { MemberManagementModal } from '../../components/MemberManagementModal';
 
-type TabType = 'overview' | 'members' | 'repositories' | 'settings';
+type TabType = 'info' | 'overview' | 'contracts' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { t } = useTranslation();
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(id!);
   const removeMemberMutation = useRemoveMember();
 
-  const tabs: { id: TabType; label: string; icon: any }[] = [
-    { id: 'overview', label: t('organizations.detail.tabs.overview'), icon: FolderOpen },
-    { id: 'members', label: t('organizations.detail.tabs.members'), icon: Users },
-    { id: 'repositories', label: t('organizations.detail.tabs.repositories'), icon: FolderOpen },
-    { id: 'settings', label: t('organizations.detail.tabs.settings'), icon: Settings },
+  const tabs: { id: TabType; label: string; icon: string }[] = [
+    { id: 'info', label: t('organizations.detail.tabs.info'), icon: 'info' },
+    { id: 'overview', label: t('organizations.detail.tabs.overview'), icon: 'folder-open' },
+    { id: 'contracts', label: t('organizations.detail.tabs.contracts'), icon: 'file-text' },
+    { id: 'repositories', label: t('organizations.detail.tabs.repositories'), icon: 'folder' },
+    { id: 'members', label: t('organizations.detail.tabs.members'), icon: 'users' },
+    { id: 'settings', label: t('organizations.detail.tabs.settings'), icon: 'settings' },
   ];
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!window.confirm('Remove this member from the organization?')) return;
+    if (!window.confirm(t('organizations.detail.members.removeConfirm'))) return;
     
     try {
       await removeMemberMutation.mutateAsync({
@@ -88,26 +81,26 @@ export const OrganizationDetail = () => {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'OWNER':
-        return 'bg-purple-100 text-purple-800';
+        return { backgroundColor: '#f3e8ff', color: '#6b21a8' };
       case 'ADMIN':
-        return 'bg-blue-100 text-blue-800';
+        return { backgroundColor: '#dbeafe', color: '#1e40af' };
       case 'MEMBER':
-        return 'bg-green-100 text-green-800';
+        return { backgroundColor: '#dcfce7', color: '#166534' };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return { backgroundColor: '#f3f4f6', color: '#374151' };
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800';
+        return { backgroundColor: '#dcfce7', color: '#166534' };
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
+        return { backgroundColor: '#fef3c7', color: '#92400e' };
       case 'SUSPENDED':
-        return 'bg-red-100 text-red-800';
+        return { backgroundColor: '#fee2e2', color: '#991b1b' };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return { backgroundColor: '#f3f4f6', color: '#374151' };
     }
   };
 
@@ -137,7 +130,7 @@ export const OrganizationDetail = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-700">{t('organizations.detail.notFound')}</p>
+            <p style={ color: '#374151' }>{t('organizations.detail.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
@@ -161,13 +154,23 @@ export const OrganizationDetail = () => {
       ]}
       onRefresh={handleRefresh}
       headerRight={(
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="relative">
+            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
+            <input
+              type="text"
+              placeholder={t('organizations.search')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" style={ borderColor: '#d1d5db' }
+            />
+          </div>
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
           <Button
             variant="outline"
             className="flex items-center gap-2"
           >
-            <MoreVertical className="w-4 h-4" />
+            <CommonIcon name="more-vertical" size={20} />
             {t('organizations.detail.actions')}
           </Button>
         </div>
@@ -176,21 +179,16 @@ export const OrganizationDetail = () => {
       <div className="space-y-6">
 
         {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#dbeafe' }}>
+                  <CommonIcon name="users" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t('organizations.detail.stats.members')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.members')}</p>
+                  <p className="text-2xl font-bold" style={ color: '#111827' }>
                     {organization.memberCount}
                   </p>
                 </div>
@@ -201,12 +199,12 @@ export const OrganizationDetail = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <FolderOpen className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
+                  <CommonIcon name="folder" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t('organizations.detail.stats.repositories')}</p>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.repositories')}</p>
+                  <p className="text-2xl font-bold" style={ color: '#111827' }>0</p>
                 </div>
               </div>
             </CardContent>
@@ -215,12 +213,12 @@ export const OrganizationDetail = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#dcfce7' }}>
+                  <CommonIcon name="shield" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t('organizations.detail.stats.status')}</p>
-                  <p className="text-lg font-semibold text-gray-900">{t('organizations.detail.stats.active')}</p>
+                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.status')}</p>
+                  <p className="text-lg font-semibold" style={ color: '#111827' }>{t('organizations.detail.stats.active')}</p>
                 </div>
               </div>
             </CardContent>
@@ -230,27 +228,22 @@ export const OrganizationDetail = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-orange-600" />
+                  <CommonIcon name="calendar" size={16} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{t('organizations.detail.stats.created')}</p>
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.created')}</p>
+                  <p className="text-sm font-semibold" style={ color: '#111827' }>
                     {new Date(organization.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6"
-        >
-          <Tabs className="border-b border-gray-200">
+        <div className="mb-6">
+          <Tabs className="border-b" style={ borderColor: '#e5e7eb' }>
             <TabList className="flex gap-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -262,22 +255,73 @@ export const OrganizationDetail = () => {
                     onSelect={() => setActiveTab(tab.id)}
                     className="flex items-center gap-2 px-4 py-3"
                   >
-                    <Icon className="w-4 h-4" />
+                    <CommonIcon name="crown" size={16} />
                     {tab.label}
                   </CommonTab>
                 );
               })}
             </TabList>
           </Tabs>
-        </motion.div>
+        </div>
 
         {/* Tab Content */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div key={activeTab} className="animate-fade-in">
+          {/* Info Tab */}
+          {activeTab === 'info' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('organizations.detail.overview.title')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.name')}</label>
+                    <p className="mt-1" style={ color: '#111827' }>{organization.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.description')}</label>
+                    <p className="mt-1" style={ color: '#111827' }>
+                      {organization.description || t('organizations.detail.overview.noDescription')}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.owner')}</label>
+                    <p className="mt-1 flex items-center gap-2" style={ color: '#111827' }>
+                      <CommonIcon name="crown" size={16} color="#eab308" />
+                      {organization.ownerName || 'Unknown'}
+                    </p>
+                  </div>
+                  {organization.createdAt && (
+                    <div>
+                      <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.stats.created')}</label>
+                      <p className="mt-1" style={ color: '#111827' }>{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.settings')}</label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {organization.settings?.isPublic && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
+                          {t('organizations.detail.overview.flags.public')}
+                        </span>
+                      )}
+                      {organization.settings?.allowInvitations && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                          {t('organizations.detail.overview.flags.openInvitations')}
+                        </span>
+                      )}
+                      {organization.settings?.requireApproval && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#fed7aa', color: '#92400e' }}>
+                          {t('organizations.detail.overview.flags.requiresApproval')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <Card>
@@ -287,37 +331,43 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.name')}</label>
-                    <p className="text-gray-900 mt-1">{organization.name}</p>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.name')}</label>
+                    <p className="mt-1" style={ color: '#111827' }>{organization.name}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.description')}</label>
-                    <p className="text-gray-900 mt-1">
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.description')}</label>
+                    <p className="mt-1" style={ color: '#111827' }>
                       {organization.description || t('organizations.detail.overview.noDescription')}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.owner')}</label>
-                    <p className="text-gray-900 mt-1 flex items-center gap-2">
-                      <Crown className="w-4 h-4 text-yellow-500" />
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.owner')}</label>
+                    <p className="mt-1 flex items-center gap-2" style={ color: '#111827' }>
+                      <CommonIcon name="crown" size={16} color="#eab308" />
                       {organization.ownerName || 'Unknown'}
                     </p>
                   </div>
+                  {organization.createdAt && (
+                    <div>
+                      <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.stats.created')}</label>
+                      <p className="mt-1" style={ color: '#111827' }>{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                  )}
                   <div>
-                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.settings')}</label>
+                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.settings')}</label>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {organization.settings?.isPublic && (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dcfce7' }>
                           {t('organizations.detail.overview.flags.public')}
                         </span>
                       )}
                       {organization.settings?.allowInvitations && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dbeafe' }>
                           {t('organizations.detail.overview.flags.openInvitations')}
                         </span>
                       )}
                       {organization.settings?.requireApproval && (
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-800 rounded text-xs font-medium">
                           {t('organizations.detail.overview.flags.requiresApproval')}
                         </span>
                       )}
@@ -335,7 +385,7 @@ export const OrganizationDetail = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle>{t('organizations.detail.members.title')}</CardTitle>
                   <Button variant="outline" className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
+                    <CommonIcon name="users" size={16} />
                     {t('organizations.detail.members.invite')}
                   </Button>
                 </div>
@@ -350,16 +400,16 @@ export const OrganizationDetail = () => {
                     {(members as any).content.map((member: any) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                        className="flex items-center justify-between p-4 border-2 rounded-lg hover: transition-colors" style={ borderColor: '#e5e7eb', borderColor: '#d1d5db' }
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">
+                          <div className="h-12 rounded-full flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                            <span className="font-bold text-lg" style={ color: '#ffffff' }>
                               {member.userName?.charAt(0).toUpperCase() || 'U'}
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold" style={ color: '#111827' }>
                               {member.userName || 'Unknown User'}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
@@ -381,7 +431,7 @@ export const OrganizationDetail = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm" style={ color: '#6b7280' }>
                             {t('organizations.detail.members.joined', { date: new Date(member.joinedAt).toLocaleDateString() })}
                           </p>
                           {isCurrentUserOwner && (
@@ -389,16 +439,16 @@ export const OrganizationDetail = () => {
                               <Button
                                 variant="outline"
                                 onClick={() => handleManageMember(member)}
-                                className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                                className="hover: text-sm flex items-center gap-1" style={ color: '#1d4ed8' } style={ color: '#2563eb' }
                               >
-                                <Shield className="w-3 h-3" />
+                                <CommonIcon name="shield" size={12} />
                                 Quản lý
                               </Button>
                               {member.role !== 'OWNER' && (
                                 <Button
                                   variant="outline"
                                   onClick={() => handleRemoveMember(member.id)}
-                                  className="text-red-600 hover:text-red-700 text-sm"
+                                  className="hover: text-sm" style={ color: '#b91c1c' } style={ color: '#dc2626' }
                                 >
                                   {t('organizations.detail.members.remove')}
                                 </Button>
@@ -411,10 +461,10 @@ export const OrganizationDetail = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">{t('organizations.detail.members.none')}</p>
+                    <CommonIcon name="users" size={64} color="#9ca3af" className="mx-auto mb-4" />
+                    <p className="mb-4" style={ color: '#4b5563' }>{t('organizations.detail.members.none')}</p>
                     <Button variant="outline" className="inline-flex items-center gap-2">
-                      <Users className="w-4 h-4" />
+                      <CommonIcon name="users" size={16} />
                       {t('organizations.detail.members.invite')}
                     </Button>
                   </div>
@@ -423,16 +473,45 @@ export const OrganizationDetail = () => {
             </Card>
           )}
 
+          {/* Contracts Tab */}
+          {activeTab === 'contracts' && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('organizations.detail.tabs.contracts')}</CardTitle>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <CommonIcon name="file-text" size={16} />
+                    {t('organizations.openContractList')}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <CommonIcon name="file-text" size={64} color="#9ca3af" className="mx-auto mb-4" />
+                  <p style={ color: '#4b5563' }>{t('organizations.noContracts')}</p>
+                  <p className="text-sm mt-2" style={ color: '#6b7280' }>{t('organizations.noContractsDesc')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Repositories Tab */}
           {activeTab === 'repositories' && (
             <Card>
               <CardHeader>
-                <CardTitle>{t('organizations.detail.repositories.title')}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('organizations.detail.repositories.title')}</CardTitle>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <CommonIcon name="folder" size={16} />
+                    {t('organizations.openRepositoryList')}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
-                  <FolderOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">{t('organizations.detail.repositories.empty')}</p>
+                  <CommonIcon name="folder" size={64} color="#9ca3af" className="mx-auto mb-4" />
+                  <p style={ color: '#4b5563' }>{t('organizations.noRepositories')}</p>
+                  <p className="text-sm mt-2" style={ color: '#6b7280' }>{t('organizations.noRepositoriesDesc')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -447,32 +526,32 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('organizations.detail.settings.general')}</h3>
+                    <h3 className="text-lg font-semibold mb-4" style={ color: '#111827' }>{t('organizations.detail.settings.general')}</h3>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
                         <div>
-                          <p className="font-medium text-gray-900">{t('organizations.detail.settings.public.label')}</p>
-                          <p className="text-sm text-gray-600">{t('organizations.detail.settings.public.desc')}</p>
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.public.label')}</p>
+                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.public.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.isPublic}
                           disabled
                         />
                       </div>
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
                         <div>
-                          <p className="font-medium text-gray-900">{t('organizations.detail.settings.allowInvitations.label')}</p>
-                          <p className="text-sm text-gray-600">{t('organizations.detail.settings.allowInvitations.desc')}</p>
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.allowInvitations.label')}</p>
+                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.allowInvitations.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.allowInvitations}
                           disabled
                         />
                       </div>
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
                         <div>
-                          <p className="font-medium text-gray-900">{t('organizations.detail.settings.requireApproval.label')}</p>
-                          <p className="text-sm text-gray-600">{t('organizations.detail.settings.requireApproval.desc')}</p>
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.requireApproval.label')}</p>
+                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.requireApproval.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.requireApproval}
@@ -482,12 +561,12 @@ export const OrganizationDetail = () => {
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-semibold text-red-600 mb-4">{t('organizations.detail.settings.danger.title')}</h3>
-                    <div className="p-4 border-2 border-red-200 bg-red-50 rounded-lg">
-                      <p className="font-medium text-red-900 mb-2">{t('organizations.detail.settings.danger.delete')}</p>
-                      <p className="text-sm text-red-700 mb-4">{t('organizations.detail.settings.danger.desc')}</p>
-                      <Button variant="outline" className="text-red-600 hover:text-red-700">
+                  <div className="pt-6 border-t" style={ borderColor: '#e5e7eb' }>
+                    <h3 className="text-lg font-semibold mb-4" style={ color: '#dc2626' }>{t('organizations.detail.settings.danger.title')}</h3>
+                    <div className="p-4 border-2 rounded-lg" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+                      <p className="font-medium mb-2" style={ color: '#7f1d1d' }>{t('organizations.detail.settings.danger.delete')}</p>
+                      <p className="text-sm mb-4" style={ color: '#b91c1c' }>{t('organizations.detail.settings.danger.desc')}</p>
+                      <Button variant="outline" className="hover:" style={ color: '#b91c1c' } style={ color: '#dc2626' }>
                         {t('organizations.detail.settings.danger.cta')}
                       </Button>
                     </div>
@@ -496,7 +575,7 @@ export const OrganizationDetail = () => {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Member Management Modal */}

@@ -1,221 +1,193 @@
 /**
  * Animation Presets and Constants
- * Predefined animations for consistent UI behavior
+ * Predefined animations for consistent UI behavior (Anime.js)
  */
 
-import { Variants } from 'framer-motion';
+import { AnimeConfig } from '../lib/animationUtils';
 
 /**
- * Common animation durations (in seconds)
+ * Common animation durations (in milliseconds)
  */
 export const ANIMATION_DURATION = {
   instant: 0,
-  fast: 0.15,
-  normal: 0.3,
-  slow: 0.5,
-  slower: 0.8,
+  fast: 150,
+  normal: 300,
+  slow: 500,
+  slower: 800,
 } as const;
 
 /**
- * Common easing functions
+ * Common easing functions (Anime.js format)
  */
 export const EASING = {
-  linear: [0, 0, 1, 1],
-  easeIn: [0.4, 0, 1, 1],
-  easeOut: [0, 0, 0.2, 1],
-  easeInOut: [0.4, 0, 0.2, 1],
-  bounce: [0.68, -0.55, 0.265, 1.55],
+  linear: 'linear',
+  easeIn: 'easeInQuad',
+  easeOut: 'easeOutQuad',
+  easeInOut: 'easeInOutQuad',
+  bounce: 'easeOutBounce',
+  elastic: 'easeOutElastic(1, .6)',
 } as const;
 
 /**
- * Fade animations
+ * Fade animation config factory
  */
-export const fadeVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
+export const createFadeConfig = (targets: any): AnimeConfig => ({
+  targets,
+  opacity: [0, 1],
+  duration: ANIMATION_DURATION.normal,
+  easing: EASING.easeInOut,
+});
+
+/**
+ * Slide animation configs
+ */
+export const createSlideConfig = {
+  fromLeft: (targets: any): AnimeConfig => ({
+    targets,
+    opacity: [0, 1],
+    translateX: [-20, 0],
+    duration: ANIMATION_DURATION.normal,
+    easing: EASING.easeOut,
+  }),
+  fromRight: (targets: any): AnimeConfig => ({
+    targets,
+    opacity: [0, 1],
+    translateX: [20, 0],
+    duration: ANIMATION_DURATION.normal,
+    easing: EASING.easeOut,
+  }),
+  fromTop: (targets: any): AnimeConfig => ({
+    targets,
+    opacity: [0, 1],
+    translateY: [-20, 0],
+    duration: ANIMATION_DURATION.normal,
+    easing: EASING.easeOut,
+  }),
+  fromBottom: (targets: any): AnimeConfig => ({
+    targets,
+    opacity: [0, 1],
+    translateY: [20, 0],
+    duration: ANIMATION_DURATION.normal,
+    easing: EASING.easeOut,
+  }),
 };
 
 /**
- * Slide animations
+ * Scale animation config factory
  */
-export const slideVariants = {
-  fromLeft: {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
-  },
-  fromRight: {
-    hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: 20 },
-  },
-  fromTop: {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-  },
-  fromBottom: {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 20 },
-  },
-} as const;
+export const createScaleConfig = (targets: any): AnimeConfig => ({
+  targets,
+  opacity: [0, 1],
+  scale: [0.8, 1],
+  duration: ANIMATION_DURATION.normal,
+  easing: EASING.easeOut,
+});
 
 /**
- * Scale animations
+ * Bounce animation config factory
  */
-export const scaleVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.8 },
+export const createBounceConfig = (targets: any): AnimeConfig => ({
+  targets,
+  opacity: [0, 1],
+  scale: [0.5, 1],
+  duration: ANIMATION_DURATION.slow,
+  easing: EASING.elastic,
+});
+
+/**
+ * Stagger animation config for lists
+ */
+export const createStaggerConfig = (targets: any, delay: number = 100): AnimeConfig => {
+  return {
+    targets,
+    opacity: [0, 1],
+    translateY: [20, 0],
+    duration: ANIMATION_DURATION.normal,
+    delay: (_el: any, i: number) => i * delay,
+    easing: EASING.easeOut,
+  };
 };
 
 /**
- * Bounce animation
+ * Page transition config
  */
-export const bounceVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.5 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 260,
-      damping: 20,
-    },
-  },
-};
+export const createPageTransitionConfig = (targets: any): AnimeConfig => ({
+  targets,
+  opacity: [0, 1],
+  translateY: [20, 0],
+  duration: ANIMATION_DURATION.normal,
+  easing: EASING.easeOut,
+});
 
 /**
- * Stagger container (for lists)
+ * Modal/Dialog animation config factory
  */
-export const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-/**
- * Stagger item (for list items)
- */
-export const staggerItem: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 24,
-    },
-  },
-};
-
-/**
- * Page transition animations
- */
-export const pageTransition = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-  transition: { duration: ANIMATION_DURATION.normal },
-} as const;
-
-/**
- * Modal/Dialog animations
- */
-export const modalVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    transition: {
-      duration: ANIMATION_DURATION.normal,
-      ease: EASING.easeOut,
-    },
-  },
-  exit: { 
-    opacity: 0, 
-    scale: 0.9,
-    transition: {
-      duration: ANIMATION_DURATION.fast,
-      ease: EASING.easeIn,
-    },
-  },
-};
+export const createModalConfig = (targets: any): AnimeConfig => ({
+  targets,
+  opacity: [0, 1],
+  scale: [0.9, 1],
+  duration: ANIMATION_DURATION.normal,
+  easing: EASING.easeOut,
+});
 
 /**
  * Hand-drawn reveal animation (for SVG paths)
  */
-export const drawInVariants: Variants = {
-  hidden: {
-    pathLength: 0,
-    opacity: 0,
-  },
-  visible: {
-    pathLength: 1,
-    opacity: 1,
-    transition: {
-      pathLength: {
-        type: 'spring',
-        duration: 1.5,
-        bounce: 0,
-      },
-      opacity: { duration: 0.3 },
-    },
-  },
-};
+export const createDrawInConfig = (targets: any): AnimeConfig => ({
+  targets,
+  strokeDashoffset: [anime.setDashoffset, 0],
+  opacity: [0, 1],
+  duration: 1500,
+  easing: 'easeInOutQuad',
+});
 
 /**
- * Hover effects
+ * Hover scale animation (use with mouseenter/mouseleave)
  */
-export const hoverEffects = {
-  scale: {
-    whileHover: { scale: 1.05 },
-    whileTap: { scale: 0.95 },
-  },
-  lift: {
-    whileHover: { y: -5, boxShadow: '0 10px 15px rgba(0, 0, 0, 0.2)' },
-  },
-  glow: {
-    whileHover: { 
-      boxShadow: '0 0 20px rgba(74, 144, 226, 0.4)',
-    },
-  },
-} as const;
+export const createHoverScaleConfig = (targets: any): AnimeConfig => ({
+  targets,
+  scale: 1.05,
+  duration: 200,
+  easing: EASING.easeOut,
+});
 
 /**
- * Loading animations
+ * Hover lift animation
  */
-export const loadingVariants: Variants = {
-  pulse: {
+export const createHoverLiftConfig = (targets: any): AnimeConfig => ({
+  targets,
+  translateY: -5,
+  duration: 200,
+  easing: EASING.easeOut,
+});
+
+/**
+ * Loading animation configs
+ */
+export const createLoadingConfig = {
+  pulse: (targets: any): AnimeConfig => ({
+    targets,
     scale: [1, 1.05, 1],
-    transition: {
-      duration: 1,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-  spin: {
+    duration: 1000,
+    loop: true,
+    easing: EASING.easeInOut,
+  }),
+  spin: (targets: any): AnimeConfig => ({
+    targets,
     rotate: 360,
-    transition: {
-      duration: 1,
-      repeat: Infinity,
-      ease: 'linear',
-    },
-  },
-  bounce: {
-    y: [0, -10, 0],
-    transition: {
-      duration: 0.6,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
+    duration: 1000,
+    loop: true,
+    easing: EASING.linear,
+  }),
+  bounce: (targets: any): AnimeConfig => ({
+    targets,
+    translateY: [0, -10, 0],
+    duration: 600,
+    loop: true,
+    easing: EASING.easeInOut,
+  }),
 };
+
+// Re-export anime for convenience
+import anime from 'animejs';
+export { anime };

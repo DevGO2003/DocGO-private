@@ -7,16 +7,17 @@ export type Breadcrumb = {
 };
 
 export interface HeaderControlLayoutProps {
-  title: string;
-  subtitle?: string;
-  breadcrumbs?: Breadcrumb[];
-  rightActions?: React.ReactNode;
-  primaryTabs?: React.ReactNode;
-  secondaryTabs?: React.ReactNode;
-  headerChildren?: React.ReactNode;
-  children?: React.ReactNode;
-  className?: string;
-  onRefresh?: () => void;
+  title: string
+  subtitle?: string
+  description: string // ✅ REQUIRED - Mô tả nội dung trang
+  breadcrumbs?: Breadcrumb[]
+  rightActions?: React.ReactNode
+  children?: React.ReactNode
+  className?: string
+  primaryTabs?: React.ReactNode
+  secondaryTabs?: React.ReactNode
+  headerChildren?: React.ReactNode
+  onRefresh?: () => void
 }
 
 export interface UploadHeaderLayoutProps extends HeaderControlLayoutProps {

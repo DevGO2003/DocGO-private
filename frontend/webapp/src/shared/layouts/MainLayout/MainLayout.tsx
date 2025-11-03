@@ -1,6 +1,5 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { ControlMainLayout } from './ControlMainLayout';
@@ -57,37 +56,33 @@ export const MainLayout = ({
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 flex">
+    <div className="h-screen overflow-hidden flex" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
       {/* Sidebar */}
       {resolvedShowSidebar && (
         <>
           {/* Mobile overlay */}
           {isSidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 lg:hidden bg-gray-600 bg-opacity-75 transition-opacity"
+            <div
+              className="fixed z-40 lg:hidden transition-opacity duration-300" style={ backgroundColor: '#4b5563' }
               onClick={() => setIsSidebarOpen(false)}
+              style={{ opacity: isSidebarOpen ? 0.75 : 0 }}
             />
           )}
           
           {/* Sidebar */}
-          <motion.div
-            initial={false}
-            animate={{
-              x: isSidebarOpen || window.innerWidth >= 1024 ? 0 : -256,
-              width: isCollapsed && window.innerWidth >= 1024 ? 64 : 256
+          <div
+            className="fixed left-0 z-50 transition-all duration-300" style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
+            style={{
+              transform: `translateX(${isSidebarOpen || window.innerWidth >= 1024 ? '0' : '-256px'})`,
+              width: isCollapsed && window.innerWidth >= 1024 ? '64px' : '256px'
             }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-y-0 left-0 z-50 bg-white shadow-lg"
           >
             <Sidebar 
               collapsed={isCollapsed}
               onCollapseToggle={() => handleSidebarCollapse(!isCollapsed)}
               onClose={() => setIsSidebarOpen(false)}
             />
-          </motion.div>
+          </div>
         </>
       )}
 
@@ -104,16 +99,14 @@ export const MainLayout = ({
         )}
 
         {/* Page Content - internal scroll only */}
-        <motion.main
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex-1 overflow-hidden p-2.5"
+        <main
+          className="flex-1 overflow-hidden p-2.5 transition-opacity duration-300"
+          style={{ opacity: 1 }}
         >
           <ControlMainLayout>
             {children}
           </ControlMainLayout>
-        </motion.main>
+        </main>
       </div>
 
     </div>

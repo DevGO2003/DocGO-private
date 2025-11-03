@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, DollarSign, Briefcase, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface ContractOverviewTabProps {
@@ -37,36 +37,36 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
     <div className="space-y-4">
       {/* Contract Dates & Value */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
+        <Card className="border-indigo-100" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Calendar className="w-4 h-4 text-indigo-600" />
-              <h3 className="text-sm font-semibold text-gray-900">Thời hạn hợp đồng</h3>
+              <CommonIcon name="calendar" className="w-4 h-4" style={ color: '#4f46e5' } />
+              <h3 className="text-sm font-semibold" style={ color: '#111827' }>Thời hạn hợp đồng</h3>
             </div>
             <div className="space-y-2">
               <div>
-                <label className="text-xs text-gray-500">Ngày hiệu lực</label>
-                <p className="text-base font-semibold text-gray-900">{formatDate(data?.effectiveDate)}</p>
+                <label className="text-xs" style={ color: '#6b7280' }>Ngày hiệu lực</label>
+                <p className="text-base font-semibold" style={ color: '#111827' }>{formatDate(data?.effectiveDate)}</p>
               </div>
               <div>
-                <label className="text-xs text-gray-500">Ngày hết hạn</label>
-                <p className="text-base font-semibold text-gray-900">{formatDate(data?.expiryDate)}</p>
+                <label className="text-xs" style={ color: '#6b7280' }>Ngày hết hạn</label>
+                <p className="text-base font-semibold" style={ color: '#111827' }>{formatDate(data?.expiryDate)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-white border-green-100">
+        <Card style={ borderColor: '#dcfce7' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="w-4 h-4 text-green-600" />
-              <h3 className="text-sm font-semibold text-gray-900">Giá trị hợp đồng</h3>
+              <CommonIcon name="dollar-sign" style={ color: '#16a34a' } />
+              <h3 className="text-sm font-semibold" style={ color: '#111827' }>Giá trị hợp đồng</h3>
             </div>
             <div className="text-center py-2">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={ color: '#16a34a' }>
                 {formatCurrency(data?.totalValue, data?.currency)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Tổng giá trị</p>
+              <p className="text-xs mt-1" style={ color: '#6b7280' }>Tổng giá trị</p>
             </div>
           </CardContent>
         </Card>
@@ -78,29 +78,29 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Briefcase className="w-4 h-4 text-blue-600" />
-                <h3 className="text-sm font-semibold text-gray-900">Thông tin dự án</h3>
+                <CommonIcon name="briefcase" style={ color: '#2563eb' } />
+                <h3 className="text-sm font-semibold" style={ color: '#111827' }>Thông tin dự án</h3>
               </div>
               <div className="space-y-2">
                 <div>
-                  <label className="text-xs text-gray-500">Dự án</label>
-                  <p className="text-sm font-medium text-gray-900">{data?.project || 'Chưa xác định'}</p>
+                  <label className="text-xs" style={ color: '#6b7280' }>Dự án</label>
+                  <p className="text-sm font-medium" style={ color: '#111827' }>{data?.project || 'Chưa xác định'}</p>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500">Phòng ban</label>
-                  <p className="text-sm font-medium text-gray-900">{data?.department || 'Chưa xác định'}</p>
+                  <label className="text-xs" style={ color: '#6b7280' }>Phòng ban</label>
+                  <p className="text-sm font-medium" style={ color: '#111827' }>{data?.department || 'Chưa xác định'}</p>
                 </div>
               </div>
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-4 h-4 text-purple-600" />
-                <h3 className="text-sm font-semibold text-gray-900">Phân loại</h3>
+                <CommonIcon name="shield" className="w-4 h-4" style={ color: '#9333ea' } />
+                <h3 className="text-sm font-semibold" style={ color: '#111827' }>Phân loại</h3>
               </div>
               <div className="space-y-2">
                 <div>
-                  <label className="text-xs text-gray-500">Độ ưu tiên</label>
+                  <label className="text-xs" style={ color: '#6b7280' }>Độ ưu tiên</label>
                   <div className="mt-1">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${priorityColors[data?.priority || ''] || 'bg-gray-100 text-gray-800'}`}>
                       {data?.priority || 'Chưa xác định'}
@@ -108,7 +108,7 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500">Độ bảo mật</label>
+                  <label className="text-xs" style={ color: '#6b7280' }>Độ bảo mật</label>
                   <div className="mt-1">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${confidentialityColors[data?.confidentiality || ''] || 'bg-gray-100 text-gray-800'}`}>
                       {data?.confidentiality || 'Chưa xác định'}
@@ -123,10 +123,10 @@ export function ContractOverviewTab({ data }: ContractOverviewTabProps) {
 
       {/* Summary */}
       {data?.summary && (
-        <Card className="bg-gradient-to-br from-gray-50 to-white">
+        <Card style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold mb-2 text-gray-900">Tóm tắt hợp đồng</h3>
-            <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
+            <h3 className="text-sm font-semibold mb-2" style={ color: '#111827' }>Tóm tắt hợp đồng</h3>
+            <p className="text-sm" style={ color: '#374151' }>{data.summary}</p>
           </CardContent>
         </Card>
       )}

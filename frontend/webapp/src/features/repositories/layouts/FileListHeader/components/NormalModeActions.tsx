@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, RefreshButton } from '@shared/components';
-import { Plus, Upload, Download, Trash2, Search, Settings } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface NormalModeActionsProps {
   onNew?: () => void;
@@ -31,9 +31,9 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           variant="default"
           size="sm"
           onClick={onNew}
-          className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+          className="inline-flex items-center gap-2 hover:bg-green-700" style={ backgroundColor: '#16a34a', color: '#ffffff' }
         >
-          <Plus className="w-4 h-4" />
+          <CommonIcon name="plus" size={16} />
           <span className="hidden md:inline">Tệp mới</span>
         </Button>
       )}
@@ -46,7 +46,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onUpload}
           className="inline-flex items-center gap-2"
         >
-          <Upload className="w-4 h-4" />
+          <CommonIcon name="upload" size={16} />
           <span className="hidden md:inline">Tải lên</span>
         </Button>
       )}
@@ -59,7 +59,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onDownload}
           className="inline-flex items-center gap-2"
         >
-          <Download className="w-4 h-4" />
+          <CommonIcon name="download" size={16} />
           <span className="hidden md:inline">Tải xuống</span>
         </Button>
       )}
@@ -72,7 +72,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onDelete}
           className="inline-flex items-center gap-2"
         >
-          <Trash2 className="w-4 h-4" />
+          <CommonIcon name="trash" size={16} />
           <span className="hidden md:inline">Xóa</span>
         </Button>
       )}
@@ -85,7 +85,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={() => onSearch('')}
           className="inline-flex items-center gap-2"
         >
-          <Search className="w-4 h-4" />
+          <CommonIcon name="search" size={16} />
           <span className="hidden md:inline">Tìm kiếm</span>
         </Button>
       )}
@@ -106,7 +106,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           onClick={onSettings}
           className="inline-flex items-center gap-2"
         >
-          <Settings className="w-4 h-4" />
+          <CommonIcon name="settings" size={16} />
         </Button>
       )}
     </>

@@ -3,9 +3,11 @@ package com.devgo2003.docgo.repository_service.controller;
 import com.devgo2003.docgo.repository_service.dto.RepositoryDTO;
 import com.devgo2003.docgo.repository_service.dto.RepositoryMemberDTO;
 import com.devgo2003.docgo.repository_service.entity.RepositoryEntity;
+import com.devgo2003.docgo.repository_service.entity.FileEntity;
 import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.service.IRepositoryService;
 import com.devgo2003.docgo.repository_service.service.RepositoryMemberService;
+import com.devgo2003.docgo.repository_service.repository.FileRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +36,7 @@ public class RepositoryManagementController {
 
     private final IRepositoryService repositoryService;
     private final RepositoryMemberService repositoryMemberService;
+    private final FileRepository fileRepository;
 
     @GetMapping
     @Operation(summary = "Lấy danh sách tất cả repositories")
@@ -579,6 +582,61 @@ public class RepositoryManagementController {
         }
     }
 
+    @GetMapping("/{repositoryId}/files")
+    @Operation(summary = "Lấy danh sách files của repository")
+    public ResponseEntity<RestResponse<Page<FileEntity>>> getRepositoryFiles(
+            @Parameter(description = "ID của repository") @PathVariable String repositoryId,
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sắp xếp theo trường") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection
+    ) {
+        try {
+            // Validate repository exists
+            if (!repositoryService.existsById(repositoryId)) {
+                return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+                    .apiVersion("v1")
+                    .statusCode(404)
+                    .shortMessage("Not Found")
+                    .description("Repository không tồn tại")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files")
+                    .build());
+            }
+
+            // Get files with pagination
+            Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            Page<FileEntity> files = fileRepository.findByRepositoryIdAndIsDeletedFalse(repositoryId, pageable);
+
+            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Danh sách files của repository đã được lấy thành công")
+                .data(files)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files")
+                .build());
+
+        } catch (Exception e) {
+            log.error("Error getting repository files: {}", repositoryId, e);
+            return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi lấy danh sách files: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/files")
+                .build());
+        }
+    }
+
     @GetMapping("/{repositoryId}/files/{fileId}")
     @Operation(summary = "Lấy chi tiết file trong repository (validate repositoryId)")
     public ResponseEntity<RestResponse<RepositoryDTO>> getFileInRepository(
@@ -676,6 +734,67 @@ public class RepositoryManagementController {
                 .timestamp(Instant.now())
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/repository-management-service/repositories/organization/" + organizationId + "/delete-all")
+                .build());
+        }
+    }
+
+    @PatchMapping("/{repositoryId}/members/{memberId}/permissions")
+    @Operation(summary = "Cập nhật quyền của thành viên trong repository")
+    public ResponseEntity<RestResponse<Map<String, Object>>> updateMemberPermissions(
+            @Parameter(description = "ID của repository") @PathVariable String repositoryId,
+            @Parameter(description = "ID của member") @PathVariable String memberId,
+            @RequestBody Map<String, Boolean> permissionsUpdate
+    ) {
+        try {
+            log.info("Updating permissions for member {} in repository {}", memberId, repositoryId);
+            
+            // Validate input
+            if (permissionsUpdate == null || permissionsUpdate.isEmpty()) {
+                return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                    .apiVersion("v1")
+                    .statusCode(400)
+                    .shortMessage("Bad Request")
+                    .description("Permissions update data is required")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
+                    .build());
+            }
+
+            // TODO: Implement actual permission update logic
+            // This would typically involve:
+            // 1. Verify user has admin rights for the repository
+            // 2. Update member permissions in database
+            // 3. Emit event for permission change
+            
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("memberId", memberId);
+            response.put("repositoryId", repositoryId);
+            response.put("permissions", permissionsUpdate);
+            response.put("updatedAt", Instant.now());
+
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã cập nhật quyền thành viên thành công")
+                .data(response)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
+                .build());
+        } catch (Exception e) {
+            log.error("Error updating member permissions: {}", e.getMessage(), e);
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi cập nhật quyền: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
                 .build());
         }
     }

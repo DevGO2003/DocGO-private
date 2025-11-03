@@ -1,17 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { NotificationBell, ProgressBar } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { logout } from '@features/auth/models/state/authSlice';
 import { LOGIN_PATH } from '@constants';
-import {
-  Menu,
-  Search,
-  User,
-  LogOut,
-  Settings,
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -59,7 +52,7 @@ export const Header = ({
   };
 
   return (
-    <header className="bg-white shadow-sm border-b-2 border-gray-200 sticky top-0 z-40 relative">
+    <header className="border-b-2 sticky top-0 z-40 relative" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }>
       <ProgressBar position="top" />
       <div className="mx-auto px-4">
         <div className="flex justify-between items-center h-16">
@@ -68,9 +61,9 @@ export const Header = ({
             {onMenuToggle && (
               <button
                 onClick={onMenuToggle}
-                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-md hover: hover:bg-gray-100" style={ color: '#6b7280' } style={ color: '#9ca3af' }
               >
-                <Menu className="h-6 w-6" />
+                <CommonIcon name="menu" size={24} />
               </button>
             )}
           </div>
@@ -78,27 +71,27 @@ export const Header = ({
           {/* Center - Search Bar */}
           {showSearch && (
             <div className="flex-1 max-w-lg mx-8 hidden md:block">
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </form>
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <CommonIcon name="search" size={20} color="#9ca3af" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border-2 rounded-lg focus:outline-none focus:" style={ borderColor: '#d1d5db', borderColor: '#3b82f6' }
+                />
+              </div>
+            </form>
+          </div>
           )}
 
           {/* Right side - Actions and User Menu */}
           <div className="flex items-center gap-4">
             {/* Search for mobile */}
             {showSearch && (
-              <button className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
-                <Search className="h-6 w-6" />
+              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={ color: '#6b7280' } style={ color: '#9ca3af' }>
+                <CommonIcon name="search" size={20} color="#9ca3af" />
               </button>
             )}
 
@@ -108,9 +101,7 @@ export const Header = ({
             {/* User Menu */}
             {showUserMenu && (
               <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
                   className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100"
                 >
@@ -121,48 +112,50 @@ export const Header = ({
                       alt={user.name}
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                      <span className="text-sm font-medium text-white">
+                    <div className="h-8 rounded-full flex items-center justify-center" style={ backgroundColor: '#3b82f6' }>
+                      <span className="text-sm font-medium" style={ color: '#ffffff' }>
                         {user.name.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
                   )}
-                </motion.button>
+                </button>
 
                 {/* Dropdown Menu */}
                 {showUserDropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border-2 border-gray-200 py-1 z-50"
+                  <div
+                    style={{
+                      opacity: showUserDropdown ? 1 : 0,
+                      transform: showUserDropdown ? 'translateY(0)' : 'translateY(-10px)',
+                    }}
+                    className="absolute right-0 mt-2 rounded-lg border-2 py-1 z-50" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
                   >
-                    <div className="px-4 py-2 border-b-2 border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                    <div className="px-4 py-2 border-b-2" style={ borderColor: '#f3f4f6' }>
+                      <p className="text-sm font-medium" style={ color: '#111827' }>{user.name}</p>
+                      <p className="text-xs" style={ color: '#6b7280' }>{user.email}</p>
                     </div>
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={ color: '#374151' }
                     >
-                      <User className="h-4 w-4" />
+                      <CommonIcon name="user" size={20} />
                       Hồ sơ
                     </Link>
                     <Link
                       to="/settings"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={ color: '#374151' }
                     >
-                      <Settings className="h-4 w-4" />
+                      <CommonIcon name="settings" size={16} />
                       Cài đặt
                     </Link>
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-red-50" style={ color: '#dc2626' }
                     >
-                      <LogOut className="h-4 w-4" />
+                      <CommonIcon name="logout" size={16} />
                       Đăng xuất
                     </button>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             )}

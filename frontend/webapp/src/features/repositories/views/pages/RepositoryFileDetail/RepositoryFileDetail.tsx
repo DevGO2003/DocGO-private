@@ -9,7 +9,7 @@ import { MainTabsNav } from '@features/repositories/views/components/FileDetail/
 import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
-import { Edit, Save, X, Send, Download, MessageCircle, Trash2, FileCheck, FilePlus } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { updateFileDetails, deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
 
 interface FileDetailData {
@@ -314,37 +314,37 @@ export const RepositoryFileDetail: React.FC = () => {
             {isEditing ? (
               <>
                 <Button variant="outline" onClick={handleDiscard}>
-                  <X className="w-4 h-4 mr-2" /> Hủy
+                  <CommonIcon name="x" className="w-4 h-4 mr-2" /> Hủy
                 </Button>
                 <Button variant="outline" onClick={handleSaveAndClose}>
-                  <Save className="w-4 h-4 mr-2" /> Lưu & Đóng
+                  <CommonIcon name="save" className="w-4 h-4 mr-2" /> Lưu & Đóng
                 </Button>
                 <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" /> Lưu
+                  <CommonIcon name="save" className="w-4 h-4 mr-2" /> Lưu
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="outline" onClick={handleEdit}>
-                  <Edit className="w-4 h-4 mr-2" /> Chỉnh sửa
+                  <CommonIcon name="edit" className="w-4 h-4 mr-2" /> Chỉnh sửa
                 </Button>
                 <Button variant="outline">
-                  <FileCheck className="w-4 h-4 mr-2" /> Gửi duyệt
+                  <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
                 </Button>
                 <Button variant="outline">
-                  <FilePlus className="w-4 h-4 mr-2" /> Tạo phiên bản
+                  <CommonIcon name="plus" className="w-4 h-4 mr-2" /> Tạo phiên bản
                 </Button>
                 <Button variant="outline">
-                  <Send className="w-4 h-4 mr-2" /> Gửi ký
+                  <CommonIcon name="send" className="w-4 h-4 mr-2" /> Gửi ký
                 </Button>
                 <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" /> Tải PDF
+                  <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải PDF
                 </Button>
                 <Button variant="outline">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Bình luận
+                  <CommonIcon name="message" className="w-4 h-4 mr-2" /> Bình luận
                 </Button>
                 <Button variant="destructive">
-                  <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                  <CommonIcon name="trash" className="w-4 h-4 mr-2" /> Xóa
                 </Button>
               </>
             )}
@@ -377,9 +377,9 @@ export const RepositoryFileDetail: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {error && (
-          <Card className="border-red-200 bg-red-50">
+          <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
             <CardContent className="p-6">
-              <Text className="text-red-700 text-center">{error}</Text>
+              <Text className="text-center" style={ color: '#b91c1c' }>{error}</Text>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>
@@ -389,7 +389,7 @@ export const RepositoryFileDetail: React.FC = () => {
         {!file && !isLoading && !error && (
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-gray-600">Không tìm thấy tệp.</p>
+              <p style={ color: '#4b5563' }>Không tìm thấy tệp.</p>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>

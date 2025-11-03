@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppSelector } from '@store/hooks';
 import {
@@ -14,6 +14,10 @@ import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants'
 import { Card, CardContent, Button, Text, RefreshButton, WindowPanel } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import PanelSelector from '../../../components/PanelSelector';
+import {
+  getLayoutPreference,
+  getSavedLayout,
+} from '@shared/lib/panelLayoutManager';
 
 // Panel state type
 interface PanelState {
@@ -35,7 +39,7 @@ export const Dashboard = () => {
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Load panel state from localStorage or use defaults
+  // Load panel state from localStorage or use defaults from layout manager
   const loadPanelState = (): PanelState[] => {
     const saved = localStorage.getItem('dashboard-panels');
     if (saved) {
@@ -46,13 +50,23 @@ export const Dashboard = () => {
       }
     }
     
-    // Default positions
+    // Load from layout preference
+    const layoutName = getLayoutPreference();
+    const layout = getSavedLayout(layoutName);
+    
+    // Convert layout config to panel state + add stats panel
+    const defaultPanels = layout.panels.map((panel) => ({
+      id: panel.id,
+      label: panel.label,
+      visible: true,
+      minimized: false,
+      position: panel.position,
+    }));
+    
+    // Add stats panel at the beginning
     return [
       { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
-      { id: 'repositories', label: 'Repositories gần đây', visible: true, minimized: false, position: { x: 20, y: 0 } },
-      { id: 'files', label: 'Files gần đây', visible: true, minimized: false, position: { x: 560, y: 0 } },
-      { id: 'organizations', label: 'Tổ chức', visible: true, minimized: false, position: { x: 20, y: 420 } },
-      { id: 'quickActions', label: 'Hành động nhanh', visible: true, minimized: false, position: { x: 20, y: 890 } },
+      ...defaultPanels,
     ];
   };
   
@@ -88,11 +102,7 @@ export const Dashboard = () => {
     ));
   };
 
-  // Reset to default positions
-  const resetPanelPositions = () => {
-    setPanels(loadPanelState());
-    localStorage.removeItem('dashboard-panels');
-  };
+  // Layout functions removed - no longer needed
 
   // Get current user ID for filtering
   const userId = user?.id;
@@ -129,6 +139,21 @@ export const Dashboard = () => {
     }
   };
 
+  const statsGridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (statsGridRef.current) {
+      anime({
+        targets: statsGridRef.current.children,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 600,
+        delay: anime.stagger(100),
+        easing: 'easeOutQuad',
+      });
+    }
+  }, []);
+
   const stats = [
     {
       title: t('dashboard.stats.repositories'),
@@ -152,31 +177,13 @@ export const Dashboard = () => {
       icon: '🏢',
     },
     {
-      title: t('dashboard.stats.storageUsed'),
+      title: t('dashboard.stats.storageUploadUsed'),
       value: '2.4 GB',
       change: '+15%',
       color: 'from-pink-500 to-rose-500',
       icon: '💾',
     },
   ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-    },
-  };
 
   const NumberCounter = ({ value }: { value: number }) => {
     const [display, setDisplay] = useState(0);
@@ -200,19 +207,11 @@ export const Dashboard = () => {
   return (
     <DashboardLayout
       title={t('dashboard.title')}
-      subtitle={t('dashboard.subtitle')}
+      description="Tổng quan hoạt động và thống kê hệ thống của bạn"
       breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
       onRefresh={handleRefresh}
       headerRight={
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetPanelPositions}
-            title="Đặt lại vị trí mặc định"
-          >
-            🔄 Reset
-          </Button>
           <PanelSelector
             panels={panels.map((p: PanelState) => ({ id: p.id, label: p.label, visible: p.visible }))}
             onToggle={togglePanel}
@@ -222,51 +221,57 @@ export const Dashboard = () => {
       }
     >
         {/* Welcome Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Text as="h1" className="text-4xl font-bold text-gray-900 mb-2">
+        <div className="mb-8 animate-fade-in">
+          <Text as="h1" className="font-bold mb-2" style={ color: '#111827' }>
             {t('dashboard.welcome', { name: user?.firstName || user?.username || '' })}
           </Text>
-          <Text as="p" className="text-gray-600">
+          <Text as="p" style={ color: '#4b5563' }>
             {t('dashboard.whatsHappening')}
           </Text>
-        </motion.div>
+        </div>
 
-        {/* Stats Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        >
-          {stats.map((stat, index) => (
-            <motion.div key={index} variants={itemVariants} whileHover={{ scale: 1.02, rotate: 0.2 }}>
-              <Card className="h-full">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
-                    <span className="text-2xl">
-                      {stat.icon}
-                    </span>
-                  </div>
-                  <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
-                    {stat.title}
-                  </Text>
-                  <div className="flex items-baseline justify-between">
-                    <Text as="p" className="text-2xl font-bold text-gray-900">
-                      {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
-                    </Text>
-                    <Text as="span" className="text-sm text-green-600 font-medium">
-                      {stat.change}
-                    </Text>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* Stats WindowPanel */}
+        {panels.find(p => p.id === 'stats')?.visible && (
+          <WindowPanel
+            id="stats"
+            title={t('dashboard.stats.title') || 'Thống kê'}
+            defaultWidth={1040}
+            defaultHeight={300}
+            minimized={panels.find(p => p.id === 'stats')?.minimized}
+            visible={panels.find(p => p.id === 'stats')?.visible}
+            position={panels.find(p => p.id === 'stats')?.position || { x: 0, y: 0 }}
+            onMinimize={(min) => minimizePanel('stats', min)}
+            onClose={() => closePanel('stats')}
+            onPositionChange={updatePanelPosition}
+          >
+            <div ref={statsGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, index) => (
+                <div key={index} className="transition-transform hover:scale-[1.02]">
+                  <Card className="h-full">
+                    <CardContent className="p-6">
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
+                        <span className="text-2xl">
+                          {stat.icon}
+                        </span>
+                      </div>
+                      <Text as="h3" className="text-sm font-medium mb-1" style={ color: '#4b5563' }>
+                        {stat.title}
+                      </Text>
+                      <div className="flex items-baseline justify-between">
+                        <Text as="p" className="text-2xl font-bold" style={ color: '#111827' }>
+                          {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
+                        </Text>
+                        <Text as="span" className="text-sm font-medium" style={ color: '#16a34a' }>
+                          {stat.change}
+                        </Text>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </WindowPanel>
+        )}
 
         {/* WindowPanels Container */}
         <div className="relative" style={{ minHeight: '1200px' }}>
@@ -288,27 +293,26 @@ export const Dashboard = () => {
               {!reposLoading && repositories && repositories.content.length > 0 ? (
                 <div className="space-y-3">
                     {repositories.content.slice(0, 5).map((repo) => (
-                      <motion.div
+                      <div
                         key={repo.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={ backgroundColor: '#f9fafb' }
                         onClick={() => navigate(`${REPOSITORIES_PATH}/${repo.id}`)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <Text as="h4" className="font-semibold text-gray-900">{repo.name}</Text>
-                            <Text as="p" className="text-sm text-gray-600">{t('dashboard.filesCount', { count: repo.fileCount })}</Text>
+                            <Text as="h4" className="font-semibold" style={ color: '#111827' }>{repo.name}</Text>
+                            <Text as="p" className="text-sm" style={ color: '#4b5563' }>{t('dashboard.filesCount', { count: repo.fileCount })}</Text>
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs" style={ color: '#6b7280' }>
                             {new Date(repo.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                 </div>
               ) : !reposLoading ? (
                 <div className="text-center py-8">
-                  <Text as="p" className="text-gray-500 mb-4">{t('dashboard.noRepositories')}</Text>
+                  <Text as="p" className="mb-4" style={ color: '#6b7280' }>{t('dashboard.noRepositories')}</Text>
                   <Button
                     variant="default"
                     onClick={() => navigate(REPOSITORIES_PATH)}
@@ -338,30 +342,29 @@ export const Dashboard = () => {
               {!filesLoading && files && files.content.length > 0 ? (
                 <div className="space-y-3">
                     {files.content.slice(0, 5).map((file) => (
-                      <motion.div
+                      <div
                         key={file.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={ backgroundColor: '#f9fafb' }
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <Text as="h4" className="font-semibold text-gray-900 truncate">
+                            <Text as="h4" className="font-semibold truncate" style={ color: '#111827' }>
                               {file.originalName || file.name}
                             </Text>
-                            <Text as="p" className="text-sm text-gray-600">
+                            <Text as="p" className="text-sm" style={ color: '#4b5563' }>
                               {(file.fileSize / 1024).toFixed(2)} KB
                             </Text>
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs" style={ color: '#6b7280' }>
                             {new Date(file.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                 </div>
               ) : !filesLoading ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Text as="p" className="text-gray-500">{t('dashboard.noFiles')}</Text>
+                <div className="py-8" style={ color: '#6b7280' }>
+                  <Text as="p" style={ color: '#6b7280' }>{t('dashboard.noFiles')}</Text>
                 </div>
               ) : null}
             </WindowPanel>
@@ -394,26 +397,25 @@ export const Dashboard = () => {
                   </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {organizations.content.map((org) => (
-                    <motion.div
+                    <div
                       key={org.id}
-                      whileHover={{ scale: 1.05 }}
-                      className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg cursor-pointer border-2 border-blue-200"
+                      className="p-4 rounded-lg cursor-pointer border-2 transition-transform hover:scale-105" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                       onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
                     >
-                      <Text as="h4" className="font-bold text-gray-900 mb-1">{org.name}</Text>
-                      <Text as="p" className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      <Text as="h4" className="font-bold mb-1" style={ color: '#111827' }>{org.name}</Text>
+                      <Text as="p" className="text-sm mb-2 line-clamp-2" style={ color: '#4b5563' }>
                         {org.description || t('dashboard.noDescription')}
                       </Text>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Text as="span" className="text-gray-500">{t('dashboard.members', { count: org.memberCount })}</Text>
+                      <div className="flex items-center text-xs" style={ color: '#6b7280' }>
+                        <Text as="span" style={ color: '#6b7280' }>{t('dashboard.members', { count: org.memberCount })}</Text>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
                 </>
               ) : !orgsLoading ? (
                 <div className="text-center py-8">
-                  <Text as="p" className="text-gray-500 mb-4">{t('dashboard.notInOrganization')}</Text>
+                  <Text as="p" className="mb-4" style={ color: '#6b7280' }>{t('dashboard.notInOrganization')}</Text>
                   <Button
                     variant="default"
                     onClick={() => navigate(ORGANIZATIONS_PATH)}

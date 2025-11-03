@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
-  RefreshButton,
   Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
   Table,
   TableHeader,
   TableRow,
@@ -75,16 +71,16 @@ export const RepositoryFilesList: React.FC = () => {
   const [tableColumns, setTableColumns] = useState([
     { key: 'checkbox', label: '', visible: true },
     { key: 'document', label: t('repositories.files.table.document'), visible: true },
-    { key: 'contractNumber', label: 'Mã HĐ', visible: false }, // New
+    { key: 'contractNumber', label: t('repositories.files.table.contractNumber'), visible: false },
     { key: 'status', label: t('repositories.files.table.status'), visible: true },
     { key: 'type', label: t('repositories.files.table.type'), visible: true },
-    { key: 'totalValue', label: 'Giá trị', visible: false }, // New
+    { key: 'totalValue', label: t('repositories.files.table.totalValue'), visible: false },
     { key: 'size', label: t('repositories.files.table.size'), visible: true },
     { key: 'uploadedAt', label: t('repositories.files.table.uploadedAt'), visible: true },
     { key: 'actions', label: '', visible: true },
-    { key: 'parties', label: 'Parties', visible: false },
-    { key: 'riskLevel', label: 'Risk', visible: true },
-    { key: 'reminders', label: 'Reminders', visible: false },
+    { key: 'parties', label: t('repositories.files.table.parties'), visible: false },
+    { key: 'riskLevel', label: t('repositories.files.table.riskLevel'), visible: true },
+    { key: 'reminders', label: t('repositories.files.table.reminders'), visible: false },
   ]);
   const [showTableSettings, setShowTableSettings] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -212,7 +208,7 @@ export const RepositoryFilesList: React.FC = () => {
       setError(e?.message || t('repositories.files.empty.notFound'));
       // If network, show retry
       if (e.code === 'NETWORK_ERROR' || !e.response) {
-        setError('Network error - Retry?');
+        setError(t('common.error.network'));
         // Add retry logic
       }
     } finally {
@@ -291,12 +287,16 @@ export const RepositoryFilesList: React.FC = () => {
       secondaryTabs={
         <Tabs>
           <TabList>
-            <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-              {t('repositories.files.tabs.all')}
-            </CommonTab>
-            <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')} className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-              {t('repositories.files.tabs.contract')}
-            </CommonTab>
+            <div style={activeTab === 'all' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : {}}>
+              <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')}>
+                {t('repositories.files.tabs.all')}
+              </CommonTab>
+            </div>
+            <div style={activeTab === 'contract' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : {}}>
+              <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')}>
+                {t('repositories.files.tabs.contract')}
+              </CommonTab>
+            </div>
           </TabList>
         </Tabs>
       }
@@ -322,19 +322,18 @@ export const RepositoryFilesList: React.FC = () => {
           onSortDirectionChange={handleSortDirectionChange}
           showAdvanced={showAdvanced}
           onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+          onRefresh={refreshFiles}
+          refreshing={refreshing}
         />
-      }
-      headerRight={
-        <RefreshButton onClick={refreshFiles} loading={refreshing} />
       }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
 
         {/* Content */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded">
-            <Text className="text-red-600">{error}</Text>
-            <Button variant="outline" onClick={() => fetchFiles(false)} size="sm" className="mt-2">Retry</Button>
+          <div className="p-4 rounded" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
+            <Text style={{ color: '#dc2626' }}>{error}</Text>
+            <Button variant="outline" onClick={() => fetchFiles(false)} size="sm" className="mt-2">{t('common.retry')}</Button>
           </div>
         )}
 
@@ -344,7 +343,7 @@ export const RepositoryFilesList: React.FC = () => {
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <Card>
-                  <div className="h-48 bg-gray-100 rounded-lg" />
+                  <div className="h-48 rounded-lg" style={{ backgroundColor: '#f3f4f6' }} />
                 </Card> {/* For grid */}
                 {/* Or table row skeleton for list */}
               </div>
@@ -356,20 +355,20 @@ export const RepositoryFilesList: React.FC = () => {
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <div className="mb-4">
-                <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mx-auto h-16 w-16" style={{ color: '#9ca3af' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <Text className="text-gray-600 mb-6">{t('repositories.files.empty.notFound')}</Text>
+              <Text className="mb-6" style={{ color: '#4b5563' }}>{t('repositories.files.empty.notFound')}</Text>
               <Button variant="outline" onClick={() => { setSearch(''); refreshFiles(); }}>{t('repositories.files.empty.clearSearchAndRefresh')}</Button>
             </div>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedFiles.length > 0 && (
-              <div className="col-span-full flex gap-2 p-2 bg-blue-50 rounded">
-                <Text>{selectedFiles.length} selected</Text>
-                <Button variant="outline" size="sm" onClick={() => selectAll(false)}>Clear</Button>
+              <div className="col-span-full flex gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff' }}>
+                <Text>{t('repositories.files.selected', { count: selectedFiles.length })}</Text>
+                <Button variant="outline" size="sm" onClick={() => selectAll(false)}>{t('repositories.files.clear')}</Button>
               </div>
             )}
             {filtered.map((f) => (
@@ -417,7 +416,7 @@ export const RepositoryFilesList: React.FC = () => {
                   </TableHeader>
                   {tableColumns.filter(col => col.visible).map(col => (
                     <TableHeader key={col.key}>
-                      <Text className="text-xs font-medium text-gray-500 uppercase">
+                      <Text className="text-xs font-medium uppercase" style={{ color: '#6b7280' }}>
                         {col.label}
                         {col.key === 'checkbox' ? null : <button onClick={() => openTableSettings()}>Settings</button>} // Add settings button in header
                       </Text>
@@ -437,11 +436,11 @@ export const RepositoryFilesList: React.FC = () => {
                     {tableColumns.filter(col => col.visible).map(col => (
                       col.key === 'checkbox' ? null : (
                         <TableCell key={col.key}>
-                          <Text className="text-sm text-gray-900">
+                          <Text className="text-sm" style={{ color: '#111827' }}>
                             {col.key === 'document' ? f.fileName :
                              col.key === 'contractNumber' ? f.contractNumber || '-' :
                              col.key === 'status' ? (
-                               <span className={`px-2 py-1 rounded text-xs bg-blue-100 text-blue-800`} title={t(`status.${f.status}.tooltip`)}>{f.status}</span>
+                               <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }} title={t(`status.${f.status}.tooltip`)}>{f.status}</span>
                              ) :
                              col.key === 'type' ? f.contractType || '-' :
                              col.key === 'totalValue' ? <Text>{f.totalValue ? `${f.totalValue.toLocaleString()} ${f.currency}` : '-'}</Text> :
@@ -453,7 +452,7 @@ export const RepositoryFilesList: React.FC = () => {
                                </Link>
                              ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || '-'}</Text> :
                              col.key === 'riskLevel' ? (
-                               <span className={`px-2 py-1 rounded text-xs ${f.riskLevel === 'LOW' ? 'bg-green-100 text-green-800' : f.riskLevel === 'HIGH' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
+                               <span className="px-2 py-1 rounded text-xs" style={f.riskLevel === 'LOW' ? { backgroundColor: '#dcfce7', color: '#166534' } : f.riskLevel === 'HIGH' ? { backgroundColor: '#fee2e2', color: '#991b1b' } : { backgroundColor: '#fef3c7', color: '#92400e' }} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
                              ) :
                              col.key === 'reminders' ? <Text>{f.reminders?.length || 0}</Text> : '-'}
                           </Text>
@@ -466,7 +465,7 @@ export const RepositoryFilesList: React.FC = () => {
             </Table>
           </TableContainer>
         )}
-        {hasMore && filtered.length > 0 && (
+        {hasMore && filtered.length > 0 && totalPages > 1 && (
           <div className="flex justify-center mt-6">
             <Button 
               onClick={loadMore} 
@@ -474,7 +473,7 @@ export const RepositoryFilesList: React.FC = () => {
               disabled={isLoading}
               className="px-6 py-3"
             >
-              {isLoading ? t('loading') : t('showMore', { count: 10 })}
+              {isLoading ? t('repositories.files.loading') : t('repositories.files.showMore')}
             </Button>
           </div>
         )}
@@ -488,11 +487,11 @@ export const RepositoryFilesList: React.FC = () => {
         )}
         {/* TODO: Implement AlertDialog when component is available */}
         {selectedFiles.length > 0 && (
-          <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-            <p className="text-sm text-gray-700 mb-2">Delete {selectedFiles.length} files?</p>
+          <div className="fixed bottom-4 right-4 rounded-lg p-4" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+            <p className="text-sm mb-2" style={{ color: '#374151' }}>{t('repositories.files.deleteConfirm', { count: selectedFiles.length })}</p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setSelectedFiles([])}>Cancel</Button>
-              <Button variant="destructive" onClick={() => {/* TODO: API delete */}}>Delete</Button>
+              <Button variant="outline" onClick={() => setSelectedFiles([])}>{t('common.cancel')}</Button>
+              <Button variant="destructive" onClick={() => {/* TODO: API delete */}}>{t('common.delete')}</Button>
             </div>
           </div>
         )}

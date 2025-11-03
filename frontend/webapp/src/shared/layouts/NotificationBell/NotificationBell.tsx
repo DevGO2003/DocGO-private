@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Check, X, Building2, Clock, RefreshCw } from 'lucide-react';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
 import { Button } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Invitation } from '@features/organizations/models/types/organization.types';
 
 export const NotificationBell = () => {
@@ -84,12 +84,12 @@ export const NotificationBell = () => {
       {/* Bell Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative p-2 hover: hover:bg-gray-100 rounded-lg transition-colors" style={ color: '#111827' } style={ color: '#4b5563' }
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
+        <CommonIcon name="bell" size={24} />
         {pendingCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+          <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full" style={ color: '#ffffff', backgroundColor: '#dc2626' }>
             {pendingCount}
           </span>
         )}
@@ -97,13 +97,13 @@ export const NotificationBell = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div className="absolute right-0 mt-2 rounded-lg border z-50" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }>
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="px-4 py-3 border-b flex items-center justify-between" style={ borderColor: '#e5e7eb' }>
+            <h3 className="text-lg font-semibold" style={ color: '#111827' }>
               Notifications
               {pendingCount > 0 && (
-                <span className="ml-2 text-sm font-normal text-gray-500">
+                <span className="ml-2 text-sm font-normal" style={ color: '#6b7280' }>
                   ({pendingCount} pending)
                 </span>
               )}
@@ -111,23 +111,23 @@ export const NotificationBell = () => {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+              className="p-1 hover: hover:bg-gray-100 rounded transition-colors disabled:opacity-50" style={ color: '#374151' } style={ color: '#6b7280' }
               title="Refresh notifications"
             >
-              <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <CommonIcon name="rotate-cw" size={16} className={isFetching ? 'animate-spin' : ''} />
             </button>
           </div>
 
           {/* Content */}
           <div className="max-h-96 overflow-y-auto">
             {isLoading ? (
-              <div className="px-4 py-8 text-center text-gray-500">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="px-4 py-8" style={ color: '#6b7280' }>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={ borderColor: '#2563eb' }></div>
                 <p className="mt-2">Loading...</p>
               </div>
             ) : pendingCount === 0 ? (
-              <div className="px-4 py-8 text-center text-gray-500">
-                <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <div className="px-4 py-8" style={ color: '#6b7280' }>
+                <CommonIcon name="bell" size={48} className="mx-auto mb-2 opacity-50" />
                 <p>No pending invitations</p>
               </div>
             ) : (
@@ -138,23 +138,23 @@ export const NotificationBell = () => {
                     className="px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-blue-600" />
+                      <div className="flex-shrink-0 h-10 rounded-full flex items-center justify-center" style={ backgroundColor: '#dbeafe' }>
+                        <CommonIcon name="building" size={20} style={ color: '#2563eb' } />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium truncate" style={ color: '#111827' }>
                           Organization Invitation
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm mt-1" style={ color: '#4b5563' }>
                           You've been invited to join as{' '}
-                          <span className="font-medium text-blue-600">
+                          <span className="font-medium" style={ color: '#2563eb' }>
                             {invitation.role}
                           </span>
                         </p>
 
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
+                        <div className="flex items-center gap-2 mt-2 text-xs" style={ color: '#6b7280' }>
+                          <CommonIcon name="clock" size={12} />
                           <span>{formatDate(invitation.createdAt)}</span>
                         </div>
 
@@ -172,7 +172,7 @@ export const NotificationBell = () => {
                               </>
                             ) : (
                               <>
-                                <Check className="w-3 h-3 mr-1" />
+                                <CommonIcon name="check" size={12} className="mr-1" />
                                 Accept
                               </>
                             )}
@@ -186,12 +186,12 @@ export const NotificationBell = () => {
                           >
                             {isDeclining ? (
                               <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-1"></div>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 mr-1" style={ borderColor: '#4b5563' }></div>
                                 Declining...
                               </>
                             ) : (
                               <>
-                                <X className="w-3 h-3 mr-1" />
+                                <CommonIcon name="x" size={12} className="mr-1" />
                                 Decline
                               </>
                             )}

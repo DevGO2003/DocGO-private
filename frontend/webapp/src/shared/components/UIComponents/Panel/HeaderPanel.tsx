@@ -6,8 +6,9 @@ import { CommonIcon } from '../Icon/CommonIcon';
 import anime from 'animejs';
 
 interface HeaderPanelProps {
-  title: string;
-  subtitle: string; // ✅ REQUIRED - không optional
+  title: string; // ✅ REQUIRED - Tiêu đề chính
+  subtitle?: string; // Phụ đề (ví dụ: "Mã: ABC123")
+  description: string; // ✅ REQUIRED - Mô tả nội dung trang
   breadcrumbs?: Array<{
     label: string;
     href?: string;
@@ -23,7 +24,8 @@ interface HeaderPanelProps {
 
 function HeaderPanel({
   title,
-  subtitle, // ✅ Required
+  subtitle,
+  description, // ✅ Required
   breadcrumbs,
   children,
   right,
@@ -68,7 +70,7 @@ function HeaderPanel({
     }
     
     return () => clearTimeout(t);
-  }, [title, subtitle, className]);
+  }, [title, subtitle, description, className]);
 
   return (
     <CommonFont
@@ -99,7 +101,7 @@ function HeaderPanel({
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={index} className="flex items-center">
                       {index > 0 && (
-                        <CommonIcon name="chevron-right" size={16} className="mx-1 text-gray-400" />
+                        <CommonIcon name="chevron-right" size={16} className="mx-1" style={ color: '#9ca3af' } />
                       )}
                       <CommonText 
                         as="span" 
@@ -122,9 +124,16 @@ function HeaderPanel({
               {title}
             </CommonText>
             
-            {/* Subtitle - REQUIRED */}
-            <CommonText as="p" className="text-gray-600 text-sm mb-2">
-              {subtitle}
+            {/* Subtitle - Optional */}
+            {subtitle && (
+              <CommonText as="p" className="text-xs font-medium mb-1" style={ color: '#6b7280' }>
+                {subtitle}
+              </CommonText>
+            )}
+            
+            {/* Description - REQUIRED */}
+            <CommonText as="p" className="text-sm mb-2" style={ color: '#4b5563' }>
+              {description}
             </CommonText>
 
             {children && <div className="mt-2">{children}</div>}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Copy, Check, UserPlus, Shield } from 'lucide-react';
-import { Button, Modal, Input, Select, Checkbox, LoadingSpinner } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
 
@@ -79,21 +79,21 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-indigo-600" />
+            <div className="h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#e0e7ff' }}>
+              <CommonIcon name="user-plus" className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold" style={{ color: '#111827' }}>
                 {t('repositories.detail.invite.title')}
               </h2>
-              <p className="text-sm text-gray-500">{repositoryName}</p>
+              <p className="text-sm" style={{ color: '#6b7280' }}>{repositoryName}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <CommonIcon name="x" className="w-5 h-5" />
           </button>
         </div>
 
@@ -123,7 +123,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
           {(isPersonal || inviteMethod === 'link') && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
                   Link mời
                 </label>
                 <div className="flex gap-2">
@@ -139,12 +139,12 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   >
                     {copied ? (
                       <>
-                        <Check className="w-4 h-4 mr-2 text-green-600" />
+                        <CommonIcon name="check" className="mr-2" />
                         Đã sao
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4 mr-2" />
+                        <CommonIcon name="copy" className="w-4 h-4 mr-2" />
                         Sao chép
                       </>
                     )}
@@ -153,7 +153,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
                   Link hết hạn sau
                 </label>
                 <Select
@@ -170,51 +170,10 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
 
               {/* Permissions for Personal Repository */}
               {isPersonal && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    <Shield className="w-4 h-4 inline mr-2" />
-                    Quyền hạn cho người được mời
-                  </label>
-                  <div className="space-y-3 bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Xem file</p>
-                        <p className="text-sm text-gray-500">Được xem và tải file</p>
-                      </div>
-                      <Checkbox
-                        checked={permissions.view}
-                        onCheckedChange={(checked) =>
-                          setPermissions({ ...permissions, view: !!checked })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Upload file</p>
-                        <p className="text-sm text-gray-500">Được upload file mới</p>
-                      </div>
-                      <Checkbox
-                        checked={permissions.upload}
-                        onCheckedChange={(checked) =>
-                          setPermissions({ ...permissions, upload: !!checked })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Xóa file</p>
-                        <p className="text-sm text-gray-500">Được xóa file khỏi repository</p>
-                      </div>
-                      <Checkbox
-                        checked={permissions.delete}
-                        onCheckedChange={(checked) =>
-                          setPermissions({ ...permissions, delete: !!checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    💡 Mặc định: người upload file sẽ có quyền xem và xóa file đó
+                <div className="border rounded-lg p-4" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }}>
+                  <p className="text-sm" style={{ color: '#1e40af' }}>
+                    💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file.
+                    Chỉ bạn mời có quyền upload và xóa.
                   </p>
                 </div>
               )}
@@ -225,13 +184,13 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
           {isOrganization && inviteMethod === 'member' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
                   Chọn thành viên
                 </label>
-                <div className="border border-gray-300 rounded-lg max-h-48 overflow-y-auto">
+                <div className="border rounded-lg max-h-48 overflow-y-auto" style={{ borderColor: '#d1d5db' }}>
                   {membersLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner text="Đang tải danh sách thành viên..." />
+                      Đang tải danh sách thành viên...
                     </div>
                   ) : organizationMembers.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
@@ -265,15 +224,15 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
 
               {/* Permissions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  <Shield className="w-4 h-4 inline mr-2" />
+                <label className="block text-sm font-medium mb-3" style={{ color: '#374151' }}>
+                  <CommonIcon name="shield" className="w-4 h-4 inline mr-2" />
                   Quyền hạn
                 </label>
-                <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+                <div className="space-y-3 rounded-lg p-4" style={{ backgroundColor: '#f9fafb' }}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">Xem file</p>
-                      <p className="text-sm text-gray-500">Được xem và tải file</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>Xem file</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>Được xem và tải file</p>
                     </div>
                     <Checkbox
                       checked={permissions.view}
@@ -284,8 +243,8 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">Upload file</p>
-                      <p className="text-sm text-gray-500">Được upload file mới</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>Upload file</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>Được upload file mới</p>
                     </div>
                     <Checkbox
                       checked={permissions.upload}
@@ -296,8 +255,8 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">Xóa file</p>
-                      <p className="text-sm text-gray-500">Được xóa file khỏi repository</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>Xóa file</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>Được xóa file khỏi repository</p>
                     </div>
                     <Checkbox
                       checked={permissions.delete}

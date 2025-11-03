@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { ShieldAlert, ArrowLeft, Home } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent, Button, CommonFont, CommonText } from '@shared/components';
 import { HOME_PATH } from '@constants';
 
@@ -39,15 +39,15 @@ export const Unauthorized = () => {
       <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <div ref={iconRef} className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
-              <ShieldAlert className="w-12 h-12 text-red-600" />
+            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={ backgroundColor: '#fee2e2' }>
+              <CommonIcon name="alert-circle" size={48} style={ color: '#dc2626' } />
             </div>
 
-            <CommonText as="h1" className="text-3xl font-bold text-gray-900 mb-3">
+            <CommonText as="h1" className="text-3xl font-bold mb-3" style={ color: '#111827' }>
               {t('unauthorized.title')}
             </CommonText>
 
-            <CommonText as="p" className="text-gray-600 mb-8">
+            <CommonText as="p" className="mb-8" style={ color: '#4b5563' }>
               {t('unauthorized.description')}
             </CommonText>
 
@@ -57,7 +57,7 @@ export const Unauthorized = () => {
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <CommonIcon name="arrow-left" size={16} />
                 {t('unauthorized.goBack')}
               </Button>
               <Button
@@ -65,7 +65,7 @@ export const Unauthorized = () => {
                 onClick={() => navigate(HOME_PATH)}
                 className="flex items-center gap-2"
               >
-                <Home className="w-4 h-4" />
+                <CommonIcon name="home" size={16} />
                 {t('unauthorized.goHome')}
               </Button>
             </div>

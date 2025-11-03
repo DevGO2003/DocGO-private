@@ -1,0 +1,1 @@
+export { RepositoryPermissionsManager } from './RepositoryPermissionsManager';

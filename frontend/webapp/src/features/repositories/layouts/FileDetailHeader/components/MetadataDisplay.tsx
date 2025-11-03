@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileData } from '../FileDetailHeader.types';
-import { FileText, User, Calendar, HardDrive } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface MetadataDisplayProps {
   file: FileData;
@@ -23,8 +23,8 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
     <div className="space-y-2 text-sm">
       {/* Code */}
       {file.code && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <FileText className="w-4 h-4" />
+        <div className="flex items-center gap-2" style={ color: '#4b5563' }>
+          <CommonIcon name="file-text" size={16} />
           <span className="font-medium">Mã:</span>
           <span>{file.code}</span>
         </div>
@@ -32,8 +32,8 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
 
       {/* Type */}
       {file.type && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <FileText className="w-4 h-4" />
+        <div className="flex items-center gap-2" style={ color: '#4b5563' }>
+          <CommonIcon name="file-text" size={16} />
           <span className="font-medium">Loại:</span>
           <span>{file.type}</span>
         </div>
@@ -41,8 +41,8 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
 
       {/* Owner */}
       {file.owner && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <User className="w-4 h-4" />
+        <div className="flex items-center gap-2" style={ color: '#4b5563' }>
+          <CommonIcon name="user" size={16} />
           <span className="font-medium">Chủ sở hữu:</span>
           <span>{file.owner}</span>
         </div>
@@ -50,8 +50,8 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
 
       {/* Created Date */}
       {file.createdAt && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-2" style={ color: '#4b5563' }>
+          <CommonIcon name="calendar" size={16} />
           <span className="font-medium">Ngày tạo:</span>
           <span>{formatDate(file.createdAt)}</span>
         </div>
@@ -59,8 +59,8 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
 
       {/* Size */}
       {file.size && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <HardDrive className="w-4 h-4" />
+        <div className="flex items-center gap-2" style={ color: '#4b5563' }>
+          <CommonIcon name="folder" size={16} />
           <span className="font-medium">Kích thước:</span>
           <span>{formatSize(file.size)}</span>
         </div>
@@ -69,7 +69,7 @@ export const MetadataDisplay: React.FC<MetadataDisplayProps> = ({ file }) => {
       {/* Status */}
       {file.status && (
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-600">Trạng thái:</span>
+          <span className="font-medium" style={ color: '#4b5563' }>Trạng thái:</span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
             file.status === 'active' ? 'bg-green-100 text-green-700' :
             file.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :

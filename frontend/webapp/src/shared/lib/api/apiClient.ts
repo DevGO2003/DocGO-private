@@ -72,10 +72,12 @@ class ApiClient {
           ''
         ).toLowerCase()
         
-        // Check for authorization header errors
+        // Check for authorization header errors (more aggressive)
         const isAuthHeaderError = errorMessage.includes('missing') || 
-                                 errorMessage.includes('invalid authorization') ||
-                                 errorMessage.includes('authorization header')
+                                 errorMessage.includes('invalid') ||
+                                 errorMessage.includes('authorization') ||
+                                 errorMessage.includes('token') ||
+                                 errorMessage.includes('unauthorized')
         
         // Check for 401/403 status
         const isUnauthorized = error.response?.status === 401 || 

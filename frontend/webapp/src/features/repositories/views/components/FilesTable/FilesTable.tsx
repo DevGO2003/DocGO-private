@@ -20,22 +20,22 @@ export const FilesTable: React.FC<{ items: FilesTableItem[]; repositoryId: strin
       <Table>
         <thead>
           <TableRow>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">File</Text></TableHeader>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Trạng thái</Text></TableHeader>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Loại</Text></TableHeader>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Kích thước</Text></TableHeader>
-            <TableHeader><Text className="text-xs font-medium text-gray-500 uppercase">Tải lên lúc</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium uppercase" style={ color: '#6b7280' }>File</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium uppercase" style={ color: '#6b7280' }>Trạng thái</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium uppercase" style={ color: '#6b7280' }>Loại</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium uppercase" style={ color: '#6b7280' }>Kích thước</Text></TableHeader>
+            <TableHeader><Text className="text-xs font-medium uppercase" style={ color: '#6b7280' }>Tải lên lúc</Text></TableHeader>
             <TableHeader></TableHeader>
           </TableRow>
         </thead>
         <tbody>
           {items.map((f) => (
             <TableRow key={f.fileId}>
-              <TableCell><Text className="text-sm text-gray-900 break-all">{f.fileName}</Text></TableCell>
-              <TableCell><Text className="text-sm text-gray-600">{f.status || '-'}</Text></TableCell>
-              <TableCell><Text className="text-sm text-gray-600">{f.contractType || '-'}</Text></TableCell>
-              <TableCell><Text className="text-sm text-gray-600">{(f.fileSize ?? 0)} bytes</Text></TableCell>
-              <TableCell><Text className="text-sm text-gray-600">{f.uploadedAt ? new Date(f.uploadedAt).toLocaleString('vi-VN') : '-'}</Text></TableCell>
+              <TableCell><Text className="text-sm" style={ color: '#111827' }>{f.fileName}</Text></TableCell>
+              <TableCell><Text className="text-sm" style={ color: '#4b5563' }>{f.status || '-'}</Text></TableCell>
+              <TableCell><Text className="text-sm" style={ color: '#4b5563' }>{f.contractType || '-'}</Text></TableCell>
+              <TableCell><Text className="text-sm" style={ color: '#4b5563' }>{(f.fileSize ?? 0)} bytes</Text></TableCell>
+              <TableCell><Text className="text-sm" style={ color: '#4b5563' }>{f.uploadedAt ? new Date(f.uploadedAt).toLocaleString('vi-VN') : '-'}</Text></TableCell>
               <TableCell>
                 <Link
                   to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: repositoryId, fileId: f.fileId })}

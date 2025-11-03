@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Check, X, Building2, Clock, RefreshCw } from 'lucide-react';
+import { CommonIcon } from '../Icon/CommonIcon';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
 import { Popover, Button, Badge, Panel, Flex, Stack, Text, Heading } from '@shared/components';
 import { Invitation } from '@features/organizations/models/types/organization.types';
@@ -126,7 +126,7 @@ export const NotificationBell = () => {
                 disabled={isFetching}
                 title="Refresh notifications"
               >
-                <RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} />
+                <CommonIcon name="refresh" size={16} className={isFetching ? 'animate-spin' : ''} />
               </Button>
             </Flex>
             {/* Content */}
@@ -135,7 +135,7 @@ export const NotificationBell = () => {
                 <Flex align="center" justify="center" py="6"><LoadingSpinner /></Flex>
               ) : pendingCount === 0 ? (
                 <Stack align="center" py="8">
-                  <Bell size={48} opacity={0.5} color="gray500" />
+                  <CommonIcon name="bell" size={48} opacity={0.5} color="gray500" />
                   <Text size="sm" color="gray500">No pending invitations</Text>
                 </Stack>
               ) : (
@@ -144,7 +144,7 @@ export const NotificationBell = () => {
                     <Panel key={invitation.id} hoverable>
                       <Flex align="start" gap="3">
                         <Flex align="center" justify="center" shrink="0" width="10" height="10" bg="blue100" rounded>
-                          <Building2 size={20} color="blue600" />
+                          <CommonIcon name="building" size={20} color="blue600" />
                         </Flex>
                         <Stack flex="1">
                           <Heading level={4} size="sm" fontWeight="medium" color="gray900" isTruncated>
@@ -154,7 +154,7 @@ export const NotificationBell = () => {
                             You've been invited to join as <Text as="span" color="blue600" fontWeight="medium">{invitation.role}</Text>
                           </Text>
                           <Flex align="center" gap="2" mt="2">
-                            <Clock size={12} color="gray500" />
+                            <CommonIcon name="clock" size={12} color="gray500" />
                             <Text size="xs" color="gray500">{formatDate(invitation.createdAt)}</Text>
                           </Flex>
                           <Flex gap="2" mt="3">
@@ -171,7 +171,7 @@ export const NotificationBell = () => {
                                 </>
                               ) : (
                                 <>
-                                  <Check size={12} /> Accept
+                                  <CommonIcon name="check" size={12} /> Accept
                                 </>
                               )}
                             </Button>
@@ -189,7 +189,7 @@ export const NotificationBell = () => {
                                 </>
                               ) : (
                                 <>
-                                  <X size={12} /> Decline
+                                  <CommonIcon name="x" size={12} /> Decline
                                 </>
                               )}
                             </Button>

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
-import { ArrowRight, X } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 interface NoRecentRepositoryModalProps {
   isOpen: boolean;
@@ -167,7 +167,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-md bg-white overflow-hidden"
+        className="relative w-full max-w-md overflow-hidden" style={ backgroundColor: '#ffffff' }
         style={{ fontFamily: '"Kalam", "Comic Sans MS", cursive' }}
       >
         <canvas
@@ -287,7 +287,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
             {/* Go to Repositories Button */}
             <button
               onClick={onGoToRepositories}
-              className="relative flex-1 py-3 px-6 font-bold text-lg text-white transition-transform hover:scale-105 flex items-center justify-center gap-2"
+              className="relative flex-1 py-3 px-6 font-bold text-lg transition-transform hover:scale-105 flex items-center justify-center gap-2" style={ color: '#ffffff' }
             >
               <canvas
                 ref={buttonCanvasRef2}
@@ -295,7 +295,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
                 style={{ width: '100%', height: '100%' }}
               />
               <span className="relative">{t('modals.noRecentRepository.goToRepos')}</span>
-              <ArrowRight className="h-5 w-5" />
+              <CommonIcon name="arrow-right" size={16} />
             </button>
           </div>
         </div>

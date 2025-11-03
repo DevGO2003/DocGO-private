@@ -1,5 +1,5 @@
-import { AlertTriangle, Shield } from 'lucide-react';
 import { Card, CardContent } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface RiskTabProps {
   data: any;
@@ -10,7 +10,7 @@ export function RiskTab({ data }: RiskTabProps) {
 
   if (!risk) {
     return (
-      <div className="text-center text-gray-500 py-8">Không có dữ liệu phân tích rủi ro</div>
+      <div className="py-8" style={ color: '#6b7280' }>Không có dữ liệu phân tích rủi ro</div>
     );
   }
 
@@ -51,7 +51,7 @@ export function RiskTab({ data }: RiskTabProps) {
         >
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-8 h-8" />
+              <CommonIcon name="alert-circle" className="w-8 h-8" />
               <div>
                 <h3 className="text-xl font-bold">Mức rủi ro tổng thể</h3>
                 <p className="text-2xl font-bold mt-1">{risk.riskLevel}</p>
@@ -71,7 +71,7 @@ export function RiskTab({ data }: RiskTabProps) {
 
             <div className="space-y-4">
               {risk.riskFactors.map((factor: any, idx: number) => (
-                <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                <div key={idx} className="border rounded-lg p-4" style={ borderColor: '#e5e7eb' }>
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       {factor.type && (
@@ -88,7 +88,7 @@ export function RiskTab({ data }: RiskTabProps) {
                   </div>
 
                   {factor.content && (
-                    <div className="bg-gray-50 p-3 rounded text-sm italic text-gray-600 mb-3">
+                    <div className="p-3 rounded text-sm mb-3" style={ backgroundColor: '#f9fafb', color: '#4b5563' }>
                       {factor.content}
                     </div>
                   )}
@@ -96,7 +96,7 @@ export function RiskTab({ data }: RiskTabProps) {
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     {factor.probability && (
                       <div>
-                        <span className="text-xs text-gray-600">Xác suất:</span>
+                        <span className="text-xs" style={ color: '#4b5563' }>Xác suất:</span>
                         <p
                           className={`font-semibold ${
                             probabilityColors[factor.probability] || 'text-gray-700'
@@ -108,7 +108,7 @@ export function RiskTab({ data }: RiskTabProps) {
                     )}
                     {factor.impact && (
                       <div>
-                        <span className="text-xs text-gray-600">Tác động:</span>
+                        <span className="text-xs" style={ color: '#4b5563' }>Tác động:</span>
                         <p
                           className={`font-semibold ${
                             impactColors[factor.impact] || 'text-gray-700'
@@ -128,10 +128,10 @@ export function RiskTab({ data }: RiskTabProps) {
 
       {/* Mitigation Measures */}
       {risk.mitigationMeasures && risk.mitigationMeasures.length > 0 && (
-        <Card className="border-green-200">
+        <Card style={ borderColor: '#bbf7d0' }>
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-6 h-6 text-green-600" />
+              <CommonIcon name="shield" style={ color: '#16a34a' } />
               <h3 className="text-lg font-semibold">
                 Biện pháp giảm thiểu rủi ro ({risk.mitigationMeasures.length})
               </h3>
@@ -139,8 +139,8 @@ export function RiskTab({ data }: RiskTabProps) {
 
             <div className="space-y-3">
               {risk.mitigationMeasures.map((measure: any, idx: number) => (
-                <div key={idx} className="border-l-4 border-green-400 pl-4 py-2 bg-green-50">
-                  <p className="text-sm text-gray-700">
+                <div key={idx} className="border-l-4 pl-4 py-2" style={ borderColor: '#4ade80' } style={ backgroundColor: '#f0fdf4' }>
+                  <p className="text-sm" style={ color: '#374151' }>
                     {typeof measure === 'string' ? measure : measure.description || measure}
                   </p>
                 </div>

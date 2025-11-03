@@ -2,21 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  Button,
-  Card,
-  CardContent,
-  RefreshButton,
-} from '@shared/components';
+import { Button, RefreshButton, Card } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
-import { 
-  Info,
-  Users, 
-  FileText, 
-  Activity
-} from 'lucide-react';
-import { useRepository, useRepositoryMembers, useRepositoryActivity } from '@features/repositories/models/api/repositoryApi';
-import { RepositoryType } from '@features/repositories/models/types';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
 import { NOT_FOUND_PATH } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
 import { RepositoryDetailTabs } from '../../components/RepositoryDetailTabs';
@@ -25,14 +14,13 @@ export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const { t } = useTranslation();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
   const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
-  const { data: activityData, isLoading: activityLoading } = useRepositoryActivity(id || '');
 
   // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
   useEffect(() => {
@@ -58,6 +46,40 @@ export const RepositoryDetail: React.FC = () => {
     navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
   };
 
+  const handleUpdatePermission = async (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {
+    try {
+      console.log(`[RepositoryDetail] Updating permission: ${permissionType} = ${value} for member ${memberId}`);
+      
+      // Call API to update permissions
+      const response = await fetch(
+        `/api/v1/repositories/${id}/members/${memberId}/permissions`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            [permissionType]: value
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to update permission: ${response.statusText}`);
+      }
+
+      // Refetch members data
+      await queryClient.invalidateQueries({ queryKey: ['repository-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['repository-members', id] });
+
+      console.log('[RepositoryDetail] Permission updated successfully');
+    } catch (error) {
+      console.error('[RepositoryDetail] Failed to update permission:', error);
+      alert(t('repositories.detail.members.permissions.error'));
+    }
+  };
+
   const handleRefresh = async () => {
     console.log('[RepositoryDetail] Refreshing data...');
     setIsRefreshing(true);
@@ -77,7 +99,7 @@ export const RepositoryDetail: React.FC = () => {
   return (
     <RepositoryLayout
       title={repository ? repository.name : t('repositories.files.breadcrumbs.repository')}
-      subtitle={repository ? undefined : t('repositories.detail.loading')}
+      description={repository ? repository.description : undefined}
       breadcrumbs={[
         { label: t('nav.repositories'), href: '/repositories' },
         repository ? { label: repository.name, current: true } : { label: t('app.loading'), current: true },
@@ -86,17 +108,25 @@ export const RepositoryDetail: React.FC = () => {
       loadingText={t('repositories.detail.loading')}
       onRefresh={handleRefresh}
       headerRight={
-        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <>
+          <Button variant="outline" onClick={goToUploadWithRepo} className="flex items-center gap-2">
+            <CommonIcon name="upload" size={16} />
+            {t('repositories.detail.actions.upload')}
+          </Button>
+          <Button variant="outline" onClick={() => setShowInviteModal(true)} className="flex items-center gap-2">
+            <CommonIcon name="user-plus" size={16} />
+            {t('repositories.detail.actions.invite')}
+          </Button>
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        </>
       }
     >
       {(!repository && !error) ? null : (
         <div>
             {/* Optional error banner */}
             {error && (
-              <Card className="border-red-200 bg-red-50 mb-4">
-                <CardContent className="p-4">
-                  <p className="text-red-700">{t('repositories.detail.error')}</p>
-                </CardContent>
+              <Card className="mb-4 p-4 border-l-4" style={{ borderLeftColor: '#dc2626', backgroundColor: '#fef2f2' }}>
+                <p style={{ color: '#b91c1c' }}>{t('repositories.detail.error')}</p>
               </Card>
             )}
 
@@ -110,44 +140,102 @@ export const RepositoryDetail: React.FC = () => {
                   />
 
                   {/* Tab Content */}
-                  {activeTab === 'info' && (
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="space-y-6">
+                  {activeTab === 'overview' && (
+                    <Card className="p-6">
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <h4 className="font-medium text-gray-900 mb-2">Mô tả</h4>
-                            <p className="text-gray-600">
-                              {repository?.description || 'Không có mô tả'}
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.info.name')}</h4>
+                            <p className="text-base font-medium" style={ color: '#111827' }>
+                              {repository?.name}
                             </p>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Chủ sở hữu</h4>
-                              <p className="text-gray-600">
-                                {repository?.ownerName || 'Chưa có thông tin'}
-                              </p>
-                            </div>
-                            {repository?.organizationId && (
-                              <div>
-                                <h4 className="font-medium text-gray-900 mb-2">Tổ chức</h4>
-                                <p className="text-gray-600">
-                                  {repository?.organizationName || 'Không có'}
-                                </p>
-                              </div>
-                            )}
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.type.label')}</h4>
+                            <p className="text-base" style={ color: '#111827' }>
+                              {repository?.type === 'PERSONAL' ? t('repositories.detail.type.personal') : t('repositories.detail.type.organization')}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.info.status')}</h4>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{
+                              backgroundColor: repository?.isPublic ? '#dcfce7' : '#f3f4f6',
+                              color: repository?.isPublic ? '#166534' : '#374151'
+                            }}>
+                              {repository?.isPublic ? t('repositories.detail.type.public') : t('repositories.detail.type.private')}
+                            </span>
                           </div>
                         </div>
-                      </CardContent>
+
+                        <div>
+                          <h4 className="text-sm font-medium mb-2" style={ color: '#6b7280' }>{t('repositories.detail.info.description')}</h4>
+                          <p style={ color: '#374151' }>
+                            {repository?.description || t('repositories.detail.info.noDescription')}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-sm font-medium mb-2" style={ color: '#6b7280' }>{t('repositories.detail.info.owner')}</h4>
+                            <p style={ color: '#111827' }>
+                              {repository?.ownerName || t('repositories.detail.info.noInfo')}
+                            </p>
+                          </div>
+                          {repository?.organizationId && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2" style={ color: '#6b7280' }>{t('repositories.detail.info.organization')}</h4>
+                              <p style={ color: '#111827' }>
+                                {repository?.organizationName || t('repositories.detail.info.none')}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.stats.files')}</h4>
+                            <p className="text-2xl font-semibold" style={ color: '#111827' }>
+                              {repository?.fileCount || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.stats.members')}</h4>
+                            <p className="text-2xl font-semibold" style={ color: '#111827' }>
+                              {repository?.memberCount || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.stats.storage')}</h4>
+                            <p className="text-2xl font-semibold" style={ color: '#111827' }>
+                              {formatFileSize(repository?.totalSize)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.info.createdAt')}</h4>
+                            <p style={ color: '#111827' }>
+                              {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : '-'}
+                            </p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium mb-1" style={ color: '#6b7280' }>{t('repositories.detail.info.updatedAt')}</h4>
+                            <p style={ color: '#111827' }>
+                              {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </Card>
                   )}
 
                   {activeTab === 'files' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         {repository.files && repository.files.length > 0 ? (
                           <div>
                             <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold" style={ color: '#111827' }>
                                 {t('repositories.detail.files.list')} ({repository.files.length})
                               </h3>
                               <Button onClick={goToUploadWithRepo}>
@@ -158,19 +246,19 @@ export const RepositoryDetail: React.FC = () => {
                               {repository.files.map((file) => (
                                 <div
                                   key={file.id}
-                                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" style={ borderColor: '#e5e7eb' }
                                   onClick={() => navigate(`/repositories/${repository.id}/files/${file.id}`)}
                                 >
                                   <div className="flex items-center gap-3">
-                                    <FileText className="w-5 h-5 text-blue-500" />
+                                    <CommonIcon name="file-text" style={ color: '#3b82f6' } />
                                     <div>
-                                      <h4 className="font-medium text-gray-900">{file.name}</h4>
-                                      <p className="text-sm text-gray-500">
+                                      <h4 className="font-medium" style={ color: '#111827' }>{file.name}</h4>
+                                      <p className="text-sm" style={ color: '#6b7280' }>
                                         {t('repositories.detail.files.uploaded')}: {new Date(file.createdAt).toLocaleDateString()}
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm" style={ color: '#6b7280' }>
                                     {file.size ? formatFileSize(file.size) : '-'}
                                   </div>
                                 </div>
@@ -179,52 +267,90 @@ export const RepositoryDetail: React.FC = () => {
                           </div>
                         ) : (
                           <div className="text-center py-8">
-                            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <CommonIcon name="file-text" className="h-12 mx-auto mb-4" style={ color: '#9ca3af' } />
+                            <h3 className="text-lg font-medium mb-2" style={ color: '#111827' }>
                               {t('repositories.detail.empty.files.title')}
                             </h3>
-                            <p className="text-gray-600 mb-4">
+                            <p className="mb-4" style={ color: '#4b5563' }>
                               {t('repositories.detail.empty.files.desc')}
                             </p>
                             <Button onClick={goToUploadWithRepo}>{t('repositories.detail.empty.files.upload')}</Button>
                           </div>
                         )}
-                      </CardContent>
                     </Card>
                   )}
 
                   {activeTab === 'members' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         {membersLoading ? (
-                          <div className="text-center py-8">Loading members...</div>
+                          <div className="text-center py-8">{t('app.loading')}</div>
                         ) : membersData?.content && membersData.content.length > 0 ? (
                           <div className="space-y-4">
                           <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-gray-900">Members</h3>
+                          <h3 className="text-lg font-medium" style={ color: '#111827' }>{t('repositories.detail.tabs.members')}</h3>
                              <Button onClick={() => setShowInviteModal(true)}>
                           {t('repositories.detail.empty.members.invite')}
                           </Button>
                             </div>
                           {membersData.content.map((member: any) => (
-                        <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                    <p className="font-medium text-gray-900">{member.username}</p>
-                  <p className="text-sm text-gray-600">{member.email}</p>
-                  </div>
-                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                  {member.role}
-                  </span>
-                  </div>
+                        <div key={member.id} className="p-4 rounded-lg border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="font-medium" style={ color: '#111827' }>{member.username}</p>
+                              <p className="text-sm" style={ color: '#4b5563' }>{member.email}</p>
+                            </div>
+                            <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                              {member.role}
+                            </span>
+                          </div>
+                          
+                          {/* Permissions Section */}
+                          <div className="space-y-3 border-t pt-4" style={ borderColor: '#e5e7eb' }>
+                            <p className="text-sm font-medium" style={ color: '#374151' }>{t('repositories.detail.members.permissions')}</p>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm" style={ color: '#4b5563' }>{t('repositories.detail.members.permissions.upload')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canUpload || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canUpload', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm" style={ color: '#4b5563' }>{t('repositories.detail.members.permissions.view')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canView || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canView', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm" style={ color: '#4b5563' }>{t('repositories.detail.members.permissions.delete')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canDelete || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canDelete', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                          </div>
+                        </div>
                   ))}
                   </div>
                   ) : (
                   <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <CommonIcon name="users" className="h-12 mx-auto mb-4" style={ color: '#9ca3af' } />
+                  <h3 className="text-lg font-medium mb-2" style={ color: '#111827' }>
                   {t('repositories.detail.empty.members.title')}
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4" style={ color: '#4b5563' }>
                   {t('repositories.detail.empty.members.desc')}
                   </p>
                   <Button onClick={() => setShowInviteModal(true)}>
@@ -232,23 +358,20 @@ export const RepositoryDetail: React.FC = () => {
                   </Button>
                   </div>
                   )}
-                  </CardContent>
-                  </Card>
+                    </Card>
                   )}
 
                   {activeTab === 'activity' && (
-                    <Card>
-                      <CardContent className="p-6">
+                    <Card className="p-6">
                         <div className="text-center py-8">
-                          <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          <CommonIcon name="clock" className="h-12 mx-auto mb-4" style={ color: '#9ca3af' } />
+                          <h3 className="text-lg font-medium mb-2" style={ color: '#111827' }>
                             {t('repositories.detail.empty.activity.title')}
                           </h3>
-                          <p className="text-gray-600">
+                          <p style={ color: '#4b5563' }>
                             {t('repositories.detail.empty.activity.desc')}
                           </p>
                         </div>
-                      </CardContent>
                     </Card>
                   )}
               </div>

@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@shared/components';
-import { Lock, Eye, Share2, Shield } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface SecurityTabProps {
   fileData: any;
@@ -16,12 +16,12 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Eye className="w-5 h-5 mr-2 text-indigo-600" />
+            <CommonIcon name="user" className="w-5 h-5 mr-2" style={ color: '#4f46e5' } />
             Mức độ truy cập
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-500">Tính khả kiến</label>
+              <label className="text-xs" style={ color: '#6b7280' }>Tính khả kiến</label>
               <div className="mt-2">
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
                   security.visibility === 'public' 
@@ -36,8 +36,8 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
             </div>
             {security.accessControl && (
               <div>
-                <label className="text-xs text-gray-500">Kiểm soát truy cập</label>
-                <p className="text-sm font-medium text-gray-900 mt-2">{security.accessControl}</p>
+                <label className="text-xs" style={ color: '#6b7280' }>Kiểm soát truy cập</label>
+                <p className="text-sm font-medium mt-2" style={ color: '#111827' }>{security.accessControl}</p>
               </div>
             )}
           </div>
@@ -49,24 +49,24 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Lock className="w-5 h-5 mr-2 text-green-600" />
+              <CommonIcon name="lock" className="mr-2" style={ color: '#16a34a' } />
               Mã hóa
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-gray-500">Trạng thái</label>
-                <p className="text-sm font-medium text-green-600 mt-2">✓ Được mã hóa</p>
+                <label className="text-xs" style={ color: '#6b7280' }>Trạng thái</label>
+                <p className="text-sm font-medium mt-2" style={ color: '#16a34a' }>✓ Được mã hóa</p>
               </div>
               {encryption.algorithm && (
                 <div>
-                  <label className="text-xs text-gray-500">Thuật toán</label>
-                  <p className="text-sm font-medium text-gray-900 mt-2">{encryption.algorithm}</p>
+                  <label className="text-xs" style={ color: '#6b7280' }>Thuật toán</label>
+                  <p className="text-sm font-medium mt-2" style={ color: '#111827' }>{encryption.algorithm}</p>
                 </div>
               )}
               {encryption.keyId && (
                 <div className="md:col-span-2">
-                  <label className="text-xs text-gray-500">Key ID</label>
-                  <p className="text-sm font-medium text-gray-900 font-mono text-xs mt-2">{encryption.keyId}</p>
+                  <label className="text-xs" style={ color: '#6b7280' }>Key ID</label>
+                  <p className="text-sm font-medium text-xs mt-2" style={ color: '#111827' }>{encryption.keyId}</p>
                 </div>
               )}
             </div>
@@ -79,17 +79,17 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Share2 className="w-5 h-5 mr-2 text-blue-600" />
+              <CommonIcon name="send" className="mr-2" style={ color: '#2563eb' } />
               Chia sẻ với ({sharedWith.length})
             </h3>
             <div className="space-y-3">
               {sharedWith.map((share: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{share.name || share.email || 'Unknown'}</p>
-                    {share.email && <p className="text-xs text-gray-500">{share.email}</p>}
+                    <p className="text-sm font-medium" style={ color: '#111827' }>{share.name || share.email || 'Unknown'}</p>
+                    {share.email && <p className="text-xs" style={ color: '#6b7280' }>{share.email}</p>}
                   </div>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                  <span className="px-2 py-1 rounded text-xs font-medium" style={ backgroundColor: '#dbeafe', color: '#1d4ed8' }>
                     {share.permission || share.role || 'VIEWER'}
                   </span>
                 </div>
@@ -104,13 +104,13 @@ export function SecurityTab({ fileData }: SecurityTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Shield className="w-5 h-5 mr-2 text-purple-600" />
+              <CommonIcon name="shield" className="w-5 h-5 mr-2" style={ color: '#9333ea' } />
               Quyền hạn
             </h3>
             <div className="space-y-2">
               {security.permissions.map((perm: string, idx: number) => (
-                <div key={idx} className="flex items-center text-sm text-gray-700">
-                  <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
+                <div key={idx} className="flex items-center text-sm" style={ color: '#374151' }>
+                  <span className="rounded-full mr-2" style={ backgroundColor: '#9333ea' }></span>
                   {perm}
                 </div>
               ))}

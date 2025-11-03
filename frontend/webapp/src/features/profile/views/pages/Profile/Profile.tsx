@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { User, Mail, Phone, Briefcase, Building2, Calendar, Edit2, Save } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
+// Removed lucide-react imports: User, Mail, Phone, Building2, Briefcase, Calendar, Edit2, Save
 import {
-Card,
-CardHeader,
-CardTitle,
-CardContent,
-Button,
-Input,
-RefreshButton,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Input,
+  RefreshButton,
   CommonLabel,
 } from '@shared/components';
 
@@ -31,8 +31,6 @@ export const Profile = () => {
     lastName: user?.lastName || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    department: user?.department || '',
-    position: user?.position || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,8 +55,6 @@ export const Profile = () => {
       lastName: user?.lastName || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      department: user?.department || '',
-      position: user?.position || '',
     });
     setIsEditing(false);
   };
@@ -77,8 +73,6 @@ export const Profile = () => {
         lastName: user?.lastName || '',
         email: user?.email || '',
         phone: user?.phone || '',
-        department: user?.department || '',
-        position: user?.position || '',
       });
 
       console.log('[Profile] Refresh completed');
@@ -92,6 +86,7 @@ export const Profile = () => {
   return (
     <ProfileLayout
       title={t('profile.title')}
+      description="Quản lý thông tin cá nhân và cài đặt tài khoản"
       breadcrumbs={[{ label: t('nav.profile'), current: true }]}
       loading={!user}
       loadingText={t('app.loading')}
@@ -103,27 +98,27 @@ export const Profile = () => {
       {user && (
         <div className="max-w-4xl mx-auto p-6">
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
+            // initial={{ opacity: 0, y: -20 }}
+            // animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('profile.title')}</h1>
             <p className="text-gray-600">{t('profile.manage')}</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Profile Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <div
+              // initial={{ opacity: 0, x: -20 }}
+              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
                     {/* Avatar */}
-                    <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, #3b82f6, #a855f7)' }}>
                       <span className="text-4xl text-white font-bold">
                         {user.firstName?.charAt(0)}
                         {user.lastName?.charAt(0)}
@@ -152,12 +147,12 @@ export const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* Details Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <div
+              // initial={{ opacity: 0, x: 20 }}
+              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-2"
             >
               <Card>
@@ -170,7 +165,7 @@ export const Profile = () => {
                         onClick={() => setIsEditing(true)}
                         className="flex items-center gap-2"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <CommonIcon name="edit" size={16} />
                         {t('profile.edit')}
                       </Button>
                     ) : (
@@ -188,7 +183,7 @@ export const Profile = () => {
                           isLoading={updateProfileMutation.isPending}
                           className="flex items-center gap-2"
                         >
-                          <Save className="w-4 h-4" />
+                          <CommonIcon name="save" size={16} />
                           {t('profile.save')}
                         </Button>
                       </div>
@@ -200,8 +195,8 @@ export const Profile = () => {
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4" />
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
+                        <CommonIcon name="user" size={16} />
                         {t('profile.labels.firstName')}
                         </CommonLabel>
                         {isEditing ? (
@@ -216,8 +211,8 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4" />
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
+                        <CommonIcon name="user" size={16} />
                         {t('profile.labels.lastName')}
                         </CommonLabel>
                         {isEditing ? (
@@ -236,8 +231,8 @@ export const Profile = () => {
                     {/* Contact Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <Mail className="w-4 h-4" />
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
+                        <CommonIcon name="mail" size={16} />
                         {t('profile.labels.email')}
                         </CommonLabel>
                         {isEditing ? (
@@ -253,8 +248,8 @@ export const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <Phone className="w-4 h-4" />
+                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
+                        <CommonIcon name="mail" size={16} />
                         {t('profile.labels.phone')}
                         </CommonLabel>
                         {isEditing ? (
@@ -267,42 +262,6 @@ export const Profile = () => {
                           />
                         ) : (
                           <p className="text-gray-900">{user.phone || t('profile.notSet')}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Work Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <Building2 className="w-4 h-4" />
-                        {t('profile.labels.department')}
-                        </CommonLabel>
-                        {isEditing ? (
-                          <Input
-                            name="department"
-                            value={formData.department}
-                            onChange={handleChange}
-                            placeholder="Engineering"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{user.department || t('profile.notSet')}</p>
-                        )}
-                      </div>
-                      <div>
-                        <CommonLabel className="flex items-center gap-2 mb-2">
-                        <Briefcase className="w-4 h-4" />
-                        {t('profile.labels.position')}
-                        </CommonLabel>
-                        {isEditing ? (
-                          <Input
-                            name="position"
-                            value={formData.position}
-                            onChange={handleChange}
-                            placeholder="Software Engineer"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{user.position || t('profile.notSet')}</p>
                         )}
                       </div>
                     </div>
@@ -321,29 +280,21 @@ export const Profile = () => {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4" />
+                            <CommonIcon name="calendar" size={16} />
                             {t('profile.account.memberSince')}
                           </span>
                           <span className="text-sm font-medium text-gray-900">
-                            {new Date(user.createdAt).toLocaleDateString()}
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : t('profile.notSet')}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* TODO: Kho mã và Tổ chức - Chưa có API */}
-                    <div className="pt-6 border-t border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Kho mã và Tổ chức
-                      </h3>
-                      <div className="text-sm text-gray-500 italic">
-                        API đang được phát triển
-                      </div>
-                    </div>
+                    {/* Kho mã và Tổ chức - Removed as per rules */}
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
       )}

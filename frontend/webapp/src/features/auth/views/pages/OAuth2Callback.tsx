@@ -122,10 +122,10 @@ export const OAuth2Callback = () => {
   }, [searchParams, navigate, dispatch]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Processing login...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={ borderColor: '#2563eb' }></div>
+        <p className="mt-4" style={ color: '#4b5563' }>Processing login...</p>
       </div>
     </div>
   );

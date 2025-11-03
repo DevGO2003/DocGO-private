@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Building2, UserCheck, X, Loader2 } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent, CardHeader, Button } from '@shared/components';
 import { useAcceptInvitation, useDeclineInvitation, type AcceptInvitationResponse } from '@/features/organizations';
 
@@ -66,12 +66,12 @@ export const AcceptInvitation = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
-            <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('organizations.acceptInvitation.invalidTitle')}</h2>
-            <p className="text-gray-600 mb-6">{t('organizations.acceptInvitation.invalidDesc')}</p>
+            <CommonIcon name="x" size={64} color="#ef4444" className="mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2" style={ color: '#111827' }>{t('organizations.acceptInvitation.invalidTitle')}</h2>
+            <p className="mb-6" style={ color: '#4b5563' }>{t('organizations.acceptInvitation.invalidDesc')}</p>
             <Button onClick={() => navigate('/organizations')} className="w-full">
               {t('organizations.acceptInvitation.goToOrganizations')}
             </Button>
@@ -83,12 +83,12 @@ export const AcceptInvitation = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
-            <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('organizations.acceptInvitation.error')}</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <CommonIcon name="x" size={64} color="#ef4444" className="mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2" style={ color: '#111827' }>{t('organizations.acceptInvitation.error')}</h2>
+            <p className="mb-6" style={ color: '#4b5563' }>{error}</p>
             <Button onClick={() => navigate('/organizations')} className="w-full">
               {t('organizations.acceptInvitation.goToOrganizations')}
             </Button>
@@ -99,11 +99,11 @@ export const AcceptInvitation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
       <Card className="max-w-2xl w-full">
-        <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <CardHeader className="border-b" style={ color: '#ffffff' }>
           <div className="flex items-center gap-3">
-            <Mail className="w-8 h-8" />
+            <CommonIcon name="mail" size={32} />
             <div>
               <h1 className="text-2xl font-bold">{t('organizations.acceptInvitation.header.title')}</h1>
               <p className="text-blue-100 mt-1">{t('organizations.acceptInvitation.header.subtitle')}</p>
@@ -114,19 +114,19 @@ export const AcceptInvitation = () => {
         <CardContent className="p-8">
           {/* Invitation Details */}
           <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="border rounded-lg p-6" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
               <div className="flex items-start gap-4">
-                <Building2 className="w-12 h-12 text-blue-600 flex-shrink-0" />
+                <CommonIcon name="building" size={48} color="#3b82f6" className="flex-shrink-0" />
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-xl font-bold mb-2" style={ color: '#111827' }>
                     {t('organizations.acceptInvitation.orgName')}
                   </h2>
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4" style={ color: '#4b5563' }>
                     {t('organizations.acceptInvitation.invitedAs', { role: 'Member' })}
                   </p>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Mail className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-sm" style={ color: '#6b7280' }>
+                    <CommonIcon name="mail" size={24} color="#3b82f6" />
                     <span>{t('organizations.acceptInvitation.invitedTo', { email: searchParams.get('email') || 'your email' })}</span>
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export const AcceptInvitation = () => {
             </div>
 
             {/* Note about invitation details */}
-            <div className="text-sm text-gray-500 text-center bg-yellow-50 border border-yellow-200 rounded p-3">
+            <div className="text-sm border rounded p-3" style={ borderColor: '#fef08a' } style={ color: '#6b7280', backgroundColor: '#fefce8' }>
               {t('organizations.acceptInvitation.note')}
             </div>
 
@@ -148,12 +148,12 @@ export const AcceptInvitation = () => {
               >
                 {isDeclining ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <CommonIcon name="loading" size={24} color="#3b82f6" className="animate-spin mr-2" />
                     {t('organizations.acceptInvitation.declining')}
                   </>
                 ) : (
                   <>
-                    <X className="w-4 h-4 mr-2" />
+                    <CommonIcon name="x" size={24} color="#ef4444" className="mr-2" />
                     {t('organizations.acceptInvitation.decline')}
                   </>
                 )}
@@ -166,12 +166,12 @@ export const AcceptInvitation = () => {
               >
                 {isAccepting ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <CommonIcon name="loading" size={24} color="#ffffff" className="animate-spin mr-2" />
                     {t('organizations.acceptInvitation.accepting')}
                   </>
                 ) : (
                   <>
-                    <UserCheck className="w-4 h-4 mr-2" />
+                    <CommonIcon name="user-check" size={24} color="#22c55e" className="mr-2" />
                     {t('organizations.acceptInvitation.accept')}
                   </>
                 )}

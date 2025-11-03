@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserPlus, AlertCircle, Mail, CheckCircle } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Dialog, Button, Input } from '@shared/components';
 import { useInviteMember, MemberRole, ManagerPermission } from '@features/organizations';
 
@@ -173,27 +173,27 @@ export const InviteMemberModal = ({
       >
         <div className="space-y-6">
           {/* Success Header */}
-          <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+          <div className="flex items-center gap-3 pb-4 border-b" style={ borderColor: '#e5e7eb' }>
+            <div className="p-3 rounded-lg" style={ backgroundColor: '#dcfce7' }>
+              <CommonIcon name="check" size={20} color="#16a34a" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">{t('organizations.inviteModal.successHeaderTitle')}</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-semibold" style={ color: '#111827' }>{t('organizations.inviteModal.successHeaderTitle')}</h3>
+              <p className="text-sm" style={ color: '#4b5563' }>
                 {t('organizations.inviteModal.successHeaderDesc', { email })}
               </p>
             </div>
           </div>
 
           {/* Invitation Link Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('organizations.inviteModal.invitationLink')}</label>
+          <div className="border rounded-lg p-4" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
+            <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>{t('organizations.inviteModal.invitationLink')}</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={invitationLink}
                 readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-white font-mono text-sm"
+                className="flex-1 px-3 py-2 border rounded-lg text-sm" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#ffffff' }
                 onClick={(e) => e.currentTarget.select()}
               />
               <Button onClick={handleCopyLink}>{t('organizations.inviteModal.copy')}</Button>
@@ -201,12 +201,12 @@ export const InviteMemberModal = ({
           </div>
 
           {/* Instructions */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-yellow-600" />
+          <div className="border rounded-lg p-4" style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }>
+            <h4 className="font-medium mb-2 flex items-center gap-2" style={ color: '#111827' }>
+              <CommonIcon name="alert-circle" size={20} color="#f59e0b" />
               {t('organizations.inviteModal.nextSteps')}
             </h4>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+            <ol className="space-y-1 text-sm" style={ color: '#374151' }>
               <li>{t('organizations.inviteModal.steps.copy')}</li>
               <li>{t('organizations.inviteModal.steps.send', { email })}</li>
               <li>{t('organizations.inviteModal.steps.accept')}</li>
@@ -214,7 +214,7 @@ export const InviteMemberModal = ({
           </div>
 
           {/* Note about email */}
-          <div className="text-sm text-gray-500 italic">
+          <div className="text-sm" style={ color: '#6b7280' }>
             💡 {t('organizations.inviteModal.note')}
           </div>
         </div>
@@ -242,34 +242,34 @@ export const InviteMemberModal = ({
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <UserPlus className="w-6 h-6 text-blue-600" />
+        <div className="flex items-center gap-3 pb-4 border-b" style={ borderColor: '#e5e7eb' }>
+          <div className="p-3 rounded-lg" style={ backgroundColor: '#dbeafe' }>
+            <CommonIcon name="user-plus" size={24} color="#2563eb" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">{t('organizations.inviteModal.header.title')}</h3>
-            <p className="text-sm text-gray-600">{t('organizations.inviteModal.header.subtitle')}</p>
+            <h3 className="font-semibold" style={ color: '#111827' }>{t('organizations.inviteModal.header.title')}</h3>
+            <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.inviteModal.header.subtitle')}</p>
           </div>
         </div>
 
         {/* Submit Error */}
         {errors.submit && (
-          <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-4 border rounded-lg" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+            <CommonIcon name="alert-circle" size={20} color="#dc2626" />
             <div>
-              <p className="text-sm font-medium text-red-800">{t('organizations.inviteModal.errorTitle')}</p>
-              <p className="text-sm text-red-700">{errors.submit}</p>
+              <p className="text-sm font-medium" style={ color: '#991b1b' }>{t('organizations.inviteModal.errorTitle')}</p>
+              <p className="text-sm" style={ color: '#b91c1c' }>{errors.submit}</p>
             </div>
           </div>
         )}
 
         {/* Email Input */}
         <div className="space-y-2">
-          <label htmlFor="invite-email" className="block text-sm font-medium text-gray-700">
-            {t('organizations.inviteModal.emailAddress')} <span className="text-red-500">*</span>
+          <label htmlFor="invite-email" className="block text-sm font-medium" style={ color: '#374151' }>
+            {t('organizations.inviteModal.emailAddress')} <span style={ color: '#ef4444' }>*</span>
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Mail className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
             <Input
               id="invite-email"
               type="email"
@@ -283,13 +283,13 @@ export const InviteMemberModal = ({
               disabled={isPending}
             />
           </div>
-          {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+          {errors.email && <p className="text-sm" style={ color: '#dc2626' }>{errors.email}</p>}
         </div>
 
         {/* Role Selection */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t('organizations.inviteModal.selectRole')} <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium" style={ color: '#374151' }>
+            {t('organizations.inviteModal.selectRole')} <span style={ color: '#ef4444' }>*</span>
           </label>
           <div className="space-y-3">
             {/* Member Role */}
@@ -303,12 +303,12 @@ export const InviteMemberModal = ({
                   setSelectedRole(e.target.value as MemberRole);
                   setSelectedPermissions([]); // Clear permissions when changing role
                 }}
-                className="mt-1 w-4 h-4 text-blue-600"
+                className="mt-1" style={ color: '#2563eb' }
                 disabled={isPending}
               />
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{t('organizations.inviteModal.role.member.title')}</p>
-                <p className="text-sm text-gray-600">{t('organizations.inviteModal.role.member.desc')}</p>
+                <p className="font-medium" style={ color: '#111827' }>{t('organizations.inviteModal.role.member.title')}</p>
+                <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.inviteModal.role.member.desc')}</p>
               </div>
             </label>
 
@@ -320,12 +320,12 @@ export const InviteMemberModal = ({
                 value={MemberRole.MANAGER}
                 checked={selectedRole === MemberRole.MANAGER}
                 onChange={(e) => setSelectedRole(e.target.value as MemberRole)}
-                className="mt-1 w-4 h-4 text-blue-600"
+                className="mt-1" style={ color: '#2563eb' }
                 disabled={isPending}
               />
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{t('organizations.inviteModal.role.manager.title')}</p>
-                <p className="text-sm text-gray-600">{t('organizations.inviteModal.role.manager.desc')}</p>
+                <p className="font-medium" style={ color: '#111827' }>{t('organizations.inviteModal.role.manager.title')}</p>
+                <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.inviteModal.role.manager.desc')}</p>
               </div>
             </label>
           </div>
@@ -333,11 +333,11 @@ export const InviteMemberModal = ({
 
         {/* Manager Permissions */}
         {selectedRole === MemberRole.MANAGER && (
-          <div className="space-y-3 pl-4 border-l-4 border-blue-200 bg-blue-50 p-4 rounded-r-lg">
-            <p className="text-sm font-medium text-gray-900">
-              {t('organizations.inviteModal.managerPermissions.title')} <span className="text-red-500">*</span>
+          <div className="space-y-3 pl-4 border-l-4 p-4 rounded-r-lg" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
+            <p className="text-sm font-medium" style={ color: '#111827' }>
+              {t('organizations.inviteModal.managerPermissions.title')} <span style={ color: '#ef4444' }>*</span>
             </p>
-            <p className="text-xs text-gray-600 -mt-2">
+            <p className="text-xs" style={ color: '#4b5563' }>
               {t('organizations.inviteModal.managerPermissions.subtitle')}
             </p>
 
@@ -345,35 +345,35 @@ export const InviteMemberModal = ({
               {MANAGER_PERMISSIONS.map((perm) => (
                 <label
                   key={perm.value}
-                  className="flex items-start gap-3 p-3 bg-white border rounded-lg cursor-pointer hover:border-blue-300 transition-colors"
+                  className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover: transition-colors" style={ borderColor: '#93c5fd' } style={ backgroundColor: '#ffffff' }
                 >
                   <input
                     type="checkbox"
                     checked={selectedPermissions.includes(perm.value)}
                     onChange={() => togglePermission(perm.value)}
-                    className="mt-1 w-4 h-4 text-blue-600 rounded"
+                    className="mt-1 rounded" style={ color: '#2563eb' }
                     disabled={isPending}
                   />
                   <div className="flex-1">
-                    <p className="font-medium text-sm text-gray-900">{perm.label}</p>
-                    <p className="text-xs text-gray-600">{perm.description}</p>
+                    <p className="font-medium text-sm" style={ color: '#111827' }>{perm.label}</p>
+                    <p className="text-xs" style={ color: '#4b5563' }>{perm.description}</p>
                   </div>
                 </label>
               ))}
             </div>
             {errors.permissions && (
-              <p className="text-sm text-red-600">{errors.permissions}</p>
+              <p className="text-sm" style={ color: '#dc2626' }>{errors.permissions}</p>
             )}
           </div>
         )}
 
         {/* Instructions */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-yellow-600" />
+        <div className="border rounded-lg p-4" style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }>
+          <h4 className="font-medium mb-2 flex items-center gap-2" style={ color: '#111827' }>
+            <AlertCircle style={ color: '#ca8a04' } />
             {t('organizations.inviteModal.nextSteps')}
           </h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+          <ol className="space-y-1 text-sm" style={ color: '#374151' }>
             <li>{t('organizations.inviteModal.steps.copy')}</li>
             <li>{t('organizations.inviteModal.steps.send', { email })}</li>
             <li>{t('organizations.inviteModal.steps.accept')}</li>
@@ -381,7 +381,7 @@ export const InviteMemberModal = ({
         </div>
 
         {/* Note about email */}
-        <div className="text-sm text-gray-500 italic">
+        <div className="text-sm" style={ color: '#6b7280' }>
           {t('organizations.inviteModal.note')}
         </div>
       </div>

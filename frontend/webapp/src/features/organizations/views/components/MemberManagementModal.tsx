@@ -3,7 +3,7 @@ import {
   Button,
   Checkbox,
 } from '@shared/components';
-import { Shield, Lock, X } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface MemberManagementModalProps {
   isOpen: boolean;
@@ -84,21 +84,21 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="relative rounded-lg max-w-2xl w-full max-h-[90vh]" style={ backgroundColor: '#ffffff' }>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b" style={ borderColor: '#e5e7eb' }>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-blue-600" />
+            <h2 className="text-xl font-bold flex items-center gap-2" style={ color: '#111827' }>
+              <CommonIcon name="shield" size={20} color="#2563eb" />
               Quản lý thành viên: {member.userName}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">Set role và cấp quyền persistent cho thành viên</p>
+            <p className="text-sm mt-1" style={ color: '#4b5563' }>Set role và cấp quyền persistent cho thành viên</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="hover: transition-colors" style={ color: '#4b5563' } style={ color: '#9ca3af' }
           >
-            <X className="w-6 h-6" />
+            <CommonIcon name="x" size={16} />
           </button>
         </div>
 
@@ -106,14 +106,14 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
         <div className="p-6 space-y-6">
           {/* Role Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600" />
+            <label className="text-sm font-semibold flex items-center gap-2" style={ color: '#111827' }>
+              <CommonIcon name="shield" size={16} />
               Role
             </label>
             <select
               value={selectedRole}
               onChange={(e) => handleRoleChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:" style={ borderColor: '#d1d5db', borderColor: '#3b82f6' }
               disabled={member.role === 'OWNER'}
             >
               {AVAILABLE_ROLES.map((role) => (
@@ -124,7 +124,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
             </select>
             {member.role === 'OWNER' && (
               <p className="text-xs text-amber-600 flex items-center gap-1">
-                <Lock className="w-3 h-3" />
+                <CommonIcon name="lock" size={16} />
                 Không thể thay đổi role của Owner
               </p>
             )}
@@ -133,15 +133,15 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
           {/* Permissions - Only for MANAGER role */}
           {selectedRole === 'MANAGER' && (
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-green-600" />
+              <label className="text-sm font-semibold flex items-center gap-2" style={ color: '#111827' }>
+                <CommonIcon name="lock" size={16} color="#16a34a" />
                 Manager Permissions
               </label>
-              <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="space-y-3 max-h-64 border rounded-lg p-4" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
                 {AVAILABLE_PERMISSIONS.map((permission) => (
                   <div
                     key={permission.id}
-                    className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+                    className="flex items-start gap-3 p-3 border rounded-lg hover: transition-colors" style={ borderColor: '#e5e7eb', borderColor: '#93c5fd' } style={ backgroundColor: '#ffffff' }
                   >
                     <Checkbox
                       checked={selectedPermissions.includes(permission.id)}
@@ -149,13 +149,13 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
                       className="mt-1"
                     />
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 text-sm">{permission.label}</p>
-                      <p className="text-xs text-gray-600 mt-0.5">{permission.description}</p>
+                      <p className="font-medium text-sm" style={ color: '#111827' }>{permission.label}</p>
+                      <p className="text-xs mt-0.5" style={ color: '#4b5563' }>{permission.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs" style={ color: '#6b7280' }>
                 * Select at least one permission for Manager role
               </p>
             </div>
@@ -163,7 +163,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex gap-3 p-6 border-t" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
           <Button
             variant="outline"
             onClick={onClose}

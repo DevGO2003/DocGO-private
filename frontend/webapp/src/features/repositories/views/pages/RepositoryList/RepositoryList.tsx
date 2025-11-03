@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Input, RefreshButton } from '@shared/components';
 import {
   usePersonalRepositories,
@@ -78,7 +78,7 @@ export const RepositoryList = () => {
   const errorMessage = currentError
     ? typeof currentError === 'string'
       ? currentError
-      : (currentError as any)?.message || 'Đã xảy ra lỗi khi tải repositories'
+      : (currentError as any)?.message || t('repositories.list.error')
     : null;
 
   const handleCreateRepository = () => {
@@ -185,7 +185,7 @@ export const RepositoryList = () => {
   return (
     <RepositoryLayout
       title={t('repositories.list.title')}
-      subtitle={t('repositories.list.subtitle')}
+      description="Quản lý kho lưu trữ tài liệu cá nhân, tổ chức và công khai"
       breadcrumbs={[{ label: t('nav.repositories'), current: true }]}
       onRefresh={handleRefresh}
       headerChildren={
@@ -206,7 +206,7 @@ export const RepositoryList = () => {
               onClick={handleCreateRepository}
               className="inline-flex items-center gap-2"
             >
-              <Plus className="w-5 h-5" />
+              <CommonIcon name="plus" className="w-5 h-5" />
               {t('repositories.list.new')}
             </Button>
           )}
@@ -218,7 +218,7 @@ export const RepositoryList = () => {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <CommonIcon name="search" className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
               <Input
                 type="text"
                 placeholder={
@@ -247,7 +247,7 @@ export const RepositoryList = () => {
           {/* Pagination */}
           {currentData && currentData.totalPages > 1 && (
             <div className="flex items-center justify-between mt-8">
-              <div className="text-sm text-gray-700">
+              <div className="text-sm" style={ color: '#374151' }>
                 {t('repositories.list.pagination.showing', {
                   from: currentData.currentPage * currentData.pageSize + 1,
                   to: Math.min((currentData.currentPage + 1) * currentData.pageSize, currentData.totalElements),

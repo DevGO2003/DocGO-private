@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { GripVertical, Save } from 'lucide-react'
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon'
 
 export interface MenuItem {
   id: string
@@ -51,12 +51,12 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-900">Menu</h3>
+        <h3 className="text-sm font-semibold" style={ color: '#111827' }>Menu</h3>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#d1d5db' } style={ color: '#374151', backgroundColor: '#ffffff' }
         >
-          <GripVertical className="w-4 h-4" />
+          <CommonIcon name="grip-vertical" size={16} />
           {isEditing ? 'Done' : 'Sort'}
         </button>
       </div>
@@ -83,9 +83,9 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
                           snapshot.isDragging ? 'border-blue-500 shadow-lg' : 'border-gray-200'
                         }`}
                       >
-                        <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <CommonIcon name="grip-vertical" size={16} className="flex-shrink-0" style={ color: '#9ca3af' } />
                         {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
-                        <span className="text-sm text-gray-700 flex-1">{item.label}</span>
+                        <span className="text-sm flex-1" style={ color: '#374151' }>{item.label}</span>
                       </div>
                     )}
                   </Draggable>
@@ -101,7 +101,7 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
             <button
               key={item.id}
               onClick={() => onItemClick?.(item)}
-              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#e5e7eb' } style={ color: '#374151', backgroundColor: '#ffffff' }
             >
               {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
               <span className="flex-1 text-left">{item.label}</span>
@@ -114,9 +114,9 @@ export default function SortableMenu({ items, onSave, onItemClick }: SortableMen
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="w-full mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors" style={ color: '#ffffff', backgroundColor: '#2563eb' }
         >
-          <Save className="w-4 h-4" />
+          <CommonIcon name="save" size={16} />
           {isSaving ? 'Saving...' : 'Save Order'}
         </button>
       )}

@@ -68,7 +68,7 @@ export const Register = () => {
 
           <CardContent>
             {error && (
-              <div ref={errorRef} className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded text-red-700 text-sm">
+              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
                 {error}
               </div>
             )}
@@ -139,11 +139,11 @@ export const Register = () => {
 
             <div className="mt-6 text-center"
             >
-              <div className="text-sm text-gray-600">
+              <div className="text-sm" style={ color: '#4b5563' }>
                 Already have an account?{' '}
                 <Link
                   to={LOGIN_PATH}
-                  className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                  className="font-medium hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
                 >
                   Sign in
                 </Link>

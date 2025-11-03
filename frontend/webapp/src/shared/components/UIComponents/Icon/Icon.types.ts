@@ -1,5 +1,27 @@
+export type IconName = 
+  | 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'smile' 
+  | 'chevron-right' | 'chevron-left' | 'chevron-up' | 'chevron-down' 
+  | 'close' | 'edit' | 'delete' | 'download' | 'upload' | 'search' | 'settings' | 'home'
+  | 'arrow-left' | 'arrow-right'
+  | 'loading' | 'refresh' | 'bell' | 'check' | 'building' | 'clock'
+  | 'x'
+  | 'save'
+  | 'send'
+  | 'copy'
+  | 'message'
+  | 'tag'
+  | 'grid'
+  | 'list'
+  | 'filter'
+  | 'rotate-cw'
+  | 'users' | 'chart' | 'file-text' | 'edit-2' | 'grip'
+  | 'menu' | 'logout' 
+  | 'user-plus' | 'user-check' | 'user-cog' | 'trash' | 'plus' | 'minus'
+  | 'mail' | 'lock' | 'shield' | 'alert-circle' | 'calendar' | 'crown'
+  | 'eye-off' | 'more-vertical' | 'scale' | 'dollar-sign' | 'briefcase';
+
 export interface CommonIconProps {
-  name: 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'smile' | 'chevron-right' | 'home' | 'arrow-left' | 'chevron-right';
+  name: IconName;
   size?: number;
   color?: string;
   className?: string;

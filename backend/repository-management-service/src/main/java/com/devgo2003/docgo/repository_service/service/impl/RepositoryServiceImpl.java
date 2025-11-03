@@ -50,14 +50,14 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.PERSONAL, pageable
         );
-        return entities.map(RepositoryDTO::fromEntity);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
     public Page<RepositoryDTO> getMyRepositories(String userId, Pageable pageable) {
         log.info("Getting repositories for user: {} with pagination: {}", userId, pageable);
         Page<RepositoryEntity> entities = repositoryRepository.findByOwnerUserIdAndIsDeletedFalse(userId, pageable);
-        return entities.map(this::enrichRepositoryDTO);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.PERSONAL, userId, pageable
         );
-        return entities.map(this::enrichRepositoryDTO);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOrganizationIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.ORGANIZATION, organizationId, pageable
         );
-        return entities.map(this::enrichRepositoryDTO);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeOrganizationAndOrganizationIdIn(
                 organizationIds, pageable
             );
-            return entities.map(this::enrichRepositoryDTO);
+            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
         } catch (Exception e) {
             log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
             // Fallback: lấy repos mà user là owner
@@ -105,7 +105,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
                 RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
             );
-            return entities.map(this::enrichRepositoryDTO);
+            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
         }
     }
     
@@ -130,6 +130,71 @@ public class RepositoryServiceImpl implements IRepositoryService {
         } catch (Exception e) {
             log.error("Failed to fetch user organizations: {}", e.getMessage());
             throw e;
+        }
+    }
+    
+    /**
+     * Enrich RepositoryDTOs with ownerName by calling User Management Service
+     */
+    @SuppressWarnings("unchecked")
+    private Page<RepositoryDTO> enrichWithUserNames(Page<RepositoryDTO> page) {
+        try {
+            // Collect unique owner user IDs
+            List<String> ownerIds = page.getContent().stream()
+                .map(RepositoryDTO::getOwnerUserId)
+                .filter(id -> id != null && !id.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+            
+            if (ownerIds.isEmpty()) {
+                return page;
+            }
+            
+            // Call User Management Service bulk API
+            String url = userManagementServiceUrl + "/api/v1/user-management-service/users/bulk?ids=" + String.join(",", ownerIds);
+            log.info("Fetching user names from: {}", url);
+            
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response != null && response.containsKey("data")) {
+                List<Map<String, Object>> users = (List<Map<String, Object>>) response.get("data");
+                
+                // Create userId -> userName map
+                Map<String, String> userNameMap = users.stream()
+                    .collect(Collectors.toMap(
+                        user -> (String) user.get("id"),
+                        user -> {
+                            String firstName = (String) user.get("firstName");
+                            String lastName = (String) user.get("lastName");
+                            String username = (String) user.get("username");
+                            
+                            if (firstName != null && lastName != null) {
+                                return firstName + " " + lastName;
+                            } else if (firstName != null) {
+                                return firstName;
+                            } else if (lastName != null) {
+                                return lastName;
+                            } else if (username != null) {
+                                return username;
+                            }
+                            return "Unknown User";
+                        },
+                        (existing, replacement) -> existing // Keep first value if duplicate
+                    ));
+                
+                // Populate ownerName
+                page.getContent().forEach(dto -> {
+                    String ownerName = userNameMap.get(dto.getOwnerUserId());
+                    if (ownerName != null) {
+                        dto.setOwnerName(ownerName);
+                    }
+                });
+            }
+            
+            return page;
+        } catch (Exception e) {
+            log.warn("Failed to enrich with user names: {}", e.getMessage());
+            // Return original page if enrichment fails
+            return page;
         }
     }
 
@@ -246,21 +311,21 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Page<RepositoryDTO> searchRepositories(String searchTerm, Pageable pageable) {
         log.info("Searching repositories with term: {}", searchTerm);
         Page<RepositoryEntity> entities = repositoryRepository.searchRepositories(searchTerm, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
     public Page<RepositoryDTO> searchPersonalRepositories(String searchTerm, String userId, Pageable pageable) {
         log.info("Searching personal repositories for user: {} with term: {}", userId, searchTerm);
         Page<RepositoryEntity> entities = repositoryRepository.searchPersonalRepositories(searchTerm, userId, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
     public Page<RepositoryDTO> searchOrganizationRepositories(String searchTerm, String organizationId, Pageable pageable) {
         log.info("Searching organization repositories for org: {} with term: {}", organizationId, searchTerm);
         Page<RepositoryEntity> entities = repositoryRepository.searchOrganizationRepositories(searchTerm, organizationId, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
@@ -282,13 +347,13 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.searchOrganizationRepositoriesByIds(
                 searchTerm, organizationIds, pageable
             );
-            return entities.map(RepositoryDTO::fromEntity);
+            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
         } catch (Exception e) {
             log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
             // Fallback: search repos mà user là owner
             log.info("Fallback to owner-based search");
             Page<RepositoryEntity> entities = repositoryRepository.searchUserOrganizationRepositories(searchTerm, userId, pageable);
-            return entities.map(RepositoryDTO::fromEntity);
+            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
         }
     }
 
@@ -360,14 +425,14 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Page<RepositoryDTO> getPublicRepositories(Pageable pageable) {
         log.info("Getting public repositories with pagination: {}", pageable);
         Page<RepositoryEntity> entities = repositoryRepository.findByIsPublicTrueAndIsDeletedFalse(pageable);
-        return entities.map(this::enrichRepositoryDTO);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override
     public Page<RepositoryDTO> searchPublicRepositories(String searchTerm, Pageable pageable) {
         log.info("Searching public repositories with term: {} and pagination: {}", searchTerm, pageable);
         Page<RepositoryEntity> entities = repositoryRepository.searchPublicRepositories(searchTerm, pageable);
-        return entities.map(this::enrichRepositoryDTO);
+        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
     }
 
     @Override

@@ -2,32 +2,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import {
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Users,
-  Settings,
-  BarChart3,
-  AlertCircle,
-  Search,
-  File as FileIcon,
-  Info,
-  Calendar,
-  Eye,
-  EyeOff,
-  Crown,
-  Folder,
-} from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   Button,
-  Input,
   LoadingSpinner,
   RefreshButton,
   Tabs,
@@ -47,8 +28,7 @@ export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('contracts');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('reports');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
@@ -103,11 +83,11 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: BarChart3 },
-    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: FileText },
-    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: Folder },
-    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: Users },
-    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: Settings },
+    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: <CommonIcon name="chart" /> },
+    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: <CommonIcon name="file-text" /> },
+    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: <CommonIcon name="folder" /> },
+    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: <CommonIcon name="users" /> },
+    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: <CommonIcon name="settings" /> },
   ];
 
   const handleRefresh = async () => {
@@ -138,8 +118,8 @@ export const OrganizationWorkspace = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-700 mb-4">{t('organizations.workspace.notFound')}</p>
+            <CommonIcon name="alert-circle" className="w-16 h-16 mx-auto mb-4" style={ color: '#ef4444' } />
+            <p className="mb-4" style={ color: '#374151' }>{t('organizations.workspace.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
@@ -155,7 +135,7 @@ export const OrganizationWorkspace = () => {
   return (
     <OrganizationLayout
       title={organization?.name || ''}
-      subtitle={t('organizations.workspace.subtitle')}
+      subtitle={organization?.createdAt ? `${t('organizations.workspace.subtitle')} • Ngày tạo: ${new Date(organization.createdAt).toLocaleDateString('vi-VN')}` : t('organizations.workspace.subtitle')}
       breadcrumbs={[
         { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
         { label: organization?.name || '', current: true },
@@ -201,59 +181,59 @@ export const OrganizationWorkspace = () => {
           {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+              className="rounded-lg p-4 border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
-                  <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
+                  <p className="text-sm font-medium" style={ color: '#1d4ed8' }>{t('organizations.workspace.stats.totalContracts')}</p>
+                  <p className="text-3xl font-bold" style={ color: '#1e3a8a' }>{stats.totalContracts}</p>
                 </div>
-                <FileText className="w-10 h-10 text-blue-500" />
+                <CommonIcon name="file-text" className="h-10" style={ color: '#3b82f6' } />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+              className="rounded-lg p-4 border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
-                  <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
+                  <p className="text-sm font-medium" style={ color: '#b45309' }>{t('organizations.workspace.stats.pending')}</p>
+                  <p className="text-3xl font-bold" style={ color: '#713f12' }>{stats.pendingApprovals}</p>
                 </div>
-                <Clock className="w-10 h-10 text-yellow-500" />
+                <CommonIcon name="clock" className="w-10 h-10" style={ color: '#eab308' } />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+              className="rounded-lg p-4 border" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
-                  <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
+                  <p className="text-sm font-medium" style={ color: '#15803d' }>{t('organizations.workspace.stats.approved')}</p>
+                  <p className="text-3xl font-bold" style={ color: '#14532d' }>{stats.approved}</p>
                 </div>
-                <CheckCircle className="w-10 h-10 text-green-500" />
+                <CommonIcon name="check" className="w-10 h-10" style={ color: '#22c55e' } />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
+              className="rounded-lg p-4 border" style={ borderColor: '#fecaca' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
-                  <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
+                  <p className="text-sm font-medium" style={ color: '#b91c1c' }>{t('organizations.workspace.stats.rejected')}</p>
+                  <p className="text-3xl font-bold" style={ color: '#7f1d1d' }>{stats.rejected}</p>
                 </div>
-                <XCircle className="w-10 h-10 text-red-500" />
+                <CommonIcon name="x" className="w-10 h-10" style={ color: '#ef4444' } />
               </div>
             </motion.div>
           </div> */}
 
           {/* Tabs */}
-          <Tabs className="border-b border-gray-200">
+          <Tabs style={{ borderBottom: '1px solid #e5e7eb' }}>
             <TabList className="flex gap-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -289,84 +269,84 @@ export const OrganizationWorkspace = () => {
                 {/* Tổng số hợp đồng */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+                  className="rounded-lg p-4 border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-blue-700 font-medium">{t('organizations.workspace.stats.totalContracts')}</p>
-                      <p className="text-3xl font-bold text-blue-900">{stats.totalContracts}</p>
+                      <p className="text-sm font-medium" style={ color: '#1d4ed8' }>{t('organizations.workspace.stats.totalContracts')}</p>
+                      <p className="text-3xl font-bold" style={ color: '#1e3a8a' }>{stats.totalContracts}</p>
                     </div>
-                    <FileText className="w-10 h-10 text-blue-500" />
+                    <CommonIcon name="file-text" className="h-10" style={ color: '#3b82f6' } />
                   </div>
                 </motion.div>
 
                 {/* Đang chờ */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+                  className="rounded-lg p-4 border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-yellow-700 font-medium">{t('organizations.workspace.stats.pending')}</p>
-                      <p className="text-3xl font-bold text-yellow-900">{stats.pendingApprovals}</p>
+                      <p className="text-sm font-medium" style={ color: '#b45309' }>{t('organizations.workspace.stats.pending')}</p>
+                      <p className="text-3xl font-bold" style={ color: '#713f12' }>{stats.pendingApprovals}</p>
                     </div>
-                    <Clock className="w-10 h-10 text-yellow-500" />
+                    <CommonIcon name="clock" className="w-10 h-10" style={ color: '#eab308' } />
                   </div>
                 </motion.div>
 
                 {/* Đã duyệt */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+                  className="rounded-lg p-4 border" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-green-700 font-medium">{t('organizations.workspace.stats.approved')}</p>
-                      <p className="text-3xl font-bold text-green-900">{stats.approved}</p>
+                      <p className="text-sm font-medium" style={ color: '#15803d' }>{t('organizations.workspace.stats.approved')}</p>
+                      <p className="text-3xl font-bold" style={ color: '#14532d' }>{stats.approved}</p>
                     </div>
-                    <CheckCircle className="w-10 h-10 text-green-500" />
+                    <CommonIcon name="check" className="w-10 h-10" style={ color: '#22c55e' } />
                   </div>
                 </motion.div>
 
                 {/* Đã từ chối */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
+                  className="rounded-lg p-4 border" style={ borderColor: '#fecaca' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-red-700 font-medium">{t('organizations.workspace.stats.rejected')}</p>
-                      <p className="text-3xl font-bold text-red-900">{stats.rejected}</p>
+                      <p className="text-sm font-medium" style={ color: '#b91c1c' }>{t('organizations.workspace.stats.rejected')}</p>
+                      <p className="text-3xl font-bold" style={ color: '#7f1d1d' }>{stats.rejected}</p>
                     </div>
-                    <XCircle className="w-10 h-10 text-red-500" />
+                    <CommonIcon name="x" className="w-10 h-10" style={ color: '#ef4444' } />
                   </div>
                 </motion.div>
 
                 {/* Tổng số file - MỚI */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200"
+                  className="rounded-lg p-4 border" style={ borderColor: '#e9d5ff' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-purple-700 font-medium">Tổng số file</p>
-                      <p className="text-3xl font-bold text-purple-900">{stats.totalFiles}</p>
+                      <p className="text-sm font-medium" style={ color: '#7e22ce' }>Tổng số file</p>
+                      <p className="text-3xl font-bold" style={ color: '#4c1d95' }>{stats.totalFiles}</p>
                     </div>
-                    <FileIcon className="w-10 h-10 text-purple-500" />
+                    <CommonIcon name="file" className="w-10 h-10" style={ color: '#a855f7' } />
                   </div>
                 </motion.div>
 
                 {/* Tổng số repository - MỚI */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200"
+                  className="rounded-lg p-4 border border-indigo-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-indigo-700 font-medium">Tổng số repository</p>
-                      <p className="text-3xl font-bold text-indigo-900">{stats.totalRepositories}</p>
+                      <p className="text-sm font-medium" style={ color: '#4338ca' }>Tổng số repository</p>
+                      <p className="text-3xl font-bold" style={ color: '#312e81' }>{stats.totalRepositories}</p>
                     </div>
-                    <Folder className="w-10 h-10 text-indigo-500" />
+                    <CommonIcon name="folder" className="w-10 h-10" style={ color: '#6366f1' } />
                   </div>
                 </motion.div>
               </div>
@@ -376,46 +356,28 @@ export const OrganizationWorkspace = () => {
           {/* Contracts Tab */}
           {activeTab === 'contracts' && (
             <div className="space-y-6">
-              {/* Search and Filter */}
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Input
-                        type="text"
-                        placeholder={t('organizations.workspace.searchContracts')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    <Button 
-                      variant="outline"
-                      onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
-                      className="flex items-center gap-2"
-                    >
-                      <Folder className="w-4 h-4" />
-                      Mở danh sách kho
-                    </Button>
-                    <Button variant="outline">
-                      {t('organizations.workspace.filter')}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Contracts List */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>{t('organizations.workspace.allContracts')}</CardTitle>
-                    {contractsFetching && !contractsLoading && (
-                      <span className="text-sm text-blue-600 flex items-center gap-2">
-                        <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-                        {t('organizations.workspace.updating')}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {contractsFetching && !contractsLoading && (
+                        <span className="text-sm flex items-center gap-2" style={ color: '#2563eb' }>
+                          <span className="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={ borderColor: '#2563eb' }></span>
+                          {t('organizations.workspace.updating')}
+                        </span>
+                      )}
+                      <Button 
+                        variant="outline"
+                        onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
+                        className="flex items-center gap-2"
+                      >
+                        <CommonIcon name="folder" className="w-4 h-4" />
+                        Mở danh sách kho
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -425,66 +387,63 @@ export const OrganizationWorkspace = () => {
                     </div>
                   ) : contracts.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">{t('organizations.workspace.noContracts')}</p>
-                      <p className="text-sm text-gray-500">{t('organizations.workspace.contractsAppear')}</p>
+                      <CommonIcon name="file-text" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
+                      <p className="mb-4" style={ color: '#4b5563' }>{t('organizations.workspace.noContracts')}</p>
+                      <p className="text-sm" style={ color: '#6b7280' }>{t('organizations.workspace.contractsAppear')}</p>
                     </div>
                   ) : (
                   <div className="space-y-3">
-                  {/* Hiển thị chờ phê duyệt trước */}
+                  {/* Hiển thị TẤT CẢ chờ phê duyệt trước - KHÔNG GIỚI HẠN */}
                   {contracts
                   .filter(c => c.status === 'PENDING_APPROVAL')
-                  .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .slice(0, showAllContracts ? undefined : 10)
                   .map((contract) => (
                   <div
                   key={contract.id}
-                  className="p-4 border-2 border-yellow-200 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+                  className="p-4 border-2 rounded-lg hover:bg-yellow-100 transition-colors" style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }
                   >
                   <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-1" />
+                  <CommonIcon name="alert-circle" className="mt-1" style={ color: '#ca8a04' } />
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{contract.title}</h4>
+                    <h4 className="font-medium" style={ color: '#111827' }>{contract.title}</h4>
                     {contract.content && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm mt-1" style={ color: '#4b5563' }>
                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                       </p>
                       )}
-                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-4 mt-2 text-xs" style={ color: '#6b7280' }>
                           <span>{contract.type}</span>
                         <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   </div>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium" style={ backgroundColor: '#fef3c7', color: '#b45309' }>
                   {contract.status}
                   </span>
                   </div>
                   </div>
                   ))}
 
-                  {/* Hiển thị các hợp đồng khác */}
+                  {/* Hiển thị các hợp đồng khác - GIỚI HẠN 10 */}
                   {contracts
                   .filter(c => c.status !== 'PENDING_APPROVAL')
-                    .filter(c => !searchTerm || c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || c.content?.toLowerCase().includes(searchTerm.toLowerCase()))
                       .slice(0, showAllContracts ? undefined : 10)
                         .map((contract) => (
                           <div
                             key={contract.id}
-                            className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#e5e7eb' }
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-3 flex-1">
-                                <FileIcon className="w-5 h-5 text-blue-600 mt-1" />
+                                <CommonIcon name="file" className="mt-1" style={ color: '#2563eb' } />
                                 <div className="flex-1">
-                                  <h4 className="font-medium text-gray-900">{contract.title}</h4>
+                                  <h4 className="font-medium" style={ color: '#111827' }>{contract.title}</h4>
                                   {contract.content && (
-                                    <p className="text-sm text-gray-600 mt-1">
+                                    <p className="text-sm mt-1" style={ color: '#4b5563' }>
                                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                                     </p>
                                   )}
-                                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                  <div className="flex items-center gap-4 mt-2 text-xs" style={ color: '#6b7280' }>
                                     <span>{contract.type}</span>
                                     <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                                   </div>
@@ -507,15 +466,15 @@ export const OrganizationWorkspace = () => {
                           </div>
                         ))}
 
-                      {/* Show More Button */}
-                      {!showAllContracts && (contracts.filter(c => c.status === 'PENDING_APPROVAL').length > 10 || contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10) && (
+                      {/* Show More Button - chỉ cho contracts không phải PENDING */}
+                      {!showAllContracts && contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10 && (
                         <div className="flex justify-center mt-6">
                           <Button
                             variant="outline"
                             onClick={() => setShowAllContracts(true)}
                             className="flex items-center gap-2"
                           >
-                            <Folder className="w-4 h-4" />
+                            <CommonIcon name="folder" className="w-4 h-4" />
                             Mở danh sách kho ({contracts.length} hợp đồng)
                           </Button>
                         </div>
@@ -533,7 +492,7 @@ export const OrganizationWorkspace = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Folder className="w-5 h-5" />
+                    <CommonIcon name="folder" size={20} />
                     {t('organizations.workspace.repositoriesTitle')}
                   </CardTitle>
                   <Button 
@@ -541,7 +500,7 @@ export const OrganizationWorkspace = () => {
                     onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
                     className="flex items-center gap-2"
                   >
-                    <Folder className="w-4 h-4" />
+                    <CommonIcon name="folder" className="w-4 h-4" />
                     Mở danh sách kho
                   </Button>
                 </div>
@@ -557,17 +516,17 @@ export const OrganizationWorkspace = () => {
                       <motion.div
                         key={repo.id}
                         whileHover={{ scale: 1.02 }}
-                        className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer bg-gradient-to-br from-gray-50 to-white"
+                        className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer" style={ borderColor: '#e5e7eb' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                         onClick={() => navigate(`/repositories/${repo.id}`)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Folder className="w-6 h-6 text-white" />
+                          <div className="h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                            <CommonIcon name="folder" style={ color: '#ffffff' } />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 truncate">{repo.name}</h4>
+                            <h4 className="font-semibold truncate" style={ color: '#111827' }>{repo.name}</h4>
                             {repo.description && (
-                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              <p className="text-sm mt-1 line-clamp-2" style={ color: '#4b5563' }>
                                 {repo.description}
                               </p>
                             )}
@@ -582,7 +541,7 @@ export const OrganizationWorkspace = () => {
                                 {repo.type}
                               </span>
                               {repo.isPublic && (
-                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <span className="text-xs flex items-center gap-1" style={ color: '#6b7280' }>
                                   <Eye className="w-3 h-3" />
                                   Công khai
                                 </span>
@@ -601,7 +560,7 @@ export const OrganizationWorkspace = () => {
                     onClick={() => setShowAllRepositories(true)}
                     className="flex items-center gap-2"
                     >
-                    <Folder className="w-4 h-4" />
+                    <CommonIcon name="folder" className="w-4 h-4" />
                     Mở danh sách kho ({repositoriesData.content.length} repository)
                     </Button>
                     </div>
@@ -609,9 +568,9 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">{t('organizations.workspace.noRepositories')}</p>
-                    <p className="text-sm text-gray-500">{t('organizations.workspace.repositoriesDesc')}</p>
+                    <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
+                    <p className="mb-2" style={ color: '#4b5563' }>{t('organizations.workspace.noRepositories')}</p>
+                    <p className="text-sm" style={ color: '#6b7280' }>{t('organizations.workspace.repositoriesDesc')}</p>
                   </div>
                 )}
               </CardContent>
@@ -624,7 +583,7 @@ export const OrganizationWorkspace = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
+                    <CommonIcon name="users" className="w-5 h-5" />
                     {t('organizations.workspace.membersCard.title')}
                   </CardTitle>
                   <Button 
@@ -632,7 +591,7 @@ export const OrganizationWorkspace = () => {
                     className="flex items-center gap-2"
                     onClick={() => navigate(`/organizations/${id}/members`)}
                   >
-                    <Settings className="w-4 h-4" />
+                    <CommonIcon name="settings" className="w-4 h-4" />
                     {t('organizations.workspace.membersCard.manage')}
                   </Button>
                 </div>
@@ -647,21 +606,21 @@ export const OrganizationWorkspace = () => {
                     {membersData.content.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#e5e7eb' }
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold">
+                          <div className="h-10 rounded-full flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                            <span className="font-semibold" style={ color: '#ffffff' }>
                               {member.username?.charAt(0).toUpperCase() || 'U'}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{member.username}</p>
-                            <p className="text-sm text-gray-600">{member.email}</p>
+                            <p className="font-medium" style={ color: '#111827' }>{member.username}</p>
+                            <p className="text-sm" style={ color: '#4b5563' }>{member.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium" style={ backgroundColor: '#dbeafe', color: '#1d4ed8' }>
                             {member.role || 'Member'}
                           </span>
                         </div>
@@ -670,8 +629,8 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">
+                    <CommonIcon name="users" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
+                    <p className="mb-4" style={ color: '#4b5563' }>
                       Chưa có thành viên nào trong tổ chức
                     </p>
                     <Button 
@@ -679,7 +638,7 @@ export const OrganizationWorkspace = () => {
                       className="inline-flex items-center gap-2"
                       onClick={() => navigate(`/organizations/${id}/members`)}
                     >
-                      <Users className="w-4 h-4" />
+                      <CommonIcon name="users" className="w-4 h-4" />
                       Quản lý thành viên
                     </Button>
                   </div>
@@ -693,33 +652,33 @@ export const OrganizationWorkspace = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Info className="w-5 h-5" />
+                  <CommonIcon name="info" className="w-5 h-5" />
                   {t('organizations.workspace.settings.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={ color: '#111827' }>
+                      <CommonIcon name="settings" className="w-5 h-5" />
                       {t('organizations.workspace.settings.general')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Organization Name */}
-                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                        <FileText className="w-5 h-5 text-blue-600 mt-1" />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <CommonIcon name="file-text" className="mt-1" style={ color: '#2563eb' } />
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.orgName')}</p>
-                          <p className="text-sm text-gray-700 mt-1">{organization.name}</p>
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.orgName')}</p>
+                          <p className="text-sm mt-1" style={ color: '#374151' }>{organization.name}</p>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 md:col-span-2">
-                        <FileText className="w-5 h-5 text-green-600 mt-1" />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border md:col-span-2" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <CommonIcon name="file-text" className="mt-1" style={ color: '#16a34a' } />
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.description')}</p>
-                          <p className="text-sm text-gray-700 mt-1">
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.description')}</p>
+                          <p className="text-sm mt-1" style={ color: '#374151' }>
                             {organization.description || t('organizations.workspace.settings.noDescription')}
                           </p>
                         </div>
@@ -727,34 +686,34 @@ export const OrganizationWorkspace = () => {
 
                       {/* Owner */}
                       {organization.owner && (
-                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-                          <Crown className="w-5 h-5 text-yellow-600 mt-1" />
+                        <div className="flex items-start gap-3 p-4 rounded-lg border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                          <CommonIcon name="crown" className="mt-1" style={ color: '#ca8a04' } />
                           <div className="flex-1">
-                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.owner')}</p>
-                            <p className="text-sm text-gray-700 mt-1">{organization.owner.username || organization.owner.email}</p>
+                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.owner')}</p>
+                            <p className="text-sm mt-1" style={ color: '#374151' }>{organization.owner.username || organization.owner.email}</p>
                           </div>
                         </div>
                       )}
 
                       {/* Member Count */}
-                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
-                        <Users className="w-5 h-5 text-indigo-600 mt-1" />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border border-indigo-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <CommonIcon name="users" className="w-5 h-5 mt-1" style={ color: '#4f46e5' } />
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.memberCount')}</p>
-                          <p className="text-sm text-gray-700 mt-1">{membersData?.totalElements || 0} thành viên</p>
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.memberCount')}</p>
+                          <p className="text-sm mt-1" style={ color: '#374151' }>{membersData?.totalElements || 0} thành viên</p>
                         </div>
                       </div>
 
                       {/* Visibility */}
-                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg border border-pink-200">
+                      <div className="flex items-start gap-3 p-4 rounded-lg border border-pink-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
                         {organization.isPublic ? (
                           <Eye className="w-5 h-5 text-pink-600 mt-1" />
                         ) : (
-                          <EyeOff className="w-5 h-5 text-pink-600 mt-1" />
+                          <CommonIcon name="eye-off" className="w-5 h-5 text-pink-600 mt-1" />
                         )}
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900">{t('organizations.workspace.settings.visibility')}</p>
-                          <p className="text-sm text-gray-700 mt-1">
+                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.visibility')}</p>
+                          <p className="text-sm mt-1" style={ color: '#374151' }>
                             {organization.isPublic 
                               ? t('organizations.workspace.settings.public')
                               : t('organizations.workspace.settings.private')}
@@ -764,11 +723,11 @@ export const OrganizationWorkspace = () => {
 
                       {/* Created At */}
                       {organization.createdAt && (
-                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg border border-teal-200">
-                          <Calendar className="w-5 h-5 text-teal-600 mt-1" />
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                          <CommonIcon name="calendar" className="w-5 h-5 text-teal-600 mt-1" />
                           <div className="flex-1">
-                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.createdAt')}</p>
-                            <p className="text-sm text-gray-700 mt-1">
+                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.createdAt')}</p>
+                            <p className="text-sm mt-1" style={ color: '#374151' }>
                               {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
                                 year: 'numeric',
                                 month: 'long',
@@ -783,11 +742,11 @@ export const OrganizationWorkspace = () => {
 
                       {/* Updated At */}
                       {organization.updatedAt && (
-                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                          <Calendar className="w-5 h-5 text-orange-600 mt-1" />
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                          <CommonIcon name="calendar" className="w-5 h-5 text-orange-600 mt-1" />
                           <div className="flex-1">
-                            <p className="font-medium text-gray-900">{t('organizations.workspace.settings.updatedAt')}</p>
-                            <p className="text-sm text-gray-700 mt-1">
+                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.updatedAt')}</p>
+                            <p className="text-sm mt-1" style={ color: '#374151' }>
                               {new Date(organization.updatedAt).toLocaleDateString('vi-VN', {
                                 year: 'numeric',
                                 month: 'long',

@@ -13,6 +13,8 @@ import {
   DocumentCreateData,
   PaginationParams,
   PaginatedResponse,
+  RepositoryPermissionDTO,
+  RepositoryInvite,
 } from '../types/repository.types';
 import type { FileUnion } from '../types/file.types';
 import { mapFileApiToUiDocument } from '../../services/mappers/file-mapper';
@@ -61,24 +63,12 @@ const repositoryApi = {
   },
 
   getPublicRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
-    try {
-      const response = await apiClient.get<PaginatedResponse<Repository>>(
-        `${BASE_PATH}/repositories/public`,
-        { params }
-      );
-      return response.data.data!;
-    } catch (err) {
-      // Fallback khi backend chưa có: trả về trang rỗng để UI hiển thị bình thường
-      return {
-        content: [],
-        totalElements: 0,
-        totalPages: 0,
-        currentPage: params?.page ?? 0,
-        pageSize: params?.size ?? 0,
-        hasNext: false,
-        hasPrevious: false,
-      };
-    }
+    // Bỏ fallback mock - gọi API thật
+    const response = await apiClient.get<PaginatedResponse<Repository>>(
+      `${BASE_PATH}/repositories/public`,
+      { params }
+    );
+    return response.data.data!;
   },
 
   createRepository: async (data: RepositoryCreateData): Promise<Repository> => {
@@ -155,7 +145,8 @@ const repositoryApi = {
   },
 
   downloadFile: async (id: string): Promise<Blob> => {
-    const response = await apiClient.getRaw<Blob>(`${BASE_PATH}/files/${id}/download`, {
+    // ✅ Download từ Automation Service (có kết nối S3), không phải Repository Service
+    const response = await apiClient.getRaw<Blob>(`/api/v1/automation-service/files/${id}/download`, {
       responseType: 'blob',
     });
     return response.data;
@@ -182,8 +173,8 @@ const repositoryApi = {
     return response.data.data!;
   },
 
-  getRepositoryMembers: async (repositoryId: string, params?: PaginationParams) => {
-    const response = await apiClient.get(`/api/v1/repository-management-service/repositories/${repositoryId}/members`, { params });
+  getRepositoryMembers: async (repositoryId: string, params?: PaginationParams): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>(`/api/v1/repository-management-service/repositories/${repositoryId}/members`, { params });
     return response.data.data!;
   },
 
@@ -242,6 +233,57 @@ const repositoryApi = {
   restoreDocument: async (id: string): Promise<Document> => {
     const response = await apiClient.put<Document>(`${BASE_PATH}/documents/${id}/restore`);
     return response.data.data!;
+  },
+
+  // Permission APIs
+  getPermissions: async (repositoryId: string): Promise<RepositoryPermissionDTO[]> => {
+    const response = await apiClient.get(`${BASE_PATH}/repositories/${repositoryId}/permissions`);
+    return response.data.data!;
+  },
+
+  addPermission: async (repositoryId: string, userId: string, permissions: string[]): Promise<RepositoryPermissionDTO> => {
+    const response = await apiClient.post(`${BASE_PATH}/repositories/${repositoryId}/permissions`, {
+      userId,
+      permissions
+    });
+    return response.data.data!;
+  },
+
+  updatePermission: async (repositoryId: string, userId: string, permissions: string[]): Promise<RepositoryPermissionDTO> => {
+    const response = await apiClient.put(`${BASE_PATH}/repositories/${repositoryId}/permissions/${userId}`, {
+      permissions
+    });
+    return response.data.data!;
+  },
+
+  removePermission: async (repositoryId: string, userId: string): Promise<void> => {
+    await apiClient.delete(`${BASE_PATH}/repositories/${repositoryId}/permissions/${userId}`);
+  },
+
+  // Invite APIs
+  createInvite: async (repositoryId: string, expiresInDays: number = 7): Promise<RepositoryInvite> => {
+    const response = await apiClient.post(`${BASE_PATH}/repositories/${repositoryId}/invites`, {
+      expiresInDays
+    });
+    return response.data.data!;
+  },
+
+  getRepositoryInvites: async (repositoryId: string): Promise<RepositoryInvite[]> => {
+    const response = await apiClient.get(`${BASE_PATH}/repositories/${repositoryId}/invites`);
+    return response.data.data!;
+  },
+
+  getInviteByToken: async (token: string): Promise<RepositoryInvite> => {
+    const response = await apiClient.get(`${BASE_PATH}/invites/${token}`);
+    return response.data.data!;
+  },
+
+  acceptInvite: async (token: string): Promise<void> => {
+    await apiClient.post(`${BASE_PATH}/invites/${token}/accept`);
+  },
+
+  revokeInvite: async (inviteId: string): Promise<void> => {
+    await apiClient.delete(`${BASE_PATH}/invites/${inviteId}`);
   },
 };
 
@@ -351,6 +393,16 @@ export const useFile = (id: string) => {
     queryKey: ['file', id],
     queryFn: () => repositoryApi.getFileById(id),
     enabled: !!id,
+  });
+};
+
+export const useFileDownload = (id: string, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: ['file-download', id],
+    queryFn: () => repositoryApi.downloadFile(id),
+    enabled: options?.enabled ?? !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -493,6 +545,89 @@ export const useDeleteDocument = () => {
     mutationFn: repositoryApi.deleteDocument,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+};
+
+// Permission & Invite Hooks
+export const useRepositoryPermissions = (repositoryId: string) => {
+  return useQuery({
+    queryKey: ['repository-permissions', repositoryId],
+    queryFn: () => repositoryApi.getPermissions(repositoryId),
+    enabled: !!repositoryId,
+  });
+};
+
+export const useAddPermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, userId, permissions }: { repositoryId: string; userId: string; permissions: string[] }) =>
+      repositoryApi.addPermission(repositoryId, userId, permissions),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-permissions', variables.repositoryId] });
+    },
+  });
+};
+
+export const useUpdatePermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, userId, permissions }: { repositoryId: string; userId: string; permissions: string[] }) =>
+      repositoryApi.updatePermission(repositoryId, userId, permissions),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-permissions', variables.repositoryId] });
+    },
+  });
+};
+
+export const useRemovePermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, userId }: { repositoryId: string; userId: string }) =>
+      repositoryApi.removePermission(repositoryId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-permissions', variables.repositoryId] });
+    },
+  });
+};
+
+export const useRepositoryInvites = (repositoryId: string) => {
+  return useQuery({
+    queryKey: ['repository-invites', repositoryId],
+    queryFn: () => repositoryApi.getRepositoryInvites(repositoryId),
+    enabled: !!repositoryId,
+  });
+};
+
+export const useCreateInvite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, expiresInDays }: { repositoryId: string; expiresInDays?: number }) =>
+      repositoryApi.createInvite(repositoryId, expiresInDays),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-invites', variables.repositoryId] });
+    },
+  });
+};
+
+export const useAcceptInvite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) => repositoryApi.acceptInvite(token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+    },
+  });
+};
+
+export const useRevokeInvite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ inviteId, repositoryId }: { inviteId: string; repositoryId: string }) =>
+      repositoryApi.revokeInvite(inviteId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-invites', variables.repositoryId] });
     },
   });
 };

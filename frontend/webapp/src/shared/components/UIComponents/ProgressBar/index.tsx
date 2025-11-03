@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useIsFetching } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
+import anime from 'animejs'
 
 interface ProgressBarProps {
   active?: boolean
@@ -20,6 +20,7 @@ export const ProgressBar = ({
   const isFetching = useIsFetching()
   const [navigating, setNavigating] = useState(false)
   const [visible, setVisible] = useState(false)
+  const progressRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setNavigating(true)
@@ -41,6 +42,29 @@ export const ProgressBar = ({
     }
   }, [isActive])
 
+  useEffect(() => {
+    if (!progressRef.current) return
+    
+    if (isActive) {
+      anime({
+        targets: progressRef.current,
+        width: ['10%', '60%', '85%', '95%', '85%', '100%'],
+        opacity: 0.9,
+        duration: 1200,
+        easing: 'easeInOutQuad',
+        loop: true,
+      })
+    } else {
+      anime({
+        targets: progressRef.current,
+        width: '100%',
+        opacity: 0,
+        duration: 200,
+        easing: 'easeInOutQuad',
+      })
+    }
+  }, [isActive])
+
   if (!visible) return null
 
   return (
@@ -49,14 +73,10 @@ export const ProgressBar = ({
       style={{ height }}
       aria-hidden
     >
-      <motion.div
+      <div
+        ref={progressRef}
         className={`h-full ${colorClass}`}
-        initial={{ width: '10%', opacity: 0.9 }}
-        animate={{
-          width: isActive ? ['10%', '60%', '85%', '95%', '85%', '100%'] : '100%',
-          opacity: isActive ? 0.9 : 0,
-        }}
-        transition={{ duration: 1.2, ease: 'easeInOut', repeat: isActive ? Infinity : 0, repeatDelay: 0.2 }}
+        style={{ width: '10%', opacity: 0.9 }}
       />
     </div>
   )

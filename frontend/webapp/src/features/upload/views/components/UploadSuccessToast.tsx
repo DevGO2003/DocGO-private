@@ -40,23 +40,23 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
 
   return (
     <div className="fixed top-4 right-4 z-50 max-w-sm w-full">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 transform transition-all duration-300 ease-out">
+      <div className="rounded-lg border p-4 transition-all duration-300" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }>
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 text-green-500 flex items-center justify-center text-xl">✅</div>
+            <div className="w-6 h-6 flex items-center justify-center text-xl" style={ color: '#22c55e' }>✅</div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900">
+              <h4 className="text-sm font-semibold" style={ color: '#111827' }>
                 ✅ Tải lên thành công
               </h4>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs" style={ color: '#6b7280' }>
                 Tệp đã được lưu vào hệ thống
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+            className="hover: transition-colors flex-shrink-0" style={ color: '#4b5563' } style={ color: '#9ca3af' }
           >
             <div className="w-5 h-5 flex items-center justify-center text-lg">✕</div>
           </button>
@@ -64,10 +64,10 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
 
         {/* File Info */}
         <div className="mb-4">
-          <p className="text-sm text-gray-800 font-medium truncate">
+          <p className="text-sm font-medium truncate" style={ color: '#1f2937' }>
             {fileName}{formatFileSize(fileSize)}
           </p>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs mt-1" style={ color: '#4b5563' }>
             Tệp đã được xử lý và sẵn sàng sử dụng
           </p>
         </div>
@@ -77,7 +77,7 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
           {onViewFile && (
             <button
               onClick={onViewFile}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors font-medium"
+              className="flex-1 px-3 py-2 text-xs rounded-md hover:bg-blue-700 transition-colors font-medium" style={ backgroundColor: '#2563eb', color: '#ffffff' }
             >
               👁️ Xem tệp
             </button>
@@ -85,7 +85,7 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
           {onViewDetails && (
             <button
               onClick={onViewDetails}
-              className="flex-1 px-3 py-2 bg-gray-600 text-white text-xs rounded-md hover:bg-gray-700 transition-colors font-medium"
+              className="flex-1 px-3 py-2 text-xs rounded-md hover:bg-gray-700 transition-colors font-medium" style={ backgroundColor: '#4b5563', color: '#ffffff' }
             >
               📄 Chi tiết
             </button>
@@ -93,7 +93,7 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 w-full bg-gray-200 rounded-full h-1">
+        <div className="mt-3 w-full rounded-full" style={ backgroundColor: '#e5e7eb' }>
           <div className="bg-green-500 h-1 rounded-full animate-pulse"></div>
         </div>
       </div>

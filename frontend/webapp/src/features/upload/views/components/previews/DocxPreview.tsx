@@ -33,9 +33,9 @@ export default function DocxPreview({ file }: DocxPreviewProps) {
   }, [file])
 
   return (
-    <div className="w-full h-full flex flex-col bg-white">
-      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-        <p className="text-xs text-gray-600">
+    <div className="w-full h-full flex flex-col" style={ backgroundColor: '#ffffff' }>
+      <div className="px-4 py-3 border-b" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+        <p className="text-xs" style={ color: '#4b5563' }>
           {file.name} • {(file.size / 1024).toFixed(2)} KB
         </p>
       </div>
@@ -43,14 +43,14 @@ export default function DocxPreview({ file }: DocxPreviewProps) {
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-              <p className="text-gray-500 text-sm">Đang tải nội dung...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 mb-2" style={ borderColor: '#2563eb' }></div>
+              <p className="text-sm" style={ color: '#6b7280' }>Đang tải nội dung...</p>
             </div>
           </div>
         ) : (
           <div className="prose prose-sm max-w-none">
             <div
-              className="docx-html text-gray-800"
+              className="docx-html" style={ color: '#1f2937' }
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>

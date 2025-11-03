@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
-import { FileQuestion, ArrowLeft, Home } from 'lucide-react';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent, Button, CommonFont, CommonText } from '@shared/components';
 import { HOME_PATH } from '@constants';
 
@@ -39,19 +39,19 @@ export const NotFound = () => {
       <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <div ref={iconRef} className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
-              <FileQuestion className="w-12 h-12 text-blue-600" />
+            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={ backgroundColor: '#dbeafe' }>
+              <CommonIcon name="help-circle" size={48} style={ color: '#2563eb' } />
             </div>
 
-            <CommonText as="h1" className="text-6xl font-bold text-gray-900 mb-3">
+            <CommonText as="h1" className="font-bold mb-3" style={ color: '#111827' }>
               {t('notFound.code')}
             </CommonText>
 
-            <CommonText as="h2" className="text-2xl font-semibold text-gray-900 mb-3">
+            <CommonText as="h2" className="text-2xl font-semibold mb-3" style={ color: '#111827' }>
               {t('notFound.title')}
             </CommonText>
 
-            <CommonText as="p" className="text-gray-600 mb-8">
+            <CommonText as="p" className="mb-8" style={ color: '#4b5563' }>
               Trang không tìm thấy hoặc đối tượng không tồn tại hoặc đã xóa.
             </CommonText>
 
@@ -61,7 +61,7 @@ export const NotFound = () => {
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <CommonIcon name="arrow-left" size={16} />
                 {t('notFound.goBack')}
               </Button>
               <Button
@@ -69,7 +69,7 @@ export const NotFound = () => {
                 onClick={() => navigate(HOME_PATH)}
                 className="flex items-center gap-2"
               >
-                <Home className="w-4 h-4" />
+                <CommonIcon name="home" size={16} />
                 {t('notFound.goHome')}
               </Button>
             </div>

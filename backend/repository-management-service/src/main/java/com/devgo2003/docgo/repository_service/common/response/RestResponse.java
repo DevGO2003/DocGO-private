@@ -22,6 +22,33 @@ public class RestResponse<T> {
     private Instant timestamp;
     private String requestId;
     private String path;
+    
+    /**
+     * Create a success response
+     */
+    public static <T> RestResponse<T> success(T data) {
+        return RestResponse.<T>builder()
+            .apiVersion("v1")
+            .statusCode(200)
+            .shortMessage("Success")
+            .description("Request processed successfully")
+            .data(data)
+            .timestamp(Instant.now())
+            .build();
+    }
+    
+    /**
+     * Create an error response
+     */
+    public static <T> RestResponse<T> error(int statusCode, String message, String description) {
+        return RestResponse.<T>builder()
+            .apiVersion("v1")
+            .statusCode(statusCode)
+            .shortMessage(message)
+            .description(description)
+            .timestamp(Instant.now())
+            .build();
+    }
 }
 
 

@@ -2,14 +2,19 @@ import { forwardRef, LabelHTMLAttributes, useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
+import { CommonIcon, CommonIconProps } from '../Icon/CommonIcon';
 
 interface CommonLabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   required?: boolean;
   error?: boolean;
+  icon?: CommonIconProps['name'];
+  iconSize?: number;
+  iconColor?: string;
+  noBorder?: boolean; // Không vẽ viền
 }
 
 export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
-  ({ className, required, error, children, ...props }, ref) => {
+  ({ className, required, error, icon, iconSize = 16, iconColor, noBorder = false, children, ...props }, ref) => {
     const labelRef = useRef<HTMLLabelElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,7 +37,7 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
     }, [children]);
 
     const drawCanvas = () => {
-      if (!containerRef.current || !canvasRef.current) return;
+      if (noBorder || !containerRef.current || !canvasRef.current) return;
       const container = containerRef.current;
       const canvas = canvasRef.current;
       const width = container.offsetWidth;
@@ -49,27 +54,32 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
     };
 
     useEffect(() => {
-      drawCanvas();
-      const timer = setTimeout(drawCanvas, 100);
-      return () => clearTimeout(timer);
-    }, [error, className, children]);
+      if (!noBorder) {
+        drawCanvas();
+        const timer = setTimeout(drawCanvas, 100);
+        return () => clearTimeout(timer);
+      }
+    }, [error, className, children, noBorder]);
 
     return (
-      <CommonFont ref={containerRef as any} className="relative inline-block">
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 pointer-events-none"
-          style={{ width: '100%', height: '100%' }}
-        />
+      <CommonFont ref={containerRef as any} className={noBorder ? "inline-block" : "relative inline-block"}>
+        {!noBorder && (
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ width: '100%', height: '100%' }}
+          />
+        )}
         <label
           ref={labelRef || ref}
-          className={`relative z-10 block text-sm font-medium ${
+          className={`${noBorder ? '' : 'relative z-10 '} flex items-center gap-2 text-sm font-medium ${
             error ? 'text-red-600' : 'text-gray-700'
           } ${className || ''}`}
           {...props}
         >
-          {children}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {icon && <CommonIcon name={icon} size={iconSize} color={iconColor || (error ? '#ef4444' : '#374151')} />}
+          <span>{children}</span>
+          {required && <span className="ml-1" style={ color: '#ef4444' }>*</span>}
         </label>
       </CommonFont>
     );

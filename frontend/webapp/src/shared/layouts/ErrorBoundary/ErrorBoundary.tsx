@@ -60,23 +60,23 @@ class ErrorBoundaryBase extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="min-h-screen flex items-center justify-center p-4" style={ backgroundColor: '#f9fafb' }>
           <Card className="max-w-2xl w-full">
             <CardHeader>
-              <CardTitle className="text-red-600">⚠️ {this.props.t('errorBoundary.title', 'Something went wrong')}</CardTitle>
+              <CardTitle style={ color: '#dc2626' }>⚠️ {this.props.t('errorBoundary.title', 'Something went wrong')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-gray-700">
+                <p style={ color: '#374151' }>
                   {this.props.t('errorBoundary.message', "We're sorry, but something unexpected happened. Please try refreshing the page.")}
                 </p>
                 
                 {this.state.error && (
-                  <details className="bg-gray-100 p-4 rounded-lg">
-                    <summary className="cursor-pointer font-semibold text-gray-900 mb-2">
+                  <details className="p-4 rounded-lg" style={ backgroundColor: '#f3f4f6' }>
+                    <summary className="cursor-pointer font-semibold mb-2" style={ color: '#111827' }>
                       {this.props.t('errorBoundary.details', 'Error Details')}
                     </summary>
-                    <pre className="text-xs text-gray-700 overflow-auto">
+                    <pre className="text-xs overflow-auto" style={ color: '#374151' }>
                       {this.state.error.toString()}
                       {this.state.errorInfo?.componentStack}
                     </pre>

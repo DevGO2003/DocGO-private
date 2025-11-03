@@ -1,34 +1,44 @@
 /**
  * Animation Utility Functions
- * Helper functions for animations (Framer Motion + Anime.js ready)
+ * Helper functions for animations (Anime.js)
  */
 
-import { Variants, Transition } from 'framer-motion';
+import anime from 'animejs';
+
+// Anime.js Animation Config Type
+export interface AnimeConfig {
+  targets?: any;
+  duration?: number;
+  delay?: number | ((el: any, i: number, l: number) => number);
+  easing?: string;
+  [key: string]: any;
+}
 
 /**
- * Create stagger animation for lists
+ * Create stagger animation config for lists
  */
 export const createStagger = (
-  staggerDelay: number = 0.1,
-  delayChildren: number = 0
-): Transition => {
+  targets: any,
+  staggerDelay: number = 100,
+  baseDelay: number = 0
+): AnimeConfig => {
   return {
-    staggerChildren: staggerDelay,
-    delayChildren,
+    targets,
+    delay: anime.stagger(staggerDelay, { start: baseDelay }),
   };
 };
 
 /**
- * Create spring animation config
+ * Create spring-like animation config (using easeOutElastic)
  */
 export const createSpring = (
-  stiffness: number = 300,
-  damping: number = 24
-): Transition => {
+  targets: any,
+  duration: number = 800
+): AnimeConfig => {
   return {
-    type: 'spring',
-    stiffness,
-    damping,
+    targets,
+    duration,
+    easing: 'easeOutElastic(1, .6)',
   };
 };
 
@@ -36,150 +46,137 @@ export const createSpring = (
  * Create tween animation config
  */
 export const createTween = (
-  duration: number = 0.3,
-  ease: string | number[] = 'easeInOut'
-): Transition => {
+  targets: any,
+  duration: number = 300,
+  easing: string = 'easeInOutQuad'
+): AnimeConfig => {
   return {
-    type: 'tween',
+    targets,
     duration,
-    ease,
+    easing,
   };
 };
 
 /**
- * Fade variants factory
+ * Create fade animation config
  */
-export const createFadeVariants = (
+export const createFadeAnimation = (
+  targets: any,
   delay: number = 0,
-  duration: number = 0.3
-): Variants => {
+  duration: number = 300
+): AnimeConfig => {
   return {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        delay,
-        duration,
-      },
-    },
+    targets,
+    opacity: [0, 1],
+    delay,
+    duration,
+    easing: 'easeInOutQuad',
   };
 };
 
 /**
- * Slide variants factory
+ * Create slide animation config
  */
-export const createSlideVariants = (
+export const createSlideAnimation = (
+  targets: any,
   direction: 'left' | 'right' | 'up' | 'down' = 'up',
   distance: number = 20,
   delay: number = 0,
-  duration: number = 0.4
-): Variants => {
-  const offset = {
-    left: { x: -distance, y: 0 },
-    right: { x: distance, y: 0 },
-    up: { x: 0, y: distance },
-    down: { x: 0, y: -distance },
+  duration: number = 400
+): AnimeConfig => {
+  const config: AnimeConfig = {
+    targets,
+    opacity: [0, 1],
+    delay,
+    duration,
+    easing: 'easeOutQuad',
   };
 
-  return {
-    hidden: {
-      opacity: 0,
-      ...offset[direction],
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      transition: {
-        delay,
-        duration,
-        ease: 'easeOut',
-      },
-    },
-  };
+  switch (direction) {
+    case 'left':
+      config.translateX = [-distance, 0];
+      break;
+    case 'right':
+      config.translateX = [distance, 0];
+      break;
+    case 'up':
+      config.translateY = [distance, 0];
+      break;
+    case 'down':
+      config.translateY = [-distance, 0];
+      break;
+  }
+
+  return config;
 };
 
 /**
- * Scale variants factory
+ * Create scale animation config
  */
-export const createScaleVariants = (
+export const createScaleAnimation = (
+  targets: any,
   initialScale: number = 0.8,
   delay: number = 0,
-  duration: number = 0.3
-): Variants => {
+  duration: number = 300
+): AnimeConfig => {
   return {
-    hidden: {
-      opacity: 0,
-      scale: initialScale,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        delay,
-        duration,
-      },
-    },
+    targets,
+    opacity: [0, 1],
+    scale: [initialScale, 1],
+    delay,
+    duration,
+    easing: 'easeOutQuad',
   };
 };
 
 /**
- * Rotate variants factory
+ * Create rotate animation config
  */
-export const createRotateVariants = (
+export const createRotateAnimation = (
+  targets: any,
   initialRotate: number = -180,
   delay: number = 0,
-  duration: number = 0.5
-): Variants => {
+  duration: number = 500
+): AnimeConfig => {
   return {
-    hidden: {
-      opacity: 0,
-      rotate: initialRotate,
-    },
-    visible: {
-      opacity: 1,
-      rotate: 0,
-      transition: {
-        delay,
-        duration,
-      },
-    },
+    targets,
+    opacity: [0, 1],
+    rotate: [initialRotate, 0],
+    delay,
+    duration,
+    easing: 'easeOutQuad',
   };
 };
 
 /**
- * Create hover effect
+ * Create hover scale animation (use with mouse events)
  */
-export const createHoverEffect = (
+export const createHoverScale = (
+  targets: any,
   scale: number = 1.05,
-  y: number = 0
-) => {
+  duration: number = 200
+): AnimeConfig => {
   return {
-    whileHover: {
-      scale,
-      y,
-      transition: {
-        duration: 0.2,
-        ease: 'easeOut',
-      },
-    },
-    whileTap: {
-      scale: 0.95,
-    },
+    targets,
+    scale,
+    duration,
+    easing: 'easeOutQuad',
   };
 };
 
 /**
- * Create tap effect
+ * Create tap/press animation (use with click events)
  */
-export const createTapEffect = (scale: number = 0.95) => {
+export const createTapAnimation = (
+  targets: any,
+  scale: number = 0.95,
+  duration: number = 100
+): AnimeConfig => {
   return {
-    whileTap: {
-      scale,
-      transition: {
-        duration: 0.1,
-      },
-    },
+    targets,
+    scale,
+    duration,
+    easing: 'easeOutQuad',
   };
 };
 
@@ -215,25 +212,26 @@ export const parallel = async (
 };
 
 /**
- * Easing functions
+ * Anime.js easing presets
  */
 export const easings = {
-  linear: [0, 0, 1, 1],
-  easeIn: [0.4, 0, 1, 1],
-  easeOut: [0, 0, 0.2, 1],
-  easeInOut: [0.4, 0, 0.2, 1],
-  bounce: [0.68, -0.55, 0.265, 1.55],
-  anticipate: [0.36, 0.66, 0.04, 1],
+  linear: 'linear',
+  easeIn: 'easeInQuad',
+  easeOut: 'easeOutQuad',
+  easeInOut: 'easeInOutQuad',
+  bounce: 'easeOutBounce',
+  elastic: 'easeOutElastic(1, .6)',
+  spring: 'spring(1, 80, 10, 0)',
 } as const;
 
 /**
- * Duration presets (in seconds)
+ * Duration presets (in milliseconds)
  */
 export const durations = {
   instant: 0,
-  fast: 0.15,
-  normal: 0.3,
-  slow: 0.5,
-  slower: 0.8,
-  slowest: 1,
+  fast: 150,
+  normal: 300,
+  slow: 500,
+  slower: 800,
+  slowest: 1000,
 } as const;

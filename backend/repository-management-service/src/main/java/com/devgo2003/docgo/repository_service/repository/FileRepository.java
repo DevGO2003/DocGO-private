@@ -23,6 +23,9 @@ public interface FileRepository extends MongoRepository<FileEntity, String> {
     @Query("{ 'overview.organizationId': ?0, 'isDeleted': false }")
     Page<FileEntity> findByOrganizationIdAndIsDeletedFalse(String organizationId, Pageable pageable);
 
+    // Filter files by repository IDs with pagination
+    Page<FileEntity> findByRepositoryIdInAndIsDeletedFalse(List<String> repositoryIds, Pageable pageable);
+    
     // Combined filters
     @Query("{ 'overview.documentType': ?0, 'overview.organizationId': ?1, 'isDeleted': false }")
     Page<FileEntity> findByDocumentTypeAndOrganizationIdAndIsDeletedFalse(String documentType, String organizationId, Pageable pageable);
@@ -35,4 +38,8 @@ public interface FileRepository extends MongoRepository<FileEntity, String> {
     
     @Query("{ 'overview.documentType': ?0, 'overview.organizationId': ?1, 'overview.ownerUserId': ?2, 'isDeleted': false }")
     Page<FileEntity> findByDocumentTypeAndOrganizationIdAndOwnerUserIdAndIsDeletedFalse(String documentType, String organizationId, String ownerUserId, Pageable pageable);
+    
+    Page<FileEntity> findByDocumentTypeAndRepositoryIdInAndIsDeletedFalse(String documentType, List<String> repositoryIds, Pageable pageable);
+    Page<FileEntity> findByOwnerUserIdAndRepositoryIdInAndIsDeletedFalse(String ownerUserId, List<String> repositoryIds, Pageable pageable);
+    Page<FileEntity> findByDocumentTypeAndOwnerUserIdAndRepositoryIdInAndIsDeletedFalse(String documentType, String ownerUserId, List<String> repositoryIds, Pageable pageable);
 }

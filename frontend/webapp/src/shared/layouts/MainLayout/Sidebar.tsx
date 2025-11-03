@@ -1,22 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import anime from 'animejs';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import {
-  Home,
-  FileText,
-  Users,
-  Settings,
-  BarChart3,
-  Folder,
-  X,
-  Star,
-  Building2,
-  Edit2,
-  GripVertical,
-  Upload,
-} from 'lucide-react';
+import { CommonIcon } from '../../components/UIComponents/Icon/CommonIcon';
 import { NoRecentRepositoryModal } from '../../components/UIComponents/Modal/NoRecentRepositoryModal';
 import { useRecentRepositories } from '../../hooks/useRecentRepositories';
 
@@ -27,13 +14,13 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { name: 'dashboard', href: '/dashboard', icon: Home },
-  { name: 'repositories', href: '/repositories', icon: Folder },
-  { name: 'upload', href: '/upload', icon: Upload },
-  // { name: 'analytics', href: '/analytics', icon: BarChart3 }, // Removed as per requirement
-  { name: 'documents', href: '/repositories', icon: FileText },
-  { name: 'organizations', href: '/organizations', icon: Building2 },
-  { name: 'settings', href: '/settings', icon: Settings },
+  { name: 'dashboard', href: '/dashboard', icon: 'home' },
+  { name: 'repositories', href: '/repositories', icon: 'folder' },
+  { name: 'upload', href: '/upload', icon: 'upload' },
+  // { name: 'analytics', href: '/analytics', icon: 'chart' }, // Removed as per requirement
+  // { name: 'documents', href: '/repositories', icon: 'file-text' }, // Removed as per rules
+  { name: 'organizations', href: '/organizations', icon: 'building' },
+  { name: 'settings', href: '/settings', icon: 'settings' },
 ];
 
 const STORAGE_KEYS = {
@@ -257,7 +244,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
       case 'repositories': return t('nav.repositories');
       case 'upload': return t('nav.upload');
       // case 'analytics': return t('nav.analytics'); // Removed
-      case 'documents': return t('nav.documents');
+      // case 'documents': return t('nav.documents'); // Removed
       case 'organizations': return t('nav.organizations');
       case 'users': return t('nav.users');
       case 'settings': return t('nav.settings');
@@ -315,12 +302,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
   const pinnedItemsList = allItems.filter(item => pinnedItems.includes(item.name));
 
   return (
-    <div className="h-full flex flex-col bg-white border-r-2 border-gray-200">
+    <div className="h-full flex flex-col border-r-2" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff' }>
       {/* Logo */}
-      <div className="flex h-16 items-center px-4 justify-between border-b-2 border-gray-200">
+      <div className="flex h-16 items-center px-4 justify-between border-b-2" style={ borderColor: '#e5e7eb' }>
         <div className="flex items-center gap-2">
-          <FileText className="h-8 w-8 text-blue-600" />
-          {!collapsed && <span className="text-xl font-bold text-gray-900">{t('app.title')}</span>}
+          <CommonIcon name="file-text" size={20} style={ color: '#2563eb' } />
+          {!collapsed && <span className="text-xl font-bold" style={ color: '#111827' }>{t('app.title')}</span>}
         </div>
         
         <div className="flex items-center gap-2">
@@ -331,16 +318,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
             title={collapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
           >
             <div className="relative w-5 h-5 flex items-center justify-center">
-              <svg 
-                className={`w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-transform duration-300 ${
-                  collapsed ? 'rotate-180' : 'rotate-0'
-                }`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <CommonIcon name="chevron-down" size={16} className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : 'rotate-0'}`} />
             </div>
           </button>
           
@@ -356,9 +334,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                 }`}
                 title={t('sidebar.tooltips.manageLabels')}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+                <CommonIcon name="settings" size={16} />
               </button>
             <button
               onClick={() => setEditMode(!editMode)}
@@ -369,7 +345,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
               }`}
               title={t('sidebar.tooltips.editMode')}
             >
-              <Edit2 className="h-4 w-4" />
+              <CommonIcon name="edit" size={16} />
             </button>
             </div>
           )}
@@ -377,24 +353,24 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           {/* Close Button (Mobile) */}
           <button
             onClick={onClose}
-            className="lg:hidden p-2 border-2 border-gray-300 rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all duration-200"
+            className="lg:hidden p-2 border-2 rounded-lg hover: hover: transition-all duration-200" style={ borderColor: '#d1d5db', color: '#4b5563', borderColor: '#9ca3af' } style={ color: '#9ca3af' }
           >
-            <X className="h-5 w-5" />
+            <CommonIcon name="x" size={20} />
           </button>
         </div>
       </div>
 
       {/* Label Manager Panel */}
       {showLabelManager && !collapsed && (
-        <div className="px-4 py-3 bg-purple-50 border-b border-purple-200">
+        <div className="px-4 py-3 border-b" style={ borderColor: '#e9d5ff' } style={ backgroundColor: '#faf5ff' }>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-purple-800">{t('sidebar.labelManager.title')}</h3>
+              <h3 className="text-sm font-semibold" style={ color: '#6b21a8' }>{t('sidebar.labelManager.title')}</h3>
               <button
                 onClick={() => setShowLabelManager(false)}
                 className="p-1 hover:bg-purple-100 rounded"
               >
-                <X className="h-4 w-4 text-purple-600" />
+                <CommonIcon name="x" size={16} color="#9333ea" />
               </button>
             </div>
             
@@ -403,7 +379,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
               <input
                 type="text"
                 placeholder={t('sidebar.labelManager.addLabel')}
-                className="flex-1 px-2 py-1 text-xs border border-purple-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-500" style={ borderColor: '#d8b4fe' }
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     addNewLabel(e.currentTarget.value);
@@ -417,7 +393,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                   addNewLabel(input.value);
                   input.value = '';
                 }}
-                className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700"
+                className="px-2 py-1 text-xs rounded hover:bg-purple-700" style={ backgroundColor: '#9333ea', color: '#ffffff' }
               >
                 {t('sidebar.labelManager.add')}
               </button>
@@ -425,18 +401,18 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
             
             {/* Available Labels */}
             <div className="space-y-1">
-              <div className="text-xs font-medium text-purple-700">{t('sidebar.labelManager.availableLabels')}</div>
+              <div className="text-xs font-medium" style={ color: '#7e22ce' }>{t('sidebar.labelManager.availableLabels')}</div>
               <div className="flex flex-wrap gap-1">
                 {availableLabels.map(label => (
-                  <div key={label} className="flex items-center gap-1 px-2 py-1 bg-white border border-purple-200 rounded text-xs">
-                    <span className="text-purple-700">{getGroupDisplayLabel(label)}</span>
+                  <div key={label} className="flex items-center gap-1 px-2 py-1 border rounded text-xs" style={ borderColor: '#e9d5ff' } style={ backgroundColor: '#ffffff' }>
+                    <span style={ color: '#7e22ce' }>{getGroupDisplayLabel(label)}</span>
                     {label !== 'others' && (
                       <button
                         onClick={() => removeLabel(label)}
                         className="p-0.5 hover:bg-red-100 rounded"
                         title={t('sidebar.labelManager.removeLabel')}
                       >
-                        <X className="h-3 w-3 text-red-500" />
+                        <CommonIcon name="x" size={12} color="#ef4444" />
                       </button>
                     )}
                   </div>
@@ -453,21 +429,16 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
         {pinnedItemsList.length > 0 && (
           <div className="space-y-2">
             {!collapsed && (
-              <div className="px-2 text-xs font-semibold text-yellow-600 uppercase tracking-wide flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-400" />
+              <div className="px-2 text-xs font-semibold uppercase tracking-wide flex items-center gap-1" style={ color: '#ca8a04' }>
+                <CommonIcon name="star" size={12} className="text-yellow-400" />
                 {t('sidebar.favorites')}
               </div>
             )}
             {pinnedItemsList.map((item) => {
-              const Icon = item.icon;
               const active = isActive(item.href);
 
               return (
-                <motion.div
-                  key={item.name}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <div key={item.name}>
                   <Link
                     to={item.href}
                     className={`
@@ -479,7 +450,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                       ${collapsed ? 'justify-center' : ''}
                     `}
                   >
-                    <Icon className={`h-5 w-5 ${active ? 'text-yellow-600' : 'text-gray-500'}`} />
+                    <CommonIcon name={item.icon as any} size={20} className={active ? 'text-yellow-600' : 'text-gray-500'} />
                     {!collapsed && (
                       <>
                         <span className="flex-1">{getDisplayLabel(item.name)}</span>
@@ -491,12 +462,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           className="p-1 hover:bg-yellow-200 rounded"
                           title={t('sidebar.tooltips.unpin')}
                         >
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <CommonIcon name="star" size={16} className="text-yellow-400" />
                         </button>
                       </>
                     )}
                   </Link>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -507,7 +478,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
         {navigationGroups.map((group) => (
             <div key={group.key} className="space-y-2">
             {!collapsed && (
-                <div className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center justify-between group">
+                <div className="px-2 text-xs font-semibold uppercase tracking-wide flex items-center justify-between" style={ color: '#6b7280' }>
                   {editingGroupLabel === group.key ? (
                     <input
                       type="text"
@@ -521,12 +492,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         }
                       }}
                       autoFocus
-                      className="w-full px-1 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      className="w-full px-1 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#ffffff' }
                       placeholder={t('sidebar.placeholder.groupName')}
                     />
                   ) : (
                     <span 
-                      className="cursor-pointer hover:text-gray-700"
+                      className="cursor-pointer hover:" style={ color: '#374151' }
                       onClick={() => editMode && setEditingGroupLabel(group.key)}
                       title={editMode ? t('sidebar.tooltips.editGroupLabel') : ''}
                     >
@@ -539,7 +510,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                       className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded transition-opacity"
                       title={t('sidebar.tooltips.editGroupLabel')}
                     >
-                      <Edit2 className="h-3 w-3 text-gray-400" />
+                      <CommonIcon name="edit-2" size={12} color="#9ca3af" />
                     </button>
                   )}
               </div>
@@ -560,7 +531,6 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         return aIndex - bIndex;
                       })
                       .map((item, index) => {
-              const Icon = item.icon;
               const active = isActive(item.href);
 
               return (
@@ -571,12 +541,10 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                             isDragDisabled={!editMode}
                           >
                             {(provided: any, snapshot: any) => (
-                <motion.div
+                <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                                 className={`${
                                   snapshot.isDragging ? 'z-50 shadow-lg' : ''
                                 }`}
@@ -594,7 +562,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         ${editMode ? 'cursor-move' : ''}
                       `}
                     >
-                      <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+                      <CommonIcon name={item.icon as any} size={20} className={active ? 'text-blue-600' : 'text-gray-500'} />
                       {!collapsed && (
                         <>
                           <span className="flex-1">{getDisplayLabel(item.name)}</span>
@@ -603,7 +571,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               <select
                                 value={itemLabels[item.name] || 'others'}
                                 onChange={(e) => assignItemToLabel(item.name, e.target.value)}
-                                className="text-xs border border-gray-300 rounded px-1 py-0.5 bg-white"
+                                className="text-xs border rounded px-1 py-0.5" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#ffffff' }
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {availableLabels.map(label => (
@@ -639,9 +607,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               }}
                             >
                               {editMode ? (
-                                <GripVertical className="h-4 w-4 text-gray-400" />
+                                <CommonIcon name="grip" size={16} color="#9ca3af" />
                               ) : (
-                                <Star className="h-4 w-4 text-gray-400" />
+                                <CommonIcon name="star" size={16} color="#9ca3af" />
                               )}
                             </div>
                           </div>
@@ -661,7 +629,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                         ${editMode ? 'cursor-move' : ''}
                     `}
                   >
-                    <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <CommonIcon name={item.icon as any} size={20} className={active ? 'text-blue-600' : 'text-gray-500'} />
                     {!collapsed && (
                       <>
                         <span className="flex-1">{getDisplayLabel(item.name)}</span>
@@ -670,7 +638,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               <select
                                 value={itemLabels[item.name] || 'others'}
                                 onChange={(e) => assignItemToLabel(item.name, e.target.value)}
-                                className="text-xs border border-gray-300 rounded px-1 py-0.5 bg-white"
+                                className="text-xs border rounded px-1 py-0.5" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#ffffff' }
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {availableLabels.map(label => (
@@ -706,9 +674,9 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           }}
                         >
                           {editMode ? (
-                            <GripVertical className="h-4 w-4 text-gray-400" />
+                            <CommonIcon name="grip" size={16} color="#9ca3af" />
                           ) : (
-                            <Star className="h-4 w-4 text-gray-400" />
+                            <CommonIcon name="star" size={16} color="#9ca3af" />
                           )}
                         </div>
                           </div>
@@ -719,7 +687,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                   
                   {/* Edit Mode - Label Input */}
                   {editMode && editingLabel === item.name && !collapsed && (
-                    <div className="px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 mt-1">
+                    <div className="px-3 py-2 rounded-lg border mt-1" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
                       <input
                         type="text"
                         defaultValue={getDisplayLabel(item.name)}
@@ -732,12 +700,12 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           }
                         }}
                         autoFocus
-                        className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" style={ borderColor: '#93c5fd' }
                         placeholder={t('sidebar.placeholder.labelName')}
                       />
                     </div>
                   )}
-                </motion.div>
+                </div>
                             )}
                           </Draggable>
               );
@@ -753,8 +721,8 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
 
       {/* Footer */}
       {!collapsed && (
-        <div className="p-4 border-t-2 border-gray-200">
-          <div className="text-xs text-gray-500 text-center">
+        <div className="p-4 border-t-2" style={ borderColor: '#e5e7eb' }>
+          <div className="text-xs" style={ color: '#6b7280' }>
             DocGO © 2025
           </div>
         </div>

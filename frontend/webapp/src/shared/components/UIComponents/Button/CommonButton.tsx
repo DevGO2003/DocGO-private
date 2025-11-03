@@ -2,9 +2,9 @@ import { forwardRef, useEffect, useRef } from 'react';
 import { cn } from '@shared/lib/utils';
 import { ButtonProps } from './Button.types';
 import { buttonVariants } from './Button.styles';
-import { Loader2 } from 'lucide-react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, isLoading, children, disabled, ...props }, ref) => {
@@ -42,12 +42,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           style={{ width: '100%', height: '100%' }}
         />
         <button
-          className={cn(buttonVariants({ variant, size, className }))}
+          className={buttonVariants({ variant, size, className })}
           ref={ref}
           disabled={disabled || isLoading}
           {...props}
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading && <CommonIcon name="loading" size={16} className="mr-2" />}
           {children}
         </button>
       </CommonFont>
