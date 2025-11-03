@@ -47,9 +47,9 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
   const getRepositoryIcon = (type: string) => {
     return type === 'ORGANIZATION' ? (
-      <CommonIcon name="building" className="w-8 h-8 text-purple-500 flex-shrink-0 ml-2" />
+      <CommonIcon name="building" className="w-8 h-8 flex-shrink-0 ml-2" style={ color: '#a855f7' } />
     ) : (
-      <CommonIcon name="user" className="w-8 h-8 text-blue-500 flex-shrink-0 ml-2" />
+      <CommonIcon name="user" className="h-8 flex-shrink-0 ml-2" style={ color: '#3b82f6' } />
     );
   };
 
@@ -73,9 +73,9 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
   if (error) {
     return (
-      <Card className="border-red-200 bg-red-50">
+      <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
         <CardContent className="p-6">
-          <p className="text-red-700 text-center">
+          <p className="text-center" style={ color: '#b91c1c' }>
             {error}
           </p>
         </CardContent>
@@ -88,11 +88,11 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
       <div className="text-center py-16 animate-fade-in">
         <Card>
           <CardContent className="p-12">
-            <CommonIcon name="folder" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
+            <h3 className="text-xl font-semibold mb-2" style={ color: '#111827' }>
               Không có repository nào
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6" style={ color: '#4b5563' }>
               Bắt đầu bằng cách tạo repository đầu tiên của bạn
             </p>
             {onCreateRepository && (
@@ -127,7 +127,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                     <CardTitle className="text-lg mb-2 line-clamp-1">
                       {repo.name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600 line-clamp-2">
+                    <p className="text-sm line-clamp-2" style={ color: '#4b5563' }>
                       {repo.description || 'Không có mô tả'}
                     </p>
                   </div>
@@ -146,7 +146,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                       {getRepositoryTypeLabel(repo.type)}
                     </span>
                     {repo.isPublic && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={ backgroundColor: '#dcfce7' }>
                         Công khai
                       </span>
                     )}
@@ -155,14 +155,14 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <CommonIcon name="file-text" className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-700">
+                      <CommonIcon name="file-text" style={ color: '#6b7280' } />
+                      <span style={ color: '#374151' }>
                         {repo.fileCount || 0} tệp
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <CommonIcon name="users" className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-700">
+                      <CommonIcon name="users" style={ color: '#6b7280' } />
+                      <span style={ color: '#374151' }>
                         {repo.memberCount || 0} thành viên
                       </span>
                     </div>
@@ -170,23 +170,23 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
                   {/* Size */}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Dung lượng:</span>
-                    <span className="font-medium text-gray-900">
+                    <span style={ color: '#4b5563' }>Dung lượng:</span>
+                    <span className="font-medium" style={ color: '#111827' }>
                       {formatFileSize(repo.totalSize)}
                     </span>
                   </div>
 
                   {/* Owner */}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Chủ sở hữu:</span>
-                    <span className="font-medium text-gray-900">
+                    <span style={ color: '#4b5563' }>Chủ sở hữu:</span>
+                    <span className="font-medium" style={ color: '#111827' }>
                       {repo.ownerName || 'Chưa có thông tin'}
                     </span>
                   </div>
 
                   {/* Updated Time */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-1 text-xs" style={ color: '#6b7280' }>
                       <CommonIcon name="clock" className="w-3 h-3" />
                       Cập nhật: {repo.updatedAt ? new Date(repo.updatedAt).toLocaleDateString('vi-VN') : 'Không có'}
                     </div>

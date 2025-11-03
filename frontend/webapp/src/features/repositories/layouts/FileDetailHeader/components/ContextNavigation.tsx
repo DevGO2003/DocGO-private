@@ -36,7 +36,7 @@ export const ContextNavigation: React.FC<ContextNavigationProps> = ({
 
       {/* File Counter */}
       {currentIndex !== undefined && totalFiles !== undefined && (
-        <span className="text-sm text-gray-600 px-2">
+        <span className="text-sm px-2" style={ color: '#4b5563' }>
           Tệp {currentIndex + 1}/{totalFiles}
         </span>
       )}

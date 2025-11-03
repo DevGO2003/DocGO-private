@@ -87,7 +87,7 @@ const HeroSection: React.FC = () => {
         
         {/* Title */}
         <div ref={titleRef}>
-          <CommonText as="h1" className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <CommonText as="h1" className="md:text-6xl font-bold mb-6" style={ color: '#111827' }>
             {t('landing.hero.title.part1')}{' '}
             <span style={{ 
               background: 'linear-gradient(to right, #2563eb, #9333ea)',
@@ -103,7 +103,7 @@ const HeroSection: React.FC = () => {
         
         {/* Description */}
         <div ref={descRef}>
-          <CommonText as="p" className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
+          <CommonText as="p" className="text-xl mb-10 max-w-3xl mx-auto" style={ color: '#4b5563' }>
             {t('landing.hero.description')}
           </CommonText>
         </div>
@@ -136,7 +136,7 @@ const HeroSection: React.FC = () => {
             <CommonText as="p" className="text-4xl font-bold" style={{ color: '#2563eb' }}>
               1000+
             </CommonText>
-            <CommonText as="p" className="text-gray-600 mt-1">
+            <CommonText as="p" className="mt-1" style={ color: '#4b5563' }>
               {t('landing.hero.stats.documents')}
             </CommonText>
           </div>
@@ -144,7 +144,7 @@ const HeroSection: React.FC = () => {
             <CommonText as="p" className="text-4xl font-bold" style={{ color: '#9333ea' }}>
               99%
             </CommonText>
-            <CommonText as="p" className="text-gray-600 mt-1">
+            <CommonText as="p" className="mt-1" style={ color: '#4b5563' }>
               {t('landing.hero.stats.accuracy')}
             </CommonText>
           </div>
@@ -152,7 +152,7 @@ const HeroSection: React.FC = () => {
             <CommonText as="p" className="text-4xl font-bold" style={{ color: '#16a34a' }}>
               5x
             </CommonText>
-            <CommonText as="p" className="text-gray-600 mt-1">
+            <CommonText as="p" className="mt-1" style={ color: '#4b5563' }>
               {t('landing.hero.stats.faster')}
             </CommonText>
           </div>

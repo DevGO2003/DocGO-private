@@ -111,8 +111,8 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
       title="Tạo Repository Mới"
       footer={
         <div className="flex items-center justify-between w-full">
-          <div className="text-sm text-gray-500">
-            Các trường có dấu <span className="text-red-500">*</span> là bắt buộc
+          <div className="text-sm" style={ color: '#6b7280' }>
+            Các trường có dấu <span style={ color: '#ef4444' }>*</span> là bắt buộc
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -143,8 +143,8 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
         <div className="space-y-6">
           {/* Repository Type Selection */}
           <div className="space-y-3">
-            <Label htmlFor="type" className="text-sm font-medium text-gray-900">
-              Chọn loại Repository <span className="text-red-500">*</span>
+            <Label htmlFor="type" className="text-sm font-medium" style={ color: '#111827' }>
+              Chọn loại Repository <span style={ color: '#ef4444' }>*</span>
             </Label>
             <div className="grid grid-cols-2 gap-3">
               {/* Personal Option */}
@@ -171,13 +171,13 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     }`}>
                       Cá nhân
                     </div>
-                    <div className="text-xs text-gray-600 mt-0.5">
+                    <div className="text-xs mt-0.5" style={ color: '#4b5563' }>
                       Repository của riêng bạn
                     </div>
                   </div>
                   {formData.type === 'PERSONAL' && (
                     <div className="absolute top-2 right-2">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="rounded-full" style={ backgroundColor: '#2563eb' }></div>
                     </div>
                   )}
                 </div>
@@ -207,29 +207,29 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     }`}>
                       Tổ chức
                     </div>
-                    <div className="text-xs text-gray-600 mt-0.5">
+                    <div className="text-xs mt-0.5" style={ color: '#4b5563' }>
                       Thuộc về một tổ chức
                     </div>
                   </div>
                   {formData.type === 'ORGANIZATION' && (
                     <div className="absolute top-2 right-2">
-                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                      <div className="rounded-full" style={ backgroundColor: '#16a34a' }></div>
                     </div>
                   )}
                 </div>
               </button>
             </div>
             {errors.type && (
-              <p className="text-sm text-red-600">{errors.type}</p>
+              <p className="text-sm" style={ color: '#dc2626' }>{errors.type}</p>
             )}
           </div>
 
           {formData.type === 'ORGANIZATION' && (
-            <div className="space-y-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="space-y-2 p-4 border rounded-lg" style={ borderColor: '#bbf7d0' } style={ backgroundColor: '#f0fdf4' }>
               <div className="flex items-center gap-2 mb-3">
-                <CommonIcon name="building" size={16} className="text-green-600" />
-                <Label htmlFor="organizationId" className="text-sm font-medium text-gray-900">
-                  Chọn tổ chức <span className="text-red-500">*</span>
+                <CommonIcon name="building" size={16} style={ color: '#16a34a' } />
+                <Label htmlFor="organizationId" className="text-sm font-medium" style={ color: '#111827' }>
+                  Chọn tổ chức <span style={ color: '#ef4444' }>*</span>
                 </Label>
               </div>
               <Select
@@ -242,10 +242,10 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     label: org.name
                   }))
                 ]}
-                className="bg-white"
+                style={ backgroundColor: '#ffffff' }
               />
               {errors.organizationId && (
-                <p className="text-sm text-red-600">{errors.organizationId}</p>
+                <p className="text-sm" style={ color: '#dc2626' }>{errors.organizationId}</p>
               )}
               {organizationsData?.content?.length === 0 && (
                 <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md mt-2">
@@ -255,7 +255,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                 </div>
               )}
               {organizationsData?.content && organizationsData.content.length > 0 && (
-                <p className="text-xs text-gray-600 mt-2">
+                <p className="text-xs mt-2" style={ color: '#4b5563' }>
                   Đã tìm thấy {organizationsData.content.length} tổ chức mà bạn tham gia
                 </p>
               )}
@@ -263,8 +263,8 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-              Tên Repository <span className="text-red-500">*</span>
+            <Label htmlFor="name" className="text-sm font-medium" style={ color: '#374151' }>
+              Tên Repository <span style={ color: '#ef4444' }>*</span>
             </Label>
             <Input
               id="name"
@@ -275,12 +275,12 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               className={errors.name ? 'border-red-500' : ''}
             />
             {errors.name && (
-              <p className="text-sm text-red-600">{errors.name}</p>
+              <p className="text-sm" style={ color: '#dc2626' }>{errors.name}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="description" className="text-sm font-medium" style={ color: '#374151' }>
               Mô tả
             </Label>
             <Textarea
@@ -292,15 +292,15 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               className={errors.description ? 'border-red-500' : ''}
             />
             {errors.description && (
-              <p className="text-sm text-red-600">{errors.description}</p>
+              <p className="text-sm" style={ color: '#dc2626' }>{errors.description}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs" style={ color: '#6b7280' }>
               {formData.description?.length || 0}/500 ký tự
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
+            <Label className="text-sm font-medium" style={ color: '#374151' }>
               Công khai
             </Label>
             <div className="flex items-center space-x-3">
@@ -309,10 +309,10 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('isPublic', e.target.checked)}
               />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium" style={ color: '#111827' }>
                   {formData.isPublic ? 'Công khai' : 'Riêng tư'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs" style={ color: '#6b7280' }>
                   {formData.isPublic
                     ? 'Bất kỳ ai cũng có thể xem repository này'
                     : 'Chỉ bạn và những người được phép mới có thể xem'}

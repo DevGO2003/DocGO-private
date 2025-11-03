@@ -11,7 +11,7 @@ export function ClausesTab({ data }: ClausesTabProps) {
 
   if (!clauses && !unfavorable) {
     return (
-      <div className="text-center text-gray-500 py-8">Không có dữ liệu điều khoản</div>
+      <div className="py-8" style={ color: '#6b7280' }>Không có dữ liệu điều khoản</div>
     );
   }
 
@@ -40,8 +40,8 @@ export function ClausesTab({ data }: ClausesTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <CommonIcon name="check" className="w-4 h-4 text-green-600" />
-              <h3 className="text-sm font-semibold text-gray-900">
+              <CommonIcon name="check" style={ color: '#16a34a' } />
+              <h3 className="text-sm font-semibold" style={ color: '#111827' }>
                 Điều khoản chính ({clauses.length})
               </h3>
             </div>
@@ -50,10 +50,10 @@ export function ClausesTab({ data }: ClausesTabProps) {
               {clauses.map((clause: any, idx: number) => (
                 <div
                   key={idx}
-                  className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow bg-gradient-to-r from-green-50 to-white"
+                  className="border rounded-lg p-3 hover:shadow-sm transition-shadow bg-gradient-to-r from-green-50 to-white" style={ borderColor: '#e5e7eb' }
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold text-sm text-gray-900">{clause.name}</h4>
+                    <h4 className="font-semibold text-sm" style={ color: '#111827' }>{clause.name}</h4>
                     <div className="flex gap-1">
                       {clause.importance && (
                         <span
@@ -76,18 +76,18 @@ export function ClausesTab({ data }: ClausesTabProps) {
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-700 mb-2">{clause.description}</p>
+                  <p className="text-xs mb-2" style={ color: '#374151' }>{clause.description}</p>
 
                   {clause.content && (
-                    <div className="bg-white p-2 rounded text-xs italic text-gray-600 mb-2 border border-gray-200">
+                    <div className="p-2 rounded text-xs mb-2 border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', color: '#4b5563' }>
                       {clause.content}
                     </div>
                   )}
 
                   {clause.advice && (
-                    <div className="bg-blue-50 p-2 rounded text-xs border border-blue-200">
-                      <span className="font-medium text-blue-900">💡 </span>
-                      <span className="text-blue-800">{clause.advice}</span>
+                    <div className="p-2 rounded text-xs border" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
+                      <span className="font-medium" style={ color: '#1e3a8a' }>💡 </span>
+                      <span style={ color: '#1e40af' }>{clause.advice}</span>
                     </div>
                   )}
                 </div>
@@ -99,11 +99,11 @@ export function ClausesTab({ data }: ClausesTabProps) {
 
       {/* Unfavorable Clauses */}
       {unfavorable && unfavorable.length > 0 && (
-        <Card className="border-red-200">
+        <Card style={ borderColor: '#fecaca' }>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <CommonIcon name="alert-circle" className="w-4 h-4 text-red-600" />
-              <h3 className="text-sm font-semibold text-red-900">
+              <CommonIcon name="alert-circle" style={ color: '#dc2626' } />
+              <h3 className="text-sm font-semibold" style={ color: '#7f1d1d' }>
                 Điều khoản bất lợi ({unfavorable.length})
               </h3>
             </div>
@@ -112,10 +112,10 @@ export function ClausesTab({ data }: ClausesTabProps) {
               {unfavorable.map((clause: any, idx: number) => (
                 <div
                   key={idx}
-                  className="border border-red-200 rounded-lg p-3 bg-gradient-to-r from-red-50 to-white"
+                  className="border rounded-lg p-3 bg-gradient-to-r from-red-50 to-white" style={ borderColor: '#fecaca' }
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold text-sm text-red-900">{clause.name}</h4>
+                    <h4 className="font-semibold text-sm" style={ color: '#7f1d1d' }>{clause.name}</h4>
                     {clause.risk && (
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium ${
@@ -127,18 +127,18 @@ export function ClausesTab({ data }: ClausesTabProps) {
                     )}
                   </div>
 
-                  <p className="text-sm text-gray-700 mb-2">{clause.description}</p>
+                  <p className="text-sm mb-2" style={ color: '#374151' }>{clause.description}</p>
 
                   {clause.content && (
-                    <div className="bg-white p-3 rounded text-sm italic text-gray-600 mb-2 border border-red-100">
+                    <div className="p-3 rounded text-sm mb-2 border" style={ borderColor: '#fee2e2' } style={ backgroundColor: '#ffffff', color: '#4b5563' }>
                       {clause.content}
                     </div>
                   )}
 
                   {clause.advice && (
-                    <div className="bg-yellow-50 p-3 rounded text-sm border border-yellow-200">
-                      <span className="font-medium text-yellow-900">⚠️ Khuyến nghị: </span>
-                      <span className="text-yellow-800">{clause.advice}</span>
+                    <div className="p-3 rounded text-sm border" style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }>
+                      <span className="font-medium" style={ color: '#713f12' }>⚠️ Khuyến nghị: </span>
+                      <span style={ color: '#854d0e' }>{clause.advice}</span>
                     </div>
                   )}
                 </div>

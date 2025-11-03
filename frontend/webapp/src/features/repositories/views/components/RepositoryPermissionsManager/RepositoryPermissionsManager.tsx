@@ -51,7 +51,7 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h3 className="text-lg font-semibold flex items-center gap-2" style={ color: '#111827' }>
           <CommonIcon name="shield" className="w-5 h-5" />
           Quản lý quyền truy cập
         </h3>
@@ -70,12 +70,12 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <CommonIcon name="users" className="w-5 h-5 text-gray-400" />
+                    <CommonIcon name="users" style={ color: '#9ca3af' } />
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium" style={ color: '#111827' }>
                         {perm.userName || perm.userId}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm" style={ color: '#6b7280' }>
                         Vai trò: {perm.role}
                       </p>
                     </div>
@@ -95,7 +95,7 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
                             onChange={() =>
                               handleTogglePermission(perm.userId, option.value, perm.permissions)
                             }
-                            className="rounded border-gray-300"
+                            className="rounded" style={ borderColor: '#d1d5db' }
                           />
                           <span>{option.label}</span>
                         </label>
@@ -106,7 +106,7 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
                       {perm.permissions.map((p) => (
                         <span
                           key={p}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
+                          className="px-2 py-1 text-xs rounded" style={ backgroundColor: '#dbeafe' }
                         >
                           {PERMISSION_OPTIONS.find(opt => opt.value === p)?.label || p}
                         </span>
@@ -130,8 +130,8 @@ export const RepositoryPermissionsManager: React.FC<RepositoryPermissionsManager
         </div>
       ) : (
         <Card className="p-6 text-center">
-          <CommonIcon name="users" className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-          <p className="text-gray-600">Chưa có thành viên nào</p>
+          <CommonIcon name="users" className="h-12 mx-auto mb-2" style={ color: '#9ca3af' } />
+          <p style={ color: '#4b5563' }>Chưa có thành viên nào</p>
           {isOwner && onAddMember && (
             <Button className="mt-4" onClick={onAddMember}>
               <CommonIcon name="plus" className="w-4 h-4 mr-2" />

@@ -44,7 +44,7 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
 
   return (
     <Tabs>
-      <TabList className="border-b border-gray-200 bg-white mb-6">
+      <TabList className="border-b mb-6" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff' }>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const tabContent = (

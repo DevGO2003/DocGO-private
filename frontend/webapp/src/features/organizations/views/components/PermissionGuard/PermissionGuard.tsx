@@ -53,11 +53,11 @@ export const PermissionGuard = ({
 };
 
 const AccessDenied = () => (
-  <Card className="border-red-200 bg-red-50">
+  <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
     <CardContent className="p-8 text-center">
       <CommonIcon name="alert-circle" size={64} color="#ef4444" className="mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-red-900 mb-2">Access Denied</h3>
-      <p className="text-red-700">
+      <h3 className="text-xl font-semibold mb-2" style={ color: '#7f1d1d' }>Access Denied</h3>
+      <p style={ color: '#b91c1c' }>
         You don't have permission to access this feature.
       </p>
     </CardContent>

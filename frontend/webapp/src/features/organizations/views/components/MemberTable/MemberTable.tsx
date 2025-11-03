@@ -54,7 +54,7 @@ export const MemberTable = ({
     return (
       <div className="animate-pulse space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+          <div key={i} className="rounded-lg" style={ backgroundColor: '#e5e7eb' }></div>
         ))}
       </div>
     );
@@ -62,43 +62,43 @@ export const MemberTable = ({
 
   if (members.length === 0) {
     return (
-      <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-        <CommonIcon name="shield" size={16} className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600 mb-2">No members yet</p>
-        <p className="text-sm text-gray-500">Invite team members to get started</p>
+      <div className="text-center py-12 border-2 border-dashed rounded-lg" style={ borderColor: '#d1d5db' }>
+        <CommonIcon name="shield" size={16} className="h-12 mx-auto mb-4" style={ color: '#9ca3af' } />
+        <p className="mb-2" style={ color: '#4b5563' }>No members yet</p>
+        <p className="text-sm" style={ color: '#6b7280' }>Invite team members to get started</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border rounded-lg" style={ borderColor: '#e5e7eb' }>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead style={ backgroundColor: '#f9fafb' }>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                 Member
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                 Role
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                 Permissions
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                 Joined
               </th>
               {canManageMembers && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider" style={ color: '#6b7280' }>
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody style={ backgroundColor: '#ffffff' }>
             {members.map((member) => {
               const isCurrentUser = member.userId === currentUserId;
               const isOwner = member.role === 'OWNER';
@@ -109,23 +109,23 @@ export const MemberTable = ({
                   {/* Member Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                        <span className="text-white font-semibold">
+                      <div className="flex-shrink-0 h-10 rounded-full flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <span className="font-semibold" style={ color: '#ffffff' }>
                           {(member.firstName?.charAt(0) || member.username.charAt(0)).toUpperCase()}
                         </span>
                       </div>
                       <div className="ml-4">
                         <div className="flex items-center gap-2">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium" style={ color: '#111827' }>
                             {member.firstName && member.lastName
                               ? `${member.firstName} ${member.lastName}`
                               : member.firstName || member.lastName || member.username}
                           </div>
                           {isCurrentUser && (
-                            <span className="text-xs text-blue-600 font-medium">(You)</span>
+                            <span className="text-xs font-medium" style={ color: '#2563eb' }>(You)</span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">{member.email}</div>
+                        <div className="text-sm" style={ color: '#6b7280' }>{member.email}</div>
                       </div>
                     </div>
                   </td>
@@ -138,7 +138,7 @@ export const MemberTable = ({
                   {/* Permissions */}
                   <td className="px-6 py-4">
                     {member.role === 'OWNER' ? (
-                      <span className="text-xs text-purple-600 font-medium">All Permissions</span>
+                      <span className="text-xs font-medium" style={ color: '#9333ea' }>All Permissions</span>
                     ) : member.role === 'MANAGER' && member.permissions && member.permissions.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {member.permissions.map((permission) => (
@@ -146,7 +146,7 @@ export const MemberTable = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-400">-</span>
+                      <span className="text-sm" style={ color: '#9ca3af' }>-</span>
                     )}
                   </td>
 
@@ -166,7 +166,7 @@ export const MemberTable = ({
                   </td>
 
                   {/* Joined Date */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm" style={ color: '#6b7280' }>
                     {formatDate(member.joinedAt)}
                   </td>
 
@@ -179,7 +179,7 @@ export const MemberTable = ({
                             onClick={() => setOpenMenuId(openMenuId === member.id ? null : member.id)}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <CommonIcon name="more-vertical" size={16} className="w-4 h-4 text-gray-600" />
+                            <CommonIcon name="more-vertical" size={16} style={ color: '#4b5563' } />
                           </button>
 
                           {openMenuId === member.id && (
@@ -191,7 +191,7 @@ export const MemberTable = ({
                               />
                               {/* Menu - Fixed position to avoid being cut off */}
                               <div 
-                                className="fixed w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-[101]"
+                                className="fixed rounded-lg" style={ backgroundColor: '#ffffff' }
                                 style={{
                                   top: '50%',
                                   left: '50%',
@@ -205,7 +205,7 @@ export const MemberTable = ({
                                         onEditMember(member);
                                         setOpenMenuId(null);
                                       }}
-                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-100" style={ color: '#374151' }
                                     >
                                       <CommonIcon name="edit" size={16} />
                                       Edit Member
@@ -216,7 +216,7 @@ export const MemberTable = ({
                                       setMemberToRemove(member);
                                       setOpenMenuId(null);
                                     }}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-red-50" style={ color: '#dc2626' }
                                   >
                                     <CommonIcon name="trash" size={16} />
                                     Remove Member
@@ -227,7 +227,7 @@ export const MemberTable = ({
                           )}
                         </div>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span style={ color: '#9ca3af' }>-</span>
                       )}
                     </td>
                   )}
@@ -241,16 +241,16 @@ export const MemberTable = ({
       {/* Remove Confirmation Modal */}
       {memberToRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="rounded-lg max-w-md w-full p-6" style={ backgroundColor: '#ffffff' }>
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 p-3 bg-red-100 rounded-lg">
-                <CommonIcon name="alert-circle" size={16} className="w-6 h-6 text-red-600" />
+              <div className="flex-shrink-0 p-3 rounded-lg" style={ backgroundColor: '#fee2e2' }>
+                <CommonIcon name="alert-circle" size={16} style={ color: '#dc2626' } />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold mb-2" style={ color: '#111827' }>
                   Remove Member
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm mb-4" style={ color: '#4b5563' }>
                   Are you sure you want to remove <strong>
                     {memberToRemove.firstName && memberToRemove.lastName
                       ? `${memberToRemove.firstName} ${memberToRemove.lastName}`
@@ -268,7 +268,7 @@ export const MemberTable = ({
                   <Button
                     onClick={() => handleRemoveMember()}
                     disabled={isRemoving}
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    className="hover:bg-red-700" style={ backgroundColor: '#dc2626', color: '#ffffff' }
                   >
                     {isRemoving ? 'Removing...' : 'Remove Member'}
                   </Button>

@@ -141,8 +141,8 @@ export const Settings = () => {
           // animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
-          <p className="text-gray-600">{t('settings.description')}</p>
+          <h1 className="font-bold mb-2" style={ color: '#111827' }>{t('settings.title')}</h1>
+          <p style={ color: '#4b5563' }>{t('settings.description')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -194,7 +194,7 @@ export const Settings = () => {
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                           {t('settings.profile.firstName')}
                         </label>
                         <Input
@@ -206,7 +206,7 @@ export const Settings = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                           {t('settings.profile.lastName')}
                         </label>
                         <Input
@@ -220,7 +220,7 @@ export const Settings = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                         Email Address
                       </label>
                       <Input
@@ -234,7 +234,7 @@ export const Settings = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                         Phone Number
                       </label>
                       <Input
@@ -272,12 +272,12 @@ export const Settings = () => {
                 <CardContent>
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      <h3 className="text-lg font-semibold mb-4" style={ color: '#111827' }>
                         {t('settings.security.changePassword')}
                       </h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                             {t('settings.security.newPassword')}
                           </label>
                           <div className="relative">
@@ -305,7 +305,7 @@ export const Settings = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                             {t('settings.security.confirmPassword')}
                           </label>
                           <Input
@@ -323,7 +323,7 @@ export const Settings = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-end pt-4 border-t border-gray-200">
+                    <div className="flex justify-end pt-4 border-t" style={ borderColor: '#e5e7eb' }>
                       <Button
                         variant="outline"
                         onClick={handlePasswordChange}
@@ -350,13 +350,13 @@ export const Settings = () => {
                     {Object.entries(notificationSettings).map(([key, value]) => (
                       <div
                         key={key}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }
                       >
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium" style={ color: '#111827' }>
                             {t(`settings.notifications.${key}`)}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm" style={ color: '#4b5563' }>
                             {t('settings.notifications.description')}
                           </p>
                         </div>
@@ -385,7 +385,7 @@ export const Settings = () => {
                 <CardContent>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>
                         {t('settings.preferences.language')}
                       </label>
                       <Select
@@ -409,7 +409,7 @@ export const Settings = () => {
                       className="relative"
                       title={t('settings.comingSoon')}
                     >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
+                      <label className="block text-sm font-medium mb-2 opacity-60" style={ color: '#374151' }>
                         {t('settings.preferences.timezone')}
                       </label>
                       <Select
@@ -434,7 +434,7 @@ export const Settings = () => {
                       className="relative"
                       title={t('settings.comingSoon')}
                     >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
+                      <label className="block text-sm font-medium mb-2 opacity-60" style={ color: '#374151' }>
                         {t('settings.preferences.theme')}
                       </label>
                       <Select
@@ -459,7 +459,7 @@ export const Settings = () => {
                       className="relative"
                       title={t('settings.comingSoon')}
                     >
-                      <label className="block text-sm font-medium text-gray-700 mb-2 opacity-60">
+                      <label className="block text-sm font-medium mb-2 opacity-60" style={ color: '#374151' }>
                         {t('settings.preferences.dateFormat')}
                       </label>
                       <Select

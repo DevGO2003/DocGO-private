@@ -88,30 +88,30 @@ export function ControlMainLayout({
           fallback={
             <div className="space-y-4 p-4">
               <div className="animate-pulse space-y-3">
-                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                <div className="rounded w-1/3" style={ backgroundColor: '#e5e7eb' }></div>
+                <div className="rounded" style={ backgroundColor: '#f3f4f6' }></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
               </div>
-              <div className="animate-pulse h-64 bg-gray-100 rounded-xl"></div>
+              <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
             </div>
           }
         >
           {loading ? (
             <div className="space-y-4 p-4">
               <div className="animate-pulse space-y-3">
-                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                <div className="rounded w-1/3" style={ backgroundColor: '#e5e7eb' }></div>
+                <div className="rounded" style={ backgroundColor: '#f3f4f6' }></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
-                <div className="animate-pulse h-32 bg-gray-100 rounded-xl"></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
+                <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
               </div>
-              <div className="animate-pulse h-64 bg-gray-100 rounded-xl"></div>
+              <div className="rounded-xl" style={ backgroundColor: '#f3f4f6' }></div>
             </div>
           ) : (
             children
@@ -127,9 +127,9 @@ export function ControlMainLayout({
           }`}
         >
           {/* Toolbar Header */}
-          <div className="flex items-center justify-between p-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+          <div className="flex items-center justify-between p-3 border-b rounded-t-lg" style={ borderColor: '#f3f4f6' } style={ backgroundColor: '#f9fafb' }>
             {!isToolbarCollapsed && (
-              <p className="text-sm font-semibold text-gray-900">Công cụ</p>
+              <p className="text-sm font-semibold" style={ color: '#111827' }>Công cụ</p>
             )}
             <button
               onClick={() => setIsToolbarCollapsed(!isToolbarCollapsed)}
@@ -137,11 +137,11 @@ export function ControlMainLayout({
               title={isToolbarCollapsed ? 'Mở rộng' : 'Thu nhỏ'}
             >
               {isToolbarCollapsed ? (
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={ color: '#4b5563' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={ color: '#4b5563' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                 </svg>
               )}

@@ -20,8 +20,8 @@ export const BulkModeActions: React.FC<BulkModeActionsProps> = ({
   onClearSelection,
 }) => {
   return (
-    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
-      <span className="text-sm font-medium text-blue-900 mr-2">
+    <div className="flex items-center gap-2 p-2 rounded-lg border" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
+      <span className="text-sm font-medium mr-2" style={ color: '#1e3a8a' }>
         Đã chọn {selectedCount} tệp
       </span>
 

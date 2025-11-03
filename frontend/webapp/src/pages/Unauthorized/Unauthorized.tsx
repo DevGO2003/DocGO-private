@@ -39,15 +39,15 @@ export const Unauthorized = () => {
       <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <div ref={iconRef} className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
-              <CommonIcon name="alert-circle" size={48} className="text-red-600" />
+            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={ backgroundColor: '#fee2e2' }>
+              <CommonIcon name="alert-circle" size={48} style={ color: '#dc2626' } />
             </div>
 
-            <CommonText as="h1" className="text-3xl font-bold text-gray-900 mb-3">
+            <CommonText as="h1" className="text-3xl font-bold mb-3" style={ color: '#111827' }>
               {t('unauthorized.title')}
             </CommonText>
 
-            <CommonText as="p" className="text-gray-600 mb-8">
+            <CommonText as="p" className="mb-8" style={ color: '#4b5563' }>
               {t('unauthorized.description')}
             </CommonText>
 

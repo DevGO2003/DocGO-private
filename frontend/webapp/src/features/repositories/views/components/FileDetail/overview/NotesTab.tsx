@@ -12,22 +12,22 @@ export function NotesTab({ fileData }: NotesTabProps) {
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <CommonIcon name="file-text" className="w-5 h-5 mr-2 text-indigo-600" />
+          <CommonIcon name="file-text" className="w-5 h-5 mr-2" style={ color: '#4f46e5' } />
           Ghi chú
         </h3>
         {notes.length > 0 ? (
           <div className="space-y-3">
             {notes.map((note: any, idx: number) => (
-              <div key={idx} className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                <p className="text-sm text-gray-700">{note.content || note}</p>
+              <div key={idx} className="p-4 border-l-4 rounded" style={ borderColor: '#facc15' } style={ backgroundColor: '#fefce8' }>
+                <p className="text-sm" style={ color: '#374151' }>{note.content || note}</p>
                 {note.author && (
-                  <p className="text-xs text-gray-500 mt-2">- {note.author}</p>
+                  <p className="text-xs mt-2" style={ color: '#6b7280' }>- {note.author}</p>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-center py-8">Chưa có ghi chú nào</p>
+          <p className="py-8" style={ color: '#6b7280' }>Chưa có ghi chú nào</p>
         )}
       </CardContent>
     </Card>

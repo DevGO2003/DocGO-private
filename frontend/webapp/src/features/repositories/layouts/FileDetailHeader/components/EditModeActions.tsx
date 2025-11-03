@@ -42,7 +42,7 @@ export const EditModeActions: React.FC<EditModeActionsProps> = ({
         variant="default"
         size="sm"
         onClick={onSave}
-        className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+        className="inline-flex items-center gap-2 hover:bg-green-700" style={ backgroundColor: '#16a34a', color: '#ffffff' }
       >
         <CommonIcon name="save" size={16} />
         <span className="hidden md:inline">Lưu</span>

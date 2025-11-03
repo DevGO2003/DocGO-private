@@ -73,13 +73,13 @@ export default function IncludeExcludeModal({
   const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - width - 8)
 
   return createPortal(
-    <div ref={panelRef} className="fixed z-[100] bg-white rounded-xl border border-gray-200 shadow-lg" style={{ top, left, width, height }}>
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+    <div ref={panelRef} className="fixed rounded-xl border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' } style={{ top, left, width, height }}>
+      <div className="p-3 border-b flex items-center justify-between" style={ borderColor: '#e5e7eb' }>
+        <h3 className="text-sm font-semibold" style={ color: '#111827' }>{title}</h3>
+        <button onClick={onClose} className="hover:" style={ color: '#374151' } style={ color: '#6b7280' }>✕</button>
       </div>
       <div className="px-3 pt-2">
-        <div className="grid grid-cols-2 w-full rounded-lg border border-gray-200 overflow-hidden">
+        <div className="grid grid-cols-2 w-full rounded-lg border overflow-hidden" style={ borderColor: '#e5e7eb' }>
           <button 
             onClick={() => setTab('include')} 
             className={`w-full py-2 text-sm text-center ${tab==='include'?'bg-indigo-600 text-white':'bg-white text-indigo-700 hover:bg-indigo-50'}`}
@@ -99,24 +99,24 @@ export default function IncludeExcludeModal({
           value={query} 
           onChange={(e)=>setQuery(e.target.value)} 
           placeholder="Tìm kiếm..." 
-          className="w-full h-8 px-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs" 
+          className="w-full h-8 px-2 rounded-lg border focus:ring-2 focus:ring-indigo-500 focus: text-xs" style={ borderColor: '#d1d5db' } 
         />
         <div className="mt-2 overflow-auto pr-2" style={{ maxHeight: height - 150 }}>
           {filtered.length === 0 ? (
-            <div className="text-sm text-gray-500 py-6 text-center">Không có mục phù hợp</div>
+            <div className="text-sm py-6" style={ color: '#6b7280' }>Không có mục phù hợp</div>
           ) : (
             <ul className="divide-y divide-gray-100">
               {filtered.map(item => {
                 const checked = tab==='include' ? include.includes(item) : exclude.includes(item)
                 return (
                   <li key={item} className="flex items-center justify-between py-2 pr-1">
-                    <span className="text-sm text-gray-700">{item}</span>
-                    <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-sm" style={ color: '#374151' }>{item}</span>
+                    <label className="inline-flex items-center gap-2 text-sm" style={ color: '#374151' }>
                       <input 
                         type="checkbox" 
                         checked={checked} 
                         onChange={() => toggle(item)} 
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" 
+                        className="w-4 h-4 rounded focus:ring-indigo-500" style={ color: '#4f46e5', borderColor: '#d1d5db' } 
                       />
                     </label>
                   </li>

@@ -167,7 +167,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-md bg-white overflow-hidden"
+        className="relative w-full max-w-md overflow-hidden" style={ backgroundColor: '#ffffff' }
         style={{ fontFamily: '"Kalam", "Comic Sans MS", cursive' }}
       >
         <canvas
@@ -287,7 +287,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
             {/* Go to Repositories Button */}
             <button
               onClick={onGoToRepositories}
-              className="relative flex-1 py-3 px-6 font-bold text-lg text-white transition-transform hover:scale-105 flex items-center justify-center gap-2"
+              className="relative flex-1 py-3 px-6 font-bold text-lg transition-transform hover:scale-105 flex items-center justify-center gap-2" style={ color: '#ffffff' }
             >
               <canvas
                 ref={buttonCanvasRef2}

@@ -20,12 +20,12 @@ const AboutSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="about" className="py-20 bg-white">
+    <section id="about" className="py-20" style={ backgroundColor: '#ffffff' }>
       <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CommonText as="h2" className="text-4xl font-bold text-gray-900 mb-6">
+        <CommonText as="h2" className="font-bold mb-6" style={ color: '#111827' }>
           {t('app.title')}
         </CommonText>
-        <CommonText as="p" className="text-xl text-gray-600 max-w-3xl">
+        <CommonText as="p" className="text-xl max-w-3xl" style={ color: '#4b5563' }>
           {t('landing.hero.description')}
         </CommonText>
       </div>

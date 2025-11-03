@@ -101,7 +101,7 @@ function HeaderPanel({
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={index} className="flex items-center">
                       {index > 0 && (
-                        <CommonIcon name="chevron-right" size={16} className="mx-1 text-gray-400" />
+                        <CommonIcon name="chevron-right" size={16} className="mx-1" style={ color: '#9ca3af' } />
                       )}
                       <CommonText 
                         as="span" 
@@ -126,13 +126,13 @@ function HeaderPanel({
             
             {/* Subtitle - Optional */}
             {subtitle && (
-              <CommonText as="p" className="text-gray-500 text-xs font-medium mb-1">
+              <CommonText as="p" className="text-xs font-medium mb-1" style={ color: '#6b7280' }>
                 {subtitle}
               </CommonText>
             )}
             
             {/* Description - REQUIRED */}
-            <CommonText as="p" className="text-gray-600 text-sm mb-2">
+            <CommonText as="p" className="text-sm mb-2" style={ color: '#4b5563' }>
               {description}
             </CommonText>
 

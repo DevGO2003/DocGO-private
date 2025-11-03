@@ -58,23 +58,23 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
       <CardContent style={{ paddingTop: 24 }}>
         <Stack gap="10px">
           <Flex align="center" justify="between">
-            <Text as="h3" className="text-base font-semibold text-gray-900">{t('uploads.recent.title')}</Text>
-            {loading && <Text as="span" className="text-xs text-gray-500">{t('uploads.recent.loading')}</Text>}
+            <Text as="h3" className="text-base font-semibold" style={ color: '#111827' }>{t('uploads.recent.title')}</Text>
+            {loading && <Text as="span" className="text-xs" style={ color: '#6b7280' }>{t('uploads.recent.loading')}</Text>}
           </Flex>
 
           {error && (
-            <Text as="p" className="text-xs text-red-600">{error}</Text>
+            <Text as="p" className="text-xs" style={ color: '#dc2626' }>{error}</Text>
           )}
 
           {(!items || items.length === 0) ? (
-            <Text as="p" className="text-sm text-gray-600">{t('uploads.recent.empty')}</Text>
+            <Text as="p" className="text-sm" style={ color: '#4b5563' }>{t('uploads.recent.empty')}</Text>
           ) : (
             <Stack gap={0}>
               {items.map((it) => (
                 <Flex key={it.fileId} align="center" justify="between" style={{ padding: '12px', background: '#fff', borderBottom: '1px solid #eee' }}>
                   <div style={{ minWidth: 0, flex: 1, marginRight: 12 }}>
-                    <p className="text-sm font-medium text-gray-900 truncate" title={it.fileName}>{it.fileName}</p>
-                    <p className="text-xs text-gray-500" style={{ marginTop: 2 }}>
+                    <p className="text-sm font-medium truncate" style={ color: '#111827' } title={it.fileName}>{it.fileName}</p>
+                    <p className="text-xs" style={ color: '#6b7280' } style={{ marginTop: 2 }}>
                       {(it.fileSize / 1024).toFixed(2)} KB • {it.contentType} • {new Date(it.uploadedAt).toLocaleString()}
                     </p>
                   </div>

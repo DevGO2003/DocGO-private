@@ -18,7 +18,7 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
   ];
 
   return (
-    <Tabs className="border-b border-gray-200">
+    <Tabs className="border-b" style={ borderColor: '#e5e7eb' }>
       <TabList>
         {tabs.map(t => (
           <CommonTab
@@ -29,7 +29,7 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
             disabled={t.disabled || loading}
             title={t.disabled ? 'File không phải hợp đồng' : undefined}
           >
-            {loading ? <span className="inline-block w-16 h-4 bg-gray-200 animate-pulse rounded"></span> : t.label}
+            {loading ? <span className="inline-block rounded" style={ backgroundColor: '#e5e7eb' }></span> : t.label}
           </CommonTab>
         ))}
       </TabList>

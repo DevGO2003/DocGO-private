@@ -66,7 +66,7 @@ export const ForgotPassword = () => {
             <div className="mt-6 text-center">
               <Link
                 to={LOGIN_PATH}
-                className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-sm font-medium hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
               >
                 Back to sign in
               </Link>

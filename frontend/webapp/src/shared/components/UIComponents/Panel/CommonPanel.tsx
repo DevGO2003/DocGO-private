@@ -30,7 +30,7 @@ export const CommonPanel: React.FC<CommonPanelProps> = ({
       )}
       <CardContent>
         {loading ? (
-          <div className="py-6 text-center text-gray-500">Đang tải...</div>
+          <div className="py-6" style={ color: '#6b7280' }>Đang tải...</div>
         ) : (
           children
         )}

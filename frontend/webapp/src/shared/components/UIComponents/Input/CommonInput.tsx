@@ -97,7 +97,7 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {label && (
           <label
             ref={labelRef}
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium" style={ color: '#374151' }
           >
             {label}
           </label>
@@ -121,13 +121,13 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {error && (
           <p
             ref={errorRef}
-            className="text-sm text-red-500 overflow-hidden"
+            className="text-sm overflow-hidden" style={ color: '#ef4444' }
           >
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p className="text-sm text-gray-500">{helperText}</p>
+          <p className="text-sm" style={ color: '#6b7280' }>{helperText}</p>
         )}
       </CommonFont>
     );

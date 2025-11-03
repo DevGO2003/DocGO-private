@@ -46,7 +46,7 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
             onSelect={() => !loading && onChange(t.id)}
             disabled={loading}
           >
-            {loading ? <span className="inline-block w-16 h-4 bg-gray-200 animate-pulse rounded"></span> : t.label}
+            {loading ? <span className="inline-block rounded" style={ backgroundColor: '#e5e7eb' }></span> : t.label}
           </CommonTab>
         ))}
       </TabList>

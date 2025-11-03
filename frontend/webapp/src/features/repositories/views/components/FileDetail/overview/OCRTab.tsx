@@ -14,11 +14,11 @@ export function OCRTab({ fileData }: OCRTabProps) {
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <CommonIcon name="file-text" className="w-5 h-5 mr-2 text-indigo-600" />
+          <CommonIcon name="file-text" className="w-5 h-5 mr-2" style={ color: '#4f46e5' } />
           Nội dung OCR
         </h3>
         {ocrMeta && (
-          <div className="text-xs text-gray-500 mb-3">
+          <div className="text-xs mb-3" style={ color: '#6b7280' }>
             {ocrMeta.engine ? `Engine: ${ocrMeta.engine}` : null}
             {ocrMeta.engine && (ocrMeta.confidence ?? ocrMeta.processingTime) ? ' · ' : null}
             {typeof ocrMeta.confidence === 'number' ? `Độ tin cậy: ${ocrMeta.confidence}` : null}
@@ -27,7 +27,7 @@ export function OCRTab({ fileData }: OCRTabProps) {
             {ocrMeta.error ? ` · Lỗi: ${ocrMeta.error}` : null}
           </div>
         )}
-        <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="text-sm p-4 rounded-lg border" style={ borderColor: '#e5e7eb' } style={ color: '#374151', backgroundColor: '#f9fafb' }>
           {ocrText || 'Chưa có nội dung OCR'}
         </div>
       </CardContent>

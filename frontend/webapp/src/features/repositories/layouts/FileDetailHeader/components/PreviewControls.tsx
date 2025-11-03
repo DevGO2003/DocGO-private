@@ -44,7 +44,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+    <div className="flex items-center gap-2 p-2 rounded-lg border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
       {/* Page Navigation */}
       <div className="flex items-center gap-1">
         <Button
@@ -57,7 +57,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           <CommonIcon name="chevron-left" size={16} />
         </Button>
         
-        <span className="text-sm text-gray-700 px-2 min-w-[60px] text-center">
+        <span className="text-sm px-2 min-w-[60px]" style={ color: '#374151' }>
           {currentPage}/{totalPages}
         </span>
         
@@ -73,7 +73,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
       </div>
 
       {/* Divider */}
-      <div className="w-px h-6 bg-gray-300" />
+      <div style={ backgroundColor: '#d1d5db' } />
 
       {/* Zoom Controls */}
       <div className="flex items-center gap-1">
@@ -87,7 +87,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           <CommonIcon name="minus" size={16} />
         </Button>
         
-        <span className="text-sm text-gray-700 px-2 min-w-[50px] text-center">
+        <span className="text-sm px-2 min-w-[50px]" style={ color: '#374151' }>
           {zoom}%
         </span>
         

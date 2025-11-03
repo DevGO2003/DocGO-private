@@ -1,10 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Replaced next/navigation
 import type { HeaderControlLayoutProps, Breadcrumb } from './types';
 import { CommonFont } from '@shared/components';
 
 function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: () => void }) {
-  const navigate = useNavigate(); // React Router equivalent
 
   if (!items || items.length === 0) return null;
 
@@ -22,9 +20,9 @@ function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: (
       <ol className="flex items-center gap-2">
         {items.map((b, idx) => (
           <li key={idx} className="flex items-center">
-            {idx > 0 && <span className="mx-1 text-gray-400">›</span>}
+            {idx > 0 && <span className="mx-1" style={{ color: '#9ca3af' }}>›</span>}
             {b.href ? (
-              <a href={b.href} className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <a href={b.href} className="hover:font-medium" style={{ color: '#4338ca' }}>
                 {b.label}
               </a>
             ) : (
@@ -47,7 +45,6 @@ function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: (
 
 export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
   title,
-  subtitle,
   description,
   breadcrumbs,
   rightActions,
@@ -67,13 +64,10 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
             <div className="mb-2">
               <Breadcrumbs items={breadcrumbs} onRefresh={onRefresh} />
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold" style={{ color: '#111827' }}>
               {title}
             </h1>
-            {subtitle && (
-              <p className="text-xs text-gray-500 font-medium mt-0.5">{subtitle}</p>
-            )}
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
+            <p className="text-sm mt-1" style={{ color: '#4b5563' }}>{description}</p>
           </div>
           <div className="min-w-0 flex-1 flex items-start justify-end gap-2">
             {headerChildren && (

@@ -31,7 +31,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           variant="default"
           size="sm"
           onClick={onNew}
-          className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+          className="inline-flex items-center gap-2 hover:bg-green-700" style={ backgroundColor: '#16a34a', color: '#ffffff' }
         >
           <CommonIcon name="plus" size={16} />
           <span className="hidden md:inline">Tệp mới</span>

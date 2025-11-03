@@ -52,11 +52,11 @@ export const OrganizationSelector = ({
   const getRoleIcon = (role?: string) => {
     switch (role?.toUpperCase()) {
       case 'OWNER':
-        return <CommonIcon name="crown" className="w-3 h-3 text-purple-600" />;
+        return <CommonIcon name="crown" className="w-3 h-3" style={ color: '#9333ea' } />;
       case 'MANAGER':
-        return <CommonIcon name="user-cog" className="w-3 h-3 text-blue-600" />;
+        return <CommonIcon name="user-cog" style={ color: '#2563eb' } />;
       case 'MEMBER':
-        return <CommonIcon name="shield" className="w-3 h-3 text-green-600" />;
+        return <CommonIcon name="shield" style={ color: '#16a34a' } />;
       default:
         return null;
     }
@@ -80,17 +80,17 @@ export const OrganizationSelector = ({
       {/* Selector Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[220px]"
+        className="flex items-center gap-2 px-4 py-2 border-2 rounded-lg hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[220px]" style={ borderColor: '#e5e7eb', borderColor: '#d1d5db' } style={ backgroundColor: '#ffffff' }
       >
         {currentOrg ? (
           <>
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-sm text-white font-bold">
+            <div className="h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+              <span className="text-sm font-bold" style={ color: '#ffffff' }>
                 {currentOrg.name.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1 text-left overflow-hidden">
-              <p className="text-sm font-semibold text-gray-900 truncate">
+              <p className="text-sm font-semibold truncate" style={ color: '#111827' }>
                 {currentOrg.name}
               </p>
               <div className="flex items-center gap-1">
@@ -103,8 +103,8 @@ export const OrganizationSelector = ({
           </>
         ) : (
           <>
-            <CommonIcon name="building" className="w-5 h-5 text-gray-500" />
-            <span className="flex-1 text-sm text-gray-700">Select Organization</span>
+            <CommonIcon name="building" style={ color: '#6b7280' } />
+            <span className="flex-1 text-sm" style={ color: '#374151' }>Select Organization</span>
           </>
         )}
         <CommonIcon name="chevron-down" 
@@ -116,7 +116,7 @@ export const OrganizationSelector = ({
 
       {/* Dropdown Menu */}
               {isOpen && (
-          <div className="absolute top-full left-0 mt-2 w-full min-w-[280px] bg-white rounded-lg shadow-xl border-2 border-gray-200 overflow-hidden z-50 animate-fade-in"
+          <div className="absolute top-full left-0 mt-2 w-full min-w-[280px] rounded-lg border-2 overflow-hidden z-50" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff' }
           >
             {/* Organizations List */}
             <div className="max-h-80 overflow-y-auto">
@@ -129,13 +129,13 @@ export const OrganizationSelector = ({
                       org.id === currentOrganizationId ? 'bg-blue-50' : ''
                     }`}
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold">
+                    <div className="h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                      <span className="font-bold" style={ color: '#ffffff' }>
                         {org.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="flex-1 text-left overflow-hidden">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-sm font-semibold truncate" style={ color: '#111827' }>
                         {org.name}
                       </p>
                       <div className="flex items-center gap-1">
@@ -146,24 +146,24 @@ export const OrganizationSelector = ({
                       </div>
                     </div>
                     {org.id === currentOrganizationId && (
-                      <CommonIcon name="check" className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <CommonIcon name="check" className="flex-shrink-0" style={ color: '#2563eb' } />
                     )}
                   </button>
                 ))
               ) : (
-                <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                <div className="px-4 py-6 text-sm" style={ color: '#6b7280' }>
                   No organizations found
                 </div>
               )}
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-200"></div>
+            <div className="border-t" style={ borderColor: '#e5e7eb' }></div>
 
             {/* Create New */}
             <button
               onClick={handleCreateNew}
-              className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 transition-colors text-blue-600 font-medium"
+              className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 transition-colors font-medium" style={ color: '#2563eb' }
             >
               <CommonIcon name="plus" className="w-4 h-4" />
               Create New Organization

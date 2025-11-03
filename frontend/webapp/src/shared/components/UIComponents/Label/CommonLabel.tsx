@@ -79,7 +79,7 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
         >
           {icon && <CommonIcon name={icon} size={iconSize} color={iconColor || (error ? '#ef4444' : '#374151')} />}
           <span>{children}</span>
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="ml-1" style={ color: '#ef4444' }>*</span>}
         </label>
       </CommonFont>
     );

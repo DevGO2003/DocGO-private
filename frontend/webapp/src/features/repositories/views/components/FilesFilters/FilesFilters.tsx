@@ -86,7 +86,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
             {/* Simple icon placeholder */}
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔎</span>
+            <span className="absolute left-2 top-1/2 text-xs" style={ color: '#9ca3af' }>🔎</span>
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -123,7 +123,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <Button
           variant="ghost"
           onClick={onToggleAdvanced}
-          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap h-auto p-0"
+          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={ color: '#4f46e5', color: '#4338ca' }
         >
           {showAdvanced ? t('repositories.files.filters.hideAdvanced') : t('repositories.files.filters.showAdvanced')}
         </Button>
@@ -161,7 +161,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
             >
               {t('repositories.files.filters.reset')}
             </Button>
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <div className="flex rounded-lg border overflow-hidden" style={ borderColor: '#d1d5db' }>
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"

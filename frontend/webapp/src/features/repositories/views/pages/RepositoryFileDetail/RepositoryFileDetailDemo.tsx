@@ -86,7 +86,7 @@ export default function RepositoryFileDetailDemo() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen" style={ backgroundColor: '#f9fafb' }>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <FileDetailHeader
@@ -116,10 +116,10 @@ export default function RepositoryFileDetailDemo() {
         />
 
         {/* Content Area */}
-        <div className="bg-white rounded-2xl border p-6">
+        <div className="rounded-2xl border p-6" style={ backgroundColor: '#ffffff' }>
           <h2 className="text-lg font-semibold mb-4">File Content</h2>
-          <div className="aspect-[8.5/11] bg-gray-100 rounded-lg flex items-center justify-center">
-            <p className="text-gray-500">
+          <div className="rounded-lg flex items-center justify-center" style={ backgroundColor: '#f3f4f6' }>
+            <p style={ color: '#6b7280' }>
               {isEditing ? 'Edit Mode - File Preview' : 'View Mode - File Preview'}
             </p>
           </div>

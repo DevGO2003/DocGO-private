@@ -23,7 +23,7 @@ import { StorageTab } from './overview/StorageTab'
 import { VersioningTab } from './overview/VersioningTab'
 
 // Placeholder for comments
-const CommentsMainTab = () => <div className="p-4 text-gray-500">Chức năng bình luận đang được phát triển</div>
+const CommentsMainTab = () => <div className="p-4" style={ color: '#6b7280' }>Chức năng bình luận đang được phát triển</div>
 
 interface FileDetailTabsProps {
   fileData: any
@@ -160,7 +160,7 @@ export function FileDetailTabs({ fileData, activeMainTab = 'overview', activeSub
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div className="rounded-lg border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }>
       <div className="p-6">
         {renderSubTabContent()}
       </div>
