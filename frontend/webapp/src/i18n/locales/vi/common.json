@@ -254,7 +254,12 @@
         "none": "Chưa có thành viên",
         "joined": "Tham gia ngày {{date}}",
         "remove": "Gỡ",
-        "removeConfirm": "Bạn có chắc chắn muốn xóa thành viên này khỏi tổ chức?"
+        "removeConfirm": "Bạn có chắc chắn muốn xóa thành viên này khỏi tổ chức?",
+        "permissions": "Quyền truy cập",
+        "permissions.upload": "Tải lên tệp",
+        "permissions.view": "Xem tệp",
+        "permissions.delete": "Xóa tệp",
+        "permissions.error": "Không thể cập nhật quyền. Vui lòng thử lại."
       },
       "repositories": {
         "title": "Kho tài liệu",
@@ -581,6 +586,13 @@
         "members": "Thành viên",
         "activity": "Hoạt động",
         "settings": "Cài đặt"
+      },
+      "members": {
+        "permissions": "Quyền truy cập",
+        "permissions.upload": "Tải lên tệp",
+        "permissions.view": "Xem tệp",
+        "permissions.delete": "Xóa tệp",
+        "permissions.error": "Không thể cập nhật quyền. Vui lòng thử lại."
       },
       "empty": {
         "files": {

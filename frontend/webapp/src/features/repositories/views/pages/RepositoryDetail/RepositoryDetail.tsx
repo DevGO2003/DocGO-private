@@ -46,6 +46,40 @@ export const RepositoryDetail: React.FC = () => {
     navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
   };
 
+  const handleUpdatePermission = async (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {
+    try {
+      console.log(`[RepositoryDetail] Updating permission: ${permissionType} = ${value} for member ${memberId}`);
+      
+      // Call API to update permissions
+      const response = await fetch(
+        `/api/v1/repositories/${id}/members/${memberId}/permissions`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            [permissionType]: value
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to update permission: ${response.statusText}`);
+      }
+
+      // Refetch members data
+      await queryClient.invalidateQueries({ queryKey: ['repository-members', id] });
+      await queryClient.refetchQueries({ queryKey: ['repository-members', id] });
+
+      console.log('[RepositoryDetail] Permission updated successfully');
+    } catch (error) {
+      console.error('[RepositoryDetail] Failed to update permission:', error);
+      alert(t('repositories.detail.members.permissions.error'));
+    }
+  };
+
   const handleRefresh = async () => {
     console.log('[RepositoryDetail] Refreshing data...');
     setIsRefreshing(true);

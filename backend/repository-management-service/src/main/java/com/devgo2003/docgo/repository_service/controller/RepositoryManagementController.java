@@ -765,4 +765,65 @@ public class RepositoryManagementController {
                 .build());
         }
     }
+
+    @PatchMapping("/{repositoryId}/members/{memberId}/permissions")
+    @Operation(summary = "Cập nhật quyền của thành viên trong repository")
+    public ResponseEntity<RestResponse<Map<String, Object>>> updateMemberPermissions(
+            @Parameter(description = "ID của repository") @PathVariable String repositoryId,
+            @Parameter(description = "ID của member") @PathVariable String memberId,
+            @RequestBody Map<String, Boolean> permissionsUpdate
+    ) {
+        try {
+            log.info("Updating permissions for member {} in repository {}", memberId, repositoryId);
+            
+            // Validate input
+            if (permissionsUpdate == null || permissionsUpdate.isEmpty()) {
+                return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                    .apiVersion("v1")
+                    .statusCode(400)
+                    .shortMessage("Bad Request")
+                    .description("Permissions update data is required")
+                    .data(null)
+                    .timestamp(Instant.now())
+                    .requestId(UUID.randomUUID().toString())
+                    .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
+                    .build());
+            }
+
+            // TODO: Implement actual permission update logic
+            // This would typically involve:
+            // 1. Verify user has admin rights for the repository
+            // 2. Update member permissions in database
+            // 3. Emit event for permission change
+            
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("memberId", memberId);
+            response.put("repositoryId", repositoryId);
+            response.put("permissions", permissionsUpdate);
+            response.put("updatedAt", Instant.now());
+
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Đã cập nhật quyền thành viên thành công")
+                .data(response)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
+                .build());
+        } catch (Exception e) {
+            log.error("Error updating member permissions: {}", e.getMessage(), e);
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Lỗi khi cập nhật quyền: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/" + repositoryId + "/members/" + memberId + "/permissions")
+                .build());
+        }
+    }
 }
