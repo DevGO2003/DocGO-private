@@ -82,7 +82,12 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
   };
 
   const handleInputChange = (field: keyof RepositoryCreateData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // If changing to ORGANIZATION type, set isPublic to false (org repos are private by default)
+    if (field === 'type' && value === 'ORGANIZATION') {
+      setFormData(prev => ({ ...prev, [field]: value, isPublic: false }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -298,27 +303,30 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Công khai
-            </Label>
-            <div className="flex items-center space-x-3">
-              <Switch
-                checked={formData.isPublic}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('isPublic', e.target.checked)}
-              />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-900">
-                  {formData.isPublic ? 'Công khai' : 'Riêng tư'}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {formData.isPublic
-                    ? 'Bất kỳ ai cũng có thể xem repository này'
-                    : 'Chỉ bạn và những người được phép mới có thể xem'}
-                </p>
+          {/* Only show visibility toggle for personal repositories */}
+          {formData.type === 'PERSONAL' && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Công khai
+              </Label>
+              <div className="flex items-center space-x-3">
+                <Switch
+                  checked={formData.isPublic}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('isPublic', e.target.checked)}
+                />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {formData.isPublic ? 'Công khai' : 'Riêng tư'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {formData.isPublic
+                      ? 'Bất kỳ ai cũng có thể xem repository này'
+                      : 'Chỉ bạn và những người được phép mới có thể xem'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </form>
     </Modal>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, Building2, Globe } from 'lucide-react';
-import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
+import { Tabs, TabList, CommonTab } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 
 interface RepositoryTabsProps {

@@ -57,7 +57,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Page<RepositoryDTO> getMyRepositories(String userId, Pageable pageable) {
         log.info("Getting repositories for user: {} with pagination: {}", userId, pageable);
         Page<RepositoryEntity> entities = repositoryRepository.findByOwnerUserIdAndIsDeletedFalse(userId, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return entities.map(this::enrichRepositoryDTO);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.PERSONAL, userId, pageable
         );
-        return entities.map(RepositoryDTO::fromEntity);
+        return entities.map(this::enrichRepositoryDTO);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOrganizationIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.ORGANIZATION, organizationId, pageable
         );
-        return entities.map(RepositoryDTO::fromEntity);
+        return entities.map(this::enrichRepositoryDTO);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeOrganizationAndOrganizationIdIn(
                 organizationIds, pageable
             );
-            return entities.map(RepositoryDTO::fromEntity);
+            return entities.map(this::enrichRepositoryDTO);
         } catch (Exception e) {
             log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
             // Fallback: lấy repos mà user là owner
@@ -105,7 +105,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
                 RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
             );
-            return entities.map(RepositoryDTO::fromEntity);
+            return entities.map(this::enrichRepositoryDTO);
         }
     }
     
@@ -360,14 +360,14 @@ public class RepositoryServiceImpl implements IRepositoryService {
     public Page<RepositoryDTO> getPublicRepositories(Pageable pageable) {
         log.info("Getting public repositories with pagination: {}", pageable);
         Page<RepositoryEntity> entities = repositoryRepository.findByIsPublicTrueAndIsDeletedFalse(pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return entities.map(this::enrichRepositoryDTO);
     }
 
     @Override
     public Page<RepositoryDTO> searchPublicRepositories(String searchTerm, Pageable pageable) {
         log.info("Searching public repositories with term: {} and pagination: {}", searchTerm, pageable);
         Page<RepositoryEntity> entities = repositoryRepository.searchPublicRepositories(searchTerm, pageable);
-        return entities.map(RepositoryDTO::fromEntity);
+        return entities.map(this::enrichRepositoryDTO);
     }
 
     @Override
@@ -385,5 +385,61 @@ public class RepositoryServiceImpl implements IRepositoryService {
         // Hard delete all repositories
         repositoryRepository.deleteAll(repositories);
         log.info("Hard deleted {} repositories for organization: {}", repositories.size(), organizationId);
+    }
+    
+    // Helper method to enrich RepositoryDTO with owner/organization names
+    private RepositoryDTO enrichRepositoryDTO(RepositoryEntity entity) {
+        log.info("🔄 Enriching repository DTO for repo: {} with ownerUserId: {}", entity.getName(), entity.getOwnerUserId());
+        log.info("🔗 User Management Service URL: {}", userManagementServiceUrl);
+        
+        RepositoryDTO dto = RepositoryDTO.fromEntity(entity);
+        
+        // Enrich owner name
+        if (entity.getOwnerUserId() != null) {
+            try {
+                String url = userManagementServiceUrl + "/api/v1/user-management-service/users/" + entity.getOwnerUserId();
+                log.info("📞 Calling user-management-service: {}", url);
+                
+                Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+                log.info("📥 Received response: {}", response);
+                
+                if (response != null && response.get("data") != null) {
+                    Map<String, Object> userData = (Map<String, Object>) response.get("data");
+                    String firstName = (String) userData.get("firstName");
+                    String lastName = (String) userData.get("lastName");
+                    
+                    // Build full name from firstName + lastName
+                    String fullName = null;
+                    if (firstName != null && lastName != null) {
+                        fullName = firstName + " " + lastName;
+                    } else if (firstName != null) {
+                        fullName = firstName;
+                    } else if (lastName != null) {
+                        fullName = lastName;
+                    }
+                    
+                    // Fallback to username if no full name
+                    if (fullName == null || fullName.trim().isEmpty()) {
+                        fullName = (String) userData.get("username");
+                    }
+                    
+                    log.info("✅ Fetched full name: {} for userId: {}", fullName, entity.getOwnerUserId());
+                    dto.setOwnerName(fullName != null ? fullName : entity.getOwnerUserId());
+                } else {
+                    log.warn("⚠️ Empty response from user-management-service");
+                    dto.setOwnerName(entity.getOwnerUserId());
+                }
+            } catch (Exception e) {
+                log.error("❌ Failed to fetch username for userId {}: {}", entity.getOwnerUserId(), e.getMessage(), e);
+                dto.setOwnerName(entity.getOwnerUserId()); // Fallback to ID
+            }
+        }
+        
+        // TODO: Enrich organization name if needed
+        if (entity.getOrganizationId() != null) {
+            dto.setOrganizationName(entity.getOrganizationId()); // Fallback for now
+        }
+        
+        return dto;
     }
 }

@@ -1,9 +1,11 @@
 package com.devgo2003.docgo.repository_service.controller;
 
 import com.devgo2003.docgo.repository_service.dto.RepositoryDTO;
+import com.devgo2003.docgo.repository_service.dto.RepositoryMemberDTO;
 import com.devgo2003.docgo.repository_service.entity.RepositoryEntity;
 import com.devgo2003.docgo.repository_service.common.response.RestResponse;
 import com.devgo2003.docgo.repository_service.service.IRepositoryService;
+import com.devgo2003.docgo.repository_service.service.RepositoryMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +33,7 @@ import java.util.UUID;
 public class RepositoryManagementController {
 
     private final IRepositoryService repositoryService;
+    private final RepositoryMemberService repositoryMemberService;
 
     @GetMapping
     @Operation(summary = "Lấy danh sách tất cả repositories")
@@ -253,40 +256,21 @@ public class RepositoryManagementController {
 
     @GetMapping("/{id}/members")
     @Operation(summary = "Lấy danh sách members của repository")
-    public ResponseEntity<RestResponse<Map<String, Object>>> getRepositoryMembers(
+    public ResponseEntity<RestResponse<Page<RepositoryMemberDTO>>> getRepositoryMembers(
             @Parameter(description = "ID của repository") @PathVariable String id,
             @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Kích thước trang") @RequestParam(defaultValue = "20") int size
     ) {
         try {
-            // For now, return mock data since repository members functionality might not be fully implemented
-            // In a real implementation, this would query repository members from database
-            var members = new java.util.ArrayList<Map<String, Object>>();
-            var member = new java.util.HashMap<String, Object>();
-            member.put("id", "1");
-            member.put("userId", "current-user-id");
-            member.put("username", "current-user");
-            member.put("email", "user@example.com");
-            member.put("role", "OWNER");
-            member.put("joinedAt", java.time.Instant.now().toString());
-            member.put("status", "ACTIVE");
-            members.add(member);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<RepositoryMemberDTO> members = repositoryMemberService.getRepositoryMembers(id, pageable);
 
-            var result = new java.util.HashMap<String, Object>();
-            result.put("content", members);
-            result.put("totalElements", members.size());
-            result.put("totalPages", 1);
-            result.put("size", size);
-            result.put("number", page);
-            result.put("first", true);
-            result.put("last", true);
-
-            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+            return ResponseEntity.ok(RestResponse.<Page<RepositoryMemberDTO>>builder()
                 .apiVersion("v1")
                 .statusCode(200)
                 .shortMessage("Success")
                 .description("Repository members retrieved successfully")
-                .data(result)
+                .data(members)
                 .timestamp(Instant.now())
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/repository-management-service/repositories/" + id + "/members")
@@ -294,7 +278,7 @@ public class RepositoryManagementController {
 
         } catch (Exception e) {
             log.error("Error getting repository members", e);
-            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+            return ResponseEntity.ok(RestResponse.<Page<RepositoryMemberDTO>>builder()
                 .apiVersion("v1")
                 .statusCode(500)
                 .shortMessage("Internal Server Error")
@@ -317,26 +301,14 @@ public class RepositoryManagementController {
             @Parameter(description = "Hướng sắp xếp (ASC/DESC)") @RequestParam(defaultValue = "DESC") String sortDirection
     ) {
         try {
-            // For now, return mock data since repository activity functionality might not be fully implemented
-            // In a real implementation, this would query activity logs from database
+            // TODO: Implement real repository activity functionality
+            // This should query activity_logs or similar collection
             var activities = new java.util.ArrayList<Map<String, Object>>();
-            var activity = new java.util.HashMap<String, Object>();
-            activity.put("id", "1");
-            activity.put("type", "REPOSITORY_CREATED");
-            activity.put("description", "Repository was created");
-            activity.put("actor", "System");
-            activity.put("actorId", "system");
-            activity.put("createdAt", java.time.Instant.now().toString());
-            var metadata = new java.util.HashMap<String, Object>();
-            metadata.put("repositoryId", id);
-            metadata.put("repositoryName", "Sample Repository");
-            activity.put("metadata", metadata);
-            activities.add(activity);
 
             var result = new java.util.HashMap<String, Object>();
             result.put("content", activities);
-            result.put("totalElements", activities.size());
-            result.put("totalPages", 1);
+            result.put("totalElements", 0);
+            result.put("totalPages", 0);
             result.put("size", size);
             result.put("number", page);
             result.put("first", true);

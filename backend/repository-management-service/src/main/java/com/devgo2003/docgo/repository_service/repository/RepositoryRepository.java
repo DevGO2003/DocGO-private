@@ -164,5 +164,6 @@ public interface RepositoryRepository extends MongoRepository<RepositoryEntity, 
     Page<RepositoryEntity> searchPublicRepositories(String searchTerm, Pageable pageable);
     
     // Find all by organization (for cascade delete)
+    @Query("{ 'organizationId': ?0 }")
     List<RepositoryEntity> findByOrganizationId(String organizationId);
 }

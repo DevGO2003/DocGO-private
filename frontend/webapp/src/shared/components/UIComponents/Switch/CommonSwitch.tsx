@@ -9,7 +9,7 @@ interface CommonSwitchProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
-  ({ className, label, description, checked, ...props }, ref) => {
+  ({ className, label, description, checked, onChange, ...props }, ref) => {
     const switchRef = useRef<HTMLInputElement>(null);
     const toggleRef = useRef<HTMLDivElement>(null);
     const labelRef = useRef<HTMLLabelElement>(null);
@@ -75,6 +75,7 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
             ref={ref || switchRef}
             type="checkbox"
             checked={checked}
+            onChange={onChange}
             className="sr-only"
             {...props}
           />
@@ -85,13 +86,17 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
               style={{ width: '100%', height: '100%' }}
             />
             <div
-              className={`w-14 h-8 rounded-full transition-colors ${
+              className={`w-14 h-8 rounded-full transition-colors cursor-pointer ${
                 checked ? 'bg-blue-500' : 'bg-gray-300'
               } ${className || ''}`}
               onClick={() => {
-                if (switchRef.current) {
-                  switchRef.current.checked = !switchRef.current.checked;
-                  switchRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+                const input = switchRef.current;
+                if (input && onChange) {
+                  const syntheticEvent = {
+                    target: { ...input, checked: !checked },
+                    currentTarget: input,
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onChange(syntheticEvent);
                 }
               }}
             >
@@ -107,9 +112,13 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
             ref={labelRef}
             className="text-sm font-medium text-gray-700 cursor-pointer"
             onClick={() => {
-              if (switchRef.current) {
-                switchRef.current.checked = !switchRef.current.checked;
-                switchRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+              const input = switchRef.current;
+              if (input && onChange) {
+                const syntheticEvent = {
+                  target: { ...input, checked: !checked },
+                  currentTarget: input,
+                } as React.ChangeEvent<HTMLInputElement>;
+                onChange(syntheticEvent);
               }
             }}
           >

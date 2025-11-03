@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Copy, Check, UserPlus, Shield } from 'lucide-react';
-import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
+import { Button, Modal, Input, Select, Checkbox, LoadingSpinner } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types';
+import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
 
 interface InviteRepositoryMemberModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface InviteRepositoryMemberModalProps {
   repositoryId: string;
   repositoryType: RepositoryType;
   repositoryName: string;
+  organizationId?: string; // Add organizationId prop
 }
 
 interface Permission {
@@ -24,10 +26,11 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   repositoryId,
   repositoryType,
   repositoryName,
+  organizationId,
 }) => {
   const { t } = useTranslation();
   const [inviteMethod, setInviteMethod] = useState<'link' | 'member'>('link');
-  const [shareLink, setShareLink] = useState(`${window.location.origin}/repositories/${repositoryId}/join`);
+  const [shareLink] = useState(`${window.location.origin}/repositories/${repositoryId}/join`);
   const [copied, setCopied] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [permissions, setPermissions] = useState<Permission>({
@@ -40,6 +43,19 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   const isPersonal = repositoryType === 'PERSONAL';
   const isOrganization = repositoryType === 'ORGANIZATION';
 
+  // Fetch organization members if this is an organization repository
+  const shouldFetchMembers = isOpen && isOrganization && !!organizationId;
+  const { data: membersData, isLoading: membersLoading } = useOrganizationMembers(
+    shouldFetchMembers ? (organizationId || '') : '',
+    shouldFetchMembers ? { page: 0, size: 100 } : undefined
+  );
+
+  const organizationMembers = membersData?.content?.map(member => ({
+    id: member.userId,
+    name: member.username || member.email,
+    email: member.email,
+  })) || [];
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareLink);
     setCopied(true);
@@ -49,20 +65,13 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   const handleInvite = () => {
     if (inviteMethod === 'link') {
       // TODO: API call to generate invite link
-      console.log('Generate link with expiry:', linkExpiry, 'days');
+      console.log('Generate link with expiry:', linkExpiry, 'days', 'permissions:', permissions);
     } else {
       // TODO: API call to invite members
       console.log('Invite members:', selectedMembers, 'with permissions:', permissions);
     }
     onClose();
   };
-
-  // Mock organization members list (replace with actual API call)
-  const organizationMembers = [
-    { id: '1', name: 'Nguyễn Văn A', email: 'nguyenvana@example.com' },
-    { id: '2', name: 'Trần Thị B', email: 'tranthib@example.com' },
-    { id: '3', name: 'Lê Văn C', email: 'levanc@example.com' },
-  ];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -159,11 +168,53 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                 />
               </div>
 
+              {/* Permissions for Personal Repository */}
               {isPersonal && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800">
-                    💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file.
-                    Chỉ bạn mới có quyền upload và xóa.
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <Shield className="w-4 h-4 inline mr-2" />
+                    Quyền hạn cho người được mời
+                  </label>
+                  <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">Xem file</p>
+                        <p className="text-sm text-gray-500">Được xem và tải file</p>
+                      </div>
+                      <Checkbox
+                        checked={permissions.view}
+                        onCheckedChange={(checked) =>
+                          setPermissions({ ...permissions, view: !!checked })
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">Upload file</p>
+                        <p className="text-sm text-gray-500">Được upload file mới</p>
+                      </div>
+                      <Checkbox
+                        checked={permissions.upload}
+                        onCheckedChange={(checked) =>
+                          setPermissions({ ...permissions, upload: !!checked })
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">Xóa file</p>
+                        <p className="text-sm text-gray-500">Được xóa file khỏi repository</p>
+                      </div>
+                      <Checkbox
+                        checked={permissions.delete}
+                        onCheckedChange={(checked) =>
+                          setPermissions({ ...permissions, delete: !!checked })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    💡 Mặc định: người upload file sẽ có quyền xem và xóa file đó
                   </p>
                 </div>
               )}
@@ -178,27 +229,37 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   Chọn thành viên
                 </label>
                 <div className="border border-gray-300 rounded-lg max-h-48 overflow-y-auto">
-                  {organizationMembers.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b last:border-b-0"
-                    >
-                      <Checkbox
-                        checked={selectedMembers.includes(member.id)}
-                        onCheckedChange={(checked) => {
-                          setSelectedMembers(
-                            checked
-                              ? [...selectedMembers, member.id]
-                              : selectedMembers.filter((id) => id !== member.id)
-                          );
-                        }}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{member.name}</p>
-                        <p className="text-sm text-gray-500">{member.email}</p>
-                      </div>
+                  {membersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner text="Đang tải danh sách thành viên..." />
                     </div>
-                  ))}
+                  ) : organizationMembers.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      Không có thành viên nào trong tổ chức
+                    </div>
+                  ) : (
+                    organizationMembers.map((member) => (
+                      <div
+                        key={member.id}
+                        className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b last:border-b-0"
+                      >
+                        <Checkbox
+                          checked={selectedMembers.includes(member.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedMembers(
+                              checked
+                                ? [...selectedMembers, member.id]
+                                : selectedMembers.filter((id) => id !== member.id)
+                            );
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{member.name}</p>
+                          <p className="text-sm text-gray-500">{member.email}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
