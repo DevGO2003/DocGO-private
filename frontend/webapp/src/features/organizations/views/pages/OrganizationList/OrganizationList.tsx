@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -52,21 +52,21 @@ export const OrganizationList = () => {
     switch (role.toUpperCase()) {
       case 'OWNER':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={ backgroundColor: '#f3e8ff', color: '#7e22ce' }>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#f3e8ff', color: '#7e22ce' }} >
             <CommonIcon name="crown" size={16} />
             {t('organizations.list.badges.owner')}
           </div>
         );
       case 'MANAGER':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={ backgroundColor: '#dbeafe', color: '#1d4ed8' }>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#dbeafe', color: '#1d4ed8' }} >
             <CommonIcon name="user-cog" size={20} />
             {t('organizations.list.badges.manager')}
           </div>
         );
       case 'MEMBER':
         return (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={ backgroundColor: '#dcfce7' }>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#dcfce7' }} >
             <CommonIcon name="shield" size={20} />
             {t('organizations.list.badges.member')}
           </div>
@@ -118,7 +118,7 @@ export const OrganizationList = () => {
       <div className="space-y-6">
         {/* Search Filter */}
         <div className="relative w-full max-w-md">
-          <CommonIcon name="search" size={20} className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
+          <CommonIcon name="search" size={20} className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
           <Input
             type="text"
             placeholder={t('organizations.list.searchPlaceholder')}
@@ -133,9 +133,9 @@ export const OrganizationList = () => {
 
         {/* Error */}
         {error && (
-          <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+          <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
             <CardContent className="p-6">
-              <p style={ color: '#b91c1c' }>
+              <p style={{ color: '#b91c1c' }} >
                 {t('organizations.list.error')}
               </p>
             </CardContent>
@@ -144,9 +144,9 @@ export const OrganizationList = () => {
 
         {/* Data structure error */}
         {!isLoading && !error && data && !data.content && (
-          <Card style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }>
+          <Card style={{ borderColor: '#fef08a', backgroundColor: '#fefce8' }} >
             <CardContent className="p-6">
-              <p style={ color: '#b45309' }>
+              <p style={{ color: '#b45309' }} >
                 {t('organizations.list.invalidResponse')}
               </p>
               <pre className="mt-2 text-xs">{JSON.stringify(data, null, 2)}</pre>
@@ -160,11 +160,11 @@ export const OrganizationList = () => {
           >
             <Card>
               <CardContent className="p-12">
-                <CommonIcon name="building" size={64} className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
-                <h3 className="text-xl font-semibold mb-2" style={ color: '#111827' }>
+                <CommonIcon name="building" size={64} className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+                <h3 className="text-xl font-semibold mb-2" style={{ color: '#111827' }} >
                   {t('organizations.list.empty.title')}
                 </h3>
-                <p className="mb-6" style={ color: '#4b5563' }>
+                <p className="mb-6" style={{ color: '#4b5563' }} >
                   {t('organizations.list.empty.desc')}
                 </p>
                 <Button
@@ -202,11 +202,11 @@ export const OrganizationList = () => {
                             </CardTitle>
                             {getRoleBadge(org.userRole)}
                           </div>
-                          <p className="text-sm line-clamp-2" style={ color: '#4b5563' }>
+                          <p className="text-sm line-clamp-2" style={{ color: '#4b5563' }} >
                             {org.description || t('dashboard.noDescription')}
                           </p>
                         </div>
-                        <CommonIcon name="building" size={32} className="flex-shrink-0 ml-2" style={ color: '#a855f7' } />
+                        <CommonIcon name="building" size={32} className="flex-shrink-0 ml-2" style={{ color: '#a855f7' }} />
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -214,8 +214,8 @@ export const OrganizationList = () => {
                         {/* Owner Badge */}
                         {org.owner && (
                           <div className="flex items-center gap-2 text-sm">
-                            <CommonIcon name="crown" size={16} style={ color: '#eab308' } />
-                            <span style={ color: '#374151' }>
+                            <CommonIcon name="crown" size={16} style={{ color: '#eab308' }} />
+                            <span style={{ color: '#374151' }} >
                               {org.ownerName || t('organizations.list.ownerLabel')}
                             </span>
                           </div>
@@ -223,15 +223,15 @@ export const OrganizationList = () => {
 
                         {/* Members Count */}
                         <div className="flex items-center gap-2 text-sm">
-                          <CommonIcon name="users" size={16} style={ color: '#6b7280' } />
-                          <span style={ color: '#374151' }>
+                          <CommonIcon name="users" size={16} style={{ color: '#6b7280' }} />
+                          <span style={{ color: '#374151' }} >
                             {t('organizations.list.members', { count: org.memberCount })}
                           </span>
                         </div>
 
                         {/* Created Date */}
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-1" style={ color: '#6b7280' }>
+                          <div className="flex items-center gap-1" style={{ color: '#6b7280' }} >
                             <CommonIcon name="calendar" size={16} />
                             <span>
                               {formatDate(org.createdAt)}
@@ -241,15 +241,15 @@ export const OrganizationList = () => {
 
                         {/* Settings Badge */}
                         {org.settings && (
-                          <div className="pt-3 border-t" style={ borderColor: '#e5e7eb' }>
+                          <div className="pt-3 border-t" style={{ borderColor: '#e5e7eb' }} >
                             <div className="flex flex-wrap gap-2">
                               {org.settings.isPublic && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dcfce7' }>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dcfce7' }} >
                                   {t('organizations.list.badges.public')}
                                 </span>
                               )}
                               {org.settings.allowInvitations && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dbeafe' }>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dbeafe' }} >
                                   {t('organizations.list.badges.openInvites')}
                                 </span>
                               )}
@@ -273,7 +273,7 @@ export const OrganizationList = () => {
                 >
                   {t('organizations.list.pagination.prev')}
                 </Button>
-                <span style={ color: '#4b5563' }>
+                <span style={{ color: '#4b5563' }} >
                   {t('organizations.list.pagination.pageOf', { page: page + 1, total: data.totalPages })}
                 </span>
                 <Button

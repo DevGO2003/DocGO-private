@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont, Checkbox, Label } from '@shared/components';
@@ -61,7 +61,7 @@ export const Login = () => {
 
           <CardContent>
             {error && (
-              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
                 {error}
               </div>
             )}
@@ -119,10 +119,10 @@ export const Login = () => {
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2" style={ borderColor: '#d1d5db' }></div>
+                <div className="w-full border-t-2" style={{ borderColor: '#d1d5db' }} ></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 font-medium" style={ backgroundColor: '#ffffff', color: '#6b7280' }>Or continue with</span>
+                <span className="px-4 font-medium" style={{ backgroundColor: '#ffffff', color: '#6b7280' }} >Or continue with</span>
               </div>
             </div>
 
@@ -159,16 +159,14 @@ export const Login = () => {
             <div className="mt-6 text-center space-y-3">
               <Link
                 to={FORGOT_PASSWORD_PATH}
-                className="block text-sm hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
-              >
+                className="block text-sm hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
                 Forgot your password?
               </Link>
-              <div className="text-sm" style={ color: '#4b5563' }>
+              <div className="text-sm" style={{ color: '#4b5563' }} >
                 Don't have an account?{' '}
                 <Link
                   to={REGISTER_PATH}
-                  className="font-medium hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
-                >
+                  className="font-medium hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
                   Sign up
                 </Link>
               </div>

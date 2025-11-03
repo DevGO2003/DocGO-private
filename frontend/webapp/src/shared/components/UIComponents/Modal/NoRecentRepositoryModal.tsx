@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+﻿import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
@@ -167,8 +167,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-md overflow-hidden" style={ backgroundColor: '#ffffff' }
-        style={{ fontFamily: '"Kalam", "Comic Sans MS", cursive' }}
+        className="relative w-full max-w-md overflow-hidden" style={{ backgroundColor: '#ffffff', fontFamily: '"Kalam", "Comic Sans MS", cursive' }}
       >
         <canvas
           ref={canvasRef}
@@ -287,8 +286,7 @@ export const NoRecentRepositoryModal: React.FC<NoRecentRepositoryModalProps> = (
             {/* Go to Repositories Button */}
             <button
               onClick={onGoToRepositories}
-              className="relative flex-1 py-3 px-6 font-bold text-lg transition-transform hover:scale-105 flex items-center justify-center gap-2" style={ color: '#ffffff' }
-            >
+              className="relative flex-1 py-3 px-6 font-bold text-lg transition-transform hover:scale-105 flex items-center justify-center gap-2" style={{ color: '#ffffff' }} >
               <canvas
                 ref={buttonCanvasRef2}
                 className="absolute inset-0 pointer-events-none"

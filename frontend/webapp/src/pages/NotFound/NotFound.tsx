@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
@@ -39,19 +39,19 @@ export const NotFound = () => {
       <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={ backgroundColor: '#dbeafe' }>
-              <CommonIcon name="help-circle" size={48} style={ color: '#2563eb' } />
+            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={{ backgroundColor: '#dbeafe' }} >
+              <CommonIcon name="help-circle" size={48} style={{ color: '#2563eb' }} />
             </div>
 
-            <CommonText as="h1" className="font-bold mb-3" style={ color: '#111827' }>
+            <CommonText as="h1" className="font-bold mb-3" style={{ color: '#111827' }} >
               {t('notFound.code')}
             </CommonText>
 
-            <CommonText as="h2" className="text-2xl font-semibold mb-3" style={ color: '#111827' }>
+            <CommonText as="h2" className="text-2xl font-semibold mb-3" style={{ color: '#111827' }} >
               {t('notFound.title')}
             </CommonText>
 
-            <CommonText as="p" className="mb-8" style={ color: '#4b5563' }>
+            <CommonText as="p" className="mb-8" style={{ color: '#4b5563' }} >
               Trang không tìm thấy hoặc đối tượng không tồn tại hoặc đã xóa.
             </CommonText>
 

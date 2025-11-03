@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+﻿import React, { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { REPOSITORY_ROUTES, buildPath } from '@shared/constants/routes'
 import UploadLayout from '../../layouts/UploadLayout'
@@ -199,9 +199,9 @@ export default function UploadPage() {
             size="sm"
           >
             <div className="p-4">
-              <p className="text-sm" style={ color: '#374151' }>{errorInfo?.message || 'Đã xảy ra lỗi khi tải tệp lên.'}</p>
+              <p className="text-sm" style={{ color: '#374151' }} >{errorInfo?.message || 'Đã xảy ra lỗi khi tải tệp lên.'}</p>
               {errorInfo?.status && (
-                <p className="text-xs mt-2" style={ color: '#6b7280' }>Mã lỗi: {errorInfo.status}</p>
+                <p className="text-xs mt-2" style={{ color: '#6b7280' }} >Mã lỗi: {errorInfo.status}</p>
               )}
               <div className="mt-4 flex justify-end">
                 <Button
@@ -223,7 +223,7 @@ export default function UploadPage() {
         {/* Left Column: Upload Controls */}
         <div className="lg:col-span-1 space-y-6 flex flex-col">
               {/* Repository Picker */}
-              <div className="rounded-2xl border p-4 flex-none" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }>
+              <div className="rounded-2xl border p-4 flex-none" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} >
                 <RepositoryPicker
                   value={selectedRepositoryId}
                   onChange={(id: string, name: string) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
@@ -244,10 +244,10 @@ export default function UploadPage() {
                   />
                 </div>
                 {/* Upload Panel - No scroll */}
-                <div className="rounded-2xl border flex flex-col min-h-fit" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }>
-                  <div className="p-4 border-b" style={ borderColor: '#f3f4f6' }>
-                    <h3 className="text-base font-semibold" style={ color: '#111827' }>Tải tệp lên</h3>
-                    <p className="text-xs mt-1" style={ color: '#6b7280' }>Repository: {selectedRepositoryName || 'Chưa chọn'}</p>
+                <div className="rounded-2xl border flex flex-col min-h-fit" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} >
+                  <div className="p-4 border-b" style={{ borderColor: '#f3f4f6' }} >
+                    <h3 className="text-base font-semibold" style={{ color: '#111827' }} >Tải tệp lên</h3>
+                    <p className="text-xs mt-1" style={{ color: '#6b7280' }} >Repository: {selectedRepositoryName || 'Chưa chọn'}</p>
                   </div>
                   <div className="p-4 flex-1">
                     <input
@@ -259,15 +259,15 @@ export default function UploadPage() {
                     {selectedFile ? (
                       <div className="space-y-3">
                         {/* File selected UI */}
-                        <div className="grid grid-cols-[40px_1fr] gap-3 p-3 rounded-lg border" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
-                          <div className="h-10 rounded-full flex items-center justify-center" style={ backgroundColor: '#dbeafe' }>
-                            <svg style={ color: '#2563eb' } fill="currentColor" viewBox="0 0 20 20">
+                        <div className="grid grid-cols-[40px_1fr] gap-3 p-3 rounded-lg border" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }} >
+                          <div className="h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#dbeafe' }} >
+                            <svg style={{ color: '#2563eb' } fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                             </svg>
                           </div>
                           <div className="min-w-0 w-full">
-                            <Text as="h4" className="text-sm font-semibold" style={ color: '#111827' } title={selectedFile.name}>{selectedFile.name}</Text>
-                            <Text as="p" className="text-xs" style={ color: '#4b5563' }>
+                            <Text as="h4" className="text-sm font-semibold" style={{ color: '#111827' } title={selectedFile.name}>{selectedFile.name}</Text>
+                            <Text as="p" className="text-xs" style={{ color: '#4b5563' }} >
                               {(selectedFile.size / 1024).toFixed(2)} KB • {selectedFile.type || 'Không xác định'}
                             </Text>
                           </div>
@@ -310,23 +310,23 @@ export default function UploadPage() {
                           )}
                         </Button>
                         {!selectedRepositoryId && (
-                          <p className="text-xs mt-2" style={ color: '#dc2626' }>Vui lòng chọn repository trước khi tải lên.</p>
+                          <p className="text-xs mt-2" style={{ color: '#dc2626' }} >Vui lòng chọn repository trước khi tải lên.</p>
                         )}
-                        <p className="text-xs mt-2" style={ color: '#6b7280' }>
+                        <p className="text-xs mt-2" style={{ color: '#6b7280' }} >
                           Lưu ý: Sẽ mất vài phút để tải và phân tích file.
                         </p>
                       </div>
                     ) : (
                       <div className="text-center py-4">
                         {/* TODO: Refactor icon & text layout bằng UI Kit */}
-                        <div className="h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                          <svg className="h-8" style={ color: '#2563eb' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                          <svg className="h-8" style={{ color: '#2563eb' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <Text as="h4" className="text-base font-semibold mb-2" style={ color: '#111827' }>Kéo thả file vào đây để upload</Text>
-                        <Text as="p" className="text-sm mb-3" style={ color: '#4b5563' }>Hỗ trợ mọi loại file • Tối đa 50MB</Text>
+                        <Text as="h4" className="text-base font-semibold mb-2" style={{ color: '#111827' }} >Kéo thả file vào đây để upload</Text>
+                        <Text as="p" className="text-sm mb-3" style={{ color: '#4b5563' }} >Hỗ trợ mọi loại file • Tối đa 50MB</Text>
                         <Button
                           onClick={() => ocrFileInputRef.current?.click()}
                           className="inline-flex items-center"

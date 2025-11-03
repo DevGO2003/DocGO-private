@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { FileListHeader } from '@features/repositories/layouts';
 import type { ViewMode, FilterState } from '@features/repositories/layouts';
 
@@ -107,7 +107,7 @@ export default function RepositoryFilesListDemo() {
   };
 
   return (
-    <div className="p-6 min-h-screen" style={ backgroundColor: '#f9fafb' }>
+    <div className="p-6 min-h-screen" style={{ backgroundColor: '#f9fafb' }} >
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <FileListHeader
@@ -137,7 +137,7 @@ export default function RepositoryFilesListDemo() {
         />
 
         {/* Content Area */}
-        <div className="rounded-2xl border p-6" style={ backgroundColor: '#ffffff' }>
+        <div className="rounded-2xl border p-6" style={{ backgroundColor: '#ffffff' }} >
           <h2 className="text-lg font-semibold mb-4">File List ({viewMode} view)</h2>
           
           {/* Mock file grid */}
@@ -157,7 +157,7 @@ export default function RepositoryFilesListDemo() {
                 }`}
               >
                 <div className="text-sm font-medium">File {i}.pdf</div>
-                <div className="text-xs mt-1" style={ color: '#6b7280' }>2.5 MB</div>
+                <div className="text-xs mt-1" style={{ color: '#6b7280' }} >2.5 MB</div>
               </div>
             ))}
           </div>

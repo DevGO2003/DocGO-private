@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+﻿import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
 import { CommonText, Card, CardContent, CommonIcon } from '@shared/components';
@@ -77,13 +77,13 @@ const FeaturesSection: React.FC = () => {
   };
 
   return (
-    <section id="features" className="py-20" style={ backgroundColor: '#ffffff' }>
+    <section id="features" className="py-20" style={{ backgroundColor: '#ffffff' }} >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={sectionRef} className="text-center mb-16">
-          <CommonText as="h2" className="font-bold mb-4" style={ color: '#111827' }>
+          <CommonText as="h2" className="font-bold mb-4" style={{ color: '#111827' }} >
             {t('landing.features.title')}
           </CommonText>
-          <CommonText as="p" className="text-xl max-w-2xl mx-auto" style={ color: '#4b5563' }>
+          <CommonText as="p" className="text-xl max-w-2xl mx-auto" style={{ color: '#4b5563' }} >
             {t('landing.features.subtitle')}
           </CommonText>
         </div>
@@ -95,15 +95,15 @@ const FeaturesSection: React.FC = () => {
                 <div className="h-14 w-14 rounded-xl flex items-center justify-center mb-6" style={{ backgroundColor: `${getColorClass(feature.color)}20` }}>
                   <CommonIcon name={feature.icon as any} size={32} color={getColorClass(feature.color)} />
                 </div>
-                <CommonText as="h3" className="text-2xl font-bold mb-4" style={ color: '#111827' }>
+                <CommonText as="h3" className="text-2xl font-bold mb-4" style={{ color: '#111827' }} >
                   {feature.title}
                 </CommonText>
-                <CommonText as="p" className="mb-6" style={ color: '#4b5563' }>
+                <CommonText as="p" className="mb-6" style={{ color: '#4b5563' }} >
                   {feature.description}
                 </CommonText>
                 <ul className="space-y-2">
                   {feature.items.map((item, idx) => (
-                    <li key={idx} className="flex items-center" style={ color: '#374151' }>
+                    <li key={idx} className="flex items-center" style={{ color: '#374151' }} >
                       <CommonIcon name="check" size={20} color="#16a34a" className="mr-2" />
                       {item}
                     </li>

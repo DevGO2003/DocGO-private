@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -118,8 +118,8 @@ export const OrganizationWorkspace = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <CommonIcon name="alert-circle" className="w-16 h-16 mx-auto mb-4" style={ color: '#ef4444' } />
-            <p className="mb-4" style={ color: '#374151' }>{t('organizations.workspace.notFound')}</p>
+            <CommonIcon name="alert-circle" className="w-16 h-16 mx-auto mb-4" style={{ color: '#ef4444' }} />
+            <p className="mb-4" style={{ color: '#374151' }}>{t('organizations.workspace.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
@@ -181,53 +181,49 @@ export const OrganizationWorkspace = () => {
           {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-            >
+              className="rounded-lg p-4 border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium" style={ color: '#1d4ed8' }>{t('organizations.workspace.stats.totalContracts')}</p>
-                  <p className="text-3xl font-bold" style={ color: '#1e3a8a' }>{stats.totalContracts}</p>
+                  <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
+                  <p className="text-3xl font-bold" style={{ color: '#1e3a8a' }} >{stats.totalContracts}</p>
                 </div>
-                <CommonIcon name="file-text" className="h-10" style={ color: '#3b82f6' } />
+                <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-            >
+              className="rounded-lg p-4 border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium" style={ color: '#b45309' }>{t('organizations.workspace.stats.pending')}</p>
-                  <p className="text-3xl font-bold" style={ color: '#713f12' }>{stats.pendingApprovals}</p>
+                  <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
+                  <p className="text-3xl font-bold" style={{ color: '#713f12' }} >{stats.pendingApprovals}</p>
                 </div>
-                <CommonIcon name="clock" className="w-10 h-10" style={ color: '#eab308' } />
+                <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-            >
+              className="rounded-lg p-4 border" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium" style={ color: '#15803d' }>{t('organizations.workspace.stats.approved')}</p>
-                  <p className="text-3xl font-bold" style={ color: '#14532d' }>{stats.approved}</p>
+                  <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
+                  <p className="text-3xl font-bold" style={{ color: '#14532d' }} >{stats.approved}</p>
                 </div>
-                <CommonIcon name="check" className="w-10 h-10" style={ color: '#22c55e' } />
+                <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
               </div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={ borderColor: '#fecaca' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-            >
+              className="rounded-lg p-4 border" style={{ borderColor: '#fecaca', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium" style={ color: '#b91c1c' }>{t('organizations.workspace.stats.rejected')}</p>
-                  <p className="text-3xl font-bold" style={ color: '#7f1d1d' }>{stats.rejected}</p>
+                  <p className="text-sm font-medium" style={{ color: '#b91c1c' }} >{t('organizations.workspace.stats.rejected')}</p>
+                  <p className="text-3xl font-bold" style={{ color: '#7f1d1d' }} >{stats.rejected}</p>
                 </div>
-                <CommonIcon name="x" className="w-10 h-10" style={ color: '#ef4444' } />
+                <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
               </div>
             </motion.div>
           </div> */}
@@ -269,84 +265,78 @@ export const OrganizationWorkspace = () => {
                 {/* Tổng số hợp đồng */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#1d4ed8' }>{t('organizations.workspace.stats.totalContracts')}</p>
-                      <p className="text-3xl font-bold" style={ color: '#1e3a8a' }>{stats.totalContracts}</p>
+                      <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#1e3a8a' }} >{stats.totalContracts}</p>
                     </div>
-                    <CommonIcon name="file-text" className="h-10" style={ color: '#3b82f6' } />
+                    <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
                   </div>
                 </motion.div>
 
                 {/* Đang chờ */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#b45309' }>{t('organizations.workspace.stats.pending')}</p>
-                      <p className="text-3xl font-bold" style={ color: '#713f12' }>{stats.pendingApprovals}</p>
+                      <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#713f12' }} >{stats.pendingApprovals}</p>
                     </div>
-                    <CommonIcon name="clock" className="w-10 h-10" style={ color: '#eab308' } />
+                    <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
                   </div>
                 </motion.div>
 
                 {/* Đã duyệt */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#15803d' }>{t('organizations.workspace.stats.approved')}</p>
-                      <p className="text-3xl font-bold" style={ color: '#14532d' }>{stats.approved}</p>
+                      <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#14532d' }} >{stats.approved}</p>
                     </div>
-                    <CommonIcon name="check" className="w-10 h-10" style={ color: '#22c55e' } />
+                    <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
                   </div>
                 </motion.div>
 
                 {/* Đã từ chối */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={ borderColor: '#fecaca' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border" style={{ borderColor: '#fecaca', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#b91c1c' }>{t('organizations.workspace.stats.rejected')}</p>
-                      <p className="text-3xl font-bold" style={ color: '#7f1d1d' }>{stats.rejected}</p>
+                      <p className="text-sm font-medium" style={{ color: '#b91c1c' }} >{t('organizations.workspace.stats.rejected')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#7f1d1d' }} >{stats.rejected}</p>
                     </div>
-                    <CommonIcon name="x" className="w-10 h-10" style={ color: '#ef4444' } />
+                    <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
                   </div>
                 </motion.div>
 
                 {/* Tổng số file - MỚI */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={ borderColor: '#e9d5ff' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border" style={{ borderColor: '#e9d5ff', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#7e22ce' }>Tổng số file</p>
-                      <p className="text-3xl font-bold" style={ color: '#4c1d95' }>{stats.totalFiles}</p>
+                      <p className="text-sm font-medium" style={{ color: '#7e22ce' }} >Tổng số file</p>
+                      <p className="text-3xl font-bold" style={{ color: '#4c1d95' }} >{stats.totalFiles}</p>
                     </div>
-                    <CommonIcon name="file" className="w-10 h-10" style={ color: '#a855f7' } />
+                    <CommonIcon name="file" className="w-10 h-10" style={{ color: '#a855f7' }} />
                   </div>
                 </motion.div>
 
                 {/* Tổng số repository - MỚI */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border border-indigo-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
-                >
+                  className="rounded-lg p-4 border border-indigo-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={ color: '#4338ca' }>Tổng số repository</p>
-                      <p className="text-3xl font-bold" style={ color: '#312e81' }>{stats.totalRepositories}</p>
+                      <p className="text-sm font-medium" style={{ color: '#4338ca' }} >Tổng số repository</p>
+                      <p className="text-3xl font-bold" style={{ color: '#312e81' }} >{stats.totalRepositories}</p>
                     </div>
-                    <CommonIcon name="folder" className="w-10 h-10" style={ color: '#6366f1' } />
+                    <CommonIcon name="folder" className="w-10 h-10" style={{ color: '#6366f1' }} />
                   </div>
                 </motion.div>
               </div>
@@ -364,8 +354,8 @@ export const OrganizationWorkspace = () => {
                     <CardTitle>{t('organizations.workspace.allContracts')}</CardTitle>
                     <div className="flex items-center gap-2">
                       {contractsFetching && !contractsLoading && (
-                        <span className="text-sm flex items-center gap-2" style={ color: '#2563eb' }>
-                          <span className="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={ borderColor: '#2563eb' }></span>
+                        <span className="text-sm flex items-center gap-2" style={{ color: '#2563eb' }} >
+                          <span className="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#2563eb' }} ></span>
                           {t('organizations.workspace.updating')}
                         </span>
                       )}
@@ -387,9 +377,9 @@ export const OrganizationWorkspace = () => {
                     </div>
                   ) : contracts.length === 0 ? (
                     <div className="text-center py-12">
-                      <CommonIcon name="file-text" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
-                      <p className="mb-4" style={ color: '#4b5563' }>{t('organizations.workspace.noContracts')}</p>
-                      <p className="text-sm" style={ color: '#6b7280' }>{t('organizations.workspace.contractsAppear')}</p>
+                      <CommonIcon name="file-text" className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+                      <p className="mb-4" style={{ color: '#4b5563' }} >{t('organizations.workspace.noContracts')}</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }} >{t('organizations.workspace.contractsAppear')}</p>
                     </div>
                   ) : (
                   <div className="space-y-3">
@@ -399,25 +389,24 @@ export const OrganizationWorkspace = () => {
                   .map((contract) => (
                   <div
                   key={contract.id}
-                  className="p-4 border-2 rounded-lg hover:bg-yellow-100 transition-colors" style={ borderColor: '#fef08a' } style={ backgroundColor: '#fefce8' }
-                  >
+                  className="p-4 border-2 rounded-lg hover:bg-yellow-100 transition-colors" style={{ borderColor: '#fef08a', backgroundColor: '#fefce8' }} >
                   <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                  <CommonIcon name="alert-circle" className="mt-1" style={ color: '#ca8a04' } />
+                  <CommonIcon name="alert-circle" className="mt-1" style={{ color: '#ca8a04' }} />
                   <div className="flex-1">
-                    <h4 className="font-medium" style={ color: '#111827' }>{contract.title}</h4>
+                    <h4 className="font-medium" style={{ color: '#111827' }} >{contract.title}</h4>
                     {contract.content && (
-                    <p className="text-sm mt-1" style={ color: '#4b5563' }>
+                    <p className="text-sm mt-1" style={{ color: '#4b5563' }} >
                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                       </p>
                       )}
-                        <div className="flex items-center gap-4 mt-2 text-xs" style={ color: '#6b7280' }>
+                        <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#6b7280' }} >
                           <span>{contract.type}</span>
                         <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   </div>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium" style={ backgroundColor: '#fef3c7', color: '#b45309' }>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} >
                   {contract.status}
                   </span>
                   </div>
@@ -431,19 +420,18 @@ export const OrganizationWorkspace = () => {
                         .map((contract) => (
                           <div
                             key={contract.id}
-                            className="p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#e5e7eb' }
-                          >
+                            className="p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: '#e5e7eb' }} >
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-3 flex-1">
-                                <CommonIcon name="file" className="mt-1" style={ color: '#2563eb' } />
+                                <CommonIcon name="file" className="mt-1" style={{ color: '#2563eb' }} />
                                 <div className="flex-1">
-                                  <h4 className="font-medium" style={ color: '#111827' }>{contract.title}</h4>
+                                  <h4 className="font-medium" style={{ color: '#111827' }} >{contract.title}</h4>
                                   {contract.content && (
-                                    <p className="text-sm mt-1" style={ color: '#4b5563' }>
+                                    <p className="text-sm mt-1" style={{ color: '#4b5563' }} >
                                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                                     </p>
                                   )}
-                                  <div className="flex items-center gap-4 mt-2 text-xs" style={ color: '#6b7280' }>
+                                  <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#6b7280' }} >
                                     <span>{contract.type}</span>
                                     <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                                   </div>
@@ -516,17 +504,17 @@ export const OrganizationWorkspace = () => {
                       <motion.div
                         key={repo.id}
                         whileHover={{ scale: 1.02 }}
-                        className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer" style={ borderColor: '#e5e7eb' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
+                        className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer" style={{ borderColor: '#e5e7eb' } style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                         onClick={() => navigate(`/repositories/${repo.id}`)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                            <CommonIcon name="folder" style={ color: '#ffffff' } />
+                          <div className="h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                            <CommonIcon name="folder" style={{ color: '#ffffff' }} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate" style={ color: '#111827' }>{repo.name}</h4>
+                            <h4 className="font-semibold truncate" style={{ color: '#111827' }} >{repo.name}</h4>
                             {repo.description && (
-                              <p className="text-sm mt-1 line-clamp-2" style={ color: '#4b5563' }>
+                              <p className="text-sm mt-1 line-clamp-2" style={{ color: '#4b5563' }} >
                                 {repo.description}
                               </p>
                             )}
@@ -541,7 +529,7 @@ export const OrganizationWorkspace = () => {
                                 {repo.type}
                               </span>
                               {repo.isPublic && (
-                                <span className="text-xs flex items-center gap-1" style={ color: '#6b7280' }>
+                                <span className="text-xs flex items-center gap-1" style={{ color: '#6b7280' }} >
                                   <Eye className="w-3 h-3" />
                                   Công khai
                                 </span>
@@ -568,9 +556,9 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
-                    <p className="mb-2" style={ color: '#4b5563' }>{t('organizations.workspace.noRepositories')}</p>
-                    <p className="text-sm" style={ color: '#6b7280' }>{t('organizations.workspace.repositoriesDesc')}</p>
+                    <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+                    <p className="mb-2" style={{ color: '#4b5563' }} >{t('organizations.workspace.noRepositories')}</p>
+                    <p className="text-sm" style={{ color: '#6b7280' }} >{t('organizations.workspace.repositoriesDesc')}</p>
                   </div>
                 )}
               </CardContent>
@@ -606,21 +594,20 @@ export const OrganizationWorkspace = () => {
                     {membersData.content.map((member) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={ borderColor: '#e5e7eb' }
-                      >
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: '#e5e7eb' }} >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 rounded-full flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                            <span className="font-semibold" style={ color: '#ffffff' }>
+                          <div className="h-10 rounded-full flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                            <span className="font-semibold" style={{ color: '#ffffff' }} >
                               {member.username?.charAt(0).toUpperCase() || 'U'}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium" style={ color: '#111827' }>{member.username}</p>
-                            <p className="text-sm" style={ color: '#4b5563' }>{member.email}</p>
+                            <p className="font-medium" style={{ color: '#111827' }} >{member.username}</p>
+                            <p className="text-sm" style={{ color: '#4b5563' }} >{member.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium" style={ backgroundColor: '#dbeafe', color: '#1d4ed8' }>
+                          <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#dbeafe', color: '#1d4ed8' }} >
                             {member.role || 'Member'}
                           </span>
                         </div>
@@ -629,8 +616,8 @@ export const OrganizationWorkspace = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <CommonIcon name="users" className="h-16 mx-auto mb-4" style={ color: '#9ca3af' } />
-                    <p className="mb-4" style={ color: '#4b5563' }>
+                    <CommonIcon name="users" className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+                    <p className="mb-4" style={{ color: '#4b5563' }} >
                       Chưa có thành viên nào trong tổ chức
                     </p>
                     <Button 
@@ -659,26 +646,26 @@ export const OrganizationWorkspace = () => {
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={ color: '#111827' }>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#111827' }} >
                       <CommonIcon name="settings" className="w-5 h-5" />
                       {t('organizations.workspace.settings.general')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Organization Name */}
-                      <div className="flex items-start gap-3 p-4 rounded-lg border" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                        <CommonIcon name="file-text" className="mt-1" style={ color: '#2563eb' } />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                        <CommonIcon name="file-text" className="mt-1" style={{ color: '#2563eb' }} />
                         <div className="flex-1">
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.orgName')}</p>
-                          <p className="text-sm mt-1" style={ color: '#374151' }>{organization.name}</p>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.orgName')}</p>
+                          <p className="text-sm mt-1" style={{ color: '#374151' }} >{organization.name}</p>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <div className="flex items-start gap-3 p-4 rounded-lg border md:col-span-2" style={ borderColor: '#bbf7d0' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                        <CommonIcon name="file-text" className="mt-1" style={ color: '#16a34a' } />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border md:col-span-2" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                        <CommonIcon name="file-text" className="mt-1" style={{ color: '#16a34a' }} />
                         <div className="flex-1">
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.description')}</p>
-                          <p className="text-sm mt-1" style={ color: '#374151' }>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.description')}</p>
+                          <p className="text-sm mt-1" style={{ color: '#374151' }} >
                             {organization.description || t('organizations.workspace.settings.noDescription')}
                           </p>
                         </div>
@@ -686,34 +673,34 @@ export const OrganizationWorkspace = () => {
 
                       {/* Owner */}
                       {organization.owner && (
-                        <div className="flex items-start gap-3 p-4 rounded-lg border" style={ borderColor: '#fef08a' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                          <CommonIcon name="crown" className="mt-1" style={ color: '#ca8a04' } />
+                        <div className="flex items-start gap-3 p-4 rounded-lg border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                          <CommonIcon name="crown" className="mt-1" style={{ color: '#ca8a04' }} />
                           <div className="flex-1">
-                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.owner')}</p>
-                            <p className="text-sm mt-1" style={ color: '#374151' }>{organization.owner.username || organization.owner.email}</p>
+                            <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.owner')}</p>
+                            <p className="text-sm mt-1" style={{ color: '#374151' }} >{organization.owner.username || organization.owner.email}</p>
                           </div>
                         </div>
                       )}
 
                       {/* Member Count */}
-                      <div className="flex items-start gap-3 p-4 rounded-lg border border-indigo-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                        <CommonIcon name="users" className="w-5 h-5 mt-1" style={ color: '#4f46e5' } />
+                      <div className="flex items-start gap-3 p-4 rounded-lg border border-indigo-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                        <CommonIcon name="users" className="w-5 h-5 mt-1" style={{ color: '#4f46e5' }} />
                         <div className="flex-1">
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.memberCount')}</p>
-                          <p className="text-sm mt-1" style={ color: '#374151' }>{membersData?.totalElements || 0} thành viên</p>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.memberCount')}</p>
+                          <p className="text-sm mt-1" style={{ color: '#374151' }} >{membersData?.totalElements || 0} thành viên</p>
                         </div>
                       </div>
 
                       {/* Visibility */}
-                      <div className="flex items-start gap-3 p-4 rounded-lg border border-pink-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                      <div className="flex items-start gap-3 p-4 rounded-lg border border-pink-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                         {organization.isPublic ? (
                           <Eye className="w-5 h-5 text-pink-600 mt-1" />
                         ) : (
                           <CommonIcon name="eye-off" className="w-5 h-5 text-pink-600 mt-1" />
                         )}
                         <div className="flex-1">
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.visibility')}</p>
-                          <p className="text-sm mt-1" style={ color: '#374151' }>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.visibility')}</p>
+                          <p className="text-sm mt-1" style={{ color: '#374151' }} >
                             {organization.isPublic 
                               ? t('organizations.workspace.settings.public')
                               : t('organizations.workspace.settings.private')}
@@ -723,11 +710,11 @@ export const OrganizationWorkspace = () => {
 
                       {/* Created At */}
                       {organization.createdAt && (
-                        <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                           <CommonIcon name="calendar" className="w-5 h-5 text-teal-600 mt-1" />
                           <div className="flex-1">
-                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.createdAt')}</p>
-                            <p className="text-sm mt-1" style={ color: '#374151' }>
+                            <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.createdAt')}</p>
+                            <p className="text-sm mt-1" style={{ color: '#374151' }} >
                               {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
                                 year: 'numeric',
                                 month: 'long',
@@ -742,11 +729,11 @@ export const OrganizationWorkspace = () => {
 
                       {/* Updated At */}
                       {organization.updatedAt && (
-                        <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                           <CommonIcon name="calendar" className="w-5 h-5 text-orange-600 mt-1" />
                           <div className="flex-1">
-                            <p className="font-medium" style={ color: '#111827' }>{t('organizations.workspace.settings.updatedAt')}</p>
-                            <p className="text-sm mt-1" style={ color: '#374151' }>
+                            <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.workspace.settings.updatedAt')}</p>
+                            <p className="text-sm mt-1" style={{ color: '#374151' }} >
                               {new Date(organization.updatedAt).toLocaleDateString('vi-VN', {
                                 year: 'numeric',
                                 month: 'long',

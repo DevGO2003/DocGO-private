@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -129,7 +129,7 @@ export const OrganizationMembers = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="mb-4" style={ color: '#374151' }>{t('organizations.members.notFound')}</p>
+            <p className="mb-4" style={{ color: '#374151' }} >{t('organizations.members.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
@@ -168,8 +168,7 @@ export const OrganizationMembers = () => {
             <Button
               onClick={() => setShowDeleteConfirm(true)}
               variant="outline"
-              className="flex items-center gap-2 hover: hover:bg-red-50" style={ color: '#b91c1c', borderColor: '#fca5a5' } style={ color: '#dc2626' }
-            >
+              className="flex items-center gap-2 hover: hover:bg-red-50" style={{ color: '#b91c1c', borderColor: '#fca5a5', color: '#dc2626' }} >
               <CommonIcon name="arrow-left" size={20} />
               Xóa tổ chức
             </Button>
@@ -213,9 +212,9 @@ export const OrganizationMembers = () => {
           </Card>
 
           {/* Info Section */}
-          <div className="mt-6 p-6 border rounded-lg" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
-            <h3 className="font-semibold mb-2" style={ color: '#1e3a8a' }>{t('organizations.members.aboutRolesTitle')}</h3>
-            <ul className="space-y-2 text-sm" style={ color: '#1e40af' }>
+          <div className="mt-6 p-6 border rounded-lg" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }} >
+            <h3 className="font-semibold mb-2" style={{ color: '#1e3a8a' }} >{t('organizations.members.aboutRolesTitle')}</h3>
+            <ul className="space-y-2 text-sm" style={{ color: '#1e40af' }} >
               <li className="flex items-start gap-2">
                 <span className="font-semibold mt-0.5">•</span>
                 <span>{t('organizations.members.roles.owner')}</span>
@@ -258,10 +257,10 @@ export const OrganizationMembers = () => {
         title="Xác nhận xóa tổ chức"
       >
         <div className="space-y-4">
-          <p style={ color: '#374151' }>
+          <p style={{ color: '#374151' }} >
             Bạn có chắc chắn muốn xóa tổ chức <strong>{organization?.name}</strong>?
           </p>
-          <p className="text-sm" style={ color: '#dc2626' }>
+          <p className="text-sm" style={{ color: '#dc2626' }} >
             ⚠️ Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến tổ chức sẽ bị xóa vĩnh viễn.
           </p>
           <div className="flex gap-3 justify-end pt-4">
@@ -275,8 +274,7 @@ export const OrganizationMembers = () => {
             <Button
               onClick={handleDeleteOrganization}
               disabled={isDeleting}
-              className="hover:bg-red-700" style={ backgroundColor: '#dc2626', color: '#ffffff' }
-            >
+              className="hover:bg-red-700" style={{ backgroundColor: '#dc2626', color: '#ffffff' }} >
               {isDeleting ? 'Đang xóa...' : 'Xóa tổ chức'}
             </Button>
           </div>

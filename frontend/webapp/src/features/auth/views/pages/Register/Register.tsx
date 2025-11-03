@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont } from '@shared/components';
@@ -68,7 +68,7 @@ export const Register = () => {
 
           <CardContent>
             {error && (
-              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
                 {error}
               </div>
             )}
@@ -139,12 +139,11 @@ export const Register = () => {
 
             <div className="mt-6 text-center"
             >
-              <div className="text-sm" style={ color: '#4b5563' }>
+              <div className="text-sm" style={{ color: '#4b5563' }} >
                 Already have an account?{' '}
                 <Link
                   to={LOGIN_PATH}
-                  className="font-medium hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
-                >
+                  className="font-medium hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
                   Sign in
                 </Link>
               </div>

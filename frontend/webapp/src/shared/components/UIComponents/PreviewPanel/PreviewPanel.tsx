@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { cn } from '@shared/lib/utils';
 
 export interface PreviewPanelProps {
@@ -61,8 +61,8 @@ export function PreviewPanel({
       containerClassName
     )}>
       {/* Header */}
-      <div className="px-4 py-3 border-b flex-shrink-0" style={ borderColor: '#f3f4f6' } style={ backgroundColor: '#f9fafb' }>
-        <p className="text-sm font-semibold" style={ color: '#111827' }>
+      <div className="px-4 py-3 border-b flex-shrink-0" style={{ borderColor: '#f3f4f6', backgroundColor: '#f9fafb' }} >
+        <p className="text-sm font-semibold" style={{ color: '#111827' }} >
           {headerTitle}
         </p>
       </div>
@@ -89,8 +89,8 @@ export function PreviewPanel({
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center">
               {emptyIcon}
-              <p className="font-medium" style={ color: '#6b7280' }>{placeholder}</p>
-              <p className="text-sm mt-1" style={ color: '#9ca3af' }>{supportedFormats}</p>
+              <p className="font-medium" style={{ color: '#6b7280' }} >{placeholder}</p>
+              <p className="text-sm mt-1" style={{ color: '#9ca3af' }} >{supportedFormats}</p>
             </div>
           </div>
         )}

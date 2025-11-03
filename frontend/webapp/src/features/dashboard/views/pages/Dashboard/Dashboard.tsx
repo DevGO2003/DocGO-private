@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -222,10 +222,10 @@ export const Dashboard = () => {
     >
         {/* Welcome Header */}
         <div className="mb-8 animate-fade-in">
-          <Text as="h1" className="font-bold mb-2" style={ color: '#111827' }>
+          <Text as="h1" className="font-bold mb-2" style={{ color: '#111827' }} >
             {t('dashboard.welcome', { name: user?.firstName || user?.username || '' })}
           </Text>
-          <Text as="p" style={ color: '#4b5563' }>
+          <Text as="p" style={{ color: '#4b5563' }} >
             {t('dashboard.whatsHappening')}
           </Text>
         </div>
@@ -254,14 +254,14 @@ export const Dashboard = () => {
                           {stat.icon}
                         </span>
                       </div>
-                      <Text as="h3" className="text-sm font-medium mb-1" style={ color: '#4b5563' }>
+                      <Text as="h3" className="text-sm font-medium mb-1" style={{ color: '#4b5563' }} >
                         {stat.title}
                       </Text>
                       <div className="flex items-baseline justify-between">
-                        <Text as="p" className="text-2xl font-bold" style={ color: '#111827' }>
+                        <Text as="p" className="text-2xl font-bold" style={{ color: '#111827' }} >
                           {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
                         </Text>
-                        <Text as="span" className="text-sm font-medium" style={ color: '#16a34a' }>
+                        <Text as="span" className="text-sm font-medium" style={{ color: '#16a34a' }} >
                           {stat.change}
                         </Text>
                       </div>
@@ -295,15 +295,15 @@ export const Dashboard = () => {
                     {repositories.content.slice(0, 5).map((repo) => (
                       <div
                         key={repo.id}
-                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={ backgroundColor: '#f9fafb' }
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={{ backgroundColor: '#f9fafb' }
                         onClick={() => navigate(`${REPOSITORIES_PATH}/${repo.id}`)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <Text as="h4" className="font-semibold" style={ color: '#111827' }>{repo.name}</Text>
-                            <Text as="p" className="text-sm" style={ color: '#4b5563' }>{t('dashboard.filesCount', { count: repo.fileCount })}</Text>
+                            <Text as="h4" className="font-semibold" style={{ color: '#111827' }} >{repo.name}</Text>
+                            <Text as="p" className="text-sm" style={{ color: '#4b5563' }} >{t('dashboard.filesCount', { count: repo.fileCount })}</Text>
                           </div>
-                          <span className="text-xs" style={ color: '#6b7280' }>
+                          <span className="text-xs" style={{ color: '#6b7280' }} >
                             {new Date(repo.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -312,7 +312,7 @@ export const Dashboard = () => {
                 </div>
               ) : !reposLoading ? (
                 <div className="text-center py-8">
-                  <Text as="p" className="mb-4" style={ color: '#6b7280' }>{t('dashboard.noRepositories')}</Text>
+                  <Text as="p" className="mb-4" style={{ color: '#6b7280' }} >{t('dashboard.noRepositories')}</Text>
                   <Button
                     variant="default"
                     onClick={() => navigate(REPOSITORIES_PATH)}
@@ -344,18 +344,17 @@ export const Dashboard = () => {
                     {files.content.slice(0, 5).map((file) => (
                       <div
                         key={file.id}
-                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={ backgroundColor: '#f9fafb' }
-                      >
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={{ backgroundColor: '#f9fafb' }} >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <Text as="h4" className="font-semibold truncate" style={ color: '#111827' }>
+                            <Text as="h4" className="font-semibold truncate" style={{ color: '#111827' }} >
                               {file.originalName || file.name}
                             </Text>
-                            <Text as="p" className="text-sm" style={ color: '#4b5563' }>
+                            <Text as="p" className="text-sm" style={{ color: '#4b5563' }} >
                               {(file.fileSize / 1024).toFixed(2)} KB
                             </Text>
                           </div>
-                          <span className="text-xs" style={ color: '#6b7280' }>
+                          <span className="text-xs" style={{ color: '#6b7280' }} >
                             {new Date(file.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -363,8 +362,8 @@ export const Dashboard = () => {
                     ))}
                 </div>
               ) : !filesLoading ? (
-                <div className="py-8" style={ color: '#6b7280' }>
-                  <Text as="p" style={ color: '#6b7280' }>{t('dashboard.noFiles')}</Text>
+                <div className="py-8" style={{ color: '#6b7280' }} >
+                  <Text as="p" style={{ color: '#6b7280' }} >{t('dashboard.noFiles')}</Text>
                 </div>
               ) : null}
             </WindowPanel>
@@ -399,15 +398,15 @@ export const Dashboard = () => {
                   {organizations.content.map((org) => (
                     <div
                       key={org.id}
-                      className="p-4 rounded-lg cursor-pointer border-2 transition-transform hover:scale-105" style={ borderColor: '#bfdbfe' } style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
+                      className="p-4 rounded-lg cursor-pointer border-2 transition-transform hover:scale-105" style={{ borderColor: '#bfdbfe' } style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
                       onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
                     >
-                      <Text as="h4" className="font-bold mb-1" style={ color: '#111827' }>{org.name}</Text>
-                      <Text as="p" className="text-sm mb-2 line-clamp-2" style={ color: '#4b5563' }>
+                      <Text as="h4" className="font-bold mb-1" style={{ color: '#111827' }} >{org.name}</Text>
+                      <Text as="p" className="text-sm mb-2 line-clamp-2" style={{ color: '#4b5563' }} >
                         {org.description || t('dashboard.noDescription')}
                       </Text>
-                      <div className="flex items-center text-xs" style={ color: '#6b7280' }>
-                        <Text as="span" style={ color: '#6b7280' }>{t('dashboard.members', { count: org.memberCount })}</Text>
+                      <div className="flex items-center text-xs" style={{ color: '#6b7280' }} >
+                        <Text as="span" style={{ color: '#6b7280' }} >{t('dashboard.members', { count: org.memberCount })}</Text>
                       </div>
                     </div>
                   ))}
@@ -415,7 +414,7 @@ export const Dashboard = () => {
                 </>
               ) : !orgsLoading ? (
                 <div className="text-center py-8">
-                  <Text as="p" className="mb-4" style={ color: '#6b7280' }>{t('dashboard.notInOrganization')}</Text>
+                  <Text as="p" className="mb-4" style={{ color: '#6b7280' }} >{t('dashboard.notInOrganization')}</Text>
                   <Button
                     variant="default"
                     onClick={() => navigate(ORGANIZATIONS_PATH)}

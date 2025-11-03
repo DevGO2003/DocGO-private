@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import type { ViewMode } from '../FileListHeader.types';
@@ -17,7 +17,7 @@ export const ViewControls: React.FC<ViewControlsProps> = ({
   onSortChange,
 }) => {
   return (
-    <div className="flex items-center gap-1 p-1 rounded-lg" style={ backgroundColor: '#f3f4f6' }>
+    <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: '#f3f4f6' }} >
       {/* Grid View */}
       {onViewModeChange && (
         <Button

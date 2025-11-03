@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Modal, Card, CardContent, Button, Text } from '@shared/components'
 import { Flex, Stack } from '@shared/components'
 
@@ -37,8 +37,8 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
             <Flex align="center" gap={8}>
               <div style={{ width: 32, height: 32, color: '#16a34a', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✅</div>
               <Stack gap={2}>
-                <Text as="h3" className="text-lg font-semibold" style={ color: '#111827' }>Tải lên thành công</Text>
-                <Text as="p" className="text-sm" style={ color: '#6b7280' }>Tệp đã được lưu vào hệ thống</Text>
+                <Text as="h3" className="text-lg font-semibold" style={{ color: '#111827' }} >Tải lên thành công</Text>
+                <Text as="p" className="text-sm" style={{ color: '#6b7280' }} >Tệp đã được lưu vào hệ thống</Text>
               </Stack>
             </Flex>
             {onClose && (
@@ -49,8 +49,8 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
           <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
             <div style={{ width: 20, height: 20, color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄</div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <Text className="text-sm font-medium" style={ color: '#111827' } style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Text>
-              <Text className="text-xs" style={ color: '#6b7280' }>{fileType?.toUpperCase()}{formatFileSize(fileSize)}</Text>
+              <Text className="text-sm font-medium" style={{ color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Text>
+              <Text className="text-xs" style={{ color: '#6b7280' }} >{fileType?.toUpperCase()}{formatFileSize(fileSize)}</Text>
             </div>
           </Flex>
 

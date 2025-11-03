@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Button,
   Checkbox,
@@ -84,20 +84,19 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative rounded-lg max-w-2xl w-full max-h-[90vh]" style={ backgroundColor: '#ffffff' }>
+      <div className="relative rounded-lg max-w-2xl w-full max-h-[90vh]" style={{ backgroundColor: '#ffffff' }} >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b" style={ borderColor: '#e5e7eb' }>
+        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: '#e5e7eb' }} >
           <div>
-            <h2 className="text-xl font-bold flex items-center gap-2" style={ color: '#111827' }>
+            <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#111827' }} >
               <CommonIcon name="shield" size={20} color="#2563eb" />
               Quản lý thành viên: {member.userName}
             </h2>
-            <p className="text-sm mt-1" style={ color: '#4b5563' }>Set role và cấp quyền persistent cho thành viên</p>
+            <p className="text-sm mt-1" style={{ color: '#4b5563' }} >Set role và cấp quyền persistent cho thành viên</p>
           </div>
           <button
             onClick={onClose}
-            className="hover: transition-colors" style={ color: '#4b5563' } style={ color: '#9ca3af' }
-          >
+            className="hover: transition-colors" style={{ color: '#4b5563', color: '#9ca3af' }} >
             <CommonIcon name="x" size={16} />
           </button>
         </div>
@@ -106,14 +105,14 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
         <div className="p-6 space-y-6">
           {/* Role Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold flex items-center gap-2" style={ color: '#111827' }>
+            <label className="text-sm font-semibold flex items-center gap-2" style={{ color: '#111827' }} >
               <CommonIcon name="shield" size={16} />
               Role
             </label>
             <select
               value={selectedRole}
               onChange={(e) => handleRoleChange(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:" style={ borderColor: '#d1d5db', borderColor: '#3b82f6' }
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:" style={{ borderColor: '#d1d5db', borderColor: '#3b82f6' }
               disabled={member.role === 'OWNER'}
             >
               {AVAILABLE_ROLES.map((role) => (
@@ -133,29 +132,28 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
           {/* Permissions - Only for MANAGER role */}
           {selectedRole === 'MANAGER' && (
             <div className="space-y-3">
-              <label className="text-sm font-semibold flex items-center gap-2" style={ color: '#111827' }>
+              <label className="text-sm font-semibold flex items-center gap-2" style={{ color: '#111827' }} >
                 <CommonIcon name="lock" size={16} color="#16a34a" />
                 Manager Permissions
               </label>
-              <div className="space-y-3 max-h-64 border rounded-lg p-4" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+              <div className="space-y-3 max-h-64 border rounded-lg p-4" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
                 {AVAILABLE_PERMISSIONS.map((permission) => (
                   <div
                     key={permission.id}
-                    className="flex items-start gap-3 p-3 border rounded-lg hover: transition-colors" style={ borderColor: '#e5e7eb', borderColor: '#93c5fd' } style={ backgroundColor: '#ffffff' }
-                  >
+                    className="flex items-start gap-3 p-3 border rounded-lg hover: transition-colors" style={{ borderColor: '#e5e7eb', borderColor: '#93c5fd', backgroundColor: '#ffffff' }} >
                     <Checkbox
                       checked={selectedPermissions.includes(permission.id)}
                       onCheckedChange={() => handlePermissionToggle(permission.id)}
                       className="mt-1"
                     />
                     <div className="flex-1">
-                      <p className="font-medium text-sm" style={ color: '#111827' }>{permission.label}</p>
-                      <p className="text-xs mt-0.5" style={ color: '#4b5563' }>{permission.description}</p>
+                      <p className="font-medium text-sm" style={{ color: '#111827' }} >{permission.label}</p>
+                      <p className="text-xs mt-0.5" style={{ color: '#4b5563' }} >{permission.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-xs" style={ color: '#6b7280' }>
+              <p className="text-xs" style={{ color: '#6b7280' }} >
                 * Select at least one permission for Manager role
               </p>
             </div>
@@ -163,7 +161,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 p-6 border-t" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+        <div className="flex gap-3 p-6 border-t" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
           <Button
             variant="outline"
             onClick={onClose}

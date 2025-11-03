@@ -1,4 +1,4 @@
-import { Card, CardContent, Text, Input, Select, Button } from '@shared/components';
+﻿import { Card, CardContent, Text, Input, Select, Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useState } from 'react';
 
@@ -55,17 +55,17 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* ID - Read only */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={ color: '#374151' }>
-                <CommonIcon name="folder" className="w-4 h-4 mr-2" style={ color: '#4f46e5' } />
+              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
+                <CommonIcon name="folder" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
                 ID
               </label>
-              <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>{id}</Text>
+              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{id}</Text>
             </div>
 
             {/* Title - Editable */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={ color: '#374151' }>
-                <CommonIcon name="tag" className="w-4 h-4 mr-2" style={ color: '#4f46e5' } />
+              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
+                <CommonIcon name="tag" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
                 Tiêu đề
               </label>
               {isEditing ? (
@@ -78,13 +78,13 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   placeholder="Nhập tiêu đề"
                 />
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>{title}</Text>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{title}</Text>
               )}
             </div>
 
             {/* Archive Serial - Editable với +1 button */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Số lưu trữ</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Số lưu trữ</label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <Input
@@ -105,7 +105,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   </Button>
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {archiveSerial || 'Chưa có'}
                 </Text>
               )}
@@ -113,7 +113,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Date Created - Date picker */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Ngày tạo</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Ngày tạo</label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <Input
@@ -130,7 +130,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   </Button>
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {dateCreated || 'Chưa xác định'}
                 </Text>
               )}
@@ -138,8 +138,8 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Document Type - Dropdown */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={ color: '#374151' }>
-                <CommonIcon name="user" className="w-4 h-4 mr-2" style={ color: '#4f46e5' } />
+              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
+                <CommonIcon name="user" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
                 Loại tài liệu
               </label>
               {isEditing ? (
@@ -162,7 +162,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   </Button>
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {documentTypes.find(t => t.value === documentType)?.label || documentType}
                 </Text>
               )}
@@ -170,7 +170,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Status - Dropdown */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Trạng thái</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Trạng thái</label>
               {isEditing ? (
                 <Select
                   value={status}
@@ -186,7 +186,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   ))}
                 </Select>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {statusOptions.find(s => s.value === status)?.label || status}
                 </Text>
               )}
@@ -194,7 +194,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Correspondent - Editable */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Đối tác</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Đối tác</label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <Input
@@ -211,7 +211,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   </Button>
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {correspondent || 'Chưa có'}
                 </Text>
               )}
@@ -219,7 +219,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Storage Path - Editable */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Đường dẫn lưu trữ</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Đường dẫn lưu trữ</label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <Input
@@ -233,7 +233,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   </Button>
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {storagePath || 'Chưa có'}
                 </Text>
               )}
@@ -241,13 +241,13 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Owner - Read only */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Người sở hữu</label>
-              <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>{ownerUserId}</Text>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Người sở hữu</label>
+              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{ownerUserId}</Text>
             </div>
 
             {/* Tags - Multi-select */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2" style={ color: '#374151' }>Tags</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Tags</label>
               {isEditing ? (
                 <div className="space-y-2">
                   <div className="flex gap-2">
@@ -261,10 +261,9 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                       {tags.map((tag: string, idx: number) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 rounded-full text-sm flex items-center gap-1" style={ backgroundColor: '#e0e7ff' }
-                        >
+                          className="px-3 py-1 rounded-full text-sm flex items-center gap-1" style={{ backgroundColor: '#e0e7ff' }} >
                           {tag}
-                          <button className="hover:" style={ color: '#312e81' }>✕</button>
+                          <button className="hover:" style={{ color: '#312e81' }} >✕</button>
                         </span>
                       ))}
                     </div>
@@ -273,13 +272,13 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               ) : tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag: string, idx: number) => (
-                    <span key={idx} className="px-3 py-1 rounded-full text-sm" style={ backgroundColor: '#e0e7ff' }>
+                    <span key={idx} className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#e0e7ff' }} >
                       {tag}
                     </span>
                   ))}
                 </div>
               ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={ borderColor: '#d1d5db' } style={ backgroundColor: '#f9fafb' }>Không có</Text>
+                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >Không có</Text>
               )}
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
@@ -181,7 +181,7 @@ export function WindowPanel({
               className="p-1.5 hover:bg-red-100 rounded transition-colors"
               title={t('panel.close')}
             >
-              <svg style={ color: '#dc2626' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{ color: '#dc2626' } fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

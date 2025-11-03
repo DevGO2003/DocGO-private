@@ -9,7 +9,7 @@ interface CommonSwitchProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
-  ({ className, label, description, checked, ...props }, ref) => {
+  ({ className, label, description, checked, onChange, ...props }, ref) => {
     const switchRef = useRef<HTMLInputElement>(null);
     const toggleRef = useRef<HTMLDivElement>(null);
     const labelRef = useRef<HTMLLabelElement>(null);
@@ -75,6 +75,7 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
             ref={ref || switchRef}
             type="checkbox"
             checked={checked}
+            onChange={onChange}
             className="sr-only"
             {...props}
           />
@@ -85,37 +86,44 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
               style={{ width: '100%', height: '100%' }}
             />
             <div
-              className={`w-14 h-8 rounded-full transition-colors ${
+              className={`w-14 h-8 rounded-full transition-colors cursor-pointer ${
                 checked ? 'bg-blue-500' : 'bg-gray-300'
               } ${className || ''}`}
               onClick={() => {
-                if (switchRef.current) {
-                  switchRef.current.checked = !switchRef.current.checked;
-                  switchRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+                const input = switchRef.current;
+                if (input && onChange) {
+                  const syntheticEvent = {
+                    target: { ...input, checked: !checked },
+                    currentTarget: input,
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onChange(syntheticEvent);
                 }
               }}
             >
               <div
                 ref={toggleRef}
-                className="absolute top-1 left-1 rounded-full" style={ backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }
-              />
+                className="absolute top-1 left-1 rounded-full" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
             </div>
           </div>
         </div>
         {label && (
           <label
             ref={labelRef}
-            className="text-sm font-medium cursor-pointer" style={ color: '#374151' }
+            className="text-sm font-medium cursor-pointer" style={{ color: '#374151' }}
             onClick={() => {
-              if (switchRef.current) {
-                switchRef.current.checked = !switchRef.current.checked;
-                switchRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+              const input = switchRef.current;
+              if (input && onChange) {
+                const syntheticEvent = {
+                  target: { ...input, checked: !checked },
+                  currentTarget: input,
+                } as React.ChangeEvent<HTMLInputElement>;
+                onChange(syntheticEvent);
               }
             }}
           >
             {label}
             {description && (
-              <p className="text-xs mt-1" style={ color: '#6b7280' }>{description}</p>
+              <p className="text-xs mt-1" style={{ color: '#6b7280' }} >{description}</p>
             )}
           </label>
         )}

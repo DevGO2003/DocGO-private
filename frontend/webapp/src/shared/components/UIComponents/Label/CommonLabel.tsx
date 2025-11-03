@@ -1,4 +1,4 @@
-import { forwardRef, LabelHTMLAttributes, useRef, useEffect } from 'react';
+﻿import { forwardRef, LabelHTMLAttributes, useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
@@ -79,7 +79,7 @@ export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
         >
           {icon && <CommonIcon name={icon} size={iconSize} color={iconColor || (error ? '#ef4444' : '#374151')} />}
           <span>{children}</span>
-          {required && <span className="ml-1" style={ color: '#ef4444' }>*</span>}
+          {required && <span className="ml-1" style={{ color: '#ef4444' }} >*</span>}
         </label>
       </CommonFont>
     );

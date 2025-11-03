@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { NotificationBell, ProgressBar } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
@@ -52,7 +52,7 @@ export const Header = ({
   };
 
   return (
-    <header className="border-b-2 sticky top-0 z-40 relative" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }>
+    <header className="border-b-2 sticky top-0 z-40 relative" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} >
       <ProgressBar position="top" />
       <div className="mx-auto px-4">
         <div className="flex justify-between items-center h-16">
@@ -61,8 +61,7 @@ export const Header = ({
             {onMenuToggle && (
               <button
                 onClick={onMenuToggle}
-                className="lg:hidden p-2 rounded-md hover: hover:bg-gray-100" style={ color: '#6b7280' } style={ color: '#9ca3af' }
-              >
+                className="lg:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#6b7280', color: '#9ca3af' }} >
                 <CommonIcon name="menu" size={24} />
               </button>
             )}
@@ -79,8 +78,7 @@ export const Header = ({
                   placeholder="Tìm kiếm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border-2 rounded-lg focus:outline-none focus:" style={ borderColor: '#d1d5db', borderColor: '#3b82f6' }
-                />
+                  className="w-full pl-10 pr-4 py-2 border-2 rounded-lg focus:outline-none focus:" style={{ borderColor: '#d1d5db', borderColor: '#3b82f6' }} />
               </div>
             </form>
           </div>
@@ -90,7 +88,7 @@ export const Header = ({
           <div className="flex items-center gap-4">
             {/* Search for mobile */}
             {showSearch && (
-              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={ color: '#6b7280' } style={ color: '#9ca3af' }>
+              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#6b7280', color: '#9ca3af' }} >
                 <CommonIcon name="search" size={20} color="#9ca3af" />
               </button>
             )}
@@ -112,8 +110,8 @@ export const Header = ({
                       alt={user.name}
                     />
                   ) : (
-                    <div className="h-8 rounded-full flex items-center justify-center" style={ backgroundColor: '#3b82f6' }>
-                      <span className="text-sm font-medium" style={ color: '#ffffff' }>
+                    <div className="h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3b82f6' }} >
+                      <span className="text-sm font-medium" style={{ color: '#ffffff' }} >
                         {user.name.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -127,31 +125,27 @@ export const Header = ({
                       opacity: showUserDropdown ? 1 : 0,
                       transform: showUserDropdown ? 'translateY(0)' : 'translateY(-10px)',
                     }}
-                    className="absolute right-0 mt-2 rounded-lg border-2 py-1 z-50" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
-                  >
-                    <div className="px-4 py-2 border-b-2" style={ borderColor: '#f3f4f6' }>
-                      <p className="text-sm font-medium" style={ color: '#111827' }>{user.name}</p>
-                      <p className="text-xs" style={ color: '#6b7280' }>{user.email}</p>
+                    className="absolute right-0 mt-2 rounded-lg border-2 py-1 z-50" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} >
+                    <div className="px-4 py-2 border-b-2" style={{ borderColor: '#f3f4f6' }} >
+                      <p className="text-sm font-medium" style={{ color: '#111827' }} >{user.name}</p>
+                      <p className="text-xs" style={{ color: '#6b7280' }} >{user.email}</p>
                     </div>
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={ color: '#374151' }
-                    >
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#374151' }} >
                       <CommonIcon name="user" size={20} />
                       Hồ sơ
                     </Link>
                     <Link
                       to="/settings"
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={ color: '#374151' }
-                    >
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#374151' }} >
                       <CommonIcon name="settings" size={16} />
                       Cài đặt
                     </Link>
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-red-50" style={ color: '#dc2626' }
-                    >
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-red-50" style={{ color: '#dc2626' }} >
                       <CommonIcon name="logout" size={16} />
                       Đăng xuất
                     </button>

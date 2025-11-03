@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
@@ -42,8 +42,7 @@ export const EditModeActions: React.FC<EditModeActionsProps> = ({
         variant="default"
         size="sm"
         onClick={onSave}
-        className="inline-flex items-center gap-2 hover:bg-green-700" style={ backgroundColor: '#16a34a', color: '#ffffff' }
-      >
+        className="inline-flex items-center gap-2 hover:bg-green-700" style={{ backgroundColor: '#16a34a', color: '#ffffff' }} >
         <CommonIcon name="save" size={16} />
         <span className="hidden md:inline">Lưu</span>
       </Button>

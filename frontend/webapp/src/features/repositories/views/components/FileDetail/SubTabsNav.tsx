@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Tabs, TabList, CommonTab } from '@shared/components';
 
 interface Props {
@@ -46,7 +46,7 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
             onSelect={() => !loading && onChange(t.id)}
             disabled={loading}
           >
-            {loading ? <span className="inline-block rounded" style={ backgroundColor: '#e5e7eb' }></span> : t.label}
+            {loading ? <span className="inline-block rounded" style={{ backgroundColor: '#e5e7eb' }} ></span> : t.label}
           </CommonTab>
         ))}
       </TabList>

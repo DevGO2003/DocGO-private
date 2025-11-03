@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
@@ -44,7 +44,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg border" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+    <div className="flex items-center gap-2 p-2 rounded-lg border" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
       {/* Page Navigation */}
       <div className="flex items-center gap-1">
         <Button
@@ -57,7 +57,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           <CommonIcon name="chevron-left" size={16} />
         </Button>
         
-        <span className="text-sm px-2 min-w-[60px]" style={ color: '#374151' }>
+        <span className="text-sm px-2 min-w-[60px]" style={{ color: '#374151' }} >
           {currentPage}/{totalPages}
         </span>
         
@@ -73,7 +73,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
       </div>
 
       {/* Divider */}
-      <div style={ backgroundColor: '#d1d5db' } />
+      <div style={{ backgroundColor: '#d1d5db' }} />
 
       {/* Zoom Controls */}
       <div className="flex items-center gap-1">
@@ -87,7 +87,7 @@ export const PreviewControls: React.FC<PreviewControlsProps> = ({
           <CommonIcon name="minus" size={16} />
         </Button>
         
-        <span className="text-sm px-2 min-w-[50px]" style={ color: '#374151' }>
+        <span className="text-sm px-2 min-w-[50px]" style={{ color: '#374151' }} >
           {zoom}%
         </span>
         

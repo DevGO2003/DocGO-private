@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+﻿import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
@@ -24,7 +24,7 @@ const DemoSection: React.FC = () => {
   return (
     <section id="demo" className="py-20" style={{ background: 'linear-gradient(to bottom right, #2563eb, #9333ea)' }}>
       <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <CommonText as="h2" className="font-bold mb-6" style={ color: '#ffffff' }>
+        <CommonText as="h2" className="font-bold mb-6" style={{ color: '#ffffff' }} >
           {t('landing.demo.title')}
         </CommonText>
         <CommonText as="p" className="text-xl mb-10 max-w-2xl mx-auto" style={{ color: '#bfdbfe' }}>
@@ -35,8 +35,7 @@ const DemoSection: React.FC = () => {
             variant="default"
             size="lg"
             onClick={() => navigate('/repositories')}
-            className="hover:shadow-2xl flex items-center gap-2" style={ backgroundColor: '#ffffff', color: '#2563eb' }
-          >
+            className="hover:shadow-2xl flex items-center gap-2" style={{ backgroundColor: '#ffffff', color: '#2563eb' }} >
             <CommonText as="span">{t('landing.demo.ctaDemo')}</CommonText>
             <CommonIcon name="arrow-right" size={20} />
           </Button>
@@ -44,8 +43,7 @@ const DemoSection: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={() => navigate('/signup')}
-            className="border-2 border-white hover:bg-white hover:" style={ color: '#2563eb' } style={ color: '#ffffff' }
-          >
+            className="border-2 border-white hover:bg-white hover:" style={{ color: '#2563eb', color: '#ffffff' }} >
             <CommonText as="span">{t('landing.demo.ctaRegister')}</CommonText>
           </Button>
         </div>

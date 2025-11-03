@@ -18,35 +18,34 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
     {
       id: 'overview',
       label: t('repositories.detail.tabs.overview', { defaultValue: 'Tổng quan' }),
-      icon: <CommonIcon name="info" />,
+      icon: 'info',
       disabled: false,
     },
     {
       id: 'files',
       label: t('repositories.detail.tabs.files'),
-      icon: <CommonIcon name="file-text" />,
+      icon: 'file-text',
       disabled: false,
     },
     {
       id: 'members',
       label: t('repositories.detail.tabs.members'),
-      icon: <CommonIcon name="users" />,
+      icon: 'users',
       disabled: false,
     },
     {
       id: 'activity',
       label: t('repositories.detail.tabs.activity'),
-      icon: <CommonIcon name="clock" />,
+      icon: 'clock',
       disabled: true,
-      tooltip: 'Tạm thởi chưa có, tương lai các phiên bản kế tiếp sẽ có',
+      tooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
     },
   ];
 
   return (
     <Tabs>
-      <TabList className="border-b mb-6" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#ffffff' }>
+      <TabList className="border-b mb-6">
         {tabs.map((tab) => {
-          const Icon = tab.icon;
           const tabContent = (
             <CommonTab
               key={tab.id}
@@ -56,7 +55,7 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
               disabled={tab.disabled}
               className="flex items-center gap-2 px-6 py-3"
             >
-              <Icon className="w-4 h-4" />
+              <CommonIcon name={tab.icon as any} className="w-4 h-4" />
               <span>{tab.label}</span>
             </CommonTab>
           );

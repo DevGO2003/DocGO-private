@@ -1,4 +1,4 @@
-import { forwardRef, ReactNode, useRef, useEffect } from 'react';
+﻿import { forwardRef, ReactNode, useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonIcon } from '../Icon/CommonIcon';
@@ -136,12 +136,11 @@ export const CommonModal = forwardRef<HTMLDivElement, CommonModalProps>(
           />
           {/* Header */}
           {title && (
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={ borderColor: '#e5e7eb' }>
-              <h2 className="text-lg font-semibold" style={ color: '#111827' }>{title}</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: '#e5e7eb' }} >
+              <h2 className="text-lg font-semibold" style={{ color: '#111827' }} >{title}</h2>
               <button
                 onClick={onClose}
-                className="hover: transition-colors" style={ color: '#4b5563' } style={ color: '#9ca3af' }
-              >
+                className="hover: transition-colors" style={{ color: '#4b5563', color: '#9ca3af' }} >
                 <CommonIcon name="x" size={20} />
               </button>
             </div>
@@ -154,7 +153,7 @@ export const CommonModal = forwardRef<HTMLDivElement, CommonModalProps>(
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
+            <div className="px-6 py-4 border-t" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
               {footer}
             </div>
           )}

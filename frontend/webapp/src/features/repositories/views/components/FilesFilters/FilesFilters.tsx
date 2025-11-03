@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, Input, Button, RefreshButton } from '@shared/components';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
@@ -86,7 +86,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
             {/* Simple icon placeholder */}
-            <span className="absolute left-2 top-1/2 text-xs" style={ color: '#9ca3af' }>🔎</span>
+            <span className="absolute left-2 top-1/2 text-xs" style={{ color: '#9ca3af' }} >🔎</span>
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -123,8 +123,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <Button
           variant="ghost"
           onClick={onToggleAdvanced}
-          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={ color: '#4f46e5', color: '#4338ca' }
-        >
+          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={{ color: '#4f46e5', color: '#4338ca' }} >
           {showAdvanced ? t('repositories.files.filters.hideAdvanced') : t('repositories.files.filters.showAdvanced')}
         </Button>
         {showAdvanced && (
@@ -161,7 +160,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
             >
               {t('repositories.files.filters.reset')}
             </Button>
-            <div className="flex rounded-lg border overflow-hidden" style={ borderColor: '#d1d5db' }>
+            <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: '#d1d5db' }} >
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"

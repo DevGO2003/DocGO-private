@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import type { FilterState } from '../FileListHeader.types';
@@ -26,12 +26,11 @@ export const FilterDisplay: React.FC<FilterDisplayProps> = ({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-sm font-medium" style={ color: '#4b5563' }>Bộ lọc:</span>
+      <span className="text-sm font-medium" style={{ color: '#4b5563' }} >Bộ lọc:</span>
       {activeFilters.map((filter, idx) => (
         <span
           key={idx}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium" style={ backgroundColor: '#dbeafe', color: '#1d4ed8' }
-        >
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#dbeafe', color: '#1d4ed8' }} >
           {filter}
           <button
             onClick={onClearFilters}

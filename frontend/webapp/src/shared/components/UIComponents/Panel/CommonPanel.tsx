@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../Card';
 
 interface CommonPanelProps {
@@ -30,7 +30,7 @@ export const CommonPanel: React.FC<CommonPanelProps> = ({
       )}
       <CardContent>
         {loading ? (
-          <div className="py-6" style={ color: '#6b7280' }>Đang tải...</div>
+          <div className="py-6" style={{ color: '#6b7280' }} >Đang tải...</div>
         ) : (
           children
         )}

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommonFont } from '@shared/components';
 import type { BaseHeaderLayoutProps, BreadcrumbItem } from './BaseHeaderLayout.types';
@@ -25,13 +25,12 @@ function Breadcrumbs({ items, onRefresh }: { items: BreadcrumbItem[]; onRefresh?
       <ol className="flex items-center gap-2">
         {items.map((item, idx) => (
           <li key={idx} className="flex items-center">
-            {idx > 0 && <span className="mx-1" style={ color: '#9ca3af' }>›</span>}
+            {idx > 0 && <span className="mx-1" style={{ color: '#9ca3af' }} >›</span>}
             {item.icon && <span className="mr-1">{item.icon}</span>}
             {item.href ? (
               <a
                 href={item.href}
-                className="hover: font-medium transition-colors" style={ color: '#4f46e5', color: '#4338ca' }
-              >
+                className="hover: font-medium transition-colors" style={{ color: '#4f46e5', color: '#4338ca' }} >
                 {item.label}
               </a>
             ) : (
@@ -98,13 +97,13 @@ export const BaseHeaderLayout: React.FC<BaseHeaderLayoutProps> = ({
             <Breadcrumbs items={breadcrumbs} onRefresh={onRefresh} />
             
             {/* Title */}
-            <h1 className="text-2xl font-bold mb-1" style={ color: '#111827' }>
+            <h1 className="text-2xl font-bold mb-1" style={{ color: '#111827' }} >
               {title}
             </h1>
             
             {/* Subtitle */}
             {subtitle && (
-              <p className="text-sm mb-3" style={ color: '#6b7280' }>
+              <p className="text-sm mb-3" style={{ color: '#6b7280' }} >
                 {subtitle}
               </p>
             )}
