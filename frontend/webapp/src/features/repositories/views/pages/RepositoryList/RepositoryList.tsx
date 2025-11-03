@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -218,7 +218,7 @@ export const RepositoryList = () => {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
-              <CommonIcon name="search" className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
+              <CommonIcon name="search" className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
               <Input
                 type="text"
                 placeholder={
@@ -247,7 +247,7 @@ export const RepositoryList = () => {
           {/* Pagination */}
           {currentData && currentData.totalPages > 1 && (
             <div className="flex items-center justify-between mt-8">
-              <div className="text-sm" style={ color: '#374151' }>
+              <div className="text-sm" style={{ color: '#374151' }} >
                 {t('repositories.list.pagination.showing', {
                   from: currentData.currentPage * currentData.pageSize + 1,
                   to: Math.min((currentData.currentPage + 1) * currentData.pageSize, currentData.totalElements),

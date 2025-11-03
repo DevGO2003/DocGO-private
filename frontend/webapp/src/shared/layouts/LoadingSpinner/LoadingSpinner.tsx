@@ -1,4 +1,4 @@
-
+﻿
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   text?: string;
@@ -26,7 +26,7 @@ export const LoadingSpinner = ({
         className={`${sizeClasses[size]} border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin`}
       />
       {text && (
-        <p className="font-medium" style={ color: '#4b5563' }>
+        <p className="font-medium" style={{ color: '#4b5563' }} >
           {text}
         </p>
       )}

@@ -102,15 +102,14 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
             >
               <div
                 ref={toggleRef}
-                className="absolute top-1 left-1 rounded-full" style={ backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }
-              />
+                className="absolute top-1 left-1 rounded-full" style={{ backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
             </div>
           </div>
         </div>
         {label && (
           <label
             ref={labelRef}
-            className="text-sm font-medium cursor-pointer" style={ color: '#374151' }
+            className="text-sm font-medium cursor-pointer" style={{ color: '#374151' }}
             onClick={() => {
               const input = switchRef.current;
               if (input && onChange) {
@@ -124,7 +123,7 @@ export const CommonSwitch = forwardRef<HTMLInputElement, CommonSwitchProps>(
           >
             {label}
             {description && (
-              <p className="text-xs mt-1" style={ color: '#6b7280' }>{description}</p>
+              <p className="text-xs mt-1" style={{ color: '#6b7280' }} >{description}</p>
             )}
           </label>
         )}

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+﻿import { ReactNode } from 'react';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 import { ManagerPermission, MemberRole } from '@/features/organizations/models/types';
@@ -53,11 +53,11 @@ export const PermissionGuard = ({
 };
 
 const AccessDenied = () => (
-  <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+  <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
     <CardContent className="p-8 text-center">
       <CommonIcon name="alert-circle" size={64} color="#ef4444" className="mx-auto mb-4" />
-      <h3 className="text-xl font-semibold mb-2" style={ color: '#7f1d1d' }>Access Denied</h3>
-      <p style={ color: '#b91c1c' }>
+      <h3 className="text-xl font-semibold mb-2" style={{ color: '#7f1d1d' }} >Access Denied</h3>
+      <p style={{ color: '#b91c1c' }} >
         You don't have permission to access this feature.
       </p>
     </CardContent>

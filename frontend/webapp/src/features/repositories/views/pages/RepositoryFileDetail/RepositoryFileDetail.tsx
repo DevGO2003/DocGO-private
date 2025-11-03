@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Card, CardContent, RefreshButton } from '@shared/components';
@@ -377,9 +377,9 @@ export const RepositoryFileDetail: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {error && (
-          <Card style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+          <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
             <CardContent className="p-6">
-              <Text className="text-center" style={ color: '#b91c1c' }>{error}</Text>
+              <Text className="text-center" style={{ color: '#b91c1c' }} >{error}</Text>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>
@@ -389,7 +389,7 @@ export const RepositoryFileDetail: React.FC = () => {
         {!file && !isLoading && !error && (
           <Card>
             <CardContent className="p-6">
-              <p style={ color: '#4b5563' }>Không tìm thấy tệp.</p>
+              <p style={{ color: '#4b5563' }} >Không tìm thấy tệp.</p>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>

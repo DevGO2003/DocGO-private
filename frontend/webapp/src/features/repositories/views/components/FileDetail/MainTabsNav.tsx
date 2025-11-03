@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Tabs, TabList, CommonTab } from '@shared/components';
 
 interface Props {
@@ -18,7 +18,7 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
   ];
 
   return (
-    <Tabs className="border-b" style={ borderColor: '#e5e7eb' }>
+    <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }} >
       <TabList>
         {tabs.map(t => (
           <CommonTab
@@ -29,7 +29,7 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
             disabled={t.disabled || loading}
             title={t.disabled ? 'File không phải hợp đồng' : undefined}
           >
-            {loading ? <span className="inline-block rounded" style={ backgroundColor: '#e5e7eb' }></span> : t.label}
+            {loading ? <span className="inline-block rounded" style={{ backgroundColor: '#e5e7eb' }} ></span> : t.label}
           </CommonTab>
         ))}
       </TabList>

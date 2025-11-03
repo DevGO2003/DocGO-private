@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { uploadBus } from '@shared/lib/upload/uploadBus'
@@ -60,7 +60,7 @@ export default function GlobalDropzone() {
     >
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="pointer-events-auto border-2 border-dashed border-white/80 rounded-2xl px-8 py-6" style={ color: '#ffffff' }>
+        <div className="pointer-events-auto border-2 border-dashed border-white/80 rounded-2xl px-8 py-6" style={{ color: '#ffffff' }} >
           <div className="text-lg font-semibold">Thả file vào đây để tải lên</div>
           <div className="text-sm opacity-80 mt-1">Hỗ trợ mọi loại file • Kéo thả ở bất kỳ đâu</div>
         </div>

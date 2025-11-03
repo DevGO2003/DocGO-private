@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
@@ -39,15 +39,15 @@ export const Unauthorized = () => {
       <div ref={containerRef} className="w-full max-w-md">
         <Card>
           <CardContent className="p-8 text-center">
-            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={ backgroundColor: '#fee2e2' }>
-              <CommonIcon name="alert-circle" size={48} style={ color: '#dc2626' } />
+            <div ref={iconRef} className="inline-flex items-center justify-center rounded-full mb-6" style={{ backgroundColor: '#fee2e2' }} >
+              <CommonIcon name="alert-circle" size={48} style={{ color: '#dc2626' }} />
             </div>
 
-            <CommonText as="h1" className="text-3xl font-bold mb-3" style={ color: '#111827' }>
+            <CommonText as="h1" className="text-3xl font-bold mb-3" style={{ color: '#111827' }} >
               {t('unauthorized.title')}
             </CommonText>
 
-            <CommonText as="p" className="mb-8" style={ color: '#4b5563' }>
+            <CommonText as="p" className="mb-8" style={{ color: '#4b5563' }} >
               {t('unauthorized.description')}
             </CommonText>
 

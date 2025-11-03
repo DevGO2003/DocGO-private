@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
@@ -20,8 +20,8 @@ export const BulkModeActions: React.FC<BulkModeActionsProps> = ({
   onClearSelection,
 }) => {
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg border" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
-      <span className="text-sm font-medium mr-2" style={ color: '#1e3a8a' }>
+    <div className="flex items-center gap-2 p-2 rounded-lg border" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }} >
+      <span className="text-sm font-medium mr-2" style={{ color: '#1e3a8a' }} >
         Đã chọn {selectedCount} tệp
       </span>
 

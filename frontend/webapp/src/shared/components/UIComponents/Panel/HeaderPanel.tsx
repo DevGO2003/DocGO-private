@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
 import { CommonText } from '../Text/CommonText';
@@ -101,7 +101,7 @@ function HeaderPanel({
                   {breadcrumbs.map((breadcrumb, index) => (
                     <li key={index} className="flex items-center">
                       {index > 0 && (
-                        <CommonIcon name="chevron-right" size={16} className="mx-1" style={ color: '#9ca3af' } />
+                        <CommonIcon name="chevron-right" size={16} className="mx-1" style={{ color: '#9ca3af' }} />
                       )}
                       <CommonText 
                         as="span" 
@@ -126,13 +126,13 @@ function HeaderPanel({
             
             {/* Subtitle - Optional */}
             {subtitle && (
-              <CommonText as="p" className="text-xs font-medium mb-1" style={ color: '#6b7280' }>
+              <CommonText as="p" className="text-xs font-medium mb-1" style={{ color: '#6b7280' }} >
                 {subtitle}
               </CommonText>
             )}
             
             {/* Description - REQUIRED */}
-            <CommonText as="p" className="text-sm mb-2" style={ color: '#4b5563' }>
+            <CommonText as="p" className="text-sm mb-2" style={{ color: '#4b5563' }} >
               {description}
             </CommonText>
 

@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Input, Card, CardContent, Text, Switch } from '@shared/components'
 
@@ -25,14 +25,14 @@ export default function VersioningPanel({
       <CardContent className="pt-4">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div>
-            <Text as="h4" className="text-base font-semibold" style={ color: '#111827' }>
-              {t('upload.versioningPanel.title')} <span className="font-normal" style={ color: '#6b7280' }>{t('upload.versioningPanel.subtitle')}</span>
+            <Text as="h4" className="text-base font-semibold" style={{ color: '#111827' }} >
+              {t('upload.versioningPanel.title')} <span className="font-normal" style={{ color: '#6b7280' }} >{t('upload.versioningPanel.subtitle')}</span>
             </Text>
             <Text as="p" className="text-xs text-amber-600" style={{ marginTop: 4 }}>{t('upload.versioningPanel.disabledNote')}</Text>
           </div>
           <div>
             <Switch checked={false} disabled onChange={() => {}} aria-label={`${t('upload.versioningPanel.title')} (${t('upload.versioningPanel.disabled')})`} />
-            <Text as="span" className="text-sm" style={ color: '#374151' } style={{ marginLeft: 8 }}>{t('upload.versioningPanel.disabled')}</Text>
+            <Text as="span" className="text-sm" style={{ color: '#374151', marginLeft: 8 }}>{t('upload.versioningPanel.disabled')}</Text>
           </div>
         </div>
 

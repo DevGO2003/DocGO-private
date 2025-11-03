@@ -1,4 +1,4 @@
-import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+﻿import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface RemindersTabProps {
@@ -10,7 +10,7 @@ export function RemindersTab({ data }: RemindersTabProps) {
 
   if (!reminders || reminders.length === 0) {
     return (
-      <div className="py-8" style={ color: '#6b7280' }>Không có nhắc nhở nào</div>
+      <div className="py-8" style={{ color: '#6b7280' }} >Không có nhắc nhở nào</div>
     );
   }
 
@@ -92,7 +92,7 @@ export function RemindersTab({ data }: RemindersTabProps) {
             <p className="text-sm mb-3">{reminder.description}</p>
 
             {reminder.content && (
-              <div className="p-3 rounded text-sm mb-3" style={ backgroundColor: '#ffffff' }>
+              <div className="p-3 rounded text-sm mb-3" style={{ backgroundColor: '#ffffff' }} >
                 {reminder.content}
               </div>
             )}

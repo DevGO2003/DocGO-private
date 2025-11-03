@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useEffect, InputHTMLAttributes } from 'react';
+﻿import { forwardRef, useRef, useEffect, InputHTMLAttributes } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonFont } from '../Font/CommonFont';
@@ -97,8 +97,7 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {label && (
           <label
             ref={labelRef}
-            className="block text-sm font-medium" style={ color: '#374151' }
-          >
+            className="block text-sm font-medium" style={{ color: '#374151' }} >
             {label}
           </label>
         )}
@@ -121,13 +120,12 @@ export const CommonInput = forwardRef<HTMLInputElement, CommonInputProps>(
         {error && (
           <p
             ref={errorRef}
-            className="text-sm overflow-hidden" style={ color: '#ef4444' }
-          >
+            className="text-sm overflow-hidden" style={{ color: '#ef4444' }} >
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p className="text-sm" style={ color: '#6b7280' }>{helperText}</p>
+          <p className="text-sm" style={{ color: '#6b7280' }} >{helperText}</p>
         )}
       </CommonFont>
     );

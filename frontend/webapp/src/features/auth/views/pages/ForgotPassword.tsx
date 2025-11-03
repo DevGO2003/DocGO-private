@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont } from '@shared/components';
@@ -66,8 +66,7 @@ export const ForgotPassword = () => {
             <div className="mt-6 text-center">
               <Link
                 to={LOGIN_PATH}
-                className="text-sm font-medium hover: hover:underline" style={ color: '#1e40af' } style={ color: '#2563eb' }
-              >
+                className="text-sm font-medium hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
                 Back to sign in
               </Link>
             </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
@@ -42,8 +42,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           variant="outline"
           size="sm"
           onClick={onSubmit}
-          className="inline-flex items-center gap-2 hover:bg-green-50" style={ borderColor: '#86efac', color: '#15803d' }
-        >
+          className="inline-flex items-center gap-2 hover:bg-green-50" style={{ borderColor: '#86efac', color: '#15803d' }} >
           <CommonIcon name="send" size={16} />
           <span className="hidden md:inline">Gửi duyệt</span>
         </Button>
@@ -68,8 +67,7 @@ export const NormalModeActions: React.FC<NormalModeActionsProps> = ({
           variant="outline"
           size="sm"
           onClick={onSendForSignature}
-          className="inline-flex items-center gap-2 hover:bg-purple-50" style={ borderColor: '#d8b4fe' } style={ color: '#7e22ce' }
-        >
+          className="inline-flex items-center gap-2 hover:bg-purple-50" style={{ borderColor: '#d8b4fe', color: '#7e22ce' }} >
           <CommonIcon name="file-text" size={16} />
           <span className="hidden md:inline">Gửi ký</span>
         </Button>

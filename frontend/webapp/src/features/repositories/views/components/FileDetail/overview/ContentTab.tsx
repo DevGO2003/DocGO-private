@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { PreviewPanel } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useFileDownload } from '@features/repositories/models/api/repositoryApi';
@@ -61,8 +61,8 @@ export function ContentTab({ fileData }: ContentTabProps) {
         {/* Show loading */}
         {showLoading && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <CommonIcon name="loading" className="h-8" style={ color: '#2563eb' } />
-            <p className="text-sm" style={ color: '#4b5563' }>Đang tải file...</p>
+            <CommonIcon name="loading" className="h-8" style={{ color: '#2563eb' }} />
+            <p className="text-sm" style={{ color: '#4b5563' }} >Đang tải file...</p>
           </div>
         )}
         
@@ -70,9 +70,9 @@ export function ContentTab({ fileData }: ContentTabProps) {
         {!showLoading && showFallback && (
         <div className="space-y-4">
           {/* Info banner */}
-          <div className="flex items-start gap-3 p-4 border rounded-lg" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
-            <CommonIcon name="alert-circle" className="flex-shrink-0 mt-0.5" style={ color: '#2563eb' } />
-            <div className="text-sm" style={ color: '#1e40af' }>
+          <div className="flex items-start gap-3 p-4 border rounded-lg" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }} >
+            <CommonIcon name="alert-circle" className="flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
+            <div className="text-sm" style={{ color: '#1e40af' }} >
               <p className="font-medium mb-1">
                 {downloadError ? 'Không thể tải file' : 'Preview tạm thời'}
               </p>
@@ -87,21 +87,21 @@ export function ContentTab({ fileData }: ContentTabProps) {
           {/* Extracted content */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold flex items-center gap-2" style={ color: '#111827' }>
-                <CommonIcon name="file-text" className="w-4 h-4" style={ color: '#4f46e5' } />
+              <h4 className="text-sm font-semibold flex items-center gap-2" style={{ color: '#111827' }} >
+                <CommonIcon name="file-text" className="w-4 h-4" style={{ color: '#4f46e5' }} />
                 Nội dung đã trích xuất
               </h4>
-              <span className="text-xs" style={ color: '#6b7280' }>
+              <span className="text-xs" style={{ color: '#6b7280' }} >
                 {content.length.toLocaleString()} ký tự
               </span>
             </div>
             
             {mimeType && (
-              <p className="text-xs" style={ color: '#6b7280' }>Loại file: {mimeType}</p>
+              <p className="text-xs" style={{ color: '#6b7280' }} >Loại file: {mimeType}</p>
             )}
 
-            <div className="mt-3 p-4 border rounded-lg max-h-[500px] overflow-auto" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
-              <pre className="text-sm" style={ color: '#374151' }>
+            <div className="mt-3 p-4 border rounded-lg max-h-[500px] overflow-auto" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
+              <pre className="text-sm" style={{ color: '#374151' }} >
                 {content || 'Chưa có nội dung được trích xuất'}
               </pre>
             </div>

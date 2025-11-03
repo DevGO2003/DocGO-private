@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+﻿import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
@@ -22,7 +22,7 @@ const LandingHeader: React.FC = () => {
   }, []);
 
   return (
-    <header ref={headerRef} className="w-full bg-white/80 backdrop-blur-sm border-b sticky top-0 z-50" style={ borderColor: '#e5e7eb' }>
+    <header ref={headerRef} className="w-full bg-white/80 backdrop-blur-sm border-b sticky top-0 z-50" style={{ borderColor: '#e5e7eb' }} >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <CommonIcon name="file-text" size={24} color="#2563eb" />
@@ -31,10 +31,10 @@ const LandingHeader: React.FC = () => {
           </CommonText>
         </div>
         <nav className="hidden md:flex items-center gap-6">
-          <a href="#features" className="text-sm hover: transition" style={ color: '#111827' } style={ color: '#4b5563' }>
+          <a href="#features" className="text-sm hover: transition" style={{ color: '#111827', color: '#4b5563' }} >
             {t('landing.features.title')}
           </a>
-          <a href="#demo" className="text-sm hover: transition" style={ color: '#111827' } style={ color: '#4b5563' }>
+          <a href="#demo" className="text-sm hover: transition" style={{ color: '#111827', color: '#4b5563' }} >
             Demo
           </a>
           <Button variant="outline" size="sm" onClick={() => navigate('/login')}>

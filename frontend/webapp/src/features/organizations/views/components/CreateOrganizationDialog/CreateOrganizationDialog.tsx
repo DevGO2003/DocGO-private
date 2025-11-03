@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Dialog, Button, Input } from '@shared/components';
@@ -141,31 +141,31 @@ export const CreateOrganizationDialog = ({
     >
       <div className="space-y-6">
         {/* Icon Header */}
-        <div className="flex items-center gap-3 pb-4 border-b" style={ borderColor: '#e5e7eb' }>
-          <div className="p-3 rounded-lg" style={ backgroundColor: '#f3e8ff' }>
+        <div className="flex items-center gap-3 pb-4 border-b" style={{ borderColor: '#e5e7eb' }} >
+          <div className="p-3 rounded-lg" style={{ backgroundColor: '#f3e8ff' }} >
             <CommonIcon name="building" size={24} />
           </div>
           <div>
-            <h3 className="font-semibold" style={ color: '#111827' }>{t('organizations.createDialog.header.title')}</h3>
-            <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.createDialog.header.subtitle')}</p>
+            <h3 className="font-semibold" style={{ color: '#111827' }} >{t('organizations.createDialog.header.title')}</h3>
+            <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.createDialog.header.subtitle')}</p>
           </div>
         </div>
 
         {/* Submit Error */}
         {errors.submit && (
-          <div className="flex items-start gap-2 p-4 border rounded-lg" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
+          <div className="flex items-start gap-2 p-4 border rounded-lg" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
             <CommonIcon name="alert-circle" size={16} />
             <div>
-              <p className="text-sm font-medium" style={ color: '#991b1b' }>{t('organizations.createDialog.errorTitle')}</p>
-              <p className="text-sm" style={ color: '#b91c1c' }>{errors.submit}</p>
+              <p className="text-sm font-medium" style={{ color: '#991b1b' }} >{t('organizations.createDialog.errorTitle')}</p>
+              <p className="text-sm" style={{ color: '#b91c1c' }} >{errors.submit}</p>
             </div>
           </div>
         )}
 
         {/* Organization Name */}
         <div className="space-y-2">
-          <label htmlFor="org-name" className="block text-sm font-medium" style={ color: '#374151' }>
-            {t('organizations.createDialog.orgNameLabel')} <span style={ color: '#ef4444' }>*</span>
+          <label htmlFor="org-name" className="block text-sm font-medium" style={{ color: '#374151' }} >
+            {t('organizations.createDialog.orgNameLabel')} <span style={{ color: '#ef4444' }} >*</span>
           </label>
           <Input
             id="org-name"
@@ -177,14 +177,14 @@ export const CreateOrganizationDialog = ({
             disabled={isPending}
           />
           {errors.name && (
-            <p className="text-sm" style={ color: '#dc2626' }>{errors.name}</p>
+            <p className="text-sm" style={{ color: '#dc2626' }} >{errors.name}</p>
           )}
         </div>
 
         {/* Description */}
         <div className="space-y-2">
-          <label htmlFor="org-description" className="block text-sm font-medium" style={ color: '#374151' }>
-            {t('organizations.createDialog.descriptionLabel')} <span style={ color: '#9ca3af' }>{t('organizations.createDialog.descriptionOptional')}</span>
+          <label htmlFor="org-description" className="block text-sm font-medium" style={{ color: '#374151' }} >
+            {t('organizations.createDialog.descriptionLabel')} <span style={{ color: '#9ca3af' }} >{t('organizations.createDialog.descriptionOptional')}</span>
           </label>
           <textarea
             id="org-description"
@@ -198,16 +198,16 @@ export const CreateOrganizationDialog = ({
             disabled={isPending}
           />
           {errors.description && (
-            <p className="text-sm" style={ color: '#dc2626' }>{errors.description}</p>
+            <p className="text-sm" style={{ color: '#dc2626' }} >{errors.description}</p>
           )}
-          <p className="text-xs" style={ color: '#6b7280' }>
+          <p className="text-xs" style={{ color: '#6b7280' }} >
             {t('organizations.createDialog.descriptionCounter', { count: formData.description?.length || 0 })}
           </p>
         </div>
 
         {/* Info Note */}
-        <div className="p-4 border rounded-lg" style={ borderColor: '#bfdbfe' } style={ backgroundColor: '#eff6ff' }>
-          <p className="text-sm" style={ color: '#1e40af' }>{t('organizations.createDialog.note')}</p>
+        <div className="p-4 border rounded-lg" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }} >
+          <p className="text-sm" style={{ color: '#1e40af' }} >{t('organizations.createDialog.note')}</p>
         </div>
       </div>
     </Dialog>

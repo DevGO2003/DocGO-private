@@ -1,4 +1,4 @@
-import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+﻿import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Card, CardContent } from '@shared/components';
 
 interface ComplianceTabProps {
@@ -10,7 +10,7 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
 
   if (!compliance) {
     return (
-      <div className="py-8" style={ color: '#6b7280' }>Không có dữ liệu tuân thủ</div>
+      <div className="py-8" style={{ color: '#6b7280' }} >Không có dữ liệu tuân thủ</div>
     );
   }
 
@@ -53,26 +53,26 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
 
       {/* Compliance Issues */}
       {compliance.issues && compliance.issues.length > 0 && (
-        <Card style={ borderColor: '#fecaca' }>
+        <Card style={{ borderColor: '#fecaca' }} >
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <CommonIcon name="alert-circle" style={ color: '#dc2626' } />
-              <h3 className="text-lg font-semibold" style={ color: '#7f1d1d' }>
+              <CommonIcon name="alert-circle" style={{ color: '#dc2626' }} />
+              <h3 className="text-lg font-semibold" style={{ color: '#7f1d1d' }} >
                 Vấn đề tuân thủ ({compliance.issues.length})
               </h3>
             </div>
 
             <div className="space-y-3">
               {compliance.issues.map((issue: any, idx: number) => (
-                <div key={idx} className="border-l-4 pl-4 py-3" style={ borderColor: '#f87171' } style={ backgroundColor: '#fef2f2' }>
-                  <p className="font-medium mb-1" style={ color: '#7f1d1d' }>
+                <div key={idx} className="border-l-4 pl-4 py-3" style={{ borderColor: '#f87171', backgroundColor: '#fef2f2' }} >
+                  <p className="font-medium mb-1" style={{ color: '#7f1d1d' }} >
                     {typeof issue === 'string' ? `Vấn đề ${idx + 1}` : issue.title || `Vấn đề ${idx + 1}`}
                   </p>
-                  <p className="text-sm" style={ color: '#374151' }>
+                  <p className="text-sm" style={{ color: '#374151' }} >
                     {typeof issue === 'string' ? issue : issue.description || issue}
                   </p>
                   {typeof issue === 'object' && issue.severity && (
-                    <span className="inline-block mt-2 px-2 py-1 bg-red-200 rounded text-xs font-medium" style={ color: '#991b1b' }>
+                    <span className="inline-block mt-2 px-2 py-1 bg-red-200 rounded text-xs font-medium" style={{ color: '#991b1b' }} >
                       Mức độ: {issue.severity}
                     </span>
                   )}
@@ -85,30 +85,30 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
 
       {/* Recommendations */}
       {compliance.recommendations && compliance.recommendations.length > 0 && (
-        <Card style={ borderColor: '#bfdbfe' }>
+        <Card style={{ borderColor: '#bfdbfe' }} >
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <CommonIcon name="alert-circle" style={ color: '#2563eb' } />
-              <h3 className="text-lg font-semibold" style={ color: '#1e3a8a' }>
+              <CommonIcon name="alert-circle" style={{ color: '#2563eb' }} />
+              <h3 className="text-lg font-semibold" style={{ color: '#1e3a8a' }} >
                 Khuyến nghị ({compliance.recommendations.length})
               </h3>
             </div>
 
             <div className="space-y-3">
               {compliance.recommendations.map((recommendation: any, idx: number) => (
-                <div key={idx} className="border-l-4 pl-4 py-3" style={ borderColor: '#60a5fa' } style={ backgroundColor: '#eff6ff' }>
-                  <p className="font-medium mb-1" style={ color: '#1e3a8a' }>
+                <div key={idx} className="border-l-4 pl-4 py-3" style={{ borderColor: '#60a5fa', backgroundColor: '#eff6ff' }} >
+                  <p className="font-medium mb-1" style={{ color: '#1e3a8a' }} >
                     {typeof recommendation === 'string'
                       ? `Khuyến nghị ${idx + 1}`
                       : recommendation.title || `Khuyến nghị ${idx + 1}`}
                   </p>
-                  <p className="text-sm" style={ color: '#374151' }>
+                  <p className="text-sm" style={{ color: '#374151' }} >
                     {typeof recommendation === 'string'
                       ? recommendation
                       : recommendation.description || recommendation}
                   </p>
                   {typeof recommendation === 'object' && recommendation.priority && (
-                    <span className="inline-block mt-2 px-2 py-1 rounded text-xs font-medium" style={ backgroundColor: '#bfdbfe' }>
+                    <span className="inline-block mt-2 px-2 py-1 rounded text-xs font-medium" style={{ backgroundColor: '#bfdbfe' }} >
                       Ưu tiên: {recommendation.priority}
                     </span>
                   )}
@@ -124,7 +124,7 @@ export function ComplianceTab({ data }: ComplianceTabProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-3">Ghi chú bổ sung</h3>
-            <p style={ color: '#374151' }>{compliance.notes}</p>
+            <p style={{ color: '#374151' }} >{compliance.notes}</p>
           </CardContent>
         </Card>
       )}

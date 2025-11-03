@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react';
+﻿import { useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -56,14 +56,14 @@ export const MainLayout = ({
   };
 
   return (
-    <div className="h-screen overflow-hidden flex" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
+    <div className="h-screen overflow-hidden flex" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
       {/* Sidebar */}
       {resolvedShowSidebar && (
         <>
           {/* Mobile overlay */}
           {isSidebarOpen && (
             <div
-              className="fixed z-40 lg:hidden transition-opacity duration-300" style={ backgroundColor: '#4b5563' }
+              className="fixed z-40 lg:hidden transition-opacity duration-300" style={{ backgroundColor: '#4b5563' }
               onClick={() => setIsSidebarOpen(false)}
               style={{ opacity: isSidebarOpen ? 0.75 : 0 }}
             />
@@ -71,7 +71,7 @@ export const MainLayout = ({
           
           {/* Sidebar */}
           <div
-            className="fixed left-0 z-50 transition-all duration-300" style={ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
+            className="fixed left-0 z-50 transition-all duration-300" style={{ backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }
             style={{
               transform: `translateX(${isSidebarOpen || window.innerWidth >= 1024 ? '0' : '-256px'})`,
               width: isCollapsed && window.innerWidth >= 1024 ? '64px' : '256px'

@@ -98,7 +98,7 @@ export const CommonTextarea = forwardRef<HTMLTextAreaElement, CommonTextareaProp
         {label && (
           <label
             ref={labelRef}
-            className="block text-sm font-medium" style={ color: '#374151' }
+            className="block text-sm font-medium" style={{ color: '#374151' }}
           >
             {label}
           </label>
@@ -122,13 +122,13 @@ export const CommonTextarea = forwardRef<HTMLTextAreaElement, CommonTextareaProp
         {error && (
           <p
             ref={errorRef}
-            className="text-sm overflow-hidden" style={ color: '#ef4444' }
+            className="text-sm overflow-hidden" style={{ color: '#ef4444' }}
           >
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p className="text-sm" style={ color: '#6b7280' }>{helperText}</p>
+          <p className="text-sm" style={{ color: '#6b7280' }}>{helperText}</p>
         )}
       </CommonFont>
     );

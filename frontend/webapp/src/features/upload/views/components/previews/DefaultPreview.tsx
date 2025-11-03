@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 interface DefaultPreviewProps {
   file: File
@@ -26,22 +26,22 @@ export default function DefaultPreview({ file }: DefaultPreviewProps) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col rounded-lg overflow-hidden" style={ backgroundColor: '#ffffff' }>
-      <div className="px-4 py-3 border-b" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
-        <p className="text-xs" style={ color: '#4b5563' }>
+    <div className="w-full h-full flex flex-col rounded-lg overflow-hidden" style={{ backgroundColor: '#ffffff' }} >
+      <div className="px-4 py-3 border-b" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
+        <p className="text-xs" style={{ color: '#4b5563' }} >
           {file.name} • {(file.size / 1024).toFixed(2)} KB
         </p>
       </div>
       <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
         <div className="text-center">
-          <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={ backgroundColor: '#f3f4f6' }>
+          <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#f3f4f6' }} >
             {getFileIcon(file.name)}
           </div>
-          <h4 className="text-sm font-semibold mb-1" style={ color: '#111827' }>Định dạng không hỗ trợ preview</h4>
-          <p className="text-xs" style={ color: '#4b5563' }>
+          <h4 className="text-sm font-semibold mb-1" style={{ color: '#111827' }} >Định dạng không hỗ trợ preview</h4>
+          <p className="text-xs" style={{ color: '#4b5563' }} >
             {file.type || 'Unknown type'}
           </p>
-          <p className="text-xs mt-2" style={ color: '#6b7280' }>
+          <p className="text-xs mt-2" style={{ color: '#6b7280' }} >
             File sẽ được upload và xử lý trên server
           </p>
         </div>

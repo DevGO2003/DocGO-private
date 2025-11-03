@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 
 interface AudioPreviewProps {
   file: File
@@ -19,22 +19,22 @@ export default function AudioPreview({ file }: AudioPreviewProps) {
   }, [file])
 
   return (
-    <div className="w-full h-full flex flex-col rounded-lg overflow-hidden" style={ backgroundColor: '#ffffff' }>
-      <div className="px-4 py-3 border-b" style={ borderColor: '#e5e7eb' } style={ backgroundColor: '#f9fafb' }>
-        <p className="text-xs" style={ color: '#4b5563' }>
+    <div className="w-full h-full flex flex-col rounded-lg overflow-hidden" style={{ backgroundColor: '#ffffff' }} >
+      <div className="px-4 py-3 border-b" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
+        <p className="text-xs" style={{ color: '#4b5563' }} >
           {file.name} • {(file.size / 1024).toFixed(2)} KB
         </p>
       </div>
       <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
         <div className="w-full max-w-sm">
           <div className="text-center mb-4">
-            <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={ backgroundColor: '#f3e8ff' }>
-              <svg className="w-8 h-8" style={ color: '#9333ea' } fill="currentColor" viewBox="0 0 20 20">
+            <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#f3e8ff' }} >
+              <svg className="w-8 h-8" style={{ color: '#9333ea' } fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 3a1 1 0 011 1v5h2V4a1 1 0 112 0v5h2V4a1 1 0 112 0v7a3 3 0 11-6 0V4a1 1 0 01-1-1z" />
               </svg>
             </div>
-            <h4 className="text-sm font-semibold" style={ color: '#111827' }>Audio File</h4>
-            <p className="text-xs mt-1" style={ color: '#4b5563' }>{file.type}</p>
+            <h4 className="text-sm font-semibold" style={{ color: '#111827' }} >Audio File</h4>
+            <p className="text-xs mt-1" style={{ color: '#4b5563' }} >{file.type}</p>
           </div>
           {url && (
             <audio

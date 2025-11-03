@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -130,7 +130,7 @@ export const OrganizationDetail = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="p-8 text-center">
-            <p style={ color: '#374151' }>{t('organizations.detail.notFound')}</p>
+            <p style={{ color: '#374151' }} >{t('organizations.detail.notFound')}</p>
             <Button
               variant="outline"
               onClick={() => navigate(ORGANIZATIONS_PATH)}
@@ -156,14 +156,13 @@ export const OrganizationDetail = () => {
       headerRight={(
         <div className="flex gap-2 items-center">
           <div className="relative">
-            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2" style={ color: '#9ca3af' } />
+            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
             <input
               type="text"
               placeholder={t('organizations.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" style={ borderColor: '#d1d5db' }
-            />
+              className="pl-9 pr-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: '#d1d5db' }} />
           </div>
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
           <Button
@@ -187,8 +186,8 @@ export const OrganizationDetail = () => {
                   <CommonIcon name="users" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.members')}</p>
-                  <p className="text-2xl font-bold" style={ color: '#111827' }>
+                  <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.members')}</p>
+                  <p className="text-2xl font-bold" style={{ color: '#111827' }} >
                     {organization.memberCount}
                   </p>
                 </div>
@@ -203,8 +202,8 @@ export const OrganizationDetail = () => {
                   <CommonIcon name="folder" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.repositories')}</p>
-                  <p className="text-2xl font-bold" style={ color: '#111827' }>0</p>
+                  <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.repositories')}</p>
+                  <p className="text-2xl font-bold" style={{ color: '#111827' }} >0</p>
                 </div>
               </div>
             </CardContent>
@@ -217,8 +216,8 @@ export const OrganizationDetail = () => {
                   <CommonIcon name="shield" size={24} />
                 </div>
                 <div>
-                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.status')}</p>
-                  <p className="text-lg font-semibold" style={ color: '#111827' }>{t('organizations.detail.stats.active')}</p>
+                  <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.status')}</p>
+                  <p className="text-lg font-semibold" style={{ color: '#111827' }} >{t('organizations.detail.stats.active')}</p>
                 </div>
               </div>
             </CardContent>
@@ -231,8 +230,8 @@ export const OrganizationDetail = () => {
                   <CommonIcon name="calendar" size={16} />
                 </div>
                 <div>
-                  <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.stats.created')}</p>
-                  <p className="text-sm font-semibold" style={ color: '#111827' }>
+                  <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.created')}</p>
+                  <p className="text-sm font-semibold" style={{ color: '#111827' }} >
                     {new Date(organization.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -243,7 +242,7 @@ export const OrganizationDetail = () => {
 
         {/* Tabs */}
         <div className="mb-6">
-          <Tabs className="border-b" style={ borderColor: '#e5e7eb' }>
+          <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }} >
             <TabList className="flex gap-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -275,30 +274,30 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.name')}</label>
-                    <p className="mt-1" style={ color: '#111827' }>{organization.name}</p>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.name')}</label>
+                    <p className="mt-1" style={{ color: '#111827' }} >{organization.name}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.description')}</label>
-                    <p className="mt-1" style={ color: '#111827' }>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.description')}</label>
+                    <p className="mt-1" style={{ color: '#111827' }} >
                       {organization.description || t('organizations.detail.overview.noDescription')}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.owner')}</label>
-                    <p className="mt-1 flex items-center gap-2" style={ color: '#111827' }>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.owner')}</label>
+                    <p className="mt-1 flex items-center gap-2" style={{ color: '#111827' }} >
                       <CommonIcon name="crown" size={16} color="#eab308" />
                       {organization.ownerName || 'Unknown'}
                     </p>
                   </div>
                   {organization.createdAt && (
                     <div>
-                      <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.stats.created')}</label>
-                      <p className="mt-1" style={ color: '#111827' }>{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.stats.created')}</label>
+                      <p className="mt-1" style={{ color: '#111827' }} >{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.settings')}</label>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.settings')}</label>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {organization.settings?.isPublic && (
                         <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
@@ -331,38 +330,38 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.name')}</label>
-                    <p className="mt-1" style={ color: '#111827' }>{organization.name}</p>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.name')}</label>
+                    <p className="mt-1" style={{ color: '#111827' }} >{organization.name}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.description')}</label>
-                    <p className="mt-1" style={ color: '#111827' }>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.description')}</label>
+                    <p className="mt-1" style={{ color: '#111827' }} >
                       {organization.description || t('organizations.detail.overview.noDescription')}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.owner')}</label>
-                    <p className="mt-1 flex items-center gap-2" style={ color: '#111827' }>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.owner')}</label>
+                    <p className="mt-1 flex items-center gap-2" style={{ color: '#111827' }} >
                       <CommonIcon name="crown" size={16} color="#eab308" />
                       {organization.ownerName || 'Unknown'}
                     </p>
                   </div>
                   {organization.createdAt && (
                     <div>
-                      <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.stats.created')}</label>
-                      <p className="mt-1" style={ color: '#111827' }>{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.stats.created')}</label>
+                      <p className="mt-1" style={{ color: '#111827' }} >{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium" style={ color: '#374151' }>{t('organizations.detail.overview.settings')}</label>
+                    <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.overview.settings')}</label>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {organization.settings?.isPublic && (
-                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dcfce7' }>
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dcfce7' }} >
                           {t('organizations.detail.overview.flags.public')}
                         </span>
                       )}
                       {organization.settings?.allowInvitations && (
-                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={ backgroundColor: '#dbeafe' }>
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dbeafe' }} >
                           {t('organizations.detail.overview.flags.openInvitations')}
                         </span>
                       )}
@@ -400,16 +399,15 @@ export const OrganizationDetail = () => {
                     {(members as any).content.map((member: any) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 border-2 rounded-lg hover: transition-colors" style={ borderColor: '#e5e7eb', borderColor: '#d1d5db' }
-                      >
+                        className="flex items-center justify-between p-4 border-2 rounded-lg hover: transition-colors" style={{ borderColor: '#e5e7eb', borderColor: '#d1d5db' }} >
                         <div className="flex items-center gap-4">
-                          <div className="h-12 rounded-full flex items-center justify-center" style={ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }>
-                            <span className="font-bold text-lg" style={ color: '#ffffff' }>
+                          <div className="h-12 rounded-full flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                            <span className="font-bold text-lg" style={{ color: '#ffffff' }} >
                               {member.userName?.charAt(0).toUpperCase() || 'U'}
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold" style={ color: '#111827' }>
+                            <p className="font-semibold" style={{ color: '#111827' }} >
                               {member.userName || 'Unknown User'}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
@@ -431,7 +429,7 @@ export const OrganizationDetail = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm" style={ color: '#6b7280' }>
+                          <p className="text-sm" style={{ color: '#6b7280' }} >
                             {t('organizations.detail.members.joined', { date: new Date(member.joinedAt).toLocaleDateString() })}
                           </p>
                           {isCurrentUserOwner && (
@@ -439,8 +437,7 @@ export const OrganizationDetail = () => {
                               <Button
                                 variant="outline"
                                 onClick={() => handleManageMember(member)}
-                                className="hover: text-sm flex items-center gap-1" style={ color: '#1d4ed8' } style={ color: '#2563eb' }
-                              >
+                                className="hover: text-sm flex items-center gap-1" style={{ color: '#1d4ed8', color: '#2563eb' }} >
                                 <CommonIcon name="shield" size={12} />
                                 Quản lý
                               </Button>
@@ -448,8 +445,7 @@ export const OrganizationDetail = () => {
                                 <Button
                                   variant="outline"
                                   onClick={() => handleRemoveMember(member.id)}
-                                  className="hover: text-sm" style={ color: '#b91c1c' } style={ color: '#dc2626' }
-                                >
+                                  className="hover: text-sm" style={{ color: '#b91c1c', color: '#dc2626' }} >
                                   {t('organizations.detail.members.remove')}
                                 </Button>
                               )}
@@ -462,7 +458,7 @@ export const OrganizationDetail = () => {
                 ) : (
                   <div className="text-center py-12">
                     <CommonIcon name="users" size={64} color="#9ca3af" className="mx-auto mb-4" />
-                    <p className="mb-4" style={ color: '#4b5563' }>{t('organizations.detail.members.none')}</p>
+                    <p className="mb-4" style={{ color: '#4b5563' }} >{t('organizations.detail.members.none')}</p>
                     <Button variant="outline" className="inline-flex items-center gap-2">
                       <CommonIcon name="users" size={16} />
                       {t('organizations.detail.members.invite')}
@@ -488,8 +484,8 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="text-center py-12">
                   <CommonIcon name="file-text" size={64} color="#9ca3af" className="mx-auto mb-4" />
-                  <p style={ color: '#4b5563' }>{t('organizations.noContracts')}</p>
-                  <p className="text-sm mt-2" style={ color: '#6b7280' }>{t('organizations.noContractsDesc')}</p>
+                  <p style={{ color: '#4b5563' }} >{t('organizations.noContracts')}</p>
+                  <p className="text-sm mt-2" style={{ color: '#6b7280' }} >{t('organizations.noContractsDesc')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -510,8 +506,8 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="text-center py-12">
                   <CommonIcon name="folder" size={64} color="#9ca3af" className="mx-auto mb-4" />
-                  <p style={ color: '#4b5563' }>{t('organizations.noRepositories')}</p>
-                  <p className="text-sm mt-2" style={ color: '#6b7280' }>{t('organizations.noRepositoriesDesc')}</p>
+                  <p style={{ color: '#4b5563' }} >{t('organizations.noRepositories')}</p>
+                  <p className="text-sm mt-2" style={{ color: '#6b7280' }} >{t('organizations.noRepositoriesDesc')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -526,32 +522,32 @@ export const OrganizationDetail = () => {
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-4" style={ color: '#111827' }>{t('organizations.detail.settings.general')}</h3>
+                    <h3 className="text-lg font-semibold mb-4" style={{ color: '#111827' }} >{t('organizations.detail.settings.general')}</h3>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb' }} >
                         <div>
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.public.label')}</p>
-                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.public.desc')}</p>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.detail.settings.public.label')}</p>
+                          <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.settings.public.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.isPublic}
                           disabled
                         />
                       </div>
-                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb' }} >
                         <div>
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.allowInvitations.label')}</p>
-                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.allowInvitations.desc')}</p>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.detail.settings.allowInvitations.label')}</p>
+                          <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.settings.allowInvitations.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.allowInvitations}
                           disabled
                         />
                       </div>
-                      <div className="flex items-center justify-between p-4 rounded-lg" style={ backgroundColor: '#f9fafb' }>
+                      <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb' }} >
                         <div>
-                          <p className="font-medium" style={ color: '#111827' }>{t('organizations.detail.settings.requireApproval.label')}</p>
-                          <p className="text-sm" style={ color: '#4b5563' }>{t('organizations.detail.settings.requireApproval.desc')}</p>
+                          <p className="font-medium" style={{ color: '#111827' }} >{t('organizations.detail.settings.requireApproval.label')}</p>
+                          <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.settings.requireApproval.desc')}</p>
                         </div>
                         <Checkbox
                           checked={organization.settings?.requireApproval}
@@ -561,12 +557,12 @@ export const OrganizationDetail = () => {
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t" style={ borderColor: '#e5e7eb' }>
-                    <h3 className="text-lg font-semibold mb-4" style={ color: '#dc2626' }>{t('organizations.detail.settings.danger.title')}</h3>
-                    <div className="p-4 border-2 rounded-lg" style={ borderColor: '#fecaca' } style={ backgroundColor: '#fef2f2' }>
-                      <p className="font-medium mb-2" style={ color: '#7f1d1d' }>{t('organizations.detail.settings.danger.delete')}</p>
-                      <p className="text-sm mb-4" style={ color: '#b91c1c' }>{t('organizations.detail.settings.danger.desc')}</p>
-                      <Button variant="outline" className="hover:" style={ color: '#b91c1c' } style={ color: '#dc2626' }>
+                  <div className="pt-6 border-t" style={{ borderColor: '#e5e7eb' }} >
+                    <h3 className="text-lg font-semibold mb-4" style={{ color: '#dc2626' }} >{t('organizations.detail.settings.danger.title')}</h3>
+                    <div className="p-4 border-2 rounded-lg" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
+                      <p className="font-medium mb-2" style={{ color: '#7f1d1d' }} >{t('organizations.detail.settings.danger.delete')}</p>
+                      <p className="text-sm mb-4" style={{ color: '#b91c1c' }} >{t('organizations.detail.settings.danger.desc')}</p>
+                      <Button variant="outline" className="hover:" style={{ color: '#b91c1c', color: '#dc2626' }} >
                         {t('organizations.detail.settings.danger.cta')}
                       </Button>
                     </div>
