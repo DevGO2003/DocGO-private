@@ -51,8 +51,40 @@
 
 ## 📋 REMAINING PHASES
 
+### 🔴 PHASE 1.3: Fix Tailwind Violations (EXTENDED)
+**Status**: 🔄 PLAN CREATED - READY TO EXECUTE
+**Estimated**: 6-8 hours
+**Priority**: 🔴 CRITICAL
+
+#### Strategy:
+1. **Top 5 Files First** (288 violations - 4.5h)
+   - [ ] OrganizationWorkspace.tsx (102)
+   - [ ] OrganizationDetail.tsx (60)
+   - [ ] InviteMemberModal.tsx (46)
+   - [ ] RepositoryDetail.tsx (46)
+   - [ ] StorageTab.tsx (34)
+
+2. **Batch Fix Remaining** (942 violations - 3.5h)
+   - [ ] Modal/Dialog (8 files, 120)
+   - [ ] Tab components (12 files, 180)
+   - [ ] Layout components (6 files, 100)
+   - [ ] Feature pages (25 files, 300)
+   - [ ] Utility components (62 files, 242)
+
+#### Tools Created:
+- ✅ `tailwind-fix-plan.md` - Detailed execution plan
+- ✅ `fix-tailwind-violations.py` - Automated fixer script
+- ✅ Tailwind→Inline color mapping (50+ colors)
+
+#### Approach:
+- Replace `className="bg-blue-50"` → `style={{ backgroundColor: '#eff6ff' }}`
+- Keep layout classes: flex, grid, gap, p-, m-, w-, h-, etc.
+- Only remove color classes: bg-, text-, border-, shadow-
+
+---
+
 ### 🔴 PHASE 2: Fix Pages (Home, Login, Signup, Dashboard)
-**Status**: ⏳ PENDING
+**Status**: ⏳ PENDING (After Phase 1.3)
 **Estimated**: 4-5 hours
 **Priority**: 🔴 HIGH
 
