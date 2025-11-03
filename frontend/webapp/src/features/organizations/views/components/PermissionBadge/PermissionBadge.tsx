@@ -1,4 +1,4 @@
-import { ManagerPermission } from '@/features/organizations';
+import { ManagerPermission } from '@/features/organizations/models/types';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { IconName } from '@shared/components/UIComponents/Icon/Icon.types';
 
@@ -10,35 +10,35 @@ interface PermissionBadgeProps {
 export const PermissionBadge = ({ permission, size = 'sm' }: PermissionBadgeProps) => {
   const getConfig = () => {
     switch (permission) {
-      case ManagerPermission.LEGAL:
+      case 'approve:legal':
         return {
           label: 'Legal',
           icon: 'scale' as IconName,
           color: 'text-purple-700',
           bg: 'bg-purple-100',
         };
-      case ManagerPermission.FINANCE:
+      case 'approve:finance':
         return {
           label: 'Finance',
           icon: 'dollar-sign' as IconName,
           color: 'text-green-700',
           bg: 'bg-green-100',
         };
-      case ManagerPermission.HR:
+      case 'approve:executive':
         return {
-          label: 'HR',
+          label: 'Executive',
           icon: 'briefcase' as IconName,
           color: 'text-blue-700',
           bg: 'bg-blue-100',
         };
-      case ManagerPermission.INVITE_MEMBERS:
+      case 'member:invite':
         return {
           label: 'Invite Members',
           icon: 'user-plus' as IconName,
           color: 'text-indigo-700',
           bg: 'bg-indigo-100',
         };
-      case ManagerPermission.MANAGE_SETTINGS:
+      case 'org:settings':
       default:
         return {
           label: 'Settings',

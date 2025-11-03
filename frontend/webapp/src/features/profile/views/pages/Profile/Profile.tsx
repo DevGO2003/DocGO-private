@@ -153,7 +153,7 @@ export const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div
+            </div>
 
             {/* Details Card */}
             <div
