@@ -145,19 +145,19 @@ export const RepositoryDetail: React.FC = () => {
                       <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.name')}</h4>
-                            <p className="text-base text-gray-900 font-medium">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.info.name')}</h4>
+                            <p className="text-base font-medium" style={{ color: '#111827' }}>
                               {repository?.name}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.type.label')}</h4>
-                            <p className="text-base text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.type.label')}</h4>
+                            <p className="text-base" style={{ color: '#111827' }}>
                               {repository?.type === 'PERSONAL' ? t('repositories.detail.type.personal') : t('repositories.detail.type.organization')}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.status')}</h4>
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.info.status')}</h4>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{
                               backgroundColor: repository?.isPublic ? '#dcfce7' : '#f3f4f6',
                               color: repository?.isPublic ? '#166534' : '#374151'
@@ -168,23 +168,23 @@ export const RepositoryDetail: React.FC = () => {
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.description')}</h4>
-                          <p className="text-gray-700">
+                          <h4 className="text-sm font-medium mb-2" style={{ color: '#6b7280' }}>{t('repositories.detail.info.description')}</h4>
+                          <p style={{ color: '#374151' }}>
                             {repository?.description || t('repositories.detail.info.noDescription')}
                           </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.owner')}</h4>
-                            <p className="text-gray-900">
+                            <h4 className="text-sm font-medium mb-2" style={{ color: '#6b7280' }}>{t('repositories.detail.info.owner')}</h4>
+                            <p style={{ color: '#111827' }}>
                               {repository?.ownerName || t('repositories.detail.info.noInfo')}
                             </p>
                           </div>
                           {repository?.organizationId && (
                             <div>
-                              <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.organization')}</h4>
-                              <p className="text-gray-900">
+                              <h4 className="text-sm font-medium mb-2" style={{ color: '#6b7280' }}>{t('repositories.detail.info.organization')}</h4>
+                              <p style={{ color: '#111827' }}>
                                 {repository?.organizationName || t('repositories.detail.info.none')}
                               </p>
                             </div>
@@ -193,20 +193,20 @@ export const RepositoryDetail: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.files')}</h4>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.stats.files')}</h4>
+                            <p className="text-2xl font-semibold" style={{ color: '#111827' }}>
                               {repository?.fileCount || 0}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.members')}</h4>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.stats.members')}</h4>
+                            <p className="text-2xl font-semibold" style={{ color: '#111827' }}>
                               {repository?.memberCount || 0}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.storage')}</h4>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.stats.storage')}</h4>
+                            <p className="text-2xl font-semibold" style={{ color: '#111827' }}>
                               {formatFileSize(repository?.totalSize)}
                             </p>
                           </div>
@@ -214,14 +214,14 @@ export const RepositoryDetail: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.createdAt')}</h4>
-                            <p className="text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.info.createdAt')}</h4>
+                            <p style={{ color: '#111827' }}>
                               {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : '-'}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.updatedAt')}</h4>
-                            <p className="text-gray-900">
+                            <h4 className="text-sm font-medium mb-1" style={{ color: '#6b7280' }}>{t('repositories.detail.info.updatedAt')}</h4>
+                            <p style={{ color: '#111827' }}>
                               {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : '-'}
                             </p>
                           </div>
@@ -235,7 +235,7 @@ export const RepositoryDetail: React.FC = () => {
                         {repository.files && repository.files.length > 0 ? (
                           <div>
                             <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
                                 {t('repositories.detail.files.list')} ({repository.files.length})
                               </h3>
                               <Button onClick={goToUploadWithRepo}>
@@ -246,19 +246,21 @@ export const RepositoryDetail: React.FC = () => {
                               {repository.files.map((file) => (
                                 <div
                                   key={file.id}
-                                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                                  className="flex items-center justify-between p-4 border rounded-lg transition-colors cursor-pointer" style={{ borderColor: '#e5e7eb' }}
+                                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                   onClick={() => navigate(`/repositories/${repository.id}/files/${file.id}`)}
                                 >
                                   <div className="flex items-center gap-3">
                                     <CommonIcon name="file-text" className="w-5 h-5 text-blue-500" />
                                     <div>
-                                      <h4 className="font-medium text-gray-900">{file.name}</h4>
-                                      <p className="text-sm text-gray-500">
+                                      <h4 className="font-medium" style={{ color: '#111827' }}>{file.name}</h4>
+                                      <p className="text-sm" style={{ color: '#6b7280' }}>
                                         {t('repositories.detail.files.uploaded')}: {new Date(file.createdAt).toLocaleDateString()}
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm" style={{ color: '#6b7280' }}>
                                     {file.size ? formatFileSize(file.size) : '-'}
                                   </div>
                                 </div>
@@ -267,11 +269,11 @@ export const RepositoryDetail: React.FC = () => {
                           </div>
                         ) : (
                           <div className="text-center py-8">
-                            <CommonIcon name="file-text" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <CommonIcon name="file-text" className="w-12 h-12 mx-auto mb-4" color="#9ca3af" />
+                            <h3 className="text-lg font-medium mb-2" style={{ color: '#111827' }}>
                               {t('repositories.detail.empty.files.title')}
                             </h3>
-                            <p className="text-gray-600 mb-4">
+                            <p className="mb-4" style={{ color: '#4b5563' }}>
                               {t('repositories.detail.empty.files.desc')}
                             </p>
                             <Button onClick={goToUploadWithRepo}>{t('repositories.detail.empty.files.upload')}</Button>
@@ -287,17 +289,17 @@ export const RepositoryDetail: React.FC = () => {
                         ) : membersData?.content && membersData.content.length > 0 ? (
                           <div className="space-y-4">
                           <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-gray-900">{t('repositories.detail.tabs.members')}</h3>
+                          <h3 className="text-lg font-medium" style={{ color: '#111827' }}>{t('repositories.detail.tabs.members')}</h3>
                              <Button onClick={() => setShowInviteModal(true)}>
                           {t('repositories.detail.empty.members.invite')}
                           </Button>
                             </div>
                           {membersData.content.map((member: any) => (
-                        <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div key={member.id} className="p-4 rounded-lg border" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <p className="font-medium text-gray-900">{member.username}</p>
-                              <p className="text-sm text-gray-600">{member.email}</p>
+                              <p className="font-medium" style={{ color: '#111827' }}>{member.username}</p>
+                              <p className="text-sm" style={{ color: '#4b5563' }}>{member.email}</p>
                             </div>
                             <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
                               {member.role}
@@ -305,11 +307,11 @@ export const RepositoryDetail: React.FC = () => {
                           </div>
                           
                           {/* Permissions Section */}
-                          <div className="space-y-3 border-t border-gray-200 pt-4">
-                            <p className="text-sm font-medium text-gray-700">{t('repositories.detail.members.permissions')}</p>
+                          <div className="space-y-3 border-t pt-4" style={{ borderColor: '#e5e7eb' }}>
+                            <p className="text-sm font-medium" style={{ color: '#374151' }}>{t('repositories.detail.members.permissions')}</p>
                             
                             <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.upload')}</label>
+                              <label className="text-sm" style={{ color: '#4b5563' }}>{t('repositories.detail.members.permissions.upload')}</label>
                               <input 
                                 type="checkbox" 
                                 checked={member.permissions?.canUpload || false}
@@ -320,7 +322,7 @@ export const RepositoryDetail: React.FC = () => {
                             </div>
                             
                             <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.view')}</label>
+                              <label className="text-sm" style={{ color: '#4b5563' }}>{t('repositories.detail.members.permissions.view')}</label>
                               <input 
                                 type="checkbox" 
                                 checked={member.permissions?.canView || false}
@@ -331,7 +333,7 @@ export const RepositoryDetail: React.FC = () => {
                             </div>
                             
                             <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.delete')}</label>
+                              <label className="text-sm" style={{ color: '#4b5563' }}>{t('repositories.detail.members.permissions.delete')}</label>
                               <input 
                                 type="checkbox" 
                                 checked={member.permissions?.canDelete || false}
@@ -346,11 +348,11 @@ export const RepositoryDetail: React.FC = () => {
                   </div>
                   ) : (
                   <div className="text-center py-8">
-                  <CommonIcon name="users" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <CommonIcon name="users" className="w-12 h-12 mx-auto mb-4" color="#9ca3af" />
+                  <h3 className="text-lg font-medium mb-2" style={{ color: '#111827' }}>
                   {t('repositories.detail.empty.members.title')}
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4" style={{ color: '#4b5563' }}>
                   {t('repositories.detail.empty.members.desc')}
                   </p>
                   <Button onClick={() => setShowInviteModal(true)}>
@@ -364,11 +366,11 @@ export const RepositoryDetail: React.FC = () => {
                   {activeTab === 'activity' && (
                     <Card className="p-6">
                         <div className="text-center py-8">
-                          <CommonIcon name="clock" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          <CommonIcon name="clock" className="w-12 h-12 mx-auto mb-4" color="#9ca3af" />
+                          <h3 className="text-lg font-medium mb-2" style={{ color: '#111827' }}>
                             {t('repositories.detail.empty.activity.title')}
                           </h3>
-                          <p className="text-gray-600">
+                          <p style={{ color: '#4b5563' }}>
                             {t('repositories.detail.empty.activity.desc')}
                           </p>
                         </div>

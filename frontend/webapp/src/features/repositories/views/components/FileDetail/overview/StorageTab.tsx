@@ -23,11 +23,11 @@ export function StorageTab({ fileData }: StorageTabProps) {
       {/* Storage Type */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <CommonIcon name="folder" className="w-5 h-5 mr-2 text-indigo-600" />
+          <h3 className="text-lg font-semibold mb-4 flex items-center" style={{ color: '#111827' }}>
+            <CommonIcon name="folder" className="w-5 h-5 mr-2" color="#4f46e5" />
             Loại lưu trữ
           </h3>
-          <div className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+          <div className="inline-block px-4 py-2 rounded-full text-sm font-medium" style={{ backgroundColor: '#eef2ff', color: '#4f46e5' }}>
             {storage.type?.toUpperCase() || 'UNKNOWN'}
           </div>
         </CardContent>
@@ -37,63 +37,63 @@ export function StorageTab({ fileData }: StorageTabProps) {
       {s3.url && (
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <CommonIcon name="upload" className="w-5 h-5 mr-2 text-blue-600" />
+            <h3 className="text-lg font-semibold mb-4 flex items-center" style={{ color: '#111827' }}>
+              <CommonIcon name="upload" className="w-5 h-5 mr-2" color="#2563eb" />
               Amazon S3
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {s3.url && (
                 <div>
-                  <label className="text-xs text-gray-500">URL</label>
-                  <p className="text-sm font-medium text-gray-900 break-all">{s3.url}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>URL</label>
+                  <p className="text-sm font-medium break-all" style={{ color: '#111827' }}>{s3.url}</p>
                 </div>
               )}
               {s3.bucket && (
                 <div>
-                  <label className="text-xs text-gray-500">Bucket</label>
-                  <p className="text-sm font-medium text-gray-900">{s3.bucket}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Bucket</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{s3.bucket}</p>
                 </div>
               )}
               {s3.objectKey && (
                 <div>
-                  <label className="text-xs text-gray-500">Object Key</label>
-                  <p className="text-sm font-medium text-gray-900 break-all">{s3.objectKey}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Object Key</label>
+                  <p className="text-sm font-medium break-all" style={{ color: '#111827' }}>{s3.objectKey}</p>
                 </div>
               )}
               {s3.region && (
                 <div>
-                  <label className="text-xs text-gray-500">Region</label>
-                  <p className="text-sm font-medium text-gray-900">{s3.region}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Region</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{s3.region}</p>
                 </div>
               )}
               {s3.contentType && (
                 <div>
-                  <label className="text-xs text-gray-500">Content Type</label>
-                  <p className="text-sm font-medium text-gray-900">{s3.contentType}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Content Type</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{s3.contentType}</p>
                 </div>
               )}
               {s3.size && (
                 <div>
-                  <label className="text-xs text-gray-500">Kích thước</label>
-                  <p className="text-sm font-medium text-gray-900">{formatBytes(s3.size)}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Kích thước</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{formatBytes(s3.size)}</p>
                 </div>
               )}
               {s3.versionId && (
                 <div>
-                  <label className="text-xs text-gray-500">Version ID</label>
-                  <p className="text-sm font-medium text-gray-900 font-mono text-xs">{s3.versionId}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Version ID</label>
+                  <p className="text-sm font-medium font-mono text-xs" style={{ color: '#111827' }}>{s3.versionId}</p>
                 </div>
               )}
               {s3.etag && (
                 <div>
-                  <label className="text-xs text-gray-500">ETag</label>
-                  <p className="text-sm font-medium text-gray-900 font-mono text-xs">{s3.etag}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>ETag</label>
+                  <p className="text-sm font-medium font-mono text-xs" style={{ color: '#111827' }}>{s3.etag}</p>
                 </div>
               )}
               {s3.checksum && (
                 <div className="md:col-span-2">
-                  <label className="text-xs text-gray-500">Checksum</label>
-                  <pre className="text-xs bg-gray-50 p-2 rounded mt-1 overflow-x-auto">
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Checksum</label>
+                  <pre className="text-xs p-2 rounded mt-1 overflow-x-auto" style={{ backgroundColor: '#f9fafb' }}>
                     {JSON.stringify(s3.checksum, null, 2)}
                   </pre>
                 </div>
@@ -107,47 +107,47 @@ export function StorageTab({ fileData }: StorageTabProps) {
       {local.path && (
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <CommonIcon name="folder" className="w-5 h-5 mr-2 text-green-600" />
+            <h3 className="text-lg font-semibold mb-4 flex items-center" style={{ color: '#111827' }}>
+              <CommonIcon name="folder" className="w-5 h-5 mr-2" color="#16a34a" />
               Lưu trữ cục bộ
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {local.path && (
                 <div>
-                  <label className="text-xs text-gray-500">Đường dẫn</label>
-                  <p className="text-sm font-medium text-gray-900 break-all">{local.path}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Đường dẫn</label>
+                  <p className="text-sm font-medium break-all" style={{ color: '#111827' }}>{local.path}</p>
                 </div>
               )}
               {local.filename && (
                 <div>
-                  <label className="text-xs text-gray-500">Tên file</label>
-                  <p className="text-sm font-medium text-gray-900">{local.filename}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Tên file</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{local.filename}</p>
                 </div>
               )}
               {local.mimeType && (
                 <div>
-                  <label className="text-xs text-gray-500">MIME Type</label>
-                  <p className="text-sm font-medium text-gray-900">{local.mimeType}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>MIME Type</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{local.mimeType}</p>
                 </div>
               )}
               {local.size && (
                 <div>
-                  <label className="text-xs text-gray-500">Kích thước</label>
-                  <p className="text-sm font-medium text-gray-900">{formatBytes(local.size)}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Kích thước</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{formatBytes(local.size)}</p>
                 </div>
               )}
               {local.mtime && (
                 <div>
-                  <label className="text-xs text-gray-500">Thời gian sửa đổi</label>
-                  <p className="text-sm font-medium text-gray-900">
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Thời gian sửa đổi</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>
                     {new Date(local.mtime).toLocaleString('vi-VN')}
                   </p>
                 </div>
               )}
               {local.revision && (
                 <div>
-                  <label className="text-xs text-gray-500">Revision</label>
-                  <p className="text-sm font-medium text-gray-900">{local.revision}</p>
+                  <label className="text-xs" style={{ color: '#6b7280' }}>Revision</label>
+                  <p className="text-sm font-medium" style={{ color: '#111827' }}>{local.revision}</p>
                 </div>
               )}
             </div>
