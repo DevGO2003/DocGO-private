@@ -20,9 +20,9 @@ function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: (
       <ol className="flex items-center gap-2">
         {items.map((b, idx) => (
           <li key={idx} className="flex items-center">
-            {idx > 0 && <span className="mx-1" style={{ color: '#9ca3af' }}>›</span>}
+            {idx > 0 && <span className="mx-1 text-gray-400">›</span>}
             {b.href ? (
-              <a href={b.href} className="hover:font-medium" style={{ color: '#4338ca' }}>
+              <a href={b.href} className="text-indigo-600 hover:text-indigo-700 font-medium">
                 {b.label}
               </a>
             ) : (
@@ -64,10 +64,10 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
             <div className="mb-2">
               <Breadcrumbs items={breadcrumbs} onRefresh={onRefresh} />
             </div>
-            <h1 className="text-2xl font-semibold" style={{ color: '#111827' }}>
+            <h1 className="text-2xl font-semibold text-gray-900">
               {title}
             </h1>
-            <p className="text-sm mt-1" style={{ color: '#4b5563' }}>{description}</p>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
           <div className="min-w-0 flex-1 flex items-start justify-end gap-2">
             {headerChildren && (

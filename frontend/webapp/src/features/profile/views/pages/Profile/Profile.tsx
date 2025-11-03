@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
-// Removed lucide-react imports: User, Mail, Phone, Building2, Briefcase, Calendar, Edit2, Save
 import {
   Card,
   CardHeader,

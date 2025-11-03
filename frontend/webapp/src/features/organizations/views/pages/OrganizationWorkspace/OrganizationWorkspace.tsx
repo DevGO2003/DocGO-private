@@ -22,13 +22,13 @@ import { useOrganizationContracts, useOrganizationRepositories } from '@features
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
-type WorkspaceTab = 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
+type WorkspaceTab = 'info' | 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('reports');
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
@@ -43,7 +43,7 @@ export const OrganizationWorkspace = () => {
     // refetch: refetchContracts  // Temporarily disabled
   } = useOrganizationContracts(id!, {
     page: 0,
-    size: 20,
+    size: 5,
   });
 
   // Fetch organization members
@@ -62,7 +62,7 @@ export const OrganizationWorkspace = () => {
   } = useOrganizationRepositories({
     organizationId: id,
     page: 0,
-    size: 20,
+    size: 5,
   });
 
   // Debug logging
@@ -83,6 +83,7 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
+    { id: 'info' as WorkspaceTab, label: t('organizations.workspace.tabs.info', { defaultValue: 'Thông tin' }), icon: <CommonIcon name="info" /> },
     { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: <CommonIcon name="chart" /> },
     { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: <CommonIcon name="file-text" /> },
     { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: <CommonIcon name="folder" /> },
@@ -181,7 +182,8 @@ export const OrganizationWorkspace = () => {
           {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
@@ -189,11 +191,12 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
               </div>
-            </motion.div>
+            </div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
@@ -201,11 +204,12 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
               </div>
-            </motion.div>
+            </div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+              className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
@@ -213,11 +217,12 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
               </div>
-            </motion.div>
+            </div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="rounded-lg p-4 border" style={{ borderColor: '#fecaca', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+              className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#b91c1c' }} >{t('organizations.workspace.stats.rejected')}</p>
@@ -225,7 +230,7 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
               </div>
-            </motion.div>
+            </div>
           </div> */}
 
           {/* Tabs */}
@@ -252,12 +257,56 @@ export const OrganizationWorkspace = () => {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <motion.div
+        <div
           key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
         >
+          {/* Info Tab */}
+          {activeTab === 'info' && organization && (
+            <Card className="p-6">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.orgName')}</h4>
+                    <p className="text-lg font-semibold text-gray-900">{organization.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.visibility')}</h4>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {organization.isPublic ? t('organizations.workspace.settings.public') : t('organizations.workspace.settings.private')}
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.description')}</h4>
+                  <p className="text-gray-700">{organization.description || t('organizations.workspace.settings.noDescription')}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.stats.totalContracts')}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.totalContracts}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.stats.totalRepositories', { defaultValue: 'Kho lưu trữ' })}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.totalRepositories}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.tabs.members')}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{membersData?.totalElements || 0}</p>
+                  </div>
+                </div>
+
+                {organization.createdAt && (
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.createdAt')}</h4>
+                    <p className="text-gray-700">{new Date(organization.createdAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* Reports Tab */}
           {activeTab === 'reports' && (
             <div className="space-y-6">
@@ -265,7 +314,8 @@ export const OrganizationWorkspace = () => {
                 {/* Tổng số hợp đồng */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
@@ -273,12 +323,13 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đang chờ */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                  className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
@@ -286,12 +337,13 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đã duyệt */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
@@ -299,10 +351,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đã từ chối */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="rounded-lg p-4 border" style={{ borderColor: '#fecaca', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
@@ -312,10 +364,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tổng số file - MỚI */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="rounded-lg p-4 border" style={{ borderColor: '#e9d5ff', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
@@ -325,10 +377,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="file" className="w-10 h-10" style={{ color: '#a855f7' }} />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tổng số repository - MỚI */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="rounded-lg p-4 border border-indigo-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                   <div className="flex items-center justify-between">
@@ -338,7 +390,7 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="folder" className="w-10 h-10" style={{ color: '#6366f1' }} />
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           )}
@@ -501,7 +553,7 @@ export const OrganizationWorkspace = () => {
                 ) : repositoriesData?.content && repositoriesData.content.length > 0 ? (
                 <div className="space-y-4">
                 {(showAllRepositories ? repositoriesData.content : repositoriesData.content.slice(0, 10)).map((repo) => (
-                      <motion.div
+                      <div
                         key={repo.id}
                         whileHover={{ scale: 1.02 }}
                         className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer" style={{ borderColor: '#e5e7eb' } style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
@@ -537,7 +589,7 @@ export const OrganizationWorkspace = () => {
                             </div>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
 
                     {/* Show More Button for Repositories */}
@@ -751,7 +803,7 @@ export const OrganizationWorkspace = () => {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </div>
       </div>
     </OrganizationLayout>
   );
