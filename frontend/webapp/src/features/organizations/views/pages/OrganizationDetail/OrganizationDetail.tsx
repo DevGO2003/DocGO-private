@@ -25,31 +25,34 @@ import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 import { MemberManagementModal } from '../../components/MemberManagementModal';
 
-type TabType = 'overview' | 'members' | 'repositories' | 'settings';
+type TabType = 'info' | 'overview' | 'contracts' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { t } = useTranslation();
 
   const { data: organization, isLoading: orgLoading } = useOrganization(id!);
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(id!);
   const removeMemberMutation = useRemoveMember();
 
-  const tabs: { id: TabType; label: string; icon: any }[] = [
-    { id: 'overview', label: t('organizations.detail.tabs.overview'), icon: FolderOpen },
-    { id: 'members', label: t('organizations.detail.tabs.members'), icon: Users },
-    { id: 'repositories', label: t('organizations.detail.tabs.repositories'), icon: FolderOpen },
-    { id: 'settings', label: t('organizations.detail.tabs.settings'), icon: Settings },
+  const tabs: { id: TabType; label: string; icon: string }[] = [
+    { id: 'info', label: t('organizations.detail.tabs.info'), icon: 'info' },
+    { id: 'overview', label: t('organizations.detail.tabs.overview'), icon: 'folder-open' },
+    { id: 'contracts', label: t('organizations.detail.tabs.contracts'), icon: 'file-text' },
+    { id: 'repositories', label: t('organizations.detail.tabs.repositories'), icon: 'folder' },
+    { id: 'members', label: t('organizations.detail.tabs.members'), icon: 'users' },
+    { id: 'settings', label: t('organizations.detail.tabs.settings'), icon: 'settings' },
   ];
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!window.confirm('Remove this member from the organization?')) return;
+    if (!window.confirm(t('organizations.detail.members.removeConfirm'))) return;
     
     try {
       await removeMemberMutation.mutateAsync({
@@ -78,26 +81,26 @@ export const OrganizationDetail = () => {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'OWNER':
-        return 'bg-purple-100 text-purple-800';
+        return { backgroundColor: '#f3e8ff', color: '#6b21a8' };
       case 'ADMIN':
-        return 'bg-blue-100 text-blue-800';
+        return { backgroundColor: '#dbeafe', color: '#1e40af' };
       case 'MEMBER':
-        return 'bg-green-100 text-green-800';
+        return { backgroundColor: '#dcfce7', color: '#166534' };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return { backgroundColor: '#f3f4f6', color: '#374151' };
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800';
+        return { backgroundColor: '#dcfce7', color: '#166534' };
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
+        return { backgroundColor: '#fef3c7', color: '#92400e' };
       case 'SUSPENDED':
-        return 'bg-red-100 text-red-800';
+        return { backgroundColor: '#fee2e2', color: '#991b1b' };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return { backgroundColor: '#f3f4f6', color: '#374151' };
     }
   };
 
@@ -151,7 +154,17 @@ export const OrganizationDetail = () => {
       ]}
       onRefresh={handleRefresh}
       headerRight={(
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="relative">
+            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder={t('organizations.search')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
           <Button
             variant="outline"
@@ -170,8 +183,8 @@ export const OrganizationDetail = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <CommonIcon name="users" size={24} color="#2563eb" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#dbeafe' }}>
+                  <CommonIcon name="users" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">{t('organizations.detail.stats.members')}</p>
@@ -186,8 +199,8 @@ export const OrganizationDetail = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <CommonIcon name="folder" size={24} color="#9333ea" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
+                  <CommonIcon name="folder" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">{t('organizations.detail.stats.repositories')}</p>
@@ -200,8 +213,8 @@ export const OrganizationDetail = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CommonIcon name="shield" size={24} color="#16a34a" />
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#dcfce7' }}>
+                  <CommonIcon name="shield" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">{t('organizations.detail.stats.status')}</p>
@@ -253,6 +266,62 @@ export const OrganizationDetail = () => {
 
         {/* Tab Content */}
         <div key={activeTab} className="animate-fade-in">
+          {/* Info Tab */}
+          {activeTab === 'info' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('organizations.detail.overview.title')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.name')}</label>
+                    <p className="text-gray-900 mt-1">{organization.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.description')}</label>
+                    <p className="text-gray-900 mt-1">
+                      {organization.description || t('organizations.detail.overview.noDescription')}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.owner')}</label>
+                    <p className="text-gray-900 mt-1 flex items-center gap-2">
+                      <CommonIcon name="crown" size={16} color="#eab308" />
+                      {organization.ownerName || 'Unknown'}
+                    </p>
+                  </div>
+                  {organization.createdAt && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">{t('organizations.detail.stats.created')}</label>
+                      <p className="text-gray-900 mt-1">{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.settings')}</label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {organization.settings?.isPublic && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
+                          {t('organizations.detail.overview.flags.public')}
+                        </span>
+                      )}
+                      {organization.settings?.allowInvitations && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                          {t('organizations.detail.overview.flags.openInvitations')}
+                        </span>
+                      )}
+                      {organization.settings?.requireApproval && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#fed7aa', color: '#92400e' }}>
+                          {t('organizations.detail.overview.flags.requiresApproval')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <Card>
@@ -278,21 +347,27 @@ export const OrganizationDetail = () => {
                       {organization.ownerName || 'Unknown'}
                     </p>
                   </div>
+                  {organization.createdAt && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">{t('organizations.detail.stats.created')}</label>
+                      <p className="text-gray-900 mt-1">{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </div>
+                  )}
                   <div>
                     <label className="text-sm font-medium text-gray-700">{t('organizations.detail.overview.settings')}</label>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {organization.settings?.isPublic && (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                           {t('organizations.detail.overview.flags.public')}
                         </span>
                       )}
                       {organization.settings?.allowInvitations && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                           {t('organizations.detail.overview.flags.openInvitations')}
                         </span>
                       )}
                       {organization.settings?.requireApproval && (
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-sm font-medium">
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-800 rounded text-xs font-medium">
                           {t('organizations.detail.overview.flags.requiresApproval')}
                         </span>
                       )}
@@ -398,16 +473,45 @@ export const OrganizationDetail = () => {
             </Card>
           )}
 
+          {/* Contracts Tab */}
+          {activeTab === 'contracts' && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('organizations.detail.tabs.contracts')}</CardTitle>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <CommonIcon name="file-text" size={16} />
+                    {t('organizations.openContractList')}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <CommonIcon name="file-text" size={64} color="#9ca3af" className="mx-auto mb-4" />
+                  <p className="text-gray-600">{t('organizations.noContracts')}</p>
+                  <p className="text-sm text-gray-500 mt-2">{t('organizations.noContractsDesc')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Repositories Tab */}
           {activeTab === 'repositories' && (
             <Card>
               <CardHeader>
-                <CardTitle>{t('organizations.detail.repositories.title')}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('organizations.detail.repositories.title')}</CardTitle>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <CommonIcon name="folder" size={16} />
+                    {t('organizations.openRepositoryList')}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
                   <CommonIcon name="folder" size={64} color="#9ca3af" className="mx-auto mb-4" />
-                  <p className="text-gray-600">{t('organizations.detail.repositories.empty')}</p>
+                  <p className="text-gray-600">{t('organizations.noRepositories')}</p>
+                  <p className="text-sm text-gray-500 mt-2">{t('organizations.noRepositoriesDesc')}</p>
                 </div>
               </CardContent>
             </Card>

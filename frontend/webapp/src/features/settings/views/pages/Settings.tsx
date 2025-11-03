@@ -61,10 +61,10 @@ export const Settings = () => {
   });
 
   const tabs = [
-    { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: User },
-    { id: 'security' as SettingsTab, label: t('settings.tabs.security'), icon: Lock },
-    { id: 'notifications' as SettingsTab, label: t('settings.tabs.notifications'), icon: Bell },
-    { id: 'preferences' as SettingsTab, label: t('settings.tabs.preferences'), icon: Globe },
+    { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: 'user' },
+    { id: 'security' as SettingsTab, label: t('settings.tabs.security'), icon: 'lock' },
+    { id: 'notifications' as SettingsTab, label: t('settings.tabs.notifications'), icon: 'bell' },
+    { id: 'preferences' as SettingsTab, label: t('settings.tabs.preferences'), icon: 'globe' },
   ];
 
   const handleProfileUpdate = async () => {
@@ -77,12 +77,12 @@ export const Settings = () => {
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Mật khẩu không khớp!');
+      console.error(t('settings.security.passwordMismatch'));
       return;
     }
 
     if (!user?.id) {
-      alert('Không tìm thấy thông tin người dùng!');
+      console.error(t('settings.security.userNotFound'));
       return;
     }
 
@@ -92,10 +92,10 @@ export const Settings = () => {
         newPassword: passwordData.newPassword,
       });
       setPasswordData({ newPassword: '', confirmPassword: '' });
-      alert('Đổi mật khẩu thành công!');
+      console.log(t('settings.security.passwordChangeSuccess'));
     } catch (error) {
       console.error('Failed to change password:', error);
-      alert('Đổi mật khẩu thất bại! Vui lòng thử lại.');
+      console.error(t('settings.security.passwordChangeFailed'));
     }
   };
 
@@ -142,7 +142,7 @@ export const Settings = () => {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('settings.title')}</h1>
-          <p className="text-gray-600">Manage your account settings and preferences</p>
+          <p className="text-gray-600">{t('settings.description')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -157,7 +157,6 @@ export const Settings = () => {
                 <Tabs>
                   <TabList className="space-y-1">
                     {tabs.map((tab) => {
-                      const Icon = tab.icon;
                       return (
                         <CommonTab
                           key={tab.id}
@@ -166,7 +165,7 @@ export const Settings = () => {
                           onSelect={() => setActiveTab(tab.id)}
                           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg"
                         >
-                          <Icon className="w-5 h-5" />
+                          <CommonIcon name={tab.icon as any} size={20} />
                           {tab.label}
                         </CommonTab>
                       );
@@ -189,14 +188,14 @@ export const Settings = () => {
             {activeTab === 'profile' && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
+                  <CardTitle>{t('settings.profile.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          First Name
+                          {t('settings.profile.firstName')}
                         </label>
                         <Input
                           value={profileData.firstName}
@@ -208,7 +207,7 @@ export const Settings = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Last Name
+                          {t('settings.profile.lastName')}
                         </label>
                         <Input
                           value={profileData.lastName}
@@ -255,8 +254,8 @@ export const Settings = () => {
                         isLoading={updateProfileMutation.isPending}
                         className="flex items-center gap-2"
                       >
-                        <Save className="w-4 h-4" />
-                        Save Changes
+                        <CommonIcon name="save" size={16} />
+                        {t('settings.profile.save')}
                       </Button>
                     </div>
                   </div>
@@ -268,18 +267,18 @@ export const Settings = () => {
             {activeTab === 'security' && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
+                  <CardTitle>{t('settings.security.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Đổi mật khẩu
+                        {t('settings.security.changePassword')}
                       </h3>
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Mật khẩu mới
+                            {t('settings.security.newPassword')}
                           </label>
                           <div className="relative">
                             <Input
@@ -291,7 +290,7 @@ export const Settings = () => {
                                   newPassword: e.target.value,
                                 })
                               }
-                              placeholder="Nhập mật khẩu mới"
+                              placeholder={t('settings.security.newPassword')}
                             />
                             <Button
                               type="button"
@@ -300,18 +299,14 @@ export const Settings = () => {
                               onClick={() => setShowNewPassword(!showNewPassword)}
                               className="absolute right-3 top-1/2 -translate-y-1/2 h-auto p-1"
                             >
-                              {showNewPassword ? (
-                                <EyeOff className="w-5 h-5" />
-                              ) : (
-                                <Eye className="w-5 h-5" />
-                              )}
+                              <CommonIcon name={showNewPassword ? "eye-off" : "eye-open"} size={20} />
                             </Button>
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Xác nhận mật khẩu mới
+                            {t('settings.security.confirmPassword')}
                           </label>
                           <Input
                             type="password"
@@ -322,7 +317,7 @@ export const Settings = () => {
                                 confirmPassword: e.target.value,
                               })
                             }
-                            placeholder="Xác nhận mật khẩu mới"
+                            placeholder={t('settings.security.confirmPassword')}
                           />
                         </div>
                       </div>
@@ -335,8 +330,8 @@ export const Settings = () => {
                         isLoading={changePasswordMutation.isPending}
                         className="flex items-center gap-2"
                       >
-                        <Shield className="w-4 h-4" />
-                        Update Password
+                        <CommonIcon name="shield" size={16} />
+                        {t('settings.security.updatePassword')}
                       </Button>
                     </div>
                   </div>
@@ -348,7 +343,7 @@ export const Settings = () => {
             {activeTab === 'notifications' && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardTitle>{t('settings.notifications.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -359,12 +354,10 @@ export const Settings = () => {
                       >
                         <div>
                           <p className="font-medium text-gray-900">
-                            {key
-                              .replace(/([A-Z])/g, ' $1')
-                              .replace(/^./, (str) => str.toUpperCase())}
+                            {t(`settings.notifications.${key}`)}
                           </p>
                           <p className="text-sm text-gray-600">
-                            Receive notifications for this category
+                            {t('settings.notifications.description')}
                           </p>
                         </div>
                         <Checkbox

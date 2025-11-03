@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,12 +14,9 @@ import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants'
 import { Card, CardContent, Button, Text, RefreshButton, WindowPanel } from '@shared/components';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import PanelSelector from '../../../components/PanelSelector';
-import LayoutSelector from '../../components/LayoutSelector';
 import {
   getLayoutPreference,
   getSavedLayout,
-  resetLayout as resetLayoutPreference,
-  switchLayout,
 } from '@shared/lib/panelLayoutManager';
 
 // Panel state type
@@ -56,14 +54,20 @@ export const Dashboard = () => {
     const layoutName = getLayoutPreference();
     const layout = getSavedLayout(layoutName);
     
-    // Convert layout config to panel state
-    return layout.panels.map((panel) => ({
+    // Convert layout config to panel state + add stats panel
+    const defaultPanels = layout.panels.map((panel) => ({
       id: panel.id,
       label: panel.label,
       visible: true,
       minimized: false,
       position: panel.position,
     }));
+    
+    // Add stats panel at the beginning
+    return [
+      { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
+      ...defaultPanels,
+    ];
   };
   
   // Panel management state
@@ -98,34 +102,7 @@ export const Dashboard = () => {
     ));
   };
 
-  // Reset layout to default
-  const handleResetLayout = () => {
-    if (window.confirm('Bạn có chắc muốn đặt lại bố cục về mặc định?')) {
-      resetLayoutPreference();
-      const layout = getSavedLayout('grid2x2');
-      const newPanels = layout.panels.map((panel) => ({
-        id: panel.id,
-        label: panel.label,
-        visible: true,
-        minimized: false,
-        position: panel.position,
-      }));
-      setPanels(newPanels);
-    }
-  };
-
-  // Switch layout
-  const handleSwitchLayout = (layoutName: string) => {
-    const layout = switchLayout(layoutName);
-    const newPanels = layout.panels.map((panel) => ({
-      id: panel.id,
-      label: panel.label,
-      visible: true,
-      minimized: false,
-      position: panel.position,
-    }));
-    setPanels(newPanels);
-  };
+  // Layout functions removed - no longer needed
 
   // Get current user ID for filtering
   const userId = user?.id;
@@ -162,6 +139,21 @@ export const Dashboard = () => {
     }
   };
 
+  const statsGridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (statsGridRef.current) {
+      anime({
+        targets: statsGridRef.current.children,
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 600,
+        delay: anime.stagger(100),
+        easing: 'easeOutQuad',
+      });
+    }
+  }, []);
+
   const stats = [
     {
       title: t('dashboard.stats.repositories'),
@@ -185,7 +177,7 @@ export const Dashboard = () => {
       icon: '🏢',
     },
     {
-      title: t('dashboard.stats.storageUsed'),
+      title: t('dashboard.stats.storageUploadUsed'),
       value: '2.4 GB',
       change: '+15%',
       color: 'from-pink-500 to-rose-500',
@@ -220,10 +212,6 @@ export const Dashboard = () => {
       onRefresh={handleRefresh}
       headerRight={
         <div className="flex items-center gap-2">
-          <LayoutSelector
-            onLayoutChange={handleSwitchLayout}
-            onReset={handleResetLayout}
-          />
           <PanelSelector
             panels={panels.map((p: PanelState) => ({ id: p.id, label: p.label, visible: p.visible }))}
             onToggle={togglePanel}
@@ -242,33 +230,48 @@ export const Dashboard = () => {
           </Text>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="transition-transform hover:scale-[1.02]">
-              <Card className="h-full">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
-                    <span className="text-2xl">
-                      {stat.icon}
-                    </span>
-                  </div>
-                  <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
-                    {stat.title}
-                  </Text>
-                  <div className="flex items-baseline justify-between">
-                    <Text as="p" className="text-2xl font-bold text-gray-900">
-                      {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
-                    </Text>
-                    <Text as="span" className="text-sm text-green-600 font-medium">
-                      {stat.change}
-                    </Text>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Stats WindowPanel */}
+        {panels.find(p => p.id === 'stats')?.visible && (
+          <WindowPanel
+            id="stats"
+            title={t('dashboard.stats.title') || 'Thống kê'}
+            defaultWidth={1040}
+            defaultHeight={300}
+            minimized={panels.find(p => p.id === 'stats')?.minimized}
+            visible={panels.find(p => p.id === 'stats')?.visible}
+            position={panels.find(p => p.id === 'stats')?.position || { x: 0, y: 0 }}
+            onMinimize={(min) => minimizePanel('stats', min)}
+            onClose={() => closePanel('stats')}
+            onPositionChange={updatePanelPosition}
+          >
+            <div ref={statsGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, index) => (
+                <div key={index} className="transition-transform hover:scale-[1.02]">
+                  <Card className="h-full">
+                    <CardContent className="p-6">
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4 flex items-center justify-center shadow-sm`}>
+                        <span className="text-2xl">
+                          {stat.icon}
+                        </span>
+                      </div>
+                      <Text as="h3" className="text-sm font-medium text-gray-600 mb-1">
+                        {stat.title}
+                      </Text>
+                      <div className="flex items-baseline justify-between">
+                        <Text as="p" className="text-2xl font-bold text-gray-900">
+                          {typeof stat.value === 'number' ? <NumberCounter value={stat.value as number} /> : stat.value}
+                        </Text>
+                        <Text as="span" className="text-sm text-green-600 font-medium">
+                          {stat.change}
+                        </Text>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </WindowPanel>
+        )}
 
         {/* WindowPanels Container */}
         <div className="relative" style={{ minHeight: '1200px' }}>

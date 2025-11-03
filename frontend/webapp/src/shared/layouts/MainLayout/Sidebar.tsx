@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { name: 'repositories', href: '/repositories', icon: 'folder' },
   { name: 'upload', href: '/upload', icon: 'upload' },
   // { name: 'analytics', href: '/analytics', icon: 'chart' }, // Removed as per requirement
-  { name: 'documents', href: '/repositories', icon: 'file-text' },
+  // { name: 'documents', href: '/repositories', icon: 'file-text' }, // Removed as per rules
   { name: 'organizations', href: '/organizations', icon: 'building' },
   { name: 'settings', href: '/settings', icon: 'settings' },
 ];
@@ -244,7 +244,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
       case 'repositories': return t('nav.repositories');
       case 'upload': return t('nav.upload');
       // case 'analytics': return t('nav.analytics'); // Removed
-      case 'documents': return t('nav.documents');
+      // case 'documents': return t('nav.documents'); // Removed
       case 'organizations': return t('nav.organizations');
       case 'users': return t('nav.users');
       case 'settings': return t('nav.settings');

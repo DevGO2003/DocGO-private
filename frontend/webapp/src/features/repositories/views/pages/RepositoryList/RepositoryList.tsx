@@ -78,7 +78,7 @@ export const RepositoryList = () => {
   const errorMessage = currentError
     ? typeof currentError === 'string'
       ? currentError
-      : (currentError as any)?.message || 'Đã xảy ra lỗi khi tải repositories'
+      : (currentError as any)?.message || t('repositories.list.error')
     : null;
 
   const handleCreateRepository = () => {

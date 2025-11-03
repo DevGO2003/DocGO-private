@@ -74,15 +74,25 @@ export const RepositoryDetail: React.FC = () => {
       loadingText={t('repositories.detail.loading')}
       onRefresh={handleRefresh}
       headerRight={
-        <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <>
+          <Button variant="outline" onClick={goToUploadWithRepo} className="flex items-center gap-2">
+            <CommonIcon name="upload" size={16} />
+            {t('repositories.detail.actions.upload')}
+          </Button>
+          <Button variant="outline" onClick={() => setShowInviteModal(true)} className="flex items-center gap-2">
+            <CommonIcon name="user-plus" size={16} />
+            {t('repositories.detail.actions.invite')}
+          </Button>
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        </>
       }
     >
       {(!repository && !error) ? null : (
         <div>
             {/* Optional error banner */}
             {error && (
-              <Card className="border-red-200 bg-red-50 mb-4 p-4">
-                <p className="text-red-700">{t('repositories.detail.error')}</p>
+              <Card className="mb-4 p-4 border-l-4" style={{ borderLeftColor: '#dc2626', backgroundColor: '#fef2f2' }}>
+                <p style={{ color: '#b91c1c' }}>{t('repositories.detail.error')}</p>
               </Card>
             )}
 
@@ -101,48 +111,47 @@ export const RepositoryDetail: React.FC = () => {
                       <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Tên Repository</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.name')}</h4>
                             <p className="text-base text-gray-900 font-medium">
                               {repository?.name}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Loại</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.type.label')}</h4>
                             <p className="text-base text-gray-900">
-                              {repository?.type === 'PERSONAL' ? 'Cá nhân' : 'Tổ chức'}
+                              {repository?.type === 'PERSONAL' ? t('repositories.detail.type.personal') : t('repositories.detail.type.organization')}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Trạng thái</h4>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              repository?.isPublic
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {repository?.isPublic ? 'Công khai' : 'Riêng tư'}
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.status')}</h4>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{
+                              backgroundColor: repository?.isPublic ? '#dcfce7' : '#f3f4f6',
+                              color: repository?.isPublic ? '#166534' : '#374151'
+                            }}>
+                              {repository?.isPublic ? t('repositories.detail.type.public') : t('repositories.detail.type.private')}
                             </span>
                           </div>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500 mb-2">Mô tả</h4>
+                          <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.description')}</h4>
                           <p className="text-gray-700">
-                            {repository?.description || 'Không có mô tả'}
+                            {repository?.description || t('repositories.detail.info.noDescription')}
                           </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-2">Chủ sở hữu</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.owner')}</h4>
                             <p className="text-gray-900">
-                              {repository?.ownerName || 'Chưa có thông tin'}
+                              {repository?.ownerName || t('repositories.detail.info.noInfo')}
                             </p>
                           </div>
                           {repository?.organizationId && (
                             <div>
-                              <h4 className="text-sm font-medium text-gray-500 mb-2">Tổ chức</h4>
+                              <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.organization')}</h4>
                               <p className="text-gray-900">
-                                {repository?.organizationName || 'Không có'}
+                                {repository?.organizationName || t('repositories.detail.info.none')}
                               </p>
                             </div>
                           )}
@@ -150,19 +159,19 @@ export const RepositoryDetail: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Số lượng file</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.files')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
                               {repository?.fileCount || 0}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Số thành viên</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.members')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
                               {repository?.memberCount || 0}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Dung lượng</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.storage')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
                               {formatFileSize(repository?.totalSize)}
                             </p>
@@ -171,13 +180,13 @@ export const RepositoryDetail: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Ngày tạo</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.createdAt')}</h4>
                             <p className="text-gray-900">
                               {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : '-'}
                             </p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-500 mb-1">Cập nhật lần cuối</h4>
+                            <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.updatedAt')}</h4>
                             <p className="text-gray-900">
                               {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : '-'}
                             </p>
@@ -240,25 +249,65 @@ export const RepositoryDetail: React.FC = () => {
                   {activeTab === 'members' && (
                     <Card className="p-6">
                         {membersLoading ? (
-                          <div className="text-center py-8">Loading members...</div>
+                          <div className="text-center py-8">{t('app.loading')}</div>
                         ) : membersData?.content && membersData.content.length > 0 ? (
                           <div className="space-y-4">
                           <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-gray-900">Members</h3>
+                          <h3 className="text-lg font-medium text-gray-900">{t('repositories.detail.tabs.members')}</h3>
                              <Button onClick={() => setShowInviteModal(true)}>
                           {t('repositories.detail.empty.members.invite')}
                           </Button>
                             </div>
                           {membersData.content.map((member: any) => (
-                        <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                    <p className="font-medium text-gray-900">{member.username}</p>
-                  <p className="text-sm text-gray-600">{member.email}</p>
-                  </div>
-                  <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                  {member.role}
-                  </span>
-                  </div>
+                        <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="font-medium text-gray-900">{member.username}</p>
+                              <p className="text-sm text-gray-600">{member.email}</p>
+                            </div>
+                            <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                              {member.role}
+                            </span>
+                          </div>
+                          
+                          {/* Permissions Section */}
+                          <div className="space-y-3 border-t border-gray-200 pt-4">
+                            <p className="text-sm font-medium text-gray-700">{t('repositories.detail.members.permissions')}</p>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.upload')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canUpload || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canUpload', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.view')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canView || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canView', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.delete')}</label>
+                              <input 
+                                type="checkbox" 
+                                checked={member.permissions?.canDelete || false}
+                                onChange={(e) => handleUpdatePermission(member.id, 'canDelete', e.target.checked)}
+                                className="w-4 h-4 rounded"
+                                disabled={member.role === 'OWNER'}
+                              />
+                            </div>
+                          </div>
+                        </div>
                   ))}
                   </div>
                   ) : (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
+// Removed lucide-react imports: User, Mail, Phone, Building2, Briefcase, Calendar, Edit2, Save
 import {
   Card,
   CardHeader,
@@ -201,7 +202,7 @@ export const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4" />
+                        <CommonIcon name="user" size={16} />
                         {t('profile.labels.firstName')}
                         </CommonLabel>
                         {isEditing ? (
@@ -217,7 +218,7 @@ export const Profile = () => {
                       </div>
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4" />
+                        <CommonIcon name="user" size={16} />
                         {t('profile.labels.lastName')}
                         </CommonLabel>
                         {isEditing ? (
@@ -237,7 +238,7 @@ export const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <Mail className="w-4 h-4" />
+                        <CommonIcon name="mail" size={16} />
                         {t('profile.labels.email')}
                         </CommonLabel>
                         {isEditing ? (
@@ -254,7 +255,7 @@ export const Profile = () => {
                       </div>
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <Phone className="w-4 h-4" />
+                        <CommonIcon name="phone-call" size={16} />
                         {t('profile.labels.phone')}
                         </CommonLabel>
                         {isEditing ? (
@@ -275,7 +276,7 @@ export const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <Building2 className="w-4 h-4" />
+                        <CommonIcon name="building" size={16} />
                         {t('profile.labels.department')}
                         </CommonLabel>
                         {isEditing ? (
@@ -291,7 +292,7 @@ export const Profile = () => {
                       </div>
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <Briefcase className="w-4 h-4" />
+                        <CommonIcon name="briefcase" size={16} />
                         {t('profile.labels.position')}
                         </CommonLabel>
                         {isEditing ? (
@@ -321,25 +322,17 @@ export const Profile = () => {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4" />
+                            <CommonIcon name="calendar" size={16} />
                             {t('profile.account.memberSince')}
                           </span>
                           <span className="text-sm font-medium text-gray-900">
-                            {new Date(user.createdAt).toLocaleDateString()}
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : t('profile.notSet')}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* TODO: Kho mã và Tổ chức - Chưa có API */}
-                    <div className="pt-6 border-t border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Kho mã và Tổ chức
-                      </h3>
-                      <div className="text-sm text-gray-500 italic">
-                        API đang được phát triển
-                      </div>
-                    </div>
+                    {/* Kho mã và Tổ chức - Removed as per rules */}
                   </div>
                 </CardContent>
               </Card>

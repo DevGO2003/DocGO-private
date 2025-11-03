@@ -208,7 +208,7 @@ export const RepositoryFilesList: React.FC = () => {
       setError(e?.message || t('repositories.files.empty.notFound'));
       // If network, show retry
       if (e.code === 'NETWORK_ERROR' || !e.response) {
-        setError('Network error - Retry?');
+        setError(t('common.error.network'));
         // Add retry logic
       }
     } finally {
@@ -327,9 +327,9 @@ export const RepositoryFilesList: React.FC = () => {
 
         {/* Content */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded">
-            <Text className="text-red-600">{error}</Text>
-            <Button variant="outline" onClick={() => fetchFiles(false)} size="sm" className="mt-2">Retry</Button>
+          <div className="p-4 rounded" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
+            <Text style={{ color: '#dc2626' }}>{error}</Text>
+            <Button variant="outline" onClick={() => fetchFiles(false)} size="sm" className="mt-2">{t('common.retry')}</Button>
           </div>
         )}
 

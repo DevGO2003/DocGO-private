@@ -3,6 +3,96 @@
     "title": "DocGO",
     "loading": "Đang tải..."
   },
+  "landing": {
+    "hero": {
+      "badge": "Quản lý tài liệu thông minh với AI",
+      "title": {
+        "part1": "Quản lý",
+        "highlight": "tài liệu & hợp đồng",
+        "part2": "dễ dàng hơn bao giờ hết"
+      },
+      "description": "DocGO giúp doanh nghiệp quản lý tài liệu, hợp đồng một cách thông minh với công nghệ AI, tự động hóa quy trình và tăng hiệu quả công việc",
+      "ctaDemo": "Dùng thử Demo",
+      "ctaLearnMore": "Tìm hiểu thêm",
+      "stats": {
+        "documents": "Tài liệu",
+        "accuracy": "Chính xác",
+        "faster": "Nhanh hơn"
+      }
+    },
+    "features": {
+      "title": "Tính năng nổi bật",
+      "subtitle": "Giải pháp toàn diện cho quản lý tài liệu và hợp đồng của doanh nghiệp",
+      "ai": {
+        "title": "AI Xử lý tự động",
+        "description": "Trích xuất thông tin từ tài liệu tự động, phân tích hợp đồng thông minh với AI",
+        "features": {
+          "ocr": "OCR chính xác cao",
+          "summary": "Tóm tắt nội dung",
+          "classify": "Phân loại tự động"
+        }
+      },
+      "security": {
+        "title": "Bảo mật cao",
+        "description": "Mã hóa dữ liệu, phân quyền chi tiết, audit log đầy đủ",
+        "features": {
+          "encryption": "Mã hóa end-to-end",
+          "permissions": "Phân quyền linh hoạt",
+          "audit": "Audit trail đầy đủ"
+        }
+      },
+      "speed": {
+        "title": "Tốc độ cao",
+        "description": "Xử lý nhanh chóng, tìm kiếm tức thì, đồng bộ real-time",
+        "features": {
+          "fast": "Xử lý nhanh",
+          "search": "Tìm kiếm tức thì",
+          "sync": "Sync real-time"
+        }
+      }
+    },
+    "demo": {
+      "title": "Sẵn sàng trải nghiệm?",
+      "description": "Dùng thử ngay Demo của DocGO và khám phá sức mạnh của quản lý tài liệu thông minh",
+      "ctaDemo": "Dùng thử Demo miễn phí",
+      "ctaRegister": "Đăng ký tài khoản"
+    }
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "welcome": "Chào mừng quay lại, {{name}}! 👋",
+    "whatsHappening": "Đây là tổng quan hoạt động và thống kê hệ thống của bạn",
+    "stats": {
+      "title": "Thống kê",
+      "repositories": "Kho tài liệu",
+      "files": "Tài liệu",
+      "organizations": "Tổ chức",
+      "storageUploadUsed": "Dung lượng đã sử dụng"
+    },
+    "recentRepositories": "Kho tài liệu gần đây",
+    "recentFiles": "Tài liệu gần đây",
+    "noRepositories": "Chưa có kho tài liệu nào",
+    "noFiles": "Chưa có tài liệu nào",
+    "notInOrganization": "Bạn chưa tham gia tổ chức nào",
+    "createRepository": "Tạo kho tài liệu",
+    "joinOrganization": "Tham gia tổ chức",
+    "viewAll": "Xem tất cả",
+    "quickActions": "Thao tác nhanh",
+    "filesCount": "{{count}} tài liệu",
+    "members": "{{count}} thành viên",
+    "noDescription": "Không có mô tả",
+    "btn": {
+      "repositories": "Kho tài liệu",
+      "organizations": "Tổ chức",
+      "profile": "Hồ sơ",
+      "settings": "Cài đặt"
+    },
+    "account": {
+      "title": "Thông tin tài khoản",
+      "status": "Trạng thái",
+      "memberSince": "Thành viên từ"
+    }
+  },
   "modals": {
     "noRecentRepository": {
       "title": "📁 Chưa có repository gần đây",
@@ -137,9 +227,11 @@
         "created": "Tạo lúc"
       },
       "tabs": {
+        "info": "Thông tin",
         "overview": "Tổng quan",
-        "members": "Thành viên",
+        "contracts": "Hợp đồng",
         "repositories": "Kho tài liệu",
+        "members": "Thành viên",
         "settings": "Cài đặt"
       },
       "overview": {
@@ -161,7 +253,8 @@
         "loading": "Đang tải danh sách thành viên...",
         "none": "Chưa có thành viên",
         "joined": "Tham gia ngày {{date}}",
-        "remove": "Gỡ"
+        "remove": "Gỡ",
+        "removeConfirm": "Bạn có chắc chắn muốn xóa thành viên này khỏi tổ chức?"
       },
       "repositories": {
         "title": "Kho tài liệu",
@@ -281,6 +374,13 @@
       "backToOrganizations": "Quay lại trang Tổ chức"
     }
     ,
+    "openContractList": "Mở danh sách hợp đồng",
+    "openRepositoryList": "Mở danh sách kho",
+    "noContracts": "Chưa có hợp đồng",
+    "noContractsDesc": "Tổ chức này chưa có hợp đồng nào",
+    "noRepositories": "Chưa có kho tài liệu",
+    "noRepositoriesDesc": "Tổ chức này chưa có kho tài liệu nào",
+    "search": "Tìm kiếm tổ chức...",
     "tabs": {
       "personal": {
         "label": "Cá nhân",
@@ -388,13 +488,43 @@
   },
   "settings": {
     "title": "Cài đặt",
+    "description": "Quản lý cài đặt tài khoản và tùy chọn của bạn",
     "tabs": {
       "profile": "Hồ sơ",
       "security": "Bảo mật",
       "notifications": "Thông báo",
       "preferences": "Tùy chọn"
     },
+    "profile": {
+      "title": "Thông tin hồ sơ",
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "save": "Lưu thay đổi"
+    },
+    "security": {
+      "title": "Cài đặt bảo mật",
+      "changePassword": "Đổi mật khẩu",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu mới",
+      "updatePassword": "Cập nhật mật khẩu",
+      "passwordMismatch": "Mật khẩu không khớp!",
+      "userNotFound": "Không tìm thấy thông tin người dùng!",
+      "passwordChangeSuccess": "Đổi mật khẩu thành công!",
+      "passwordChangeFailed": "Đổi mật khẩu thất bại! Vui lòng thử lại."
+    },
+    "notifications": {
+      "title": "Thông báo",
+      "description": "Nhận thông báo cho danh mục này",
+      "emailNotifications": "Thông báo qua Email",
+      "pushNotifications": "Thông báo Push",
+      "documentUpdates": "Cập nhật tài liệu",
+      "organizationInvites": "Lời mời tổ chức",
+      "weeklyDigest": "Bản tin hàng tuần"
+    },
     "preferences": {
+      "title": "Tùy chọn",
       "language": "Ngôn ngữ",
       "timezone": "Múi giờ",
       "theme": "Giao diện",
