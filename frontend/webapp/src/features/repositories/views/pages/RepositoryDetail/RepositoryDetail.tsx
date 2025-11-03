@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, RefreshButton, Card } from '@shared/components';
+import { Button, RefreshButton, Card, CommonSwitch } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
@@ -310,33 +310,27 @@ export const RepositoryDetail: React.FC = () => {
                             
                             <div className="flex items-center justify-between">
                               <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.upload')}</label>
-                              <input 
-                                type="checkbox" 
+                              <CommonSwitch
                                 checked={member.permissions?.canUpload || false}
                                 onChange={(e) => handleUpdatePermission(member.id, 'canUpload', e.target.checked)}
-                                className="w-4 h-4 rounded"
                                 disabled={member.role === 'OWNER'}
                               />
                             </div>
                             
                             <div className="flex items-center justify-between">
                               <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.view')}</label>
-                              <input 
-                                type="checkbox" 
+                              <CommonSwitch
                                 checked={member.permissions?.canView || false}
                                 onChange={(e) => handleUpdatePermission(member.id, 'canView', e.target.checked)}
-                                className="w-4 h-4 rounded"
                                 disabled={member.role === 'OWNER'}
                               />
                             </div>
                             
                             <div className="flex items-center justify-between">
                               <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.delete')}</label>
-                              <input 
-                                type="checkbox" 
+                              <CommonSwitch
                                 checked={member.permissions?.canDelete || false}
                                 onChange={(e) => handleUpdatePermission(member.id, 'canDelete', e.target.checked)}
-                                className="w-4 h-4 rounded"
                                 disabled={member.role === 'OWNER'}
                               />
                             </div>

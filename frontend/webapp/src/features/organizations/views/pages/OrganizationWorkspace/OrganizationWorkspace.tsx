@@ -22,13 +22,13 @@ import { useOrganizationContracts, useOrganizationRepositories } from '@features
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
-type WorkspaceTab = 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
+type WorkspaceTab = 'info' | 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
 
 export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('reports');
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
@@ -43,7 +43,7 @@ export const OrganizationWorkspace = () => {
     // refetch: refetchContracts  // Temporarily disabled
   } = useOrganizationContracts(id!, {
     page: 0,
-    size: 20,
+    size: 5,
   });
 
   // Fetch organization members
@@ -62,7 +62,7 @@ export const OrganizationWorkspace = () => {
   } = useOrganizationRepositories({
     organizationId: id,
     page: 0,
-    size: 20,
+    size: 5,
   });
 
   // Debug logging
@@ -83,6 +83,7 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
+    { id: 'info' as WorkspaceTab, label: t('organizations.workspace.tabs.info', { defaultValue: 'Thông tin' }), icon: <CommonIcon name="info" /> },
     { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: <CommonIcon name="chart" /> },
     { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: <CommonIcon name="file-text" /> },
     { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: <CommonIcon name="folder" /> },
@@ -179,9 +180,8 @@ export const OrganizationWorkspace = () => {
 
           {/* Stats Cards - Moved to Reports Tab */}
           {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
+            <div
+              className="rounded-lg p-4 border"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -190,11 +190,10 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="file-text" className="w-10 h-10 text-blue-500" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
+            <div
+              className="rounded-lg p-4 border"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -203,11 +202,10 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="clock" className="w-10 h-10 text-yellow-500" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
+            <div
+              className="rounded-lg p-4 border"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -216,11 +214,10 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="check" className="w-10 h-10 text-green-500" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
+            <div
+              className="rounded-lg p-4 border"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -229,7 +226,7 @@ export const OrganizationWorkspace = () => {
                 </div>
                 <CommonIcon name="x" className="w-10 h-10 text-red-500" />
               </div>
-            </motion.div>
+            </div>
           </div> */}
 
           {/* Tabs */}
@@ -256,19 +253,62 @@ export const OrganizationWorkspace = () => {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <motion.div
+        <div
           key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
         >
+          {/* Info Tab */}
+          {activeTab === 'info' && organization && (
+            <Card className="p-6">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.orgName')}</h4>
+                    <p className="text-lg font-semibold text-gray-900">{organization.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.visibility')}</h4>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {organization.isPublic ? t('organizations.workspace.settings.public') : t('organizations.workspace.settings.private')}
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.description')}</h4>
+                  <p className="text-gray-700">{organization.description || t('organizations.workspace.settings.noDescription')}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.stats.totalContracts')}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.totalContracts}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.stats.totalRepositories', { defaultValue: 'Kho lưu trữ' })}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.totalRepositories}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">{t('organizations.workspace.tabs.members')}</h4>
+                    <p className="text-2xl font-semibold text-gray-900">{membersData?.totalElements || 0}</p>
+                  </div>
+                </div>
+
+                {organization.createdAt && (
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.createdAt')}</h4>
+                    <p className="text-gray-700">{new Date(organization.createdAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* Reports Tab */}
           {activeTab === 'reports' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {/* Tổng số hợp đồng */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
                 >
                   <div className="flex items-center justify-between">
@@ -278,11 +318,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="file-text" className="w-10 h-10 text-blue-500" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đang chờ */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
                 >
                   <div className="flex items-center justify-between">
@@ -292,11 +331,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="clock" className="w-10 h-10 text-yellow-500" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đã duyệt */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
+                <div
                   className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
                 >
                   <div className="flex items-center justify-between">
@@ -306,10 +344,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="check" className="w-10 h-10 text-green-500" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Đã từ chối */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
                 >
@@ -320,10 +358,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="x" className="w-10 h-10 text-red-500" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tổng số file - MỚI */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200"
                 >
@@ -334,10 +372,10 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="file" className="w-10 h-10 text-purple-500" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tổng số repository - MỚI */}
-                <motion.div
+                <div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200"
                 >
@@ -348,7 +386,7 @@ export const OrganizationWorkspace = () => {
                     </div>
                     <CommonIcon name="folder" className="w-10 h-10 text-indigo-500" />
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           )}
@@ -513,7 +551,7 @@ export const OrganizationWorkspace = () => {
                 ) : repositoriesData?.content && repositoriesData.content.length > 0 ? (
                 <div className="space-y-4">
                 {(showAllRepositories ? repositoriesData.content : repositoriesData.content.slice(0, 10)).map((repo) => (
-                      <motion.div
+                      <div
                         key={repo.id}
                         whileHover={{ scale: 1.02 }}
                         className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer bg-gradient-to-br from-gray-50 to-white"
@@ -549,7 +587,7 @@ export const OrganizationWorkspace = () => {
                             </div>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
 
                     {/* Show More Button for Repositories */}
@@ -764,7 +802,7 @@ export const OrganizationWorkspace = () => {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </div>
       </div>
     </OrganizationLayout>
   );

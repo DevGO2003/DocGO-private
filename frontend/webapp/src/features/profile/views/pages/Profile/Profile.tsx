@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
-// Removed lucide-react imports: User, Mail, Phone, Building2, Briefcase, Calendar, Edit2, Save
 import {
   Card,
   CardHeader,
@@ -31,8 +30,6 @@ export const Profile = () => {
     lastName: user?.lastName || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    department: user?.department || '',
-    position: user?.position || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,8 +54,6 @@ export const Profile = () => {
       lastName: user?.lastName || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      department: user?.department || '',
-      position: user?.position || '',
     });
     setIsEditing(false);
   };
@@ -77,8 +72,6 @@ export const Profile = () => {
         lastName: user?.lastName || '',
         email: user?.email || '',
         phone: user?.phone || '',
-        department: user?.department || '',
-        position: user?.position || '',
       });
 
       console.log('[Profile] Refresh completed');
@@ -171,7 +164,7 @@ export const Profile = () => {
                         onClick={() => setIsEditing(true)}
                         className="flex items-center gap-2"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <CommonIcon name="edit" size={16} />
                         {t('profile.edit')}
                       </Button>
                     ) : (
@@ -189,7 +182,7 @@ export const Profile = () => {
                           isLoading={updateProfileMutation.isPending}
                           className="flex items-center gap-2"
                         >
-                          <Save className="w-4 h-4" />
+                          <CommonIcon name="save" size={16} />
                           {t('profile.save')}
                         </Button>
                       </div>
@@ -255,7 +248,7 @@ export const Profile = () => {
                       </div>
                       <div>
                         <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <CommonIcon name="phone-call" size={16} />
+                        <CommonIcon name="mail" size={16} />
                         {t('profile.labels.phone')}
                         </CommonLabel>
                         {isEditing ? (
@@ -268,42 +261,6 @@ export const Profile = () => {
                           />
                         ) : (
                           <p className="text-gray-900">{user.phone || t('profile.notSet')}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Work Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <CommonIcon name="building" size={16} />
-                        {t('profile.labels.department')}
-                        </CommonLabel>
-                        {isEditing ? (
-                          <Input
-                            name="department"
-                            value={formData.department}
-                            onChange={handleChange}
-                            placeholder="Engineering"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{user.department || t('profile.notSet')}</p>
-                        )}
-                      </div>
-                      <div>
-                        <CommonLabel noBorder className="flex items-center gap-2 mb-2">
-                        <CommonIcon name="briefcase" size={16} />
-                        {t('profile.labels.position')}
-                        </CommonLabel>
-                        {isEditing ? (
-                          <Input
-                            name="position"
-                            value={formData.position}
-                            onChange={handleChange}
-                            placeholder="Software Engineer"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{user.position || t('profile.notSet')}</p>
                         )}
                       </div>
                     </div>
