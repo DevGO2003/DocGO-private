@@ -1,4 +1,4 @@
-﻿import { forwardRef, ReactNode, useRef, useEffect } from 'react';
+import { forwardRef, ReactNode, useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { createRoughCanvas, drawRoughRect } from '@shared/lib/roughUtils';
 import { CommonIcon } from '../Icon/CommonIcon';
@@ -140,7 +140,7 @@ export const CommonModal = forwardRef<HTMLDivElement, CommonModalProps>(
               <h2 className="text-lg font-semibold" style={{ color: '#111827' }} >{title}</h2>
               <button
                 onClick={onClose}
-                className="hover: transition-colors" style={{ color: '#4b5563', color: '#9ca3af' }} >
+                className="hover: transition-colors" style={{ color: '#9ca3af' }} >
                 <CommonIcon name="x" size={20} />
               </button>
             </div>

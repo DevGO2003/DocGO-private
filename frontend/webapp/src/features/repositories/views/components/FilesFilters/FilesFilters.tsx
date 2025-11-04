@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, Input, Button, RefreshButton } from '@shared/components';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
@@ -123,7 +123,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <Button
           variant="ghost"
           onClick={onToggleAdvanced}
-          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={{ color: '#4f46e5', color: '#4338ca' }} >
+          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={{ color: '#4338ca' }} >
           {showAdvanced ? t('repositories.files.filters.hideAdvanced') : t('repositories.files.filters.showAdvanced')}
         </Button>
         {showAdvanced && (

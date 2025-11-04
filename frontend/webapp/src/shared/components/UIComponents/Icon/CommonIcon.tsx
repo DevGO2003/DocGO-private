@@ -25,7 +25,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'message': '💬',
   'upload': '⬆️',
   'tag': '🏷️',
-  'grid': '▦',
+  'grid-square': '▦',
   'list': '☰',
   'filter': '⚙️',
   edit: <span role="img" aria-label="edit">✏️</span>,

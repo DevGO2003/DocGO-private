@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -168,7 +168,7 @@ export const OrganizationMembers = () => {
             <Button
               onClick={() => setShowDeleteConfirm(true)}
               variant="outline"
-              className="flex items-center gap-2 hover: hover:bg-red-50" style={{ color: '#b91c1c', borderColor: '#fca5a5', color: '#dc2626' }} >
+              className="flex items-center gap-2 hover: hover:bg-red-50" style={{ color: '#dc2626', borderColor: '#fca5a5' }} >
               <CommonIcon name="arrow-left" size={20} />
               Xóa tổ chức
             </Button>

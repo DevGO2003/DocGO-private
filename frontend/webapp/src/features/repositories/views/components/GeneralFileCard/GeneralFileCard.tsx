@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Card, CardContent } from '@shared/components';
 import { Checkbox } from '@shared/components';
 
@@ -58,7 +58,7 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
       <CardContent className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-medium truncate" style={{ color: '#111827' } title={item.fileName}>{item.fileName}</div>
+          <div className="font-medium truncate" style={{ color: '#111827' }} title={item.fileName}>{item.fileName}</div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {item.status && (
               <span className={`px-2 py-0.5 rounded-lg text-xs border ${badgeClass(item.status)}`}>{item.status}</span>

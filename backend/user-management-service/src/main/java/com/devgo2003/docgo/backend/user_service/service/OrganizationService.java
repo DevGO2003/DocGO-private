@@ -206,6 +206,8 @@ public class OrganizationService {
                 .ownerUserId(request.getOwnerUserId())
                 .adminUserIds(List.of(request.getOwnerUserId()))
                 .memberCount(1)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .settings(Organization.OrganizationSettings.builder()
                         .allowMemberInvite(true)
                         .requireAdminApproval(false)

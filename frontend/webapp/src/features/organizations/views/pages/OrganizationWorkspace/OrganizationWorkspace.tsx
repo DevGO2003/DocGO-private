@@ -236,9 +236,7 @@ export const OrganizationWorkspace = () => {
           {/* Tabs */}
           <Tabs style={{ borderBottom: '1px solid #e5e7eb' }}>
             <TabList className="flex gap-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
+              {tabs.map((tab) => (
                   <CommonTab
                     key={tab.id}
                     value={tab.id}
@@ -246,11 +244,11 @@ export const OrganizationWorkspace = () => {
                     onSelect={() => setActiveTab(tab.id)}
                     className="flex items-center gap-2 px-4 py-3"
                   >
-                    <Icon className="w-4 h-4" />
+                    {tab.icon}
                     {tab.label}
                   </CommonTab>
-                );
-              })}
+                )
+              )}
             </TabList>
           </Tabs>
       </div>

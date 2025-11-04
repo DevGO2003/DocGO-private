@@ -1538,6 +1538,7 @@ async def upload_document(
                 "data": {
                     "fileId": file_id,
                     "fileUrl": file_url,
+                    "repositoryId": repository_id,
                     "correlationId": correlation_id
                 },
             })

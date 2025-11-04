@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useMyOrganizations } from '@features/organizations';
@@ -80,7 +80,7 @@ export const OrganizationSelector = ({
       {/* Selector Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 border-2 rounded-lg hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[220px]" style={{ borderColor: '#e5e7eb', borderColor: '#d1d5db', backgroundColor: '#ffffff' }} >
+        className="flex items-center gap-2 px-4 py-2 border-2 rounded-lg hover: transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[220px]" style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff' }} >
         {currentOrg ? (
           <>
             <div className="h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >

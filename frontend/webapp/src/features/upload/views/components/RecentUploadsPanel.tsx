@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { automationFileApi, AutomationRecentItem } from '../../models/api/automationFileApi'
@@ -73,7 +73,7 @@ const RecentUploadsPanel: React.FC<RecentUploadsPanelProps> = ({ limit = 5, clas
               {items.map((it) => (
                 <Flex key={it.fileId} align="center" justify="between" style={{ padding: '12px', background: '#fff', borderBottom: '1px solid #eee' }}>
                   <div style={{ minWidth: 0, flex: 1, marginRight: 12 }}>
-                    <p className="text-sm font-medium truncate" style={{ color: '#111827' } title={it.fileName}>{it.fileName}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: '#111827' }} title={it.fileName}>{it.fileName}</p>
                     <p className="text-xs" style={{ color: '#6b7280', marginTop: 2 }}>
                       {(it.fileSize / 1024).toFixed(2)} KB • {it.contentType} • {new Date(it.uploadedAt).toLocaleString()}
                     </p>

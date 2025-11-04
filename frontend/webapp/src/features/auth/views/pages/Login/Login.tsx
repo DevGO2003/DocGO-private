@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont, Checkbox, Label } from '@shared/components';
@@ -159,14 +159,14 @@ export const Login = () => {
             <div className="mt-6 text-center space-y-3">
               <Link
                 to={FORGOT_PASSWORD_PATH}
-                className="block text-sm hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
+                className="block text-sm hover: hover:underline" style={{ color: '#2563eb' }} >
                 Forgot your password?
               </Link>
               <div className="text-sm" style={{ color: '#4b5563' }} >
                 Don't have an account?{' '}
                 <Link
                   to={REGISTER_PATH}
-                  className="font-medium hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
+                  className="font-medium hover: hover:underline" style={{ color: '#2563eb' }} >
                   Sign up
                 </Link>
               </div>

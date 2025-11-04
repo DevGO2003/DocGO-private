@@ -1107,6 +1107,56 @@ public class UserController {
                 .build());
     }
     
+    @GetMapping("/{id}/organizations")
+    @Operation(
+        summary = "Lấy danh sách organizations của user theo ID",
+        description = """
+        🔹 Đầu vào
+        
+        📄 id (bắt buộc, path)
+        Loại: string
+        Mô tả: ID của user
+        
+        📄 page (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số trang (default: 0)
+        
+        📄 size (tùy chọn, query)
+        Loại: integer
+        Mô tả: Số lượng bản ghi trên mỗi trang (default: 100)
+        
+        🔹 Đầu ra
+        
+        📝 data
+        Loại: Page<OrganizationResponse>
+        Mô tả: Danh sách tổ chức mà user là thành viên
+        """
+    )
+    public ResponseEntity<RestResponse<Page<OrganizationResponse>>> getUserOrganizations(
+        @PathVariable String id,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "100") int size
+    ) {
+        log.info("🔍 [GET /api/v1/user-management-service/users/{}/organizations] - Page: {}, Size: {}", id, page, size);
+
+        User user = userService.getUserById(id);
+        
+        Page<OrganizationResponse> organizations = organizationService.getMyOrganizations(
+            user.getUsername(),
+            page,
+            size
+        );
+
+        log.info("✅ Found {} organizations for user: {}", organizations.getTotalElements(), user.getUsername());
+
+        return ResponseEntity.ok(RestResponse.<Page<OrganizationResponse>>builder()
+            .apiVersion("v1")
+            .data(organizations)
+            .statusCode(HttpStatus.OK.value())
+            .shortMessage("Lấy danh sách organizations thành công")
+            .build());
+    }
+    
     @GetMapping("/me/organizations")
     @Operation(
         summary = "Lấy danh sách organizations của user hiện tại",

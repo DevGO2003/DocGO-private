@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useMyRepositories, useCreateRepository } from '@features/repositories/models/api/repositoryApi'
 import { useMyOrganizations } from '@features/organizations'
 import { useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi'
@@ -76,7 +76,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
 
         {activeTab === 'personal' && showCreate && (
           <form
-            className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 border rounded-lg" style={{ borderColor: '#e5e7eb' } style={{ backgroundColor: '#ffffff' }
+            className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 border rounded-lg" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
             onSubmit={async (e) => {
               e.preventDefault()
               if (!newRepoName.trim()) return
@@ -103,14 +103,14 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
             }}
           >
             <input
-              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }
+              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }}
               placeholder="Tên repository"
               value={newRepoName}
               onChange={(e) => setNewRepoName(e.target.value)}
               required
             />
             <input
-              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }
+              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }}
               placeholder="Mô tả (tuỳ chọn)"
               value={newRepoDesc}
               onChange={(e) => setNewRepoDesc(e.target.value)}
@@ -122,7 +122,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
               </label>
               <button
                 type="submit"
-                className="ml-auto px-3 py-2 text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50" style={{ backgroundColor: '#2563eb', color: '#ffffff' }
+                className="ml-auto px-3 py-2 text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
                 disabled={createRepo.isPending || !newRepoName.trim()}
               >
                 {createRepo.isPending ? 'Đang tạo...' : 'Tạo'}
@@ -135,7 +135,7 @@ const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, cl
           <div className="flex items-center gap-2">
             <label className="text-sm" style={{ color: '#4b5563' }} >Tổ chức:</label>
             <select
-              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }
+              className="px-3 py-2 text-sm border rounded-lg" style={{ borderColor: '#e5e7eb' }}
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
             >

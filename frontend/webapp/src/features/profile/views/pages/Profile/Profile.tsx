@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -14,16 +15,28 @@ import {
 } from '@shared/components';
 
 import ProfileLayout from '../../../layouts/ProfileLayout';
-import { useAppSelector } from '@store/hooks';
+import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { useUpdateProfile } from '@features/auth';
+import { setUser } from '@features/auth/models/state/authSlice';
+import { useMyOrganizations } from '@features/organizations';
+import { useMyRepositories } from '@features/repositories';
 
 export const Profile = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const updateProfileMutation = useUpdateProfile();
+  
+  // Fetch organizations and repositories count
+  const { data: organizationsData } = useMyOrganizations();
+  const { data: repositoriesData } = useMyRepositories();
+  
+  const organizationsCount = organizationsData?.content?.length || 0;
+  const repositoriesCount = repositoriesData?.content?.length || 0;
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -41,10 +54,30 @@ export const Profile = () => {
 
   const handleSave = async () => {
     try {
-      await updateProfileMutation.mutateAsync(formData);
+      if (!user?.id) {
+        console.error('User ID not found');
+        return;
+      }
+      
+      console.log('[Profile] Updating profile with data:', formData);
+      const updatedUser = await updateProfileMutation.mutateAsync({
+        ...formData,
+        userId: user.id,
+      });
+      
+      console.log('[Profile] Profile updated successfully:', updatedUser);
+      
+      // Update Redux state with new user data
+      dispatch(setUser(updatedUser));
+      
+      // Reload user data after update
+      await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
       setIsEditing(false);
+      // Navigate back to dashboard after successful update
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.error('[Profile] Failed to update profile:', error);
     }
   };
 
@@ -134,11 +167,11 @@ export const Profile = () => {
                     <div className="mt-6 pt-6 border-t border-gray-200">
                       <div className="grid grid-cols-2 gap-4 text-center">
                         <div>
-                          <div className="text-2xl font-bold text-gray-900">0</div>
+                          <div className="text-2xl font-bold text-gray-900">{repositoriesCount}</div>
                           <div className="text-sm text-gray-600">{t('profile.stats.repositories')}</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-gray-900">0</div>
+                          <div className="text-2xl font-bold text-gray-900">{organizationsCount}</div>
                           <div className="text-sm text-gray-600">{t('profile.stats.organizations')}</div>
                         </div>
                       </div>
@@ -159,14 +192,24 @@ export const Profile = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle>{t('profile.title')}</CardTitle>
                     {!isEditing ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(true)}
-                        className="flex items-center gap-2"
-                      >
-                        <CommonIcon name="edit" size={16} />
-                        {t('profile.edit')}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate('/dashboard')}
+                          className="flex items-center gap-2"
+                        >
+                          <CommonIcon name="arrow-left" size={16} />
+                          Quay lại Dashboard
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(true)}
+                          className="flex items-center gap-2"
+                        >
+                          <CommonIcon name="edit" size={16} />
+                          {t('profile.edit')}
+                        </Button>
+                      </div>
                     ) : (
                       <div className="flex gap-2">
                         <Button

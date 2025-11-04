@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface AudioPreviewProps {
   file: File
@@ -29,7 +29,7 @@ export default function AudioPreview({ file }: AudioPreviewProps) {
         <div className="w-full max-w-sm">
           <div className="text-center mb-4">
             <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#f3e8ff' }} >
-              <svg className="w-8 h-8" style={{ color: '#9333ea' } fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-8 h-8" style={{ color: '#9333ea' }} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 3a1 1 0 011 1v5h2V4a1 1 0 112 0v5h2V4a1 1 0 112 0v7a3 3 0 11-6 0V4a1 1 0 01-1-1z" />
               </svg>
             </div>

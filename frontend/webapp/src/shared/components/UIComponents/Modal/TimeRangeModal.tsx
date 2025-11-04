@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 type DateTime = string | undefined
@@ -58,7 +58,7 @@ export default function TimeRangeModal({
     <div ref={panelRef} className="fixed rounded-xl border" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', top, left, width, height }}>
       <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: '#e5e7eb' }} >
         <h3 className="text-sm font-semibold" style={{ color: '#111827' }} >{title}</h3>
-        <button onClick={onClose} className="hover:" style={{ color: '#374151', color: '#6b7280' }} >✕</button>
+        <button onClick={onClose} className="hover:" style={{ color: '#6b7280' }} >✕</button>
       </div>
       <div className="p-3 space-y-3">
         <div>
