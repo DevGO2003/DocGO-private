@@ -28,10 +28,11 @@ export type AutomationRecentItem = {
   uploadedAt: string
 }
 
-const UPLOAD_ENDPOINT = '/api/files/upload'
+const UPLOAD_ENDPOINT = '/api/v1/automation-service/files'
 const RECENT_ENDPOINT = '/api/v1/automation-service/files/recent'
 
 export const automationFileApi = {
+  // Upload file with 100s timeout
   uploadFile: async (file: File, repositoryId: string): Promise<RestResponse<AutomationUploadData>> => {
     const form = new FormData()
     form.append('file', file, file.name)
@@ -50,7 +51,7 @@ export const automationFileApi = {
     
     const response = await apiClient.post<AutomationUploadData>(`${UPLOAD_ENDPOINT}`, form, {
       transformRequest: [(data) => data],
-      timeout: 300000,
+      timeout: 180000, // 180 seconds (3 minutes) - Allow time for AI classification + Kafka
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
     })

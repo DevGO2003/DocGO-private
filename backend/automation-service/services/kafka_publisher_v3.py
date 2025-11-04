@@ -33,9 +33,17 @@ class KafkaPublisherV3:
                 bootstrap_servers=self.bootstrap_servers,
                 client_id=self.client_id,
                 value_serializer=lambda v: json.dumps(v, default=str).encode('utf-8'),
+                # Performance optimizations for DocGO workflow
+                acks=1,  # Wait for leader only (faster than 'all')
+                compression_type='lz4',  # Lower latency than gzip
+                linger_ms=5,  # Reduced for faster delivery (AI workflow needs quick response)
+                batch_size=65536,  # 64KB batch size (larger for file metadata)
+                max_request_size=10485760,  # 10MB max request (AI results can be large)
+                request_timeout_ms=30000,  # 30s timeout for large AI analysis results
+                retry_backoff_ms=100,  # Quick retry for transient errors
             )
             await self.producer.start()
-            print(f"✅ Kafka Publisher V3 started: {self.bootstrap_servers}")
+            print(f"✅ Kafka Publisher V3 started: {self.bootstrap_servers} (optimized for DocGO)")
     
     async def stop(self):
         """Stop Kafka producer"""

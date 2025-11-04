@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@shared/components';
 import { getAvailableLayouts, getLayoutPreference } from '@shared/lib/panelLayoutManager';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
@@ -19,7 +19,7 @@ export function LayoutSelector({ onLayoutChange, onReset }: LayoutSelectorProps)
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors" style={{ backgroundColor: '#ffffff' }
+          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors" style={{ backgroundColor: '#ffffff' }}
           title="Chọn bố cục"
         >
           <CommonIcon name="grid" size={16} color="#475569" />
@@ -51,7 +51,7 @@ export function LayoutSelector({ onLayoutChange, onReset }: LayoutSelectorProps)
       {/* Reset Button */}
       <button
         onClick={onReset}
-        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors" style={{ backgroundColor: '#ffffff' }
+        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors" style={{ backgroundColor: '#ffffff' }}
         title="Đặt lại bố cục về mặc định"
       >
         <CommonIcon name="rotate-cw" size={16} color="#475569" />

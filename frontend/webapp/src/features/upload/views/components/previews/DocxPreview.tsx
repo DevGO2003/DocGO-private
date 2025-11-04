@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 interface DocxPreviewProps {
   file: File
@@ -50,7 +50,7 @@ export default function DocxPreview({ file }: DocxPreviewProps) {
         ) : (
           <div className="prose prose-sm max-w-none">
             <div
-              className="docx-html" style={{ color: '#1f2937' }
+              className="docx-html" style={{ color: '#1f2937' }}
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>

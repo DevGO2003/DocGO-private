@@ -118,11 +118,15 @@ const authApi = {
     );
   },
 
-  updateProfile: async (data: Partial<User>): Promise<User> => {
+  updateProfile: async (data: Partial<User> & { userId: string }): Promise<User> => {
+    console.log('[AuthAPI] updateProfile request payload:', data);
+    const { userId, ...updateData } = data;
+    
     const response = await apiClient.put<User>(
-      `${BASE_PATH}/auth/profile`,
-      data
+      `${BASE_PATH}/users/${userId}`,
+      updateData
     );
+    console.log('[AuthAPI] updateProfile response:', response.data);
     
     if (!response.data.data) {
       throw new Error(response.data.description || 'Cập nhật profile thất bại');

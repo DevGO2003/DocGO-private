@@ -1,4 +1,4 @@
-﻿import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
@@ -43,7 +43,7 @@ const DemoSection: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={() => navigate('/signup')}
-            className="border-2 border-white hover:bg-white hover:" style={{ color: '#2563eb', color: '#ffffff' }} >
+            className="border-2 border-white hover:bg-white hover:" style={{ color: '#ffffff' }} >
             <CommonText as="span">{t('landing.demo.ctaRegister')}</CommonText>
           </Button>
         </div>

@@ -25,9 +25,16 @@ export default defineConfig({
     port: 3000,
     open: false,
     middlewareMode: false,
+    watch: {
+      usePolling: true, // Enable polling for Docker on Windows
+      interval: 100,    // Check every 100ms
+    },
+    hmr: {
+      overlay: true,    // Show error overlay
+    },
   },
   optimizeDeps: {
     include: ['@hello-pangea/dnd'],
   },
-  logLevel: 'warn',
+  logLevel: 'info',
 });

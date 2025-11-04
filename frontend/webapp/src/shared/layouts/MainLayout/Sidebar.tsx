@@ -310,17 +310,6 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Collapse/Expand Button */}
-          <button
-            onClick={() => onCollapseToggle?.()}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group relative overflow-hidden"
-            title={collapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
-          >
-            <div className="relative w-5 h-5 flex items-center justify-center">
-              <CommonIcon name="chevron-down" size={16} className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : 'rotate-0'}`} />
-            </div>
-          </button>
-          
           {/* Edit Mode Button */}
           {!collapsed && (
             <div className="flex items-center gap-2">
@@ -348,6 +337,17 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
             </button>
             </div>
           )}
+          
+          {/* Collapse/Expand Button */}
+          <button
+            onClick={() => onCollapseToggle?.()}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group relative overflow-hidden"
+            title={collapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
+          >
+            <div className="relative w-7 h-7 flex items-center justify-center">
+              <CommonIcon name={collapsed ? 'chevron-right' : 'chevron-left'} size={24} />
+            </div>
+          </button>
           
           {/* Close Button (Mobile) */}
           <button

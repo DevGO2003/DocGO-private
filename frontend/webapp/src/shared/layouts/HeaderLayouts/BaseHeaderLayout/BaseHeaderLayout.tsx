@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommonFont } from '@shared/components';
 import type { BaseHeaderLayoutProps, BreadcrumbItem } from './BaseHeaderLayout.types';
@@ -30,7 +30,7 @@ function Breadcrumbs({ items, onRefresh }: { items: BreadcrumbItem[]; onRefresh?
             {item.href ? (
               <a
                 href={item.href}
-                className="hover: font-medium transition-colors" style={{ color: '#4f46e5', color: '#4338ca' }} >
+                className="hover: font-medium transition-colors" style={{ color: '#4338ca' }} >
                 {item.label}
               </a>
             ) : (

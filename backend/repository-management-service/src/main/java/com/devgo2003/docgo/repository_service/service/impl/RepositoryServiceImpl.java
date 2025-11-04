@@ -112,7 +112,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
     @SuppressWarnings("unchecked")
     private List<String> getUserOrganizationIds(String userId) {
         try {
-            String url = userManagementServiceUrl + "/api/v1/users/" + userId + "/organizations?page=0&size=100";
+            String url = userManagementServiceUrl + "/api/v1/user-management-service/users/" + userId + "/organizations?page=0&size=100";
             log.info("Calling user-management-service: {}", url);
             
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);

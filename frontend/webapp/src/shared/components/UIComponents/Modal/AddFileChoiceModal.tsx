@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { createPortal } from 'react-dom'
 
 type AddFileChoiceModalProps = {
@@ -22,7 +22,7 @@ export default function AddFileChoiceModal({
       <div className="relative rounded-xl border w-full max-w-sm" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} >
         <div className="p-3 border-b flex items-center justify-between" style={{ borderColor: '#e5e7eb' }} >
           <h3 className="text-sm font-semibold" style={{ color: '#111827' }} >Thêm tài liệu</h3>
-          <button onClick={onClose} className="hover:" style={{ color: '#374151', color: '#6b7280' }} >✕</button>
+          <button onClick={onClose} className="hover:" style={{ color: '#6b7280' }} >✕</button>
         </div>
         <div className="p-3 space-y-2">
           <button 

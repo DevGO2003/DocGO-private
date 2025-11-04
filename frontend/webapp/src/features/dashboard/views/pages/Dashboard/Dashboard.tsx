@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -295,7 +295,7 @@ export const Dashboard = () => {
                     {repositories.content.slice(0, 5).map((repo) => (
                       <div
                         key={repo.id}
-                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={{ backgroundColor: '#f9fafb' }
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={{ backgroundColor: '#f9fafb' }}
                         onClick={() => navigate(`${REPOSITORIES_PATH}/${repo.id}`)}
                       >
                         <div className="flex items-center justify-between">
@@ -398,7 +398,7 @@ export const Dashboard = () => {
                   {organizations.content.map((org) => (
                     <div
                       key={org.id}
-                      className="p-4 rounded-lg cursor-pointer border-2 transition-transform hover:scale-105" style={{ borderColor: '#bfdbfe' } style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }
+                      className="p-4 rounded-lg cursor-pointer border-2 transition-transform hover:scale-105" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)' }}
                       onClick={() => navigate(`${ORGANIZATIONS_PATH}/${org.id}`)}
                     >
                       <Text as="h4" className="font-bold mb-1" style={{ color: '#111827' }} >{org.name}</Text>

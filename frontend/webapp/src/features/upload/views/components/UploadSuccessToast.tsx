@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react'
+import React, { useEffect } from 'react'
 
 interface UploadSuccessToastProps {
   fileName: string
@@ -56,7 +56,7 @@ const UploadSuccessToast: React.FC<UploadSuccessToastProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="hover: transition-colors flex-shrink-0" style={{ color: '#4b5563', color: '#9ca3af' }} >
+            className="hover: transition-colors flex-shrink-0" style={{ color: '#9ca3af' }} >
             <div className="w-5 h-5 flex items-center justify-center text-lg">✕</div>
           </button>
         </div>

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { NotificationBell, ProgressBar } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
@@ -61,7 +61,7 @@ export const Header = ({
             {onMenuToggle && (
               <button
                 onClick={onMenuToggle}
-                className="lg:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#6b7280', color: '#9ca3af' }} >
+                className="lg:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#9ca3af' }} >
                 <CommonIcon name="menu" size={24} />
               </button>
             )}
@@ -72,13 +72,15 @@ export const Header = ({
             <div className="flex-1 max-w-lg mx-8 hidden md:block">
             <form onSubmit={handleSearch}>
               <div className="relative">
-                <CommonIcon name="search" size={20} color="#9ca3af" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border-2 rounded-lg focus:outline-none focus:" style={{ borderColor: '#d1d5db', borderColor: '#3b82f6' }} />
+                  className="w-full pl-4 pr-10 py-2 border-2 rounded-lg focus:outline-none focus:" style={{ borderColor: '#3b82f6' }} />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <CommonIcon name="search" size={20} color="#9ca3af" />
+                </div>
               </div>
             </form>
           </div>
@@ -88,7 +90,7 @@ export const Header = ({
           <div className="flex items-center gap-4">
             {/* Search for mobile */}
             {showSearch && (
-              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#6b7280', color: '#9ca3af' }} >
+              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#9ca3af' }} >
                 <CommonIcon name="search" size={20} color="#9ca3af" />
               </button>
             )}
@@ -124,8 +126,11 @@ export const Header = ({
                     style={{
                       opacity: showUserDropdown ? 1 : 0,
                       transform: showUserDropdown ? 'translateY(0)' : 'translateY(-10px)',
+                      borderColor: '#e5e7eb',
+                      backgroundColor: '#ffffff',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                     }}
-                    className="absolute right-0 mt-2 rounded-lg border-2 py-1 z-50" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} >
+                    className="absolute right-0 mt-2 rounded-lg border-2 py-1 z-50">
                     <div className="px-4 py-2 border-b-2" style={{ borderColor: '#f3f4f6' }} >
                       <p className="text-sm font-medium" style={{ color: '#111827' }} >{user.name}</p>
                       <p className="text-xs" style={{ color: '#6b7280' }} >{user.email}</p>

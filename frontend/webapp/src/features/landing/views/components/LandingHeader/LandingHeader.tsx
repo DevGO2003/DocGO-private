@@ -1,4 +1,4 @@
-﻿import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import anime from 'animejs';
@@ -31,10 +31,10 @@ const LandingHeader: React.FC = () => {
           </CommonText>
         </div>
         <nav className="hidden md:flex items-center gap-6">
-          <a href="#features" className="text-sm hover: transition" style={{ color: '#111827', color: '#4b5563' }} >
+          <a href="#features" className="text-sm hover: transition" style={{ color: '#4b5563' }} >
             {t('landing.features.title')}
           </a>
-          <a href="#demo" className="text-sm hover: transition" style={{ color: '#111827', color: '#4b5563' }} >
+          <a href="#demo" className="text-sm hover: transition" style={{ color: '#4b5563' }} >
             Demo
           </a>
           <Button variant="outline" size="sm" onClick={() => navigate('/login')}>

@@ -22,7 +22,7 @@ class ApiClient {
     this.baseURL = env.apiBaseUrl
     this.client = axios.create({
       baseURL: this.baseURL,
-      timeout: 30000,
+      timeout: 600000, // 10 minutes for file uploads
       // Do not set default Content-Type; let axios/browser set appropriately
       withCredentials: true,
     })

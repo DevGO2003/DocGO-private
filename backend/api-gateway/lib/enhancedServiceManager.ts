@@ -117,7 +117,7 @@ class EnhancedServiceManager {
       name: 'automation-service',
       url: selectUrl(process.env.AUTOMATION_SERVICE_URL, 'http://automation-service:8003', 'http://localhost:8003'),
       healthCheck: '/health',
-      timeout: 15000,
+      timeout: 600000, // 10 minutes for file upload and processing
       enableCaching: false, // Không cache cho AI processing
       cacheTags: ['automation']
     });

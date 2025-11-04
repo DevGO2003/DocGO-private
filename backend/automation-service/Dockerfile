@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender1 \
     libgomp1 \
+    libgl1 \
+    libglvnd0 \
+    libglx0 \
+    libopengl0 \
     libavcodec-dev \
     libavformat-dev \
     libswscale-dev \

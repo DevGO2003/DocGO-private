@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -232,7 +232,13 @@ export const OrganizationDetail = () => {
                 <div>
                   <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.created')}</p>
                   <p className="text-sm font-semibold" style={{ color: '#111827' }} >
-                    {new Date(organization.createdAt).toLocaleDateString()}
+                    {organization.createdAt ? new Date(organization.createdAt).toLocaleDateString('vi-VN', { 
+                      year: 'numeric', 
+                      month: '2-digit', 
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'Chưa có thông tin'}
                   </p>
                 </div>
               </div>
@@ -293,7 +299,15 @@ export const OrganizationDetail = () => {
                   {organization.createdAt && (
                     <div>
                       <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.stats.created')}</label>
-                      <p className="mt-1" style={{ color: '#111827' }} >{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <p className="mt-1" style={{ color: '#111827' }} >
+                        {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
                     </div>
                   )}
                   <div>
@@ -349,7 +363,15 @@ export const OrganizationDetail = () => {
                   {organization.createdAt && (
                     <div>
                       <label className="text-sm font-medium" style={{ color: '#374151' }} >{t('organizations.detail.stats.created')}</label>
-                      <p className="mt-1" style={{ color: '#111827' }} >{new Date(organization.createdAt).toLocaleDateString('vi-VN')}</p>
+                      <p className="mt-1" style={{ color: '#111827' }} >
+                        {new Date(organization.createdAt).toLocaleDateString('vi-VN', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
                     </div>
                   )}
                   <div>
@@ -399,7 +421,7 @@ export const OrganizationDetail = () => {
                     {(members as any).content.map((member: any) => (
                       <div
                         key={member.id}
-                        className="flex items-center justify-between p-4 border-2 rounded-lg hover: transition-colors" style={{ borderColor: '#e5e7eb', borderColor: '#d1d5db' }} >
+                        className="flex items-center justify-between p-4 border-2 rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: '#d1d5db' }} >
                         <div className="flex items-center gap-4">
                           <div className="h-12 rounded-full flex items-center justify-center" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
                             <span className="font-bold text-lg" style={{ color: '#ffffff' }} >
@@ -437,7 +459,7 @@ export const OrganizationDetail = () => {
                               <Button
                                 variant="outline"
                                 onClick={() => handleManageMember(member)}
-                                className="hover: text-sm flex items-center gap-1" style={{ color: '#1d4ed8', color: '#2563eb' }} >
+                                className="hover: text-sm flex items-center gap-1" style={{ color: '#2563eb' }} >
                                 <CommonIcon name="shield" size={12} />
                                 Quản lý
                               </Button>
@@ -445,7 +467,7 @@ export const OrganizationDetail = () => {
                                 <Button
                                   variant="outline"
                                   onClick={() => handleRemoveMember(member.id)}
-                                  className="hover: text-sm" style={{ color: '#b91c1c', color: '#dc2626' }} >
+                                  className="hover: text-sm" style={{ color: '#dc2626' }} >
                                   {t('organizations.detail.members.remove')}
                                 </Button>
                               )}
@@ -562,7 +584,7 @@ export const OrganizationDetail = () => {
                     <div className="p-4 border-2 rounded-lg" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
                       <p className="font-medium mb-2" style={{ color: '#7f1d1d' }} >{t('organizations.detail.settings.danger.delete')}</p>
                       <p className="text-sm mb-4" style={{ color: '#b91c1c' }} >{t('organizations.detail.settings.danger.desc')}</p>
-                      <Button variant="outline" className="hover:" style={{ color: '#b91c1c', color: '#dc2626' }} >
+                      <Button variant="outline" className="hover:" style={{ color: '#dc2626' }} >
                         {t('organizations.detail.settings.danger.cta')}
                       </Button>
                     </div>

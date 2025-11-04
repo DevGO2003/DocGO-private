@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import anime from 'animejs';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CommonFont } from '@shared/components';
@@ -143,7 +143,7 @@ export const Register = () => {
                 Already have an account?{' '}
                 <Link
                   to={LOGIN_PATH}
-                  className="font-medium hover: hover:underline" style={{ color: '#1e40af', color: '#2563eb' }} >
+                  className="font-medium hover: hover:underline" style={{ color: '#2563eb' }} >
                   Sign in
                 </Link>
               </div>

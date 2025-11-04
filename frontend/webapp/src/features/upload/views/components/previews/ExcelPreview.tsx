@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 
 interface ExcelPreviewProps {
   file: File
@@ -15,7 +15,7 @@ export default function ExcelPreview({ file }: ExcelPreviewProps) {
       <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
         <div className="text-center">
           <div className="h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: '#dcfce7' }} >
-            <svg className="h-8" style={{ color: '#16a34a' } fill="currentColor" viewBox="0 0 20 20">
+            <svg className="h-8" style={{ color: '#16a34a' }} fill="currentColor" viewBox="0 0 20 20">
               <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zm10-1a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
             </svg>
           </div>
