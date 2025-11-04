@@ -53,7 +53,14 @@ async def get_kafka_producer():
         from config import Config
         kafka_producer = AIOKafkaProducer(
             bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+            # Performance optimizations for DocGO
+            acks=1,
+            compression_type='lz4',  # Lower latency
+            linger_ms=5,  # Quick delivery for UX
+            batch_size=65536,  # 64KB for large file metadata
+            max_request_size=10485760,  # 10MB for AI results
+            request_timeout_ms=30000
         )
         await kafka_producer.start()
     return kafka_producer
