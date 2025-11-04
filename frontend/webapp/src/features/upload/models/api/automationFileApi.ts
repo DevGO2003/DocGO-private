@@ -28,7 +28,7 @@ export type AutomationRecentItem = {
   uploadedAt: string
 }
 
-const UPLOAD_ENDPOINT = '/api/v1/automation-service/files'
+const UPLOAD_ENDPOINT = '/api/files/upload'
 const RECENT_ENDPOINT = '/api/v1/automation-service/files/recent'
 
 export const automationFileApi = {

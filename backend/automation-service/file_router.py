@@ -51,31 +51,42 @@ async def get_kafka_producer():
     global kafka_producer
     if kafka_producer is None:
         from config import Config
-        kafka_producer = AIOKafkaProducer(
-            bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-            # Performance optimizations for DocGO
-            acks=1,
-            compression_type='lz4',  # Lower latency
-            linger_ms=5,  # Quick delivery for UX
-            batch_size=65536,  # 64KB for large file metadata
-            max_request_size=10485760,  # 10MB for AI results
-            request_timeout_ms=30000
-        )
-        await kafka_producer.start()
+        try:
+            print(f"[DEBUG] Connecting to Kafka: {Config.KAFKA_BOOTSTRAP_SERVERS}")
+            kafka_producer = AIOKafkaProducer(
+                bootstrap_servers=Config.KAFKA_BOOTSTRAP_SERVERS,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                # Performance optimizations for DocGO
+                acks=1,
+                compression_type='gzip',  # Standard compression (lz4 not installed)
+                request_timeout_ms=30000
+            )
+            await kafka_producer.start()
+            print(f"[DEBUG] ✓ Kafka producer started successfully")
+        except Exception as e:
+            print(f"[WARN] Failed to connect to Kafka ({Config.KAFKA_BOOTSTRAP_SERVERS}): {e}")
+            print(f"[WARN] Kafka events will NOT be published. Make sure Kafka is running.")
+            kafka_producer = None
+            raise
     return kafka_producer
 
 async def publish_kafka_event(event: dict, document_id: str = None):
+    topic = "docgo-file-events"  # Define topic outside try block
+    event_type = event.get("eventType", "UNKNOWN")
+    print(f"[DEBUG] publish_kafka_event called: eventType={event_type}, document_id={document_id}")
     try:
+        print(f"[DEBUG] Getting Kafka producer...")
         producer = await get_kafka_producer()
-        # Use single topic as per EVENT-ARCHITECTURE-V3.md
-        topic = "docgo-file-events"
+        print(f"[DEBUG] Producer obtained: {producer}")
         # Use fileId as the Kafka key (fallback to documentId for backward compatibility)
         key = document_id or event.get("data", {}).get("fileId") or event.get("data", {}).get("documentId", "unknown")
+        print(f"[DEBUG] Sending event to Kafka: topic={topic}, key={key}, eventType={event_type}")
         await producer.send_and_wait(topic, event, key=key.encode('utf-8'))
-        print(f"[DEBUG] Published -> topic={topic} key={key}")
+        print(f"[DEBUG] ✓ Published -> topic={topic} key={key} eventType={event_type}")
     except Exception as e:
-        print(f"[WARN] Kafka publish failed ({topic}): {e}")
+        print(f"[WARN] Kafka publish failed (topic={topic}, eventType={event_type}): {type(e).__name__}: {e}")
+        print(f"[WARN] Continuing without Kafka (non-blocking). Event will NOT be persisted.")
+        # Non-blocking: don't raise, just log and continue
 progress_service = ProgressService()
 extract_file_service = ExtractFileService()
 contract_summary_service = ContractSummaryService()
@@ -1153,7 +1164,12 @@ async def upload_document(
             })
             
             # Only publish if Kafka is enabled
-            if getattr(Config, 'KAFKA_ENABLED', False):
+            kafka_enabled = getattr(Config, 'KAFKA_ENABLED', False)
+            print(f"[DEBUG] KAFKA_ENABLED={kafka_enabled} (type={type(kafka_enabled).__name__})")
+            print(f"[DEBUG] Config.KAFKA_ENABLED={Config.KAFKA_ENABLED}")
+            print(f"[DEBUG] Config.KAFKA_BOOTSTRAP_SERVERS={Config.KAFKA_BOOTSTRAP_SERVERS}")
+            
+            if kafka_enabled:
                 try:
                     # Calculate hash values for file integrity first
                     import hashlib

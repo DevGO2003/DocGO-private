@@ -593,7 +593,7 @@ public class RepositoryManagementController {
     ) {
         try {
             // Validate repository exists
-            if (!repositoryService.existsById(repositoryId)) {
+            if (repositoryService.getRepositoryById(repositoryId).isEmpty()) {
                 return ResponseEntity.ok(RestResponse.<Page<FileEntity>>builder()
                     .apiVersion("v1")
                     .statusCode(404)

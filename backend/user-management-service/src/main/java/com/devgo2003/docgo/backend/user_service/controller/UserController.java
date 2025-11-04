@@ -1139,7 +1139,7 @@ public class UserController {
     ) {
         log.info("🔍 [GET /api/v1/user-management-service/users/{}/organizations] - Page: {}, Size: {}", id, page, size);
 
-        User user = userService.getUserById(id);
+        User user = userService.getUserById(id).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
         
         Page<OrganizationResponse> organizations = organizationService.getMyOrganizations(
             user.getUsername(),

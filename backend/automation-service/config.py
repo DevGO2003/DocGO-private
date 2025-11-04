@@ -40,8 +40,8 @@ class Config:
     # ==========================================
     # INFRASTRUCTURE SERVICES (Shared from root .env)
     # ==========================================
-    # Kafka Configuration - DISABLED
-    KAFKA_ENABLED: bool = os.getenv("KAFKA_ENABLED", "false").lower() == "true"
+    # Kafka Configuration - ENABLED by default
+    KAFKA_ENABLED: bool = os.getenv("KAFKA_ENABLED", "true").lower() == "true"
     KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
     KAFKA_CLIENT_ID: str = os.getenv("KAFKA_CLIENT_ID", f"{os.getenv('KAFKA_CLIENT_ID_PREFIX', 'docgo')}-automation")
     KAFKA_GROUP_ID: str = os.getenv("KAFKA_GROUP_ID", f"{os.getenv('KAFKA_GROUP_ID_PREFIX', 'docgo-group')}-automation")

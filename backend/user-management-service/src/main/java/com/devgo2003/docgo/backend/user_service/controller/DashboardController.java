@@ -42,8 +42,8 @@ public class DashboardController {
             String currentUserId = userId;
             if (currentUserId == null || currentUserId.trim().isEmpty()) {
                 var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof com.devgo2003.docgo.backend.user_service.security.JwtAuthenticationFilter.JwtUserPrincipal p) {
-                    currentUserId = p.getUserId();
+                if (auth != null && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+                    currentUserId = userDetails.getUsername();
                 }
             }
 
@@ -140,7 +140,7 @@ public class DashboardController {
                 .shortMessage("Success")
                 .description("Dashboard statistics retrieved successfully")
                 .data(stats)
-                .timestamp(Instant.now())
+                .timestamp(java.time.ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/user-management-service/dashboard/stats")
                 .build());
@@ -153,7 +153,7 @@ public class DashboardController {
                 .shortMessage("Internal Server Error")
                 .description("Failed to retrieve dashboard statistics: " + e.getMessage())
                 .data(null)
-                .timestamp(Instant.now())
+                .timestamp(java.time.ZonedDateTime.now())
                 .requestId(UUID.randomUUID().toString())
                 .path("/api/v1/user-management-service/dashboard/stats")
                 .build());
