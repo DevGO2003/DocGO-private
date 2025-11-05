@@ -32,7 +32,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       }}
       onChange={handleChange}
       className={cn(
-        'w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2',
+        'w-4 h-4 text-indigo-600 bg-gray-100 rounded focus:ring-indigo-500 focus:ring-2 border-0',
         className
       )}
       {...props}

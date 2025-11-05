@@ -1,5 +1,6 @@
 import React from 'react'
 import { ControlMainLayout } from '@shared/layouts'
+import type { TabsConfig } from '@shared/layouts/HeaderControlLayout/types'
 
 interface OrganizationLayoutProps {
   children: React.ReactNode
@@ -17,6 +18,7 @@ interface OrganizationLayoutProps {
   extra?: React.ReactNode
   primaryTabs?: React.ReactNode
   secondaryTabs?: React.ReactNode
+  tabsConfig?: TabsConfig
   onRefresh?: () => void
 }
 
@@ -44,6 +46,7 @@ function OrganizationLayout({
   extra,
   primaryTabs,
   secondaryTabs,
+  tabsConfig,
   onRefresh,
 }: OrganizationLayoutProps) {
   return (
@@ -60,6 +63,7 @@ function OrganizationLayout({
       loadingText={loadingText}
       primaryTabs={primaryTabs}
       secondaryTabs={secondaryTabs}
+      tabsConfig={tabsConfig}
       onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>

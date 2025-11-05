@@ -4,6 +4,10 @@ import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
 import { RepositoryType } from '@features/repositories/models/types/repository.types';
 
+/**
+ * @deprecated Use GenericMainTabsNav with tabsConfig in HeaderControlLayout instead
+ * This component will be removed in future versions
+ */
 interface RepositoryTabsProps {
   activeTab: RepositoryType;
   onTabChange: (tab: RepositoryType) => void;
@@ -47,7 +51,7 @@ export const RepositoryTabs: React.FC<RepositoryTabsProps> = ({
 
   return (
     <div style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
-      <Tabs>
+      <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }}>
         <TabList className="flex flex-1">
           {tabs.map((tab) => {
             return (

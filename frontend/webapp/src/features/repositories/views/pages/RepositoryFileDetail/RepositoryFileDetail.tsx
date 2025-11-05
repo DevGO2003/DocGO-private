@@ -5,8 +5,6 @@ import { Button, Card, CardContent, RefreshButton } from '@shared/components';
 import { Flex, Text } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { fetchFileById } from '@features/upload/models/api/fileApi';
-import { MainTabsNav } from '@features/repositories/views/components/FileDetail/MainTabsNav';
-import { SubTabsNav } from '@features/repositories/views/components/FileDetail/SubTabsNav';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
@@ -351,29 +349,53 @@ export const RepositoryFileDetail: React.FC = () => {
           </Flex>
         </div>
       }
-      primaryTabs={
-        <MainTabsNav
-          activeMainTab={activeMainTab}
-          onChange={(tabId: string) => {
-            if (!isLoading) {
-              setActiveMainTab(tabId);
-              if (tabId === 'contracts') setActiveSubTab('contract-overview');
-              else if (tabId === 'overview') setActiveSubTab('details');
-              else if (tabId === 'comments') setActiveSubTab('comments-list');
-            }
-          }}
-          fileData={documentData}
-          loading={isLoading}
-        />
-      }
-      secondaryTabs={
-        <SubTabsNav
-          activeMainTab={activeMainTab}
-          activeSubTab={activeSubTab}
-          onChange={(tabId: string) => !isLoading && setActiveSubTab(tabId)}
-          loading={isLoading}
-        />
-      }
+      tabsConfig={{
+        mainTabs: [
+          { id: 'overview', label: 'Tổng quan', disabled: false },
+          { 
+            id: 'contracts', 
+            label: 'Hợp đồng', 
+            disabled: !(documentData?.type === 'contract' || documentData?.contractType),
+            disabledTooltip: 'File không phải hợp đồng'
+          },
+          { id: 'comments', label: 'Bình luận', disabled: false },
+        ],
+        activeMainTab: activeMainTab,
+        onMainTabChange: (tabId: string) => {
+          if (!isLoading) {
+            setActiveMainTab(tabId);
+            if (tabId === 'contracts') setActiveSubTab('contract-overview');
+            else if (tabId === 'overview') setActiveSubTab('details');
+            else if (tabId === 'comments') setActiveSubTab('comments-list');
+          }
+        },
+        subTabsMap: {
+          contracts: [
+            { id: 'contract-overview', label: 'Tổng quan HĐ' },
+            { id: 'parties', label: 'Các bên' },
+            { id: 'payment', label: 'Thanh toán' },
+            { id: 'clauses', label: 'Điều khoản' },
+            { id: 'risk', label: 'Rủi ro' },
+            { id: 'reminders', label: 'Nhắc nhở' },
+            { id: 'compliance', label: 'Tuân thủ' },
+          ],
+          overview: [
+            { id: 'details', label: 'Chi tiết' },
+            { id: 'content', label: 'Nội dung' },
+            { id: 'ocr', label: 'Nội dung OCR' },
+            { id: 'metadata', label: 'Siêu dữ liệu' },
+            { id: 'notes', label: 'Ghi chú' },
+            { id: 'history', label: 'Lịch sử' },
+            { id: 'permissions', label: 'Quyền hạn' },
+          ],
+          comments: [
+            { id: 'comments-list', label: 'Danh sách bình luận' },
+          ],
+        },
+        activeSubTab: activeSubTab,
+        onSubTabChange: (tabId: string) => !isLoading && setActiveSubTab(tabId),
+        loading: isLoading,
+      }}
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {error && (

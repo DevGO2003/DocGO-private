@@ -10,9 +10,6 @@ import {
   TableCell,
   TableContainer,
   Text,
-  Tabs,
-  TabList,
-  CommonTab,
   Checkbox,
 } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
@@ -284,22 +281,15 @@ export const RepositoryFilesList: React.FC = () => {
       loading={isLoading}
       loadingText={t('repositories.files.loading')}
       onRefresh={refreshFiles}
-      secondaryTabs={
-        <Tabs>
-          <TabList>
-            <div style={activeTab === 'all' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : {}}>
-              <CommonTab value="all" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')}>
-                {t('repositories.files.tabs.all')}
-              </CommonTab>
-            </div>
-            <div style={activeTab === 'contract' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : {}}>
-              <CommonTab value="contract" activeValue={activeTab} onSelect={(v: string) => setActiveTab(v as 'all' | 'contract')}>
-                {t('repositories.files.tabs.contract')}
-              </CommonTab>
-            </div>
-          </TabList>
-        </Tabs>
-      }
+      tabsConfig={{
+        mainTabs: [
+          { id: 'all', label: t('repositories.files.tabs.all') },
+          { id: 'contract', label: t('repositories.files.tabs.contract') },
+        ],
+        activeMainTab: activeTab,
+        onMainTabChange: (tabId: string) => setActiveTab(tabId as 'all' | 'contract'),
+        loading: isLoading,
+      }}
       headerChildren={
         <FilesFilters
           search={search}

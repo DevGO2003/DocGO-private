@@ -1,6 +1,10 @@
 ﻿import React from 'react';
 import { Tabs, TabList, CommonTab } from '@shared/components';
 
+/**
+ * @deprecated Use GenericSubTabsNav with tabsConfig in HeaderControlLayout instead
+ * This component will be removed in future versions
+ */
 interface Props {
   activeMainTab: string;
   activeSubTab: string;
@@ -36,7 +40,7 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
   const subTabs = subTabsMap[activeMainTab] ?? [];
 
   return (
-    <Tabs className="mb-4">
+    <Tabs className="border-b mb-4" style={{ borderColor: '#e5e7eb' }}>
       <TabList>
         {subTabs.map(t => (
           <CommonTab

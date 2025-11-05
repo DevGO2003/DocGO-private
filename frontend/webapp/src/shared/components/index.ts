@@ -15,6 +15,8 @@ export * from './UIComponents/Stack';
 export * from './UIComponents/Grid';
 export * from './UIComponents/Table';
 export * from './UIComponents/Tabs/CommonTabs';
+export { GenericMainTabsNav } from './UIComponents/Tabs/GenericMainTabsNav';
+export { GenericSubTabsNav } from './UIComponents/Tabs/GenericSubTabsNav';
 export * from './UIComponents/Modal/CreateRepositoryModal';
 export * from './UIComponents/ProgressBar';
 export * from './UIComponents/Checkbox';

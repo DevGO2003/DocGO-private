@@ -10,7 +10,6 @@ import {
   usePublicRepositories,
   RepositoryType
 } from '@features/repositories';
-import { RepositoryTabs } from '@features/repositories/views/components/RepositoryTabs';
 import { RepositoryGrid } from '@features/repositories/views/components/RepositoryGrid';
 import { CreateRepositoryModal } from '@features/repositories/views/components/CreateRepositoryModal';
 import type { RepositoryCreateData } from '@features/repositories/models/types/repository.types';
@@ -188,15 +187,28 @@ export const RepositoryList = () => {
       description="Quản lý kho lưu trữ tài liệu cá nhân, tổ chức và công khai"
       breadcrumbs={[{ label: t('nav.repositories'), current: true }]}
       onRefresh={handleRefresh}
-      headerChildren={
-        <RepositoryTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          personalCount={personalData?.totalElements || 0}
-          organizationCount={organizationData?.totalElements || 0}
-          publicCount={publicData?.totalElements || 0}
-        />
-      }
+      tabsConfig={{
+        mainTabs: [
+          {
+            id: 'PERSONAL',
+            label: `${t('repositories.tabs.personal.label')} ${personalData?.totalElements ? `(${personalData.totalElements})` : ''}`,
+            icon: 'user',
+          },
+          {
+            id: 'ORGANIZATION',
+            label: `${t('repositories.tabs.organization.label')} ${organizationData?.totalElements ? `(${organizationData.totalElements})` : ''}`,
+            icon: 'building',
+          },
+          {
+            id: 'PUBLIC',
+            label: `${t('repositories.tabs.public.label')} ${publicData?.totalElements ? `(${publicData.totalElements})` : ''}`,
+            icon: 'building',
+          },
+        ],
+        activeMainTab: activeTab,
+        onMainTabChange: (tabId: string) => handleTabChange(tabId as RepositoryType),
+        loading: personalLoading || organizationLoading || publicLoading,
+      }}
       headerRight={
         <div className="flex gap-2">
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />

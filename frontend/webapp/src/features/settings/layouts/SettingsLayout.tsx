@@ -1,5 +1,6 @@
 import React from 'react'
 import { ControlMainLayout } from '@shared/layouts'
+import type { TabsConfig } from '@shared/layouts/HeaderControlLayout/types'
 
 interface SettingsLayoutProps {
   children: React.ReactNode
@@ -16,6 +17,7 @@ interface SettingsLayoutProps {
   loadingText?: string
   extra?: React.ReactNode
   onRefresh?: () => void
+  tabsConfig?: TabsConfig
 }
 
 /**
@@ -40,6 +42,7 @@ function SettingsLayout({
   loadingText,
   extra,
   onRefresh,
+  tabsConfig,
 }: SettingsLayoutProps) {
   return (
     <ControlMainLayout
@@ -54,6 +57,7 @@ function SettingsLayout({
       loading={loading}
       loadingText={loadingText}
       onRefresh={onRefresh}
+      tabsConfig={tabsConfig}
     >
       <div className={`w-full h-full ${className}`}>
         {children}

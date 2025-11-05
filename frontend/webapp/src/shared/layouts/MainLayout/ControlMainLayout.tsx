@@ -1,5 +1,6 @@
 import { ReactNode, useState, Suspense } from 'react'
 import { HeaderControlLayout } from '../../layouts/HeaderControlLayout'
+import type { TabsConfig } from '../../layouts/HeaderControlLayout/types'
 
 interface ControlMainLayoutProps {
   children: ReactNode
@@ -19,6 +20,7 @@ interface ControlMainLayoutProps {
   headerRight?: ReactNode
   primaryTabs?: React.ReactNode
   secondaryTabs?: React.ReactNode
+  tabsConfig?: TabsConfig
   onRefresh?: () => void
 }
 
@@ -48,6 +50,7 @@ export function ControlMainLayout({
   headerRight,
   primaryTabs,
   secondaryTabs,
+  tabsConfig,
   onRefresh,
 }: ControlMainLayoutProps) {
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState(false)
@@ -76,6 +79,7 @@ export function ControlMainLayout({
             headerChildren={headerChildren}
             primaryTabs={primaryTabs}
             secondaryTabs={secondaryTabs}
+            tabsConfig={tabsConfig}
             onRefresh={handleRefresh}
           />
         </div>

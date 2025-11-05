@@ -1,5 +1,6 @@
 import React from 'react'
 import { ControlMainLayout } from '@shared/layouts'
+import type { TabsConfig } from '@shared/layouts/HeaderControlLayout/types'
 
 interface RepositoryLayoutProps {
   children: React.ReactNode
@@ -17,6 +18,7 @@ interface RepositoryLayoutProps {
   extra?: React.ReactNode
   primaryTabs?: React.ReactNode
   secondaryTabs?: React.ReactNode
+  tabsConfig?: TabsConfig
   onRefresh?: () => void
 }
 
@@ -44,6 +46,7 @@ function RepositoryLayout({
   extra,
   primaryTabs,
   secondaryTabs,
+  tabsConfig,
   onRefresh,
 }: RepositoryLayoutProps) {
   return (
@@ -60,6 +63,7 @@ function RepositoryLayout({
       loadingText={loadingText}
       primaryTabs={primaryTabs}
       secondaryTabs={secondaryTabs}
+      tabsConfig={tabsConfig}
       onRefresh={onRefresh}
     >
       <div className={`w-full h-full ${className}`}>

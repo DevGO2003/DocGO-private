@@ -11,9 +11,6 @@ import {
   Button,
   LoadingSpinner,
   RefreshButton,
-  Tabs,
-  TabList,
-  CommonTab,
   Checkbox,
 } from '@shared/components';
 import {
@@ -174,6 +171,12 @@ export const OrganizationDetail = () => {
           </Button>
         </div>
       )}
+      tabsConfig={{
+        mainTabs: tabs,
+        activeMainTab: activeTab,
+        onMainTabChange: setActiveTab,
+        loading: orgLoading,
+      }}
     >
       <div className="space-y-6">
 
@@ -246,28 +249,6 @@ export const OrganizationDetail = () => {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6">
-          <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }} >
-            <TabList className="flex gap-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <CommonTab
-                    key={tab.id}
-                    value={tab.id}
-                    activeValue={activeTab}
-                    onSelect={() => setActiveTab(tab.id)}
-                    className="flex items-center gap-2 px-4 py-3"
-                  >
-                    <CommonIcon name="crown" size={16} />
-                    {tab.label}
-                  </CommonTab>
-                );
-              })}
-            </TabList>
-          </Tabs>
-        </div>
 
         {/* Tab Content */}
         <div key={activeTab} className="animate-fade-in">

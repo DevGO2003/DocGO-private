@@ -100,12 +100,23 @@ export const OrganizationList = () => {
       ]}
       onRefresh={handleRefresh}
       headerRight={(
-        <div className="flex gap-2">
-          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <div className="min-w-0 flex-1 flex items-start justify-end gap-2">
+          {/* Search Filter */}
+          <div className="relative w-full max-w-md">
+            <CommonIcon name="search" size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#9ca3af' }} />
+            <Input
+              type="text"
+              placeholder={t('organizations.list.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <Button variant="outline" onClick={handleCreateOrganization} className="flex items-center gap-2">
             <CommonIcon name="plus" size={20} />
             {t('organizations.list.new')}
           </Button>
+          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
         </div>
       )}
     >
@@ -116,17 +127,6 @@ export const OrganizationList = () => {
       />
 
       <div className="space-y-6">
-        {/* Search Filter */}
-        <div className="relative w-full max-w-md">
-          <CommonIcon name="search" size={20} className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
-          <Input
-            type="text"
-            placeholder={t('organizations.list.searchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
 
         {/* Loading */}
         {isLoading && <LoadingSpinner text={t('organizations.list.loading')} />}

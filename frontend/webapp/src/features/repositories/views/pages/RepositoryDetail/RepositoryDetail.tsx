@@ -8,7 +8,6 @@ import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
 import { NOT_FOUND_PATH } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
-import { RepositoryDetailTabs } from '../../components/RepositoryDetailTabs';
 
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -120,6 +119,38 @@ export const RepositoryDetail: React.FC = () => {
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
         </>
       }
+      tabsConfig={{
+        mainTabs: [
+          {
+            id: 'overview',
+            label: t('repositories.detail.tabs.overview', { defaultValue: 'Tổng quan' }),
+            icon: 'info',
+            disabled: false,
+          },
+          {
+            id: 'files',
+            label: t('repositories.detail.tabs.files'),
+            icon: 'file-text',
+            disabled: false,
+          },
+          {
+            id: 'members',
+            label: t('repositories.detail.tabs.members'),
+            icon: 'users',
+            disabled: false,
+          },
+          {
+            id: 'activity',
+            label: t('repositories.detail.tabs.activity'),
+            icon: 'clock',
+            disabled: true,
+            disabledTooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
+          },
+        ],
+        activeMainTab: activeTab,
+        onMainTabChange: setActiveTab,
+        loading: isLoading,
+      }}
     >
       {(!repository && !error) ? null : (
         <div>
@@ -133,11 +164,6 @@ export const RepositoryDetail: React.FC = () => {
             {/* Content Section */}
             {repository && (
               <div>
-                  {/* Tabs Navigation */}
-                  <RepositoryDetailTabs
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                  />
 
                   {/* Tab Content */}
                   {activeTab === 'overview' && (

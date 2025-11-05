@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Tabs, TabList, CommonTab } from '@shared/components/UIComponents/Tabs/CommonTabs';
 
+/**
+ * @deprecated Use GenericMainTabsNav with tabsConfig in HeaderControlLayout instead
+ * This component will be removed in future versions
+ */
 interface RepositoryDetailTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -43,8 +47,8 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
   ];
 
   return (
-    <Tabs>
-      <TabList className="border-b mb-6">
+    <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }}>
+      <TabList className="mb-6">
         {tabs.map((tab) => {
           const tabContent = (
             <CommonTab

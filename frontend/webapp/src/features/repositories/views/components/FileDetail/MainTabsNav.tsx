@@ -1,6 +1,10 @@
 ﻿import React from 'react';
 import { Tabs, TabList, CommonTab } from '@shared/components';
 
+/**
+ * @deprecated Use GenericMainTabsNav with tabsConfig in HeaderControlLayout instead
+ * This component will be removed in future versions
+ */
 interface Props {
   activeMainTab: string;
   onChange: (tabId: string) => void;

@@ -10,9 +10,6 @@ import {
   Button,
   Input,
   RefreshButton,
-  Tabs,
-  TabList,
-  CommonTab,
   Checkbox,
   Select,
 } from '@shared/components';
@@ -133,57 +130,17 @@ export const Settings = () => {
       headerRight={
         <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
       }
+      tabsConfig={{
+        mainTabs: tabs,
+        activeMainTab: activeTab,
+        onMainTabChange: setActiveTab,
+        loading: !user,
+      }}
     >
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div
-          // initial={{ opacity: 0, y: -20 }}
-          // animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="font-bold mb-2" style={{ color: '#111827' }} >{t('settings.title')}</h1>
-          <p style={{ color: '#4b5563' }} >{t('settings.description')}</p>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div
-            // initial={{ opacity: 0, x: -20 }}
-            // animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
-          >
-            <Card>
-              <CardContent className="p-4">
-                <Tabs>
-                  <TabList className="space-y-1">
-                    {tabs.map((tab) => {
-                      return (
-                        <CommonTab
-                          key={tab.id}
-                          value={tab.id}
-                          activeValue={activeTab}
-                          onSelect={() => setActiveTab(tab.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg"
-                        >
-                          <CommonIcon name={tab.icon as any} size={20} />
-                          {tab.label}
-                        </CommonTab>
-                      );
-                    })}
-                  </TabList>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Content */}
-          <div
-            key={activeTab}
-            // initial={{ opacity: 0, x: 20 }}
-            // animate={{ opacity: 1, x: 0 }}
-            // transition={{ duration: 0.3 }}
-            className="lg:col-span-3"
-          >
+        {/* Content */}
+        <div key={activeTab} className="w-full">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <Card>
@@ -482,7 +439,6 @@ export const Settings = () => {
                 </CardContent>
               </Card>
             )}
-          </div>
         </div>
       </div>
     </SettingsLayout>

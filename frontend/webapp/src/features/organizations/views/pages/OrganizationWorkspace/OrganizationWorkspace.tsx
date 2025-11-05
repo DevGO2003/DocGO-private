@@ -11,9 +11,6 @@ import {
   Button,
   LoadingSpinner,
   RefreshButton,
-  Tabs,
-  TabList,
-  CommonTab,
 } from '@shared/components';
 import { useOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
@@ -83,12 +80,12 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'info' as WorkspaceTab, label: t('organizations.workspace.tabs.info', { defaultValue: 'Thông tin' }), icon: <CommonIcon name="info" /> },
-    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: <CommonIcon name="chart" /> },
-    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: <CommonIcon name="file-text" /> },
-    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: <CommonIcon name="folder" /> },
-    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: <CommonIcon name="users" /> },
-    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: <CommonIcon name="settings" /> },
+    { id: 'info' as WorkspaceTab, label: t('organizations.workspace.tabs.info', { defaultValue: 'Thông tin' }), icon: 'info' },
+    { id: 'reports' as WorkspaceTab, label: t('organizations.workspace.tabs.reports'), icon: 'chart' },
+    { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: 'file-text' },
+    { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: 'folder' },
+    { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: 'users' },
+    { id: 'settings' as WorkspaceTab, label: t('organizations.workspace.tabs.settings'), icon: 'settings' },
   ];
 
   const handleRefresh = async () => {
@@ -156,6 +153,12 @@ export const OrganizationWorkspace = () => {
             </Button> */}
         </div>
       )}
+      tabsConfig={{
+        mainTabs: tabs,
+        activeMainTab: activeTab,
+        onMainTabChange: setActiveTab,
+        loading: isLoading,
+      }}
     >
       {/* Temporarily disabled - Upload Contract Dialog */}
       {/* <UploadContractDialog
@@ -233,24 +236,6 @@ export const OrganizationWorkspace = () => {
             </div>
           </div> */}
 
-          {/* Tabs */}
-          <Tabs style={{ borderBottom: '1px solid #e5e7eb' }}>
-            <TabList className="flex gap-2">
-              {tabs.map((tab) => (
-                  <CommonTab
-                    key={tab.id}
-                    value={tab.id}
-                    activeValue={activeTab}
-                    onSelect={() => setActiveTab(tab.id)}
-                    className="flex items-center gap-2 px-4 py-3"
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </CommonTab>
-                )
-              )}
-            </TabList>
-          </Tabs>
       </div>
 
       {/* Content */}

@@ -1,6 +1,8 @@
 import React from 'react';
 import type { HeaderControlLayoutProps, Breadcrumb } from './types';
 import { CommonFont } from '@shared/components';
+import { GenericMainTabsNav } from '@shared/components/UIComponents/Tabs/GenericMainTabsNav';
+import { GenericSubTabsNav } from '@shared/components/UIComponents/Tabs/GenericSubTabsNav';
 
 function Breadcrumbs({ items, onRefresh }: { items?: Breadcrumb[]; onRefresh?: () => void }) {
 
@@ -48,6 +50,7 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
   description,
   breadcrumbs,
   rightActions,
+  tabsConfig,
   primaryTabs,
   secondaryTabs,
   headerChildren,
@@ -80,15 +83,43 @@ export const HeaderControlLayout: React.FC<HeaderControlLayoutProps> = ({
         </div>
 
         {/* Tabs row: Below subtitle */}
-        {secondaryTabs && (
-          <div className="mt-3">
-            {secondaryTabs}
-          </div>
-        )}
-        {primaryTabs && (
-          <div className="mt-3">
-            {primaryTabs}
-          </div>
+        {tabsConfig ? (
+          <>
+            {tabsConfig.mainTabs && tabsConfig.mainTabs.length > 0 && (
+              <div className="mt-3">
+                <GenericMainTabsNav
+                  tabs={tabsConfig.mainTabs}
+                  activeTab={tabsConfig.activeMainTab || ''}
+                  onTabChange={tabsConfig.onMainTabChange || (() => {})}
+                  loading={tabsConfig.loading}
+                />
+              </div>
+            )}
+            {tabsConfig.subTabsMap && tabsConfig.activeMainTab && (
+              <div className="mt-1">
+                <GenericSubTabsNav
+                  subTabsMap={tabsConfig.subTabsMap}
+                  activeMainTab={tabsConfig.activeMainTab}
+                  activeSubTab={tabsConfig.activeSubTab || ''}
+                  onSubTabChange={tabsConfig.onSubTabChange || (() => {})}
+                  loading={tabsConfig.loading}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {primaryTabs && (
+              <div className="mt-3">
+                {primaryTabs}
+              </div>
+            )}
+            {secondaryTabs && (
+              <div className="mt-1">
+                {secondaryTabs}
+              </div>
+            )}
+          </>
         )}
       </div>
 

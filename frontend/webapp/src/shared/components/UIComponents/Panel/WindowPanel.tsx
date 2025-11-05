@@ -17,6 +17,7 @@ interface WindowPanelProps {
   onMinimize?: (minimized: boolean) => void;
   onClose?: () => void;
   onPositionChange?: (id: string, x: number, y: number) => void;
+  onFocus?: (id: string) => void; // Callback khi panel được click/focus
   loading?: boolean;
   zIndex?: number;
   minimizedContent?: React.ReactNode; // Nội dung hiển thị khi minimize
@@ -35,6 +36,7 @@ export function WindowPanel({
   onMinimize,
   onClose,
   onPositionChange,
+  onFocus,
   loading = false,
   zIndex = 1,
   minimizedContent,
@@ -51,6 +53,9 @@ export function WindowPanel({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (containerRef.current) {
+      // Gọi onFocus để tăng z-index khi panel được click
+      onFocus?.(id);
+      
       // Fix: Tính offset từ vị trí click đến vị trí panel (position.x/y)
       // Thay vì dùng rect.left/top (có thể bị offset do scroll)
       setDragOffset({
@@ -141,6 +146,7 @@ export function WindowPanel({
         transition: isDragging ? 'none' : 'width 0.2s ease, height 0.2s ease',
         zIndex,
       }}
+      onClick={() => onFocus?.(id)} // Cũng gọi onFocus khi click vào content
     >
       {/* Header - Draggable */}
       <div

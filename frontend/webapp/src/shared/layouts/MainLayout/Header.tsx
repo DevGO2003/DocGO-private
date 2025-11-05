@@ -103,17 +103,17 @@ export const Header = ({
               <div className="relative">
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100"
+                  className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-gray-100"
                 >
                   {user.avatar ? (
                     <img
-                      className="h-8 w-8 rounded-full object-cover"
+                      className="h-10 w-10 rounded-full object-cover"
                       src={user.avatar}
                       alt={user.name}
                     />
                   ) : (
-                    <div className="h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3b82f6' }} >
-                      <span className="text-sm font-medium" style={{ color: '#ffffff' }} >
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#3b82f6' }} >
+                      <span className="text-lg font-medium" style={{ color: '#ffffff' }} >
                         {user.name.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
