@@ -561,30 +561,48 @@
       "back": "Quay lại",
       "settings": "Cài đặt",
       "type": {
+        "label": "Loại",
         "organization": "Tổ chức",
         "personal": "Cá nhân",
         "public": "Công khai",
         "private": "Riêng tư"
       },
+      "actions": {
+        "upload": "Tải lên",
+        "invite": "Mời thành viên"
+      },
+      "files": {
+        "list": "Danh sách tệp",
+        "uploaded": "Tải lên"
+      },
       "updated": "Cập nhật: {{date}}",
       "info": {
         "title": "Thông tin Repository",
+        "name": "Tên repository",
         "description": "Mô tả",
         "noDescription": "Không có mô tả",
         "owner": "Chủ sở hữu",
-        "organization": "Tổ chức"
+        "noInfo": "Chưa có thông tin",
+        "organization": "Tổ chức",
+        "none": "Không có",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "updatedAt": "Cập nhật lần cuối"
       },
       "stats": {
         "title": "Thống kê",
         "files": "Tệp",
         "members": "Thành viên",
-        "storage": "Dung lượng"
+        "storage": "Dung lượng",
+        "calculating": "Đang tính..."
       },
       "tabs": {
+        "overview": "Tổng quan",
         "info": "Thông tin",
         "files": "Tệp",
         "members": "Thành viên",
         "activity": "Hoạt động",
+        "activityDisabled": "Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có",
         "settings": "Cài đặt"
       },
       "members": {

@@ -183,14 +183,6 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                       {repo.ownerName || 'Chưa có thông tin'}
                     </span>
                   </div>
-
-                  {/* Updated Time */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs" style={{ color: '#6b7280' }} >
-                      <CommonIcon name="clock" className="w-3 h-3" />
-                      Cập nhật: {repo.updatedAt ? new Date(repo.updatedAt).toLocaleDateString('vi-VN') : 'Không có'}
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>

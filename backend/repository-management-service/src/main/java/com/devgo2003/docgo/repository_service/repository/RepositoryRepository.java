@@ -33,6 +33,9 @@ public interface RepositoryRepository extends MongoRepository<RepositoryEntity, 
         Pageable pageable
     );
 
+    // Find all repositories (all types, not deleted)
+    Page<RepositoryEntity> findByIsDeletedFalse(Pageable pageable);
+
     // Find by owner (all types)
     Page<RepositoryEntity> findByOwnerUserIdAndIsDeletedFalse(
         String ownerUserId,

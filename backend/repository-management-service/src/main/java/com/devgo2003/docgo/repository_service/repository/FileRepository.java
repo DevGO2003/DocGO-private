@@ -12,6 +12,10 @@ import java.util.List;
 public interface FileRepository extends MongoRepository<FileEntity, String> {
     
     Page<FileEntity> findByRepositoryIdAndIsDeletedFalse(String repositoryId, Pageable pageable);
+    
+    List<FileEntity> findAllByRepositoryIdAndIsDeletedFalse(String repositoryId);
+    
+    long countByRepositoryIdAndIsDeletedFalse(String repositoryId);
 
     // Query nested fields using dot notation
     @Query("{ 'overview.ownerUserId': ?0, 'isDeleted': false }")

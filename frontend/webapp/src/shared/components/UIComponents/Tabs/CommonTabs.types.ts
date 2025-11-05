@@ -17,4 +17,5 @@ export interface CommonTabProps {
   children: React.ReactNode;
   disabled?: boolean;
   className?: string; // Added to fix prop type errors
+  title?: string; // Tooltip for disabled tabs
 }

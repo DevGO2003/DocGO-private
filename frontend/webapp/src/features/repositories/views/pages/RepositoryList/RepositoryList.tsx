@@ -210,15 +210,36 @@ export const RepositoryList = () => {
         loading: personalLoading || organizationLoading || publicLoading,
       }}
       headerRight={
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          {/* Search Input */}
+          <div className="relative">
+            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9ca3af' }} />
+            <Input
+              type="text"
+              placeholder={
+                activeTab === 'PERSONAL'
+                  ? t('repositories.list.search.personal')
+                  : activeTab === 'ORGANIZATION'
+                  ? t('repositories.list.search.organization')
+                  : t('repositories.list.search.public')
+              }
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 w-64"
+            />
+          </div>
+          
+          {/* Refresh Button */}
           <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          
+          {/* Create Repository Button */}
           {activeTab !== 'PUBLIC' && (
             <Button
               variant="outline"
               onClick={handleCreateRepository}
               className="inline-flex items-center gap-2"
             >
-              <CommonIcon name="plus" className="w-5 h-5" />
+              <CommonIcon name="plus" size={16} />
               {t('repositories.list.new')}
             </Button>
           )}
@@ -227,25 +248,6 @@ export const RepositoryList = () => {
       showToolbar={false}
       className="min-h-full"
     >
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative max-w-md">
-              <CommonIcon name="search" className="absolute left-3 top-1/2" style={{ color: '#9ca3af' }} />
-              <Input
-                type="text"
-                placeholder={
-                  activeTab === 'PERSONAL'
-                    ? t('repositories.list.search.personal')
-                    : activeTab === 'ORGANIZATION'
-                    ? t('repositories.list.search.organization')
-                    : t('repositories.list.search.public')
-                }
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
 
           {/* Repository Grid */}
           <RepositoryGrid
