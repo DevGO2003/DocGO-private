@@ -1,0 +1,173 @@
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+
+HỢP ĐỒNG PHÁT TRIỂN PHẦN MỀM HỆ THỐNG QUẢN LÝ TÀI LIỆU DOCGO
+Số: HĐ-DOCGO-2024-001
+Ngày: 01/02/2024
+
+BÊN A - KHÁCH HÀNG:
+CÔNG TY TNHH ĐẦU TƯ VÀ PHÁT TRIỂN CÔNG NGHỆ VIỆT NAM
+Địa chỉ: Tầng 15, Bitexco Financial Tower, 02 Hải Triều, Q1, TP.HCM
+Điện thoại: +84-28-3914-3388 | Email: contact@vntech.com.vn
+Mã số thuế: 0312345678
+Người đại diện: Ông NGUYỄN VĂN MINH - Tổng Giám đốc
+Email: minh.nguyen@vntech.com.vn | ĐT: +84-903-123-456
+
+BÊN B - NHÀ THẦU:
+CÔNG TY TNHH GIẢI PHÁP PHẦN MỀM DEVGO
+Địa chỉ: Tầng 7, Sài Gòn Centre, 65 Lê Lợi, Q1, TP.HCM
+Điện thoại: +84-28-3822-6789 | Email: info@devgo.vn
+Mã số thuế: 0315678901
+Người đại diện: Bà TRẦN THỊ PHƯƠNG LAN - Giám đốc Điều hành
+Email: lan.tran@devgo.vn | ĐT: +84-908-765-432
+
+================================================================================
+ĐIỀU 1: MỤC ĐÍCH VÀ PHẠM VI
+================================================================================
+Bên B phát triển và triển khai hệ thống quản lý tài liệu DocGO cho Bên A, bao gồm:
+- Quản lý kho lưu trữ tài liệu
+- AI phân loại và OCR tự động
+- Hệ thống phê duyệt đa cấp
+- Quản lý hợp đồng thông minh
+- Tích hợp chữ ký số
+- Báo cáo và phân tích
+
+================================================================================
+ĐIỀU 2: GIÁ TRỊ VÀ THANH TOÁN
+================================================================================
+Tổng giá trị: 1.000.000.000 VNĐ (Một tỷ đồng)
+Giá trị sau thuế VAT: 1.100.000.000 VNĐ
+
+Thanh toán theo tiến độ:
+- Đợt 1 (30%): 330.000.000 VNĐ - Trong 7 ngày sau ký HĐ (15/02/2024)
+- Đợt 2 (30%): 330.000.000 VNĐ - Hoàn thành 50% (30/06/2024)
+- Đợt 3 (30%): 330.000.000 VNĐ - Nghiệm thu chính thức (31/10/2024)
+- Đợt 4 (10%): 110.000.000 VNĐ - Sau 12 tháng bảo hành (31/10/2025)
+
+Phương thức: Chuyển khoản Vietcombank CN Sài Gòn - TK: 0071001234567
+
+================================================================================
+ĐIỀU 3: THỜI GIAN
+================================================================================
+Ngày hiệu lực: 01/02/2024
+Ngày hoàn thành: 31/10/2024
+Bảo hành: 24 tháng (01/11/2024 - 31/10/2026)
+
+Phạt chậm tiến độ: 0.1%/ngày, tối đa 10% giá trị hợp đồng
+
+================================================================================
+ĐIỀU 4: QUYỀN VÀ NGHĨA VỤ BÊN A
+================================================================================
+Quyền:
+- Nhận phần mềm đúng chất lượng và tiến độ
+- Yêu cầu sửa lỗi miễn phí trong bảo hành
+- Được đào tạo 20 người dùng
+- Nhận mã nguồn và tài liệu kỹ thuật
+- Sở hữu toàn bộ quyền sau thanh toán 100%
+
+Nghĩa vụ:
+- Cung cấp thông tin đầy đủ, kịp thời
+- Thanh toán đúng hạn
+- Chuẩn bị hạ tầng theo yêu cầu
+- Bảo mật thông tin của Bên B
+
+================================================================================
+ĐIỀU 5: QUYỀN VÀ NGHĨA VỤ BÊN B
+================================================================================
+Quyền:
+- Được thanh toán đầy đủ theo tiến độ
+- Tạm dừng nếu chậm thanh toán >45 ngày
+- Giữ quyền sở hữu trí tuệ cho đến khi thanh toán đủ
+
+Nghĩa vụ:
+- Phát triển đúng yêu cầu, tiến độ, chất lượng
+- Báo cáo tiến độ hàng tuần
+- Khắc phục lỗi miễn phí trong bảo hành
+- Bảo mật tuyệt đối thông tin Bên A
+- Bàn giao mã nguồn, tài liệu đầy đủ
+- Hỗ trợ 24/7 trong 60 ngày đầu
+
+================================================================================
+ĐIỀU 6: QUYỀN SỞ HỮU TRÍ TUỆ
+================================================================================
+Sau thanh toán 100%, Bên A sở hữu toàn bộ:
+- Mã nguồn (source code)
+- Thiết kế UI/UX
+- Database schema
+- Tài liệu kỹ thuật
+
+Bên B cam kết không vi phạm bản quyền bên thứ ba.
+
+================================================================================
+ĐIỀU 7: BẢO MẬT
+================================================================================
+Phạm vi: Tài liệu kỹ thuật, mã nguồn, dữ liệu khách hàng, chiến lược
+
+Cam kết:
+- Không tiết lộ cho bên thứ ba
+- Áp dụng biện pháp bảo mật hợp lý
+- Thông báo ngay khi rò rỉ
+
+Thời hạn: Trong suốt HĐ + 5 năm sau khi kết thúc
+Vi phạm: Bồi thường tối thiểu 30% giá trị HĐ
+
+================================================================================
+ĐIỀU 8: BẢO HÀNH
+================================================================================
+Thời gian: 24 tháng kể từ 01/11/2024
+
+Nội dung:
+- Sửa lỗi do lập trình
+- Cập nhật bản vá bảo mật
+- Tối ưu hiệu năng
+- Hỗ trợ kỹ thuật
+
+SLA:
+- Critical: Phản hồi 2h, khắc phục 24h
+- High: Phản hồi 8h, khắc phục 72h
+- Medium: Phản hồi 24h, khắc phục 7 ngày
+- Low: Phản hồi 48h, khắc phục 30 ngày
+
+================================================================================
+ĐIỀU 9: CHẤM DỨT HỢP ĐỒNG
+================================================================================
+Vi phạm nghiêm trọng của Bên A:
+- Chậm thanh toán >60 ngày
+- Vi phạm nghĩa vụ bảo mật
+
+Vi phạm nghiêm trọng của Bên B:
+- Chậm tiến độ >90 ngày
+- Không đạt yêu cầu sau 3 lần nghiệm thu
+- Vi phạm nghĩa vụ bảo mật
+
+Xử lý:
+- Do lỗi Bên B: Hoàn tiền + bồi thường 20%
+- Do lỗi Bên A: Thanh toán công việc hoàn thành + bồi thường 20%
+
+================================================================================
+ĐIỀU 10: TRÁCH NHIỆM VÀ BỒI THƯỜNG
+================================================================================
+Giới hạn: Tối đa 100% giá trị HĐ (trừ vi phạm bảo mật)
+
+Bất khả kháng: Không chịu trách nhiệm nếu do thiên tai, chiến tranh, dịch bệnh
+
+================================================================================
+ĐIỀU 11: GIẢI QUYẾT TRANH CHẤP
+================================================================================
+1. Thương lượng trong 30 ngày
+2. Nếu không thỏa thuận: Trọng tài VIAC
+
+Luật áp dụng: Pháp luật Việt Nam
+
+================================================================================
+ĐIỀU 12: CAM KẾT
+================================================================================
+Hai bên cam kết thực hiện đầy đủ, nghiêm túc các điều khoản, hợp tác chặt chẽ và tuân thủ pháp luật.
+
+Hợp đồng ký ngày 01/02/2024 tại TP.HCM, 02 bản có giá trị như nhau.
+
+ĐẠI DIỆN BÊN A                    ĐẠI DIỆN BÊN B
+(Đã ký và đóng dấu)               (Đã ký và đóng dấu)
+
+Ông NGUYỄN VĂN MINH               Bà TRẦN THỊ PHƯƠNG LAN
+Tổng Giám đốc                     Giám đốc Điều hành

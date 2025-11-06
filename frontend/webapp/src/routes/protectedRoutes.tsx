@@ -16,6 +16,7 @@ import {
   Profile,
   Settings,
   UploadPage,
+  MyApprovalsDashboard,
 } from './routeComponents';
 import { PROTECTED_ROUTES } from './routeConfig';
 
@@ -42,6 +43,9 @@ export const protectedRoutes = (
 
     {/* Upload Routes */}
     <Route path={PROTECTED_ROUTES.UPLOAD} element={<UploadPage />} />
+
+    {/* Approval Routes */}
+    <Route path="/approvals/me" element={<MyApprovalsDashboard />} />
 
     {/* Organization Routes */}
     <Route path={PROTECTED_ROUTES.ORGANIZATIONS} element={<OrganizationList />} />

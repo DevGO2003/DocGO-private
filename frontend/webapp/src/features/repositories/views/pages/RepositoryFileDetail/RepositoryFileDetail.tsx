@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Card, CardContent, RefreshButton } from '@shared/components';
@@ -9,6 +9,10 @@ import { FileDetailTabs } from '@features/repositories/views/components/FileDeta
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { updateFileDetails, deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
+import { useContractApproval } from '@features/approvals/hooks/useContractApproval';
+import { ApprovalWorkflowStatus } from '@features/approvals/components/ApprovalWorkflowStatus';
+import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
+import { ApprovalLevel } from '@features/approvals/types/approval.types';
 
 interface FileDetailData {
   fileId: string;
@@ -34,6 +38,35 @@ export const RepositoryFileDetail: React.FC = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [editedData, setEditedData] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Approval workflow states
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showStartApprovalModal, setShowStartApprovalModal] = useState(false);
+  
+  // Get user info from localStorage
+  const currentUser = {
+    role: localStorage.getItem('userRole') || 'MEMBER',
+    permissions: (localStorage.getItem('userPermissions') || '').split(',').filter(Boolean)
+  };
+  
+  // Use approval hook
+  const {
+    workflow,
+    loading: approvalLoading,
+    error: approvalError,
+    currentLevel,
+    startApproval,
+    approve,
+    reject,
+    refresh: refreshApproval
+  } = useContractApproval({
+    contractId: fileId || '',
+    userRole: currentUser.role,
+    userPermissions: currentUser.permissions,
+    autoRefresh: true,
+    refreshInterval: 30000
+  });
 
   useEffect(() => {
     // Kiểm tra repository ID có hợp lệ không
@@ -326,9 +359,15 @@ export const RepositoryFileDetail: React.FC = () => {
                 <Button variant="outline" onClick={handleEdit}>
                   <CommonIcon name="edit" className="w-4 h-4 mr-2" /> Chỉnh sửa
                 </Button>
-                <Button variant="outline">
-                  <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
-                </Button>
+                {!workflow && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowStartApprovalModal(true)}
+                    disabled={!documentData?.totalValue}
+                  >
+                    <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
+                  </Button>
+                )}
                 <Button variant="outline">
                   <CommonIcon name="plus" className="w-4 h-4 mr-2" /> Tạo phiên bản
                 </Button>
@@ -398,6 +437,27 @@ export const RepositoryFileDetail: React.FC = () => {
       }}
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Approval Workflow Section */}
+        {workflow && (
+          <Card className="p-6">
+            <ApprovalWorkflowStatus
+              workflow={workflow}
+              userRole={currentUser.role}
+              userPermissions={currentUser.permissions}
+              onApprove={() => setShowApproveModal(true)}
+              onReject={() => setShowRejectModal(true)}
+            />
+          </Card>
+        )}
+        
+        {approvalError && (
+          <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }}>
+            <CardContent className="p-4">
+              <Text style={{ color: '#b91c1c' }}>{approvalError}</Text>
+            </CardContent>
+          </Card>
+        )}
+        
         {error && (
           <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
             <CardContent className="p-6">
@@ -429,6 +489,67 @@ export const RepositoryFileDetail: React.FC = () => {
               setIsDirty(true);
             }}
           />
+        )}
+        
+        {/* Approval Modals */}
+        {showStartApprovalModal && (
+          <ApprovalActionModal
+            isOpen={showStartApprovalModal}
+            onClose={() => setShowStartApprovalModal(false)}
+            action="approve"
+            level={ApprovalLevel.LEGAL}
+            contractTitle={documentData?.title || 'Hợp đồng'}
+            onSubmit={async (comment) => {
+              try {
+                await startApproval(comment);
+                setShowStartApprovalModal(false);
+                alert('✅ Đã gửi phê duyệt thành công!');
+                await refreshApproval();
+              } catch (err: any) {
+                alert('❌ Lỗi: ' + err.message);
+              }
+            }}
+          />
+        )}
+        
+        {currentLevel && (
+          <>
+            <ApprovalActionModal
+              isOpen={showApproveModal}
+              onClose={() => setShowApproveModal(false)}
+              action="approve"
+              level={currentLevel}
+              contractTitle={documentData?.title || 'Hợp đồng'}
+              onSubmit={async (comment) => {
+                try {
+                  await approve(comment);
+                  setShowApproveModal(false);
+                  alert('✅ Đã phê duyệt thành công!');
+                  await refreshApproval();
+                } catch (err: any) {
+                  alert('❌ Lỗi: ' + err.message);
+                }
+              }}
+            />
+            
+            <ApprovalActionModal
+              isOpen={showRejectModal}
+              onClose={() => setShowRejectModal(false)}
+              action="reject"
+              level={currentLevel}
+              contractTitle={documentData?.title || 'Hợp đồng'}
+              onSubmit={async (comment) => {
+                try {
+                  await reject(comment);
+                  setShowRejectModal(false);
+                  alert('❌ Đã từ chối!');
+                  await refreshApproval();
+                } catch (err: any) {
+                  alert('❌ Lỗi: ' + err.message);
+                }
+              }}
+            />
+          </>
         )}
       </div>
     </RepositoryLayout>

@@ -1,5 +1,6 @@
 /**
  * Approval API Service
+ * Gọi các API endpoint của backend approval system
  */
 
 import axios from 'axios';
@@ -10,7 +11,7 @@ import {
   ApprovalApiResponse
 } from '../types/approval.types';
 
-const API_BASE_URL = process.env.REACT_APP_REPOSITORY_SERVICE_URL || 'http://localhost:8002/api/v1/repository-management-service';
+const API_BASE_URL = import.meta.env.VITE_REPOSITORY_SERVICE_URL || 'http://localhost:8002/api/v1/repository-management-service';
 
 // Helper to get auth headers
 const getAuthHeaders = () => {
