@@ -1,9 +1,11 @@
 import React from 'react';
 import { Tabs, TabList, CommonTab } from './CommonTabs';
+import { CommonIcon } from '../Icon/CommonIcon';
 
 export interface SubTabConfig {
   id: string;
   label: string;
+  icon?: string;
   disabled?: boolean;
 }
 
@@ -39,11 +41,16 @@ export const GenericSubTabsNav: React.FC<GenericSubTabsNavProps> = ({
             onSelect={() => !tab.disabled && !loading && onSubTabChange(tab.id)}
             disabled={tab.disabled || loading}
           >
-            {loading ? (
-              <span className="inline-block w-16 h-4 rounded" style={{ backgroundColor: '#e5e7eb' }}></span>
-            ) : (
-              tab.label
-            )}
+            <div className="flex items-center gap-2">
+              {tab.icon && (
+                <CommonIcon name={tab.icon as any} size={16} />
+              )}
+              {loading ? (
+                <span className="inline-block w-16 h-4 rounded" style={{ backgroundColor: '#e5e7eb' }}></span>
+              ) : (
+                tab.label
+              )}
+            </div>
           </CommonTab>
         ))}
       </TabList>

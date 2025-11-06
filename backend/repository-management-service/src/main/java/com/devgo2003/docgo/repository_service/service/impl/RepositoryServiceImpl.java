@@ -3,8 +3,10 @@ package com.devgo2003.docgo.repository_service.service.impl;
 import com.devgo2003.docgo.repository_service.dto.RepositoryDTO;
 import com.devgo2003.docgo.repository_service.entity.RepositoryEntity;
 import com.devgo2003.docgo.repository_service.entity.FileEntity;
+import com.devgo2003.docgo.repository_service.entity.RepositoryMemberEntity;
 import com.devgo2003.docgo.repository_service.repository.RepositoryRepository;
 import com.devgo2003.docgo.repository_service.repository.FileRepository;
+import com.devgo2003.docgo.repository_service.repository.RepositoryMemberRepository;
 import com.devgo2003.docgo.repository_service.service.IRepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
 
     private final RepositoryRepository repositoryRepository;
     private final FileRepository fileRepository;
+    private final RepositoryMemberRepository repositoryMemberRepository;
     private final RestTemplate restTemplate;
     
     @Value("${user.management.service.url:http://localhost:8001}")
@@ -38,26 +41,26 @@ public class RepositoryServiceImpl implements IRepositoryService {
     
     public RepositoryServiceImpl(RepositoryRepository repositoryRepository, 
                                   FileRepository fileRepository,
+                                  RepositoryMemberRepository repositoryMemberRepository,
                                   RestTemplate restTemplate) {
         this.repositoryRepository = repositoryRepository;
         this.fileRepository = fileRepository;
+        this.repositoryMemberRepository = repositoryMemberRepository;
         this.restTemplate = restTemplate;
     }
 
     @Override
     public Page<RepositoryDTO> getAllRepositories(Pageable pageable) {
         log.info("Getting all repositories with pagination: {}", pageable);
-        Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndIsDeletedFalse(
-            RepositoryEntity.RepositoryType.PERSONAL, pageable
-        );
-        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+        Page<RepositoryEntity> entities = repositoryRepository.findByIsDeletedFalse(pageable);
+        return enrichWithUserNames(entities.map(this::enrichWithStats));
     }
 
     @Override
     public Page<RepositoryDTO> getMyRepositories(String userId, Pageable pageable) {
         log.info("Getting repositories for user: {} with pagination: {}", userId, pageable);
         Page<RepositoryEntity> entities = repositoryRepository.findByOwnerUserIdAndIsDeletedFalse(userId, pageable);
-        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+        return enrichWithUserNames(entities.map(this::enrichWithStats));
     }
 
     @Override
@@ -66,7 +69,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.PERSONAL, userId, pageable
         );
-        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+        return enrichWithUserNames(entities.map(this::enrichWithStats));
     }
 
     @Override
@@ -75,7 +78,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
         Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOrganizationIdAndIsDeletedFalse(
             RepositoryEntity.RepositoryType.ORGANIZATION, organizationId, pageable
         );
-        return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+        return enrichWithUserNames(entities.map(this::enrichWithStats));
     }
 
     @Override
@@ -97,7 +100,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeOrganizationAndOrganizationIdIn(
                 organizationIds, pageable
             );
-            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+            return enrichWithUserNames(entities.map(this::enrichWithStats));
         } catch (Exception e) {
             log.error("Error getting user organizations from user-management-service: {}", e.getMessage());
             // Fallback: lấy repos mà user là owner
@@ -105,7 +108,7 @@ public class RepositoryServiceImpl implements IRepositoryService {
             Page<RepositoryEntity> entities = repositoryRepository.findByTypeAndOwnerUserIdAndIsDeletedFalse(
                 RepositoryEntity.RepositoryType.ORGANIZATION, userId, pageable
             );
-            return enrichWithUserNames(entities.map(RepositoryDTO::fromEntity));
+            return enrichWithUserNames(entities.map(this::enrichWithStats));
         }
     }
     
@@ -130,6 +133,34 @@ public class RepositoryServiceImpl implements IRepositoryService {
         } catch (Exception e) {
             log.error("Failed to fetch user organizations: {}", e.getMessage());
             throw e;
+        }
+    }
+    
+    /**
+     * Enrich RepositoryEntity with file and member statistics
+     */
+    private RepositoryDTO enrichWithStats(RepositoryEntity entity) {
+        try {
+            // Count files in repository
+            long fileCount = fileRepository.countByRepositoryIdAndIsDeletedFalse(entity.getId());
+            
+            // Calculate total size of all files
+            List<FileEntity> allFiles = fileRepository.findAllByRepositoryIdAndIsDeletedFalse(entity.getId());
+            long totalSize = allFiles.stream()
+                .filter(file -> file.getSize() != null)
+                .mapToLong(FileEntity::getSize)
+                .sum();
+            
+            // Count active members
+            int memberCount = (int) repositoryMemberRepository.countByRepositoryIdAndStatus(
+                entity.getId(), 
+                RepositoryMemberEntity.MembershipStatus.ACTIVE
+            );
+            
+            return RepositoryDTO.fromEntityWithStats(entity, fileCount, totalSize, memberCount);
+        } catch (Exception e) {
+            log.warn("Failed to calculate stats for repository {}: {}", entity.getId(), e.getMessage());
+            return RepositoryDTO.fromEntityWithStats(entity, 0L, 0L, 0);
         }
     }
     
@@ -203,7 +234,8 @@ public class RepositoryServiceImpl implements IRepositoryService {
         log.info("Getting repository by id: {}", id);
         return repositoryRepository.findByIdAndIsDeletedFalse(id)
             .map(repo -> {
-                RepositoryDTO dto = RepositoryDTO.fromEntity(repo);
+                // Use helper method to enrich with stats
+                RepositoryDTO dto = enrichWithStats(repo);
                 
                 // Lấy top 5 files mới nhất theo updatedAt
                 try {
@@ -214,11 +246,11 @@ public class RepositoryServiceImpl implements IRepositoryService {
                         .map(file -> {
                             Map<String, Object> fileMap = new java.util.HashMap<>();
                             fileMap.put("id", file.getId());
-                            fileMap.put("name", file.getOverview() != null ? file.getOverview().get("title") : "Unknown");
+                            fileMap.put("name", file.getName() != null ? file.getName() : "Unknown");
                             fileMap.put("updatedAt", file.getUpdatedAt());
                             fileMap.put("createdAt", file.getCreatedAt());
-                            fileMap.put("size", file.getMetadata() != null ? file.getMetadata().get("file.size") : null);
-                            fileMap.put("contentType", file.getOverview() != null ? file.getOverview().get("contentType") : null);
+                            fileMap.put("size", file.getSize());
+                            fileMap.put("contentType", file.getContentType());
                             return fileMap;
                         })
                         .collect(java.util.stream.Collectors.toList());

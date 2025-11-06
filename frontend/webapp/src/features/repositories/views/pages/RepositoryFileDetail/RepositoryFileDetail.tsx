@@ -390,14 +390,15 @@ export const RepositoryFileDetail: React.FC = () => {
       }
       tabsConfig={{
         mainTabs: [
-          { id: 'overview', label: 'Tổng quan', disabled: false },
+          { id: 'overview', label: 'Tổng quan', icon: 'folder', disabled: false },
           { 
             id: 'contracts', 
             label: 'Hợp đồng', 
+            icon: 'file',
             disabled: !(documentData?.type === 'contract' || documentData?.contractType),
             disabledTooltip: 'File không phải hợp đồng'
           },
-          { id: 'comments', label: 'Bình luận', disabled: false },
+          { id: 'comments', label: 'Bình luận', icon: 'message', disabled: false },
         ],
         activeMainTab: activeMainTab,
         onMainTabChange: (tabId: string) => {
@@ -410,25 +411,25 @@ export const RepositoryFileDetail: React.FC = () => {
         },
         subTabsMap: {
           contracts: [
-            { id: 'contract-overview', label: 'Tổng quan HĐ' },
-            { id: 'parties', label: 'Các bên' },
-            { id: 'payment', label: 'Thanh toán' },
-            { id: 'clauses', label: 'Điều khoản' },
-            { id: 'risk', label: 'Rủi ro' },
-            { id: 'reminders', label: 'Nhắc nhở' },
-            { id: 'compliance', label: 'Tuân thủ' },
+            { id: 'contract-overview', label: 'Tổng quan HĐ', icon: 'info' },
+            { id: 'parties', label: 'Các bên', icon: 'building' },
+            { id: 'payment', label: 'Thanh toán', icon: 'dollar-sign' },
+            { id: 'clauses', label: 'Điều khoản', icon: 'file-text' },
+            { id: 'risk', label: 'Rủi ro', icon: 'alert-circle' },
+            { id: 'reminders', label: 'Nhắc nhở', icon: 'bell' },
+            { id: 'compliance', label: 'Tuân thủ', icon: 'tag' },
           ],
           overview: [
-            { id: 'details', label: 'Chi tiết' },
-            { id: 'content', label: 'Nội dung' },
-            { id: 'ocr', label: 'Nội dung OCR' },
-            { id: 'metadata', label: 'Siêu dữ liệu' },
-            { id: 'notes', label: 'Ghi chú' },
-            { id: 'history', label: 'Lịch sử' },
-            { id: 'permissions', label: 'Quyền hạn' },
+            { id: 'details', label: 'Chi tiết', icon: 'info' },
+            { id: 'content', label: 'Nội dung', icon: 'file-text' },
+            { id: 'ocr', label: 'Nội dung OCR', icon: 'file-text' },
+            { id: 'metadata', label: 'Siêu dữ liệu', icon: 'tag' },
+            { id: 'notes', label: 'Ghi chú', icon: 'message' },
+            { id: 'history', label: 'Lịch sử', icon: 'clock' },
+            { id: 'permissions', label: 'Quyền hạn', icon: 'lock' },
           ],
           comments: [
-            { id: 'comments-list', label: 'Danh sách bình luận' },
+            { id: 'comments-list', label: 'Danh sách bình luận', icon: 'message' },
           ],
         },
         activeSubTab: activeSubTab,

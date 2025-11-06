@@ -144,7 +144,7 @@ export const RepositoryDetail: React.FC = () => {
             label: t('repositories.detail.tabs.activity'),
             icon: 'clock',
             disabled: true,
-            disabledTooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
+            disabledTooltip: t('repositories.detail.tabs.activityDisabled'),
           },
         ],
         activeMainTab: activeTab,
@@ -221,19 +221,20 @@ export const RepositoryDetail: React.FC = () => {
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.files')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
-                              {repository?.fileCount || 0}
+                              {repository?.files?.length ?? repository?.fileCount ?? 0}
                             </p>
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.members')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
-                              {repository?.memberCount || 0}
+                              {membersData?.totalElements ?? repository?.memberCount ?? 0}
                             </p>
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.storage')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
-                              {formatFileSize(repository?.totalSize)}
+                              {repository?.totalSize != null ? formatFileSize(repository.totalSize) : 
+                                repository?.files?.length > 0 ? t('repositories.detail.stats.calculating') : '0 B'}
                             </p>
                           </div>
                         </div>

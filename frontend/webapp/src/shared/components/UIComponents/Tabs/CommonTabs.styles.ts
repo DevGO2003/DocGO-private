@@ -4,5 +4,5 @@ export const tabsStyles = {
   tabBase: 'relative px-3 py-1.5 text-sm transition-colors',
   tabActive: 'bg-gray-100 text-gray-900 font-semibold',
   tabInactive: 'bg-white text-gray-700 hover:bg-gray-50',
-  tabDisabled: 'opacity-50 cursor-not-allowed',
+  tabDisabled: 'bg-white text-gray-700 opacity-50 cursor-not-allowed',
 };

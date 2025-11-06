@@ -54,7 +54,7 @@ export const TabList: React.FC<TabListProps> = ({ children, className }) => {
   )
 }
 
-export const CommonTab: React.FC<CommonTabProps> = ({ value, activeValue, onSelect, children, disabled }) => {
+export const CommonTab: React.FC<CommonTabProps> = ({ value, activeValue, onSelect, children, disabled, title }) => {
   const isActive = value === activeValue
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -64,10 +64,12 @@ export const CommonTab: React.FC<CommonTabProps> = ({ value, activeValue, onSele
       type="button"
       onClick={() => !disabled && onSelect(value)}
       disabled={disabled}
+      title={title}
       className={cn(
         tabsStyles.tabBase,
-        isActive ? tabsStyles.tabActive : tabsStyles.tabInactive,
-        disabled && tabsStyles.tabDisabled,
+        disabled 
+          ? tabsStyles.tabDisabled 
+          : (isActive ? tabsStyles.tabActive : tabsStyles.tabInactive),
       )}
     >
       {children}
