@@ -82,15 +82,17 @@ public class OrganizationService {
                             .map(org -> {
                                 OrganizationResponse response = OrganizationResponse.fromEntity(org);
                                 
-                                // Thêm thông tin role của user trong org này
-                                response.setUserRole(membership.getSimpleRole());
+                                // Thêm thông tin role của user trong org này từ membership
+                                String role = membership.getRole() != null ? membership.getRole() : membership.getSimpleRole();
+                                response.setUserRole(role);
                                 
                                 // Thêm permissions
                                 if (membership.getPermissions() != null) {
                                     response.setUserPermissions(membership.getPermissions());
                                 }
                                 
-                                log.debug("Mapped organization: {} with role: {}", org.getName(), membership.getSimpleRole());
+                                log.debug("Mapped organization: {} with role: {} (permissions: {})", 
+                                    org.getName(), role, membership.getPermissions());
                                 
                                 return response;
                             })
@@ -146,23 +148,30 @@ public class OrganizationService {
                     OrganizationResponse response = OrganizationResponse.fromEntity(org);
                     
                     log.info("Checking role for user {} in org {}", currentUserId, id);
-                    log.info("Organization ownerUserId: {}", org.getOwnerUserId());
-                    log.info("Are they equal? {}", org.getOwnerUserId().equals(currentUserId));
                     
-                    // Determine user's role in this organization
-                    if (org.getOwnerUserId() != null && org.getOwnerUserId().equals(currentUserId)) {
-                        response.setUserRole("OWNER");
-                        log.info("✅ User is OWNER");
-                    } else if (org.getAdminUserIds() != null && org.getAdminUserIds().contains(currentUserId)) {
-                        response.setUserRole("MANAGER");
-                        log.info("✅ User is MANAGER");
-                        // TODO: Get user's specific permissions from membership
-                    } else if (org.getUserIds() != null && org.getUserIds().contains(currentUserId)) {
-                        response.setUserRole("MEMBER");
-                        log.info("✅ User is MEMBER");
+                    // Fetch role and permissions from OrganizationMembership (the source of truth)
+                    Optional<OrganizationMembership> membershipOpt = membershipRepository
+                            .findByOrganizationIdAndUserId(id, currentUserId);
+                    
+                    if (membershipOpt.isPresent()) {
+                        OrganizationMembership membership = membershipOpt.get();
+                        String role = membership.getRole();
+                        List<String> permissions = membership.getPermissions();
+                        
+                        response.setUserRole(role); // OWNER, MANAGER, or MEMBER from membership
+                        response.setUserPermissions(permissions);
+                        
+                        log.info("✅ User role from membership: {}", role);
+                        log.info("✅ User permissions from membership: {}", permissions);
                     } else {
-                        response.setUserRole("MEMBER"); // Default
-                        log.info("⚠️ User not found in org, defaulting to MEMBER");
+                        // Fallback: Check if user is owner from organization entity
+                        if (org.getOwnerUserId() != null && org.getOwnerUserId().equals(currentUserId)) {
+                            response.setUserRole("OWNER");
+                            log.info("✅ User is OWNER (from org entity fallback)");
+                        } else {
+                            response.setUserRole("MEMBER"); // Default
+                            log.info("⚠️ No membership found, defaulting to MEMBER");
+                        }
                     }
                     
                     log.info("Final role for user {} in organization {}: {}", currentUserId, id, response.getUserRole());

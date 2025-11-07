@@ -13,6 +13,7 @@ import { useContractApproval } from '@features/approvals/hooks/useContractApprov
 import { ApprovalWorkflowStatus } from '@features/approvals/components/ApprovalWorkflowStatus';
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
+import { useAppSelector } from '@store/hooks';
 
 interface FileDetailData {
   fileId: string;
@@ -44,10 +45,16 @@ export const RepositoryFileDetail: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showStartApprovalModal, setShowStartApprovalModal] = useState(false);
   
-  // Get user info from localStorage
+  // Get user info from Redux store
+  const authUser = useAppSelector((state) => state.auth.user);
+  
+  // Get organization role and permissions from localStorage
+  const orgRole = localStorage.getItem('organizationRole') || authUser?.role || 'MEMBER';
+  const orgPermissions = (localStorage.getItem('organizationPermissions') || '').split(',').filter(Boolean);
+  
   const currentUser = {
-    role: localStorage.getItem('userRole') || 'MEMBER',
-    permissions: (localStorage.getItem('userPermissions') || '').split(',').filter(Boolean)
+    role: orgRole,
+    permissions: orgPermissions
   };
   
   // Use approval hook

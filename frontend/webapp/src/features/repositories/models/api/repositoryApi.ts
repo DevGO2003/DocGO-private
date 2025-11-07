@@ -154,10 +154,12 @@ const repositoryApi = {
 
   // Contracts
   getAllContracts: async (params?: PaginationParams & { organizationId?: string }): Promise<PaginatedResponse<Contract>> => {
-    const queryParams = { ...params };
+    const queryParams: any = { ...params };
     if (params?.organizationId) {
-      queryParams.documentType = 'CONTRACT';
+      // Fetch ALL files in organization's repositories, filter by isContract instead of documentType
+      // This includes: documentType = "CONTRACT", "hop-dong", "hợp đồng", etc.
       queryParams.organizationId = params.organizationId;
+      // Don't set documentType to allow all contract types
     } else {
       queryParams.documentType = 'CONTRACT';
     }
@@ -165,6 +167,21 @@ const repositoryApi = {
       `/api/v1/repository-management-service/files`,
       { params: queryParams }
     );
+    
+    // Filter by isContract flag if available
+    if (params?.organizationId && response.data.data) {
+      const filtered = {
+        ...response.data.data,
+        content: response.data.data.content?.filter((file: any) => 
+          file.isContract === true || 
+          file.documentType?.toUpperCase().includes('CONTRACT') ||
+          file.documentType?.toLowerCase().includes('hop') ||
+          file.documentType?.toLowerCase().includes('hợp')
+        ) || []
+      };
+      return filtered as PaginatedResponse<Contract>;
+    }
+    
     return response.data.data!;
   },
 

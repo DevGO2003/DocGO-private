@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ import { useOrganizationContracts, useOrganizationRepositories } from '@features
 // import { UploadContractDialog } from '@features/contract'; // Temporarily disabled
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
+import { saveOrganizationContext } from '@features/organizations/utils/organizationContext';
 
 type WorkspaceTab = 'info' | 'reports' | 'contracts' | 'repositories' | 'members' | 'settings';
 
@@ -37,10 +38,10 @@ export const OrganizationWorkspace = () => {
     data: contractsData, 
     isLoading: contractsLoading, 
     isFetching: contractsFetching,
-    // refetch: refetchContracts  // Temporarily disabled
+    refetch: refetchContracts
   } = useOrganizationContracts(id!, {
     page: 0,
-    size: 5,
+    size: 100, // Increased to show more contracts
   });
 
   // Fetch organization members
@@ -62,6 +63,27 @@ export const OrganizationWorkspace = () => {
     size: 5,
   });
 
+  // Auto-save organization context for approval system
+  useEffect(() => {
+    if (organization && id) {
+      console.log('[OrganizationWorkspace] Auto-saving organization context:', {
+        orgId: id,
+        orgName: organization.name,
+        userRole: organization.userRole,
+        userPermissions: organization.userPermissions
+      });
+      saveOrganizationContext(organization);
+    }
+  }, [organization, id]);
+
+  // Auto-refetch contracts when switching to contracts tab
+  useEffect(() => {
+    if (activeTab === 'contracts') {
+      console.log('[OrganizationWorkspace] Refetching contracts on tab switch...');
+      refetchContracts();
+    }
+  }, [activeTab, refetchContracts]);
+
   // Debug logging
   console.log('[OrganizationWorkspace] Members Data:', membersData);
   console.log('[OrganizationWorkspace] Members Content:', membersData?.content);
@@ -70,12 +92,34 @@ export const OrganizationWorkspace = () => {
 
   // Calculate stats from real data
   const contracts = contractsData?.content || [];
+  
+  // Helper function to get contract status
+  const getContractStatus = (contract: any) => {
+    // Try multiple status fields in order of priority
+    return contract.status 
+      || contract.approvalStatus 
+      || contract.workflowStatus 
+      || (contract.workflow?.status)
+      || 'DRAFT'; // Default status
+  };
+  
+  // Debug: Log contracts data to see status field
+  console.log('[OrganizationWorkspace] Contracts data:', contracts);
+  console.log('[OrganizationWorkspace] Contracts with status:', contracts.map(c => ({
+    id: c.id,
+    name: (c as any).fileName || c.title,
+    status: c.status,
+    approvalStatus: (c as any).approvalStatus,
+    workflowStatus: (c as any).workflowStatus,
+    computedStatus: getContractStatus(c)
+  })));
+  
   const stats = {
     totalContracts: contracts.length,
-    pendingApprovals: contracts.filter(c => c.status === 'PENDING_APPROVAL').length,
-    approved: contracts.filter(c => c.status === 'APPROVED').length,
-    rejected: contracts.filter(c => c.status === 'REJECTED').length,
-    totalFiles: contractsData?.totalElements || 0, // Use contracts count as proxy for files
+    pendingApprovals: contracts.filter(c => getContractStatus(c) === 'PENDING_APPROVAL').length,
+    approved: contracts.filter(c => getContractStatus(c) === 'APPROVED').length,
+    rejected: contracts.filter(c => ['REJECTED', 'CANCELLED'].includes(getContractStatus(c))).length,
+    totalFiles: contractsData?.totalElements || 0,
     totalRepositories: repositoriesData?.totalElements || 0,
   };
 
@@ -392,6 +436,16 @@ export const OrganizationWorkspace = () => {
                         </span>
                       )}
                       <Button 
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => refetchContracts()}
+                        disabled={contractsFetching}
+                        className="flex items-center gap-2"
+                      >
+                        <CommonIcon name="refresh-cw" className="w-4 h-4" />
+                        {contractsFetching ? 'Đang tải...' : 'Làm mới'}
+                      </Button>
+                      <Button 
                         variant="outline"
                         onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
                         className="flex items-center gap-2"
@@ -417,77 +471,93 @@ export const OrganizationWorkspace = () => {
                   <div className="space-y-3">
                   {/* Hiển thị TẤT CẢ chờ phê duyệt trước - KHÔNG GIỚI HẠN */}
                   {contracts
-                  .filter(c => c.status === 'PENDING_APPROVAL')
-                  .map((contract) => (
+                  .filter(c => getContractStatus(c) === 'PENDING_APPROVAL')
+                  .map((contract) => {
+                    const contractStatus = getContractStatus(contract);
+                    return (
                   <div
                   key={contract.id}
-                  className="p-4 border-2 rounded-lg hover:bg-yellow-100 transition-colors" style={{ borderColor: '#fef08a', backgroundColor: '#fefce8' }} >
+                  onClick={() => navigate(`/repositories/${(contract as any).repositoryId}/files/${contract.id}`)}
+                  className="p-4 border-2 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer" style={{ borderColor: '#fef08a', backgroundColor: '#fefce8' }} >
                   <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
                   <CommonIcon name="alert-circle" className="mt-1" style={{ color: '#ca8a04' }} />
                   <div className="flex-1">
-                    <h4 className="font-medium" style={{ color: '#111827' }} >{contract.title}</h4>
-                    {contract.content && (
+                    <h4 className="font-medium" style={{ color: '#111827' }} >
+                      {contract.title || (contract as any).fileName || (contract as any).name || 'Hợp đồng không có tên'}
+                    </h4>
+                    {contract.content && typeof contract.content === 'string' && (
                     <p className="text-sm mt-1" style={{ color: '#4b5563' }} >
                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                       </p>
                       )}
                         <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#6b7280' }} >
-                          <span>{contract.type}</span>
+                          <span>{contract.type || (contract as any).documentType || 'Hợp đồng'}</span>
                         <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   </div>
-                  <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} >
-                  {contract.status}
+                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} >
+                  ⏳ Chờ duyệt
                   </span>
                   </div>
                   </div>
-                  ))}
+                  );
+                  })}
 
                   {/* Hiển thị các hợp đồng khác - GIỚI HẠN 10 */}
                   {contracts
-                  .filter(c => c.status !== 'PENDING_APPROVAL')
+                  .filter(c => getContractStatus(c) !== 'PENDING_APPROVAL')
                       .slice(0, showAllContracts ? undefined : 10)
-                        .map((contract) => (
+                        .map((contract) => {
+                          const contractStatus = getContractStatus(contract);
+                          return (
                           <div
                             key={contract.id}
-                            className="p-4 border rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: '#e5e7eb' }} >
+                            onClick={() => navigate(`/repositories/${(contract as any).repositoryId}/files/${contract.id}`)}
+                            className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" style={{ borderColor: '#e5e7eb' }} >
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-3 flex-1">
                                 <CommonIcon name="file" className="mt-1" style={{ color: '#2563eb' }} />
                                 <div className="flex-1">
-                                  <h4 className="font-medium" style={{ color: '#111827' }} >{contract.title}</h4>
-                                  {contract.content && (
+                                  <h4 className="font-medium" style={{ color: '#111827' }} >
+                                    {contract.title || (contract as any).fileName || (contract as any).name || 'Hợp đồng không có tên'}
+                                  </h4>
+                                  {contract.content && typeof contract.content === 'string' && (
                                     <p className="text-sm mt-1" style={{ color: '#4b5563' }} >
                                       {contract.content.length > 160 ? `${contract.content.slice(0, 160)}...` : contract.content}
                                     </p>
                                   )}
                                   <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#6b7280' }} >
-                                    <span>{contract.type}</span>
+                                    <span>{contract.type || (contract as any).documentType || 'Hợp đồng'}</span>
                                     <span>{new Date(contract.createdAt).toLocaleDateString()}</span>
                                   </div>
                                 </div>
                               </div>
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  contract.status === 'APPROVED'
-                                    ? 'bg-green-100 text-green-700'
-                                    : contract.status === 'PENDING_APPROVAL'
-                                    ? 'bg-yellow-100 text-yellow-700'
-                                    : contract.status === 'REJECTED'
-                                    ? 'bg-red-100 text-red-700'
-                                    : 'bg-gray-100 text-gray-700'
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 ${
+                                  contractStatus === 'APPROVED'
+                                    ? 'bg-green-100 text-green-800'
+                                    : contractStatus === 'PENDING_APPROVAL'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : ['REJECTED', 'CANCELLED'].includes(contractStatus)
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-gray-100 text-gray-800'
                                 }`}
                               >
-                                {contract.status}
+                                {contractStatus === 'APPROVED' && '✓ Đã duyệt'}
+                                {contractStatus === 'PENDING_APPROVAL' && '⏳ Chờ duyệt'}
+                                {contractStatus === 'REJECTED' && '✗ Từ chối'}
+                                {contractStatus === 'CANCELLED' && '🚫 Đã huỷ'}
+                                {!['APPROVED', 'PENDING_APPROVAL', 'REJECTED', 'CANCELLED'].includes(contractStatus) && contractStatus}
                               </span>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
 
                       {/* Show More Button - chỉ cho contracts không phải PENDING */}
-                      {!showAllContracts && contracts.filter(c => c.status !== 'PENDING_APPROVAL').length > 10 && (
+                      {!showAllContracts && contracts.filter(c => getContractStatus(c) !== 'PENDING_APPROVAL').length > 10 && (
                         <div className="flex justify-center mt-6">
                           <Button
                             variant="outline"
