@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types';
@@ -89,12 +89,9 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               <p className="text-sm" style={{ color: '#6b7280' }}>{repositoryName}</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <CommonIcon name="x" className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Invite Method Tabs */}
@@ -105,14 +102,14 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               onClick={() => setInviteMethod('link')}
               className="flex-1"
             >
-              Chia sẻ link
+              {t('repositories.detail.invite.shareLink')}
             </Button>
             <Button
               variant={inviteMethod === 'member' ? 'default' : 'outline'}
               onClick={() => setInviteMethod('member')}
               className="flex-1"
             >
-              Chọn thành viên
+              {t('repositories.detail.invite.selectMember')}
             </Button>
           </div>
         )}
@@ -124,7 +121,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                  Link mời
+                  {t('repositories.detail.invite.inviteLink')}
                 </label>
                 <div className="flex gap-2">
                   <Input
@@ -140,12 +137,12 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                     {copied ? (
                       <>
                         <CommonIcon name="check" className="mr-2" />
-                        Đã sao
+                        {t('repositories.detail.invite.copied')}
                       </>
                     ) : (
                       <>
                         <CommonIcon name="copy" className="w-4 h-4 mr-2" />
-                        Sao chép
+                        {t('repositories.detail.invite.copy')}
                       </>
                     )}
                   </Button>
@@ -154,16 +151,16 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
 
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                  Link hết hạn sau
+                  {t('repositories.detail.invite.linkExpiresAfter')}
                 </label>
                 <Select
                   value={linkExpiry}
                   onChange={(e) => setLinkExpiry(e.target.value)}
                   options={[
-                    { value: '1', label: '1 ngày' },
-                    { value: '7', label: '7 ngày' },
-                    { value: '30', label: '30 ngày' },
-                    { value: 'never', label: 'Không giới hạn' },
+                    { value: '1', label: t('repositories.detail.invite.expiryOptions.1day') },
+                    { value: '7', label: t('repositories.detail.invite.expiryOptions.7days') },
+                    { value: '30', label: t('repositories.detail.invite.expiryOptions.30days') },
+                    { value: 'never', label: t('repositories.detail.invite.expiryOptions.never') },
                   ]}
                 />
               </div>
@@ -172,8 +169,10 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               {isPersonal && (
                 <div className="border rounded-lg p-4" style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }}>
                   <p className="text-sm" style={{ color: '#1e40af' }}>
-                    💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file.
-                    Chỉ bạn mời có quyền upload và xóa.
+                    <Trans i18nKey="repositories.detail.invite.personalRepoInfo">
+                      💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file.
+                      Chỉ bạn mời có quyền upload và xóa.
+                    </Trans>
                   </p>
                 </div>
               )}
@@ -185,16 +184,16 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                  Chọn thành viên
+                  {t('repositories.detail.invite.selectMemberLabel')}
                 </label>
                 <div className="border rounded-lg max-h-48 overflow-y-auto" style={{ borderColor: '#d1d5db' }}>
                   {membersLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      Đang tải danh sách thành viên...
+                      {t('repositories.detail.invite.loadingMembers')}
                     </div>
                   ) : organizationMembers.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      Không có thành viên nào trong tổ chức
+                      {t('repositories.detail.invite.noMembers')}
                     </div>
                   ) : (
                     organizationMembers.map((member) => (
@@ -226,13 +225,13 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
               <div>
                 <label className="block text-sm font-medium mb-3" style={{ color: '#374151' }}>
                   <CommonIcon name="shield" className="w-4 h-4 inline mr-2" />
-                  Quyền hạn
+                  {t('repositories.detail.invite.permissions.title')}
                 </label>
                 <div className="space-y-3 rounded-lg p-4" style={{ backgroundColor: '#f9fafb' }}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium" style={{ color: '#111827' }}>Xem file</p>
-                      <p className="text-sm" style={{ color: '#6b7280' }}>Được xem và tải file</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>{t('repositories.detail.invite.permissions.view.label')}</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>{t('repositories.detail.invite.permissions.view.description')}</p>
                     </div>
                     <Checkbox
                       checked={permissions.view}
@@ -243,8 +242,8 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium" style={{ color: '#111827' }}>Upload file</p>
-                      <p className="text-sm" style={{ color: '#6b7280' }}>Được upload file mới</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>{t('repositories.detail.invite.permissions.upload.label')}</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>{t('repositories.detail.invite.permissions.upload.description')}</p>
                     </div>
                     <Checkbox
                       checked={permissions.upload}
@@ -255,8 +254,8 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium" style={{ color: '#111827' }}>Xóa file</p>
-                      <p className="text-sm" style={{ color: '#6b7280' }}>Được xóa file khỏi repository</p>
+                      <p className="font-medium" style={{ color: '#111827' }}>{t('repositories.detail.invite.permissions.delete.label')}</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>{t('repositories.detail.invite.permissions.delete.description')}</p>
                     </div>
                     <Checkbox
                       checked={permissions.delete}

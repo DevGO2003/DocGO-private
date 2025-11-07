@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
+  RefreshButton,
   Card,
   Table,
   TableHeader,
@@ -11,6 +12,7 @@ import {
   TableContainer,
   Text,
   Checkbox,
+  CommonIcon,
 } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import repositoryApi from '@features/repositories/models/api/repositoryApi';
@@ -223,8 +225,15 @@ export const RepositoryFilesList: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
+    if (currentPage === 0) {
+      fetchFiles(false);
+    } else {
+      fetchFiles(true);
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
     setCurrentPage(0);
-    fetchFiles(false);
   }, [debouncedSearch, status, type, selectedTags, sortBy, sortDirection, activeTab]);
 
   useEffect(() => {
@@ -264,15 +273,15 @@ export const RepositoryFilesList: React.FC = () => {
   }, [id]);
 
   const loadMore = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    fetchFiles(true); // Append mode
+    if (hasMore) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
   };
 
   return (
     <RepositoryLayout
       title={t('repositories.files.breadcrumbs.files')}
-      subtitle={id ? `Mã repo: ${id}` : undefined}
+      subtitle={id ? t('repositories.files.subtitle', { id }) : undefined}
       breadcrumbs={[
         { label: t('nav.repositories'), href: '/repositories' },
         { label: repoName || id || t('repositories.files.breadcrumbs.repository'), href: `/repositories/${id}` },
@@ -312,9 +321,10 @@ export const RepositoryFilesList: React.FC = () => {
           onSortDirectionChange={handleSortDirectionChange}
           showAdvanced={showAdvanced}
           onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-          onRefresh={refreshFiles}
-          refreshing={refreshing}
         />
+      }
+      headerRight={
+        <RefreshButton onClick={refreshFiles} loading={refreshing} />
       }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -345,9 +355,7 @@ export const RepositoryFilesList: React.FC = () => {
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <div className="mb-4">
-                <svg className="mx-auto h-16 w-16" style={{ color: '#9ca3af' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <CommonIcon name="file-search" className="mx-auto h-16 w-16 text-gray-400" />
               </div>
               <Text className="mb-6" style={{ color: '#4b5563' }}>{t('repositories.files.empty.notFound')}</Text>
               <Button variant="outline" onClick={() => { setSearch(''); refreshFiles(); }}>{t('repositories.files.empty.clearSearchAndRefresh')}</Button>
@@ -408,7 +416,7 @@ export const RepositoryFilesList: React.FC = () => {
                     <TableHeader key={col.key}>
                       <Text className="text-xs font-medium uppercase" style={{ color: '#6b7280' }}>
                         {col.label}
-                        {col.key === 'checkbox' ? null : <button onClick={() => openTableSettings()}>Settings</button>} // Add settings button in header
+                        {col.key === 'checkbox' ? null : <button onClick={() => openTableSettings()}>{t('repositories.files.table.settings')}</button>} // Add settings button in header
                       </Text>
                     </TableHeader>
                   ))}
@@ -428,23 +436,23 @@ export const RepositoryFilesList: React.FC = () => {
                         <TableCell key={col.key}>
                           <Text className="text-sm" style={{ color: '#111827' }}>
                             {col.key === 'document' ? f.fileName :
-                             col.key === 'contractNumber' ? f.contractNumber || '-' :
+                             col.key === 'contractNumber' ? f.contractNumber || t('common.noData') :
                              col.key === 'status' ? (
                                <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }} title={t(`status.${f.status}.tooltip`)}>{f.status}</span>
                              ) :
-                             col.key === 'type' ? f.contractType || '-' :
-                             col.key === 'totalValue' ? <Text>{f.totalValue ? `${f.totalValue.toLocaleString()} ${f.currency}` : '-'}</Text> :
-                             col.key === 'size' ? `${f.fileSize ?? f.size} bytes` :
+                             col.key === 'type' ? f.contractType || t('common.noData') :
+                             col.key === 'totalValue' ? <Text>{f.totalValue ? `${f.totalValue.toLocaleString()} ${f.currency}` : t('common.noData')}</Text> :
+                             col.key === 'size' ? t('repositories.files.table.bytes', { count: f.fileSize ?? f.size }) :
                              col.key === 'uploadedAt' ? new Date(f.uploadedAt).toLocaleString() :
                              col.key === 'actions' ? (
                                <Link to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}>
-                                 <Button variant="outline" size="sm">{t('viewDetail')}</Button>
+                                 <Button variant="outline" size="sm">{t('repositories.files.table.viewDetail')}</Button>
                                </Link>
-                             ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || '-'}</Text> :
+                             ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || t('common.noData')}</Text> :
                              col.key === 'riskLevel' ? (
                                <span className="px-2 py-1 rounded text-xs" style={f.riskLevel === 'LOW' ? { backgroundColor: '#dcfce7', color: '#166534' } : f.riskLevel === 'HIGH' ? { backgroundColor: '#fee2e2', color: '#991b1b' } : { backgroundColor: '#fef3c7', color: '#92400e' }} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
                              ) :
-                             col.key === 'reminders' ? <Text>{f.reminders?.length || 0}</Text> : '-'}
+                             col.key === 'reminders' ? <Text>{f.reminders?.length || 0}</Text> : t('common.noData')}
                           </Text>
                         </TableCell>
                       )

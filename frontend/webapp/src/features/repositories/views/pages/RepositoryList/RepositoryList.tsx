@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -184,7 +184,7 @@ export const RepositoryList = () => {
   return (
     <RepositoryLayout
       title={t('repositories.list.title')}
-      description="Quản lý kho lưu trữ tài liệu cá nhân, tổ chức và công khai"
+      description={t('repositories.list.description')}
       breadcrumbs={[{ label: t('nav.repositories'), current: true }]}
       onRefresh={handleRefresh}
       tabsConfig={{
@@ -263,9 +263,9 @@ export const RepositoryList = () => {
             <div className="flex items-center justify-between mt-8">
               <div className="text-sm" style={{ color: '#374151' }} >
                 {t('repositories.list.pagination.showing', {
-                  from: currentData.currentPage * currentData.pageSize + 1,
-                  to: Math.min((currentData.currentPage + 1) * currentData.pageSize, currentData.totalElements),
-                  total: currentData.totalElements,
+                  from: (currentData.currentPage || 0) * (currentData.pageSize || 0) + 1,
+                  to: Math.min(((currentData.currentPage || 0) + 1) * (currentData.pageSize || 0), currentData.totalElements || 0),
+                  total: currentData.totalElements || 0,
                 })}
               </div>
 

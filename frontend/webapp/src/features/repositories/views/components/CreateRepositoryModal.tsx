@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Input,
@@ -33,6 +34,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<RepositoryCreateData>({
     name: '',
     description: '',
@@ -49,19 +51,19 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
     const newErrors: Partial<Record<keyof RepositoryCreateData, string>> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Tên repository là bắt buộc';
+      newErrors.name = t('repositories.createModal.errors.nameRequired');
     } else if (formData.name.length < 3) {
-      newErrors.name = 'Tên repository phải có ít nhất 3 ký tự';
+      newErrors.name = t('repositories.createModal.errors.nameTooShort');
     } else if (formData.name.length > 100) {
-      newErrors.name = 'Tên repository không được quá 100 ký tự';
+      newErrors.name = t('repositories.createModal.errors.nameTooLong');
     }
 
     if (formData.description && formData.description.length > 500) {
-      newErrors.description = 'Mô tả không được quá 500 ký tự';
+      newErrors.description = t('repositories.createModal.errors.descriptionTooLong');
     }
 
     if (formData.type === 'ORGANIZATION' && !formData.organizationId) {
-      newErrors.organizationId = 'Vui lòng chọn tổ chức';
+      newErrors.organizationId = t('repositories.createModal.errors.organizationRequired');
     }
 
     setErrors(newErrors);
@@ -113,11 +115,11 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Tạo Repository Mới"
+      title={t('repositories.createModal.title')}
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="text-sm" style={{ color: '#6b7280' }}>
-            Các trường có dấu <span style={{ color: '#ef4444' }}>*</span> là bắt buộc
+            {t('repositories.createModal.requiredFields')}
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -126,17 +128,17 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               onClick={handleClose}
               disabled={isLoading}
             >
-              Hủy
+              {t('repositories.createModal.cancel')}
             </Button>
             <Button form="create-repo-form" type="submit" disabled={isLoading} className="min-w-[120px]">
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <CommonIcon name="user" size={16} />
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Đang tạo...
+                  {t('repositories.createModal.submitting')}
                 </div>
               ) : (
-                'Tạo Repository'
+                t('repositories.createModal.submit')
               )}
             </Button>
           </div>
@@ -149,7 +151,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
           {/* Repository Type Selection */}
           <div className="space-y-3">
             <Label htmlFor="type" className="text-sm font-medium" style={{ color: '#111827' }}>
-              Chọn loại Repository <span style={{ color: '#ef4444' }}>*</span>
+              {t('repositories.createModal.labels.type')} <span style={{ color: '#ef4444' }}>*</span>
             </Label>
             <div className="grid grid-cols-2 gap-3">
               {/* Personal Option */}
@@ -174,10 +176,10 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     <div className={`font-semibold ${
                       formData.type === 'PERSONAL' ? 'text-blue-900' : 'text-gray-900'
                     }`}>
-                      Cá nhân
+                      {t('repositories.createModal.types.personal.label')}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: '#4b5563' }}>
-                      Repository của riêng bạn
+                      {t('repositories.createModal.types.personal.description')}
                     </div>
                   </div>
                   {formData.type === 'PERSONAL' && (
@@ -210,10 +212,10 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                     <div className={`font-semibold ${
                       formData.type === 'ORGANIZATION' ? 'text-green-900' : 'text-gray-900'
                     }`}>
-                      Tổ chức
+                      {t('repositories.createModal.types.organization.label')}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: '#4b5563' }}>
-                      Thuộc về một tổ chức
+                      {t('repositories.createModal.types.organization.description')}
                     </div>
                   </div>
                   {formData.type === 'ORGANIZATION' && (
@@ -234,14 +236,14 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               <div className="flex items-center gap-2 mb-3">
                 <CommonIcon name="building" size={16} />
                 <Label htmlFor="organizationId" className="text-sm font-medium" style={{ color: '#111827' }}>
-                  Chọn tổ chức <span style={{ color: '#ef4444' }}>*</span>
+                  {t('repositories.createModal.labels.organization')} <span style={{ color: '#ef4444' }}>*</span>
                 </Label>
               </div>
               <Select
                 value={formData.organizationId || ''}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleInputChange('organizationId', e.target.value)}
                 options={[
-                  { value: '', label: '-- Chọn tổ chức --' },
+                  { value: '', label: t('repositories.createModal.placeholders.organization') },
                   ...(organizationsData?.content || []).map(org => ({
                     value: org.id,
                     label: org.name
@@ -255,13 +257,13 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               {organizationsData?.content?.length === 0 && (
                 <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md mt-2">
                   <div className="text-amber-600 text-sm">
-                    ⚠️ Bạn chưa có tổ chức nào. Hãy tạo hoặc tham gia một tổ chức trước.
+                    {t('repositories.createModal.warnings.noOrganizations')}
                   </div>
                 </div>
               )}
               {organizationsData?.content && organizationsData.content.length > 0 && (
                 <p className="text-xs mt-2" style={{ color: '#4b5563' }}>
-                  Đã tìm thấy {organizationsData.content.length} tổ chức mà bạn tham gia
+                  {t('repositories.createModal.organizationsFound', { count: organizationsData.content.length })}
                 </p>
               )}
             </div>
@@ -269,12 +271,12 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium" style={{ color: '#374151' }}>
-              Tên Repository <span style={{ color: '#ef4444' }}>*</span>
+              {t('repositories.createModal.labels.name')} <span style={{ color: '#ef4444' }}>*</span>
             </Label>
             <Input
               id="name"
               type="text"
-              placeholder="Nhập tên repository..."
+              placeholder={t('repositories.createModal.placeholders.name')}
               value={formData.name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
               className={errors.name ? 'border-red-500' : ''}
@@ -286,11 +288,11 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium" style={{ color: '#374151' }}>
-              Mô tả
+              {t('repositories.createModal.labels.description')}
             </Label>
             <Textarea
               id="description"
-              placeholder="Nhập mô tả cho repository..."
+              placeholder={t('repositories.createModal.placeholders.description')}
               value={formData.description}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
               rows={3}
@@ -300,7 +302,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
               <p className="text-sm" style={{ color: '#dc2626' }}>{errors.description}</p>
             )}
             <p className="text-xs" style={{ color: '#6b7280' }}>
-              {formData.description?.length || 0}/500 ký tự
+              {t('repositories.createModal.characterCount', { count: formData.description?.length || 0, max: 500 })}
             </p>
           </div>
 
@@ -308,7 +310,7 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
           {formData.type === 'PERSONAL' && (
             <div className="space-y-2">
               <Label className="text-sm font-medium" style={{ color: '#374151' }}>
-                Công khai
+                {t('repositories.createModal.labels.public')}
               </Label>
               <div className="flex items-center space-x-3">
                 <Switch
@@ -317,12 +319,10 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
                 />
                 <div className="space-y-1">
                   <p className="text-sm font-medium" style={{ color: '#111827' }}>
-                    {formData.isPublic ? 'Công khai' : 'Riêng tư'}
+                    {t(formData.isPublic ? 'repositories.createModal.public.label' : 'repositories.createModal.private.label')}
                   </p>
                   <p className="text-xs" style={{ color: '#6b7280' }}>
-                    {formData.isPublic
-                      ? 'Bất kỳ ai cũng có thể xem repository này'
-                      : 'Chỉ bạn và những người được phép mới có thể xem'}
+                    {t(formData.isPublic ? 'repositories.createModal.public.description' : 'repositories.createModal.private.description')}
                   </p>
                 </div>
               </div>

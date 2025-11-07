@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select, Input, Button, RefreshButton } from '@shared/components';
+import { Select, Input, Button } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
 import AddFileChoiceModal from '@shared/components/UIComponents/Modal/AddFileChoiceModal';
@@ -30,9 +31,7 @@ interface FilesFiltersProps {
   onSortDirectionChange: (d: SortDirection) => void;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
-  // Refresh
-  onRefresh?: () => void;
-  refreshing?: boolean;
+
 }
 
 export const FilesFilters: React.FC<FilesFiltersProps> = ({
@@ -56,10 +55,14 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSortDirectionChange,
   showAdvanced,
   onToggleAdvanced,
-  onRefresh,
-  refreshing,
 }) => {
   const { t } = useTranslation();
+
+  const fileTypes = [
+    { value: 'ALL', label: t('repositories.files.filters.fileTypes.all', 'Tất cả') },
+    { value: 'CONTRACT', label: t('repositories.files.filters.fileTypes.contract', 'Hợp đồng') },
+    { value: 'GENERAL', label: t('repositories.files.filters.fileTypes.general', 'Tài liệu chung') },
+  ];
 
   // Local state for modals + anchors
   const [openTags, setOpenTags] = useState(false);
@@ -86,7 +89,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
             {/* Simple icon placeholder */}
-            <span className="absolute left-2 top-1/2 text-xs" style={{ color: '#9ca3af' }} >🔎</span>
+            <CommonIcon name="search" size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -180,9 +183,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
                 {t('repositories.files.filters.viewList')}
               </Button>
             </div>
-            {onRefresh && (
-              <RefreshButton onClick={onRefresh} loading={refreshing} className="h-[28px]" />
-            )}
+
           </div>
         )}
       </div>
@@ -208,10 +209,14 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
       <IncludeExcludeModal
         open={openTypes}
         title={t('repositories.files.filters.fileType')}
-        availableItems={["ALL","CONTRACT","GENERAL"]}
-        include={type && type !== 'ALL' ? [type] : []}
+        availableItems={fileTypes.map(ft => ft.label)}
+        include={type && type !== 'ALL' ? [fileTypes.find(ft => ft.value === type)?.label].filter(Boolean) as string[] : []}
         exclude={[]}
-        onChange={(inc) => { const picked = Array.isArray(inc) && inc.length > 0 ? inc[0] : 'ALL'; onTypeChange(picked); }}
+        onChange={(inc) => {
+          const pickedLabel = Array.isArray(inc) && inc.length > 0 ? inc[0] : '';
+          const pickedValue = fileTypes.find(ft => ft.label === pickedLabel)?.value || 'ALL';
+          onTypeChange(pickedValue);
+        }}
         onClose={()=>setOpenTypes(false)}
         anchorEl={anchorTypes}
       />

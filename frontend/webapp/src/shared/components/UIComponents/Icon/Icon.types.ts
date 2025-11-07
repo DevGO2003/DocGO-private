@@ -18,7 +18,8 @@ export type IconName =
   | 'menu' | 'logout' 
   | 'user-plus' | 'user-check' | 'user-cog' | 'trash' | 'plus' | 'minus'
   | 'mail' | 'lock' | 'shield' | 'alert-circle' | 'calendar' | 'crown'
-  | 'eye-off' | 'more-vertical' | 'scale' | 'dollar-sign' | 'briefcase';
+  | 'eye-off' | 'more-vertical' | 'scale' | 'dollar-sign' | 'briefcase'
+  | 'folder-open' | 'file-search' | 'phone';
 
 export interface CommonIconProps {
   name: IconName;

@@ -68,6 +68,9 @@ const iconMap: Record<string, React.ReactNode> = {
   scale: <span role="img" aria-label="scale">⚖️</span>,
   'dollar-sign': <span role="img" aria-label="dollar-sign">💲</span>,
   briefcase: <span role="img" aria-label="briefcase">💼</span>,
+  'folder-open': <span role="img" aria-label="folder-open">📂</span>,
+  'file-search': <span role="img" aria-label="file-search">🔍📄</span>,
+  phone: <span role="img" aria-label="phone">📞</span>,
 };
 
 export const CommonIcon: React.FC<CommonIconProps> = ({ name, size = 22, color = '#333', className, fontFamily }) => {

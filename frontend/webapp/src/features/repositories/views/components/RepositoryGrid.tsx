@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -26,6 +27,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
   onCreateRepository,
   onRepositoryClick,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleRepositoryClick = (repoId: string) => {
@@ -47,14 +49,16 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
   const getRepositoryIcon = (type: string) => {
     return type === 'ORGANIZATION' ? (
-      <CommonIcon name="building" className="w-8 h-8 flex-shrink-0 ml-2" style={{ color: '#a855f7' }} />
+      <CommonIcon name="building" className="w-8 h-8 flex-shrink-0 ml-2" color="#a855f7" />
     ) : (
-      <CommonIcon name="user" className="h-8 flex-shrink-0 ml-2" style={{ color: '#3b82f6' }} />
+      <CommonIcon name="user" className="h-8 flex-shrink-0 ml-2" color="#3b82f6" />
     );
   };
 
   const getRepositoryTypeLabel = (type: string) => {
-    return type === 'ORGANIZATION' ? 'Tổ chức' : 'Cá nhân';
+    return type === 'ORGANIZATION'
+      ? t('repositories.grid.types.organization')
+      : t('repositories.grid.types.personal');
   };
 
   const getRepositoryTypeColor = (type: string) => {
@@ -66,7 +70,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <LoadingSpinner text="Đang tải repositories..." />
+        <LoadingSpinner text={t('repositories.grid.loading')} />
       </div>
     );
   }
@@ -88,12 +92,12 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
       <div className="text-center py-16 animate-fade-in">
         <Card>
           <CardContent className="p-12">
-            <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
+            <CommonIcon name="folder" className="h-16 mx-auto mb-4" color="#9ca3af" />
             <h3 className="text-xl font-semibold mb-2" style={{ color: '#111827' }} >
-              Không có repository nào
+              {t('repositories.grid.empty.title')}
             </h3>
             <p className="mb-6" style={{ color: '#4b5563' }} >
-              Bắt đầu bằng cách tạo repository đầu tiên của bạn
+              {t('repositories.grid.empty.description')}
             </p>
             {onCreateRepository && (
               <Button
@@ -102,7 +106,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                 className="inline-flex items-center gap-2"
               >
                 <CommonIcon name="plus" className="w-5 h-5" />
-                Tạo Repository
+                {t('repositories.grid.empty.create')}
               </Button>
             )}
           </CardContent>
@@ -128,7 +132,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                       {repo.name}
                     </CardTitle>
                     <p className="text-sm line-clamp-2" style={{ color: '#4b5563' }} >
-                      {repo.description || 'Không có mô tả'}
+                      {repo.description || t('repositories.grid.noDescription')}
                     </p>
                   </div>
                   {getRepositoryIcon(repo.type)}
@@ -147,7 +151,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                     </span>
                     {repo.isPublic && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#dcfce7' }} >
-                        Công khai
+                        {t('repositories.grid.public')}
                       </span>
                     )}
                   </div>
@@ -155,22 +159,22 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <CommonIcon name="file-text" style={{ color: '#6b7280' }} />
+                      <CommonIcon name="file-text" color="#6b7280" />
                       <span style={{ color: '#374151' }} >
-                        {repo.fileCount || 0} tệp
+                        {t('repositories.grid.stats.files', { count: repo.fileCount || 0 })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <CommonIcon name="users" style={{ color: '#6b7280' }} />
+                      <CommonIcon name="users" color="#6b7280" />
                       <span style={{ color: '#374151' }} >
-                        {repo.memberCount || 0} thành viên
+                        {t('repositories.grid.stats.members', { count: repo.memberCount || 0 })}
                       </span>
                     </div>
                   </div>
 
                   {/* Size */}
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: '#4b5563' }} >Dung lượng:</span>
+                    <span style={{ color: '#4b5563' }} >{t('repositories.grid.stats.size')}</span>
                     <span className="font-medium" style={{ color: '#111827' }} >
                       {formatFileSize(repo.totalSize)}
                     </span>
@@ -178,9 +182,9 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
 
                   {/* Owner */}
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: '#4b5563' }} >Chủ sở hữu:</span>
+                    <span style={{ color: '#4b5563' }} >{t('repositories.grid.stats.owner')}</span>
                     <span className="font-medium" style={{ color: '#111827' }} >
-                      {repo.ownerName || 'Chưa có thông tin'}
+                      {repo.ownerName || t('repositories.grid.stats.noOwner')}
                     </span>
                   </div>
                 </div>
