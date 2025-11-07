@@ -38,6 +38,23 @@ export const OrganizationSelector = ({
 
   const handleSelectOrganization = (orgId: string) => {
     setIsOpen(false);
+    
+    // Find the selected organization
+    const selectedOrg = data?.content.find((org: Organization) => org.id === orgId);
+    
+    // Save organization context to localStorage for approval system
+    if (selectedOrg) {
+      localStorage.setItem('currentOrganizationId', orgId);
+      localStorage.setItem('organizationRole', selectedOrg.userRole || 'MEMBER');
+      localStorage.setItem('organizationPermissions', (selectedOrg.userPermissions || []).join(','));
+      
+      console.log('[OrganizationSelector] Organization context saved:', {
+        orgId,
+        role: selectedOrg.userRole,
+        permissions: selectedOrg.userPermissions
+      });
+    }
+    
     if (onOrganizationChange) {
       onOrganizationChange(orgId);
     }

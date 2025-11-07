@@ -38,12 +38,16 @@ public class ContractApprovalController {
     ) {
         log.info("Starting approval for contract: {} by user: {}", contractId, userId);
 
+        // Decode base64-encoded headers (Vietnamese characters support)
+        String decodedUserName = decodeHeader(userName);
+        String decodedUserEmail = decodeHeader(userEmail);
+
         ContractApprovalWorkflow workflow = approvalService.createWorkflow(
             contractId,
             organizationId,
             userId,
-            userName,
-            userEmail,
+            decodedUserName,
+            decodedUserEmail,
             request.getComment()
         );
 
@@ -91,6 +95,10 @@ public class ContractApprovalController {
     ) {
         log.info("Approving contract: {} by user: {}", contractId, userId);
 
+        // Decode base64-encoded headers
+        String decodedUserName = decodeHeader(userName);
+        String decodedUserEmail = decodeHeader(userEmail);
+
         // Get current workflow
         ContractApprovalWorkflow workflow = approvalService.getWorkflowByContractId(contractId);
         if (workflow == null) {
@@ -106,8 +114,8 @@ public class ContractApprovalController {
         ContractApprovalWorkflow updated = approvalService.approve(
             workflow.getId(),
             userId,
-            userName,
-            userEmail,
+            decodedUserName,
+            decodedUserEmail,
             userRole,
             permissions,
             request.getComment()
@@ -129,6 +137,10 @@ public class ContractApprovalController {
     ) {
         log.info("Rejecting contract: {} by user: {}", contractId, userId);
 
+        // Decode base64-encoded headers
+        String decodedUserName = decodeHeader(userName);
+        String decodedUserEmail = decodeHeader(userEmail);
+
         // Get current workflow
         ContractApprovalWorkflow workflow = approvalService.getWorkflowByContractId(contractId);
         if (workflow == null) {
@@ -144,8 +156,8 @@ public class ContractApprovalController {
         ContractApprovalWorkflow updated = approvalService.reject(
             workflow.getId(),
             userId,
-            userName,
-            userEmail,
+            decodedUserName,
+            decodedUserEmail,
             userRole,
             permissions,
             request.getComment()
@@ -200,6 +212,23 @@ public class ContractApprovalController {
             response.setStatusCode(400);
             response.setMessage(message);
             return response;
+        }
+    }
+
+    /**
+     * Decode base64-encoded header value
+     * Frontend encodes Vietnamese characters to base64 to avoid ISO-8859-1 issues
+     */
+    private String decodeHeader(String encodedValue) {
+        if (encodedValue == null || encodedValue.isEmpty()) {
+            return "";
+        }
+        try {
+            byte[] decodedBytes = java.util.Base64.getDecoder().decode(encodedValue);
+            return new String(decodedBytes, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.warn("Failed to decode header value, using as-is: {}", encodedValue);
+            return encodedValue;
         }
     }
 }
