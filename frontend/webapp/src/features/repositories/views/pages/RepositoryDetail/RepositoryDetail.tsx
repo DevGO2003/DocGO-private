@@ -5,8 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button, RefreshButton, Card, CommonSwitch } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { useRepository, useRepositoryMembers } from '@features/repositories/models/api/repositoryApi';
-import { NOT_FOUND_PATH } from '@constants';
+import { useRepository, useRepositoryMembers, useUpdateMemberPermissions } from '@features/repositories/models/api/repositoryApi';
+import { NOT_FOUND_PATH, REPOSITORY_ROUTES, buildPath } from '@constants';
 import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
 
 export const RepositoryDetail: React.FC = () => {
@@ -17,6 +17,7 @@ export const RepositoryDetail: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const { t } = useTranslation();
+  const updatePermissionsMutation = useUpdateMemberPermissions();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
   const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
@@ -45,38 +46,22 @@ export const RepositoryDetail: React.FC = () => {
     navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
   };
 
-  const handleUpdatePermission = async (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {
-    try {
-      console.log(`[RepositoryDetail] Updating permission: ${permissionType} = ${value} for member ${memberId}`);
-      
-      // Call API to update permissions
-      const response = await fetch(
-        `/api/v1/repositories/${id}/members/${memberId}/permissions`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-          },
-          body: JSON.stringify({
-            [permissionType]: value
-          })
-        }
-      );
+  const handleUpdatePermission = (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {
+    if (!id) return;
 
-      if (!response.ok) {
-        throw new Error(`Failed to update permission: ${response.statusText}`);
+    updatePermissionsMutation.mutate(
+      {
+        repositoryId: id,
+        memberId,
+        permissions: { [permissionType]: value },
+      },
+      {
+        onError: (error) => {
+          console.error('[RepositoryDetail] Failed to update permission:', error);
+          alert(t('repositories.detail.members.permissions.error'));
+        },
       }
-
-      // Refetch members data
-      await queryClient.invalidateQueries({ queryKey: ['repository-members', id] });
-      await queryClient.refetchQueries({ queryKey: ['repository-members', id] });
-
-      console.log('[RepositoryDetail] Permission updated successfully');
-    } catch (error) {
-      console.error('[RepositoryDetail] Failed to update permission:', error);
-      alert(t('repositories.detail.members.permissions.error'));
-    }
+    );
   };
 
   const handleRefresh = async () => {
@@ -108,6 +93,14 @@ export const RepositoryDetail: React.FC = () => {
       onRefresh={handleRefresh}
       headerRight={
         <>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(buildPath(REPOSITORY_ROUTES.FILES_LIST, { id: id || '' }))} 
+            className="flex items-center gap-2"
+          >
+            <CommonIcon name="folder-open" size={16} />
+            {t('repositories.detail.actions.viewFiles', { defaultValue: 'Danh sách tệp' })}
+          </Button>
           <Button variant="outline" onClick={goToUploadWithRepo} className="flex items-center gap-2">
             <CommonIcon name="upload" size={16} />
             {t('repositories.detail.actions.upload')}
@@ -234,7 +227,7 @@ export const RepositoryDetail: React.FC = () => {
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.storage')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
                               {repository?.totalSize != null ? formatFileSize(repository.totalSize) : 
-                                repository?.files?.length > 0 ? t('repositories.detail.stats.calculating') : '0 B'}
+                                repository?.files?.length > 0 ? t('repositories.detail.stats.calculating') : t('repositories.detail.stats.emptyStorage')}
                             </p>
                           </div>
                         </div>
@@ -243,13 +236,13 @@ export const RepositoryDetail: React.FC = () => {
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.createdAt')}</h4>
                             <p className="text-gray-900">
-                              {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : '-'}
+                              {repository?.createdAt ? new Date(repository.createdAt).toLocaleString('vi-VN') : t('common.noData')}
                             </p>
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.info.updatedAt')}</h4>
                             <p className="text-gray-900">
-                              {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : '-'}
+                              {repository?.updatedAt ? new Date(repository.updatedAt).toLocaleString('vi-VN') : t('common.noData')}
                             </p>
                           </div>
                         </div>
@@ -286,7 +279,7 @@ export const RepositoryDetail: React.FC = () => {
                                     </div>
                                   </div>
                                   <div className="text-sm text-gray-500">
-                                    {file.size ? formatFileSize(file.size) : '-'}
+                                    {file.size ? formatFileSize(file.size) : t('common.noData')}
                                   </div>
                                 </div>
                               ))}

@@ -285,6 +285,10 @@ const repositoryApi = {
   revokeInvite: async (inviteId: string): Promise<void> => {
     await apiClient.delete(`${BASE_PATH}/invites/${inviteId}`);
   },
+
+  updateMemberPermissions: async (repositoryId: string, memberId: string, permissions: Partial<Record<'canUpload' | 'canView' | 'canDelete', boolean>>): Promise<void> => {
+    await apiClient.patch<void>(`${BASE_PATH}/repositories/${repositoryId}/members/${memberId}/permissions`, permissions);
+  },
 };
 
 // React Query hooks
@@ -617,6 +621,17 @@ export const useAcceptInvite = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repositories'] });
       queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+    },
+  });
+};
+
+export const useUpdateMemberPermissions = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, memberId, permissions }: { repositoryId: string; memberId: string; permissions: Partial<Record<'canUpload' | 'canView' | 'canDelete', boolean>> }) =>
+      repositoryApi.updateMemberPermissions(repositoryId, memberId, permissions),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-members', variables.repositoryId] });
     },
   });
 };

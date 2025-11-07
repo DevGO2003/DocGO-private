@@ -57,7 +57,7 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
       )}
       <CardContent className="p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="font-medium truncate" style={{ color: '#111827' }} title={item.fileName}>{item.fileName}</div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {item.status && (
@@ -80,7 +80,15 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
             {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString('vi-VN') : ''}
           </div>
         </div>
-        {right}
+        {right && (
+          <div className="flex flex-col items-end gap-4 flex-shrink-0 min-w-[140px]">
+            {React.Children.map(React.Children.toArray(right), (child, index) => (
+              <div key={index} className="w-full flex justify-end">
+                {child}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       </CardContent>
     </Card>
