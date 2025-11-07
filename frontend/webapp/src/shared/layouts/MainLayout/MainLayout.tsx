@@ -56,61 +56,71 @@ export const MainLayout = ({
   };
 
   return (
-    <div className="h-screen overflow-hidden flex" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
-      {/* Sidebar */}
-      {resolvedShowSidebar && (
-        <>
-          {/* Mobile overlay */}
-          {isSidebarOpen && (
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        {resolvedShowSidebar && (
+          <>
+            {/* Mobile overlay */}
+            {isSidebarOpen && (
+              <div
+                className="fixed inset-0 z-40 lg:hidden transition-opacity duration-300"
+                style={{ backgroundColor: '#4b5563', opacity: isSidebarOpen ? 0.75 : 0 }}
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
+            
+            {/* Sidebar */}
             <div
-              className="fixed z-40 lg:hidden transition-opacity duration-300"
-              style={{ backgroundColor: '#4b5563', opacity: isSidebarOpen ? 0.75 : 0 }}
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
-          
-          {/* Sidebar */}
-          <div
-            className="fixed left-0 z-50 transition-all duration-300"
-            style={{
-              backgroundColor: '#ffffff',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-              transform: `translateX(${isSidebarOpen || window.innerWidth >= 1024 ? '0' : '-256px'})`,
-              width: isCollapsed && window.innerWidth >= 1024 ? '64px' : '256px'
-            }}
-          >
-            <Sidebar 
-              collapsed={isCollapsed}
-              onCollapseToggle={() => handleSidebarCollapse(!isCollapsed)}
-              onClose={() => setIsSidebarOpen(false)}
-            />
-          </div>
-        </>
-      )}
-
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col min-w-0 ${resolvedShowSidebar ? (isCollapsed ? 'ml-16' : 'ml-64') : ''}`}>
-        {/* Header */}
-        {resolvedShowHeader && (
-          <Header
-            onMenuToggle={handleSidebarToggle}
-            showSearch={true}
-            showNotifications={true}
-            showUserMenu={true}
-          />
+              className="fixed lg:relative left-0 top-0 h-full z-50 transition-all duration-300"
+              style={{
+                backgroundColor: '#ffffff',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                transform: `translateX(${isSidebarOpen || window.innerWidth >= 1024 ? '0' : '-256px'})`,
+                width: isCollapsed && window.innerWidth >= 1024 ? '64px' : '256px'
+              }}
+            >
+              <Sidebar 
+                collapsed={isCollapsed}
+                onCollapseToggle={() => handleSidebarCollapse(!isCollapsed)}
+                onClose={() => setIsSidebarOpen(false)}
+              />
+            </div>
+          </>
         )}
 
-        {/* Page Content - internal scroll only */}
-        <main
-          className="flex-1 overflow-hidden p-2.5 transition-opacity duration-300"
-          style={{ opacity: 1 }}
-        >
-          <ControlMainLayout>
-            {children}
-          </ControlMainLayout>
-        </main>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Header */}
+          {resolvedShowHeader && (
+            <Header
+              onMenuToggle={handleSidebarToggle}
+              showSearch={true}
+              showNotifications={true}
+              showUserMenu={true}
+            />
+          )}
+
+          {/* Page Content - internal scroll only */}
+          <main
+            className="flex-1 overflow-hidden p-2.5 transition-opacity duration-300"
+            style={{ opacity: 1 }}
+          >
+            <ControlMainLayout>
+              {children}
+            </ControlMainLayout>
+          </main>
+        </div>
       </div>
 
+      {/* Footer - spans full width below sidebar and content */}
+      {resolvedShowSidebar && (
+        <footer className="px-4 py-3 border-t" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }}>
+          <div className="text-xs text-center" style={{ color: '#6b7280' }}>
+            DocGO © 2025
+          </div>
+        </footer>
+      )}
     </div>
   );
 };

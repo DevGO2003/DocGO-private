@@ -42,6 +42,9 @@ export function mapFileApiToUiDocument(apiData: FileItem, fileId: string, fileNa
     title: ov.title || `Document ${fileId}`,
     description: ct.summary || '',
     status: ov.status || 'DRAFT',
+    // ✅ APPROVAL STATUS - From workflow
+    approvalStatus: ov.approvalStatus || null,
+    workflowStatus: ov.workflowStatus || null,
     contractType: ov.contractType || ov.category || 'Other',
     tags: ov.tags || [],
     contractNumber: fileId,

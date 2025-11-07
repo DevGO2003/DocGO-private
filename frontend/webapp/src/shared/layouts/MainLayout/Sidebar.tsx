@@ -301,39 +301,39 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
   const pinnedItemsList = allItems.filter(item => pinnedItems.includes(item.name));
 
   return (
-    <div className="h-full flex flex-col border-r-2" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff' }} >
+    <div className="h-full flex flex-col border-r-2 overflow-hidden" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff' }} >
       {/* Logo */}
-      <div className="flex h-16 items-center px-4 justify-between border-b-2" style={{ borderColor: '#e5e7eb' }} >
-        <div className="flex items-center gap-2">
-          <CommonIcon name="file-text" size={20} />
-          {!collapsed && <span className="text-xl font-bold" style={{ color: '#111827' }}>{t('app.title')}</span>}
+      <div className="flex h-16 items-center px-4 justify-between border-b-2 shrink-0" style={{ borderColor: '#e5e7eb' }} >
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <CommonIcon name="file-text" size={20} className="shrink-0" />
+          {!collapsed && <span className="text-xl font-bold truncate" style={{ color: '#111827' }}>{t('app.title')}</span>}
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 shrink-0">
           {/* Edit Mode Button */}
           {!collapsed && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setShowLabelManager(!showLabelManager)}
-                className={`p-2 rounded-lg transition-all duration-200 ${
+                className={`p-1.5 rounded transition-all duration-200 ${
                   showLabelManager 
                     ? 'bg-purple-50 text-purple-600 border border-purple-200' 
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
                 title={t('sidebar.tooltips.manageLabels')}
               >
-                <CommonIcon name="settings" size={16} />
+                <CommonIcon name="settings" size={14} />
               </button>
             <button
               onClick={() => setEditMode(!editMode)}
-              className={`p-2 border-2 rounded-lg transition-all duration-200 ${
+              className={`p-1.5 border-2 rounded transition-all duration-200 ${
                 editMode 
                   ? 'border-blue-500 bg-blue-50 text-blue-600' 
                   : 'border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-blue-50'
               }`}
               title={t('sidebar.tooltips.editMode')}
             >
-              <CommonIcon name="edit" size={16} />
+              <CommonIcon name="edit" size={14} />
             </button>
             </div>
           )}
@@ -341,12 +341,10 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
           {/* Collapse/Expand Button */}
           <button
             onClick={() => onCollapseToggle?.()}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group relative overflow-hidden"
+            className="p-1.5 rounded hover:bg-gray-100 transition-all duration-200 flex items-center justify-center"
             title={collapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
           >
-            <div className="relative w-7 h-7 flex items-center justify-center">
-              <CommonIcon name={collapsed ? 'chevron-right' : 'chevron-left'} size={24} />
-            </div>
+            <CommonIcon name={collapsed ? 'chevron-right' : 'chevron-left'} size={18} />
           </button>
           
           {/* Close Button (Mobile) */}
@@ -724,15 +722,6 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
         </DragDropContext>
       </nav>
 
-      {/* Footer */}
-      {!collapsed && (
-        <div className="p-4 border-t-2" style={{ borderColor: '#e5e7eb' }} >
-          <div className="text-xs" style={{ color: '#6b7280' }} >
-            DocGO © 2025
-          </div>
-        </div>
-      )}
-      
       {/* No Recent Repository Modal */}
       <NoRecentRepositoryModal
         isOpen={showNoRecentModal}

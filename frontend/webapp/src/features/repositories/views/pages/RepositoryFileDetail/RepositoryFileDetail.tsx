@@ -8,9 +8,9 @@ import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { updateFileDetails, deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
+import { updateFileDetails, deleteFile } from '@features/repositories/services/fileDetailApi';
+import { apiClient } from '@shared/lib/api/apiClient';
 import { useContractApproval } from '@features/approvals/hooks/useContractApproval';
-import { ApprovalWorkflowStatus } from '@features/approvals/components/ApprovalWorkflowStatus';
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
 import { useAppSelector } from '@store/hooks';
@@ -266,6 +266,94 @@ export const RepositoryFileDetail: React.FC = () => {
     setEditedData(null);
   };
 
+  const handleDownloadPDF = async () => {
+    if (!fileId) return;
+    
+    try {
+      console.log('Downloading file:', fileId);
+      
+      // Download file with authentication
+      const response: any = await apiClient.get(
+        `/api/v1/repository-management-service/files/${fileId}/download`,
+        {
+          responseType: 'blob' // Important for file download
+        }
+      );
+      
+      // Extract blob from response (apiClient may wrap it)
+      const blob = response.data instanceof Blob 
+        ? response.data 
+        : new Blob([response.data], { 
+            type: response.headers?.['content-type'] || 'application/octet-stream' 
+          });
+      
+      // Get filename from Content-Disposition header or use default
+      let fileName = documentData?.title || file?.fileName || 'document';
+      const contentDisposition = response.headers?.['content-disposition'];
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = fileNameMatch[1];
+        }
+      }
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ Download successful:', fileName);
+    } catch (error: any) {
+      console.error('❌ Download failed:', error);
+      alert('Không thể tải xuống file. Vui lòng thử lại.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!fileId) return;
+    
+    // Confirm deletion
+    const confirmMessage = `Bạn có chắc chắn muốn xóa tài liệu "${documentData?.title || file?.fileName}"?\n\nHành động này không thể hoàn tác.`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Call delete API
+      await deleteFile(fileId);
+      
+      console.log('✅ File deleted successfully');
+      alert('Đã xóa tài liệu thành công!');
+      
+      // Navigate to organization workspace with contracts tab
+      const orgId = documentData?.organizationId || documentData?.overview?.organizationId;
+      if (orgId) {
+        navigate(`/organizations/${orgId}/workspace?tab=contracts`);
+      } else {
+        // Fallback to repository
+        navigate(`/repositories/${id}`);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Delete failed:', error);
+      setError(error?.message || 'Không thể xóa tài liệu');
+      alert('Không thể xóa tài liệu. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRefresh = async () => {
     console.log('[RepositoryFileDetail] Refreshing data...');
     setIsRefreshing(true);
@@ -381,13 +469,13 @@ export const RepositoryFileDetail: React.FC = () => {
                 <Button variant="outline">
                   <CommonIcon name="send" className="w-4 h-4 mr-2" /> Gửi ký
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleDownloadPDF}>
                   <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải PDF
                 </Button>
                 <Button variant="outline">
                   <CommonIcon name="message" className="w-4 h-4 mr-2" /> Bình luận
                 </Button>
-                <Button variant="destructive">
+                <Button variant="destructive" onClick={handleDelete}>
                   <CommonIcon name="trash" className="w-4 h-4 mr-2" /> Xóa
                 </Button>
               </>
@@ -405,7 +493,14 @@ export const RepositoryFileDetail: React.FC = () => {
             disabled: !(documentData?.type === 'contract' || documentData?.contractType),
             disabledTooltip: 'File không phải hợp đồng'
           },
-          { id: 'comments', label: 'Bình luận', icon: 'message', disabled: false },
+          { id: 'approval', label: 'Phê duyệt', icon: 'check-circle', disabled: false },
+          { 
+            id: 'comments', 
+            label: 'Bình luận', 
+            icon: 'message', 
+            disabled: true,
+            disabledTooltip: 'Chức năng đang phát triển'
+          },
         ],
         activeMainTab: activeMainTab,
         onMainTabChange: (tabId: string) => {
@@ -413,6 +508,7 @@ export const RepositoryFileDetail: React.FC = () => {
             setActiveMainTab(tabId);
             if (tabId === 'contracts') setActiveSubTab('contract-overview');
             else if (tabId === 'overview') setActiveSubTab('details');
+            else if (tabId === 'approval') setActiveSubTab('approval-status');
             else if (tabId === 'comments') setActiveSubTab('comments-list');
           }
         },
@@ -445,19 +541,6 @@ export const RepositoryFileDetail: React.FC = () => {
       }}
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* Approval Workflow Section */}
-        {workflow && (
-          <Card className="p-6">
-            <ApprovalWorkflowStatus
-              workflow={workflow}
-              userRole={currentUser.role}
-              userPermissions={currentUser.permissions}
-              onApprove={() => setShowApproveModal(true)}
-              onReject={() => setShowRejectModal(true)}
-            />
-          </Card>
-        )}
-        
         {approvalError && (
           <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }}>
             <CardContent className="p-4">
@@ -492,6 +575,11 @@ export const RepositoryFileDetail: React.FC = () => {
             activeMainTab={activeMainTab}
             activeSubTab={activeSubTab}
             isEditing={isEditing}
+            workflow={workflow}
+            userRole={currentUser.role}
+            userPermissions={currentUser.permissions}
+            onApprove={() => setShowApproveModal(true)}
+            onReject={() => setShowRejectModal(true)}
             onDataChange={(newData) => {
               setEditedData(newData);
               setIsDirty(true);

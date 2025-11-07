@@ -332,6 +332,17 @@ public class ContractApprovalService {
             Map<String, Object> overview = contract.getOverview();
             overview.put("approvalStatus", status.name());
             overview.put("approvalStatusUpdatedAt", LocalDateTime.now().toString());
+            
+            // ✅ FIX: Update document status based on approval status
+            if (status == WorkflowStatus.FULLY_APPROVED) {
+                overview.put("status", "ACTIVE");  // Contract is now active
+            } else if (status == WorkflowStatus.REJECTED) {
+                overview.put("status", "REJECTED");
+            } else {
+                // Still in approval process
+                overview.put("status", "PENDING");
+            }
+            
             fileRepository.save(contract);
         }
     }
@@ -341,6 +352,7 @@ public class ContractApprovalService {
         if (contract != null) {
             Map<String, Object> overview = contract.getOverview();
             overview.put("approvalStatus", "REJECTED");
+            overview.put("status", "REJECTED");  // ✅ FIX: Also update document status
             overview.put("rejectedAt", LocalDateTime.now().toString());
             overview.put("rejectedBy", rejectedBy);
             overview.put("rejectionReason", reason);

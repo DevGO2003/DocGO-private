@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // Contract tab components
 import { ContractOverviewTab } from './contract/ContractOverviewTab'
@@ -8,6 +8,9 @@ import { ClausesTab } from './contract/ClausesTab'
 import { RiskTab } from './contract/RiskTab'
 import { RemindersTab } from './contract/RemindersTab'
 import { ComplianceTab } from './contract/ComplianceTab'
+
+// Approval tab components
+import { ApprovalTab } from './approval/ApprovalTab'
 
 // Overview tab components
 import { DetailsTab } from './overview/DetailsTab'
@@ -29,6 +32,11 @@ interface FileDetailTabsProps {
   fileData: any
   isEditing?: boolean
   onDataChange?: (newData: any) => void
+  workflow?: any
+  userRole?: string
+  userPermissions?: string[]
+  onApprove?: () => void
+  onReject?: () => void
 }
 
 // mainTabs - File focused
@@ -87,13 +95,36 @@ export const commentsSubTabs = [
 export function getSubTabsFor(mainTabId: string) {
   if (mainTabId === 'contracts') return contractSubTabs;
   if (mainTabId === 'overview') return fileDetailSubTabs;
+  if (mainTabId === 'approval') return []; // Approval tab has no subtabs
   return commentsSubTabs;
 }
 
-export function FileDetailTabs({ fileData, activeMainTab = 'overview', activeSubTab = 'details' }: FileDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
+export function FileDetailTabs({ 
+  fileData, 
+  activeMainTab = 'overview', 
+  activeSubTab = 'details',
+  workflow,
+  userRole = 'MEMBER',
+  userPermissions = [],
+  onApprove,
+  onReject
+}: FileDetailTabsProps & { activeMainTab?: string; activeSubTab?: string }) {
   if (!fileData) return null;
 
   const renderSubTabContent = () => {
+    // Approval tab doesn't need subtabs check
+    if (activeMainTab === 'approval') {
+      return (
+        <ApprovalTab 
+          workflow={workflow || null}
+          userRole={userRole}
+          userPermissions={userPermissions}
+          onApprove={onApprove}
+          onReject={onReject}
+        />
+      )
+    }
+
     const subTabs = getSubTabsFor(activeMainTab)
     const currentSubTab = subTabs.find(tab => tab.id === activeSubTab)
     

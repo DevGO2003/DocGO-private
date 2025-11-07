@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import {
@@ -26,7 +26,11 @@ export const OrganizationWorkspace = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('info');
+  const [searchParams] = useSearchParams();
+  
+  // Read tab from URL query parameter, default to 'info'
+  const tabFromUrl = searchParams.get('tab') as WorkspaceTab;
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>(tabFromUrl || 'info');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
@@ -34,6 +38,13 @@ export const OrganizationWorkspace = () => {
 
   const { data: organization, isLoading } = useOrganization(id!);
   const { t } = useTranslation();
+  
+  // Update active tab when URL query parameter changes
+  useEffect(() => {
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl, activeTab]);
   const { 
     data: contractsData, 
     isLoading: contractsLoading, 
@@ -89,17 +100,23 @@ export const OrganizationWorkspace = () => {
   console.log('[OrganizationWorkspace] Members Content:', membersData?.content);
   console.log('[OrganizationWorkspace] Members Loading:', membersLoading);
   console.log('[OrganizationWorkspace] Repositories Data:', repositoriesData);
+  console.log('[OrganizationWorkspace] Contracts Data:', contractsData);
+  console.log('[OrganizationWorkspace] Contracts Loading:', contractsLoading);
+  console.log('[OrganizationWorkspace] Active Tab:', activeTab);
 
   // Calculate stats from real data
   const contracts = contractsData?.content || [];
+  console.log('[OrganizationWorkspace] Contracts array:', contracts, 'Length:', contracts.length);
   
   // Helper function to get contract status
   const getContractStatus = (contract: any) => {
-    // Try multiple status fields in order of priority
-    return contract.status 
-      || contract.approvalStatus 
-      || contract.workflowStatus 
+    // Priority: approvalStatus (from workflow) > status (document status)
+    // approvalStatus contains: PENDING_APPROVAL, LEGAL_REVIEW, FULLY_APPROVED, REJECTED, etc.
+    // status contains: DRAFT, ACTIVE, PENDING, etc.
+    return contract.approvalStatus
+      || contract.workflowStatus
       || (contract.workflow?.status)
+      || contract.status
       || 'DRAFT'; // Default status
   };
   
@@ -116,8 +133,22 @@ export const OrganizationWorkspace = () => {
   
   const stats = {
     totalContracts: contracts.length,
-    pendingApprovals: contracts.filter(c => getContractStatus(c) === 'PENDING_APPROVAL').length,
-    approved: contracts.filter(c => getContractStatus(c) === 'APPROVED').length,
+    // Workflow statuses: PENDING_APPROVAL, LEGAL_REVIEW, FINANCE_REVIEW, EXECUTIVE_REVIEW
+    pendingApprovals: contracts.filter(c => {
+      const status = getContractStatus(c);
+      return status === 'PENDING_APPROVAL' ||
+             status === 'LEGAL_REVIEW' ||
+             status === 'FINANCE_REVIEW' ||
+             status === 'EXECUTIVE_REVIEW';
+    }).length,
+    // Approved: FULLY_APPROVED, LEGAL_APPROVED, FINANCE_APPROVED, EXECUTIVE_APPROVED
+    approved: contracts.filter(c => {
+      const status = getContractStatus(c);
+      return status === 'FULLY_APPROVED' ||
+             status === 'LEGAL_APPROVED' ||
+             status === 'FINANCE_APPROVED' ||
+             status === 'EXECUTIVE_APPROVED';
+    }).length,
     rejected: contracts.filter(c => ['REJECTED', 'CANCELLED'].includes(getContractStatus(c))).length,
     totalFiles: contractsData?.totalElements || 0,
     totalRepositories: repositoriesData?.totalElements || 0,
@@ -471,9 +502,25 @@ export const OrganizationWorkspace = () => {
                   <div className="space-y-3">
                   {/* Hiển thị TẤT CẢ chờ phê duyệt trước - KHÔNG GIỚI HẠN */}
                   {contracts
-                  .filter(c => getContractStatus(c) === 'PENDING_APPROVAL')
+                  .filter(c => {
+                    const status = getContractStatus(c);
+                    return status === 'PENDING_APPROVAL' ||
+                           status === 'LEGAL_REVIEW' ||
+                           status === 'FINANCE_REVIEW' ||
+                           status === 'EXECUTIVE_REVIEW';
+                  })
                   .map((contract) => {
                     const contractStatus = getContractStatus(contract);
+                    // Map workflow status to display text
+                    const getStatusDisplay = (status: string) => {
+                      switch(status) {
+                        case 'PENDING_APPROVAL': return '⏳ Chờ phê duyệt';
+                        case 'LEGAL_REVIEW': return '⚖️ Đang chờ Pháp lý duyệt';
+                        case 'FINANCE_REVIEW': return '💰 Đang chờ Tài chính duyệt';
+                        case 'EXECUTIVE_REVIEW': return '👔 Đang chờ Điều hành duyệt';
+                        default: return '⏳ Chờ duyệt';
+                      }
+                    };
                     return (
                   <div
                   key={contract.id}
@@ -498,7 +545,7 @@ export const OrganizationWorkspace = () => {
                   </div>
                   </div>
                   <span className="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1" style={{ backgroundColor: '#fef3c7', color: '#b45309' }} >
-                  ⏳ Chờ duyệt
+                  {getStatusDisplay(contractStatus)}
                   </span>
                   </div>
                   </div>
@@ -507,10 +554,40 @@ export const OrganizationWorkspace = () => {
 
                   {/* Hiển thị các hợp đồng khác - GIỚI HẠN 10 */}
                   {contracts
-                  .filter(c => getContractStatus(c) !== 'PENDING_APPROVAL')
+                  .filter(c => {
+                    const status = getContractStatus(c);
+                    return status !== 'PENDING_APPROVAL' &&
+                           status !== 'LEGAL_REVIEW' &&
+                           status !== 'FINANCE_REVIEW' &&
+                           status !== 'EXECUTIVE_REVIEW';
+                  })
                       .slice(0, showAllContracts ? undefined : 10)
                         .map((contract) => {
                           const contractStatus = getContractStatus(contract);
+                          // Map workflow status to display text and style
+                          const getStatusInfo = (status: string) => {
+                            switch(status) {
+                              case 'FULLY_APPROVED':
+                                return { text: '✓ Đã phê duyệt hoàn toàn', className: 'bg-green-100 text-green-800' };
+                              case 'LEGAL_APPROVED':
+                                return { text: '⚖️ Pháp lý đã duyệt', className: 'bg-blue-100 text-blue-800' };
+                              case 'FINANCE_APPROVED':
+                                return { text: '💰 Tài chính đã duyệt', className: 'bg-blue-100 text-blue-800' };
+                              case 'EXECUTIVE_APPROVED':
+                                return { text: '👔 Điều hành đã duyệt', className: 'bg-blue-100 text-blue-800' };
+                              case 'REJECTED':
+                                return { text: '✗ Bị từ chối', className: 'bg-red-100 text-red-800' };
+                              case 'CANCELLED':
+                                return { text: '🚫 Đã huỷ', className: 'bg-red-100 text-red-800' };
+                              case 'DRAFT':
+                                return { text: '📝 Nháp', className: 'bg-gray-100 text-gray-800' };
+                              case 'ACTIVE':
+                                return { text: '✓ Đang hoạt động', className: 'bg-green-100 text-green-800' };
+                              default:
+                                return { text: status, className: 'bg-gray-100 text-gray-800' };
+                            }
+                          };
+                          const statusInfo = getStatusInfo(contractStatus);
                           return (
                           <div
                             key={contract.id}
@@ -534,22 +611,8 @@ export const OrganizationWorkspace = () => {
                                   </div>
                                 </div>
                               </div>
-                              <span
-                                className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 ${
-                                  contractStatus === 'APPROVED'
-                                    ? 'bg-green-100 text-green-800'
-                                    : contractStatus === 'PENDING_APPROVAL'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : ['REJECTED', 'CANCELLED'].includes(contractStatus)
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-gray-100 text-gray-800'
-                                }`}
-                              >
-                                {contractStatus === 'APPROVED' && '✓ Đã duyệt'}
-                                {contractStatus === 'PENDING_APPROVAL' && '⏳ Chờ duyệt'}
-                                {contractStatus === 'REJECTED' && '✗ Từ chối'}
-                                {contractStatus === 'CANCELLED' && '🚫 Đã huỷ'}
-                                {!['APPROVED', 'PENDING_APPROVAL', 'REJECTED', 'CANCELLED'].includes(contractStatus) && contractStatus}
+                              <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 ${statusInfo.className}`}>
+                                {statusInfo.text}
                               </span>
                             </div>
                           </div>
@@ -557,7 +620,13 @@ export const OrganizationWorkspace = () => {
                         })}
 
                       {/* Show More Button - chỉ cho contracts không phải PENDING */}
-                      {!showAllContracts && contracts.filter(c => getContractStatus(c) !== 'PENDING_APPROVAL').length > 10 && (
+                      {!showAllContracts && contracts.filter(c => {
+                        const status = getContractStatus(c);
+                        return status !== 'PENDING_APPROVAL' &&
+                               status !== 'LEGAL_REVIEW' &&
+                               status !== 'FINANCE_REVIEW' &&
+                               status !== 'EXECUTIVE_REVIEW';
+                      }).length > 10 && (
                         <div className="flex justify-center mt-6">
                           <Button
                             variant="outline"

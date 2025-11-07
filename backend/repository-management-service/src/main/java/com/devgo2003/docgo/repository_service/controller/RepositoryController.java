@@ -180,45 +180,6 @@ public class RepositoryController {
             .build());
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Xóa file (soft delete)")
-    public ResponseEntity<RestResponse<Void>> deleteFile(
-            @Parameter(description = "ID của file cần xóa") 
-            @PathVariable String id) {
-        
-        // Validate file ID
-        if (!validationService.isValidFileId(id)) {
-            throw new FileNotFoundException("Invalid file ID format: " + id);
-        }
-        
-        // Get existing file
-        FileEntity existingFile = fileService.getFileById(id)
-            .orElseThrow(() -> new FileNotFoundException("File not found with ID: " + id));
-        
-        // Validate file status for deletion
-        List<String> validationErrors = validationService.validateFileStatus(existingFile, "DELETE");
-        if (!validationErrors.isEmpty()) {
-            throw new IllegalArgumentException("Không thể xóa file: " + String.join(", ", validationErrors));
-        }
-        
-        // Perform soft delete
-        existingFile.setIsDeleted(true);
-        existingFile.setUpdatedAt(java.time.Instant.now().toString());
-        existingFile.setUpdatedBy("system"); // TODO: Get from authentication context
-        fileService.updateFile(id, existingFile);
-        
-        return ResponseEntity.ok(RestResponse.<Void>builder()
-            .apiVersion("v1")
-            .statusCode(200)
-            .shortMessage("Success")
-            .description("Đã xóa file thành công")
-            .data(null)
-            .timestamp(Instant.now())
-            .requestId(UUID.randomUUID().toString())
-            .path("/api/v1/repository-management-service/files/" + id)
-            .build());
-    }
-
     @PutMapping("/{id}/restore")
     @Operation(summary = "Khôi phục file đã xóa")
     public ResponseEntity<RestResponse<FileResponse>> restoreFile(
