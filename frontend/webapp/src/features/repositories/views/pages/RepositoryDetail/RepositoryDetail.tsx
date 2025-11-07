@@ -57,10 +57,10 @@ export const RepositoryDetail: React.FC = () => {
       },
       {
         onError: (error) => {
-          console.error('[RepositoryDetail] Failed to update permission:', error);
-          alert(t('repositories.detail.members.permissions.error'));
+      console.error('[RepositoryDetail] Failed to update permission:', error);
+      alert(t('repositories.detail.members.permissions.error'));
         },
-      }
+    }
     );
   };
 

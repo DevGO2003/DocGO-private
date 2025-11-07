@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select, Input, Button } from '@shared/components';
+import { Select, Input, Button, RefreshButton } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
@@ -29,9 +29,8 @@ interface FilesFiltersProps {
   onSortByChange: (v: string) => void;
   sortDirection: SortDirection;
   onSortDirectionChange: (d: SortDirection) => void;
-  showAdvanced: boolean;
-  onToggleAdvanced: () => void;
-
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export const FilesFilters: React.FC<FilesFiltersProps> = ({
@@ -53,8 +52,8 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSortByChange,
   sortDirection,
   onSortDirectionChange,
-  showAdvanced,
-  onToggleAdvanced,
+  onRefresh,
+  refreshing = false,
 }) => {
   const { t } = useTranslation();
 
@@ -83,116 +82,117 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   };
 
   return (
-    <>
-      {/* Row 1: Search + Sort + SortDir (compact) */}
-      <div className="flex items-center gap-[5px] w-full">
+    <div className="flex flex-col gap-2 w-full">
+      {/* Row 1: Search + Sort + SortDir + RefreshButton */}
+      <div className="flex items-center gap-2 w-full">
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
-            {/* Simple icon placeholder */}
             <CommonIcon name="search" size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t('repositories.files.filters.search')}
-              className="pl-7 h-[28px] text-xs"
+              className="pl-7"
             />
           </div>
         </div>
-        <Select
-          value={sortBy}
-          onChange={(e) => onSortByChange(e.target.value)}
-          className="h-[28px] min-w-[130px] text-xs"
-          options={[
-            { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
-            { value: 'title', label: t('repositories.files.filters.sortOptions.fileName') },
-            { value: 'status', label: t('repositories.files.filters.sortOptions.status') },
-            { value: 'totalValue', label: t('repositories.files.filters.sortOptions.totalValue') },
-            { value: 'uploadedAt', label: t('repositories.files.filters.sortOptions.uploadedAt') },
-          ]}
-        />
-        <Select
-          value={sortDirection}
-          onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
-          className="h-[28px] min-w-[110px] text-xs"
-          options={[
-            { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
-            { value: 'desc', label: t('repositories.files.filters.sortDirections.desc') },
-          ]}
-        />
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Select
+            value={sortBy}
+            onChange={(e) => onSortByChange(e.target.value)}
+            className="w-[130px]"
+            options={[
+              { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
+              { value: 'title', label: t('repositories.files.filters.sortOptions.fileName') },
+              { value: 'status', label: t('repositories.files.filters.sortOptions.status') },
+              { value: 'totalValue', label: t('repositories.files.filters.sortOptions.totalValue') },
+              { value: 'uploadedAt', label: t('repositories.files.filters.sortOptions.uploadedAt') },
+            ]}
+          />
+          <Select
+            value={sortDirection}
+            onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
+            className="w-[110px]"
+            options={[
+              { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
+              { value: 'desc', label: t('repositories.files.filters.sortDirections.desc') },
+            ]}
+          />
+        </div>
+        {onRefresh && <RefreshButton onClick={onRefresh} loading={refreshing} className="flex-shrink-0" />}
       </div>
 
-      {/* Row 2: Advanced toggle + filter triggers + reset + view toggle */}
-      <div className="flex items-center gap-[5px] w-full mt-[5px]">
+      {/* Row 2: Filter buttons (always visible) */}
+      <div className="flex items-center gap-2 w-full justify-end">
         <Button
-          variant="ghost"
-          onClick={onToggleAdvanced}
-          className="text-sm hover: font-medium whitespace-nowrap h-auto p-0" style={{ color: '#4338ca' }} >
-          {showAdvanced ? t('repositories.files.filters.hideAdvanced') : t('repositories.files.filters.showAdvanced')}
+          variant="outline"
+          onClick={(e)=>{ setOpenTags(true); setAnchorTags(e.currentTarget); }}
+        >
+          <CommonIcon name="tag" size={16} />
+          {t('repositories.files.filters.classification')}
         </Button>
-        {showAdvanced && (
-          <div className="ml-auto flex items-center gap-[5px]">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e)=>{ setOpenTags(true); setAnchorTags(e.currentTarget); }}
-              className="h-[28px] text-xs"
-            >
-              {t('repositories.files.filters.classification')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e)=>{ setOpenTypes(true); setAnchorTypes(e.currentTarget); }}
-              className="h-[28px] text-xs"
-            >
-              {t('repositories.files.filters.fileType')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e)=>{ setOpenTime(true); setAnchorTime(e.currentTarget); }}
-              className="h-[28px] text-xs"
-            >
-              {t('repositories.files.filters.timeRange')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { onSearchChange(''); onTypeChange('ALL'); }}
-              className="h-[28px] text-xs"
-            >
-              {t('repositories.files.filters.reset')}
-            </Button>
-            <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: '#d1d5db' }} >
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => onViewModeChange('grid')}
-                className="p-1.5 rounded-none border-0 h-auto"
-                title={t('repositories.files.filters.viewGrid')}
-              >
-                {t('repositories.files.filters.viewGrid')}
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => onViewModeChange('list')}
-                className="p-1.5 rounded-none border-0 border-l h-auto"
-                title={t('repositories.files.filters.viewList')}
-              >
-                {t('repositories.files.filters.viewList')}
-              </Button>
-            </div>
-
-          </div>
-        )}
+        <Button
+          variant="outline"
+          onClick={(e)=>{ setOpenTypes(true); setAnchorTypes(e.currentTarget); }}
+        >
+          <CommonIcon name="file" size={16} />
+          {t('repositories.files.filters.fileType')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={(e)=>{ setOpenTime(true); setAnchorTime(e.currentTarget); }}
+        >
+          <CommonIcon name="calendar" size={16} />
+          {t('repositories.files.filters.timeRange')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => { onSearchChange(''); onTypeChange('ALL'); }}
+        >
+          <CommonIcon name="rotate-cw" size={16} />
+          {t('repositories.files.filters.reset')}
+        </Button>
       </div>
 
-      {/* Row 3: Actions */}
-      <div className="mt-[5px] flex items-center gap-[5px] justify-end">
-        <Button variant="outline" size="sm" onClick={()=>setOpenAdd(true)} className="h-[28px] text-xs">{t('repositories.files.filters.add')}</Button>
-        <Button variant="outline" size="sm" className="h-[28px] text-xs">{t('repositories.files.filters.edit')}</Button>
-        <Button variant="destructive" size="sm" className="h-[28px] text-xs">{t('repositories.files.filters.delete')}</Button>
+      {/* Row 3: View toggle (left) and Actions (right) */}
+      <div className="flex items-center gap-2 justify-between w-full">
+        {/* Left: View toggle */}
+        <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: '#d1d5db' }}>
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            onClick={() => onViewModeChange('grid')}
+            className="rounded-none border-0"
+            title={t('repositories.files.filters.viewGrid')}
+          >
+            <CommonIcon name="grid" size={16} />
+            {t('repositories.files.filters.viewGrid')}
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'ghost'}
+            onClick={() => onViewModeChange('list')}
+            className="rounded-none border-0 border-l"
+            title={t('repositories.files.filters.viewList')}
+          >
+            <CommonIcon name="list" size={16} />
+            {t('repositories.files.filters.viewList')}
+          </Button>
+        </div>
+
+        {/* Right: Action buttons */}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={()=>setOpenAdd(true)} className="flex items-center gap-2">
+            <CommonIcon name="plus" size={16} />
+            {t('repositories.files.filters.add')}
+          </Button>
+          <Button variant="outline" className="flex items-center gap-2">
+            <CommonIcon name="edit" size={16} />
+            {t('repositories.files.filters.edit')}
+          </Button>
+          <Button variant="destructive" className="flex items-center gap-2">
+            <CommonIcon name="trash" size={16} />
+            {t('repositories.files.filters.delete')}
+          </Button>
+        </div>
       </div>
 
       {/* Modals */}
@@ -234,7 +234,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         onUpload={() => { setOpenAdd(false); }}
         onClose={()=>setOpenAdd(false)}
       />
-    </>
+    </div>
   );
 };
 

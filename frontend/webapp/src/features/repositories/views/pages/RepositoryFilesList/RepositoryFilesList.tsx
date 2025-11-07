@@ -319,12 +319,9 @@ export const RepositoryFilesList: React.FC = () => {
           onSortByChange={handleSortByChange}
           sortDirection={sortDirection}
           onSortDirectionChange={handleSortDirectionChange}
-          showAdvanced={showAdvanced}
-          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+          onRefresh={refreshFiles}
+          refreshing={refreshing}
         />
-      }
-      headerRight={
-        <RefreshButton onClick={refreshFiles} loading={refreshing} />
       }
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
