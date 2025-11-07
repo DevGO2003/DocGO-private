@@ -34,6 +34,9 @@ export const UploadPage = lazy(() =>
   import('@features/upload/views/pages/UploadPage').then(m => ({ default: (m as any).UploadPage ?? m.default }))
 );
 
+// Approvals
+export const MyApprovalsDashboard = lazy(() => import('@features/approvals/views/MyApprovalsDashboard').then(m => ({ default: m.MyApprovalsDashboard })));
+
 // Error pages
 export const NotFound = lazy(() => import('@pages/NotFound').then(m => ({ default: m.NotFound })));
 export const Unauthorized = lazy(() => import('@pages/Unauthorized').then(m => ({ default: m.Unauthorized })));

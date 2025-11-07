@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Test User - Approval System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .user-type {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-type:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .user-type h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .user-type p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .permissions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .permission-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            color: #004085;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .current-user {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .current-user h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .current-user p {
+            color: #856404;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Setup Test User</h1>
+        <p class="subtitle">Chọn user để test Approval System</p>
+        
+        <div id="currentUser" class="current-user" style="display: none;">
+            <h3>👤 User hiện tại:</h3>
+            <p id="currentRole"></p>
+            <p id="currentPermissions"></p>
+        </div>
+        
+        <div class="user-type" onclick="setUser('OWNER')">
+            <h3>👑 OWNER - Chủ tổ chức</h3>
+            <p>Có thể approve tất cả các level. Quyền cao nhất.</p>
+            <div class="permissions">
+                <span class="permission-badge">✅ Approve All Levels</span>
+                <span class="permission-badge">🔒 Full Access</span>
+            </div>
+        </div>
+        
+        <div class="user-type" onclick="setUser('MANAGER_LEGAL')">
+            <h3>⚖️ MANAGER - Legal Approver</h3>
+            <p>Chỉ có thể approve ở level LEGAL</p>
+            <div class="permissions">
+                <span class="permission-badge">approve:legal</span>
+            </div>
+        </div>
+        
+        <div class="user-type" onclick="setUser('MANAGER_FINANCE')">
+            <h3>💰 MANAGER - Finance Approver</h3>
+            <p>Chỉ có thể approve ở level FINANCE</p>
+            <div class="permissions">
+                <span class="permission-badge">approve:finance</span>
+            </div>
+        </div>
+        
+        <div class="user-type" onclick="setUser('MANAGER_EXECUTIVE')">
+            <h3>🎯 MANAGER - Executive Approver</h3>
+            <p>Chỉ có thể approve ở level EXECUTIVE</p>
+            <div class="permissions">
+                <span class="permission-badge">approve:executive</span>
+            </div>
+        </div>
+        
+        <div class="user-type" onclick="setUser('MANAGER_ALL')">
+            <h3>🌟 MANAGER - All Permissions</h3>
+            <p>Có thể approve tất cả levels (nhưng phải tuần tự)</p>
+            <div class="permissions">
+                <span class="permission-badge">approve:legal</span>
+                <span class="permission-badge">approve:finance</span>
+                <span class="permission-badge">approve:executive</span>
+            </div>
+        </div>
+        
+        <div class="user-type" onclick="setUser('MEMBER')">
+            <h3>👤 MEMBER - Thành viên</h3>
+            <p>Không có quyền approve, chỉ có thể gửi duyệt</p>
+            <div class="permissions">
+                <span class="permission-badge" style="background: #6c757d;">❌ No Approval Rights</span>
+            </div>
+        </div>
+        
+        <button onclick="clearUser()">🗑️ Clear User Data</button>
+        
+        <div id="success" class="success">
+            ✅ User đã được thiết lập! Refresh trang để áp dụng.
+        </div>
+        
+        <div class="info-box">
+            <strong>📝 Hướng dẫn test:</strong><br>
+            1. Chọn user type ở trên<br>
+            2. Vào trang contract detail<br>
+            3. Click "Gửi duyệt" để tạo workflow<br>
+            4. Thay đổi user để test approve từng level<br>
+            5. Vào <a href="/approvals/me" style="color: #004085; font-weight: bold;">/approvals/me</a> để xem dashboard
+        </div>
+    </div>
+    
+    <script>
+        const users = {
+            OWNER: {
+                userId: 'user-owner-001',
+                userName: 'Nguyễn Văn Owner',
+                userEmail: 'owner@company.com',
+                userRole: 'OWNER',
+                userPermissions: [],
+                currentOrganizationId: 'org-001'
+            },
+            MANAGER_LEGAL: {
+                userId: 'user-legal-001',
+                userName: 'Nguyễn Văn Legal',
+                userEmail: 'legal@company.com',
+                userRole: 'MANAGER',
+                userPermissions: ['approve:legal'],
+                currentOrganizationId: 'org-001'
+            },
+            MANAGER_FINANCE: {
+                userId: 'user-finance-001',
+                userName: 'Trần Thị Finance',
+                userEmail: 'finance@company.com',
+                userRole: 'MANAGER',
+                userPermissions: ['approve:finance'],
+                currentOrganizationId: 'org-001'
+            },
+            MANAGER_EXECUTIVE: {
+                userId: 'user-exec-001',
+                userName: 'Lê Văn Executive',
+                userEmail: 'executive@company.com',
+                userRole: 'MANAGER',
+                userPermissions: ['approve:executive'],
+                currentOrganizationId: 'org-001'
+            },
+            MANAGER_ALL: {
+                userId: 'user-all-001',
+                userName: 'Phạm Thị All',
+                userEmail: 'all@company.com',
+                userRole: 'MANAGER',
+                userPermissions: ['approve:legal', 'approve:finance', 'approve:executive'],
+                currentOrganizationId: 'org-001'
+            },
+            MEMBER: {
+                userId: 'user-member-001',
+                userName: 'Hoàng Văn Member',
+                userEmail: 'member@company.com',
+                userRole: 'MEMBER',
+                userPermissions: [],
+                currentOrganizationId: 'org-001'
+            }
+        };
+        
+        function setUser(userType) {
+            const user = users[userType];
+            
+            localStorage.setItem('userId', user.userId);
+            localStorage.setItem('userName', user.userName);
+            localStorage.setItem('userEmail', user.userEmail);
+            localStorage.setItem('userRole', user.userRole);
+            localStorage.setItem('userPermissions', user.userPermissions.join(','));
+            localStorage.setItem('currentOrganizationId', user.currentOrganizationId);
+            
+            document.getElementById('success').style.display = 'block';
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
+        
+        function clearUser() {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userPermissions');
+            localStorage.removeItem('currentOrganizationId');
+            
+            alert('✅ User data đã được xóa!');
+            location.reload();
+        }
+        
+        function displayCurrentUser() {
+            const role = localStorage.getItem('userRole');
+            const permissions = localStorage.getItem('userPermissions');
+            const name = localStorage.getItem('userName');
+            
+            if (role && name) {
+                document.getElementById('currentUser').style.display = 'block';
+                document.getElementById('currentRole').textContent = `Role: ${role} - ${name}`;
+                document.getElementById('currentPermissions').textContent = `Permissions: ${permissions || 'None'}`;
+            }
+        }
+        
+        // Display current user on load
+        displayCurrentUser();
+    </script>
+</body>
+</html>
