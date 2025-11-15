@@ -15,7 +15,6 @@ import {
 import { useOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
 import { useOrganizationContracts, useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi';
-// import { UploadContractDialog } from '@features/contract'; // Temporarily disabled
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 import { saveOrganizationContext } from '@features/organizations/utils/organizationContext';
@@ -34,7 +33,6 @@ export const OrganizationWorkspace = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
-  // const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false); // Temporarily disabled
 
   const { data: organization, isLoading } = useOrganization(id!);
   const { t } = useTranslation();
@@ -217,15 +215,6 @@ export const OrganizationWorkspace = () => {
       headerRight={(
         <div className="flex items-center gap-2">
             <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
-            {/* Temporarily disabled - Upload Contract feature */}
-            {/* <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => setIsUploadDialogOpen(true)}
-            >
-              <Upload className="w-4 h-4" />
-              Upload Contract
-            </Button> */}
         </div>
       )}
       tabsConfig={{
@@ -235,85 +224,6 @@ export const OrganizationWorkspace = () => {
         loading: isLoading,
       }}
     >
-      {/* Temporarily disabled - Upload Contract Dialog */}
-      {/* <UploadContractDialog
-        open={isUploadDialogOpen}
-        onClose={() => setIsUploadDialogOpen(false)}
-        organizationId={id!}
-        onSuccess={() => {
-          console.log('✅ [Workspace] Contract uploaded successfully!');
-          console.log('🔄 [Workspace] Manually triggering refetch...');
-
-          // Force refetch contracts
-          refetchContracts().then(() => {
-            console.log('✅ [Workspace] Refetch completed!');
-          });
-
-          // Switch to contracts tab if not already there
-          setActiveTab('contracts');
-        }}
-      /> */}
-
-      <div className="space-y-6">
-
-          {/* Stats Cards - Moved to Reports Tab */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
-                  <p className="text-3xl font-bold" style={{ color: '#1e3a8a' }} >{stats.totalContracts}</p>
-                </div>
-                <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
-              </div>
-            </div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
-                  <p className="text-3xl font-bold" style={{ color: '#713f12' }} >{stats.pendingApprovals}</p>
-                </div>
-                <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
-              </div>
-            </div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
-                  <p className="text-3xl font-bold" style={{ color: '#14532d' }} >{stats.approved}</p>
-                </div>
-                <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
-              </div>
-            </div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium" style={{ color: '#b91c1c' }} >{t('organizations.workspace.stats.rejected')}</p>
-                  <p className="text-3xl font-bold" style={{ color: '#7f1d1d' }} >{stats.rejected}</p>
-                </div>
-                <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
-              </div>
-            </div>
-          </div> */}
-
-      </div>
-
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div
           key={activeTab}
@@ -517,7 +427,7 @@ export const OrganizationWorkspace = () => {
                         case 'PENDING_APPROVAL': return '⏳ Chờ phê duyệt';
                         case 'LEGAL_REVIEW': return '⚖️ Đang chờ Pháp lý duyệt';
                         case 'FINANCE_REVIEW': return '💰 Đang chờ Tài chính duyệt';
-                        case 'EXECUTIVE_REVIEW': return '👔 Đang chờ Điều hành duyệt';
+                        case 'EXECUTIVE_REVIEW': return '👔 Đang chờ duyệt cuối';
                         default: return '⏳ Chờ duyệt';
                       }
                     };
@@ -574,7 +484,7 @@ export const OrganizationWorkspace = () => {
                               case 'FINANCE_APPROVED':
                                 return { text: '💰 Tài chính đã duyệt', className: 'bg-blue-100 text-blue-800' };
                               case 'EXECUTIVE_APPROVED':
-                                return { text: '👔 Điều hành đã duyệt', className: 'bg-blue-100 text-blue-800' };
+                                return { text: '👔 Đã duyệt cuối', className: 'bg-blue-100 text-blue-800' };
                               case 'REJECTED':
                                 return { text: '✗ Bị từ chối', className: 'bg-red-100 text-red-800' };
                               case 'CANCELLED':

@@ -3,6 +3,64 @@
     "title": "DocGO",
     "loading": "Loading..."
   },
+  "landing": {
+    "header": {
+      "demo": "Demo"
+    },
+    "hero": {
+      "badge": "Smart AI-powered Document Management",
+      "title": {
+        "part1": "Manage",
+        "highlight": "documents & contracts",
+        "part2": "easier than ever"
+      },
+      "description": "DocGO helps businesses manage documents and contracts intelligently with AI technology, automate workflows and increase work efficiency",
+      "ctaDemo": "Try Demo",
+      "ctaLearnMore": "Learn More",
+      "stats": {
+        "documents": "Documents",
+        "accuracy": "Accurate",
+        "faster": "Faster"
+      }
+    },
+    "features": {
+      "title": "Key Features",
+      "subtitle": "Comprehensive solution for enterprise document and contract management",
+      "ai": {
+        "title": "AI Automation",
+        "description": "Automatically extract information from documents, analyze contracts intelligently with AI",
+        "features": {
+          "ocr": "High accuracy OCR",
+          "summary": "Content summarization",
+          "classify": "Auto classification"
+        }
+      },
+      "security": {
+        "title": "High Security",
+        "description": "Data encryption, granular permissions, comprehensive audit logs",
+        "features": {
+          "encryption": "End-to-end encryption",
+          "permissions": "Flexible permissions",
+          "audit": "Complete audit trail"
+        }
+      },
+      "speed": {
+        "title": "High Speed",
+        "description": "Fast processing, instant search, real-time synchronization",
+        "features": {
+          "fast": "Fast processing",
+          "search": "Instant search",
+          "sync": "Real-time sync"
+        }
+      }
+    },
+    "demo": {
+      "title": "Ready to experience?",
+      "description": "Try DocGO Demo now and discover the power of intelligent document management",
+      "ctaDemo": "Try Free Demo",
+      "ctaRegister": "Sign Up"
+    }
+  },
   "modals": {
     "noRecentRepository": {
       "title": "📁 No recent repository please select a repository! ✨",
@@ -169,7 +227,8 @@
     "upload": "Upload",
     "analytics": "Analytics",
     "documents": "Files",
-    "users": "Users"
+    "users": "Users",
+    "login": "Login"
   },
   "settings": {
     "title": "Settings",
@@ -454,8 +513,9 @@
   "repositories": {
     "list": {
       "title": "My Repositories",
-      "subtitle": "Manage your document repositories and files",
+      "description": "Manage your document repositories and files",
       "new": "New Repository",
+      "error": "Failed to load repositories. Please try again.",
       "search": {
         "personal": "Search personal repositories...",
         "organization": "Search organization repositories...",
@@ -468,6 +528,77 @@
       },
       "createError": "Error creating repository: {{error}}",
       "error": "Failed to load repositories"
+    },
+    "createModal": {
+      "title": "Create New Repository",
+      "requiredFields": "* Required fields",
+      "cancel": "Cancel",
+      "submit": "Create Repository",
+      "submitting": "Creating...",
+      "labels": {
+        "type": "Repository Type",
+        "organization": "Select Organization",
+        "name": "Repository Name",
+        "description": "Description",
+        "public": "Visibility"
+      },
+      "types": {
+        "personal": {
+          "label": "Personal",
+          "description": "Only you can access"
+        },
+        "organization": {
+          "label": "Organization",
+          "description": "Shared with organization members"
+        }
+      },
+      "placeholders": {
+        "organization": "Select an organization...",
+        "name": "Enter repository name",
+        "description": "Brief description of the repository..."
+      },
+      "public": {
+        "label": "Public",
+        "description": "Anyone can view this repository"
+      },
+      "private": {
+        "label": "Private",
+        "description": "Only you and members can access"
+      },
+      "characterCount": "{{count}} / {{max}} characters",
+      "organizationsFound": "Found {{count}} organization(s)",
+      "warnings": {
+        "noOrganizations": "You are not a member of any organization. Please create or join an organization first."
+      },
+      "errors": {
+        "nameRequired": "Repository name is required",
+        "nameTooShort": "Repository name must be at least 3 characters",
+        "nameTooLong": "Repository name must be less than 100 characters",
+        "descriptionTooLong": "Description must be less than 500 characters",
+        "organizationRequired": "Please select an organization",
+        "createFailed": "Failed to create repository: {{error}}"
+      }
+    },
+    "grid": {
+      "loading": "Loading repositories...",
+      "noDescription": "No description",
+      "public": "Public",
+      "types": {
+        "organization": "Organization",
+        "personal": "Personal"
+      },
+      "stats": {
+        "files": "{{count}} files",
+        "members": "{{count}} members",
+        "size": "Size",
+        "owner": "Owner",
+        "noOwner": "Unknown"
+      },
+      "empty": {
+        "title": "No repositories yet",
+        "description": "Create your first repository to get started",
+        "create": "Create Repository"
+      }
     },
     "detail": {
       "loading": "Loading repository info...",
@@ -679,10 +810,12 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "description": "Activity overview and system statistics",
     "subtitle": "Recent activity overview",
     "welcome": "Welcome back, {{name}}! 👋",
     "whatsHappening": "Here's what's happening with your projects today.",
     "stats": {
+      "title": "Statistics",
       "repositories": "Repositories",
       "files": "Files",
       "organizations": "Organizations",

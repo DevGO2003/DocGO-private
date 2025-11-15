@@ -65,7 +65,7 @@ export const Dashboard = () => {
     
     // Add stats panel at the beginning
     return [
-      { id: 'stats', label: 'Thống kê', visible: true, minimized: false, position: { x: 0, y: 0 } },
+      { id: 'stats', label: 'Statistics', visible: true, minimized: false, position: { x: 0, y: 0 } },
       ...defaultPanels,
     ];
   };
@@ -207,7 +207,7 @@ export const Dashboard = () => {
   return (
     <DashboardLayout
       title={t('dashboard.title')}
-      description="Tổng quan hoạt động và thống kê hệ thống của bạn"
+      description={t('dashboard.description')}
       breadcrumbs={[{ label: t('nav.dashboard'), current: true }]}
       onRefresh={handleRefresh}
       headerRight={
@@ -234,7 +234,7 @@ export const Dashboard = () => {
         {panels.find(p => p.id === 'stats')?.visible && (
           <WindowPanel
             id="stats"
-            title={t('dashboard.stats.title') || 'Thống kê'}
+            title={t('dashboard.stats.title')}
             defaultWidth={1040}
             defaultHeight={300}
             minimized={panels.find(p => p.id === 'stats')?.minimized}
@@ -373,7 +373,7 @@ export const Dashboard = () => {
           {panels.find(p => p.id === 'organizations')?.visible && (
             <WindowPanel
               id="organizations"
-              title="My Organizations"
+              title={t('dashboard.myOrganizations')}
               defaultWidth={1040}
               defaultHeight={450}
               minimized={panels.find(p => p.id === 'organizations')?.minimized}
