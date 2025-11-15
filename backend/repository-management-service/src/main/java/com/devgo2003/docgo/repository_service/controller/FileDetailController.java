@@ -13,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -109,6 +110,8 @@ public class FileDetailController {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> s3Data = (Map<String, Object>) storage.get("s3");
                 String s3Url = (String) s3Data.get("url");
+                String objectKey = (String) s3Data.get("objectKey");
+                String contentType = (String) s3Data.get("contentType");
                 
                 if (s3Url == null || s3Url.isEmpty()) {
                     throw new RuntimeException("S3 URL not found in storage");
@@ -116,12 +119,26 @@ public class FileDetailController {
                 
                 log.warn("S3 presigned URL may be expired. Redirecting to S3 URL: {}", s3Url);
                 
-                // Redirect to S3 URL (URL may be expired - needs refresh mechanism)
+                String derivedName = fileName;
+                try {
+                    if (objectKey != null && !objectKey.isEmpty()) {
+                        int idx = objectKey.lastIndexOf('/');
+                        derivedName = idx >= 0 ? objectKey.substring(idx + 1) : objectKey;
+                    } else {
+                        URL u = new URL(s3Url);
+                        String path = u.getPath();
+                        int idx = path.lastIndexOf('/');
+                        String last = idx >= 0 ? path.substring(idx + 1) : path;
+                        if (last != null && !last.isEmpty()) derivedName = last;
+                    }
+                } catch (Exception ignore) {}
+
                 return ResponseEntity.status(302)
                     .header(HttpHeaders.LOCATION, s3Url)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + derivedName + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE)
                     .build();
-                    
+                
             } else {
                 // File is stored locally - serve from disk
                 String filePath = null;
@@ -147,16 +164,74 @@ public class FileDetailController {
                     throw new RuntimeException("File not found or not readable: " + filePath);
                 }
                 
-                // Return file as download
+                String actualName = path.getFileName().toString();
+                MediaType mediaType = MediaTypeFactory.getMediaType(actualName).orElse(MediaType.APPLICATION_OCTET_STREAM);
                 return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + ".pdf\"")
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + actualName + "\"")
                     .body(resource);
             }
                 
         } catch (Exception e) {
             log.error("Error downloading file {}: {}", fileId, e.getMessage(), e);
             throw new RuntimeException("Failed to download file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Open file inline - streams content for browser viewing
+     */
+    @GetMapping("/{fileId}/open")
+    public ResponseEntity<Resource> openFile(@PathVariable String fileId) {
+        log.info("GET /files/{}/open", fileId);
+        try {
+            FileEntity file = fileService.getFileById(fileId)
+                .orElseThrow(() -> new RuntimeException("File not found: " + fileId));
+
+            Map<String, Object> storage = file.getStorage();
+            Map<String, Object> overview = file.getOverview();
+            String fileName = (String) overview.getOrDefault("title", "document");
+
+            String storageType = (String) storage.get("type");
+            if ("s3".equals(storageType)) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> s3Data = (Map<String, Object>) storage.get("s3");
+                String s3Url = (String) s3Data.get("url");
+                String contentType = (String) s3Data.get("contentType");
+                if (s3Url == null || s3Url.isEmpty()) {
+                    throw new RuntimeException("S3 URL not found in storage");
+                }
+                return ResponseEntity.status(302)
+                    .header(HttpHeaders.LOCATION, s3Url)
+                    .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                    .build();
+            } else {
+                String filePath = null;
+                if (storage.get("path") != null) {
+                    filePath = (String) storage.get("path");
+                } else if (storage.get("filePath") != null) {
+                    filePath = (String) storage.get("filePath");
+                } else if (storage.get("localPath") != null) {
+                    filePath = (String) storage.get("localPath");
+                }
+                if (filePath == null || filePath.isEmpty()) {
+                    throw new RuntimeException("File path not found in storage");
+                }
+                Path path = Paths.get(filePath);
+                Resource resource = new UrlResource(path.toUri());
+                if (!resource.exists() || !resource.isReadable()) {
+                    throw new RuntimeException("File not found or not readable: " + filePath);
+                }
+                String actualName = path.getFileName().toString();
+                MediaType mediaType = MediaTypeFactory.getMediaType(actualName).orElse(MediaType.APPLICATION_OCTET_STREAM);
+                return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + actualName + "\"")
+                    .body(resource);
+            }
+        } catch (Exception e) {
+            log.error("Error opening file {}: {}", fileId, e.getMessage(), e);
+            throw new RuntimeException("Failed to open file: " + e.getMessage());
         }
     }
 }

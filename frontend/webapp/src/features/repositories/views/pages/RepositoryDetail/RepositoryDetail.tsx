@@ -326,7 +326,7 @@ export const RepositoryDetail: React.FC = () => {
                           
                           {/* Permissions Section */}
                           <div className="space-y-3 border-t border-gray-200 pt-4">
-                            <p className="text-sm font-medium text-gray-700">{t('repositories.detail.members.permissions')}</p>
+                            <p className="text-sm font-medium text-gray-700">{t('repositories.detail.members.permissions.title')}</p>
                             
                             <div className="flex items-center justify-between">
                               <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.upload')}</label>

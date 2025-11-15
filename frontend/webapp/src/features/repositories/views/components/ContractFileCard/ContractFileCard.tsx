@@ -1,5 +1,9 @@
 import React from 'react';
-import { Card, CardContent, Checkbox } from '@shared/components';
+import { Card, CardContent, Checkbox, Button, CommonIcon } from '@shared/components';
+import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { openPreview } from '@store/slices/previewPanelSlice';
 import type { ContractFile } from '@features/repositories/models/types/file.types';
 
 interface ContractFileCardProps {
@@ -7,6 +11,9 @@ interface ContractFileCardProps {
   right?: React.ReactNode;
   isSelected?: boolean;
   onSelect?: (checked: boolean) => void;
+  detailHref: string;
+  openUrl?: string;
+  downloadUrl?: string;
 }
 
 const badgeClass = (status?: string) => {
@@ -28,7 +35,11 @@ const badgeClass = (status?: string) => {
   }
 };
 
-export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right, isSelected, onSelect }) => {
+export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl, downloadUrl }) => {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const [showPreview, setShowPreview] = React.useState(false);
+  const [previewPos, setPreviewPos] = React.useState<{ x: number; y: number } | null>(null);
   return (
     <Card className="relative group">
       {isSelected !== undefined && onSelect && (
@@ -39,7 +50,7 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
             className="border-2 border-white" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
         </div>
       )}
-      <CardContent className="p-4">
+      <CardContent className="p-4 pb-14">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-medium truncate" style={{ color: '#111827' }} title={item.fileName}>{item.fileName}</div>
@@ -59,12 +70,12 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
                 {item.totalValue ? `${item.totalValue.toLocaleString()} ${item.currency || ''}` : ''}
               </div>
               {item.parties && item.parties.length > 0 && (
-                <div>Parties: {item.parties.map(p => p.name).filter(Boolean).join(', ')}</div>
+                <div>{t('fileCard.parties')}: {item.parties.map(p => p.name).filter(Boolean).join(', ')}</div>
               )}
               {(item.effectiveDate || item.expiryDate) && (
                 <div>
-                  {item.effectiveDate ? new Date(item.effectiveDate).toLocaleDateString('vi-VN') : ''}
-                  {item.expiryDate ? ` → ${new Date(item.expiryDate).toLocaleDateString('vi-VN')}` : ''}
+                  {item.effectiveDate ? new Date(item.effectiveDate).toLocaleDateString() : ''}
+                  {item.expiryDate ? ` → ${new Date(item.expiryDate).toLocaleDateString()}` : ''}
                 </div>
               )}
               {item.riskLevel && (
@@ -78,6 +89,67 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
           {right}
         </div>
       </CardContent>
+      <div className="absolute inset-x-0 bottom-0 z-10">
+        <div className="flex rounded-none border-t" style={{ borderColor: '#e5e7eb' }}>
+          <Link to={detailHref} className="flex-1">
+            <Button variant="ghost" className="w-full h-10">
+              <CommonIcon name="file-text" className="mr-2 h-4 w-4" />
+              {t('fileCard.viewDetails')}
+            </Button>
+          </Link>
+          <button
+            className="flex-1"
+            onClick={() => {
+              dispatch(openPreview({
+                fileId: item.fileId,
+                fileName: item.fileName,
+                fileType: item.fileType || 'contract',
+              }));
+            }}
+            onMouseEnter={(e) => {
+              const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+              setPreviewPos({ x: rect.left + rect.width / 2, y: rect.top });
+              setShowPreview(true);
+            }}
+            onMouseLeave={() => {
+              setShowPreview(false);
+              setPreviewPos(null);
+            }}
+          >
+            <Button variant="ghost" className="w-full h-10">
+              <CommonIcon name="search" className="mr-2 h-4 w-4" />
+              {t('fileCard.preview')}
+            </Button>
+          </button>
+          <button
+            className="flex-1"
+            onClick={() => {
+              if (downloadUrl) window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <Button variant="ghost" className="w-full h-10">
+              <CommonIcon name="download" className="mr-2 h-4 w-4" />
+              {t('fileCard.download')}
+            </Button>
+          </button>
+        </div>
+      </div>
+      {showPreview && previewPos && (
+        <div
+          className="fixed z-50 bg-white border rounded-lg shadow p-3"
+          style={{ left: previewPos.x, top: previewPos.y - 8, transform: 'translate(-50%, -100%)', borderColor: '#e5e7eb' }}
+        >
+          <div className="text-sm" style={{ color: '#374151' }}>
+            <div className="font-medium truncate" title={item.fileName}>{item.fileName}</div>
+            <div className="mt-1 text-xs" style={{ color: '#6b7280' }}>
+              {(item.fileType || 'contract')} · {(item.fileSize ?? 0)} bytes
+            </div>
+            <div className="mt-2 text-xs" style={{ color: '#6b7280' }}>
+              {t('fileCard.openTabForFullContent')}
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };

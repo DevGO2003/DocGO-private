@@ -63,11 +63,10 @@
   },
   "modals": {
     "noRecentRepository": {
-      "title": "",
-      "desc": "You haven't opened any repository recently. To view files, please select a repository!",
-      "question": "Do you want to go to the repositories list?",
-      "cancel": "Cancel",
-      "goToRepos": "Go to Repositories"
+      "title": "📁 No recent repository please select a repository! ✨",
+      "question": "🤔 Do you want to go to the repositories list?",
+      "cancel": "❌ Cancel",
+      "goToRepos": "🚀 Go to Repositories"
     }
   },
   "uploads": {
@@ -150,6 +149,71 @@
       "inactive": "Inactive",
       "suspended": "Suspended",
       "deleted": "Deleted"
+    }
+  },
+  "repositories": {
+    "grid": {
+      "loading": "Loading repositories...",
+      "types": {
+        "organization": "Organization",
+        "personal": "Personal"
+      },
+      "empty": {
+        "title": "No repositories yet",
+        "description": "Start by creating a new repository",
+        "create": "Create new"
+      },
+      "noDescription": "No description",
+      "public": "Public",
+      "stats": {
+        "files": "{{count}} files",
+        "members": "{{count}} members",
+        "size": "Size",
+        "owner": "Owner",
+        "noOwner": "No owner"
+      }
+    },
+    "list": {
+      "title": "Repository List",
+      "description": "Manage your personal, organization, and public repositories",
+      "new": "Create New Repository",
+      "search": {
+        "personal": "Search personal repositories...",
+        "organization": "Search organization repositories...",
+        "public": "Search public repositories..."
+      },
+      "pagination": {
+        "showing": "Showing {{from}} - {{to}} of {{total}} results"
+      },
+      "empty": {
+        "personal": "No personal repositories yet",
+        "organization": "No organization repositories yet",
+        "public": "No public repositories yet",
+        "create": "Create New Repository",
+        "noResults": "No results found"
+      }
+    },
+    "tabs": {
+      "personal": {
+        "label": "Personal"
+      },
+      "organization": {
+        "label": "Organization"
+      },
+      "public": {
+        "label": "Public"
+      }
+    },
+    "detail": {
+      "members": {
+        "permissions": {
+          "title": "Permissions",
+          "error": "Failed to update permissions. Please try again.",
+          "upload": "Upload permission",
+          "view": "View permission",
+          "delete": "Delete permission"
+        }
+      }
     }
   },
   "nav": {
@@ -461,7 +525,9 @@
         "showing": "Showing {{from}} to {{to}} of {{total}} repositories",
         "prev": "Previous",
         "next": "Next"
-      }
+      },
+      "createError": "Error creating repository: {{error}}",
+      "error": "Failed to load repositories"
     },
     "createModal": {
       "title": "Create New Repository",
@@ -773,6 +839,55 @@
       "organizations": "Organizations",
       "profile": "Profile",
       "settings": "Settings"
+    }
+  },
+  "fileCard": {
+    "viewDetails": "View Details",
+    "preview": "Preview",
+    "download": "Download",
+    "openTabForFullContent": "Open tab to view full content",
+    "parties": "Parties",
+    "effectiveDate": "Effective Date",
+    "expiryDate": "Expiry Date",
+    "riskLevel": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PENDING_REVIEW": "Pending Review",
+      "APPROVED": "Approved",
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "ARCHIVED": "Archived",
+      "tooltip": {
+        "DRAFT": "Status: Draft",
+        "PENDING_REVIEW": "Status: Pending Review",
+        "APPROVED": "Status: Approved",
+        "ACTIVE": "Status: Active",
+        "EXPIRED": "Status: Expired",
+        "ARCHIVED": "Status: Archived"
+      }
+    },
+    "riskLevel": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "tooltip": {
+        "LOW": "Risk Level: Low",
+        "MEDIUM": "Risk Level: Medium",
+        "HIGH": "Risk Level: High"
+      }
+    }
+  },
+  "common": {
+    "noData": "No Data",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "error": {
+      "network": "Network Error"
     }
   }
 }

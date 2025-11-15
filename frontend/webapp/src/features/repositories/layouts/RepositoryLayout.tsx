@@ -1,4 +1,5 @@
 import React from 'react'
+import { DocumentPreviewPanel } from '@shared/components/FilePreview'
 import { ControlMainLayout } from '@shared/layouts'
 import type { TabsConfig } from '@shared/layouts/HeaderControlLayout/types'
 
@@ -50,27 +51,30 @@ function RepositoryLayout({
   onRefresh,
 }: RepositoryLayoutProps) {
   return (
-    <ControlMainLayout
-      title={title}
-      subtitle={subtitle}
-      description={description}
-      breadcrumbs={breadcrumbs}
-      headerChildren={headerChildren}
-      headerRight={headerRight}
-      showToolbar={showToolbar}
-      toolbarContent={toolbarContent}
-      loading={loading}
-      loadingText={loadingText}
-      primaryTabs={primaryTabs}
-      secondaryTabs={secondaryTabs}
-      tabsConfig={tabsConfig}
-      onRefresh={onRefresh}
-    >
-      <div className={`w-full h-full ${className}`}>
-        {children}
-      </div>
-      {extra}
-    </ControlMainLayout>
+    <>
+      <ControlMainLayout
+        title={title}
+        subtitle={subtitle}
+        description={description}
+        breadcrumbs={breadcrumbs}
+        headerChildren={headerChildren}
+        headerRight={headerRight}
+        showToolbar={showToolbar}
+        toolbarContent={toolbarContent}
+        loading={loading}
+        loadingText={loadingText}
+        primaryTabs={primaryTabs}
+        secondaryTabs={secondaryTabs}
+        tabsConfig={tabsConfig}
+        onRefresh={onRefresh}
+      >
+        <div className={`w-full h-full ${className}`}>
+          {children}
+        </div>
+        {extra}
+      </ControlMainLayout>
+      <DocumentPreviewPanel />
+    </>
   )
 }
 

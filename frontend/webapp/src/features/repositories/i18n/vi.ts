@@ -100,8 +100,8 @@ export const vi = {
         },
       },
       members: {
-        permissions: 'Quyền hạn',
         permissions: {
+          title: 'Quyền hạn',
           error: 'Cập nhật quyền thất bại. Vui lòng thử lại.',
           upload: 'Quyền tải lên',
           view: 'Quyền xem',
