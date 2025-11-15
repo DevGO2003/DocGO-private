@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PreviewPanel } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useFileDownload } from '@features/repositories/models/api/repositoryApi';
+import PreviewFactory from '@features/upload/views/components/previews/PreviewFactory';
 
 interface ContentTabProps {
   fileData: any;
@@ -66,6 +67,11 @@ export function ContentTab({ fileData }: ContentTabProps) {
           </div>
         )}
         
+        {/* Rich preview when file blob is available (same behavior as Upload preview) */}
+        {!showLoading && fileObject && !showFallback && (
+          <PreviewFactory file={fileObject} />
+        )}
+
         {/* Fallback: Show extracted text if file download failed or not available */}
         {!showLoading && showFallback && (
         <div className="space-y-4">
