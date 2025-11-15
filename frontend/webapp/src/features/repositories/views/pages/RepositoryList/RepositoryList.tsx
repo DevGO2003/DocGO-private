@@ -130,7 +130,9 @@ export const RepositoryList = () => {
         status: error?.response?.status,
         config: error?.config
       });
-      alert(`Lỗi khi tạo repository: ${error?.response?.data?.description || error?.message || 'Unknown error'}`);
+      alert(t('repositories.createModal.errors.createFailed', { 
+        error: error?.response?.data?.description || error?.message || 'Unknown error'
+      }));
     } finally {
       setIsCreating(false);
     }

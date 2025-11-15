@@ -86,7 +86,7 @@ export function getApprovalLevelLabel(level: ApprovalLevel): string {
     case ApprovalLevel.FINANCE:
       return 'Phê duyệt Tài chính';
     case ApprovalLevel.EXECUTIVE:
-      return 'Phê duyệt Điều hành';
+      return 'Phê duyệt cuối';
     default:
       return level;
   }
@@ -107,9 +107,9 @@ export function getWorkflowStatusLabel(status: WorkflowStatus): string {
     case WorkflowStatus.FINANCE_APPROVED:
       return 'Tài chính đã duyệt';
     case WorkflowStatus.EXECUTIVE_REVIEW:
-      return 'Đang chờ Điều hành duyệt';
+      return 'Đang chờ duyệt cuối';
     case WorkflowStatus.EXECUTIVE_APPROVED:
-      return 'Điều hành đã duyệt';
+      return 'Đã duyệt cuối';
     case WorkflowStatus.FULLY_APPROVED:
       return 'Đã phê duyệt hoàn toàn';
     case WorkflowStatus.REJECTED:

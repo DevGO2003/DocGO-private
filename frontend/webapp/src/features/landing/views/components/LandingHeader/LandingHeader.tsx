@@ -35,7 +35,7 @@ const LandingHeader: React.FC = () => {
             {t('landing.features.title')}
           </a>
           <a href="#demo" className="text-sm hover: transition" style={{ color: '#4b5563' }} >
-            Demo
+            {t('landing.header.demo')}
           </a>
           <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
             {t('nav.login')}

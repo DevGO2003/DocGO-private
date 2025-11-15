@@ -131,8 +131,6 @@ export const Profile = () => {
         <div className="max-w-4xl mx-auto p-6">
           {/* Header */}
           <div
-            // initial={{ opacity: 0, y: -20 }}
-            // animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('profile.title')}</h1>
@@ -142,8 +140,6 @@ export const Profile = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Profile Card */}
             <div
-              // initial={{ opacity: 0, x: -20 }}
-              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
               <Card>
@@ -183,8 +179,6 @@ export const Profile = () => {
 
             {/* Details Card */}
             <div
-              // initial={{ opacity: 0, x: 20 }}
-              // animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-2"
             >
               <Card>

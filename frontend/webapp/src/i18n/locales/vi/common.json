@@ -4,6 +4,9 @@
     "loading": "Đang tải..."
   },
   "landing": {
+    "header": {
+      "demo": "Demo"
+    },
     "hero": {
       "badge": "Quản lý tài liệu thông minh với AI",
       "title": {
@@ -60,6 +63,7 @@
   },
   "dashboard": {
     "title": "Bảng điều khiển",
+    "description": "Tổng quan hoạt động và thống kê hệ thống của bạn",
     "welcome": "Chào mừng quay lại, {{name}}! 👋",
     "whatsHappening": "Đây là tổng quan hoạt động và thống kê hệ thống của bạn",
     "stats": {
@@ -71,6 +75,7 @@
     },
     "recentRepositories": "Kho tài liệu gần đây",
     "recentFiles": "Tài liệu gần đây",
+    "myOrganizations": "Tổ chức của tôi",
     "noRepositories": "Chưa có kho tài liệu nào",
     "noFiles": "Chưa có tài liệu nào",
     "notInOrganization": "Bạn chưa tham gia tổ chức nào",
@@ -489,7 +494,8 @@
     "upload": "Tải lên",
     "analytics": "Phân tích",
     "documents": "Tệp",
-    "users": "Người dùng"
+    "users": "Người dùng",
+    "login": "Đăng nhập"
   },
   "settings": {
     "title": "Cài đặt",
@@ -542,8 +548,9 @@
   "repositories": {
     "list": {
       "title": "Kho tài liệu của tôi",
-      "subtitle": "Quản lý kho tài liệu và tệp của bạn",
+      "description": "Quản lý kho tài liệu và tệp của bạn",
       "new": "Tạo kho mới",
+      "error": "Không thể tải danh sách kho. Vui lòng thử lại.",
       "search": {
         "personal": "Tìm kiếm kho cá nhân...",
         "organization": "Tìm kiếm kho tổ chức...",
@@ -553,6 +560,77 @@
         "showing": "Hiển thị {{from}} đến {{to}} trong số {{total}} kho",
         "prev": "Trước",
         "next": "Sau"
+      }
+    },
+    "createModal": {
+      "title": "Tạo kho tài liệu mới",
+      "requiredFields": "* Trường bắt buộc",
+      "cancel": "Hủy",
+      "submit": "Tạo kho",
+      "submitting": "Đang tạo...",
+      "labels": {
+        "type": "Loại kho",
+        "organization": "Chọn tổ chức",
+        "name": "Tên kho",
+        "description": "Mô tả",
+        "public": "Chế độ hiển thị"
+      },
+      "types": {
+        "personal": {
+          "label": "Cá nhân",
+          "description": "Chỉ bạn có thể truy cập"
+        },
+        "organization": {
+          "label": "Tổ chức",
+          "description": "Chia sẻ với thành viên tổ chức"
+        }
+      },
+      "placeholders": {
+        "organization": "Chọn một tổ chức...",
+        "name": "Nhập tên kho tài liệu",
+        "description": "Mô tả ngắn gọn về kho tài liệu..."
+      },
+      "public": {
+        "label": "Công khai",
+        "description": "Mọi người có thể xem kho này"
+      },
+      "private": {
+        "label": "Riêng tư",
+        "description": "Chỉ bạn và thành viên có thể truy cập"
+      },
+      "characterCount": "{{count}} / {{max}} ký tự",
+      "organizationsFound": "Tìm thấy {{count}} tổ chức",
+      "warnings": {
+        "noOrganizations": "Bạn chưa là thành viên của tổ chức nào. Vui lòng tạo hoặc tham gia tổ chức trước."
+      },
+      "errors": {
+        "nameRequired": "Tên kho là bắt buộc",
+        "nameTooShort": "Tên kho phải có ít nhất 3 ký tự",
+        "nameTooLong": "Tên kho phải ít hơn 100 ký tự",
+        "descriptionTooLong": "Mô tả phải ít hơn 500 ký tự",
+        "organizationRequired": "Vui lòng chọn một tổ chức",
+        "createFailed": "Tạo kho thất bại: {{error}}"
+      }
+    },
+    "grid": {
+      "loading": "Đang tải danh sách kho...",
+      "noDescription": "Không có mô tả",
+      "public": "Công khai",
+      "types": {
+        "organization": "Tổ chức",
+        "personal": "Cá nhân"
+      },
+      "stats": {
+        "files": "{{count}} file",
+        "members": "{{count}} thành viên",
+        "size": "Dung lượng",
+        "owner": "Chủ sở hữu",
+        "noOwner": "Không rõ"
+      },
+      "empty": {
+        "title": "Chưa có kho nào",
+        "description": "Tạo kho đầu tiên để bắt đầu",
+        "create": "Tạo kho"
       }
     },
     "detail": {

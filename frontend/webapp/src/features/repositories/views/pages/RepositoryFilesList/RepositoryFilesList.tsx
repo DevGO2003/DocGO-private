@@ -21,9 +21,6 @@ import { GeneralFileCard } from '@features/repositories/views/components/General
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import TableSettings from './TableSettings';
 import { tagAPI } from '@features/tags/services/tag-api';
-// TODO: Add Tooltip and AlertDialog components to @shared/components
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shared/components';
-// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@shared/components';
 // Use real repository API
 
 interface RepoFileItem {
