@@ -93,6 +93,60 @@
       "memberSince": "Thành viên từ"
     }
   },
+  "repositories": {
+    "grid": {
+      "loading": "Đang tải kho tài liệu...",
+      "types": {
+        "organization": "Tổ chức",
+        "personal": "Cá nhân"
+      },
+      "empty": {
+        "title": "Chưa có kho tài liệu nào",
+        "description": "Bắt đầu bằng cách tạo kho tài liệu mới",
+        "create": "Tạo kho mới"
+      },
+      "noDescription": "Không có mô tả",
+      "public": "Công khai",
+      "stats": {
+        "files": "{{count}} tệp",
+        "members": "{{count}} thành viên",
+        "size": "Kích thước",
+        "owner": "Chủ sở hữu",
+        "noOwner": "Không có chủ sở hữu"
+      }
+    },
+    "list": {
+      "title": "Danh sách kho tài liệu",
+      "description": "Quản lý các kho tài liệu cá nhân, tổ chức và công khai của bạn",
+      "new": "Tạo kho mới",
+      "search": {
+        "personal": "Tìm kiếm kho cá nhân...",
+        "organization": "Tìm kiếm kho tổ chức...",
+        "public": "Tìm kiếm kho công khai..."
+      },
+      "pagination": {
+        "showing": "Hiển thị {{from}} - {{to}} trong tổng {{total}} kết quả"
+      },
+      "empty": {
+        "personal": "Chưa có kho cá nhân nào",
+        "organization": "Chưa có kho tổ chức nào",
+        "public": "Chưa có kho công khai nào",
+        "create": "Tạo kho mới",
+        "noResults": "Không tìm thấy kết quả"
+      }
+    },
+    "tabs": {
+      "personal": {
+        "label": "Cá nhân"
+      },
+      "organization": {
+        "label": "Tổ chức"
+      },
+      "public": {
+        "label": "Công khai"
+      }
+    }
+  },
   "modals": {
     "noRecentRepository": {
       "title": "📁 Chưa có repository gần đây",
@@ -479,7 +533,7 @@
     }
   },
   "nav": {
-    "dashboard": "Bảng điều khiển",
+    "dashboard": "Trang chủ",
     "products": "Sản phẩm",
     "orders": "Đơn hàng",
     "profile": "Hồ sơ",
@@ -791,5 +845,54 @@
     "description": "Rất tiếc, bạn không có quyền truy cập trang này. Nếu bạn nghĩ đây là nhầm lẫn, hãy liên hệ quản trị viên.",
     "goBack": "Quay lại",
     "goHome": "Về trang chủ"
+  },
+  "fileCard": {
+    "viewDetails": "Xem chi tiết",
+    "preview": "Xem trước",
+    "download": "Tải xuống",
+    "openTabForFullContent": "Mở tab để xem nội dung đầy đủ",
+    "parties": "Các bên",
+    "effectiveDate": "Ngày hiệu lực",
+    "expiryDate": "Ngày hết hạn",
+    "riskLevel": {
+      "LOW": "Thấp",
+      "MEDIUM": "Trung bình",
+      "HIGH": "Cao"
+    },
+    "status": {
+      "DRAFT": "Bản nháp",
+      "PENDING_REVIEW": "Chờ xem xét",
+      "APPROVED": "Đã duyệt",
+      "ACTIVE": "Đang hoạt động",
+      "EXPIRED": "Đã hết hạn",
+      "ARCHIVED": "Đã lưu trữ",
+      "tooltip": {
+        "DRAFT": "Tình trạng: Bản nháp",
+        "PENDING_REVIEW": "Tình trạng: Chờ xem xét",
+        "APPROVED": "Tình trạng: Đã duyệt",
+        "ACTIVE": "Tình trạng: Đang hoạt động",
+        "EXPIRED": "Tình trạng: Đã hết hạn",
+        "ARCHIVED": "Tình trạng: Đã lưu trữ"
+      }
+    },
+    "riskLevel": {
+      "LOW": "Thấp",
+      "MEDIUM": "Trung bình",
+      "HIGH": "Cao",
+      "tooltip": {
+        "LOW": "Mức độ rủi ro: Thấp",
+        "MEDIUM": "Mức độ rủi ro: Trung bình",
+        "HIGH": "Mức độ rủi ro: Cao"
+      }
+    }
+  },
+  "common": {
+    "noData": "Không có dữ liệu",
+    "retry": "Thử lại",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "error": {
+      "network": "Lỗi mạng"
+    }
   }
 }

@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, CardContent, Checkbox, Button, CommonIcon } from '@shared/components';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { openPreview } from '@store/slices/previewPanelSlice';
 import type { ContractFile } from '@features/repositories/models/types/file.types';
 
 interface ContractFileCardProps {
@@ -33,6 +36,8 @@ const badgeClass = (status?: string) => {
 };
 
 export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl, downloadUrl }) => {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = React.useState(false);
   const [previewPos, setPreviewPos] = React.useState<{ x: number; y: number } | null>(null);
   return (
@@ -65,12 +70,12 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
                 {item.totalValue ? `${item.totalValue.toLocaleString()} ${item.currency || ''}` : ''}
               </div>
               {item.parties && item.parties.length > 0 && (
-                <div>Parties: {item.parties.map(p => p.name).filter(Boolean).join(', ')}</div>
+                <div>{t('fileCard.parties')}: {item.parties.map(p => p.name).filter(Boolean).join(', ')}</div>
               )}
               {(item.effectiveDate || item.expiryDate) && (
                 <div>
-                  {item.effectiveDate ? new Date(item.effectiveDate).toLocaleDateString('vi-VN') : ''}
-                  {item.expiryDate ? ` → ${new Date(item.expiryDate).toLocaleDateString('vi-VN')}` : ''}
+                  {item.effectiveDate ? new Date(item.effectiveDate).toLocaleDateString() : ''}
+                  {item.expiryDate ? ` → ${new Date(item.expiryDate).toLocaleDateString()}` : ''}
                 </div>
               )}
               {item.riskLevel && (
@@ -89,13 +94,17 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
           <Link to={detailHref} className="flex-1">
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="file-text" className="mr-2 h-4 w-4" />
-              Xem chi tiết
+              {t('fileCard.viewDetails')}
             </Button>
           </Link>
           <button
             className="flex-1"
             onClick={() => {
-              if (openUrl) window.open(openUrl, '_blank', 'noopener,noreferrer');
+              dispatch(openPreview({
+                fileId: item.fileId,
+                fileName: item.fileName,
+                fileType: item.fileType || 'contract',
+              }));
             }}
             onMouseEnter={(e) => {
               const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
@@ -109,7 +118,7 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
           >
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="search" className="mr-2 h-4 w-4" />
-              Xem trước
+              {t('fileCard.preview')}
             </Button>
           </button>
           <button
@@ -120,7 +129,7 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
           >
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="download" className="mr-2 h-4 w-4" />
-              Tải xuống
+              {t('fileCard.download')}
             </Button>
           </button>
         </div>
@@ -136,7 +145,7 @@ export const ContractFileCard: React.FC<ContractFileCardProps> = ({ item, right,
               {(item.fileType || 'contract')} · {(item.fileSize ?? 0)} bytes
             </div>
             <div className="mt-2 text-xs" style={{ color: '#6b7280' }}>
-              Mở tab để xem nội dung đầy đủ
+              {t('fileCard.openTabForFullContent')}
             </div>
           </div>
         </div>

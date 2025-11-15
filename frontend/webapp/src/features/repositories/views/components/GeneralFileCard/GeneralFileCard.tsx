@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent, Button, CommonIcon } from '@shared/components';
 import { Checkbox } from '@shared/components';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { openPreview } from '@store/slices/previewPanelSlice';
 
 export interface GeneralFileItem {
   fileId: string;
@@ -49,6 +52,8 @@ interface GeneralFileCardProps {
 }
 
 export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl, downloadUrl }) => {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = React.useState(false);
   const [previewPos, setPreviewPos] = React.useState<{ x: number; y: number } | null>(null);
   return (
@@ -78,12 +83,12 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
           </div>
             <div className="mt-2 space-y-1 text-xs" style={{ color: '#6b7280' }} >
               {item.totalValue && <div>Value: {item.totalValue.toLocaleString()} {item.currency}</div>}
-              {item.parties && <div>Parties: {item.parties.map(p => p.name).join(', ')}</div>}
+              {item.parties && <div>{t('fileCard.parties')}: {item.parties.map(p => p.name).join(', ')}</div>}
               {item.riskLevel && <span className={`px-1 py-0.5 rounded text-xs ${item.riskLevel === 'LOW' ? 'bg-green-100' : 'bg-yellow-100'}`}>{item.riskLevel}</span>}
               {item.reminders && <div>Reminders: {item.reminders.length}</div>}
             </div>
           <div className="mt-2 text-xs" style={{ color: '#6b7280' }} >
-            {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString('vi-VN') : ''}
+            {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes · {item.uploadedAt ? new Date(item.uploadedAt).toLocaleString() : ''}
           </div>
         </div>
         {right && (
@@ -102,13 +107,17 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
           <Link to={detailHref} className="flex-1">
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="file-text" className="mr-2 h-4 w-4" />
-              Xem chi tiết
+              {t('fileCard.viewDetails')}
             </Button>
           </Link>
           <button
             className="flex-1"
             onClick={() => {
-              if (openUrl) window.open(openUrl, '_blank', 'noopener,noreferrer');
+              dispatch(openPreview({
+                fileId: item.fileId,
+                fileName: item.fileName,
+                fileType: item.fileType || 'file',
+              }));
             }}
             onMouseEnter={(e) => {
               const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
@@ -122,7 +131,7 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
           >
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="search" className="mr-2 h-4 w-4" />
-              Xem trước
+              {t('fileCard.preview')}
             </Button>
           </button>
           <button
@@ -133,7 +142,7 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
           >
             <Button variant="ghost" className="w-full h-10">
               <CommonIcon name="download" className="mr-2 h-4 w-4" />
-              Tải xuống
+              {t('fileCard.download')}
             </Button>
           </button>
         </div>
@@ -149,7 +158,7 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
               {(item.fileType || 'file')} · {(item.fileSize ?? 0)} bytes
             </div>
             <div className="mt-2 text-xs" style={{ color: '#6b7280' }}>
-              Mở tab để xem nội dung đầy đủ
+              {t('fileCard.openTabForFullContent')}
             </div>
           </div>
         </div>
