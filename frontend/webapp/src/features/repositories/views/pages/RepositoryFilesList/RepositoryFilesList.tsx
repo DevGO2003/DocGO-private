@@ -18,6 +18,8 @@ import { REPOSITORY_ROUTES, buildPath } from '@constants';
 import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { FilesFilters } from '@features/repositories/views/components/FilesFilters/FilesFilters';
 import { GeneralFileCard } from '@features/repositories/views/components/GeneralFileCard/GeneralFileCard';
+import { ContractFileCard } from '@features/repositories/views/components/ContractFileCard/ContractFileCard';
+import { mapFileApiToUiDocument } from '@features/repositories/models/mappers/file-mapper';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import TableSettings from './TableSettings';
 import { tagAPI } from '@features/tags/services/tag-api';
@@ -43,6 +45,7 @@ interface RepoFileItem {
   riskLevel?: string;
   reminders?: any[];
   documentType?: string;
+  kind?: 'general' | 'contract';
 }
 
 export const RepositoryFilesList: React.FC = () => {
@@ -149,7 +152,7 @@ export const RepositoryFilesList: React.FC = () => {
       result = result.filter(f => f.tags?.some(tag => selectedTags.includes(tag)));
     }
     if (activeTab === 'contract') {
-      result = result.filter(f => f.contractType?.toLowerCase().includes('contract') || f.fileType === 'CONTRACT');
+      result = result.filter(f => f.kind === 'contract');
     }
     result = [...result].sort((a, b) => {
       let aVal = a[sortBy as keyof RepoFileItem] || '';
@@ -187,10 +190,36 @@ export const RepositoryFilesList: React.FC = () => {
       };
       const resp = await repositoryApi.getRepositoryFiles(id || '', fetchParams);
       const pageContent = resp?.content || [];
-      const newFiles = pageContent.map((f: any) => ({
-        ...f,
-        totalValue: f.totalValue ?? undefined, // Convert null to undefined
-      }));
+      const newFiles = pageContent.map((f: any) => {
+        const doc = mapFileApiToUiDocument(f as any, String(f.id || f.fileId), f.name || f.fileName, f.size);
+        const isContract = (doc.documentType === 'CONTRACT');
+        const base: RepoFileItem = {
+          fileId: String(doc.id),
+          fileName: doc.title,
+          size: f.size,
+          uploadedAt: doc.createdAt,
+          status: doc.status,
+          contractType: doc.contractType,
+          tags: doc.tags,
+          fileType: doc.fileType || f.mimeType,
+          fileSize: doc.fileSize ?? f.fileSize ?? f.size,
+          documentType: doc.documentType,
+          kind: isContract ? 'contract' : 'general',
+        };
+        if (isContract) {
+          return {
+            ...base,
+            totalValue: doc.totalValue ?? undefined,
+            currency: doc.currency ?? undefined,
+            parties: Array.isArray(doc.parties) ? doc.parties.map((p: any) => ({ name: p.name, role: p.role })) : undefined,
+            contractNumber: doc.contractNumber ?? String(doc.id),
+            riskLevel: doc.riskLevel ?? undefined,
+          } as RepoFileItem;
+        }
+        return {
+          ...base,
+        } as RepoFileItem;
+      });
       setTotalPages(resp.totalPages || 0);
       setHasMore((resp.currentPage ?? 0) < (resp.totalPages ?? 0) - 1);
       if (append) {
@@ -367,34 +396,66 @@ export const RepositoryFilesList: React.FC = () => {
               </div>
             )}
             {filtered.map((f) => (
-              <GeneralFileCard
-                key={f.fileId}
-                item={{
-                  fileId: f.fileId,
-                  fileName: f.fileName,
-                  status: f.status,
-                  contractType: f.contractType,
-                  tags: f.tags,
-                  fileType: f.fileType,
-                  fileSize: f.fileSize ?? f.size,
-                  uploadedAt: f.uploadedAt,
-                  totalValue: f.totalValue,
-                  currency: f.currency,
-                  riskLevel: f.riskLevel,
-                  reminders: f.reminders,
-                  parties: f.parties,
-                }}
-                right={
-                  <Link
-                    className="inline-flex"
-                    to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
-                  >
-                    <Button variant="outline">{t('repositories.files.table.viewDetail')}</Button>
-                  </Link>
-                }
-                isSelected={selectedFiles.includes(f.fileId)}
-                onSelect={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
-              />
+              f.kind === 'contract' ? (
+                <ContractFileCard
+                  key={f.fileId}
+                  item={{
+                    kind: 'contract',
+                    fileId: f.fileId,
+                    fileName: f.fileName,
+                    status: f.status,
+                    tags: f.tags,
+                    fileType: f.fileType,
+                    fileSize: f.fileSize ?? f.size,
+                    uploadedAt: f.uploadedAt,
+                    contractType: f.contractType,
+                    totalValue: f.totalValue,
+                    currency: f.currency,
+                    parties: f.parties,
+                    effectiveDate: undefined,
+                    expiryDate: undefined,
+                    riskLevel: f.riskLevel,
+                    contractNumber: f.contractNumber,
+                  }}
+                  detailHref={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
+                  openUrl={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
+                  downloadUrl={`/api/v1/repository-management-service/files/${f.fileId}/download`}
+                  isSelected={selectedFiles.includes(f.fileId)}
+                  onSelect={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
+                />
+              ) : (
+                <GeneralFileCard
+                  key={f.fileId}
+                  item={{
+                    fileId: f.fileId,
+                    fileName: f.fileName,
+                    status: f.status,
+                    contractType: f.contractType,
+                    tags: f.tags,
+                    fileType: f.fileType,
+                    fileSize: f.fileSize ?? f.size,
+                    uploadedAt: f.uploadedAt,
+                    totalValue: f.totalValue,
+                    currency: f.currency,
+                    riskLevel: f.riskLevel,
+                    reminders: f.reminders,
+                    parties: f.parties,
+                  }}
+                  detailHref={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
+                  openUrl={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
+                  downloadUrl={`/api/v1/repository-management-service/files/${f.fileId}/download`}
+                  right={
+                    <Link
+                      className="inline-flex"
+                      to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
+                    >
+                      <Button variant="outline">{t('repositories.files.table.viewDetail')}</Button>
+                    </Link>
+                  }
+                  isSelected={selectedFiles.includes(f.fileId)}
+                  onSelect={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
+                />
+              )
             ))}
           </div>
         ) : (
