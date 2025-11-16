@@ -129,6 +129,86 @@ async def download_file(
         raise e
 
 
+@router.get("/{file_id}/presign-download", summary="Tạo presigned URL tải file", response_model=RestResponse[str])
+async def presign_download_url(
+    file_id: str,
+    user_id: Optional[str] = Query(None),
+    expires_in: int = Query(3600, ge=60, le=24 * 3600)
+):
+    """Trả về presigned URL để tải file trực tiếp từ S3/Filebase.
+
+    - Nếu S3 không bật, trả về URL download nội bộ của automation-service.
+    - `expires_in` là thời gian hết hạn của URL (giây).
+    """
+    try:
+        url = file_service.generate_presigned_download_url(file_id=file_id, user_id=user_id, expires_in=expires_in)
+        return RestResponse[
+            str
+        ](
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Tạo presigned URL tải file thành công",
+            data=url,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=f"/api/v1/automation-service/files/{file_id}/presign-download",
+        )
+    except HTTPException as e:
+        return RestResponse[
+            str
+        ](
+            apiVersion="v1",
+            statusCode=e.status_code,
+            shortMessage="Error",
+            description=str(e.detail),
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=f"/api/v1/automation-service/files/{file_id}/presign-download",
+        )
+
+
+@router.get("/{file_id}/presign-view", summary="Tạo presigned URL xem file trực tiếp", response_model=RestResponse[str])
+async def presign_view_url(
+    file_id: str,
+    user_id: Optional[str] = Query(None),
+    expires_in: int = Query(3600, ge=60, le=24 * 3600)
+):
+    """Trả về presigned URL để xem trực tiếp file (inline) từ S3/Filebase.
+
+    - Nếu S3 không bật, trả về URL download nội bộ của automation-service.
+    - `expires_in` là thời gian hết hạn của URL (giây).
+    """
+    try:
+        url = file_service.generate_presigned_view_url(file_id=file_id, user_id=user_id, expires_in=expires_in)
+        return RestResponse[
+            str
+        ](
+            apiVersion="v1",
+            statusCode=200,
+            shortMessage="Success",
+            description="Tạo presigned URL xem file thành công",
+            data=url,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=f"/api/v1/automation-service/files/{file_id}/presign-view",
+        )
+    except HTTPException as e:
+        return RestResponse[
+            str
+        ](
+            apiVersion="v1",
+            statusCode=e.status_code,
+            shortMessage="Error",
+            description=str(e.detail),
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            requestId=str(uuid.uuid4()),
+            path=f"/api/v1/automation-service/files/{file_id}/presign-view",
+        )
+
+
 @router.get("", summary="Danh sách files với projection", response_model=RestResponse[PaginatedViewResponse])
 async def get_all_files(
     view: str = Query("table"),

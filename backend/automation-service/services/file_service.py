@@ -268,6 +268,187 @@ class FileStorageService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Lỗi download file: {str(e)}")
     
+    def generate_presigned_download_url(self, file_id: str, user_id: Optional[str] = None, expires_in: int = 3600) -> str:
+        """
+        Tạo presigned URL để tải file trực tiếp từ S3/Filebase.
+        Nếu S3 không được bật, fallback về URL download nội bộ của automation-service.
+        """
+        try:
+            if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
+                import boto3
+                from botocore.config import Config as BotoConfig
+
+                s3_client = boto3.client(
+                    's3',
+                    endpoint_url=self.s3_endpoint,
+                    region_name=self.s3_region,
+                    aws_access_key_id=self.s3_access_key,
+                    aws_secret_access_key=self.s3_secret_key,
+                    config=BotoConfig(
+                        signature_version='s3v4',
+                        s3={'addressing_style': 'path'}
+                    )
+                )
+
+                # Tìm đúng object trên S3 giống như download_file
+                response = s3_client.list_objects_v2(
+                    Bucket=self.s3_bucket,
+                    Prefix=file_id
+                )
+
+                if 'Contents' not in response or not response['Contents']:
+                    response = s3_client.list_objects_v2(
+                        Bucket=self.s3_bucket,
+                        Prefix=f"files/{file_id}"
+                    )
+
+                if 'Contents' not in response or not response['Contents']:
+                    response = s3_client.list_objects_v2(
+                        Bucket=self.s3_bucket,
+                        Prefix=f"automation-service/{user_id if user_id else 'public'}/{file_id}"
+                    )
+
+                if 'Contents' not in response or not response['Contents']:
+                    raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
+
+                objects = response.get('Contents', [])
+                if not objects:
+                    raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
+
+                prefix_with_folder = f"files/{file_id}_"
+                candidates = [obj for obj in objects if str(obj.get('Key', '')).startswith(prefix_with_folder)] or objects
+
+                def _score_key(key: str) -> int:
+                    name = key.split('/')[-1].lower()
+                    if name == 'document.xml':
+                        return 100
+                    if name.endswith('.xml'):
+                        return 90
+                    if name.endswith(('.pdf', '.docx', '.doc', '.xlsx', '.xls', '.pptx', '.ppt', '.txt')):
+                        return 0
+                    return 50
+
+                preferred_object = min(
+                    candidates,
+                    key=lambda obj: _score_key(str(obj.get('Key', '')))
+                )
+
+                s3_key = preferred_object['Key']
+
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': self.s3_bucket,
+                        'Key': s3_key
+                    },
+                    ExpiresIn=expires_in
+                )
+
+                return presigned_url
+
+            # Fallback: nếu không dùng S3, trả về URL download nội bộ
+            return f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Lỗi tạo presigned URL tải file: {str(e)}")
+
+    def generate_presigned_view_url(self, file_id: str, user_id: Optional[str] = None, expires_in: int = 3600) -> str:
+        """
+        Tạo presigned URL để xem trực tiếp file (inline) từ S3/Filebase.
+        Nếu S3 không được bật, fallback về URL download nội bộ của automation-service.
+        """
+        try:
+            if self.s3_enabled and self.s3_access_key and self.s3_secret_key:
+                import boto3
+                from botocore.config import Config as BotoConfig
+
+                s3_client = boto3.client(
+                    's3',
+                    endpoint_url=self.s3_endpoint,
+                    region_name=self.s3_region,
+                    aws_access_key_id=self.s3_access_key,
+                    aws_secret_access_key=self.s3_secret_key,
+                    config=BotoConfig(
+                        signature_version='s3v4',
+                        s3={'addressing_style': 'path'}
+                    )
+                )
+
+                # Tìm đúng object trên S3 giống như download_file
+                response = s3_client.list_objects_v2(
+                    Bucket=self.s3_bucket,
+                    Prefix=file_id
+                )
+
+                if 'Contents' not in response or not response['Contents']:
+                    response = s3_client.list_objects_v2(
+                        Bucket=self.s3_bucket,
+                        Prefix=f"files/{file_id}"
+                    )
+
+                if 'Contents' not in response or not response['Contents']:
+                    response = s3_client.list_objects_v2(
+                        Bucket=self.s3_bucket,
+                        Prefix=f"automation-service/{user_id if user_id else 'public'}/{file_id}"
+                    )
+
+                if 'Contents' not in response or not response['Contents']:
+                    raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
+
+                objects = response.get('Contents', [])
+                if not objects:
+                    raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
+
+                prefix_with_folder = f"files/{file_id}_"
+                candidates = [obj for obj in objects if str(obj.get('Key', '')).startswith(prefix_with_folder)] or objects
+
+                def _score_key(key: str) -> int:
+                    name = key.split('/')[-1].lower()
+                    if name == 'document.xml':
+                        return 100
+                    if name.endswith('.xml'):
+                        return 90
+                    if name.endswith(('.pdf', '.docx', '.doc', '.xlsx', '.xls', '.pptx', '.ppt', '.txt')):
+                        return 0
+                    return 50
+
+                preferred_object = min(
+                    candidates,
+                    key=lambda obj: _score_key(str(obj.get('Key', '')))
+                )
+
+                s3_key = preferred_object['Key']
+
+                # Lấy tên file để set content-disposition inline cho đẹp
+                raw_filename = s3_key.split('/')[-1]
+                prefix = f"{file_id}_"
+                if raw_filename.startswith(prefix):
+                    filename = raw_filename[len(prefix):]
+                else:
+                    filename = raw_filename
+
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': self.s3_bucket,
+                        'Key': s3_key,
+                        'ResponseContentDisposition': f'inline; filename="{filename}"'
+                    },
+                    ExpiresIn=expires_in
+                )
+
+                return presigned_url
+
+            # Fallback: nếu không dùng S3, trả về URL download nội bộ (trình duyệt có thể tự quyết định hiển thị)
+            return f"{self.base_url}/api/v1/automation-service/files/{file_id}/download"
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Lỗi tạo presigned URL xem file: {str(e)}")
+    
     def get_all_files(self, page_number: int = 0, page_size: int = 10, 
                      sort_by: Optional[List[str]] = None, 
                      sort_direction: Optional[List[str]] = None, 

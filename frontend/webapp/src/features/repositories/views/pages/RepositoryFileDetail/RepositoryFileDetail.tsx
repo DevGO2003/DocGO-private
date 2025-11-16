@@ -7,7 +7,7 @@ import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
+import { deleteFile, getPresignedDownloadUrl } from '@features/repositories/services/fileDetailApi';
 import { useContractApproval } from '@features/approvals/hooks/useContractApproval';
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
@@ -207,45 +207,23 @@ export const RepositoryFileDetail: React.FC = () => {
 
     try {
       setIsDownloading(true);
-      console.log('Downloading file:', fileId);
+      console.log('Getting presigned download URL for file:', fileId);
 
-      // Download file with authentication via automation-service
-      const response: any = await downloadFile(fileId);
+      const response: any = await getPresignedDownloadUrl(fileId);
+      const presignedUrl = response?.data?.data;
 
-      // Extract blob from response (apiClient may wrap it)
-      const blob = response.data instanceof Blob
-        ? response.data
-        : new Blob([response.data], {
-          type: response.headers?.['content-type'] || 'application/octet-stream'
-        });
-
-      // Get filename from Content-Disposition header or use default
-      let fileName = documentData?.title || file?.fileName || 'document';
-      const contentDisposition = response.headers?.['content-disposition'];
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/i);
-        if (fileNameMatch && fileNameMatch[1]) {
-          fileName = fileNameMatch[1];
-        }
+      if (!presignedUrl || typeof presignedUrl !== 'string') {
+        console.error('Presigned URL is missing or invalid:', response);
+        alert('Không lấy được URL tải file. Vui lòng thử lại.');
+        return;
       }
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
+      // Open presigned URL in a new tab; browser will handle download/view
+      window.open(presignedUrl, '_blank');
 
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      console.log('✅ Download successful:', fileName);
+      console.log('✅ Opened presigned URL in new tab');
     } catch (error: any) {
-      console.error('❌ Download failed:', error);
+      console.error('❌ Download via presigned URL failed:', error);
       alert('Không thể tải xuống file. Vui lòng thử lại.');
     } finally {
       setIsDownloading(false);
@@ -384,7 +362,7 @@ export const RepositoryFileDetail: React.FC = () => {
               onClick={handleDownloadPDF}
               disabled={isDownloading || !file}
             >
-              <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải tệp
+              <CommonIcon name="download" className="w-4 h-4 mr-2" />{isDownloading ? ' Đang tải...' : ' Tải tệp'}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               <CommonIcon name="trash" className="w-4 h-4 mr-2" /> Xóa
