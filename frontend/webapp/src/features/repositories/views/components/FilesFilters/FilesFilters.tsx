@@ -6,14 +6,11 @@ import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeEx
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
 import AddFileChoiceModal from '@shared/components/UIComponents/Modal/AddFileChoiceModal';
 
-export type ViewMode = 'grid' | 'list';
 export type SortDirection = 'asc' | 'desc';
 
 interface FilesFiltersProps {
   search: string;
   onSearchChange: (v: string) => void;
-  viewMode: ViewMode;
-  onViewModeChange: (m: ViewMode) => void;
   // New props
   status: string;
   onStatusChange: (v: string) => void;
@@ -31,13 +28,12 @@ interface FilesFiltersProps {
   onSortDirectionChange: (d: SortDirection) => void;
   onRefresh?: () => void;
   refreshing?: boolean;
+  onUploadClick?: () => void;
 }
 
 export const FilesFilters: React.FC<FilesFiltersProps> = ({
   search,
   onSearchChange,
-  viewMode,
-  onViewModeChange,
   // status,
   // onStatusChange,
   type,
@@ -54,6 +50,7 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   onSortDirectionChange,
   onRefresh,
   refreshing = false,
+  onUploadClick,
 }) => {
   const { t } = useTranslation();
 
@@ -68,9 +65,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
   const [openTypes, setOpenTypes] = useState(false);
   const [openTime, setOpenTime] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
-  const [anchorTags, setAnchorTags] = useState<HTMLElement | null>(null);
-  const [anchorTypes, setAnchorTypes] = useState<HTMLElement | null>(null);
-  const [anchorTime, setAnchorTime] = useState<HTMLElement | null>(null);
 
   const handleTagsChange = (inc: string[]) => {
     // Diff with selectedTags and call onToggleTag accordingly
@@ -122,75 +116,16 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         {onRefresh && <RefreshButton onClick={onRefresh} loading={refreshing} className="flex-shrink-0" />}
       </div>
 
-      {/* Row 2: Filter buttons (always visible) */}
-      <div className="flex items-center gap-2 w-full justify-end">
-        <Button
-          variant="outline"
-          onClick={(e)=>{ setOpenTags(true); setAnchorTags(e.currentTarget); }}
-        >
-          <CommonIcon name="tag" size={16} />
-          {t('repositories.files.filters.classification')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={(e)=>{ setOpenTypes(true); setAnchorTypes(e.currentTarget); }}
-        >
-          <CommonIcon name="file" size={16} />
-          {t('repositories.files.filters.fileType')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={(e)=>{ setOpenTime(true); setAnchorTime(e.currentTarget); }}
-        >
-          <CommonIcon name="calendar" size={16} />
-          {t('repositories.files.filters.timeRange')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => { onSearchChange(''); onTypeChange('ALL'); }}
-        >
-          <CommonIcon name="rotate-cw" size={16} />
-          {t('repositories.files.filters.reset')}
-        </Button>
-      </div>
-
-      {/* Row 3: View toggle (left) and Actions (right) */}
-      <div className="flex items-center gap-2 justify-between w-full">
-        {/* Left: View toggle */}
-        <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: '#d1d5db' }}>
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-            onClick={() => onViewModeChange('grid')}
-            className="rounded-none border-0"
-            title={t('repositories.files.filters.viewGrid')}
-          >
-            <CommonIcon name="grid" size={16} />
-            {t('repositories.files.filters.viewGrid')}
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            onClick={() => onViewModeChange('list')}
-            className="rounded-none border-0 border-l"
-            title={t('repositories.files.filters.viewList')}
-          >
-            <CommonIcon name="list" size={16} />
-            {t('repositories.files.filters.viewList')}
-          </Button>
-        </div>
-
-        {/* Right: Action buttons */}
+      {/* Row 2: Actions (Upload, etc.) */}
+      <div className="flex items-center gap-2 justify-end w-full">
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={()=>setOpenAdd(true)} className="flex items-center gap-2">
-            <CommonIcon name="plus" size={16} />
-            {t('repositories.files.filters.add')}
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <CommonIcon name="edit" size={16} />
-            {t('repositories.files.filters.edit')}
-          </Button>
-          <Button variant="destructive" className="flex items-center gap-2">
-            <CommonIcon name="trash" size={16} />
-            {t('repositories.files.filters.delete')}
+          <Button
+            variant="outline"
+            onClick={onUploadClick}
+            className="flex items-center gap-2"
+          >
+            <CommonIcon name="upload" size={16} />
+            {t('repositories.files.filters.upload', 'Tải tệp lên')}
           </Button>
         </div>
       </div>
@@ -204,7 +139,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         exclude={[]}
         onChange={(inc) => handleTagsChange(inc)}
         onClose={()=>setOpenTags(false)}
-        anchorEl={anchorTags}
       />
       <IncludeExcludeModal
         open={openTypes}
@@ -218,7 +152,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
           onTypeChange(pickedValue);
         }}
         onClose={()=>setOpenTypes(false)}
-        anchorEl={anchorTypes}
       />
       <TimeRangeModal
         open={openTime}
@@ -226,7 +159,6 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
         value={{}}
         onChange={() => {}}
         onClose={()=>setOpenTime(false)}
-        anchorEl={anchorTime}
       />
       <AddFileChoiceModal
         open={openAdd}

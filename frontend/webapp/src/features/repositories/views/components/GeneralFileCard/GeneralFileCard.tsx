@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { openPreview } from '@store/slices/previewPanelSlice';
+import { getPresignedDownloadUrl } from '@features/repositories/services/fileDetailApi';
 
 export interface GeneralFileItem {
   fileId: string;
@@ -48,14 +49,31 @@ interface GeneralFileCardProps {
   onSelect?: (checked: boolean) => void;
   detailHref: string;
   openUrl?: string;
-  downloadUrl?: string;
 }
 
-export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl, downloadUrl }) => {
+export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [showPreview, setShowPreview] = React.useState(false);
   const [previewPos, setPreviewPos] = React.useState<{ x: number; y: number } | null>(null);
+
+  const handleDownload = async () => {
+    try {
+      const response: any = await getPresignedDownloadUrl(item.fileId);
+      const presignedUrl = response?.data?.data;
+
+      if (!presignedUrl || typeof presignedUrl !== 'string') {
+        console.error('Presigned URL is missing or invalid:', response);
+        alert('Không lấy được URL tải file. Vui lòng thử lại.');
+        return;
+      }
+
+      window.open(presignedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error: any) {
+      console.error('❌ Download via presigned URL failed:', error);
+      alert('Không thể tải xuống file. Vui lòng thử lại.');
+    }
+  };
   return (
     <Card className="relative group">
       {isSelected !== undefined && onSelect && (
@@ -103,10 +121,10 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
       </div>
       </CardContent>
       <div className="absolute inset-x-0 bottom-0 z-10">
-        <div className="flex rounded-none border-t" style={{ borderColor: '#e5e7eb' }}>
+        <div className="flex rounded-none border-t items-stretch" style={{ borderColor: '#e5e7eb' }}>
           <Link to={detailHref} className="flex-1">
-            <Button variant="ghost" className="w-full h-10">
-              <CommonIcon name="file-text" className="mr-2 h-4 w-4" />
+            <Button variant="ghost" className="w-full h-9 text-xs">
+              <CommonIcon name="file-text" className="mr-1 h-4 w-4" />
               {t('fileCard.viewDetails')}
             </Button>
           </Link>
@@ -129,19 +147,17 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
               setPreviewPos(null);
             }}
           >
-            <Button variant="ghost" className="w-full h-10">
-              <CommonIcon name="search" className="mr-2 h-4 w-4" />
+            <Button variant="ghost" className="w-full h-9 text-xs">
+              <CommonIcon name="search" className="mr-1 h-4 w-4" />
               {t('fileCard.preview')}
             </Button>
           </button>
           <button
             className="flex-1"
-            onClick={() => {
-              if (downloadUrl) window.open(downloadUrl, '_blank', 'noopener,noreferrer');
-            }}
+            onClick={handleDownload}
           >
-            <Button variant="ghost" className="w-full h-10">
-              <CommonIcon name="download" className="mr-2 h-4 w-4" />
+            <Button variant="ghost" className="w-full h-9 text-xs">
+              <CommonIcon name="download" className="mr-1 h-4 w-4" />
               {t('fileCard.download')}
             </Button>
           </button>

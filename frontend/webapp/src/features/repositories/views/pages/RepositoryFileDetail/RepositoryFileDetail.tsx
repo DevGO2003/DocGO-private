@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Card, CardContent, RefreshButton, Text } from '@shared/components';
@@ -24,6 +25,7 @@ export const RepositoryFileDetail: React.FC = () => {
   const { id, fileId } = useParams<{ id: string; fileId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,8 +235,8 @@ export const RepositoryFileDetail: React.FC = () => {
   const handleDelete = async () => {
     if (!fileId) return;
 
-    // Confirm deletion
-    const confirmMessage = `Bạn có chắc chắn muốn xóa tài liệu "${documentData?.title || file?.fileName}"?\n\nHành động này không thể hoàn tác.`;
+    // Confirm deletion (use i18n key repositories.files.deleteConfirm)
+    const confirmMessage = t('repositories.files.deleteConfirm', { count: 1 });
     if (!window.confirm(confirmMessage)) {
       return;
     }
