@@ -39,8 +39,6 @@ export const Dashboard = () => {
   const [page] = useState(0);
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [qaSearch, setQaSearch] = useState('');
-  const [qaTab, setQaTab] = useState<'navigate' | 'manage' | 'account'>('navigate');
   
   // Load panel state from localStorage or use defaults from layout manager
   const loadPanelState = (): PanelState[] => {
@@ -133,41 +131,6 @@ export const Dashboard = () => {
     };
 
   const formattedStorage = usagePending ? '...' : formatBytes(totalBytes);
-
-  const qaActions = React.useMemo(() => ([
-    {
-      id: 'repos',
-      icon: '📁',
-      label: t('dashboard.btn.repositories'),
-      hint: `${repositories?.totalElements || 0} repo`,
-      onClick: () => navigate(REPOSITORIES_PATH),
-      category: 'navigate' as const,
-    },
-    {
-      id: 'orgs',
-      icon: '🏢',
-      label: t('dashboard.btn.organizations'),
-      hint: `${organizations?.totalElements || 0} tổ chức`,
-      onClick: () => navigate(ORGANIZATIONS_PATH),
-      category: 'navigate' as const,
-    },
-    {
-      id: 'profile',
-      icon: '👤',
-      label: t('dashboard.btn.profile'),
-      hint: `${user?.firstName || user?.username || ''}`,
-      onClick: () => navigate(PROFILE_PATH),
-      category: 'account' as const,
-    },
-    {
-      id: 'refresh',
-      icon: '🔄',
-      label: 'Làm mới',
-      hint: '',
-      onClick: handleRefresh,
-      category: 'manage' as const,
-    },
-  ]), [t, repositories?.totalElements, organizations?.totalElements, user, navigate]);
 
   console.log('[Dashboard] User:', user);
   console.log('[Dashboard] User ID:', userId);
@@ -487,8 +450,8 @@ export const Dashboard = () => {
             <WindowPanel
               id="quickActions"
               title={t('dashboard.quickActions')}
-              defaultWidth={1040}
-              defaultHeight={300}
+              defaultWidth={900}
+              defaultHeight={220}
               minimized={panels.find(p => p.id === 'quickActions')?.minimized}
               visible={panels.find(p => p.id === 'quickActions')?.visible}
               position={panels.find(p => p.id === 'quickActions')?.position || { x: 0, y: 890 }}
@@ -496,131 +459,78 @@ export const Dashboard = () => {
               onClose={() => closePanel('quickActions')}
               onPositionChange={updatePanelPosition}
             >
-              <div className="space-y-3">
-                {/* Tabs */}
-                <div className="flex items-center gap-1">
-                  {([
-                    { key: 'navigate', label: 'Điều hướng' },
-                    { key: 'manage', label: 'Quản trị' },
-                    { key: 'account', label: 'Tài khoản' },
-                  ] as const).map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      onClick={() => setQaTab(tab.key)}
-                      className={`px-2 py-1 rounded-md text-xs border ${qaTab === tab.key ? 'bg-gray-100 border-gray-300' : 'border-gray-200 hover:bg-gray-50'}`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
-                  {/* Left: Search + actions list */}
-                  <div className="md:col-span-2 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        value={qaSearch}
-                        onChange={(e) => setQaSearch(e.target.value)}
-                        placeholder="Tìm nhanh..."
-                        className="flex-1 px-3 py-2 border rounded-md text-sm"
-                      />
-                      <Button variant="outline" onClick={handleRefresh} className="px-3 py-2">
-                        <span className="text-sm">🔄</span>
-                      </Button>
-                    </div>
-
-                    <div className="rounded-md border divide-y">
-                      {qaActions
-                        .filter((a) => a.category === qaTab)
-                        .filter((a) => {
-                          const q = qaSearch.trim().toLowerCase();
-                          if (!q) return true;
-                          return a.label.toLowerCase().includes(q) || a.hint.toLowerCase().includes(q);
-                        })
-                        .map((a) => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          onClick={a.onClick}
-                          className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 text-left"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="text-base">{a.icon}</span>
-                            <span className="text-sm" style={{ color: '#111827' }}>{a.label}</span>
-                          </span>
-                          {a.hint ? (
-                            <span className="text-xs" style={{ color: '#6b7280' }}>{a.hint}</span>
-                          ) : null}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Info chips compact at bottom */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <div className="p-2 rounded-md border flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
-                          <span>💾</span> Dung lượng
-                        </span>
-                        <span className="text-sm" style={{ color: '#111827' }}>{formattedStorage}</span>
-                      </div>
-                      <div className="p-2 rounded-md border flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
-                          <span>📁</span> Repo
-                        </span>
-                        <span className="text-sm" style={{ color: '#111827' }}>{repositories?.totalElements || 0}</span>
-                      </div>
-                      <div className="p-2 rounded-md border flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
-                          <span>🏢</span> Tổ chức
-                        </span>
-                        <span className="text-sm" style={{ color: '#111827' }}>{organizations?.totalElements || 0}</span>
-                      </div>
-                      <div className="p-2 rounded-md border flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
-                          <span>🗂️</span> Tệp
-                        </span>
-                        <span className="text-sm" style={{ color: '#111827' }}>{files?.totalElements || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: help panel */}
-                  <div>
-                    <Card>
-                      <CardContent>
-                        <Text as="h3" className="text-sm font-medium mb-2" style={{ color: '#111827' }}>
-                          Hướng dẫn nhanh
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 space-y-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(REPOSITORIES_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">📁</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.repositories')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Quản lý tất cả kho tài liệu của bạn ({repositories?.totalElements || 0} kho)
                         </Text>
-                        <ul className="text-xs space-y-1" style={{ color: '#6b7280' }}>
-                          <li>• Gõ để lọc lệnh</li>
-                          <li>• Enter để mở hành động</li>
-                          <li>• Tab để chuyển nhóm lệnh</li>
-                        </ul>
-                        <div className="mt-3">
-                          <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>Gợi ý</Text>
-                          <div className="mt-2 space-y-1">
-                            {[qaActions[0], qaActions[1]].filter(Boolean).map((s) => (
-                              <button
-                                key={s!.id}
-                                type="button"
-                                onClick={s!.onClick}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-md border hover:bg-gray-50 text-left"
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span className="text-base">{s!.icon}</span>
-                                  <span className="text-sm" style={{ color: '#111827' }}>{s!.label}</span>
-                                </span>
-                                {s!.hint ? (
-                                  <span className="text-xs" style={{ color: '#6b7280' }}>{s!.hint}</span>
-                                ) : null}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(ORGANIZATIONS_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">🏢</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.organizations')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Xem các tổ chức bạn đang tham gia ({organizations?.totalElements || 0} tổ chức)
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(PROFILE_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">👤</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.profile')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Cập nhật thông tin cá nhân ({user?.firstName || user?.username || ''})
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">⚙️</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.settings')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Cấu hình và tuỳ chỉnh trải nghiệm DocGO
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+                <div className="w-full md:w-64 space-y-2 border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4">
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    Trạng thái nhanh:
+                  </Text>
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    • {repositories?.totalElements || 0} kho & {organizations?.totalElements || 0} tổ chức.
+                  </Text>
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    • Dung lượng đã sử dụng: {formattedStorage}.
+                  </Text>
                 </div>
               </div>
             </WindowPanel>

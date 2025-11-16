@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getFileComments, addFileComment } from '@features/repositories/services/commentsApi'
 
@@ -18,6 +18,8 @@ interface CommentItem {
 export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
   const [commentInput, setCommentInput] = useState('')
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest')
+  const [likes, setLikes] = useState<Record<string, boolean>>({})
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const queryClient = useQueryClient()
 
   const { data, isPending, error } = useQuery({
@@ -68,6 +70,30 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
     } catch (e) {
       console.error('[Comments] add failed', e)
       alert('Không thể gửi bình luận. Vui lòng thử lại.')
+    }
+  }
+
+  const toggleLike = (commentId: string) => {
+    if (!commentId) return
+    setLikes((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }))
+  }
+
+  const handleReply = (c: FileComment) => {
+    const prefix = c.user ? `@${c.user} ` : ''
+    setCommentInput((prev) => (prev ? `${prev}\n${prefix}` : prefix))
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
+  }
+
+  const handleCopy = async (c: FileComment) => {
+    try {
+      await navigator.clipboard.writeText(c.content || '')
+    } catch (err) {
+      console.error('[Comments] copy failed', err)
     }
   }
 
@@ -131,6 +157,7 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
           value={commentInput}
           onChange={(e) => setCommentInput(e.target.value)}
           onKeyDown={onKeyDown}
+          ref={textareaRef}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 min-h-[100px]"
           placeholder="Nhập bình luận... (Ctrl/Cmd + Enter để gửi)"
         />
@@ -169,9 +196,24 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
                   </div>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{c.content}</p>
                   <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                    <button className="hover:text-gray-700">Thích</button>
-                    <button className="hover:text-gray-700">Trả lời</button>
-                    <button className="hover:text-gray-700">Sao chép</button>
+                    <button
+                      className="hover:text-gray-700"
+                      onClick={() => toggleLike(c.id)}
+                    >
+                      {likes[c.id] ? 'Đã thích' : 'Thích'}
+                    </button>
+                    <button
+                      className="hover:text-gray-700"
+                      onClick={() => handleReply(c)}
+                    >
+                      Trả lời
+                    </button>
+                    <button
+                      className="hover:text-gray-700"
+                      onClick={() => handleCopy(c)}
+                    >
+                      Sao chép
+                    </button>
                   </div>
                 </div>
               </div>
