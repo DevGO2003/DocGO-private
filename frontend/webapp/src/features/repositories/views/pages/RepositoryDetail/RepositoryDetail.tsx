@@ -132,13 +132,6 @@ export const RepositoryDetail: React.FC = () => {
             icon: 'users',
             disabled: false,
           },
-          {
-            id: 'activity',
-            label: t('repositories.detail.tabs.activity'),
-            icon: 'clock',
-            disabled: true,
-            disabledTooltip: t('repositories.detail.tabs.activityDisabled'),
-          },
         ],
         activeMainTab: activeTab,
         onMainTabChange: setActiveTab,
@@ -374,22 +367,8 @@ export const RepositoryDetail: React.FC = () => {
                   )}
                     </Card>
                   )}
-
-                  {activeTab === 'activity' && (
-                    <Card className="p-6">
-                        <div className="text-center py-8">
-                          <CommonIcon name="clock" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            {t('repositories.detail.empty.activity.title')}
-                          </h3>
-                          <p className="text-gray-600">
-                            {t('repositories.detail.empty.activity.desc')}
-                          </p>
-                        </div>
-                    </Card>
-                  )}
-              </div>
-            )}
+                </div>
+              )}
         </div>
       )}
 

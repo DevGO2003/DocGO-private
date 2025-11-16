@@ -117,7 +117,7 @@ export async function deleteFile(fileId: string) {
  * Download file
  */
 export async function downloadFile(fileId: string) {
-  return apiClient.get(`/api/v1/repository-management-service/files/${fileId}/download`, {
+  return apiClient.get(`/api/v1/automation-service/files/${fileId}/download`, {
     responseType: 'blob',
   });
 }

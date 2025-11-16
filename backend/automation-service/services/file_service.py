@@ -168,16 +168,46 @@ class FileStorageService:
                     if 'Contents' not in response or not response['Contents']:
                         raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
                     
-                    # Get the first matching object
-                    s3_object = response['Contents'][0]
+                    objects = response.get('Contents', [])
+                    if not objects:
+                        raise HTTPException(status_code=404, detail="File không tìm thấy trên S3")
+
+                    # Prefer original uploaded object with pattern files/{file_id}_{filename}
+                    prefix_with_folder = f"files/{file_id}_"
+                    candidates = [obj for obj in objects if str(obj.get('Key', '')).startswith(prefix_with_folder)] or objects
+
+                    def _score_key(key: str) -> int:
+                        name = key.split('/')[-1].lower()
+                        # Strongly de-prioritize internal XML parts like document.xml
+                        if name == 'document.xml':
+                            return 100
+                        if name.endswith('.xml'):
+                            return 90
+                        # Prefer common user-facing document types
+                        if name.endswith(('.pdf', '.docx', '.doc', '.xlsx', '.xls', '.pptx', '.ppt', '.txt')):
+                            return 0
+                        # Neutral default
+                        return 50
+
+                    preferred_object = min(
+                        candidates,
+                        key=lambda obj: _score_key(str(obj.get('Key', '')))
+                    )
+
+                    s3_object = preferred_object
                     s3_key = s3_object['Key']
                     
                     # Download the file
                     file_obj = s3_client.get_object(Bucket=self.s3_bucket, Key=s3_key)
                     file_content = file_obj['Body'].read()
                     
-                    # Extract filename from S3 key
-                    filename = s3_key.split('/')[-1]
+                    # Extract filename from S3 key and strip internal prefix if present
+                    raw_filename = s3_key.split('/')[-1]
+                    prefix = f"{file_id}_"
+                    if raw_filename.startswith(prefix):
+                        filename = raw_filename[len(prefix):]
+                    else:
+                        filename = raw_filename
                     content_type = file_obj.get('ContentType', 'application/octet-stream')
                     
                     return FileDownloadResponse(
@@ -218,7 +248,12 @@ class FileStorageService:
                     with open(local_file, "rb") as f:
                         file_content = f.read()
                     
-                    filename = os.path.basename(local_file)
+                    raw_filename = os.path.basename(local_file)
+                    prefix = f"{file_id}_"
+                    if raw_filename.startswith(prefix):
+                        filename = raw_filename[len(prefix):]
+                    else:
+                        filename = raw_filename
                     return FileDownloadResponse(
                         filename=filename,
                         content_type="application/octet-stream",

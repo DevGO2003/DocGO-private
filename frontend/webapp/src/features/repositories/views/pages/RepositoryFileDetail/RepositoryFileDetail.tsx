@@ -7,8 +7,7 @@ import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { updateFileDetails, deleteFile } from '@features/repositories/services/fileDetailApi';
-import { apiClient } from '@shared/lib/api/apiClient';
+import { deleteFile, downloadFile } from '@features/repositories/services/fileDetailApi';
 import { useContractApproval } from '@features/approvals/hooks/useContractApproval';
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
@@ -35,6 +34,7 @@ export const RepositoryFileDetail: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<string>('details');
   const [notFound, setNotFound] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Approval workflow states
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -203,18 +203,14 @@ export const RepositoryFileDetail: React.FC = () => {
   };
 
   const handleDownloadPDF = async () => {
-    if (!fileId) return;
+    if (!fileId || isDownloading) return;
 
     try {
+      setIsDownloading(true);
       console.log('Downloading file:', fileId);
 
-      // Download file with authentication
-      const response: any = await apiClient.get(
-        `/api/v1/repository-management-service/files/${fileId}/download`,
-        {
-          responseType: 'blob' // Important for file download
-        }
-      );
+      // Download file with authentication via automation-service
+      const response: any = await downloadFile(fileId);
 
       // Extract blob from response (apiClient may wrap it)
       const blob = response.data instanceof Blob
@@ -251,6 +247,8 @@ export const RepositoryFileDetail: React.FC = () => {
     } catch (error: any) {
       console.error('❌ Download failed:', error);
       alert('Không thể tải xuống file. Vui lòng thử lại.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -381,7 +379,11 @@ export const RepositoryFileDetail: React.FC = () => {
                 <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
               </Button>
             )}
-            <Button variant="outline" onClick={handleDownloadPDF}>
+            <Button
+              variant="outline"
+              onClick={handleDownloadPDF}
+              disabled={isDownloading || !file}
+            >
               <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải tệp
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
