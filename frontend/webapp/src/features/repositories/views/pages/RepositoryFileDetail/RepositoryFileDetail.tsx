@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Card, CardContent, RefreshButton } from '@shared/components';
-import { Flex, Text } from '@shared/components';
+import { Button, Card, CardContent, RefreshButton, Text } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
@@ -420,6 +419,7 @@ export const RepositoryFileDetail: React.FC = () => {
     }
   };
 
+
   return (
     <RepositoryLayout
       title={documentData?.title || file?.fileName || 'Chi tiết tài liệu'}
@@ -434,9 +434,8 @@ export const RepositoryFileDetail: React.FC = () => {
       loadingText="Đang tải chi tiết tệp..."
       onRefresh={handleRefresh}
       headerRight={
-        <div className="w-full">
-          <Flex wrap gap={2.5} align="center" justify="end">
-            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+        <div className="w-full flex items-center" style={{ columnGap: '10px' }}>
+          <div className="flex items-center" style={{ columnGap: '10px' }}>
             {isEditing ? (
               <>
                 <Button variant="outline" onClick={handleDiscard}>
@@ -472,7 +471,13 @@ export const RepositoryFileDetail: React.FC = () => {
                 <Button variant="outline" onClick={handleDownloadPDF}>
                   <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải PDF
                 </Button>
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActiveMainTab('comments');
+                    setActiveSubTab('comments-list');
+                  }}
+                >
                   <CommonIcon name="message" className="w-4 h-4 mr-2" /> Bình luận
                 </Button>
                 <Button variant="destructive" onClick={handleDelete}>
@@ -480,7 +485,10 @@ export const RepositoryFileDetail: React.FC = () => {
                 </Button>
               </>
             )}
-          </Flex>
+          </div>
+          <div className="ml-auto">
+            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          </div>
         </div>
       }
       tabsConfig={{
@@ -498,8 +506,7 @@ export const RepositoryFileDetail: React.FC = () => {
             id: 'comments', 
             label: 'Bình luận', 
             icon: 'message', 
-            disabled: true,
-            disabledTooltip: 'Chức năng đang phát triển'
+            disabled: false,
           },
         ],
         activeMainTab: activeMainTab,

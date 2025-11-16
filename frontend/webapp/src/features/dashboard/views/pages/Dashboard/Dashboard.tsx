@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAppSelector } from '@store/hooks';
 import {
   useMyRepositories,
   useFiles
 } from '@features/repositories';
+import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
@@ -38,6 +39,8 @@ export const Dashboard = () => {
   const [page] = useState(0);
   const [size] = useState(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [qaSearch, setQaSearch] = useState('');
+  const [qaTab, setQaTab] = useState<'navigate' | 'manage' | 'account'>('navigate');
   
   // Load panel state from localStorage or use defaults from layout manager
   const loadPanelState = (): PanelState[] => {
@@ -113,6 +116,59 @@ export const Dashboard = () => {
   const { data: files, isLoading: filesLoading } = useFiles({ page, size, userId });
   const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
 
+  const { data: myReposAll, isPending: usagePending } = useQuery({
+    queryKey: ['my-storage-usage'],
+    queryFn: () => repositoryApi.getMyRepositories({ page: 0, size: 1000 }),
+    staleTime: 60_000,
+  });
+
+  const totalBytes = (myReposAll?.content || []).reduce((sum: number, r: any) => sum + (r?.totalSize || 0), 0);
+
+  const formatBytes = (bytes: number) => {
+    if (!bytes) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const val = bytes / Math.pow(1024, i);
+    return `${val.toFixed(val >= 10 || i === 0 ? 0 : 2)} ${units[i]}`;
+    };
+
+  const formattedStorage = usagePending ? '...' : formatBytes(totalBytes);
+
+  const qaActions = React.useMemo(() => ([
+    {
+      id: 'repos',
+      icon: '📁',
+      label: t('dashboard.btn.repositories'),
+      hint: `${repositories?.totalElements || 0} repo`,
+      onClick: () => navigate(REPOSITORIES_PATH),
+      category: 'navigate' as const,
+    },
+    {
+      id: 'orgs',
+      icon: '🏢',
+      label: t('dashboard.btn.organizations'),
+      hint: `${organizations?.totalElements || 0} tổ chức`,
+      onClick: () => navigate(ORGANIZATIONS_PATH),
+      category: 'navigate' as const,
+    },
+    {
+      id: 'profile',
+      icon: '👤',
+      label: t('dashboard.btn.profile'),
+      hint: `${user?.firstName || user?.username || ''}`,
+      onClick: () => navigate(PROFILE_PATH),
+      category: 'account' as const,
+    },
+    {
+      id: 'refresh',
+      icon: '🔄',
+      label: 'Làm mới',
+      hint: '',
+      onClick: handleRefresh,
+      category: 'manage' as const,
+    },
+  ]), [t, repositories?.totalElements, organizations?.totalElements, user, navigate]);
+
   console.log('[Dashboard] User:', user);
   console.log('[Dashboard] User ID:', userId);
 
@@ -178,7 +234,7 @@ export const Dashboard = () => {
     },
     {
       title: t('dashboard.stats.storageUploadUsed'),
-      value: '2.4 GB',
+      value: formattedStorage,
       change: '+15%',
       color: 'from-pink-500 to-rose-500',
       icon: '💾',
@@ -440,46 +496,132 @@ export const Dashboard = () => {
               onClose={() => closePanel('quickActions')}
               onPositionChange={updatePanelPosition}
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(REPOSITORIES_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">📁</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.repositories')}</Text>
+              <div className="space-y-3">
+                {/* Tabs */}
+                <div className="flex items-center gap-1">
+                  {([
+                    { key: 'navigate', label: 'Điều hướng' },
+                    { key: 'manage', label: 'Quản trị' },
+                    { key: 'account', label: 'Tài khoản' },
+                  ] as const).map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setQaTab(tab.key)}
+                      className={`px-2 py-1 rounded-md text-xs border ${qaTab === tab.key ? 'bg-gray-100 border-gray-300' : 'border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+                  {/* Left: Search + actions list */}
+                  <div className="md:col-span-2 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={qaSearch}
+                        onChange={(e) => setQaSearch(e.target.value)}
+                        placeholder="Tìm nhanh..."
+                        className="flex-1 px-3 py-2 border rounded-md text-sm"
+                      />
+                      <Button variant="outline" onClick={handleRefresh} className="px-3 py-2">
+                        <span className="text-sm">🔄</span>
+                      </Button>
+                    </div>
+
+                    <div className="rounded-md border divide-y">
+                      {qaActions
+                        .filter((a) => a.category === qaTab)
+                        .filter((a) => {
+                          const q = qaSearch.trim().toLowerCase();
+                          if (!q) return true;
+                          return a.label.toLowerCase().includes(q) || a.hint.toLowerCase().includes(q);
+                        })
+                        .map((a) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={a.onClick}
+                          className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 text-left"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-base">{a.icon}</span>
+                            <span className="text-sm" style={{ color: '#111827' }}>{a.label}</span>
+                          </span>
+                          {a.hint ? (
+                            <span className="text-xs" style={{ color: '#6b7280' }}>{a.hint}</span>
+                          ) : null}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Info chips compact at bottom */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <div className="p-2 rounded-md border flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
+                          <span>💾</span> Dung lượng
+                        </span>
+                        <span className="text-sm" style={{ color: '#111827' }}>{formattedStorage}</span>
+                      </div>
+                      <div className="p-2 rounded-md border flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
+                          <span>📁</span> Repo
+                        </span>
+                        <span className="text-sm" style={{ color: '#111827' }}>{repositories?.totalElements || 0}</span>
+                      </div>
+                      <div className="p-2 rounded-md border flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
+                          <span>🏢</span> Tổ chức
+                        </span>
+                        <span className="text-sm" style={{ color: '#111827' }}>{organizations?.totalElements || 0}</span>
+                      </div>
+                      <div className="p-2 rounded-md border flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
+                          <span>🗂️</span> Tệp
+                        </span>
+                        <span className="text-sm" style={{ color: '#111827' }}>{files?.totalElements || 0}</span>
+                      </div>
+                    </div>
                   </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(ORGANIZATIONS_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">🏢</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.organizations')}</Text>
+
+                  {/* Right: help panel */}
+                  <div>
+                    <Card>
+                      <CardContent>
+                        <Text as="h3" className="text-sm font-medium mb-2" style={{ color: '#111827' }}>
+                          Hướng dẫn nhanh
+                        </Text>
+                        <ul className="text-xs space-y-1" style={{ color: '#6b7280' }}>
+                          <li>• Gõ để lọc lệnh</li>
+                          <li>• Enter để mở hành động</li>
+                          <li>• Tab để chuyển nhóm lệnh</li>
+                        </ul>
+                        <div className="mt-3">
+                          <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>Gợi ý</Text>
+                          <div className="mt-2 space-y-1">
+                            {[qaActions[0], qaActions[1]].filter(Boolean).map((s) => (
+                              <button
+                                key={s!.id}
+                                type="button"
+                                onClick={s!.onClick}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-md border hover:bg-gray-50 text-left"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="text-base">{s!.icon}</span>
+                                  <span className="text-sm" style={{ color: '#111827' }}>{s!.label}</span>
+                                </span>
+                                {s!.hint ? (
+                                  <span className="text-xs" style={{ color: '#6b7280' }}>{s!.hint}</span>
+                                ) : null}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(PROFILE_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">👤</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.profile')}</Text>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">⚙️</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.settings')}</Text>
-                  </div>
-                </Button>
+                </div>
               </div>
             </WindowPanel>
           )}

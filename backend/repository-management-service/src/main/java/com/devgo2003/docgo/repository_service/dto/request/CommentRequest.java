@@ -22,7 +22,6 @@ public class CommentRequest {
     @Size(min = 1, max = 2000, message = "Nội dung comment phải từ 1-2000 ký tự")
     private String content;
     
-    @NotBlank(message = "Tên tác giả không được để trống")
     @Size(max = 255, message = "Tên tác giả không được vượt quá 255 ký tự")
     private String author;
     
