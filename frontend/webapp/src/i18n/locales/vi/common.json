@@ -687,6 +687,17 @@
         "create": "Tạo kho"
       }
     },
+    "tabs": {
+      "personal": {
+        "label": "Cá nhân"
+      },
+      "organization": {
+        "label": "Tổ chức"
+      },
+      "public": {
+        "label": "Công khai"
+      }
+    },
     "detail": {
       "loading": "Đang tải thông tin repository...",
       "error": "Không thể tải thông tin repository. Vui lòng thử lại.",

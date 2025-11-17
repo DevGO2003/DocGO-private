@@ -24,9 +24,8 @@ import { AuditTab } from './overview/AuditTab'
 import { SecurityTab } from './overview/SecurityTab'
 import { StorageTab } from './overview/StorageTab'
 import { VersioningTab } from './overview/VersioningTab'
+import CommentsTab from './comments/CommentsTab'
 
-// Placeholder for comments
-const CommentsMainTab = () => <div className="p-4" style={{ color: '#6b7280' }} >Chức năng bình luận đang được phát triển</div>
 
 interface FileDetailTabsProps {
   fileData: any
@@ -184,7 +183,7 @@ export function FileDetailTabs({
 
     // Comments
     if (activeMainTab === 'comments') {
-      return <CommentsMainTab />
+      return <CommentsTab fileId={fileData?.id || (fileData as any)?.fileId} />
     }
     
     return null

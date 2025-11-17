@@ -19,6 +19,25 @@ import {
 import type { FileUnion } from '../types/file.types';
 import { mapFileApiToUiDocument } from '../../services/mappers/file-mapper';
 
+export interface FileComment {
+  id: string;
+  fileId: string;
+  content: string;
+  author: string;
+  authorId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
+  deletedBy?: string;
+  deletedAt?: string;
+}
+
+export interface AddCommentData {
+  content: string;
+  author: string;
+  authorId?: string;
+}
+
 const BASE_PATH = '/api/v1/repository-management-service';
 
 // Repository API
@@ -254,12 +273,12 @@ const repositoryApi = {
 
   // Permission APIs
   getPermissions: async (repositoryId: string): Promise<RepositoryPermissionDTO[]> => {
-    const response = await apiClient.get(`${BASE_PATH}/repositories/${repositoryId}/permissions`);
+    const response = await apiClient.get<RepositoryPermissionDTO[]>(`${BASE_PATH}/repositories/${repositoryId}/permissions`);
     return response.data.data!;
   },
 
   addPermission: async (repositoryId: string, userId: string, permissions: string[]): Promise<RepositoryPermissionDTO> => {
-    const response = await apiClient.post(`${BASE_PATH}/repositories/${repositoryId}/permissions`, {
+    const response = await apiClient.post<RepositoryPermissionDTO>(`${BASE_PATH}/repositories/${repositoryId}/permissions`, {
       userId,
       permissions
     });
@@ -267,7 +286,7 @@ const repositoryApi = {
   },
 
   updatePermission: async (repositoryId: string, userId: string, permissions: string[]): Promise<RepositoryPermissionDTO> => {
-    const response = await apiClient.put(`${BASE_PATH}/repositories/${repositoryId}/permissions/${userId}`, {
+    const response = await apiClient.put<RepositoryPermissionDTO>(`${BASE_PATH}/repositories/${repositoryId}/permissions/${userId}`, {
       permissions
     });
     return response.data.data!;
@@ -279,19 +298,19 @@ const repositoryApi = {
 
   // Invite APIs
   createInvite: async (repositoryId: string, expiresInDays: number = 7): Promise<RepositoryInvite> => {
-    const response = await apiClient.post(`${BASE_PATH}/repositories/${repositoryId}/invites`, {
+    const response = await apiClient.post<RepositoryInvite>(`${BASE_PATH}/repositories/${repositoryId}/invites`, {
       expiresInDays
     });
     return response.data.data!;
   },
 
   getRepositoryInvites: async (repositoryId: string): Promise<RepositoryInvite[]> => {
-    const response = await apiClient.get(`${BASE_PATH}/repositories/${repositoryId}/invites`);
+    const response = await apiClient.get<RepositoryInvite[]>(`${BASE_PATH}/repositories/${repositoryId}/invites`);
     return response.data.data!;
   },
 
   getInviteByToken: async (token: string): Promise<RepositoryInvite> => {
-    const response = await apiClient.get(`${BASE_PATH}/invites/${token}`);
+    const response = await apiClient.get<RepositoryInvite>(`${BASE_PATH}/invites/${token}`);
     return response.data.data!;
   },
 
@@ -305,6 +324,25 @@ const repositoryApi = {
 
   updateMemberPermissions: async (repositoryId: string, memberId: string, permissions: Partial<Record<'canUpload' | 'canView' | 'canDelete', boolean>>): Promise<void> => {
     await apiClient.patch<void>(`${BASE_PATH}/repositories/${repositoryId}/members/${memberId}/permissions`, permissions);
+  },
+
+  getFileComments: async (fileId: string, params?: { page?: number; size?: number }): Promise<FileComment[]> => {
+    const response = await apiClient.get<FileComment[]>(`${BASE_PATH}/files/${fileId}/comments`, { params });
+    return response.data.data!;
+  },
+
+  addFileComment: async (fileId: string, data: AddCommentData): Promise<FileComment> => {
+    const response = await apiClient.post<FileComment>(`${BASE_PATH}/files/${fileId}/comments`, data);
+    return response.data.data!;
+  },
+
+  deleteFileComment: async (fileId: string, commentId: string): Promise<void> => {
+    await apiClient.delete<void>(`${BASE_PATH}/files/${fileId}/comments/${commentId}`);
+  },
+
+  countFileComments: async (fileId: string): Promise<number> => {
+    const response = await apiClient.get<number>(`${BASE_PATH}/files/${fileId}/comments/count`);
+    return response.data.data! as unknown as number;
   },
 };
 
@@ -661,6 +699,44 @@ export const useRevokeInvite = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['repository-invites', variables.repositoryId] });
     },
+  });
+};
+
+export const useFileComments = (fileId: string, params?: { page?: number; size?: number }) => {
+  return useQuery({
+    queryKey: ['file-comments', fileId, params],
+    queryFn: () => repositoryApi.getFileComments(fileId, params),
+    enabled: !!fileId,
+  });
+};
+
+export const useAddFileComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fileId, data }: { fileId: string; data: AddCommentData }) => repositoryApi.addFileComment(fileId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['file-comments', variables.fileId] });
+      queryClient.invalidateQueries({ queryKey: ['file-comments-count', variables.fileId] });
+    },
+  });
+};
+
+export const useDeleteFileComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fileId, commentId }: { fileId: string; commentId: string }) => repositoryApi.deleteFileComment(fileId, commentId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['file-comments', variables.fileId] });
+      queryClient.invalidateQueries({ queryKey: ['file-comments-count', variables.fileId] });
+    },
+  });
+};
+
+export const useFileCommentsCount = (fileId: string) => {
+  return useQuery({
+    queryKey: ['file-comments-count', fileId],
+    queryFn: () => repositoryApi.countFileComments(fileId),
+    enabled: !!fileId,
   });
 };
 

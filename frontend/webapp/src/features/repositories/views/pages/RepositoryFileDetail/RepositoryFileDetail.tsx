@@ -494,13 +494,7 @@ export const RepositoryFileDetail: React.FC = () => {
             disabledTooltip: 'File không phải hợp đồng'
           },
           { id: 'approval', label: 'Phê duyệt', icon: 'check-circle', disabled: false },
-          { 
-            id: 'comments', 
-            label: 'Bình luận', 
-            icon: 'message', 
-            disabled: true,
-            disabledTooltip: 'Chức năng đang phát triển'
-          },
+          { id: 'comments', label: 'Bình luận', icon: 'message', disabled: false },
         ],
         activeMainTab: activeMainTab,
         onMainTabChange: (tabId: string) => {
