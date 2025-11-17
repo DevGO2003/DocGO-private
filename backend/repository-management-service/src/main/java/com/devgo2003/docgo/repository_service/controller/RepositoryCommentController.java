@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -95,13 +96,19 @@ public class RepositoryCommentController {
             @Parameter(description = "Nội dung bình luận", required = true)
             @Valid @RequestBody CommentRequest request,
             @Parameter(description = "ID người dùng (từ token)")
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @Parameter(description = "Tên người dùng (từ token)")
+            @RequestHeader(value = "X-Username", required = false) String username) {
         
         String requestId = UUID.randomUUID().toString();
         
         try {
             // Sử dụng userId từ header hoặc từ request
             String actorId = userId != null ? userId : request.getAuthorId();
+            // Nếu client không gửi author thì lấy từ header username
+            if (!StringUtils.hasText(request.getAuthor())) {
+                request.setAuthor(StringUtils.hasText(username) ? username : "User");
+            }
             
             CommentResponse comment = commentService.addComment(fileId, request, actorId);
             

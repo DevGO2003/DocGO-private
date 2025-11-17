@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAppSelector } from '@store/hooks';
 import {
   useMyRepositories,
   useFiles
 } from '@features/repositories';
+import repositoryApi from '@features/repositories/models/api/repositoryApi';
 import { useMyOrganizations } from '@features/organizations';
 import { REPOSITORIES_PATH, ORGANIZATIONS_PATH, PROFILE_PATH } from '@constants';
 // removed unused type imports
@@ -113,6 +114,24 @@ export const Dashboard = () => {
   const { data: files, isLoading: filesLoading } = useFiles({ page, size, userId });
   const { data: organizations, isLoading: orgsLoading } = useMyOrganizations({ page, size });
 
+  const { data: myReposAll, isPending: usagePending } = useQuery({
+    queryKey: ['my-storage-usage'],
+    queryFn: () => repositoryApi.getMyRepositories({ page: 0, size: 1000 }),
+    staleTime: 60_000,
+  });
+
+  const totalBytes = (myReposAll?.content || []).reduce((sum: number, r: any) => sum + (r?.totalSize || 0), 0);
+
+  const formatBytes = (bytes: number) => {
+    if (!bytes) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const val = bytes / Math.pow(1024, i);
+    return `${val.toFixed(val >= 10 || i === 0 ? 0 : 2)} ${units[i]}`;
+    };
+
+  const formattedStorage = usagePending ? '...' : formatBytes(totalBytes);
+
   console.log('[Dashboard] User:', user);
   console.log('[Dashboard] User ID:', userId);
 
@@ -178,7 +197,7 @@ export const Dashboard = () => {
     },
     {
       title: t('dashboard.stats.storageUploadUsed'),
-      value: '2.4 GB',
+      value: formattedStorage,
       change: '+15%',
       color: 'from-pink-500 to-rose-500',
       icon: '💾',
@@ -431,8 +450,8 @@ export const Dashboard = () => {
             <WindowPanel
               id="quickActions"
               title={t('dashboard.quickActions')}
-              defaultWidth={1040}
-              defaultHeight={300}
+              defaultWidth={900}
+              defaultHeight={220}
               minimized={panels.find(p => p.id === 'quickActions')?.minimized}
               visible={panels.find(p => p.id === 'quickActions')?.visible}
               position={panels.find(p => p.id === 'quickActions')?.position || { x: 0, y: 890 }}
@@ -440,46 +459,79 @@ export const Dashboard = () => {
               onClose={() => closePanel('quickActions')}
               onPositionChange={updatePanelPosition}
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(REPOSITORIES_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">📁</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.repositories')}</Text>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(ORGANIZATIONS_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">🏢</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.organizations')}</Text>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(PROFILE_PATH)}
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">👤</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.profile')}</Text>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-24"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">⚙️</div>
-                    <Text as="span" className="text-sm">{t('dashboard.btn.settings')}</Text>
-                  </div>
-                </Button>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 space-y-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(REPOSITORIES_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">📁</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.repositories')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Quản lý tất cả kho tài liệu của bạn ({repositories?.totalElements || 0} kho)
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(ORGANIZATIONS_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">🏢</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.organizations')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Xem các tổ chức bạn đang tham gia ({organizations?.totalElements || 0} tổ chức)
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(PROFILE_PATH)}
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">👤</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.profile')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Cập nhật thông tin cá nhân ({user?.firstName || user?.username || ''})
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start py-3 px-3"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="text-xl">⚙️</div>
+                      <div>
+                        <Text as="span" className="text-sm font-medium">{t('dashboard.btn.settings')}</Text>
+                        <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                          Cấu hình và tuỳ chỉnh trải nghiệm DocGO
+                        </Text>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+                <div className="w-full md:w-64 space-y-2 border-t md:border-t-0 md:border-l pt-3 md:pt-0 md:pl-4">
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    Trạng thái nhanh:
+                  </Text>
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    • {repositories?.totalElements || 0} kho & {organizations?.totalElements || 0} tổ chức.
+                  </Text>
+                  <Text as="span" className="text-xs" style={{ color: '#6b7280' }}>
+                    • Dung lượng đã sử dụng: {formattedStorage}.
+                  </Text>
+                </div>
               </div>
             </WindowPanel>
           )}

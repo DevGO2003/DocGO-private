@@ -117,7 +117,21 @@ export async function deleteFile(fileId: string) {
  * Download file
  */
 export async function downloadFile(fileId: string) {
-  return apiClient.get(`/api/v1/repository-management-service/files/${fileId}/download`, {
+  return apiClient.get(`/api/v1/automation-service/files/${fileId}/download`, {
     responseType: 'blob',
   });
+}
+
+/**
+ * Get presigned URL for direct file download from S3/Filebase
+ */
+export async function getPresignedDownloadUrl(fileId: string) {
+  return apiClient.get(`/api/v1/automation-service/files/${fileId}/presign-download`);
+}
+
+/**
+ * Get presigned URL for inline view (open in new tab)
+ */
+export async function getPresignedViewUrl(fileId: string) {
+  return apiClient.get(`/api/v1/automation-service/files/${fileId}/presign-view`);
 }

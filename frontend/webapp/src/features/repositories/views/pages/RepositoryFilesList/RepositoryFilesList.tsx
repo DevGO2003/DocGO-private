@@ -3,15 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
-  RefreshButton,
   Card,
-  Table,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableContainer,
   Text,
-  Checkbox,
   CommonIcon,
 } from '@shared/components';
 import { REPOSITORY_ROUTES, buildPath } from '@constants';
@@ -52,7 +45,6 @@ export const RepositoryFilesList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<RepoFileItem[]>([]);
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [status, setStatus] = useState('ALL');
   const [type, setType] = useState('ALL');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
@@ -61,7 +53,6 @@ export const RepositoryFilesList: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'contract'>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -70,24 +61,19 @@ export const RepositoryFilesList: React.FC = () => {
   const [tableColumns, setTableColumns] = useState([
     { key: 'checkbox', label: '', visible: true },
     { key: 'document', label: t('repositories.files.table.document'), visible: true },
-    { key: 'contractNumber', label: t('repositories.files.table.contractNumber'), visible: false },
-    { key: 'status', label: t('repositories.files.table.status'), visible: true },
-    { key: 'type', label: t('repositories.files.table.type'), visible: true },
-    { key: 'totalValue', label: t('repositories.files.table.totalValue'), visible: false },
-    { key: 'size', label: t('repositories.files.table.size'), visible: true },
-    { key: 'uploadedAt', label: t('repositories.files.table.uploadedAt'), visible: true },
-    { key: 'actions', label: '', visible: true },
-    { key: 'parties', label: t('repositories.files.table.parties'), visible: false },
-    { key: 'riskLevel', label: t('repositories.files.table.riskLevel'), visible: true },
-    { key: 'reminders', label: t('repositories.files.table.reminders'), visible: false },
   ]);
-  const [showTableSettings, setShowTableSettings] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [repoName, setRepoName] = useState('');
 
   const navigate = useNavigate();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleUploadClick = () => {
+    if (!id) return;
+    const encodedName = encodeURIComponent(repoName || '');
+    navigate(`/upload?repositoryId=${id}&repositoryName=${encodedName}`);
+  };
 
   const refreshFiles = () => {
     setCurrentPage(0);
@@ -123,11 +109,6 @@ export const RepositoryFilesList: React.FC = () => {
 
   const selectAll = (checked: boolean) => {
     setSelectedFiles(checked ? filtered.map(f => f.fileId) : []);
-  };
-
-  const openTableSettings = () => {
-    // Trigger modal, for now console or add state
-    // Later: setShowTableSettings(true)
   };
 
   const filtered = useMemo(() => {
@@ -329,8 +310,6 @@ export const RepositoryFilesList: React.FC = () => {
         <FilesFilters
           search={search}
           onSearchChange={setSearch}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           status={status}
           onStatusChange={setStatus}
           type={type}
@@ -347,6 +326,7 @@ export const RepositoryFilesList: React.FC = () => {
           onSortDirectionChange={handleSortDirectionChange}
           onRefresh={refreshFiles}
           refreshing={refreshing}
+          onUploadClick={handleUploadClick}
         />
       }
     >
@@ -361,7 +341,7 @@ export const RepositoryFilesList: React.FC = () => {
         )}
 
         {isLoading && !refreshing && (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : ''}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Skeleton placeholders, e.g., 3-6 */}
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
@@ -384,7 +364,7 @@ export const RepositoryFilesList: React.FC = () => {
               <Button variant="outline" onClick={() => { setSearch(''); refreshFiles(); }}>{t('repositories.files.empty.clearSearchAndRefresh')}</Button>
             </div>
           </div>
-        ) : viewMode === 'grid' ? (
+        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedFiles.length > 0 && (
               <div className="col-span-full flex gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff' }}>
@@ -416,7 +396,6 @@ export const RepositoryFilesList: React.FC = () => {
                   }}
                   detailHref={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
                   openUrl={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
-                  downloadUrl={`/api/v1/repository-management-service/files/${f.fileId}/download`}
                   isSelected={selectedFiles.includes(f.fileId)}
                   onSelect={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
                 />
@@ -440,7 +419,6 @@ export const RepositoryFilesList: React.FC = () => {
                   }}
                   detailHref={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
                   openUrl={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}
-                  downloadUrl={`/api/v1/repository-management-service/files/${f.fileId}/download`}
                   right={
                     <Link
                       className="inline-flex"
@@ -455,68 +433,6 @@ export const RepositoryFilesList: React.FC = () => {
               )
             ))}
           </div>
-        ) : (
-          <TableContainer>
-            <Table>
-              <thead>
-                <TableRow>
-                  <TableHeader>
-                    <Checkbox 
-                      checked={selectedFiles.length === filtered.length && filtered.length > 0}
-                      onCheckedChange={(checked: boolean) => selectAll(checked)}
-                      indeterminate={selectedFiles.length > 0 && selectedFiles.length < filtered.length}
-                    />
-                  </TableHeader>
-                  {tableColumns.filter(col => col.visible).map(col => (
-                    <TableHeader key={col.key}>
-                      <Text className="text-xs font-medium uppercase" style={{ color: '#6b7280' }}>
-                        {col.label}
-                        {col.key === 'checkbox' ? null : <button onClick={() => openTableSettings()}>{t('repositories.files.table.settings')}</button>} // Add settings button in header
-                      </Text>
-                    </TableHeader>
-                  ))}
-                </TableRow>
-              </thead>
-              <tbody>
-                {filtered.map((f) => (
-                  <TableRow key={f.fileId}>
-                    <TableCell>
-                      <Checkbox 
-                        checked={selectedFiles.includes(f.fileId)}
-                        onCheckedChange={(checked: boolean) => toggleSelectFile(f.fileId, checked)}
-                      />
-                    </TableCell>
-                    {tableColumns.filter(col => col.visible).map(col => (
-                      col.key === 'checkbox' ? null : (
-                        <TableCell key={col.key}>
-                          <Text className="text-sm" style={{ color: '#111827' }}>
-                            {col.key === 'document' ? f.fileName :
-                             col.key === 'contractNumber' ? f.contractNumber || t('common.noData') :
-                             col.key === 'status' ? (
-                               <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }} title={t(`status.${f.status}.tooltip`)}>{f.status}</span>
-                             ) :
-                             col.key === 'type' ? f.contractType || t('common.noData') :
-                             col.key === 'totalValue' ? <Text>{f.totalValue ? `${f.totalValue.toLocaleString()} ${f.currency}` : t('common.noData')}</Text> :
-                             col.key === 'size' ? t('repositories.files.table.bytes', { count: f.fileSize ?? f.size }) :
-                             col.key === 'uploadedAt' ? new Date(f.uploadedAt).toLocaleString() :
-                             col.key === 'actions' ? (
-                               <Link to={buildPath(REPOSITORY_ROUTES.FILE_DETAIL, { id: id || '', fileId: f.fileId })}>
-                                 <Button variant="outline" size="sm">{t('repositories.files.table.viewDetail')}</Button>
-                               </Link>
-                             ) : col.key === 'parties' ? <Text>{f.parties?.map(p => p.name).join(', ') || t('common.noData')}</Text> :
-                             col.key === 'riskLevel' ? (
-                               <span className="px-2 py-1 rounded text-xs" style={f.riskLevel === 'LOW' ? { backgroundColor: '#dcfce7', color: '#166534' } : f.riskLevel === 'HIGH' ? { backgroundColor: '#fee2e2', color: '#991b1b' } : { backgroundColor: '#fef3c7', color: '#92400e' }} title={t(`riskLevel.${f.riskLevel}.tooltip`)}>{f.riskLevel}</span>
-                             ) :
-                             col.key === 'reminders' ? <Text>{f.reminders?.length || 0}</Text> : t('common.noData')}
-                          </Text>
-                        </TableCell>
-                      )
-                    ))}
-                  </TableRow>
-                ))}
-              </tbody>
-            </Table>
-          </TableContainer>
         )}
         {hasMore && filtered.length > 0 && totalPages > 1 && (
           <div className="flex justify-center mt-6">
@@ -529,14 +445,6 @@ export const RepositoryFilesList: React.FC = () => {
               {isLoading ? t('repositories.files.loading') : t('repositories.files.showMore')}
             </Button>
           </div>
-        )}
-        {showTableSettings && (
-          <TableSettings 
-            isOpen={showTableSettings}
-            columns={tableColumns} 
-            onColumnsChange={setTableColumns} 
-            onClose={() => setShowTableSettings(false)} 
-          />
         )}
         {/* TODO: Implement AlertDialog when component is available */}
         {selectedFiles.length > 0 && (

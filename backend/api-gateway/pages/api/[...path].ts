@@ -253,6 +253,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       requestData = req.body;
     }
 
+    // Detect automation-service file download endpoint to preserve binary content
+    const isAutomationFileDownload =
+      serviceKey === 'automation' &&
+      methodUpper === 'GET' &&
+      endpoint.startsWith('/api/v1/automation-service/files/') &&
+      endpoint.endsWith('/download');
+
     // If multipart/form-data, parse with formidable and forward as FormData via fetch
     let response;
     const isMultipart = (headers['Content-Type'] || '').includes('multipart/form-data');
@@ -316,6 +323,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         maxContentLength: Infinity,
         validateStatus: () => true // Don't throw on non-2xx status codes
       };
+
+      // For automation-service file download, request binary payload without transformation
+      if (isAutomationFileDownload) {
+        requestConfig.responseType = 'arraybuffer';
+        requestConfig.transformResponse = [(data: any) => data];
+      }
+
       response = await service.request(requestConfig);
     }
 
@@ -332,8 +346,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     logger.info(`✅ Proxy response: ${response.status}`);
-      // Send through raw response body to support both JSON and text
+
+    // For automation-service file download, forward binary data and content headers
+    if (isAutomationFileDownload) {
+      const upstreamHeaders = (response as any).headers || {};
+      if (upstreamHeaders['content-type']) {
+        res.setHeader('Content-Type', upstreamHeaders['content-type']);
+      }
+      if (upstreamHeaders['content-disposition']) {
+        res.setHeader('Content-Disposition', upstreamHeaders['content-disposition']);
+      }
+      if (upstreamHeaders['content-length']) {
+        res.setHeader('Content-Length', upstreamHeaders['content-length']);
+      }
+
       return res.status(response.status).send(response.data as any);
+    }
+
+    // Default behavior: send raw response body (JSON or text) for non-binary endpoints
+    return res.status(response.status).send(response.data as any);
 
   } catch (error: any) {
     logger.error('❌ Proxy error:', error);

@@ -24,7 +24,7 @@ import { AuditTab } from './overview/AuditTab'
 import { SecurityTab } from './overview/SecurityTab'
 import { StorageTab } from './overview/StorageTab'
 import { VersioningTab } from './overview/VersioningTab'
-import CommentsTab from './comments/CommentsTab'
+import { CommentsMainTab } from './comments/CommentsMainTab'
 
 
 interface FileDetailTabsProps {
@@ -183,7 +183,7 @@ export function FileDetailTabs({
 
     // Comments
     if (activeMainTab === 'comments') {
-      return <CommentsTab fileId={fileData?.id || (fileData as any)?.fileId} />
+      return <CommentsMainTab fileId={fileData?.id || (fileData as any)?.fileId} />
     }
     
     return null

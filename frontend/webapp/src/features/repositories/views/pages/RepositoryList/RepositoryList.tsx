@@ -212,39 +212,44 @@ export const RepositoryList = () => {
         loading: personalLoading || organizationLoading || publicLoading,
       }}
       headerRight={
-        <div className="flex items-center gap-3">
-          {/* Search Input */}
-          <div className="relative">
-            <CommonIcon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9ca3af' }} />
-            <Input
-              type="text"
-              placeholder={
-                activeTab === 'PERSONAL'
-                  ? t('repositories.list.search.personal')
-                  : activeTab === 'ORGANIZATION'
-                  ? t('repositories.list.search.organization')
-                  : t('repositories.list.search.public')
-              }
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 w-64"
-            />
+        <div className="w-full flex items-center" style={{ columnGap: '10px' }}>
+          {/* Left group with search and create, spaced 10px */}
+          <div className="flex items-center" style={{ columnGap: '10px' }}>
+            {/* Search Input */}
+            <div className="relative">
+              <CommonIcon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9ca3af' }} />
+              <Input
+                type="text"
+                placeholder={
+                  activeTab === 'PERSONAL'
+                    ? t('repositories.list.search.personal')
+                    : activeTab === 'ORGANIZATION'
+                    ? t('repositories.list.search.organization')
+                    : t('repositories.list.search.public')
+                }
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+
+            {/* Create Repository Button */}
+            {activeTab !== 'PUBLIC' && (
+              <Button
+                variant="outline"
+                onClick={handleCreateRepository}
+                className="inline-flex items-center gap-2"
+              >
+                <CommonIcon name="plus" size={16} />
+                {t('repositories.list.new')}
+              </Button>
+            )}
           </div>
-          
-          {/* Refresh Button */}
-          <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
-          
-          {/* Create Repository Button */}
-          {activeTab !== 'PUBLIC' && (
-            <Button
-              variant="outline"
-              onClick={handleCreateRepository}
-              className="inline-flex items-center gap-2"
-            >
-              <CommonIcon name="plus" size={16} />
-              {t('repositories.list.new')}
-            </Button>
-          )}
+
+          {/* Refresh Button aligned to the right */}
+          <div className="ml-auto">
+            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          </div>
         </div>
       }
       showToolbar={false}

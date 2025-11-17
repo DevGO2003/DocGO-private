@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Card, CardContent, RefreshButton } from '@shared/components';
-import { Flex, Text } from '@shared/components';
+import { Button, Card, CardContent, RefreshButton, Text } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { fetchFileById } from '@features/upload/models/api/fileApi';
 import { FileDetailTabs } from '@features/repositories/views/components/FileDetail/FileDetailTabs';
 import { NOT_FOUND_PATH } from '@constants';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { updateFileDetails, deleteFile } from '@features/repositories/services/fileDetailApi';
-import { apiClient } from '@shared/lib/api/apiClient';
+import { deleteFile, getPresignedDownloadUrl } from '@features/repositories/services/fileDetailApi';
 import { useContractApproval } from '@features/approvals/hooks/useContractApproval';
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
@@ -26,6 +25,7 @@ export const RepositoryFileDetail: React.FC = () => {
   const { id, fileId } = useParams<{ id: string; fileId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,28 +35,26 @@ export const RepositoryFileDetail: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('details');
   const [notFound, setNotFound] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [editedData, setEditedData] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+  const [isDownloading, setIsDownloading] = useState(false);
+
   // Approval workflow states
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showStartApprovalModal, setShowStartApprovalModal] = useState(false);
-  
+
   // Get user info from Redux store
   const authUser = useAppSelector((state) => state.auth.user);
-  
+
   // Get organization role and permissions from localStorage
   const orgRole = localStorage.getItem('organizationRole') || authUser?.role || 'MEMBER';
   const orgPermissions = (localStorage.getItem('organizationPermissions') || '').split(',').filter(Boolean);
-  
+
   const currentUser = {
     role: orgRole,
     permissions: orgPermissions
   };
-  
+
   // Use approval hook
   const {
     workflow,
@@ -89,17 +87,17 @@ export const RepositoryFileDetail: React.FC = () => {
         setError(null);
         const resp = await fetchFileById(fileId || '');
         if (!isMounted) return;
-        
+
         // Kiểm tra xem file có tồn tại không
         if (!resp || !(resp as any).data) {
           setNotFound(true);
           return;
         }
-        
+
         const apiData = (resp as any).data;
         const basic = apiData as FileDetailData;
         setFile(basic);
-        
+
         // Map API data to full structure expected by tabs (like src-old)
         const mapped = {
           id: (apiData as any)?.id ?? basic.fileId,
@@ -206,136 +204,52 @@ export const RepositoryFileDetail: React.FC = () => {
     navigate('/repositories/' + (id ?? ''));
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditedData(documentData);
-  };
-
-  const handleSave = async () => {
-    if (!editedData || !fileId) return;
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Extract data to update
-      const updateData = {
-        title: editedData.overview?.title,
-        documentType: editedData.overview?.documentType,
-        status: editedData.overview?.status,
-        tags: editedData.overview?.tags,
-        archiveSerial: editedData.overview?.archiveSerial,
-        dateCreated: editedData.overview?.dateCreated,
-      };
-      
-      // Call API to update
-      await updateFileDetails(fileId, updateData);
-      
-      // Refresh data
-      const resp = await fetchFileById(fileId);
-      if (resp && (resp as any).data) {
-        const apiData = (resp as any).data;
-        setDocumentData(apiData);
-      }
-      
-      setIsEditing(false);
-      setIsDirty(false);
-      setEditedData(null);
-      
-      // Show success message (you can use toast/notification here)
-      console.log('Lưu thành công!');
-    } catch (e: any) {
-      setError(e?.message || 'Không thể lưu thay đổi');
-      console.error('Save error:', e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveAndClose = async () => {
-    await handleSave();
-    handleBack();
-  };
-
-  const handleDiscard = () => {
-    if (isDirty && !window.confirm('Bạn có muốn hủy các thay đổi?')) {
-      return;
-    }
-    setIsEditing(false);
-    setIsDirty(false);
-    setEditedData(null);
-  };
-
   const handleDownloadPDF = async () => {
-    if (!fileId) return;
-    
+    if (!fileId || isDownloading) return;
+
     try {
-      console.log('Downloading file:', fileId);
-      
-      // Download file with authentication
-      const response: any = await apiClient.get(
-        `/api/v1/repository-management-service/files/${fileId}/download`,
-        {
-          responseType: 'blob' // Important for file download
-        }
-      );
-      
-      // Extract blob from response (apiClient may wrap it)
-      const blob = response.data instanceof Blob 
-        ? response.data 
-        : new Blob([response.data], { 
-            type: response.headers?.['content-type'] || 'application/octet-stream' 
-          });
-      
-      // Get filename from Content-Disposition header or use default
-      let fileName = documentData?.title || file?.fileName || 'document';
-      const contentDisposition = response.headers?.['content-disposition'];
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/i);
-        if (fileNameMatch && fileNameMatch[1]) {
-          fileName = fileNameMatch[1];
-        }
+      setIsDownloading(true);
+      console.log('Getting presigned download URL for file:', fileId);
+
+      const response: any = await getPresignedDownloadUrl(fileId);
+      const presignedUrl = response?.data?.data;
+
+      if (!presignedUrl || typeof presignedUrl !== 'string') {
+        console.error('Presigned URL is missing or invalid:', response);
+        alert('Không lấy được URL tải file. Vui lòng thử lại.');
+        return;
       }
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      console.log('✅ Download successful:', fileName);
+
+      // Open presigned URL in a new tab; browser will handle download/view
+      window.open(presignedUrl, '_blank');
+
+      console.log('✅ Opened presigned URL in new tab');
     } catch (error: any) {
-      console.error('❌ Download failed:', error);
+      console.error('❌ Download via presigned URL failed:', error);
       alert('Không thể tải xuống file. Vui lòng thử lại.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!fileId) return;
-    
-    // Confirm deletion
-    const confirmMessage = `Bạn có chắc chắn muốn xóa tài liệu "${documentData?.title || file?.fileName}"?\n\nHành động này không thể hoàn tác.`;
+
+    // Confirm deletion (use i18n key repositories.files.deleteConfirm)
+    const confirmMessage = t('repositories.files.deleteConfirm', { count: 1 });
     if (!window.confirm(confirmMessage)) {
       return;
     }
-    
+
     try {
       setIsLoading(true);
-      
+
       // Call delete API
       await deleteFile(fileId);
-      
+
       console.log('✅ File deleted successfully');
       alert('Đã xóa tài liệu thành công!');
-      
+
       // Navigate to organization workspace with contracts tab
       const orgId = documentData?.organizationId || documentData?.overview?.organizationId;
       if (orgId) {
@@ -344,7 +258,7 @@ export const RepositoryFileDetail: React.FC = () => {
         // Fallback to repository
         navigate(`/repositories/${id}`);
       }
-      
+
     } catch (error: any) {
       console.error('❌ Delete failed:', error);
       setError(error?.message || 'Không thể xóa tài liệu');
@@ -434,61 +348,39 @@ export const RepositoryFileDetail: React.FC = () => {
       loadingText="Đang tải chi tiết tệp..."
       onRefresh={handleRefresh}
       headerRight={
-        <div className="w-full">
-          <Flex wrap gap={2.5} align="center" justify="end">
-            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
-            {isEditing ? (
-              <>
-                <Button variant="outline" onClick={handleDiscard}>
-                  <CommonIcon name="x" className="w-4 h-4 mr-2" /> Hủy
-                </Button>
-                <Button variant="outline" onClick={handleSaveAndClose}>
-                  <CommonIcon name="save" className="w-4 h-4 mr-2" /> Lưu & Đóng
-                </Button>
-                <Button onClick={handleSave}>
-                  <CommonIcon name="save" className="w-4 h-4 mr-2" /> Lưu
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={handleEdit}>
-                  <CommonIcon name="edit" className="w-4 h-4 mr-2" /> Chỉnh sửa
-                </Button>
-                {!workflow && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowStartApprovalModal(true)}
-                    disabled={!documentData?.totalValue}
-                  >
-                    <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
-                  </Button>
-                )}
-                <Button variant="outline">
-                  <CommonIcon name="plus" className="w-4 h-4 mr-2" /> Tạo phiên bản
-                </Button>
-                <Button variant="outline">
-                  <CommonIcon name="send" className="w-4 h-4 mr-2" /> Gửi ký
-                </Button>
-                <Button variant="outline" onClick={handleDownloadPDF}>
-                  <CommonIcon name="download" className="w-4 h-4 mr-2" /> Tải PDF
-                </Button>
-                <Button variant="outline">
-                  <CommonIcon name="message" className="w-4 h-4 mr-2" /> Bình luận
-                </Button>
-                <Button variant="destructive" onClick={handleDelete}>
-                  <CommonIcon name="trash" className="w-4 h-4 mr-2" /> Xóa
-                </Button>
-              </>
+        <div className="w-full flex items-center" style={{ columnGap: '10px' }}>
+          <div className="flex items-center" style={{ columnGap: '10px' }}>
+            {!workflow && (
+              <Button
+                variant="outline"
+                onClick={() => setShowStartApprovalModal(true)}
+                disabled={!documentData?.totalValue}
+              >
+                <CommonIcon name="check" className="w-4 h-4 mr-2" /> Gửi duyệt
+              </Button>
             )}
-          </Flex>
+            <Button
+              variant="outline"
+              onClick={handleDownloadPDF}
+              disabled={isDownloading || !file}
+            >
+              <CommonIcon name="download" className="w-4 h-4 mr-2" />{isDownloading ? ' Đang tải...' : ' Tải tệp'}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              <CommonIcon name="trash" className="w-4 h-4 mr-2" /> Xóa
+            </Button>
+          </div>
+          <div className="ml-auto">
+            <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
+          </div>
         </div>
       }
       tabsConfig={{
         mainTabs: [
           { id: 'overview', label: 'Tổng quan', icon: 'folder', disabled: false },
-          { 
-            id: 'contracts', 
-            label: 'Hợp đồng', 
+          {
+            id: 'contracts',
+            label: 'Hợp đồng',
             icon: 'file',
             disabled: !(documentData?.type === 'contract' || documentData?.contractType),
             disabledTooltip: 'File không phải hợp đồng'
@@ -542,11 +434,11 @@ export const RepositoryFileDetail: React.FC = () => {
             </CardContent>
           </Card>
         )}
-        
+
         {error && (
-          <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
+          <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }}>
             <CardContent className="p-6">
-              <Text className="text-center" style={{ color: '#b91c1c' }} >{error}</Text>
+              <Text className="text-center" style={{ color: '#b91c1c' }}>{error}</Text>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>
@@ -556,7 +448,7 @@ export const RepositoryFileDetail: React.FC = () => {
         {!file && !isLoading && !error && (
           <Card>
             <CardContent className="p-6">
-              <p style={{ color: '#4b5563' }} >Không tìm thấy tệp.</p>
+              <p style={{ color: '#4b5563' }}>Không tìm thấy tệp.</p>
               <div className="flex justify-center mt-4">
                 <Button variant="outline" onClick={handleBack}>Quay lại repository</Button>
               </div>
@@ -568,19 +460,14 @@ export const RepositoryFileDetail: React.FC = () => {
             fileData={documentData}
             activeMainTab={activeMainTab}
             activeSubTab={activeSubTab}
-            isEditing={isEditing}
             workflow={workflow}
             userRole={currentUser.role}
             userPermissions={currentUser.permissions}
             onApprove={() => setShowApproveModal(true)}
             onReject={() => setShowRejectModal(true)}
-            onDataChange={(newData) => {
-              setEditedData(newData);
-              setIsDirty(true);
-            }}
           />
         )}
-        
+
         {/* Approval Modals */}
         {showStartApprovalModal && (
           <ApprovalActionModal

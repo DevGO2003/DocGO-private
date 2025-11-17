@@ -42,7 +42,18 @@ export const Header = ({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchTerm);
+    const trimmed = searchTerm.trim();
+
+    // Nếu không có từ khóa, điều hướng về danh sách repositories mặc định
+    if (!trimmed) {
+      navigate('/repositories');
+      return;
+    }
+
+    // Điều hướng tới trang danh sách repositories với query search
+    const params = new URLSearchParams();
+    params.set('search', trimmed);
+    navigate(`/repositories?${params.toString()}`);
   };
 
   const handleLogout = () => {
