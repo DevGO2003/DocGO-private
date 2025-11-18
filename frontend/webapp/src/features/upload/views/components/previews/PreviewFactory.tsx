@@ -10,6 +10,7 @@ import MarkdownPreview from './MarkdownPreview'
 import DefaultPreview from './DefaultPreview'
 import TextPreview from './TextPreview'
 import DocxPreview from './DocxPreview'
+import DocxDebugPreview from './DocxDebugPreview'
 
 export type PreviewType = 'pdf' | 'image' | 'document' | 'excel' | 'audio' | 'video' | 'html' | 'markdown' | 'default' | 'text' | 'docx'
 

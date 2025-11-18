@@ -73,7 +73,7 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
     }
   }
 
-  const toggleLike = (commentId: string) => {
+  const toggleLike = (commentId: string | undefined) => {
     if (!commentId) return
     setLikes((prev) => ({
       ...prev,
@@ -81,7 +81,7 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
     }))
   }
 
-  const handleReply = (c: FileComment) => {
+  const handleReply = (c: CommentItem) => {
     const prefix = c.user ? `@${c.user} ` : ''
     setCommentInput((prev) => (prev ? `${prev}\n${prefix}` : prefix))
     if (textareaRef.current) {
@@ -89,7 +89,7 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
     }
   }
 
-  const handleCopy = async (c: FileComment) => {
+  const handleCopy = async (c: CommentItem) => {
     try {
       await navigator.clipboard.writeText(c.content || '')
     } catch (err) {
@@ -200,7 +200,7 @@ export function CommentsMainTab({ fileId }: CommentsMainTabProps) {
                       className="hover:text-gray-700"
                       onClick={() => toggleLike(c.id)}
                     >
-                      {likes[c.id] ? 'Đã thích' : 'Thích'}
+                      {typeof c.id === 'string' && likes[c.id] ? 'Đã thích' : 'Thích'}
                     </button>
                     <button
                       className="hover:text-gray-700"
