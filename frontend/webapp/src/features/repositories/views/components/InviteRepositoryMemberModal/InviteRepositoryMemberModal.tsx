@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
 import { RepositoryType } from '@features/repositories/models/types';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
+import { useAddPermission, useCreateInvite } from '@features/repositories/models/api/repositoryApi';
 
 interface InviteRepositoryMemberModalProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   organizationId,
 }) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [inviteMethod, setInviteMethod] = useState<'link' | 'member'>('link');
   const [shareLink] = useState(`${window.location.origin}/repositories/${repositoryId}/join`);
   const [copied, setCopied] = useState(false);
@@ -39,6 +42,10 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
     delete: false,
   });
   const [linkExpiry, setLinkExpiry] = useState('7'); // days
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const addPermissionMutation = useAddPermission();
+  const createInviteMutation = useCreateInvite();
 
   const isPersonal = repositoryType === 'PERSONAL';
   const isOrganization = repositoryType === 'ORGANIZATION';
@@ -62,15 +69,54 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleInvite = () => {
-    if (inviteMethod === 'link') {
-      // TODO: API call to generate invite link
-      console.log('Generate link with expiry:', linkExpiry, 'days', 'permissions:', permissions);
-    } else {
-      // TODO: API call to invite members
-      console.log('Invite members:', selectedMembers, 'with permissions:', permissions);
+  const handleInvite = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      if (inviteMethod === 'link') {
+        // Generate invite link
+        await createInviteMutation.mutateAsync({
+          repositoryId,
+          expiresInDays: parseInt(linkExpiry) || 7,
+        });
+        alert('Đã tạo link mời thành công!');
+      } else {
+        // Invite selected members
+        if (selectedMembers.length === 0) {
+          alert('Vui lòng chọn ít nhất một thành viên');
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Convert permissions to API format
+        const permissionList: string[] = [];
+        if (permissions.view) permissionList.push('VIEW');
+        if (permissions.upload) permissionList.push('UPLOAD');
+        if (permissions.delete) permissionList.push('DELETE');
+        
+        // Add each selected member
+        for (const memberId of selectedMembers) {
+          await addPermissionMutation.mutateAsync({
+            repositoryId,
+            userId: memberId,
+            permissions: permissionList,
+          });
+        }
+        
+        // Invalidate members query to refresh list
+        await queryClient.invalidateQueries({ queryKey: ['repository-members', repositoryId] });
+        
+        alert(`Đã mời ${selectedMembers.length} thành viên thành công!`);
+      }
+      
+      onClose();
+    } catch (error: any) {
+      console.error('Failed to invite:', error);
+      alert(error?.response?.data?.message || error?.message || 'Mời thành viên thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   return (
@@ -272,15 +318,22 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Hủy
           </Button>
           <Button
             variant="default"
             onClick={handleInvite}
-            disabled={isOrganization && inviteMethod === 'member' && selectedMembers.length === 0}
+            disabled={isSubmitting || (isOrganization && inviteMethod === 'member' && selectedMembers.length === 0)}
           >
-            {inviteMethod === 'link' ? 'Tạo link' : 'Mời thành viên'}
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Đang xử lý...
+              </>
+            ) : (
+              inviteMethod === 'link' ? 'Tạo Link' : 'Mời thành viên'
+            )}
           </Button>
         </div>
       </div>
