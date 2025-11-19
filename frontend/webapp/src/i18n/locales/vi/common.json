@@ -746,7 +746,10 @@
         "members": "Thành viên",
         "activity": "Hoạt động",
         "activityDisabled": "Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có",
-        "settings": "Cài đặt"
+        "settings": "Cài đặt",
+        "contracts": "Hợp đồng",
+        "comments": "Bình luận",
+        "contractOnly": "File không phải hợp đồng"
       },
       "members": {
         "permissions": "Quyền truy cập",

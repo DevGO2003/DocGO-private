@@ -42,7 +42,7 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
       label: t('repositories.detail.tabs.activity'),
       icon: 'clock',
       disabled: true,
-      tooltip: 'Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có',
+      tooltip: t('repositories.detail.tabs.activityDisabled'),
     },
   ];
 

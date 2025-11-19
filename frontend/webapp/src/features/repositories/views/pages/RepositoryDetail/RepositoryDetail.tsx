@@ -380,6 +380,7 @@ export const RepositoryDetail: React.FC = () => {
           repositoryId={repository.id}
           repositoryType={repository.type}
           repositoryName={repository.name}
+          organizationId={repository.organizationId}
         />
       )}
     </RepositoryLayout>
