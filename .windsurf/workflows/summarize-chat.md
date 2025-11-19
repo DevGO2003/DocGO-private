@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Summarize Chat Command - Tóm tắt cuộc trò chuyện
 
 ## Mục đích

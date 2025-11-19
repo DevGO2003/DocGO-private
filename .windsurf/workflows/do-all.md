@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Do All Command - Chạy toàn bộ tác vụ tự động, áp dụng mọi thay đổi không hỏi lại
 
 ## Mục đích

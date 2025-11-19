@@ -798,4 +798,40 @@ public class RepositoryManagementController {
                 .build());
         }
     }
+
+    @PostMapping("/admin/migrate-owners")
+    @Operation(summary = "Migration: Thêm owner vào members cho tất cả repository hiện có")
+    public ResponseEntity<RestResponse<Map<String, Object>>> migrateRepositoryOwners() {
+        log.info("Starting migration: Adding owners as members to all repositories");
+        
+        try {
+            int fixed = repositoryService.migrateOwnersToMembers();
+            
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(200)
+                .shortMessage("Success")
+                .description("Migration completed successfully")
+                .data(Map.of(
+                    "totalFixed", fixed,
+                    "message", "Added " + fixed + " owners to repository members"
+                ))
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/admin/migrate-owners")
+                .build());
+        } catch (Exception e) {
+            log.error("Error during migration: {}", e.getMessage(), e);
+            return ResponseEntity.ok(RestResponse.<Map<String, Object>>builder()
+                .apiVersion("v1")
+                .statusCode(500)
+                .shortMessage("Internal Server Error")
+                .description("Migration failed: " + e.getMessage())
+                .data(null)
+                .timestamp(Instant.now())
+                .requestId(UUID.randomUUID().toString())
+                .path("/api/v1/repository-management-service/repositories/admin/migrate-owners")
+                .build());
+        }
+    }
 }

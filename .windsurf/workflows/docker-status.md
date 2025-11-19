@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Docker Status
 
 Xem trạng thái các Docker containers đang chạy cho kiến trúc 5 services.

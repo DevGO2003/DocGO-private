@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Git Commit
 
 Tạo commit với message mô tả thay đổi.

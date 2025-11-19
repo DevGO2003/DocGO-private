@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Git Restore ENV Local
 
 Push commits lên remote repository origin.

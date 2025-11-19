@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Tạo Báo Cáo Tiến Độ Hằng Ngày
 
 ## Mục đích

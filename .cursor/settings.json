@@ -1,1 +1,0 @@
-{ \"cursor.ai.rules\": \".cursor/rules/*.mdc\", \"cursor.commands.dir\": \".cursor/commands\", \"files.exclude\": { \".cursor/logs\": true } }

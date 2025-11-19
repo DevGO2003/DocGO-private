@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Mongo Command - Kết nối MongoDB qua MCP Server
 
 ## Mục đích

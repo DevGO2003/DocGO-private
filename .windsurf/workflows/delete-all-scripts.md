@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Clean Workspace Command - Dọn dẹp toàn bộ workspace
 
 ## Mục đích

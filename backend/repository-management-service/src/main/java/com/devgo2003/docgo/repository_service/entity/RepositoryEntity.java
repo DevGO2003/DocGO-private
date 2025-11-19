@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 
 @Data
 @NoArgsConstructor
@@ -63,6 +64,10 @@ public class RepositoryEntity {
 
     @Field("permissions")
     private List<RepositoryPermission> permissions;
+    
+    @Field("members")
+    @Builder.Default
+    private List<RepositoryMember> members = new ArrayList<>();
 
     // Repository Type Enum
     public enum RepositoryType {
@@ -100,7 +105,7 @@ public class RepositoryEntity {
         private Boolean enableTags = true;
     }
 
-    // Repository Permission
+    // Repository Permission (Legacy - for backward compatibility)
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -120,6 +125,69 @@ public class RepositoryEntity {
 
         @Field("grantedAt")
         private LocalDateTime grantedAt;
+    }
+    
+    // Repository Member (Full member info)
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RepositoryMember {
+        @Field("userId")
+        private String userId;
+        
+        @Field("username")
+        private String username;
+        
+        @Field("email")
+        private String email;
+
+        @Field("role")
+        private String role; // OWNER, ADMIN, MEMBER, VIEWER
+
+        @Field("status")
+        private String status; // ACTIVE, PENDING, SUSPENDED, LEFT
+        
+        @Field("permissions")
+        @Builder.Default
+        private MemberPermissions permissions = new MemberPermissions();
+
+        @Field("invitedBy")
+        private String invitedBy;
+        
+        @Field("invitedAt")
+        private LocalDateTime invitedAt;
+
+        @Field("joinedAt")
+        private LocalDateTime joinedAt;
+        
+        @Field("leftAt")
+        private LocalDateTime leftAt;
+    }
+    
+    // Member Permissions
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberPermissions {
+        @Builder.Default
+        private Boolean canView = true;
+        
+        @Builder.Default
+        private Boolean canUpload = false;
+        
+        @Builder.Default
+        private Boolean canEdit = false;
+        
+        @Builder.Default
+        private Boolean canDelete = false;
+        
+        @Builder.Default
+        private Boolean canManageMembers = false;
+        
+        @Builder.Default
+        private Boolean canManageSettings = false;
     }
 
     // Helper methods

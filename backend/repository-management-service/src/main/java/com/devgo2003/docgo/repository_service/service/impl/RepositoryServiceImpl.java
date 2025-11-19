@@ -151,11 +151,20 @@ public class RepositoryServiceImpl implements IRepositoryService {
                 .mapToLong(FileEntity::getSize)
                 .sum();
             
-            // Count active members
-            int memberCount = (int) repositoryMemberRepository.countByRepositoryIdAndStatus(
-                entity.getId(), 
-                RepositoryMemberEntity.MembershipStatus.ACTIVE
-            );
+            // Count members: Owner is a member too!
+            int memberCount = 0;
+            
+            if (entity.getMembers() != null && !entity.getMembers().isEmpty()) {
+                // Count ALL active members (including owner)
+                memberCount = (int) entity.getMembers().stream()
+                    .filter(member -> "ACTIVE".equals(member.getStatus()))
+                    .count();
+                log.debug("Repository {} has {} active members", entity.getId(), memberCount);
+            } else {
+                // No members array or empty -> at least owner exists = 1
+                memberCount = 1;
+                log.debug("Repository {} has no members array, defaulting to 1 (owner)", entity.getId());
+            }
             
             return RepositoryDTO.fromEntityWithStats(entity, fileCount, totalSize, memberCount);
         } catch (Exception e) {
@@ -281,9 +290,29 @@ public class RepositoryServiceImpl implements IRepositoryService {
         if (repository.getSettings() == null) {
             repository.setSettings(RepositoryEntity.RepositorySettings.builder().build());
         }
+        
+        // ✅ Initialize members array with owner
+        List<RepositoryEntity.RepositoryMember> members = new ArrayList<>();
+        RepositoryEntity.RepositoryMember ownerMember = RepositoryEntity.RepositoryMember.builder()
+            .userId(repository.getOwnerUserId())
+            .role("OWNER")
+            .status("ACTIVE")
+            .permissions(RepositoryEntity.MemberPermissions.builder()
+                .canView(true)
+                .canUpload(true)
+                .canEdit(true)
+                .canDelete(true)
+                .canManageMembers(true)
+                .canManageSettings(true)
+                .build())
+            .joinedAt(LocalDateTime.now())
+            .build();
+        members.add(ownerMember);
+        repository.setMembers(members);
 
         RepositoryEntity saved = repositoryRepository.save(repository);
-        log.info("Repository created successfully with id: {}", saved.getId());
+        log.info("Repository created successfully with id: {} and owner added as member", saved.getId());
+        
         return RepositoryDTO.fromEntity(saved);
     }
 
@@ -538,5 +567,74 @@ public class RepositoryServiceImpl implements IRepositoryService {
         }
         
         return dto;
+    }
+    
+    @Override
+    public int migrateOwnersToMembers() {
+        log.info("🔄 Starting migration: Adding owners to members array for all repositories");
+        int fixedCount = 0;
+        
+        try {
+            // Get all repositories
+            List<RepositoryEntity> allRepos = repositoryRepository.findAll();
+            log.info("📊 Found {} repositories to check", allRepos.size());
+            
+            for (RepositoryEntity repo : allRepos) {
+                try {
+                    boolean needsUpdate = false;
+                    
+                    // Initialize members array if null
+                    if (repo.getMembers() == null) {
+                        repo.setMembers(new ArrayList<>());
+                    }
+                    
+                    // Check if owner is already in members array
+                    boolean ownerExists = repo.getMembers().stream()
+                        .anyMatch(member -> repo.getOwnerUserId().equals(member.getUserId()));
+                    
+                    if (!ownerExists) {
+                        // Owner is not in members array, add them
+                        RepositoryEntity.RepositoryMember ownerMember = RepositoryEntity.RepositoryMember.builder()
+                            .userId(repo.getOwnerUserId())
+                            .role("OWNER")
+                            .status("ACTIVE")
+                            .permissions(RepositoryEntity.MemberPermissions.builder()
+                                .canView(true)
+                                .canUpload(true)
+                                .canEdit(true)
+                                .canDelete(true)
+                                .canManageMembers(true)
+                                .canManageSettings(true)
+                                .build())
+                            .joinedAt(repo.getCreatedAt() != null ? repo.getCreatedAt() : LocalDateTime.now())
+                            .build();
+                        
+                        repo.getMembers().add(ownerMember);
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate) {
+                        repo.setUpdatedAt(LocalDateTime.now());
+                        repositoryRepository.save(repo);
+                        fixedCount++;
+                        log.info("✅ Added owner {} to members array of repository {} ({})", 
+                            repo.getOwnerUserId(), repo.getId(), repo.getName());
+                    } else {
+                        log.debug("⏭️ Owner {} is already in members array of repository {} ({})", 
+                            repo.getOwnerUserId(), repo.getId(), repo.getName());
+                    }
+                } catch (Exception e) {
+                    log.error("❌ Failed to add owner to members array for repository {} ({}): {}", 
+                        repo.getId(), repo.getName(), e.getMessage());
+                }
+            }
+            
+            log.info("✅ Migration completed: Fixed {} repositories", fixedCount);
+            return fixedCount;
+            
+        } catch (Exception e) {
+            log.error("❌ Migration failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Migration failed: " + e.getMessage(), e);
+        }
     }
 }

@@ -43,4 +43,7 @@ public interface IRepositoryService {
     
     // Cascade delete operations
     void hardDeleteAllByOrganization(String organizationId);
+    
+    // Migration operations
+    int migrateOwnersToMembers();
 }

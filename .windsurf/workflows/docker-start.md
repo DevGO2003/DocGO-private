@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # Docker Start
 
 Khởi động toàn Docker Compose cho kiến trúc 5 services.
