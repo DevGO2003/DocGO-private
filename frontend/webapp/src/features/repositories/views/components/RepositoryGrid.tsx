@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -167,7 +167,7 @@ export const RepositoryGrid: React.FC<RepositoryGridProps> = ({
                     <div className="flex items-center gap-2 text-sm">
                       <CommonIcon name="users" color="#6b7280" />
                       <span style={{ color: '#374151' }} >
-                        {t('repositories.grid.stats.members', { count: repo.memberCount || 0 })}
+                        {t('repositories.grid.stats.members', { count: Math.max(repo.memberCount || 0, 1) })}
                       </span>
                     </div>
                   </div>

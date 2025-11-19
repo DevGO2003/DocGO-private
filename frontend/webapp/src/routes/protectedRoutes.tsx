@@ -9,6 +9,7 @@ import {
   RepositoryDetail,
   RepositoryFileDetail,
   RepositoryFilesList,
+  AcceptRepositoryInvite,
   OrganizationList,
   OrganizationDetail,
   OrganizationWorkspace,
@@ -40,6 +41,7 @@ export const protectedRoutes = (
     <Route path={PROTECTED_ROUTES.REPOSITORY_FILES_LIST} element={<RepositoryFilesList />} />
     <Route path={PROTECTED_ROUTES.REPOSITORY_DETAIL} element={<RepositoryDetail />} />
     <Route path={PROTECTED_ROUTES.REPOSITORY_FILE_DETAIL} element={<RepositoryFileDetail />} />
+    <Route path="/repositories/invites/:token/accept" element={<AcceptRepositoryInvite />} />
 
     {/* Upload Routes */}
     <Route path={PROTECTED_ROUTES.UPLOAD} element={<UploadPage />} />

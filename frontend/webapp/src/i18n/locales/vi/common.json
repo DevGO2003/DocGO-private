@@ -687,6 +687,17 @@
         "create": "Tạo kho"
       }
     },
+    "tabs": {
+      "personal": {
+        "label": "Cá nhân"
+      },
+      "organization": {
+        "label": "Tổ chức"
+      },
+      "public": {
+        "label": "Công khai"
+      }
+    },
     "detail": {
       "loading": "Đang tải thông tin repository...",
       "error": "Không thể tải thông tin repository. Vui lòng thử lại.",
@@ -735,7 +746,10 @@
         "members": "Thành viên",
         "activity": "Hoạt động",
         "activityDisabled": "Tạm thời chưa có, tương lai các phiên bản kế tiếp sẽ có",
-        "settings": "Cài đặt"
+        "settings": "Cài đặt",
+        "contracts": "Hợp đồng",
+        "comments": "Bình luận",
+        "contractOnly": "File không phải hợp đồng"
       },
       "members": {
         "permissions": "Quyền truy cập",
@@ -762,6 +776,40 @@
         "settings": {
           "title": "Cài đặt Repository",
           "desc": "Tùy chỉnh cấu hình và quyền truy cập"
+        }
+      },
+      "invite": {
+        "title": "Mời thành viên",
+        "shareLink": "Chia sẻ link",
+        "selectMember": "Chọn thành viên",
+        "inviteLink": "Link mời",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép",
+        "linkExpiresAfter": "Link hết hạn sau",
+        "expiryOptions": {
+          "1day": "1 ngày",
+          "7days": "7 ngày",
+          "30days": "30 ngày",
+          "never": "Không bao giờ"
+        },
+        "personalRepoInfo": "💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file. Chỉ bạn mời có quyền upload và xóa.",
+        "selectMemberLabel": "Chọn thành viên",
+        "loadingMembers": "Đang tải danh sách thành viên...",
+        "noMembers": "Không có thành viên nào",
+        "permissions": {
+          "title": "Quyền truy cập",
+          "view": {
+            "label": "Xem tệp",
+            "description": "Có thể xem và tải xuống tệp"
+          },
+          "upload": {
+            "label": "Tải lên tệp",
+            "description": "Có thể tải lên tệp mới"
+          },
+          "delete": {
+            "label": "Xóa tệp",
+            "description": "Có thể xóa tệp khỏi repository"
+          }
         }
       }
     },

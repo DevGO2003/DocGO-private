@@ -22,13 +22,50 @@ export const RepositoryDetail: React.FC = () => {
   const { data: repository, isLoading, error } = useRepository(id || '');
   const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[RepositoryDetail] State:', { 
+      isLoading, 
+      hasRepository: !!repository, 
+      hasError: !!error,
+      errorStatus: (error as any)?.response?.status,
+      repositoryId: id 
+    });
+    
+    if (repository) {
+      console.log('[RepositoryDetail] ✅ Repository loaded:', repository);
+      console.log('[RepositoryDetail] Owner info:', {
+        ownerName: repository.ownerName,
+        ownerUserId: repository.ownerUserId,
+      });
+    }
+    
+    if (error) {
+      console.error('[RepositoryDetail] ❌ Error loading repository:', error);
+      console.error('[RepositoryDetail] Error response:', (error as any)?.response);
+    }
+  }, [repository, isLoading, error, id]);
+
+  useEffect(() => {
+    if (membersData) {
+      console.log('[RepositoryDetail] ✅ Members loaded:', membersData);
+      console.log('[RepositoryDetail] Members count:', membersData.content?.length);
+    }
+  }, [membersData]);
+
   // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
   useEffect(() => {
     if (!isLoading && !id) {
       navigate(NOT_FOUND_PATH, { replace: true });
+      return;
     }
     if (!isLoading && error) {
-      navigate(NOT_FOUND_PATH, { replace: true });
+      // Chỉ redirect nếu lỗi là 404 Not Found
+      const err = error as any;
+      if (err.response?.status === 404) {
+        navigate(NOT_FOUND_PATH, { replace: true });
+      }
+      // Các lỗi khác sẽ được hiển thị trên UI (error banner)
     }
   }, [isLoading, id, error, navigate]);
 
@@ -79,6 +116,41 @@ export const RepositoryDetail: React.FC = () => {
       setIsRefreshing(false);
     }
   };
+
+  // Show error UI if repository fails to load (except 404 which redirects)
+  if (!isLoading && error && (error as any)?.response?.status !== 404) {
+    return (
+      <RepositoryLayout
+        title={t('repositories.detail.error.title', { defaultValue: 'Lỗi tải repository' })}
+        breadcrumbs={[
+          { label: t('nav.repositories'), href: '/repositories' },
+          { label: t('repositories.detail.error.title'), current: true },
+        ]}
+      >
+        <div className="flex flex-col items-center justify-center py-16">
+          <CommonIcon name="alert-circle" className="w-16 h-16 text-red-500 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {t('repositories.detail.error.title', { defaultValue: 'Không thể tải repository' })}
+          </h2>
+          <p className="text-gray-600 mb-4 text-center max-w-md">
+            {(error as any)?.response?.data?.message || 
+             (error as any)?.message || 
+             t('repositories.detail.error.description', { defaultValue: 'Đã xảy ra lỗi khi tải thông tin repository. Vui lòng thử lại.' })}
+          </p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => navigate('/repositories')}>
+              <CommonIcon name="arrow-left" className="mr-2" size={16} />
+              {t('repositories.detail.error.backToList', { defaultValue: 'Quay lại danh sách' })}
+            </Button>
+            <Button onClick={handleRefresh}>
+              <CommonIcon name="rotate-cw" className="mr-2" size={16} />
+              {t('repositories.detail.error.retry', { defaultValue: 'Thử lại' })}
+            </Button>
+          </div>
+        </div>
+      </RepositoryLayout>
+    );
+  }
 
   return (
     <RepositoryLayout
@@ -190,14 +262,47 @@ export const RepositoryDetail: React.FC = () => {
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.owner')}</h4>
                             <p className="text-gray-900">
-                              {repository?.ownerName || t('repositories.detail.info.noInfo')}
+                              {(() => {
+                                // Priority 1: Use ownerName from repository if available
+                                if (repository?.ownerName) {
+                                  return repository.ownerName;
+                                }
+                                
+                                // Priority 2: If we have members data, search for owner in members list
+                                if (membersData?.content && membersData.content.length > 0) {
+                                  const ownerMember = membersData.content.find((m: any) => m.userId === repository?.ownerUserId);
+                                  if (ownerMember) {
+                                    const memberName = ownerMember.username || ownerMember.name || ownerMember.email;
+                                    if (memberName) {
+                                      return memberName;
+                                    }
+                                  }
+                                }
+                                
+                                // Priority 3: If members still loading, show loading state
+                                if (membersLoading && !membersData) {
+                                  return 'Đang tải...';
+                                }
+                                
+                                // Priority 4: If we have ownerUserId but no name, show friendly message
+                                if (repository?.ownerUserId) {
+                                  // If members returned empty (403 or no permission), show "Chủ sở hữu"
+                                  if (membersData?.content?.length === 0) {
+                                    return 'Chủ sở hữu repository';
+                                  }
+                                  // Otherwise show partial ID
+                                  return `User ID: ${repository.ownerUserId.substring(0, 8)}...`;
+                                }
+                                
+                                return t('repositories.detail.info.noInfo');
+                              })()}
                             </p>
                           </div>
-                          {repository?.organizationId && (
+                          {repository?.type === 'ORGANIZATION' && (
                             <div>
                               <h4 className="text-sm font-medium text-gray-500 mb-2">{t('repositories.detail.info.organization')}</h4>
                               <p className="text-gray-900">
-                                {repository?.organizationName || t('repositories.detail.info.none')}
+                                {repository?.organizationName || repository?.organizationId || t('repositories.detail.info.none')}
                               </p>
                             </div>
                           )}
@@ -213,14 +318,14 @@ export const RepositoryDetail: React.FC = () => {
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.members')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
-                              {membersData?.totalElements ?? repository?.memberCount ?? 0}
+                              {Math.max(membersData?.totalElements ?? repository?.memberCount ?? 0, 1)}
                             </p>
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.storage')}</h4>
                             <p className="text-2xl font-semibold text-gray-900">
                               {repository?.totalSize != null ? formatFileSize(repository.totalSize) : 
-                                repository?.files?.length > 0 ? t('repositories.detail.stats.calculating') : t('repositories.detail.stats.emptyStorage')}
+                                (repository?.files?.length ?? 0) > 0 ? t('repositories.detail.stats.calculating') : t('repositories.detail.stats.emptyStorage')}
                             </p>
                           </div>
                         </div>
@@ -380,6 +485,7 @@ export const RepositoryDetail: React.FC = () => {
           repositoryId={repository.id}
           repositoryType={repository.type}
           repositoryName={repository.name}
+          organizationId={repository.organizationId}
         />
       )}
     </RepositoryLayout>

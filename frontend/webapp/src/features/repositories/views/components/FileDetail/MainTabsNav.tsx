@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabList, CommonTab } from '@shared/components';
 
 /**
@@ -13,27 +14,28 @@ interface Props {
 }
 
 export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData, loading }) => {
+  const { t } = useTranslation();
   const isContract = fileData?.type === 'contract' || fileData?.contractType;
   
   const tabs = [
-    { id: 'overview', label: 'Tổng quan', disabled: false },
-    { id: 'contracts', label: 'Hợp đồng', disabled: !isContract },
-    { id: 'comments', label: 'Bình luận', disabled: false },
+    { id: 'overview', label: t('repositories.detail.tabs.overview'), disabled: false },
+    { id: 'contracts', label: t('repositories.detail.tabs.contracts', { defaultValue: 'Hợp đồng' }), disabled: !isContract },
+    { id: 'comments', label: t('repositories.detail.tabs.comments', { defaultValue: 'Bình luận' }), disabled: false },
   ];
 
   return (
     <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }} >
       <TabList>
-        {tabs.map(t => (
+        {tabs.map(tab => (
           <CommonTab
-            key={t.id}
-            value={t.id}
+            key={tab.id}
+            value={tab.id}
             activeValue={activeMainTab}
-            onSelect={() => !t.disabled && !loading && onChange(t.id)}
-            disabled={t.disabled || loading}
-            title={t.disabled ? 'File không phải hợp đồng' : undefined}
+            onSelect={() => !tab.disabled && !loading && onChange(tab.id)}
+            disabled={tab.disabled || loading}
+            title={tab.disabled ? t('repositories.detail.tabs.contractOnly', { defaultValue: 'File không phải hợp đồng' }) : undefined}
           >
-            {loading ? <span className="inline-block rounded" style={{ backgroundColor: '#e5e7eb' }} ></span> : t.label}
+            {loading ? <span className="inline-block rounded" style={{ backgroundColor: '#e5e7eb' }} ></span> : tab.label}
           </CommonTab>
         ))}
       </TabList>

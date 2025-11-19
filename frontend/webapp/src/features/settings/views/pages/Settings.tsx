@@ -10,14 +10,13 @@ import {
   Button,
   Input,
   RefreshButton,
-  Checkbox,
   Select,
 } from '@shared/components';
 import SettingsLayout from '../../layouts/SettingsLayout';
 import { useAppSelector } from '@store/hooks';
 import { useUpdateProfile, useChangePassword } from '@features/auth';
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'preferences';
+type SettingsTab = 'profile' | 'security' | 'preferences';
 
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -42,14 +41,6 @@ export const Settings = () => {
     confirmPassword: '',
   });
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: false,
-    documentUpdates: true,
-    organizationInvites: true,
-    weeklyDigest: false,
-  });
-
   const [preferenceSettings, setPreferenceSettings] = useState({
     language: 'en',
     timezone: 'UTC+7',
@@ -60,13 +51,21 @@ export const Settings = () => {
   const tabs = [
     { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: 'user' },
     { id: 'security' as SettingsTab, label: t('settings.tabs.security'), icon: 'lock' },
-    { id: 'notifications' as SettingsTab, label: t('settings.tabs.notifications'), icon: 'bell' },
     { id: 'preferences' as SettingsTab, label: t('settings.tabs.preferences'), icon: 'globe' },
   ];
 
   const handleProfileUpdate = async () => {
+    if (!user?.id) {
+      console.error('User ID not found');
+      return;
+    }
+    
     try {
-      await updateProfileMutation.mutateAsync(profileData);
+      await updateProfileMutation.mutateAsync({
+        ...profileData,
+        userId: user.id,
+      });
+      console.log('Profile updated successfully');
     } catch (error) {
       console.error('Failed to update profile:', error);
     }
@@ -291,42 +290,6 @@ export const Settings = () => {
                         {t('settings.security.updatePassword')}
                       </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('settings.notifications.title')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {Object.entries(notificationSettings).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb' }} >
-                        <div>
-                          <p className="font-medium" style={{ color: '#111827' }} >
-                            {t(`settings.notifications.${key}`)}
-                          </p>
-                          <p className="text-sm" style={{ color: '#4b5563' }} >
-                            {t('settings.notifications.description')}
-                          </p>
-                        </div>
-                        <Checkbox
-                          checked={value}
-                          onCheckedChange={(checked) =>
-                            setNotificationSettings({
-                              ...notificationSettings,
-                              [key]: checked,
-                            })
-                          }
-                        />
-                      </div>
-                    ))}
                   </div>
                 </CardContent>
               </Card>

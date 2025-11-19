@@ -7,7 +7,6 @@ import { PaymentTab } from './contract/PaymentTab'
 import { ClausesTab } from './contract/ClausesTab'
 import { RiskTab } from './contract/RiskTab'
 import { RemindersTab } from './contract/RemindersTab'
-import { ComplianceTab } from './contract/ComplianceTab'
 
 // Approval tab components
 import { ApprovalTab } from './approval/ApprovalTab'
@@ -25,6 +24,7 @@ import { SecurityTab } from './overview/SecurityTab'
 import { StorageTab } from './overview/StorageTab'
 import { VersioningTab } from './overview/VersioningTab'
 import { CommentsMainTab } from './comments/CommentsMainTab'
+
 
 interface FileDetailTabsProps {
   fileData: any
@@ -67,7 +67,6 @@ export const contractSubTabs = [
   { id: 'clauses', name: 'Điều khoản', icon: 'file-text', description: 'Điều khoản chính và bất lợi' },
   { id: 'risk', name: 'Rủi ro', icon: 'alert-circle', description: 'Phân tích rủi ro' },
   { id: 'reminders', name: 'Nhắc nhở', icon: 'bell', description: 'Nhắc nhở và mốc quan trọng' },
-  { id: 'compliance', name: 'Tuân thủ', icon: 'tag', description: 'Trạng thái tuân thủ' },
 ];
 
 // fileDetailSubTabs - for file overview tabs
@@ -173,8 +172,6 @@ export function FileDetailTabs({
           return <RiskTab data={fileData} />
         case 'reminders':
           return <RemindersTab data={fileData} />
-        case 'compliance':
-          return <ComplianceTab data={fileData} />
         default:
           return null
       }
@@ -182,7 +179,7 @@ export function FileDetailTabs({
 
     // Comments
     if (activeMainTab === 'comments') {
-      return <CommentsMainTab fileId={fileData?.id} />
+      return <CommentsMainTab fileId={fileData?.id || (fileData as any)?.fileId} />
     }
     
     return null
