@@ -1,18 +1,63 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
+import { useMyPendingRepositoryInvites, useAcceptInvite } from '@features/repositories/models/api/repositoryApi';
 import { Button } from '@shared/components';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { Invitation } from '@features/organizations/models/types/organization.types';
+import { RepositoryInvite } from '@features/repositories/models/types/repository.types';
+
+type CombinedInvitation = {
+  id: string;
+  type: 'organization' | 'repository';
+  data: Invitation | RepositoryInvite;
+  createdAt: string;
+};
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: invitations, isLoading, refetch, isFetching } = useMyPendingInvitations();
-  const { mutate: acceptInvitation, isPending: isAccepting } = useAcceptInvitation();
-  const { mutate: declineInvitation, isPending: isDeclining } = useDeclineInvitation();
+  const { data: orgInvitations, isLoading: orgLoading, refetch: refetchOrg, isFetching: orgFetching } = useMyPendingInvitations();
+  const { data: repoInvitations, isLoading: repoLoading, refetch: refetchRepo, isFetching: repoFetching, error: repoError } = useMyPendingRepositoryInvites();
 
-  const pendingCount = invitations?.length || 0;
+  // Debug logging
+  useEffect(() => {
+    console.log('[NotificationBell] Org invitations:', orgInvitations);
+    console.log('[NotificationBell] Repo invitations:', repoInvitations);
+    if (repoError) {
+      console.error('[NotificationBell] Error loading repo invitations:', repoError);
+    }
+  }, [orgInvitations, repoInvitations, repoError]);
+  
+  const { mutate: acceptOrgInvitation, isPending: isAcceptingOrg } = useAcceptInvitation();
+  const { mutate: declineInvitation, isPending: isDeclining } = useDeclineInvitation();
+  const { mutate: acceptRepoInvite, isPending: isAcceptingRepo } = useAcceptInvite();
+
+  // Combine both types of invitations
+  const combinedInvitations = useMemo<CombinedInvitation[]>(() => {
+    const orgs: CombinedInvitation[] = (orgInvitations || []).map(inv => ({
+      id: inv.id,
+      type: 'organization' as const,
+      data: inv,
+      createdAt: inv.createdAt,
+    }));
+    
+    const repos: CombinedInvitation[] = (repoInvitations || []).map(inv => ({
+      id: inv.id,
+      type: 'repository' as const,
+      data: inv,
+      createdAt: inv.createdAt,
+    }));
+    
+    return [...orgs, ...repos].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [orgInvitations, repoInvitations]);
+
+  const pendingCount = combinedInvitations.length;
+  const isLoading = orgLoading || repoLoading;
+  const isFetching = orgFetching || repoFetching;
+  const isAccepting = isAcceptingOrg || isAcceptingRepo;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -31,38 +76,67 @@ export const NotificationBell = () => {
     };
   }, [isOpen]);
 
-  const handleAccept = (invitationIdOrToken: string) => {
-    console.log('🔄 Accepting invitation with ID/Token:', invitationIdOrToken);
-    acceptInvitation(
-      { token: invitationIdOrToken },
-      {
-        onSuccess: () => {
-          console.log('✅ Invitation accepted from notification');
-          refetch(); // Refresh the list
-        },
-        onError: (error: any) => {
-          console.error('❌ Failed to accept invitation:', error);
-          alert('Failed to accept invitation. Please try again.');
-        },
-      }
-    );
+  const handleRefresh = () => {
+    refetchOrg();
+    refetchRepo();
   };
 
-  const handleDecline = (invitationIdOrToken: string) => {
-    console.log('🔄 Declining invitation with ID/Token:', invitationIdOrToken);
-    declineInvitation(
-      { token: invitationIdOrToken },
-      {
+  const handleAccept = (invitation: CombinedInvitation) => {
+    if (invitation.type === 'organization') {
+      const orgData = invitation.data as Invitation;
+      console.log('🔄 Accepting organization invitation:', orgData.token || orgData.id);
+      acceptOrgInvitation(
+        { token: orgData.token || orgData.id },
+        {
+          onSuccess: () => {
+            console.log('✅ Organization invitation accepted');
+            handleRefresh();
+          },
+          onError: (error: any) => {
+            console.error('❌ Failed to accept organization invitation:', error);
+            alert('Failed to accept organization invitation. Please try again.');
+          },
+        }
+      );
+    } else {
+      const repoData = invitation.data as RepositoryInvite;
+      console.log('🔄 Accepting repository invitation:', repoData.token);
+      acceptRepoInvite(repoData.token, {
         onSuccess: () => {
-          console.log('✅ Invitation declined from notification');
-          refetch(); // Refresh the list
+          console.log('✅ Repository invitation accepted');
+          handleRefresh();
+          alert('Đã tham gia repository thành công!');
         },
         onError: (error: any) => {
-          console.error('❌ Failed to decline invitation:', error);
-          alert('Failed to decline invitation. Please try again.');
+          console.error('❌ Failed to accept repository invitation:', error);
+          alert('Failed to accept repository invitation. Please try again.');
         },
-      }
-    );
+      });
+    }
+  };
+
+  const handleDecline = (invitation: CombinedInvitation) => {
+    if (invitation.type === 'organization') {
+      const orgData = invitation.data as Invitation;
+      console.log('🔄 Declining organization invitation:', orgData.token || orgData.id);
+      declineInvitation(
+        { token: orgData.token || orgData.id },
+        {
+          onSuccess: () => {
+            console.log('✅ Organization invitation declined');
+            handleRefresh();
+          },
+          onError: (error: any) => {
+            console.error('❌ Failed to decline organization invitation:', error);
+            alert('Failed to decline invitation. Please try again.');
+          },
+        }
+      );
+    } else {
+      // Repository invitations don't have decline functionality in current API
+      console.log('Repository invitations cannot be declined - just ignore them');
+      alert('Lời mời repository sẽ tự động hết hạn. Bạn không cần từ chối.');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -110,7 +184,7 @@ export const NotificationBell = () => {
               )}
             </h3>
             <button
-              onClick={() => refetch()}
+              onClick={handleRefresh}
               disabled={isFetching}
               className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
               style={{ color: '#6b7280' }}
@@ -134,75 +208,94 @@ export const NotificationBell = () => {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {invitations?.map((invitation: Invitation) => (
-                  <div
-                    key={invitation.id}
-                    className="px-4 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#dbeafe' }}>
-                        <CommonIcon name="building" size={20} color="#2563eb" />
-                      </div>
+                {combinedInvitations.map((invitation) => {
+                  const isOrg = invitation.type === 'organization';
+                  const orgData = isOrg ? (invitation.data as Invitation) : null;
+                  const repoData = !isOrg ? (invitation.data as RepositoryInvite) : null;
 
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>
-                          Organization Invitation
-                        </p>
-                        <p className="text-sm mt-1" style={{ color: '#4b5563' }}>
-                          You've been invited to join as{' '}
-                          <span className="font-medium" style={{ color: '#2563eb' }}>
-                            {invitation.role}
-                          </span>
-                        </p>
-
-                        <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: '#6b7280' }}>
-                          <CommonIcon name="clock" size={12} />
-                          <span>{formatDate(invitation.createdAt)}</span>
+                  return (
+                    <div
+                      key={invitation.id}
+                      className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: isOrg ? '#dbeafe' : '#fef3c7' }}>
+                          <CommonIcon name={isOrg ? 'building' : 'folder'} size={20} color={isOrg ? '#2563eb' : '#d97706'} />
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-2 mt-3">
-                          <Button
-                            onClick={() => handleAccept(invitation.token || invitation.id)}
-                            disabled={isAccepting || isDeclining}
-                            className="flex-1 py-1 px-2 text-xs h-8"
-                          >
-                            {isAccepting ? (
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>
+                            {isOrg ? 'Organization Invitation' : 'Repository Invitation'}
+                          </p>
+                          <p className="text-sm mt-1" style={{ color: '#4b5563' }}>
+                            {isOrg ? (
                               <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                                Accepting...
+                                You've been invited to join as{' '}
+                                <span className="font-medium" style={{ color: '#2563eb' }}>
+                                  {orgData?.role}
+                                </span>
                               </>
                             ) : (
                               <>
-                                <CommonIcon name="check" size={12} className="mr-1" />
-                                Accept
+                                You've been invited to{' '}
+                                <span className="font-medium" style={{ color: '#d97706' }}>
+                                  {repoData?.repositoryName || 'a repository'}
+                                </span>
                               </>
                             )}
-                          </Button>
+                          </p>
 
-                          <Button
-                            onClick={() => handleDecline(invitation.token || invitation.id)}
-                            disabled={isAccepting || isDeclining}
-                            variant="outline"
-                            className="flex-1 py-1 px-2 text-xs h-8"
-                          >
-                            {isDeclining ? (
-                              <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 mr-1" style={{ borderColor: '#4b5563' }}></div>
-                                Declining...
-                              </>
-                            ) : (
-                              <>
-                                <CommonIcon name="x" size={12} className="mr-1" />
-                                Decline
-                              </>
+                          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: '#6b7280' }}>
+                            <CommonIcon name="clock" size={12} />
+                            <span>{formatDate(invitation.createdAt)}</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              onClick={() => handleAccept(invitation)}
+                              disabled={isAccepting || isDeclining}
+                              className="flex-1 py-1 px-2 text-xs h-8"
+                            >
+                              {isAccepting ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                  Accepting...
+                                </>
+                              ) : (
+                                <>
+                                  <CommonIcon name="check" size={12} className="mr-1" />
+                                  Accept
+                                </>
+                              )}
+                            </Button>
+
+                            {isOrg && (
+                              <Button
+                                onClick={() => handleDecline(invitation)}
+                                disabled={isAccepting || isDeclining}
+                                variant="outline"
+                                className="flex-1 py-1 px-2 text-xs h-8"
+                              >
+                                {isDeclining ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 mr-1" style={{ borderColor: '#4b5563' }}></div>
+                                    Declining...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CommonIcon name="x" size={12} className="mr-1" />
+                                    Decline
+                                  </>
+                                )}
+                              </Button>
                             )}
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

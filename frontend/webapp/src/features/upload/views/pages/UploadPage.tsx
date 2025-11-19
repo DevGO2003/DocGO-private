@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { REPOSITORY_ROUTES, buildPath } from '@shared/constants/routes'
 import UploadLayout from '../../layouts/UploadLayout'
-import VersioningPanel from '../components/VersioningPanel'
 import PreviewFactory from '../components/previews/PreviewFactory'
 import SystemInfoPanel from '../components/SystemInfoPanel'
 import UploadSuccessNotification from '../components/UploadSuccessNotification'
@@ -21,9 +20,6 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [createFromOldVersion, setCreateFromOldVersion] = useState(false)
-  const [baseContractId, setBaseContractId] = useState('')
-  const [newVersionName, setNewVersionName] = useState('')
   const ocrFileInputRef = useRef<HTMLInputElement>(null)
 
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>('')
@@ -127,9 +123,6 @@ export default function UploadPage() {
     try {
       // Reset form state
       setSelectedFile(null);
-      setCreateFromOldVersion(false);
-      setBaseContractId('');
-      setNewVersionName('');
 
       // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ['files'] });
@@ -236,22 +229,8 @@ export default function UploadPage() {
                   onChange={(id: string, name: string) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
                 />
               </div>
-              {/* Versioning + Upload - Same Row */}
-              {/* TODO: Refactor Grid bằng UI Kit nếu có */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
-                {/* Versioning Panel */}
-                <div>
-                  <VersioningPanel
-                    createFromOldVersion={createFromOldVersion}
-                    setCreateFromOldVersion={setCreateFromOldVersion}
-                    baseContractId={baseContractId}
-                    setBaseContractId={setBaseContractId}
-                    newVersionName={newVersionName}
-                    setNewVersionName={setNewVersionName}
-                  />
-                </div>
-                {/* Upload Panel - No scroll */}
-                <div className="rounded-2xl border flex flex-col min-h-fit" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} >
+              {/* Upload Panel */}
+              <div className="rounded-2xl border flex flex-col min-h-fit" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} >
                   <div className="p-4 border-b" style={{ borderColor: '#f3f4f6' }} >
                     <h3 className="text-base font-semibold" style={{ color: '#111827' }} >Tải tệp lên</h3>
                     <p className="text-xs mt-1" style={{ color: '#6b7280' }} >Repository: {selectedRepositoryName || 'Chưa chọn'}</p>
@@ -346,7 +325,6 @@ export default function UploadPage() {
                       </div>
                     )}
                   </div>
-                </div>
               </div>
               {/* System Info Panel */}
               <SystemInfoPanel />

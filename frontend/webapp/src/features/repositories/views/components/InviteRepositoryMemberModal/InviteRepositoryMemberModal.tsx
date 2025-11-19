@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+import { 
+  useCreateInvite,
+  useAddPermission,
+  useCreatePersonalInvite,
+} from '@features/repositories/models/api/repositoryApi';
 import { Button, Modal, Input, Select, Checkbox } from '@shared/components';
+import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { RepositoryType } from '@features/repositories/models/types';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
-import { useAddPermission, useCreateInvite } from '@features/repositories/models/api/repositoryApi';
 
 interface InviteRepositoryMemberModalProps {
   isOpen: boolean;
@@ -33,7 +37,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [inviteMethod, setInviteMethod] = useState<'link' | 'member'>('link');
-  const [shareLink] = useState(`${window.location.origin}/repositories/${repositoryId}/join`);
+  const [shareLink, setShareLink] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [permissions, setPermissions] = useState<Permission>({
@@ -46,6 +50,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
   
   const addPermissionMutation = useAddPermission();
   const createInviteMutation = useCreateInvite();
+  const createPersonalInviteMutation = useCreatePersonalInvite();
 
   const isPersonal = repositoryType === 'PERSONAL';
   const isOrganization = repositoryType === 'ORGANIZATION';
@@ -73,14 +78,23 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
     if (isSubmitting) return;
     
     setIsSubmitting(true);
+    console.log('[InviteModal] Starting invite process...', { inviteMethod, selectedMembers, permissions });
+    
     try {
       if (inviteMethod === 'link') {
         // Generate invite link
-        await createInviteMutation.mutateAsync({
+        console.log('[InviteModal] Creating invite link with expiry:', linkExpiry);
+        const result = await createInviteMutation.mutateAsync({
           repositoryId,
           expiresInDays: parseInt(linkExpiry) || 7,
         });
-        alert('Đã tạo link mời thành công!');
+        console.log('[InviteModal] Invite link created:', result);
+        
+        // Set the invite link from API response
+        const inviteUrl = result.inviteLink || `${window.location.origin}/repositories/invites/${result.token}/accept?repositoryId=${repositoryId}`;
+        setShareLink(inviteUrl);
+        
+        alert(`Đã tạo link mời thành công!\n\nLink: ${inviteUrl}\n\nBạn có thể copy link từ ô bên dưới.`);
       } else {
         // Invite selected members
         if (selectedMembers.length === 0) {
@@ -95,24 +109,76 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         if (permissions.upload) permissionList.push('UPLOAD');
         if (permissions.delete) permissionList.push('DELETE');
         
-        // Add each selected member
+        console.log('[InviteModal] Inviting members with permissions:', { selectedMembers, permissionList });
+        
+        // Try to create personal invites (with notifications) first
+        let successCount = 0;
+        let useDirectAdd = false;
+        
         for (const memberId of selectedMembers) {
-          await addPermissionMutation.mutateAsync({
-            repositoryId,
-            userId: memberId,
-            permissions: permissionList,
-          });
+          try {
+            console.log('[InviteModal] Creating personal invite for member:', memberId);
+            const result = await createPersonalInviteMutation.mutateAsync({
+              repositoryId,
+              userId: memberId,
+              permissions: permissionList,
+              expiresInDays: 30, // Personal invites expire in 30 days
+            });
+            console.log('[InviteModal] Personal invite created successfully:', result);
+            successCount++;
+          } catch (error: any) {
+            // If personal invite API not available (404, 500, 501), fallback to direct add
+            const status = error?.response?.status;
+            if (status === 404 || status === 500 || status === 501) {
+              console.warn('[InviteModal] Personal invite API not available (status:', status, '), falling back to direct add');
+              useDirectAdd = true;
+              break;
+            }
+            throw error;
+          }
         }
         
-        // Invalidate members query to refresh list
-        await queryClient.invalidateQueries({ queryKey: ['repository-members', repositoryId] });
+        // Fallback: If personal invite API doesn't exist, use direct add (no notifications)
+        if (useDirectAdd) {
+          console.log('[InviteModal] Using direct add fallback...');
+          for (const memberId of selectedMembers) {
+            console.log('[InviteModal] Adding member directly:', memberId);
+            await addPermissionMutation.mutateAsync({
+              repositoryId,
+              userId: memberId,
+              permissions: permissionList,
+            });
+            successCount++;
+          }
+        }
         
-        alert(`Đã mời ${selectedMembers.length} thành viên thành công!`);
+        console.log('[InviteModal] Invalidating queries...');
+        // Invalidate queries to refresh lists
+        await queryClient.invalidateQueries({ queryKey: ['repository-members', repositoryId] });
+        await queryClient.invalidateQueries({ queryKey: ['repository-permissions', repositoryId] });
+        await queryClient.invalidateQueries({ queryKey: ['repository', repositoryId] });
+        await queryClient.invalidateQueries({ queryKey: ['my-repository-invites'] });
+        
+        console.log('[InviteModal] All members invited successfully');
+        
+        if (useDirectAdd) {
+          alert(`✅ Đã thêm ${successCount} thành viên thành công!\n\n⚠️ Lưu ý: Thành viên được thêm trực tiếp (không qua thông báo) do API chưa hỗ trợ.`);
+        } else {
+          alert(`✅ Đã gửi lời mời đến ${successCount} thành viên!\n\n📬 Họ sẽ nhận được thông báo trong vòng 30 giây và cần chấp nhận lời mời.`);
+        }
+        
+        // Close modal after adding members
+        onClose();
       }
       
-      onClose();
+      // Don't close modal after creating link - let user copy it first
     } catch (error: any) {
-      console.error('Failed to invite:', error);
+      console.error('[InviteModal] Failed to invite:', error);
+      console.error('[InviteModal] Error details:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
       alert(error?.response?.data?.message || error?.message || 'Mời thành viên thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);

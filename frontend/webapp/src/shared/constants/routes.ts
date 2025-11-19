@@ -44,6 +44,8 @@ export const REPOSITORY_ROUTES = {
   EDIT: '/repositories/:id/edit',
   FILE_DETAIL: '/repositories/:id/files/:fileId',
   UPLOAD: '/upload',
+  JOIN: '/repositories/:id/join',
+  ACCEPT_INVITE: '/repositories/invites/:token/accept',
 } as const;
 
 // ============================================

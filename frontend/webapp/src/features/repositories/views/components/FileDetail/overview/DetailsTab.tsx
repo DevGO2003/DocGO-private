@@ -11,16 +11,16 @@ interface DetailsTabProps {
 export function DetailsTab({ fileData, isEditing = false, onDataChange }: DetailsTabProps) {
   const id = fileData?.id ?? 'Chưa xác định';
   const overview = fileData?.overview ?? {};
+  const basic = fileData?.basic ?? {};
+  const fileSystemMetadata = fileData?.fileSystemMetadata ?? {};
   
-  const [title, setTitle] = useState(overview?.title ?? 'Chưa có tiêu đề');
+  const [title, setTitle] = useState(basic?.fileName ?? overview?.title ?? 'Chưa có tiêu đề');
   const [archiveSerial, setArchiveSerial] = useState(overview?.archiveSerial ?? '');
   const [documentType, setDocumentType] = useState(overview?.documentType ?? 'GENERAL');
   const [status, setStatus] = useState(overview?.status ?? 'ACTIVE');
-  const [tags, setTags] = useState<string[]>(Array.isArray(overview?.tags) ? overview.tags : []);
-  const [ownerUserId] = useState(overview?.ownerUserId ?? 'Chưa xác định');
-  const [dateCreated, setDateCreated] = useState('');
+  const [ownerName] = useState(basic?.owner?.username || basic?.owner?.email || 'Chưa xác định');
+  const dateAdded = fileSystemMetadata?.dateAdded ? new Date(fileSystemMetadata.dateAdded).toLocaleDateString('vi-VN') : 'Chưa xác định';
   const [correspondent, setCorrespondent] = useState('');
-  const [storagePath, setStoragePath] = useState('');
 
   const handleFieldChange = (field: string, value: any) => {
     if (onDataChange) {
@@ -55,8 +55,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* ID - Read only */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
-                <CommonIcon name="folder" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >
                 ID
               </label>
               <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{id}</Text>
@@ -64,8 +63,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
 
             {/* Title - Editable */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
-                <CommonIcon name="tag" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >
                 Tiêu đề
               </label>
               {isEditing ? (
@@ -111,55 +109,29 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               )}
             </div>
 
-            {/* Date Created - Date picker */}
+            {/* Date Added - Read only */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Ngày tạo</label>
-              {isEditing ? (
-                <div className="flex gap-2">
-                  <Input
-                    type="date"
-                    value={dateCreated}
-                    onChange={(e) => {
-                      setDateCreated(e.target.value);
-                      handleFieldChange('dateCreated', e.target.value);
-                    }}
-                    className="flex-1"
-                  />
-                  <Button variant="outline" className="px-3">
-                    <CommonIcon name="calendar" className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
-                  {dateCreated || 'Chưa xác định'}
-                </Text>
-              )}
+              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
+                {dateAdded}
+              </Text>
             </div>
 
             {/* Document Type - Dropdown */}
             <div>
-              <label className="block text-sm font-medium mb-2 flex items-center" style={{ color: '#374151' }} >
-                <CommonIcon name="user" className="w-4 h-4 mr-2" style={{ color: '#4f46e5' }} />
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >
                 Loại tài liệu
               </label>
               {isEditing ? (
                 <div className="flex gap-2">
                   <Select
                     value={documentType}
-                    onValueChange={(value) => {
-                      setDocumentType(value);
-                      handleFieldChange('documentType', value);
+                    options={documentTypes}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      setDocumentType(e.target.value);
+                      handleFieldChange('documentType', e.target.value);
                     }}
-                  >
-                    {documentTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </Select>
-                  <Button variant="outline" className="px-3">
-                    <CommonIcon name="plus" className="w-4 h-4" />
-                  </Button>
+                  />
                 </div>
               ) : (
                 <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
@@ -174,17 +146,12 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               {isEditing ? (
                 <Select
                   value={status}
-                  onValueChange={(value) => {
-                    setStatus(value);
-                    handleFieldChange('status', value);
+                  options={statusOptions}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setStatus(e.target.value);
+                    handleFieldChange('status', e.target.value);
                   }}
-                >
-                  {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </Select>
+                />
               ) : (
                 <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
                   {statusOptions.find(s => s.value === status)?.label || status}
@@ -206,9 +173,6 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
                   <Button variant="outline" className="px-3">
                     <CommonIcon name="chevron-down" className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" className="px-3">
-                    <CommonIcon name="plus" className="w-4 h-4" />
-                  </Button>
                 </div>
               ) : (
                 <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
@@ -217,69 +181,10 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               )}
             </div>
 
-            {/* Storage Path - Editable */}
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Đường dẫn lưu trữ</label>
-              {isEditing ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={storagePath}
-                    onChange={(e) => setStoragePath(e.target.value)}
-                    placeholder="Chọn đường dẫn"
-                    className="flex-1"
-                  />
-                  <Button variant="outline" className="px-3">
-                    <CommonIcon name="chevron-down" className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
-                  {storagePath || 'Chưa có'}
-                </Text>
-              )}
-            </div>
-
             {/* Owner - Read only */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Người sở hữu</label>
-              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{ownerUserId}</Text>
-            </div>
-
-            {/* Tags - Multi-select */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Tags</label>
-              {isEditing ? (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input placeholder="Thêm tag..." className="flex-1" />
-                    <Button variant="outline" className="px-3">
-                      <CommonIcon name="plus" className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {tags.map((tag: string, idx: number) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1 rounded-full text-sm flex items-center gap-1" style={{ backgroundColor: '#e0e7ff' }} >
-                          {tag}
-                          <button className="hover:" style={{ color: '#312e81' }} >✕</button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag: string, idx: number) => (
-                    <span key={idx} className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: '#e0e7ff' }} >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >Không có</Text>
-              )}
+              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >{ownerName}</Text>
             </div>
           </div>
         </CardContent>

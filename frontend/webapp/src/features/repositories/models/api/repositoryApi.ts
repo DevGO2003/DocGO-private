@@ -304,6 +304,18 @@ const repositoryApi = {
     return response.data.data!;
   },
 
+  // Create personal invite for specific user
+  createPersonalInvite: async (repositoryId: string, userId: string, permissions: string[], expiresInDays: number = 7): Promise<RepositoryInvite> => {
+    console.log('[API] Creating personal invite:', { repositoryId, userId, permissions, expiresInDays });
+    const response = await apiClient.post<RepositoryInvite>(`${BASE_PATH}/repositories/${repositoryId}/invites/personal`, {
+      userId,
+      permissions,
+      expiresInDays
+    });
+    console.log('[API] Personal invite created:', response.data);
+    return response.data.data!;
+  },
+
   getRepositoryInvites: async (repositoryId: string): Promise<RepositoryInvite[]> => {
     const response = await apiClient.get<RepositoryInvite[]>(`${BASE_PATH}/repositories/${repositoryId}/invites`);
     return response.data.data!;
@@ -311,6 +323,13 @@ const repositoryApi = {
 
   getInviteByToken: async (token: string): Promise<RepositoryInvite> => {
     const response = await apiClient.get<RepositoryInvite>(`${BASE_PATH}/invites/${token}`);
+    return response.data.data!;
+  },
+
+  getMyPendingInvites: async (): Promise<RepositoryInvite[]> => {
+    console.log('[API] Fetching my pending repository invites from:', `${BASE_PATH}/invites/my`);
+    const response = await apiClient.get<RepositoryInvite[]>(`${BASE_PATH}/invites/my`);
+    console.log('[API] Response:', response.data);
     return response.data.data!;
   },
 
@@ -515,8 +534,21 @@ export const useContract = (id: string) => {
 export const useRepositoryMembers = (repositoryId: string, params?: PaginationParams) => {
   return useQuery({
     queryKey: ['repository-members', repositoryId, params],
-    queryFn: () => repositoryApi.getRepositoryMembers(repositoryId, params),
+    queryFn: async () => {
+      try {
+        return await repositoryApi.getRepositoryMembers(repositoryId, params);
+      } catch (error: any) {
+        const status = error?.response?.status;
+        // If user doesn't have permission to view members (403), return empty result
+        if (status === 403) {
+          console.warn('[useRepositoryMembers] No permission to view members, returning empty list');
+          return { content: [], totalElements: 0, totalPages: 0, pageNumber: 0, pageSize: 10 };
+        }
+        throw error;
+      }
+    },
     enabled: !!repositoryId,
+    retry: false, // Don't retry on 403
   });
 };
 
@@ -669,6 +701,49 @@ export const useCreateInvite = () => {
   });
 };
 
+export const useCreatePersonalInvite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repositoryId, userId, permissions, expiresInDays }: { 
+      repositoryId: string; 
+      userId: string; 
+      permissions: string[]; 
+      expiresInDays?: number 
+    }) => repositoryApi.createPersonalInvite(repositoryId, userId, permissions, expiresInDays),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['repository-invites', variables.repositoryId] });
+      queryClient.invalidateQueries({ queryKey: ['repository-members', variables.repositoryId] });
+    },
+  });
+};
+
+export const useMyPendingRepositoryInvites = () => {
+  return useQuery({
+    queryKey: ['my-repository-invites'],
+    queryFn: async () => {
+      // TEMPORARY: Disable this API call until backend implements it
+      // This prevents 500 errors from affecting the UI
+      console.log('[useMyPendingRepositoryInvites] API disabled - returning empty array');
+      return [];
+      
+      /* TODO: Re-enable when backend is ready
+      try {
+        const result = await repositoryApi.getMyPendingInvites();
+        console.log('[useMyPendingRepositoryInvites] Fetched invites:', result);
+        return result;
+      } catch (error: any) {
+        console.error('[useMyPendingRepositoryInvites] Error fetching invites:', error);
+        return [];
+      }
+      */
+    },
+    enabled: false, // DISABLE QUERY COMPLETELY
+    refetchInterval: false, // Don't auto-refetch
+    retry: false,
+    staleTime: Infinity,
+  });
+};
+
 export const useAcceptInvite = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -676,6 +751,7 @@ export const useAcceptInvite = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repositories'] });
       queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+      queryClient.invalidateQueries({ queryKey: ['my-repository-invites'] });
     },
   });
 };
