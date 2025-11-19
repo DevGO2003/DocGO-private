@@ -774,6 +774,40 @@
           "title": "Cài đặt Repository",
           "desc": "Tùy chỉnh cấu hình và quyền truy cập"
         }
+      },
+      "invite": {
+        "title": "Mời thành viên",
+        "shareLink": "Chia sẻ link",
+        "selectMember": "Chọn thành viên",
+        "inviteLink": "Link mời",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép",
+        "linkExpiresAfter": "Link hết hạn sau",
+        "expiryOptions": {
+          "1day": "1 ngày",
+          "7days": "7 ngày",
+          "30days": "30 ngày",
+          "never": "Không bao giờ"
+        },
+        "personalRepoInfo": "💡 <strong>Repository cá nhân:</strong> Người được mời sẽ có quyền xem và tải file. Chỉ bạn mời có quyền upload và xóa.",
+        "selectMemberLabel": "Chọn thành viên",
+        "loadingMembers": "Đang tải danh sách thành viên...",
+        "noMembers": "Không có thành viên nào",
+        "permissions": {
+          "title": "Quyền truy cập",
+          "view": {
+            "label": "Xem tệp",
+            "description": "Có thể xem và tải xuống tệp"
+          },
+          "upload": {
+            "label": "Tải lên tệp",
+            "description": "Có thể tải lên tệp mới"
+          },
+          "delete": {
+            "label": "Xóa tệp",
+            "description": "Có thể xóa tệp khỏi repository"
+          }
+        }
       }
     },
     "files": {
