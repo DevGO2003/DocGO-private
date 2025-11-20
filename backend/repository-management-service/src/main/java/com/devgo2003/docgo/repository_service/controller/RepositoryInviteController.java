@@ -63,6 +63,36 @@ public class RepositoryInviteController {
         return ResponseEntity.ok(RestResponse.success(null));
     }
 
+    // Create personal invite for specific user (with notification)
+    @PostMapping("/repositories/{repositoryId}/invites/personal")
+    public ResponseEntity<RestResponse<RepositoryInviteDTO>> createPersonalInvite(
+            @PathVariable String repositoryId,
+            @RequestBody CreatePersonalInviteRequest request,
+            @RequestHeader("X-User-ID") String currentUserId
+    ) {
+        log.info("Creating personal invite for repository: {} to user: {} with permissions: {}", 
+                 repositoryId, request.getUserId(), request.getPermissions());
+        
+        RepositoryInviteDTO invite = inviteService.createPersonalInvite(
+            repositoryId,
+            request.getUserId(),
+            request.getPermissions(),
+            currentUserId,
+            request.getExpiresInDays()
+        );
+        return ResponseEntity.ok(RestResponse.success(invite));
+    }
+
+    // Get my pending invites (for notification bell)
+    @GetMapping("/invites/my")
+    public ResponseEntity<RestResponse<List<RepositoryInviteDTO>>> getMyPendingInvites(
+            @RequestHeader("X-User-ID") String currentUserId
+    ) {
+        log.info("Getting pending invites for user: {}", currentUserId);
+        List<RepositoryInviteDTO> invites = inviteService.getUserPendingInvites(currentUserId);
+        return ResponseEntity.ok(RestResponse.success(invites));
+    }
+
     // Revoke invite
     @DeleteMapping("/invites/{inviteId}")
     public ResponseEntity<RestResponse<Void>> revokeInvite(
@@ -76,5 +106,12 @@ public class RepositoryInviteController {
     @Data
     public static class CreateInviteRequest {
         private Integer expiresInDays = 7; // Default 7 days
+    }
+
+    @Data
+    public static class CreatePersonalInviteRequest {
+        private String userId; // Target user ID
+        private List<String> permissions; // e.g., ["VIEW", "UPLOAD", "DELETE"]
+        private Integer expiresInDays = 30; // Default 30 days
     }
 }

@@ -70,6 +70,88 @@ public class RepositoryInviteServiceImpl implements IRepositoryInviteService {
     }
 
     @Override
+    public RepositoryInviteDTO createPersonalInvite(
+            String repositoryId,
+            String targetUserId,
+            List<String> permissions,
+            String invitedBy,
+            Integer expiresInDays
+    ) {
+        log.info("Creating personal invite for repository: {} to user: {} by: {}", repositoryId, targetUserId, invitedBy);
+
+        RepositoryEntity repository = repositoryRepository.findByIdAndIsDeletedFalse(repositoryId)
+            .orElseThrow(() -> new RuntimeException("Repository not found"));
+
+        // Check if inviter has permission (must be owner or have ADMIN permission)
+        if (!repository.getOwnerUserId().equals(invitedBy) && 
+            !permissionService.hasPermission(repositoryId, invitedBy, "ADMIN")) {
+            throw new RuntimeException("Insufficient permissions to invite members");
+        }
+
+        // Check if target user already has access
+        if (repository.getPermissions() != null) {
+            boolean alreadyHasAccess = repository.getPermissions().stream()
+                .anyMatch(p -> p.getUserId().equals(targetUserId));
+
+            if (alreadyHasAccess) {
+                throw new RuntimeException("User already has access to this repository");
+            }
+        }
+
+        // Validate permissions
+        if (permissions == null || permissions.isEmpty()) {
+            throw new RuntimeException("At least one permission must be specified");
+        }
+
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = expiresInDays != null 
+            ? LocalDateTime.now().plusDays(expiresInDays)
+            : LocalDateTime.now().plusDays(30); // Default 30 days for personal invites
+
+        RepositoryInviteEntity invite = RepositoryInviteEntity.builder()
+            .token(token)
+            .repositoryId(repositoryId)
+            .repositoryName(repository.getName())
+            .invitedBy(invitedBy)
+            .invitedTo(targetUserId)
+            .permissions(permissions)
+            .isPersonalInvite(true)
+            .createdAt(LocalDateTime.now())
+            .expiresAt(expiresAt)
+            .isUsed(false)
+            .isRevoked(false)
+            .build();
+
+        RepositoryInviteEntity saved = inviteRepository.save(invite);
+        log.info("Created personal invite with token: {} for user: {}", token, targetUserId);
+
+        // TODO: Send notification to targetUserId
+        // This should trigger a notification that appears in the user's notification bell
+        // For now, the notification system should poll /invites/my endpoint
+
+        return toDTO(saved);
+    }
+
+    @Override
+    public List<RepositoryInviteDTO> getUserPendingInvites(String userId) {
+        log.info("Getting pending invites for user: {}", userId);
+
+        // Find all personal invites where:
+        // - invitedTo = userId
+        // - isPersonalInvite = true
+        // - isUsed = false
+        // - isRevoked = false
+        // - not expired
+        List<RepositoryInviteEntity> invites = inviteRepository.findByInvitedToAndIsPersonalInviteTrueAndIsUsedFalseAndIsRevokedFalse(userId);
+        
+        // Filter out expired invites
+        return invites.stream()
+            .filter(RepositoryInviteEntity::isValid)
+            .map(this::toDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<RepositoryInviteDTO> getRepositoryInvites(String repositoryId, String currentUserId) {
         RepositoryEntity repository = repositoryRepository.findByIdAndIsDeletedFalse(repositoryId)
             .orElseThrow(() -> new RuntimeException("Repository not found"));
@@ -134,11 +216,22 @@ public class RepositoryInviteServiceImpl implements IRepositoryInviteService {
             }
         }
 
-        // Grant default permissions (VIEW only for invited users)
+        // Grant permissions based on invite type
+        List<String> permissionsToGrant;
+        if (invite.getIsPersonalInvite() && invite.getPermissions() != null && !invite.getPermissions().isEmpty()) {
+            // Use permissions specified in personal invite
+            permissionsToGrant = invite.getPermissions();
+            log.info("Granting permissions from personal invite: {}", permissionsToGrant);
+        } else {
+            // Default permissions for link invites (VIEW only)
+            permissionsToGrant = Arrays.asList("VIEW");
+            log.info("Granting default VIEW permission for link invite");
+        }
+        
         permissionService.addPermission(
             repositoryId,
             userId,
-            Arrays.asList("VIEW"),
+            permissionsToGrant,
             invite.getInvitedBy()
         );
 
@@ -193,6 +286,9 @@ public class RepositoryInviteServiceImpl implements IRepositoryInviteService {
             .repositoryName(entity.getRepositoryName())
             .invitedBy(entity.getInvitedBy())
             .inviterName(entity.getInviterName())
+            .invitedTo(entity.getInvitedTo())
+            .permissions(entity.getPermissions())
+            .isPersonalInvite(entity.getIsPersonalInvite())
             .createdAt(entity.getCreatedAt())
             .expiresAt(entity.getExpiresAt())
             .isExpired(entity.isExpired())

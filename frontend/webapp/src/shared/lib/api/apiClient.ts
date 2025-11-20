@@ -34,6 +34,17 @@ class ApiClient {
       (config: any) => {
         const token = this.getAuthToken()
         if (token) config.headers.Authorization = `Bearer ${token}`
+        
+        // CRITICAL: Add X-User-Id header for all requests (required by backend)
+        // NOTE: Backend expects "X-User-Id" NOT "X-User-ID" (case sensitive!)
+        const userId = this.getUserId()
+        if (userId) {
+          config.headers['X-User-Id'] = userId
+          if (env.isDev) console.log(`[API Request] X-User-Id: ${userId}`)
+        } else {
+          if (env.isDev) console.warn('[API Request] ⚠️ No X-User-Id found! This may cause 403/404 errors.')
+        }
+        
         if (config.data instanceof FormData) {
           // Remove any Content-Type so the browser can set multipart boundary
           if (config.headers) {
@@ -133,6 +144,8 @@ class ApiClient {
         const parsed = JSON.parse(authData)
         if (parsed.tokenData?.accessToken) {
           if (parsed.tokenData.expiresAt && Date.now() >= parsed.tokenData.expiresAt) {
+            console.warn('[API] Access token expired at:', new Date(parsed.tokenData.expiresAt).toLocaleString())
+            console.warn('[API] Current time:', new Date().toLocaleString())
             this.clearExpiredTokens()
             return null
           }
@@ -140,9 +153,51 @@ class ApiClient {
         }
         if (parsed.accessToken) return parsed.accessToken
       }
-      return localStorage.getItem('auth_token')
+      const fallbackToken = localStorage.getItem('auth_token')
+      if (env.isDev && !fallbackToken) {
+        console.warn('[API] No auth token found in localStorage!')
+        console.warn('[API] Keys in localStorage:', Object.keys(localStorage))
+      }
+      return fallbackToken
     } catch (error) {
+      console.error('[API] Error reading auth token:', error)
       this.clearExpiredTokens()
+      return null
+    }
+  }
+
+  private getUserId(): string | null {
+    if (typeof window === 'undefined') return null
+    try {
+      // Try to get from docgo_auth_v1 first
+      const authData = localStorage.getItem('docgo_auth_v1')
+      if (authData) {
+        const parsed = JSON.parse(authData)
+        if (parsed.userData?.id) {
+          return parsed.userData.id
+        }
+        if (parsed.user?.id) {
+          return parsed.user.id
+        }
+      }
+      
+      // Fallback to user_data
+      const userData = localStorage.getItem('user_data')
+      if (userData) {
+        const parsed = JSON.parse(userData)
+        if (parsed.id) {
+          return parsed.id
+        }
+      }
+      
+      if (env.isDev) {
+        console.warn('[API] No user ID found in localStorage!')
+        console.warn('[API] docgo_auth_v1:', localStorage.getItem('docgo_auth_v1')?.substring(0, 100))
+        console.warn('[API] user_data:', localStorage.getItem('user_data')?.substring(0, 100))
+      }
+      return null
+    } catch (error) {
+      console.error('[API] Error reading user ID:', error)
       return null
     }
   }
@@ -219,10 +274,20 @@ class ApiClient {
   private async doTokenRefresh(): Promise<boolean> {
     try {
       const refreshToken = localStorage.getItem('refresh_token')
-      if (!refreshToken) { this.logout(); return false }
+      if (!refreshToken) {
+        console.error('[API] No refresh token found, logging out...')
+        this.logout()
+        return false
+      }
+      
+      console.log('[API] Attempting to refresh token...')
       const response = await this.client.post('/api/v1/user-management-service/auth/refresh', { refreshToken })
       const refreshData = response.data?.data
+      
       if (refreshData?.accessToken) {
+        console.log('[API] Token refresh successful!')
+        console.log('[API] New token expires in:', refreshData.expiresIn || 900, 'seconds')
+        
         const authData = localStorage.getItem('docgo_auth_v1')
         if (authData) {
           const parsed = JSON.parse(authData)
@@ -239,8 +304,15 @@ class ApiClient {
         localStorage.setItem('auth_token', refreshData.accessToken)
         if (refreshData.refreshToken) localStorage.setItem('refresh_token', refreshData.refreshToken)
         return true
+      } else {
+        console.error('[API] Token refresh failed - no accessToken in response:', refreshData)
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[API] Token refresh error:', {
+        status: error?.response?.status,
+        message: error?.response?.data?.message || error?.message,
+        data: error?.response?.data
+      })
       this.logout()
     }
     return false
@@ -262,10 +334,25 @@ class ApiClient {
 
   private logout() {
     if (typeof window === 'undefined') return
+    console.warn('[API] Logging out user due to authentication failure')
+    
+    // Clear all auth data
     this.clearExpiredTokens()
+    
     const path = window.location.pathname
     const isOnAuthPages = path === '/login' || path.startsWith('/auth')
-    if (!isOnAuthPages) window.location.href = '/login'
+    
+    if (!isOnAuthPages) {
+      console.log('[API] Session expired, redirecting to login page...')
+      
+      // Show alert to user
+      alert('⚠️ Phiên đăng nhập đã hết hạn!\n\nVui lòng đăng nhập lại để tiếp tục sử dụng.')
+      
+      // Immediate redirect
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 100)
+    }
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> { return this.client.get(url, config) }

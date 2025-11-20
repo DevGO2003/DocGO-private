@@ -385,14 +385,50 @@ export const useMyRepositories = (params?: PaginationParams) => {
 export const usePersonalRepositories = (params?: PaginationParams & { userId?: string }) => {
   return useQuery({
     queryKey: ['personal-repositories', params],
-    queryFn: () => repositoryApi.getPersonalRepositories(params),
+    queryFn: async () => {
+      console.log('[usePersonalRepositories] Fetching personal repositories...', params);
+      try {
+        const result = await repositoryApi.getPersonalRepositories(params);
+        console.log('[usePersonalRepositories] ✅ Success:', result);
+        return result;
+      } catch (error: any) {
+        console.error('[usePersonalRepositories] ❌ Error:', error);
+        console.error('[usePersonalRepositories] Error details:', {
+          message: error?.message,
+          response: error?.response?.data,
+          status: error?.response?.status
+        });
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
   });
 };
 
 export const useOrganizationRepositories = (params?: PaginationParams & { organizationId?: string }) => {
   return useQuery({
     queryKey: ['organization-repositories', params],
-    queryFn: () => repositoryApi.getOrganizationRepositories(params),
+    queryFn: async () => {
+      console.log('[useOrganizationRepositories] Fetching organization repositories...', params);
+      try {
+        const result = await repositoryApi.getOrganizationRepositories(params);
+        console.log('[useOrganizationRepositories] ✅ Success:', result);
+        return result;
+      } catch (error: any) {
+        console.error('[useOrganizationRepositories] ❌ Error:', error);
+        console.error('[useOrganizationRepositories] Error details:', {
+          message: error?.message,
+          response: error?.response?.data,
+          status: error?.response?.status
+        });
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
     // Luôn enable - backend sẽ tự động lấy repos của tất cả orgs mà user tham gia
   });
 };
@@ -400,7 +436,25 @@ export const useOrganizationRepositories = (params?: PaginationParams & { organi
 export const usePublicRepositories = (params?: PaginationParams) => {
   return useQuery({
     queryKey: ['public-repositories', params],
-    queryFn: () => repositoryApi.getPublicRepositories(params),
+    queryFn: async () => {
+      console.log('[usePublicRepositories] Fetching public repositories...', params);
+      try {
+        const result = await repositoryApi.getPublicRepositories(params);
+        console.log('[usePublicRepositories] ✅ Success:', result);
+        return result;
+      } catch (error: any) {
+        console.error('[usePublicRepositories] ❌ Error:', error);
+        console.error('[usePublicRepositories] Error details:', {
+          message: error?.message,
+          response: error?.response?.data,
+          status: error?.response?.status
+        });
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
   });
 };
 
@@ -721,26 +775,22 @@ export const useMyPendingRepositoryInvites = () => {
   return useQuery({
     queryKey: ['my-repository-invites'],
     queryFn: async () => {
-      // TEMPORARY: Disable this API call until backend implements it
-      // This prevents 500 errors from affecting the UI
-      console.log('[useMyPendingRepositoryInvites] API disabled - returning empty array');
-      return [];
-      
-      /* TODO: Re-enable when backend is ready
       try {
+        console.log('[useMyPendingRepositoryInvites] Fetching pending invites...');
         const result = await repositoryApi.getMyPendingInvites();
-        console.log('[useMyPendingRepositoryInvites] Fetched invites:', result);
+        console.log('[useMyPendingRepositoryInvites] ✅ Fetched invites:', result);
         return result;
       } catch (error: any) {
-        console.error('[useMyPendingRepositoryInvites] Error fetching invites:', error);
+        console.error('[useMyPendingRepositoryInvites] ❌ Error fetching invites:', error);
+        // Return empty array on error to prevent UI breaking
         return [];
       }
-      */
     },
-    enabled: false, // DISABLE QUERY COMPLETELY
-    refetchInterval: false, // Don't auto-refetch
-    retry: false,
-    staleTime: Infinity,
+
+    refetchOnWindowFocus: false, // Disable to reduce requests
+    staleTime: 60000, // Cache for 1 minute
+    retry: 1, // Only retry once
+    retryDelay: 3000, // Wait 3s before retry
   });
 };
 
@@ -748,10 +798,23 @@ export const useAcceptInvite = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (token: string) => repositoryApi.acceptInvite(token),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repositories'] });
-      queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
-      queryClient.invalidateQueries({ queryKey: ['my-repository-invites'] });
+    onSuccess: async () => {
+      console.log('[useAcceptInvite] ✅ Invite accepted, refreshing all repository data...');
+      
+      // Invalidate all repository-related queries
+      await queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['my-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['personal-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['organization-repositories'] });
+      await queryClient.invalidateQueries({ queryKey: ['my-repository-invites'] });
+      
+      // Invalidate all repository members queries (for all repos)
+      await queryClient.invalidateQueries({ queryKey: ['repository-members'] });
+      
+      // Invalidate all individual repository queries
+      await queryClient.invalidateQueries({ queryKey: ['repository'] });
+      
+      console.log('[useAcceptInvite] ✅ All queries invalidated');
     },
   });
 };

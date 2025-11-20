@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -19,6 +20,9 @@ public class RepositoryInviteDTO {
     private String repositoryName;
     private String invitedBy;
     private String inviterName;
+    private String invitedTo; // Target user ID for personal invites
+    private List<String> permissions; // Permissions to grant
+    private Boolean isPersonalInvite; // true = personal invite, false = link invite
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private Boolean isExpired;
