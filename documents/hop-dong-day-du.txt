@@ -1,0 +1,474 @@
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+===============================================================================
+
+HỢP ĐỒNG CUNG CẤP DỊCH VỤ PHÁT TRIỂN PHẦN MỀM
+Số: HĐ-2025-001 | Ngày ký: 20/11/2025
+
+BÊN A - KHÁCH HÀNG:
+CÔNG TY TNHH ABC
+Địa chỉ: 123 Nguyễn Văn Linh, Q.7, TP.HCM | MST: 0312345678
+Người đại diện: Ông NGUYỄN VĂN A - Giám đốc
+ĐT: +84-903-111-222 | Email: nguyen.a@abc.com.vn
+
+BÊN B - NHÀ CUNG CẤP:
+CÔNG TY TNHH XYZ
+Địa chỉ: 456 Lê Văn Việt, Q.9, TP.HCM | MST: 0315678901
+Người đại diện: Bà TRẦN THỊ B - Giám đốc
+ĐT: +84-908-333-444 | Email: tran.b@xyz.vn
+
+===============================================================================
+ĐIỀU 1: PHẠM VI VÀ NỘI DUNG CÔNG VIỆC
+===============================================================================
+
+1.1. Mục đích
+Bên B phát triển và triển khai hệ thống quản lý tài liệu điện tử cho Bên A.
+
+1.2. Các giai đoạn thực hiện
+
+Giai đoạn 1 - Phân tích và thiết kế (2 tuần):
+- Khảo sát yêu cầu nghiệp vụ
+- Thiết kế kiến trúc hệ thống
+- Thiết kế database và API
+- Thiết kế giao diện người dùng (UI/UX)
+- Lập kế hoạch triển khai chi tiết
+
+Giai đoạn 2 - Phát triển phần mềm (6 tuần):
+- Module quản lý người dùng và phân quyền
+- Module quản lý kho tài liệu (upload, download, search)
+- Module luồng phê duyệt đa cấp
+- Module báo cáo và thống kê
+- Module tích hợp chữ ký số
+- Tích hợp AI phân loại tài liệu tự động
+
+Giai đoạn 3 - Kiểm thử (1 tuần):
+- Kiểm thử chức năng (functional testing)
+- Kiểm thử hiệu năng (performance testing)
+- Kiểm thử bảo mật (security testing)
+- Kiểm thử nghiệm thu người dùng (UAT)
+
+Giai đoạn 4 - Triển khai và đào tạo (2 tuần):
+- Cài đặt hệ thống lên production
+- Migration dữ liệu (nếu có)
+- Đào tạo 30 người dùng
+- Bàn giao tài liệu và hệ thống
+
+1.3. Sản phẩm bàn giao
+- Mã nguồn đầy đủ (source code)
+- Database và dữ liệu mẫu
+- Tài liệu kỹ thuật (technical documentation)
+- Tài liệu hướng dẫn sử dụng (user manual)
+- Tài liệu hướng dẫn vận hành (admin guide)
+- Video hướng dẫn sử dụng
+- Tài khoản admin và demo
+
+1.4. Công nghệ sử dụng
+- Frontend: React.js, TypeScript, TailwindCSS
+- Backend: Node.js/FastAPI, PostgreSQL, Redis
+- Cloud: AWS S3/MinIO cho lưu trữ file
+- AI: OpenAI API cho phân loại tự động
+
+===============================================================================
+ĐIỀU 2: GIÁ TRỊ VÀ THANH TOÁN
+===============================================================================
+
+2.1. Giá trị hợp đồng
+- Giá trị trước thuế: 500.000.000 VNĐ
+- Thuế VAT (10%): 50.000.000 VNĐ
+- Tổng giá trị: 550.000.000 VNĐ (Năm trăm năm mươi triệu đồng)
+
+2.2. Lịch thanh toán
+
+Đợt 1 - 165.000.000 VNĐ (30%):
+- Thời gian: Trong 7 ngày sau khi ký hợp đồng
+- Điều kiện: Ký hợp đồng và khởi động dự án
+
+Đợt 2 - 165.000.000 VNĐ (30%):
+- Thời gian: Sau khi hoàn thành 50% công việc
+- Điều kiện: Hoàn thành phân tích, thiết kế và 50% modules
+- Nghiệm thu: Bên A ký biên bản xác nhận
+
+Đợt 3 - 165.000.000 VNĐ (30%):
+- Thời gian: Sau nghiệm thu chính thức
+- Điều kiện: Hoàn thành 100% hệ thống, triển khai và đào tạo
+- Nghiệm thu: Bên A ký biên bản bàn giao
+
+Đợt 4 - 55.000.000 VNĐ (10%):
+- Thời gian: Sau 12 tháng bảo hành
+- Điều kiện: Hệ thống hoạt động ổn định
+
+2.3. Phương thức thanh toán
+- Hình thức: Chuyển khoản ngân hàng
+- Tài khoản: 0089876543210 - Techcombank Chi nhánh TP.HCM
+- Chủ TK: CÔNG TY TNHH XYZ
+- Nội dung: "Thanh toán HĐ-2025-001 - Đợt [số]"
+
+2.4. Xử lý chậm thanh toán
+- Chậm 1-15 ngày: Nhắc nhở bằng email
+- Chậm 16-30 ngày: Phạt 0.05%/ngày
+- Chậm 31-45 ngày: Bên B tạm dừng công việc
+- Chậm >45 ngày: Bên B có quyền chấm dứt hợp đồng
+
+===============================================================================
+ĐIỀU 3: THỜI GIAN THỰC HIỆN
+===============================================================================
+
+3.1. Thời gian
+- Ngày ký hợp đồng: 20/11/2025
+- Ngày bắt đầu: 25/11/2025
+- Ngày hoàn thành: 20/02/2026
+- Tổng thời gian: 13 tuần (khoảng 3 tháng)
+- Thời gian bảo hành: 12 tháng (từ 21/02/2026 đến 20/02/2027)
+
+3.2. Kế hoạch chi tiết
+- Tuần 1-2: Phân tích và thiết kế
+- Tuần 3-8: Phát triển phần mềm
+- Tuần 9: Kiểm thử
+- Tuần 10-11: Triển khai và đào tạo
+- Tuần 12-13: Nghiệm thu và bàn giao
+
+3.3. Xử lý chậm tiến độ
+- Chậm 1-15 ngày: Cảnh cáo bằng văn bản
+- Chậm 16-30 ngày: Phạt 0.1%/ngày, tối đa 5% giá trị HĐ
+- Chậm 31-60 ngày: Phạt 0.15%/ngày, tối đa 10% giá trị HĐ
+- Chậm >60 ngày: Bên A có quyền đơn phương chấm dứt hợp đồng
+
+3.4. Gia hạn thời gian
+Được chấp nhận khi có lý do chính đáng:
+- Bên A thay đổi yêu cầu
+- Bên A chậm cung cấp thông tin
+- Sự kiện bất khả kháng
+- Hai bên thỏa thuận bằng văn bản
+
+===============================================================================
+ĐIỀU 4: TIÊU CHUẨN NGHIỆM THU
+===============================================================================
+
+4.1. Tiêu chuẩn chức năng
+- Đầy đủ 100% các chức năng theo phạm vi thỏa thuận
+- Không có lỗi nghiêm trọng (critical bugs)
+- Tối đa 5 lỗi nhỏ được chấp nhận (và phải sửa trong 7 ngày)
+- Giao diện đúng với thiết kế đã duyệt
+- Tương thích đa nền tảng (PC, tablet, mobile)
+
+4.2. Tiêu chuẩn hiệu năng
+- Thời gian tải trang <3 giây
+- API response time <500ms
+- Hỗ trợ tối thiểu 100 người dùng đồng thời
+- Upload file <10MB trong <2 giây
+- Tìm kiếm trả kết quả <1 giây
+
+4.3. Tiêu chuẩn bảo mật
+- Mã hóa mật khẩu và dữ liệu nhạy cảm
+- Có cơ chế xác thực và phân quyền
+- Logs hoạt động người dùng
+- Backup dữ liệu tự động hàng ngày
+- Tuân thủ chuẩn bảo mật OWASP
+
+4.4. Quy trình nghiệm thu
+1. Bên B thông báo sẵn sàng nghiệm thu (trước 5 ngày)
+2. Bên A kiểm tra trong 7 ngày làm việc
+3. Bên A lập biên bản (chấp nhận hoặc yêu cầu sửa)
+4. Nếu có lỗi: Bên B sửa trong 7 ngày
+5. Nghiệm thu lại (tối đa 3 lần)
+
+===============================================================================
+ĐIỀU 5: QUYỀN VÀ NGHĨA VỤ BÊN A
+===============================================================================
+
+5.1. Quyền của Bên A
+- Nhận dịch vụ đúng tiến độ, chất lượng cam kết
+- Yêu cầu báo cáo tiến độ hàng tuần
+- Kiểm tra và giám sát quá trình thực hiện
+- Được đào tạo sử dụng hệ thống (30 người)
+- Nhận toàn bộ mã nguồn và tài liệu kỹ thuật
+- Sở hữu toàn bộ quyền sở hữu trí tuệ sau thanh toán 100%
+- Yêu cầu sửa lỗi miễn phí trong thời gian bảo hành
+- Được hỗ trợ kỹ thuật 24/7 trong 12 tháng bảo hành
+
+5.2. Nghĩa vụ của Bên A
+- Thanh toán đầy đủ, đúng hạn theo lịch
+- Cung cấp thông tin, tài liệu đầy đủ và kịp thời
+- Cử người phụ trách theo dõi dự án
+- Phản hồi và duyệt các deliverable trong 5 ngày làm việc
+- Chuẩn bị hạ tầng cần thiết:
+  + Server (8 CPU cores, 16GB RAM, 500GB SSD)
+  + Bandwidth tối thiểu 100Mbps
+  + Domain và SSL certificate
+- Sắp xếp nhân sự tham gia đào tạo đầy đủ
+- Phối hợp trong quá trình kiểm thử và nghiệm thu
+- Bảo mật thông tin của Bên B
+- Không sao chép, chỉnh sửa mã nguồn trước khi thanh toán 100%
+
+===============================================================================
+ĐIỀU 6: QUYỀN VÀ NGHĨA VỤ BÊN B
+===============================================================================
+
+6.1. Quyền của Bên B
+- Được thanh toán đầy đủ, đúng hạn
+- Tạm dừng nếu Bên A chậm thanh toán >45 ngày
+- Giữ quyền sở hữu trí tuệ cho đến khi nhận đủ thanh toán
+- Yêu cầu Bên A cung cấp thông tin cần thiết
+- Từ chối các yêu cầu ngoài phạm vi đã thỏa thuận
+
+6.2. Nghĩa vụ của Bên B
+- Thực hiện đúng phạm vi, tiến độ, chất lượng cam kết
+- Báo cáo tiến độ hàng tuần cho Bên A
+- Triển khai đủ nhân sự có trình độ chuyên môn
+- Khắc phục lỗi miễn phí trong thời gian bảo hành
+- Bảo mật tuyệt đối thông tin của Bên A
+- Bàn giao mã nguồn, database và tài liệu đầy đủ
+- Hỗ trợ kỹ thuật 24/7 trong thời gian bảo hành
+- Không sử dụng mã nguồn cho bên thứ ba
+- Cam kết không vi phạm bản quyền của bên khác
+
+===============================================================================
+ĐIỀU 7: QUYỀN SỞ HỮU TRÍ TUỆ
+===============================================================================
+
+7.1. Chuyển giao quyền
+Sau khi Bên A thanh toán 100% giá trị hợp đồng, Bên A sở hữu toàn bộ:
+- Mã nguồn (source code)
+- Database schema và dữ liệu
+- Thiết kế giao diện (UI/UX designs)
+- Logo, hình ảnh, tài nguyên
+- Tài liệu kỹ thuật
+- Quyền sử dụng, sửa đổi, phân phối không giới hạn
+
+7.2. Cam kết của Bên B
+- Sản phẩm không vi phạm bản quyền bên thứ ba
+- Sử dụng thư viện và công cụ hợp pháp
+- Bồi thường nếu có tranh chấp về bản quyền
+
+7.3. Giữ lại quyền
+Bên B được phép:
+- Sử dụng tên dự án trong portfolio (với sự đồng ý của Bên A)
+- Tái sử dụng kiến thức và kinh nghiệm cho dự án khác
+- Không được sao chép hoặc bán lại sản phẩm tương tự
+
+===============================================================================
+ĐIỀU 8: BẢO MẬT THÔNG TIN
+===============================================================================
+
+8.1. Phạm vi bảo mật
+Các thông tin cần bảo mật bao gồm:
+- Tài liệu kỹ thuật và mã nguồn
+- Dữ liệu và thông tin khách hàng
+- Quy trình nghiệp vụ nội bộ
+- Chiến lược kinh doanh
+- Thông tin tài chính
+
+8.2. Cam kết bảo mật
+Các bên cam kết:
+- Không tiết lộ thông tin cho bên thứ ba
+- Chỉ sử dụng thông tin cho mục đích hợp đồng
+- Áp dụng biện pháp bảo mật hợp lý
+- Hạn chế số người tiếp cận thông tin
+- Thông báo ngay khi phát hiện rò rỉ
+
+8.3. Thời hạn bảo mật
+- Trong suốt thời gian hợp đồng
+- Thêm 5 năm sau khi kết thúc hợp đồng
+
+8.4. Xử lý vi phạm
+- Vi phạm bảo mật: Bồi thường tối thiểu 30% giá trị hợp đồng
+- Bên bị vi phạm có quyền chấm dứt hợp đồng ngay lập tức
+- Bên vi phạm chịu toàn bộ thiệt hại phát sinh
+
+===============================================================================
+ĐIỀU 9: BẢO HÀNH VÀ HỖ TRỢ
+===============================================================================
+
+9.1. Thời gian bảo hành
+- 12 tháng kể từ ngày nghiệm thu chính thức
+- Từ 21/02/2026 đến 20/02/2027
+
+9.2. Nội dung bảo hành
+- Sửa lỗi do lập trình (bugs, errors)
+- Cập nhật bản vá bảo mật
+- Tối ưu hiệu năng hệ thống
+- Hỗ trợ kỹ thuật qua email, điện thoại, remote
+- Backup dữ liệu định kỳ
+- Hướng dẫn sử dụng tính năng mới
+
+9.3. Không bảo hành
+- Lỗi do người dùng sử dụng sai
+- Lỗi do thay đổi hạ tầng server
+- Lỗi do cài đặt phần mềm bên thứ ba
+- Thiệt hại do thiên tai, hỏa hoạn
+- Tính năng mới ngoài phạm vi ban đầu
+
+9.4. Mức độ ưu tiên (SLA)
+- Critical (hệ thống ngừng hoạt động):
+  + Phản hồi trong 2 giờ
+  + Khắc phục trong 24 giờ
+  
+- High (chức năng chính bị lỗi):
+  + Phản hồi trong 8 giờ
+  + Khắc phục trong 72 giờ
+  
+- Medium (chức năng phụ bị lỗi):
+  + Phản hồi trong 24 giờ
+  + Khắc phục trong 7 ngày
+  
+- Low (lỗi nhỏ, đề xuất cải tiến):
+  + Phản hồi trong 48 giờ
+  + Khắc phục trong 30 ngày
+
+9.5. Kênh hỗ trợ
+- Email: support@xyz.vn
+- Hotline: 1900-5678 (24/7)
+- Remote support: TeamViewer, AnyDesk
+- Onsite support (nếu cần thiết)
+
+===============================================================================
+ĐIỀU 10: CHẤM DỨT HỢP ĐỒNG
+===============================================================================
+
+10.1. Chấm dứt theo thỏa thuận
+Hai bên có thể chấm dứt hợp đồng khi:
+- Cùng nhất trí chấm dứt bằng văn bản
+- Thỏa thuận điều kiện thanh toán và bàn giao
+
+10.2. Chấm dứt do vi phạm của Bên A
+Bên B có quyền chấm dứt khi Bên A:
+- Chậm thanh toán >60 ngày
+- Không cung cấp thông tin sau 3 lần yêu cầu
+- Vi phạm nghĩa vụ bảo mật nghiêm trọng
+Xử lý: Bên A thanh toán công việc đã hoàn thành + bồi thường 20%
+
+10.3. Chấm dứt do vi phạm của Bên B
+Bên A có quyền chấm dứt khi Bên B:
+- Chậm tiến độ >90 ngày
+- Không đạt nghiệm thu sau 3 lần
+- Vi phạm nghĩa vụ bảo mật nghiêm trọng
+Xử lý: Bên B hoàn lại tiền đã nhận + bồi thường 20%
+
+10.4. Chấm dứt do bất khả kháng
+Hợp đồng chấm dứt nếu có sự kiện bất khả kháng kéo dài >60 ngày:
+- Thiên tai, hỏa hoạn, động đất
+- Chiến tranh, bạo loạn
+- Dịch bệnh nghiêm trọng
+- Thay đổi chính sách, pháp luật
+Xử lý: Thanh toán theo công việc đã hoàn thành, không bồi thường
+
+10.5. Thủ tục chấm dứt
+1. Bên chấm dứt gửi thông báo trước 15 ngày
+2. Hai bên họp thanh lý hợp đồng
+3. Lập biên bản thanh lý, xác định công việc đã làm
+4. Thanh toán theo thỏa thuận
+5. Bàn giao tài liệu, mã nguồn đã hoàn thành
+
+===============================================================================
+ĐIỀU 11: TRÁCH NHIỆM VÀ BỒI THƯỜNG
+===============================================================================
+
+11.1. Giới hạn trách nhiệm
+- Bồi thường tối đa không quá 100% giá trị hợp đồng
+- Trừ trường hợp vi phạm bảo mật (không giới hạn)
+
+11.2. Bất khả kháng
+Các bên không chịu trách nhiệm khi có sự kiện bất khả kháng:
+- Thiên tai (lũ lụt, động đất, bão)
+- Dịch bệnh nghiêm trọng
+- Chiến tranh, khủng bố
+- Thay đổi pháp luật
+- Sự cố hệ thống không kiểm soát được
+
+Điều kiện: Thông báo cho bên kia trong 7 ngày và có giấy tờ chứng minh
+
+11.3. Bảo hiểm
+Các bên tự mua bảo hiểm cho tài sản và nhân sự của mình
+
+===============================================================================
+ĐIỀU 12: GIẢI QUYẾT TRANH CHẤP
+===============================================================================
+
+12.1. Thương lượng
+- Khi có tranh chấp, hai bên thương lượng trong 30 ngày
+- Địa điểm: Trụ sở của bên bị khiếu nại
+- Có biên bản ghi nhận kết quả
+
+12.2. Hòa giải
+- Nếu thương lượng không thành, mời bên thứ ba hòa giải
+- Thời gian: 30 ngày
+- Chi phí: Hai bên chia đều
+
+12.3. Trọng tài/Tòa án
+Nếu không giải quyết được:
+- Trường hợp 1: Đưa ra Trung tâm Trọng tài Quốc tế Việt Nam (VIAC)
+- Trường hợp 2: Tòa án có thẩm quyền tại TP.HCM
+- Luật áp dụng: Pháp luật Việt Nam
+- Ngôn ngữ: Tiếng Việt
+- Chi phí: Bên thua chịu toàn bộ
+
+===============================================================================
+ĐIỀU 13: ĐIỀU KHOẢN CHUNG
+===============================================================================
+
+13.1. Hiệu lực
+- Hợp đồng có hiệu lực kể từ ngày ký
+- Thời hạn: Đến khi hoàn thành nghĩa vụ của các bên
+
+13.2. Sửa đổi, bổ sung
+- Mọi sửa đổi phải bằng văn bản, có chữ ký và đóng dấu của cả hai bên
+- Phụ lục là bộ phận không tách rời của hợp đồng
+
+13.3. Thông báo
+Mọi thông báo gửi đến địa chỉ trong hợp đồng bằng:
+- Email (có giá trị pháp lý)
+- Thư bảo đảm
+- Chuyển phát nhanh
+- Giao trực tiếp (có biên bản)
+
+13.4. Chuyển nhượng
+- Không được chuyển nhượng hợp đồng cho bên thứ ba
+- Trừ khi có sự đồng ý bằng văn bản của bên kia
+
+13.5. Tách rời điều khoản
+- Nếu một điều khoản vô hiệu, các điều khoản khác vẫn có hiệu lực
+- Hai bên thương lượng thay thế điều khoản vô hiệu
+
+13.6. Toàn vẹn hợp đồng
+- Hợp đồng này thay thế mọi thỏa thuận trước đó (nếu có)
+- Các phụ lục kèm theo là bộ phận của hợp đồng
+
+13.7. Ngôn ngữ
+- Hợp đồng được lập bằng tiếng Việt
+- 02 bản có giá trị pháp lý như nhau
+- Mỗi bên giữ 01 bản
+
+===============================================================================
+ĐIỀU 14: CAM KẾT CHUNG
+===============================================================================
+
+Hai bên cam kết:
+- Thực hiện đầy đủ, nghiêm túc các điều khoản của hợp đồng
+- Hợp tác chặt chẽ, hỗ trợ lẫn nhau
+- Giải quyết vấn đề phát sinh trên tinh thần thiện chí
+- Tuân thủ pháp luật Việt Nam
+- Không làm ảnh hưởng đến uy tín của nhau
+
+Hợp đồng được lập tại TP. Hồ Chí Minh, ngày 20 tháng 11 năm 2025
+02 (hai) bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.
+
+===============================================================================
+
+ĐẠI DIỆN BÊN A                              ĐẠI DIỆN BÊN B
+KHÁCH HÀNG                                  NHÀ CUNG CẤP
+
+(Đã ký và đóng dấu)                         (Đã ký và đóng dấu)
+
+
+
+Ông NGUYỄN VĂN A                            Bà TRẦN THỊ B
+Giám đốc                                    Giám đốc
+CÔNG TY TNHH ABC                            CÔNG TY TNHH XYZ
+
+
+PHỤ LỤC (Kèm theo):
+- Phụ lục 1: Danh sách chi tiết chức năng
+- Phụ lục 2: Giao diện mẫu (mockups)
+- Phụ lục 3: Yêu cầu kỹ thuật hạ tầng
+- Phụ lục 4: Kế hoạch triển khai chi tiết
+- Phụ lục 5: Biểu mẫu nghiệm thu

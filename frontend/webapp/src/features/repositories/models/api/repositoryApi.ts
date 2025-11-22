@@ -378,7 +378,25 @@ export const useRepositories = (params?: PaginationParams) => {
 export const useMyRepositories = (params?: PaginationParams) => {
   return useQuery({
     queryKey: ['my-repositories', params],
-    queryFn: () => repositoryApi.getMyRepositories(params),
+    queryFn: async () => {
+      console.log('[useMyRepositories] Fetching my repositories...', params);
+      try {
+        const result = await repositoryApi.getMyRepositories(params);
+        console.log('[useMyRepositories] ✅ Success:', result);
+        return result;
+      } catch (error: any) {
+        console.error('[useMyRepositories] ❌ Error:', error);
+        console.error('[useMyRepositories] Error details:', {
+          message: error?.message,
+          response: error?.response?.data,
+          status: error?.response?.status
+        });
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000, // 30 seconds
   });
 };
 

@@ -24,7 +24,7 @@ public class RepositoryInviteController {
     public ResponseEntity<RestResponse<RepositoryInviteDTO>> createInvite(
             @PathVariable String repositoryId,
             @RequestBody CreateInviteRequest request,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         RepositoryInviteDTO invite = inviteService.createInvite(
             repositoryId,
@@ -38,7 +38,7 @@ public class RepositoryInviteController {
     @GetMapping("/repositories/{repositoryId}/invites")
     public ResponseEntity<RestResponse<List<RepositoryInviteDTO>>> getRepositoryInvites(
             @PathVariable String repositoryId,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         List<RepositoryInviteDTO> invites = inviteService.getRepositoryInvites(repositoryId, currentUserId);
         return ResponseEntity.ok(RestResponse.success(invites));
@@ -57,7 +57,7 @@ public class RepositoryInviteController {
     @PostMapping("/invites/{token}/accept")
     public ResponseEntity<RestResponse<Void>> acceptInvite(
             @PathVariable String token,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         inviteService.acceptInvite(token, currentUserId);
         return ResponseEntity.ok(RestResponse.success(null));
@@ -68,7 +68,7 @@ public class RepositoryInviteController {
     public ResponseEntity<RestResponse<RepositoryInviteDTO>> createPersonalInvite(
             @PathVariable String repositoryId,
             @RequestBody CreatePersonalInviteRequest request,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         log.info("Creating personal invite for repository: {} to user: {} with permissions: {}", 
                  repositoryId, request.getUserId(), request.getPermissions());
@@ -86,7 +86,7 @@ public class RepositoryInviteController {
     // Get my pending invites (for notification bell)
     @GetMapping("/invites/my")
     public ResponseEntity<RestResponse<List<RepositoryInviteDTO>>> getMyPendingInvites(
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         log.info("Getting pending invites for user: {}", currentUserId);
         List<RepositoryInviteDTO> invites = inviteService.getUserPendingInvites(currentUserId);
@@ -97,7 +97,7 @@ public class RepositoryInviteController {
     @DeleteMapping("/invites/{inviteId}")
     public ResponseEntity<RestResponse<Void>> revokeInvite(
             @PathVariable String inviteId,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         inviteService.revokeInvite(inviteId, currentUserId);
         return ResponseEntity.ok(RestResponse.success(null));

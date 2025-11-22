@@ -1,7 +1,7 @@
 ﻿import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '@store/hooks';
-import { setCredentials, setTokens, setUser } from '../../models/state/authSlice';
+import { setCredentials } from '../../models/state/authSlice';
 import { HOME_PATH, LOGIN_PATH } from '@constants';
 import env from '@shared/config/env';
 
@@ -68,29 +68,17 @@ export const OAuth2Callback = () => {
                 expiresIn 
               });
 
-              // Store tokens with expiration info in Redux
-              if (refresh) {
-                dispatch(setTokens({
+              // Store user + tokens together to ensure user ID is available for API calls
+              dispatch(setCredentials({ 
+                user: result.data.user, 
+                token: accessToken,
+                tokenData: {
                   accessToken,
-                  refreshToken: refresh,
-                  expiresIn
-                }));
-              } else {
-                // Fallback if no refresh token
-                dispatch(setCredentials({ 
-                  user: result.data.user, 
-                  token: accessToken,
-                  tokenData: {
-                    accessToken,
-                    refreshToken: refresh || '',
-                    expiresAt: Date.now() + (expiresIn * 1000),
-                    tokenType: 'Bearer'
-                  }
-                }));
-              }
-
-              // Store user info
-              dispatch(setUser(result.data.user));
+                  refreshToken: refresh || '',
+                  expiresAt: Date.now() + (expiresIn * 1000),
+                  tokenType: 'Bearer'
+                }
+              }));
 
               console.log('[OAuth2Callback] Login successful, redirecting to home...');
               // Redirect to home

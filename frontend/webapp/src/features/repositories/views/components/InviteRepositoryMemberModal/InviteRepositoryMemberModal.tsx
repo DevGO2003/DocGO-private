@@ -85,17 +85,29 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         // Generate invite link
         console.log('[InviteModal] Creating invite link with expiry:', linkExpiry);
         try {
+          // Handle 'never' expiry - set to 365 days
+          const expiryDays = linkExpiry === 'never' ? 365 : parseInt(linkExpiry) || 7;
+          
           const result = await createInviteMutation.mutateAsync({
             repositoryId,
-            expiresInDays: parseInt(linkExpiry) || 7,
+            expiresInDays: expiryDays,
           });
-          console.log('[InviteModal] Invite link created:', result);
+          console.log('[InviteModal] ✅ Invite link created:', result);
           
           // Set the invite link from API response
-          const inviteUrl = result.inviteLink || `${window.location.origin}/repositories/invites/${result.token}/accept?repositoryId=${repositoryId}`;
+          const inviteUrl = result.inviteLink || `${window.location.origin}/invite/${result.token}`;
           setShareLink(inviteUrl);
           
-          alert(`✅ Đã tạo link mời thành công!\n\nLink: ${inviteUrl}\n\nBạn có thể copy link từ ô bên dưới.`);
+          // Auto-copy to clipboard
+          try {
+            await navigator.clipboard.writeText(inviteUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 3000);
+            alert(`✅ Đã tạo và copy link mời thành công!\n\n📋 Link đã được copy vào clipboard!\n\nLink: ${inviteUrl}\n\n⏱️ Hết hạn sau: ${linkExpiry === 'never' ? '1 năm' : linkExpiry + ' ngày'}`);
+          } catch (copyError) {
+            alert(`✅ Đã tạo link mời thành công!\n\nLink: ${inviteUrl}\n\nBạn có thể copy link từ ô bên dưới.`);
+          }
+          
           return; // Don't close modal - let user copy link
         } catch (linkError: any) {
           console.error('[InviteModal] Failed to create invite link:', linkError);
@@ -341,10 +353,11 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   value={linkExpiry}
                   onChange={(e) => setLinkExpiry(e.target.value)}
                   options={[
-                    { value: '1', label: t('repositories.detail.invite.expiryOptions.1day') },
-                    { value: '7', label: t('repositories.detail.invite.expiryOptions.7days') },
-                    { value: '30', label: t('repositories.detail.invite.expiryOptions.30days') },
-                    { value: 'never', label: t('repositories.detail.invite.expiryOptions.never') },
+                    { value: '1', label: '1 ngày' },
+                    { value: '7', label: '7 ngày' },
+                    { value: '30', label: '30 ngày' },
+                    { value: '90', label: '90 ngày (3 tháng)' },
+                    { value: 'never', label: 'Không giới hạn (1 năm)' },
                   ]}
                 />
               </div>
@@ -467,7 +480,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Đang xử lý...
+                {inviteMethod === 'link' ? 'Đang tạo link...' : 'Đang mời...'}
               </>
             ) : (
               inviteMethod === 'link' ? 'Tạo Link' : 'Mời thành viên'

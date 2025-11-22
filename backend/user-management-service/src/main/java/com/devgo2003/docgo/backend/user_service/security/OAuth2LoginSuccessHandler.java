@@ -168,9 +168,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                     .avatarUrl((avatarUrl != null && !avatarUrl.isBlank()) ? avatarUrl : null)
                                     .password("") // OAuth2 users don't need password
                                     .status(User.UserStatus.ACTIVE)
+                                    .role(User.UserRole.USER) // Set default role for OAuth2 users
                                     .build();
                             User savedUser = userRepository.save(newUser);
-                            logger.info("[{}] Successfully created new OAuth2 user: {}", requestId, username);
+                            logger.info("[{}] Successfully created new OAuth2 user with role USER: {}", requestId, username);
                             return savedUser;
                         } catch (Exception e) {
                             logger.error("[{}] Failed to create new OAuth2 user: {}", requestId, e.getMessage(), e);
@@ -185,9 +186,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private String generateAccessToken(User user, String requestId) {
         try {
+            String roleValue = user.getRole() != null ? user.getRole().name() : "USER";
             return jwtUtil.generateAccessToken(user.getUsername(), Map.of(
                     "userId", user.getId(),
-                    "role", "USER"
+                    "role", roleValue
             ));
         } catch (Exception e) {
             logger.error("[{}] Error generating access token: {}", requestId, e.getMessage(), e);
