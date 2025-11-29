@@ -22,17 +22,17 @@ export const CommonSelect = forwardRef<HTMLSelectElement, CommonSelectProps>(
       if (canvasRef.current && containerRef.current) {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        
+
         const width = container.offsetWidth;
         const height = container.offsetHeight;
-        
+
         if (width === 0 || height === 0) return;
-        
+
         canvas.width = width;
         canvas.height = height;
 
         const rc = createRoughCanvas(canvas);
-        
+
         // Draw hand-drawn select border
         drawRoughRect(rc, 5, 5, width - 10, height - 10, {
           stroke: error ? '#ef4444' : '#94a3b8',
@@ -139,7 +139,7 @@ export const CommonSelect = forwardRef<HTMLSelectElement, CommonSelectProps>(
               </option>
             ))}
           </select>
-          <div data-chevron className="absolute right-3 top-1/2 pointer-events-none" style={{ color: '#4b5563' }} >
+          <div data-chevron className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#4b5563' }} >
             <CommonIcon name="chevron-down" size={20} />
           </div>
         </div>

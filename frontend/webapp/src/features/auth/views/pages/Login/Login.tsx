@@ -61,7 +61,7 @@ export const Login = () => {
 
           <CardContent>
             {error && (
-              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
+              <div ref={errorRef} className="mb-4 p-3 border-2 rounded text-sm flex items-center" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2', color: '#b91c1c' }} >
                 {error}
               </div>
             )}
