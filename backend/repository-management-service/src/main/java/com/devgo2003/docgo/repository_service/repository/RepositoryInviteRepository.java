@@ -15,4 +15,6 @@ public interface RepositoryInviteRepository extends MongoRepository<RepositoryIn
     List<RepositoryInviteEntity> findByInvitedByAndIsRevokedFalse(String invitedBy);
     
     Optional<RepositoryInviteEntity> findByTokenAndIsUsedFalseAndIsRevokedFalse(String token);
+    
+    List<RepositoryInviteEntity> findByInvitedToAndIsPersonalInviteTrueAndIsUsedFalseAndIsRevokedFalse(String invitedTo);
 }

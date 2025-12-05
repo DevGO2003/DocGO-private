@@ -24,7 +24,7 @@ public class RepositoryInviteController {
     public ResponseEntity<RestResponse<RepositoryInviteDTO>> createInvite(
             @PathVariable String repositoryId,
             @RequestBody CreateInviteRequest request,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         RepositoryInviteDTO invite = inviteService.createInvite(
             repositoryId,
@@ -38,7 +38,7 @@ public class RepositoryInviteController {
     @GetMapping("/repositories/{repositoryId}/invites")
     public ResponseEntity<RestResponse<List<RepositoryInviteDTO>>> getRepositoryInvites(
             @PathVariable String repositoryId,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         List<RepositoryInviteDTO> invites = inviteService.getRepositoryInvites(repositoryId, currentUserId);
         return ResponseEntity.ok(RestResponse.success(invites));
@@ -57,17 +57,47 @@ public class RepositoryInviteController {
     @PostMapping("/invites/{token}/accept")
     public ResponseEntity<RestResponse<Void>> acceptInvite(
             @PathVariable String token,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         inviteService.acceptInvite(token, currentUserId);
         return ResponseEntity.ok(RestResponse.success(null));
+    }
+
+    // Create personal invite for specific user (with notification)
+    @PostMapping("/repositories/{repositoryId}/invites/personal")
+    public ResponseEntity<RestResponse<RepositoryInviteDTO>> createPersonalInvite(
+            @PathVariable String repositoryId,
+            @RequestBody CreatePersonalInviteRequest request,
+            @RequestHeader("X-User-Id") String currentUserId
+    ) {
+        log.info("Creating personal invite for repository: {} to user: {} with permissions: {}", 
+                 repositoryId, request.getUserId(), request.getPermissions());
+        
+        RepositoryInviteDTO invite = inviteService.createPersonalInvite(
+            repositoryId,
+            request.getUserId(),
+            request.getPermissions(),
+            currentUserId,
+            request.getExpiresInDays()
+        );
+        return ResponseEntity.ok(RestResponse.success(invite));
+    }
+
+    // Get my pending invites (for notification bell)
+    @GetMapping("/invites/my")
+    public ResponseEntity<RestResponse<List<RepositoryInviteDTO>>> getMyPendingInvites(
+            @RequestHeader("X-User-Id") String currentUserId
+    ) {
+        log.info("Getting pending invites for user: {}", currentUserId);
+        List<RepositoryInviteDTO> invites = inviteService.getUserPendingInvites(currentUserId);
+        return ResponseEntity.ok(RestResponse.success(invites));
     }
 
     // Revoke invite
     @DeleteMapping("/invites/{inviteId}")
     public ResponseEntity<RestResponse<Void>> revokeInvite(
             @PathVariable String inviteId,
-            @RequestHeader("X-User-ID") String currentUserId
+            @RequestHeader("X-User-Id") String currentUserId
     ) {
         inviteService.revokeInvite(inviteId, currentUserId);
         return ResponseEntity.ok(RestResponse.success(null));
@@ -76,5 +106,12 @@ public class RepositoryInviteController {
     @Data
     public static class CreateInviteRequest {
         private Integer expiresInDays = 7; // Default 7 days
+    }
+
+    @Data
+    public static class CreatePersonalInviteRequest {
+        private String userId; // Target user ID
+        private List<String> permissions; // e.g., ["VIEW", "UPLOAD", "DELETE"]
+        private Integer expiresInDays = 30; // Default 30 days
     }
 }

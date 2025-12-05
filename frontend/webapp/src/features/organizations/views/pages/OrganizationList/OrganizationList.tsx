@@ -202,9 +202,11 @@ export const OrganizationList = () => {
                             </CardTitle>
                             {getRoleBadge(org.userRole)}
                           </div>
-                          <p className="text-sm line-clamp-2" style={{ color: '#4b5563' }} >
-                            {org.description || t('dashboard.noDescription')}
-                          </p>
+                          {org.description && (
+                            <p className="text-sm line-clamp-2" style={{ color: '#4b5563' }} >
+                              {org.description}
+                            </p>
+                          )}
                         </div>
                         <CommonIcon name="building" size={32} className="flex-shrink-0 ml-2" style={{ color: '#a855f7' }} />
                       </div>

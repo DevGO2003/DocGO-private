@@ -17,6 +17,7 @@ import {
   useOrganization,
   useOrganizationMembers,
   useRemoveMember,
+  useDeleteOrganization,
 } from '@/features/organizations';
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
@@ -50,7 +51,7 @@ export const OrganizationDetail = () => {
 
   const handleRemoveMember = async (memberId: string) => {
     if (!window.confirm(t('organizations.detail.members.removeConfirm'))) return;
-    
+
     try {
       await removeMemberMutation.mutateAsync({
         orgId: id!,
@@ -58,6 +59,22 @@ export const OrganizationDetail = () => {
       });
     } catch (error) {
       console.error('Failed to remove member:', error);
+    }
+  };
+
+  const deleteOrganizationMutation = useDeleteOrganization();
+
+  const handleDeleteOrganization = async () => {
+    if (!window.confirm(t('organizations.detail.settings.danger.confirmDelete') || 'Are you sure you want to delete this organization? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteOrganizationMutation.mutateAsync(id!);
+      navigate(ORGANIZATIONS_PATH);
+    } catch (error) {
+      console.error('Failed to delete organization:', error);
+      alert(t('organizations.detail.settings.danger.deleteFailed') || 'Failed to delete organization');
     }
   };
 
@@ -235,9 +252,9 @@ export const OrganizationDetail = () => {
                 <div>
                   <p className="text-sm" style={{ color: '#4b5563' }} >{t('organizations.detail.stats.created')}</p>
                   <p className="text-sm font-semibold" style={{ color: '#111827' }} >
-                    {organization.createdAt ? new Date(organization.createdAt).toLocaleDateString('vi-VN', { 
-                      year: 'numeric', 
-                      month: '2-digit', 
+                    {organization.createdAt ? new Date(organization.createdAt).toLocaleDateString('vi-VN', {
+                      year: 'numeric',
+                      month: '2-digit',
                       day: '2-digit',
                       hour: '2-digit',
                       minute: '2-digit'
@@ -565,8 +582,14 @@ export const OrganizationDetail = () => {
                     <div className="p-4 border-2 rounded-lg" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
                       <p className="font-medium mb-2" style={{ color: '#7f1d1d' }} >{t('organizations.detail.settings.danger.delete')}</p>
                       <p className="text-sm mb-4" style={{ color: '#b91c1c' }} >{t('organizations.detail.settings.danger.desc')}</p>
-                      <Button variant="outline" className="hover:" style={{ color: '#dc2626' }} >
-                        {t('organizations.detail.settings.danger.cta')}
+                      <Button
+                        variant="outline"
+                        className="hover:"
+                        style={{ color: '#dc2626' }}
+                        onClick={handleDeleteOrganization}
+                        disabled={deleteOrganizationMutation.isPending}
+                      >
+                        {deleteOrganizationMutation.isPending ? 'Deleting...' : t('organizations.detail.settings.danger.cta')}
                       </Button>
                     </div>
                   </div>

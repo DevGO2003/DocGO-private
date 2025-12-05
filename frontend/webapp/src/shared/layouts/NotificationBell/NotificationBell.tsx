@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMyPendingInvitations, useAcceptInvitation, useDeclineInvitation } from '@features/organizations';
 import { useMyPendingRepositoryInvites, useAcceptInvite } from '@features/repositories/models/api/repositoryApi';
 import { Button } from '@shared/components';
@@ -14,8 +15,10 @@ type CombinedInvitation = {
 };
 
 export const NotificationBell = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const { data: orgInvitations, isLoading: orgLoading, refetch: refetchOrg, isFetching: orgFetching } = useMyPendingInvitations();
   const { data: repoInvitations, isLoading: repoLoading, refetch: refetchRepo, isFetching: repoFetching, error: repoError } = useMyPendingRepositoryInvites();
@@ -42,7 +45,7 @@ export const NotificationBell = () => {
       createdAt: inv.createdAt,
     }));
     
-    const repos: CombinedInvitation[] = (repoInvitations || []).map(inv => ({
+    const repos: CombinedInvitation[] = (repoInvitations || []).map((inv: RepositoryInvite) => ({
       id: inv.id,
       type: 'repository' as const,
       data: inv,
@@ -77,9 +80,35 @@ export const NotificationBell = () => {
   }, [isOpen]);
 
   const handleRefresh = () => {
+    console.log('[NotificationBell] Manual refresh triggered');
     refetchOrg();
     refetchRepo();
+    setLastRefresh(new Date());
   };
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    console.log('[NotificationBell] Setting up auto-refresh (every 30s)');
+    const interval = setInterval(() => {
+      console.log('[NotificationBell] Auto-refreshing notifications...');
+      refetchOrg();
+      refetchRepo();
+      setLastRefresh(new Date());
+    }, 30000); // 30 seconds
+
+    return () => {
+      console.log('[NotificationBell] Cleaning up auto-refresh');
+      clearInterval(interval);
+    };
+  }, [refetchOrg, refetchRepo]);
+
+  // Refresh when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      console.log('[NotificationBell] Dropdown opened - refreshing...');
+      handleRefresh();
+    }
+  }, [isOpen]);
 
   const handleAccept = (invitation: CombinedInvitation) => {
     if (invitation.type === 'organization') {
@@ -103,13 +132,25 @@ export const NotificationBell = () => {
       console.log('🔄 Accepting repository invitation:', repoData.token);
       acceptRepoInvite(repoData.token, {
         onSuccess: () => {
-          console.log('✅ Repository invitation accepted');
+          console.log('✅ Repository invitation accepted, navigating to repo:', repoData.repositoryId);
           handleRefresh();
-          alert('Đã tham gia repository thành công!');
+          setIsOpen(false); // Close dropdown
+          
+          // Show success message
+          alert(`✅ Đã tham gia repository "${repoData.repositoryName}" thành công!\n\nBạn sẽ được chuyển đến repository.`);
+          
+          // Navigate to repository detail page
+          if (repoData.repositoryId) {
+            navigate(`/repositories/${repoData.repositoryId}`);
+          } else {
+            // Fallback to repositories list
+            navigate('/repositories');
+          }
         },
         onError: (error: any) => {
           console.error('❌ Failed to accept repository invitation:', error);
-          alert('Failed to accept repository invitation. Please try again.');
+          const errorMsg = error?.response?.data?.description || error?.response?.data?.message || error?.message || 'Unknown error';
+          alert(`❌ Không thể tham gia repository!\n\nLỗi: ${errorMsg}\n\nVui lòng thử lại.`);
         },
       });
     }
@@ -175,20 +216,25 @@ export const NotificationBell = () => {
         <div className="absolute right-0 mt-2 rounded-lg border z-50" style={{ borderColor: '#e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
           {/* Header */}
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#e5e7eb' }}>
-            <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
-              Notifications
-              {pendingCount > 0 && (
-                <span className="ml-2 text-sm font-normal" style={{ color: '#6b7280' }}>
-                  ({pendingCount} pending)
-                </span>
-              )}
-            </h3>
+            <div>
+              <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
+                Notifications
+                {pendingCount > 0 && (
+                  <span className="ml-2 text-sm font-normal" style={{ color: '#6b7280' }}>
+                    ({pendingCount} pending)
+                  </span>
+                )}
+              </h3>
+              <p className="text-xs mt-0.5" style={{ color: '#9ca3af' }}>
+                Auto-refresh every 30s
+              </p>
+            </div>
             <button
               onClick={handleRefresh}
               disabled={isFetching}
               className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
               style={{ color: '#6b7280' }}
-              title="Refresh notifications"
+              title={`Refresh notifications\nLast refresh: ${lastRefresh.toLocaleTimeString()}`}
             >
               <CommonIcon name="rotate-cw" size={16} className={isFetching ? 'animate-spin' : ''} />
             </button>

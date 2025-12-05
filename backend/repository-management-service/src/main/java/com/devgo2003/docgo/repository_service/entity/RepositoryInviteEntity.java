@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -34,6 +35,16 @@ public class RepositoryInviteEntity {
 
     @Field("inviterName")
     private String inviterName; // Name of inviter for display
+
+    @Field("invitedTo")
+    private String invitedTo; // Target user ID (for personal invites only)
+
+    @Field("permissions")
+    private List<String> permissions; // Permissions to grant (e.g., ["VIEW", "UPLOAD"])
+
+    @Field("isPersonalInvite")
+    @Builder.Default
+    private Boolean isPersonalInvite = false; // true = personal invite with notification, false = link invite
 
     @Field("createdAt")
     private LocalDateTime createdAt;

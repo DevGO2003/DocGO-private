@@ -8,7 +8,11 @@ public interface IRepositoryInviteService {
     
     RepositoryInviteDTO createInvite(String repositoryId, String invitedBy, Integer expiresInDays);
     
+    RepositoryInviteDTO createPersonalInvite(String repositoryId, String targetUserId, List<String> permissions, String invitedBy, Integer expiresInDays);
+    
     List<RepositoryInviteDTO> getRepositoryInvites(String repositoryId, String currentUserId);
+    
+    List<RepositoryInviteDTO> getUserPendingInvites(String userId);
     
     RepositoryInviteDTO getInviteByToken(String token);
     

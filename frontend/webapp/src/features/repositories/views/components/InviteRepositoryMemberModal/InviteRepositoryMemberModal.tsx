@@ -84,17 +84,37 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
       if (inviteMethod === 'link') {
         // Generate invite link
         console.log('[InviteModal] Creating invite link with expiry:', linkExpiry);
-        const result = await createInviteMutation.mutateAsync({
-          repositoryId,
-          expiresInDays: linkExpiry === 'never' ? 36500 : (parseInt(linkExpiry) || 7),
-        });
-        console.log('[InviteModal] Invite link created:', result);
-
-        // Set the invite link from API response
-        const inviteUrl = result.inviteLink || `${window.location.origin}/repositories/invites/${result.token}/accept?repositoryId=${repositoryId}`;
-        setShareLink(inviteUrl);
-
-        alert(`Đã tạo link mời thành công!\n\nLink: ${inviteUrl}\n\nBạn có thể copy link từ ô bên dưới.`);
+        try {
+          // Handle 'never' expiry - set to 365 days
+          const expiryDays = linkExpiry === 'never' ? 365 : parseInt(linkExpiry) || 7;
+          
+          const result = await createInviteMutation.mutateAsync({
+            repositoryId,
+            expiresInDays: linkExpiry === 'never' ? 36500 : (expiryDays),
+          });
+          console.log('[InviteModal] ✅ Invite link created:', result);
+  
+          // Set the invite link from API response
+          const inviteUrl = result.inviteLink || `${window.location.origin}/invite/${result.token}`;
+          setShareLink(inviteUrl);
+  
+          // Auto-copy to clipboard
+          try {
+            await navigator.clipboard.writeText(inviteUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 3000);
+            alert(`✅ Đã tạo và copy link mời thành công!\n\n📋 Link đã được copy vào clipboard!\n\nLink: ${inviteUrl}\n\n⏱️ Hết hạn sau: ${linkExpiry === 'never' ? '1 năm' : linkExpiry + ' ngày'}`);
+          } catch (copyError) {
+            alert(`✅ Đã tạo link mời thành công!\n\nLink: ${inviteUrl}\n\nBạn có thể copy link từ ô bên dưới.`);
+          }
+          
+          return; // Don't close modal - let user copy link
+        } catch (linkError: any) {
+          console.error('[InviteModal] Failed to create invite link:', linkError);
+          const errorMsg = linkError?.response?.data?.description || linkError?.response?.data?.message || linkError?.message || 'Unknown error';
+          alert(`❌ Không thể tạo link mời!\n\nLỗi: ${errorMsg}\n\n💡 Thử lại hoặc mời trực tiếp bằng cách chọn thành viên.`);
+          throw linkError;
+        }
       } else {
         // Invite selected members
         if (selectedMembers.length === 0) {
@@ -127,28 +147,71 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             console.log('[InviteModal] Personal invite created successfully:', result);
             successCount++;
           } catch (error: any) {
-            // If personal invite API not available (404, 500, 501), fallback to direct add
             const status = error?.response?.status;
+            const errorData = error?.response?.data;
+            const errorMsg = errorData?.description || errorData?.message || error?.message || '';
+            
+            console.error('[InviteModal] Personal invite failed:', { status, errorMsg, errorData });
+            
+            // Check for duplicate invitation (409 Conflict or specific message)
+            if (status === 409 || errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('duplicate')) {
+              console.warn('[InviteModal] Member already invited or has access:', memberId);
+              // Skip this member but continue with others
+              continue;
+            }
+            
+            // If personal invite API not available (404, 500, 501), fallback to direct add
             if (status === 404 || status === 500 || status === 501) {
               console.warn('[InviteModal] Personal invite API not available (status:', status, '), falling back to direct add');
+              console.warn('[InviteModal] Backend needs to implement: POST /repositories/{id}/invites/personal');
               useDirectAdd = true;
               break;
             }
-            throw error;
+            
+            // For other errors, show message but continue
+            console.error('[InviteModal] Unexpected error for member', memberId, ':', errorMsg);
+            // Continue to next member instead of throwing
           }
         }
 
         // Fallback: If personal invite API doesn't exist, use direct add (no notifications)
         if (useDirectAdd) {
           console.log('[InviteModal] Using direct add fallback...');
+          console.log('[InviteModal] ⚠️ WARNING: Members will be added WITHOUT notifications!');
+          console.log('[InviteModal] To enable notifications, backend must implement:');
+          console.log('[InviteModal] POST /api/v1/repository-management-service/repositories/{repositoryId}/invites/personal');
+          
           for (const memberId of selectedMembers) {
-            console.log('[InviteModal] Adding member directly:', memberId);
-            await addPermissionMutation.mutateAsync({
-              repositoryId,
-              userId: memberId,
-              permissions: permissionList,
-            });
-            successCount++;
+            try {
+              console.log('[InviteModal] Adding member directly:', memberId);
+              await addPermissionMutation.mutateAsync({
+                repositoryId,
+                userId: memberId,
+                permissions: permissionList,
+              });
+              successCount++;
+            } catch (addError: any) {
+              const status = addError?.response?.status;
+              const errorMsg = addError?.response?.data?.description || addError?.response?.data?.message || addError?.message || '';
+              
+              console.error('[InviteModal] Failed to add member', memberId, ':', errorMsg);
+              
+              // Check if member already has access (409 or specific message)
+              if (status === 409 || errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('exists')) {
+                console.warn('[InviteModal] Member already has access:', memberId);
+                successCount++; // Count as success since they have access
+                continue;
+              }
+              
+              // Check for permission denied
+              if (status === 403) {
+                alert(`❌ Không có quyền thêm thành viên!\n\nBạn cần là owner hoặc admin của repository để mời thành viên.`);
+                throw addError;
+              }
+              
+              // For other errors, log but continue
+              console.error('[InviteModal] Skipping member', memberId, 'due to error');
+            }
           }
         }
 
@@ -160,11 +223,11 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         await queryClient.invalidateQueries({ queryKey: ['my-repository-invites'] });
 
         console.log('[InviteModal] All members invited successfully');
-
+        
         if (useDirectAdd) {
           alert(`✅ Đã thêm ${successCount} thành viên thành công!\n\n⚠️ Lưu ý: Thành viên được thêm trực tiếp (không qua thông báo) do API chưa hỗ trợ.`);
         } else {
-          alert(`✅ Đã gửi lời mời đến ${successCount} thành viên!\n\n📬 Họ sẽ nhận được thông báo trong vòng 30 giây và cần chấp nhận lời mời.`);
+          alert(`✅ Đã gửi lời mời đến ${successCount}/${selectedMembers.length} thành viên!\n\n📬 Thành viên sẽ nhận được thông báo (biểu tượng chuông 🔔 ở góc phải trên).\n\n⏱️ Họ cần nhấn "Accept" để xác nhận tham gia repository.\n\n💡 Tip: Thành viên có thể cần refresh trang hoặc đợi vài giây để thấy thông báo.`);
         }
 
         // Close modal after adding members
@@ -179,13 +242,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
         response: error?.response?.data,
         status: error?.response?.status,
       });
-      let message = error?.response?.data?.message || error?.message || 'Mời thành viên thất bại. Vui lòng thử lại.';
-
-      if (error?.response?.status === 500) {
-        message = 'Có lỗi xảy ra từ hệ thống. Có thể thành viên đã tồn tại trong kho lưu trữ hoặc có lỗi kết nối.';
-      }
-
-      alert(message);
+      alert(error?.response?.data?.message || error?.message || 'Mời thành viên thất bại. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -275,10 +332,11 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
                   value={linkExpiry}
                   onChange={(e) => setLinkExpiry(e.target.value)}
                   options={[
-                    { value: '1', label: t('repositories.detail.invite.expiryOptions.1day') },
-                    { value: '7', label: t('repositories.detail.invite.expiryOptions.7days') },
-                    { value: '30', label: t('repositories.detail.invite.expiryOptions.30days') },
-                    { value: 'never', label: t('repositories.detail.invite.expiryOptions.never') },
+                    { value: '1', label: '1 ngày' },
+                    { value: '7', label: '7 ngày' },
+                    { value: '30', label: '30 ngày' },
+                    { value: '90', label: '90 ngày (3 tháng)' },
+                    { value: 'never', label: 'Không giới hạn (1 năm)' },
                   ]}
                 />
               </div>
@@ -401,7 +459,7 @@ export const InviteRepositoryMemberModal: React.FC<InviteRepositoryMemberModalPr
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Đang xử lý...
+                {inviteMethod === 'link' ? 'Đang tạo link...' : 'Đang mời...'}
               </>
             ) : (
               inviteMethod === 'link' ? 'Tạo Link' : 'Mời thành viên'

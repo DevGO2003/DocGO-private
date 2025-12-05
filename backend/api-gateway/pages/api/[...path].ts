@@ -172,7 +172,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               if (claims.userId && !headers['X-User-Id']) headers['X-User-Id'] = String(claims.userId);
               if (claims.sub && !headers['X-Username']) headers['X-Username'] = String(claims.sub);
               if (claims.email && !headers['X-User-Email']) headers['X-User-Email'] = String(claims.email);
-              if (Array.isArray(claims.roles) && !headers['X-User-Roles']) headers['X-User-Roles'] = claims.roles.join(',');
+              // Support both 'roles' (array) and 'role' (string) fields
+              if (!headers['X-User-Roles']) {
+                if (Array.isArray(claims.roles)) {
+                  headers['X-User-Roles'] = claims.roles.join(',');
+                } else if (claims.role) {
+                  headers['X-User-Roles'] = String(claims.role);
+                }
+              }
             }
           } catch (e) {
             logger.warn('⚠️ Failed to decode JWT payload for identity injection');
@@ -197,7 +204,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             if (claims.userId && !headers['X-User-Id']) headers['X-User-Id'] = String(claims.userId);
             if (claims.sub && !headers['X-Username']) headers['X-Username'] = String(claims.sub);
             if (claims.email && !headers['X-User-Email']) headers['X-User-Email'] = String(claims.email);
-            if (Array.isArray(claims.roles) && !headers['X-User-Roles']) headers['X-User-Roles'] = claims.roles.join(',');
+            // Support both 'roles' (array) and 'role' (string) fields
+            if (!headers['X-User-Roles']) {
+              if (Array.isArray(claims.roles)) {
+                headers['X-User-Roles'] = claims.roles.join(',');
+              } else if (claims.role) {
+                headers['X-User-Roles'] = String(claims.role);
+              }
+            }
           }
         } catch {}
       }
