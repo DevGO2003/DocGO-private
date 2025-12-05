@@ -1,4 +1,5 @@
 // Export UIComponents
+export * from './UIComponents/Alert';
 export * from './UIComponents/Button';
 export * from './UIComponents/Card';
 export * from './UIComponents/Input';

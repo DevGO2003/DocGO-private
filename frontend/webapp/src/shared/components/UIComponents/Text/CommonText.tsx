@@ -34,9 +34,13 @@ export const CommonText = forwardRef<HTMLElement, CommonTextProps>(
     }, [children, className, handDrawn]);
 
     const Component = as as any;
+    
+    // Block elements should use 'block', inline elements use 'inline-block'
+    const isBlockElement = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(as);
+    const displayClass = isBlockElement ? 'block' : 'inline-block';
 
     return (
-      <CommonFont ref={wrapperRef as any} className="relative inline-block">
+      <CommonFont ref={wrapperRef as any} className={`relative ${displayClass}`}>
         <Component
           ref={setContentRef}
           data-text-content

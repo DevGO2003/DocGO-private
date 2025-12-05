@@ -45,7 +45,9 @@ export const Dashboard = () => {
     const saved = localStorage.getItem('dashboard-panels');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        // Filter out quickActions panel (removed from UI)
+        const parsed = JSON.parse(saved) as PanelState[];
+        return parsed.filter(p => p.id !== 'quickActions');
       } catch (e) {
         console.error('Failed to parse saved panel state:', e);
       }

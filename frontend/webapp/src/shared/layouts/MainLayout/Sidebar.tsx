@@ -591,7 +591,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                                 }
                               }}
                               className="p-1 hover:bg-gray-200 rounded"
-                              title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                              title={editMode ? t('sidebar.tooltips.editLabel') : (pinnedItems.includes(item.name) ? t('sidebar.tooltips.unpin') : t('sidebar.tooltips.pin'))}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
@@ -606,7 +606,11 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                               {editMode ? (
                                 <CommonIcon name="grip" size={16} color="#9ca3af" />
                               ) : (
-                                <CommonIcon name="star" size={16} color="#9ca3af" />
+                                <CommonIcon 
+                                  name={(pinnedItems.includes(item.name) ? 'star' : 'star-outline') as any} 
+                                  size={16} 
+                                  color={pinnedItems.includes(item.name) ? '#facc15' : '#9ca3af'}
+                                />
                               )}
                             </div>
                           </div>
@@ -659,7 +663,7 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                             }
                           }}
                           className="p-1 hover:bg-gray-200 rounded"
-                          title={editMode ? t('sidebar.tooltips.editLabel') : t('sidebar.tooltips.pin')}
+                          title={editMode ? t('sidebar.tooltips.editLabel') : (pinnedItems.includes(item.name) ? t('sidebar.tooltips.unpin') : t('sidebar.tooltips.pin'))}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault();
@@ -674,7 +678,11 @@ export const Sidebar = ({ collapsed = false, onCollapseToggle, onClose }: Sideba
                           {editMode ? (
                             <CommonIcon name="grip" size={16} color="#9ca3af" />
                           ) : (
-                            <CommonIcon name="star" size={16} color="#9ca3af" />
+                            <CommonIcon 
+                              name={(pinnedItems.includes(item.name) ? 'star' : 'star-outline') as any} 
+                              size={16} 
+                              color={pinnedItems.includes(item.name) ? '#facc15' : '#9ca3af'}
+                            />
                           )}
                         </div>
                           </div>

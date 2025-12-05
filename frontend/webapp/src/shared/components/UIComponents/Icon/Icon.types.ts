@@ -1,9 +1,9 @@
 export type IconName = 
-  | 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'smile' 
+  | 'file' | 'folder' | 'info' | 'warning' | 'user' | 'success' | 'star' | 'star-outline' | 'smile' 
   | 'chevron-right' | 'chevron-left' | 'chevron-up' | 'chevron-down' 
   | 'close' | 'edit' | 'delete' | 'download' | 'upload' | 'search' | 'settings' | 'home'
   | 'arrow-left' | 'arrow-right'
-  | 'loading' | 'refresh' | 'bell' | 'check' | 'building' | 'clock'
+  | 'loading' | 'refresh' | 'refresh-cw' | 'bell' | 'check' | 'building' | 'clock' | 'eye'
   | 'x'
   | 'save'
   | 'send'

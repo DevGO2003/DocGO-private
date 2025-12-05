@@ -134,7 +134,7 @@ export const OrganizationList = () => {
         {/* Error */}
         {error && (
           <Card style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }} >
-            <CardContent className="p-6">
+            <CardContent className="p-6 text-center">
               <p style={{ color: '#b91c1c' }} >
                 {t('organizations.list.error')}
               </p>

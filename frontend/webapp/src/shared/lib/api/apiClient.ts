@@ -31,7 +31,10 @@ class ApiClient {
 
   private setupInterceptors() {
     this.client.interceptors.request.use(
-      (config: any) => {
+      async (config: any) => {
+        // Proactive token refresh: check if token is about to expire (within 5 minutes)
+        await this.checkAndRefreshTokenIfNeeded()
+        
         const token = this.getAuthToken()
         if (token) config.headers.Authorization = `Bearer ${token}`
         
@@ -96,6 +99,23 @@ class ApiClient {
                               isAuthHeaderError
         const isForbidden = error.response?.status === 403 || 
                            error.response?.data?.statusCode === 403
+        const isServiceUnavailable = error.response?.status === 503
+        
+        // Auto retry on 503 (service temporarily unavailable)
+        if (isServiceUnavailable && !originalRequest._retry503) {
+          originalRequest._retry503 = true
+          const retryCount = originalRequest._retryCount503 || 0
+          
+          if (retryCount < 3) {
+            originalRequest._retryCount503 = retryCount + 1
+            if (env.isDev) {
+              console.log(`[API] 503 error, retrying... (attempt ${retryCount + 1}/3)`)
+            }
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+            return this.client(originalRequest)
+          }
+        }
         
         // Auto retry with refresh token
         if ((isUnauthorized || isForbidden) && !originalRequest._retry) {
@@ -248,6 +268,31 @@ class ApiClient {
       message = `Lỗi validation: ${validationErrors}`
     }
     if (env.isDev) console.error('[API Error]', { status: statusCode, message, url: error.config?.url, data: effective })
+  }
+
+  private async checkAndRefreshTokenIfNeeded(): Promise<void> {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const authData = localStorage.getItem('docgo_auth_v1')
+      if (!authData) return
+      
+      const parsed = JSON.parse(authData)
+      const expiresAt = parsed.tokenData?.expiresAt
+      
+      if (!expiresAt) return
+      
+      // Check if token expires within 5 minutes (300000ms)
+      const timeUntilExpiry = expiresAt - Date.now()
+      const FIVE_MINUTES = 5 * 60 * 1000
+      
+      if (timeUntilExpiry > 0 && timeUntilExpiry < FIVE_MINUTES) {
+        console.log(`[API] Token expires in ${Math.round(timeUntilExpiry / 1000)}s, refreshing proactively...`)
+        await this.handleUnauthorized()
+      }
+    } catch (error) {
+      console.warn('[API] Error checking token expiry:', error)
+    }
   }
 
   private async handleUnauthorized(): Promise<boolean> {

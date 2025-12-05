@@ -12,6 +12,7 @@ const iconMap: Record<string, React.ReactNode> = {
   user: <span role="img" aria-label="user">👤</span>,
   success: <span role="img" aria-label="check">✔️</span>,
   star: <span role="img" aria-label="star">⭐</span>,
+  'star-outline': <span role="img" aria-label="star-outline">☆</span>,
   smile: <span role="img" aria-label="smile">😊</span>,
   'chevron-right': <span role="img" aria-label="chevron-right">›</span>,
   'chevron-left': <span role="img" aria-label="chevron-left">‹</span>,
@@ -38,6 +39,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'arrow-right': <span role="img" aria-label="arrow-right">→</span>,
   loading: <span role="img" aria-label="loading">⏳</span>,
   refresh: <span role="img" aria-label="refresh">↻</span>,
+  'refresh-cw': <span role="img" aria-label="refresh-cw">↻</span>,
   'rotate-cw': <span role="img" aria-label="rotate-cw">↻</span>,
   bell: <span role="img" aria-label="bell">🔔</span>,
   check: <span role="img" aria-label="check">✓</span>,
@@ -63,6 +65,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'alert-circle': <span role="img" aria-label="alert-circle">⚠️</span>,
   calendar: <span role="img" aria-label="calendar">📅</span>,
   crown: <span role="img" aria-label="crown">👑</span>,
+  'eye': <span role="img" aria-label="eye">👁️</span>,
   'eye-off': <span role="img" aria-label="eye-off">🙈</span>,
   'more-vertical': <span role="img" aria-label="more-vertical">⋮</span>,
   scale: <span role="img" aria-label="scale">⚖️</span>,
@@ -76,8 +79,8 @@ const iconMap: Record<string, React.ReactNode> = {
 export const CommonIcon: React.FC<CommonIconProps> = ({ name, size = 22, color = '#333', className, fontFamily }) => {
   return (
     <CommonFont
-      style={{ fontSize: size, color, display: 'inline-block', fontFamily: fontFamily }}
-      className={className}
+      style={{ fontSize: size, color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontFamily }}
+      className={`flex-shrink-0 ${className || ''}`}
     >
       {iconMap[name] || iconMap['file']}
     </CommonFont>

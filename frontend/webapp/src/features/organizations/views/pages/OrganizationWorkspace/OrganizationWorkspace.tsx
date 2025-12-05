@@ -153,7 +153,7 @@ export const OrganizationWorkspace = () => {
   };
 
   const tabs = [
-    { id: 'info' as WorkspaceTab, label: 'THÔNG TIN CHUNG', icon: 'info' },
+    { id: 'info' as WorkspaceTab, label: 'Thông tin chung', icon: 'info' },
     { id: 'contracts' as WorkspaceTab, label: t('organizations.workspace.tabs.contracts'), icon: 'file-text' },
     { id: 'repositories' as WorkspaceTab, label: t('organizations.workspace.tabs.repositories'), icon: 'folder' },
     { id: 'members' as WorkspaceTab, label: t('organizations.workspace.tabs.members'), icon: 'users' },
@@ -229,230 +229,131 @@ export const OrganizationWorkspace = () => {
           {/* THÔNG TIN CHUNG Tab - Merged Info + Reports */}
           {activeTab === 'info' && organization && (
             <div className="space-y-6">
-              {/* Organization Basic Info Card */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#111827' }}>
-                  <CommonIcon name="info" className="w-5 h-5" />
-                  Thông tin tổ chức
-                </h3>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.orgName')}</h4>
-                      <p className="text-lg font-semibold text-gray-900">{organization.name}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.visibility')}</h4>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {organization.isPublic ? t('organizations.workspace.settings.public') : t('organizations.workspace.settings.private')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.description')}</h4>
-                    <p className="text-gray-700">{organization.description || t('organizations.workspace.settings.noDescription')}</p>
-                  </div>
-
-                  {organization.createdAt && (
-                    <div className="pt-4 border-t">
-                      <h4 className="text-sm font-medium text-gray-500 mb-2">{t('organizations.workspace.settings.createdAt')}</h4>
-                      <p className="text-gray-700">{new Date(organization.createdAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-
-              {/* Detailed Organization Settings */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#111827' }}>
-                  <CommonIcon name="settings" className="w-5 h-5" />
-                  Cài đặt chi tiết
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Organization Name */}
-                  <div className="flex items-start gap-3 p-4 rounded-lg border" style={{ borderColor: '#bfdbfe', backgroundImage: 'linear-gradient(to bottom right, #eff6ff 0%, #dbeafe 100%)' }}>
-                    <CommonIcon name="file-text" className="mt-1" style={{ color: '#2563eb' }} />
-                    <div className="flex-1">
-                      <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.orgName')}</p>
-                      <p className="text-sm mt-1" style={{ color: '#374151' }}>{organization.name}</p>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div className="flex items-start gap-3 p-4 rounded-lg border md:col-span-2" style={{ borderColor: '#bbf7d0', backgroundImage: 'linear-gradient(to bottom right, #f0fdf4 0%, #dcfce7 100%)' }}>
-                    <CommonIcon name="file-text" className="mt-1" style={{ color: '#16a34a' }} />
-                    <div className="flex-1">
-                      <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.description')}</p>
-                      <p className="text-sm mt-1" style={{ color: '#374151' }}>
-                        {organization.description || t('organizations.workspace.settings.noDescription')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Owner */}
-                  {organization.owner && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border" style={{ borderColor: '#fef08a', backgroundImage: 'linear-gradient(to bottom right, #fefce8 0%, #fef3c7 100%)' }}>
-                      <CommonIcon name="crown" className="mt-1" style={{ color: '#ca8a04' }} />
-                      <div className="flex-1">
-                        <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.owner')}</p>
-                        <p className="text-sm mt-1" style={{ color: '#374151' }}>{organization.owner.username || organization.owner.email}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Member Count */}
-                  <div className="flex items-start gap-3 p-4 rounded-lg border border-indigo-200" style={{ backgroundImage: 'linear-gradient(to bottom right, #eef2ff 0%, #e0e7ff 100%)' }}>
-                    <CommonIcon name="users" className="w-5 h-5 mt-1" style={{ color: '#4f46e5' }} />
-                    <div className="flex-1">
-                      <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.memberCount')}</p>
-                      <p className="text-sm mt-1" style={{ color: '#374151' }}>{membersData?.totalElements || 0} thành viên</p>
-                    </div>
-                  </div>
-
-                  {/* Visibility */}
-                  <div className="flex items-start gap-3 p-4 rounded-lg border border-pink-200" style={{ backgroundImage: 'linear-gradient(to bottom right, #fdf2f8 0%, #fce7f3 100%)' }}>
-                    {organization.isPublic ? (
-                      <CommonIcon name="eye" className="w-5 h-5 text-pink-600 mt-1" />
-                    ) : (
-                      <CommonIcon name="eye-off" className="w-5 h-5 text-pink-600 mt-1" />
-                    )}
-                    <div className="flex-1">
-                      <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.visibility')}</p>
-                      <p className="text-sm mt-1" style={{ color: '#374151' }}>
-                        {organization.isPublic 
-                          ? t('organizations.workspace.settings.public')
-                          : t('organizations.workspace.settings.private')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Created At */}
-                  {organization?.createdAt && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border border-teal-200" style={{ backgroundImage: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' }}>
-                      <CommonIcon name="calendar" className="w-5 h-5 text-teal-600 mt-1" />
-                      <div className="flex-1">
-                        <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.createdAt')}</p>
-                        <p className="text-sm mt-1" style={{ color: '#374151' }}>
-                          {new Date(organization?.createdAt || '').toLocaleDateString('vi-VN', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Updated At */}
-                  {organization.updatedAt && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200" style={{ backgroundImage: 'linear-gradient(to bottom right, #fff7ed 0%, #fed7aa 100%)' }}>
-                      <CommonIcon name="calendar" className="w-5 h-5 text-orange-600 mt-1" />
-                      <div className="flex-1">
-                        <p className="font-medium" style={{ color: '#111827' }}>{t('organizations.workspace.settings.updatedAt')}</p>
-                        <p className="text-sm mt-1" style={{ color: '#374151' }}>
-                          {new Date(organization.updatedAt).toLocaleDateString('vi-VN', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Card>
-
-              {/* Statistics Cards - Previously from Reports Tab */}
+              {/* Statistics Cards - Đưa lên trên */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: '#111827' }}>
                   <CommonIcon name="chart" className="w-5 h-5" />
                   Thống kê
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {/* Tổng số hợp đồng */}
-                <div
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200"
-                >
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#1d4ed8' }} >{t('organizations.workspace.stats.totalContracts')}</p>
-                      <p className="text-3xl font-bold" style={{ color: '#1e3a8a' }} >{stats.totalContracts}</p>
+                      <p className="text-sm font-medium" style={{ color: '#1d4ed8' }}>{t('organizations.workspace.stats.totalContracts')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#1e3a8a' }}>{stats.totalContracts}</p>
                     </div>
-                    <CommonIcon name="file-text" className="h-10" style={{ color: '#3b82f6' }} />
+                    <span className="text-3xl">📃</span>
                   </div>
                 </div>
 
                 {/* Đang chờ */}
-                <div
-                  className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200"
-                >
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#b45309' }} >{t('organizations.workspace.stats.pending')}</p>
-                      <p className="text-3xl font-bold" style={{ color: '#713f12' }} >{stats.pendingApprovals}</p>
+                      <p className="text-sm font-medium" style={{ color: '#b45309' }}>{t('organizations.workspace.stats.pending')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#713f12' }}>{stats.pendingApprovals}</p>
                     </div>
-                    <CommonIcon name="clock" className="w-10 h-10" style={{ color: '#eab308' }} />
+                    <span className="text-3xl">🕐</span>
                   </div>
                 </div>
 
                 {/* Đã duyệt */}
-                <div
-                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200"
-                >
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#15803d' }} >{t('organizations.workspace.stats.approved')}</p>
-                      <p className="text-3xl font-bold" style={{ color: '#14532d' }} >{stats.approved}</p>
+                      <p className="text-sm font-medium" style={{ color: '#15803d' }}>{t('organizations.workspace.stats.approved')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#14532d' }}>{stats.approved}</p>
                     </div>
-                    <CommonIcon name="check" className="w-10 h-10" style={{ color: '#22c55e' }} />
+                    <span className="text-3xl">✅</span>
                   </div>
                 </div>
 
-                {/* Đã từ chối */}
-                <div
-                  whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={{ borderColor: '#fecaca', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                {/* Từ chối */}
+                <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#b91c1c' }} >{t('organizations.workspace.stats.rejected')}</p>
-                      <p className="text-3xl font-bold" style={{ color: '#7f1d1d' }} >{stats.rejected}</p>
+                      <p className="text-sm font-medium" style={{ color: '#b91c1c' }}>{t('organizations.workspace.stats.rejected')}</p>
+                      <p className="text-3xl font-bold" style={{ color: '#7f1d1d' }}>{stats.rejected}</p>
                     </div>
-                    <CommonIcon name="x" className="w-10 h-10" style={{ color: '#ef4444' }} />
+                    <span className="text-3xl">❌</span>
                   </div>
                 </div>
 
-                {/* Tổng số file - MỚI */}
-                <div
-                  whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border" style={{ borderColor: '#e9d5ff', backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                {/* Tổng số file */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#7e22ce' }} >Tổng số file</p>
-                      <p className="text-3xl font-bold" style={{ color: '#4c1d95' }} >{stats.totalFiles}</p>
+                      <p className="text-sm font-medium" style={{ color: '#7e22ce' }}>Tổng số file</p>
+                      <p className="text-3xl font-bold" style={{ color: '#4c1d95' }}>{stats.totalFiles}</p>
                     </div>
-                    <CommonIcon name="file" className="w-10 h-10" style={{ color: '#a855f7' }} />
+                    <span className="text-3xl">📄</span>
                   </div>
                 </div>
 
-                {/* Tổng số repository - MỚI */}
-                <div
-                  whileHover={{ scale: 1.02 }}
-                  className="rounded-lg p-4 border border-indigo-200" style={{ backgroundImage: 'linear-gradient(to bottom right, ...)' /* MANUAL FIX NEEDED */ }} >
+                {/* Tổng số repository */}
+                <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#4338ca' }} >Tổng số repository</p>
-                      <p className="text-3xl font-bold" style={{ color: '#312e81' }} >{stats.totalRepositories}</p>
+                      <p className="text-sm font-medium" style={{ color: '#4338ca' }}>Tổng số repository</p>
+                      <p className="text-3xl font-bold" style={{ color: '#312e81' }}>{stats.totalRepositories}</p>
                     </div>
-                    <CommonIcon name="folder" className="w-10 h-10" style={{ color: '#6366f1' }} />
+                    <span className="text-3xl">📁</span>
                   </div>
                 </div>
                 </div>
               </div>
+
+              {/* Organization Info Card */}
+              <Card className="p-4">
+                <h3 className="text-base font-semibold mb-3 flex items-center gap-2" style={{ color: '#111827' }}>
+                  <span>ℹ️</span>
+                  Thông tin tổ chức
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {/* Organization Name */}
+                  <div className="flex items-center gap-2 p-3 rounded-lg border bg-blue-50 border-blue-200">
+                    <span>🏢</span>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500">Tên tổ chức</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{organization.name}</p>
+                    </div>
+                  </div>
+
+                  {/* Member Count */}
+                  <div className="flex items-center gap-2 p-3 rounded-lg border bg-indigo-50 border-indigo-200">
+                    <span>👥</span>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-500">Thành viên</p>
+                      <p className="text-sm font-medium text-gray-900">{membersData?.totalElements || 0} người</p>
+                    </div>
+                  </div>
+
+                  {/* Created At */}
+                  {organization?.createdAt && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg border bg-teal-50 border-teal-200">
+                      <span>📅</span>
+                      <div className="min-w-0">
+                        <p className="text-xs text-gray-500">Ngày tạo</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {new Date(organization.createdAt).toLocaleDateString('vi-VN')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Description - Full width */}
+                  {organization.description && (
+                    <div className="col-span-2 md:col-span-3 lg:col-span-4 flex items-start gap-2 p-3 rounded-lg border bg-green-50 border-green-200">
+                      <span>📝</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-gray-500">Mô tả</p>
+                        <p className="text-sm text-gray-700">{organization.description}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
             </div>
           )}
 
