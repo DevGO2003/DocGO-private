@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Select, Input, Button, RefreshButton } from '@shared/components';
+import { Select, Input, Button, ReloadButton } from '@shared/components';
+import { Upload, ArrowDownUp, SortAsc, SortDesc } from 'lucide-react';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import IncludeExcludeModal from '@shared/components/UIComponents/Modal/IncludeExcludeModal';
 import TimeRangeModal from '@shared/components/UIComponents/Modal/TimeRangeModal';
@@ -80,21 +81,19 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
       {/* Row 1: Search + Sort + SortDir + RefreshButton */}
       <div className="flex items-center gap-2 w-full">
         <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <CommonIcon name="search" size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={t('repositories.files.filters.search')}
-              className="pl-7"
-            />
-          </div>
+          <Input
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t('repositories.files.filters.search')}
+            leftIcon={<CommonIcon name="search" size={14} className="text-gray-400" />}
+          />
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Select
             value={sortBy}
-            onChange={(e) => onSortByChange(e.target.value)}
+            onChange={onSortByChange}
             className="w-[130px]"
+            leftIcon={<ArrowDownUp className="w-4 h-4 text-gray-500" />}
             options={[
               { value: 'createdAt', label: t('repositories.files.filters.sortOptions.createdAt') },
               { value: 'title', label: t('repositories.files.filters.sortOptions.fileName') },
@@ -105,26 +104,23 @@ export const FilesFilters: React.FC<FilesFiltersProps> = ({
           />
           <Select
             value={sortDirection}
-            onChange={(e) => onSortDirectionChange(e.target.value as SortDirection)}
+            onChange={(v) => onSortDirectionChange(v as SortDirection)}
             className="w-[110px]"
+            leftIcon={sortDirection === 'asc' ? <SortAsc className="w-4 h-4 text-gray-500" /> : <SortDesc className="w-4 h-4 text-gray-500" />}
             options={[
               { value: 'asc', label: t('repositories.files.filters.sortDirections.asc') },
               { value: 'desc', label: t('repositories.files.filters.sortDirections.desc') },
             ]}
           />
         </div>
-        {onRefresh && <RefreshButton onClick={onRefresh} loading={refreshing} className="flex-shrink-0" />}
+        {onRefresh && <ReloadButton onClick={onRefresh} loading={refreshing} showLabel={false} className="flex-shrink-0" />}
       </div>
 
       {/* Row 2: Actions (Upload, etc.) */}
       <div className="flex items-center gap-2 justify-end w-full">
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={onUploadClick}
-            className="flex items-center gap-2"
-          >
-            <CommonIcon name="upload" size={16} />
+          <Button variant="outline" onClick={onUploadClick} className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
             {t('repositories.files.filters.upload', 'Tải tệp lên')}
           </Button>
         </div>

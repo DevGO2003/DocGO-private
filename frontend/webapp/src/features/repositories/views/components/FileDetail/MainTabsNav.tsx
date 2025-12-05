@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabList, CommonTab } from '@shared/components';
+import { LayoutDashboard, FileText, MessageSquare, Briefcase } from 'lucide-react';
 
 /**
  * @deprecated Use GenericMainTabsNav with tabsConfig in HeaderControlLayout instead
@@ -18,9 +19,9 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
   const isContract = fileData?.type === 'contract' || fileData?.contractType;
   
   const tabs = [
-    { id: 'overview', label: t('repositories.detail.tabs.overview'), disabled: false },
-    { id: 'contracts', label: t('repositories.detail.tabs.contracts', { defaultValue: 'Hợp đồng' }), disabled: !isContract },
-    { id: 'comments', label: t('repositories.detail.tabs.comments', { defaultValue: 'Bình luận' }), disabled: false },
+    { id: 'overview', label: t('repositories.detail.tabs.overview'), icon: <LayoutDashboard className="w-4 h-4" />, disabled: false },
+    { id: 'contracts', label: t('repositories.detail.tabs.contracts', { defaultValue: 'Hợp đồng' }), icon: <Briefcase className="w-4 h-4" />, disabled: !isContract },
+    { id: 'comments', label: t('repositories.detail.tabs.comments', { defaultValue: 'Bình luận' }), icon: <MessageSquare className="w-4 h-4" />, disabled: false },
   ];
 
   return (
@@ -34,7 +35,9 @@ export const MainTabsNav: React.FC<Props> = ({ activeMainTab, onChange, fileData
             onSelect={() => !tab.disabled && !loading && onChange(tab.id)}
             disabled={tab.disabled || loading}
             title={tab.disabled ? t('repositories.detail.tabs.contractOnly', { defaultValue: 'File không phải hợp đồng' }) : undefined}
+            className="flex items-center gap-2"
           >
+            {tab.icon}
             {loading ? <span className="inline-block rounded" style={{ backgroundColor: '#e5e7eb' }} ></span> : tab.label}
           </CommonTab>
         ))}
