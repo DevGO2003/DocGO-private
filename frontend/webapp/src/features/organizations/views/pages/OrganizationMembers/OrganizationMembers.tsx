@@ -148,7 +148,7 @@ export const OrganizationMembers = () => {
       subtitle={t('organizations.members.subtitle')}
       breadcrumbs={[
         { label: t('organizations.list.title'), href: ORGANIZATIONS_PATH },
-        { label: organization?.name || '', href: `/organizations/${id}/workspace` },
+        { label: organization?.name || '', href: `/organizations/${id}` },
         { label: t('organizations.members.title'), current: true },
       ]}
       onRefresh={handleRefresh}

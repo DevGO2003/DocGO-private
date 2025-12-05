@@ -1,5 +1,5 @@
 ﻿import React from 'react'
-import { Modal, Card, CardContent, Button, Text } from '@shared/components'
+import { Modal, Button, Text } from '@shared/components'
 import { Flex, Stack } from '@shared/components'
 
 interface UploadSuccessNotificationProps {
@@ -19,88 +19,61 @@ const UploadSuccessNotification: React.FC<UploadSuccessNotificationProps> = ({
   fileName,
   fileSize,
   fileType,
-  onViewFile,
-  onDownloadFile,
   onUploadMore,
   onViewDetails,
-  onViewList,
   onClose,
   showActions = true
 }) => {
-  const formatFileSize = (size?: string) => (size ? ` (${size})` : '')
-
   return (
-    <Modal isOpen onClose={onClose} title="Tải lên thành công">
-      <Card>
-        <CardContent>
-          <Flex align="center" justify="between" style={{ marginBottom: 12 }}>
-            <Flex align="center" gap={8}>
-              <div style={{ width: 32, height: 32, color: '#16a34a', fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✅</div>
-              <Stack gap={2}>
-                <Text as="h3" className="text-lg font-semibold" style={{ color: '#111827' }} >Tải lên thành công</Text>
-                <Text as="p" className="text-sm" style={{ color: '#6b7280' }} >Tệp đã được lưu vào hệ thống</Text>
-              </Stack>
-            </Flex>
-            {onClose && (
-              <Button variant="ghost" onClick={onClose}>Đóng</Button>
+    <Modal 
+      isOpen 
+      onClose={onClose || (() => {})} 
+      title="Tải lên thành công"
+      footer={
+        showActions && (
+          <div className="flex justify-end gap-3 w-full">
+            {onUploadMore && (
+              <Button variant="outline" onClick={onUploadMore}>
+                <span>📤</span> Tải thêm
+              </Button>
             )}
-          </Flex>
+            {onViewDetails && (
+              <Button onClick={onViewDetails}>
+                <span>📋</span> Xem chi tiết
+              </Button>
+            )}
+          </div>
+        )
+      }
+    >
+      {/* Success Icon */}
+      <div className="flex flex-col items-center text-center py-4">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <span className="text-3xl">✅</span>
+        </div>
+        <Text as="p" className="text-sm mb-6" style={{ color: '#6b7280' }}>
+          Tệp đã được lưu vào hệ thống thành công!
+        </Text>
+      </div>
 
-          <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
-            <div style={{ width: 20, height: 20, color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄</div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <Text className="text-sm font-medium" style={{ color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Text>
-              <Text className="text-xs" style={{ color: '#6b7280' }} >{fileType?.toUpperCase()}{formatFileSize(fileSize)}</Text>
-            </div>
-          </Flex>
+      {/* File Info */}
+      <div className="bg-gray-50 rounded-lg p-4 mb-2">
+        <Flex align="center" gap={12}>
+          <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl">📄</span>
+          </div>
+          <Stack gap={2} style={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
+            <Text className="text-sm font-semibold truncate" style={{ color: '#111827' }} title={fileName}>
+              {fileName}
+            </Text>
+            <Text className="text-xs" style={{ color: '#6b7280' }}>
+              {fileType?.toUpperCase()} {fileSize && `• ${fileSize}`}
+            </Text>
+          </Stack>
+        </Flex>
+      </div>
 
-          {showActions && (
-            <Stack gap={8}>
-              <Flex gap={8} style={{ flexWrap: 'wrap' }}>
-                {onViewDetails && (
-                  <Button 
-                    onClick={onViewDetails}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 6,
-                      minWidth: 140 
-                    }}
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Xem chi tiết
-                  </Button>
-                )}
-                {onViewFile && (
-                  <Button 
-                    variant="secondary" 
-                    onClick={onViewFile}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 6,
-                      minWidth: 140 
-                    }}
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Xem preview
-                  </Button>
-                )}
-              </Flex>
-              <Flex gap={8} style={{ flexWrap: 'wrap' }}>
-                {onDownloadFile && <Button variant="outline" onClick={onDownloadFile}>Tải xuống</Button>}
-                {onUploadMore && <Button variant="outline" onClick={onUploadMore}>Tải thêm</Button>}
-              </Flex>
-            </Stack>
-          )}
-        </CardContent>
-      </Card>
-    </Modal>
+      </Modal>
   )
 }
 

@@ -14,10 +14,19 @@ class SmartSampler:
     - 30% tail (kết thúc, chữ ký)
     """
     
-    # Simple contract keywords for confidence scoring
+    # Simple contract keywords for confidence scoring (expanded)
     CONTRACT_KEYWORDS = {
-        'vi': ['hợp đồng', 'bên a', 'bên b', 'điều', 'ký kết', 'thỏa thuận', 'cam kết'],
-        'en': ['contract', 'agreement', 'party a', 'party b', 'article', 'signed', 'executed'],
+        'vi': [
+            'hợp đồng', 'bên a', 'bên b', 'điều', 'ký kết', 'thỏa thuận', 'cam kết',
+            'điều khoản', 'thanh toán', 'giao hàng', 'bảo hành', 'tranh chấp',
+            'bên mua', 'bên bán', 'đại diện', 'giám đốc', 'mã số thuế',
+            'hiệu lực', 'chấm dứt', 'phụ lục', 'nghĩa vụ', 'quyền lợi'
+        ],
+        'en': [
+            'contract', 'agreement', 'party a', 'party b', 'article', 'signed', 'executed',
+            'terms', 'conditions', 'payment', 'delivery', 'warranty', 'dispute',
+            'buyer', 'seller', 'representative', 'effective date', 'termination'
+        ],
     }
     
     @staticmethod
@@ -78,29 +87,36 @@ class SmartSampler:
         Simple keyword matching for fallback
         
         Args:
-            text: Document text (first 5000 chars checked)
+            text: Document text (first 10000 chars checked)
         
         Returns:
             Confidence score 0.0 to 1.0
         """
-        text_lower = text[:5000].lower()
+        import re
+        
+        # Normalize text: lowercase, collapse whitespace, remove special chars
+        text_normalized = text[:10000].lower()
+        text_normalized = re.sub(r'\s+', ' ', text_normalized)  # Collapse whitespace
+        text_normalized = re.sub(r'[­\u00ad\u200b\u200c\u200d\ufeff]', '', text_normalized)  # Remove soft hyphens and zero-width chars
         
         # Count Vietnamese keywords
-        vi_matches = sum(1 for kw in SmartSampler.CONTRACT_KEYWORDS['vi'] if kw in text_lower)
+        vi_matches = sum(1 for kw in SmartSampler.CONTRACT_KEYWORDS['vi'] if kw in text_normalized)
         
         # Count English keywords
-        en_matches = sum(1 for kw in SmartSampler.CONTRACT_KEYWORDS['en'] if kw in text_lower)
+        en_matches = sum(1 for kw in SmartSampler.CONTRACT_KEYWORDS['en'] if kw in text_normalized)
         
         total_matches = vi_matches + en_matches
         
-        # Calculate confidence
-        if total_matches >= 4:
+        # Calculate confidence (adjusted thresholds)
+        if total_matches >= 5:
+            return 0.95  # Very high confidence
+        elif total_matches >= 4:
             return 0.9  # High confidence
         elif total_matches >= 3:
             return 0.8  # Good confidence
         elif total_matches >= 2:
-            return 0.6  # Medium confidence
+            return 0.7  # Medium-high confidence
         elif total_matches >= 1:
-            return 0.4  # Low confidence
+            return 0.5  # Medium confidence
         else:
             return 0.1  # Very low confidence

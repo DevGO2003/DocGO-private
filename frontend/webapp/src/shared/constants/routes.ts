@@ -56,7 +56,6 @@ export const ORGANIZATION_ROUTES = {
   DETAIL: '/organizations/:id',
   CREATE: '/organizations/create',
   EDIT: '/organizations/:id/edit',
-  WORKSPACE: '/organizations/:id/workspace',
   MEMBERS: '/organizations/:id/members',
   INVITE: '/organizations/:id/invite',
   ACCEPT_INVITATION: '/invitations/accept',
@@ -203,7 +202,6 @@ export const REPOSITORY_FILE_DETAIL_PATH = REPOSITORY_ROUTES.FILE_DETAIL;
 export const ORGANIZATIONS_PATH = ORGANIZATION_ROUTES.LIST;
 export const ORGANIZATION_DETAIL_PATH = ORGANIZATION_ROUTES.DETAIL;
 export const ORGANIZATION_CREATE_PATH = ORGANIZATION_ROUTES.CREATE;
-export const ORGANIZATION_WORKSPACE_PATH = ORGANIZATION_ROUTES.WORKSPACE;
 export const ORGANIZATION_MEMBERS_PATH = ORGANIZATION_ROUTES.MEMBERS;
 export const ACCEPT_INVITATION_PATH = ORGANIZATION_ROUTES.ACCEPT_INVITATION;
 export const PROFILE_PATH = USER_ROUTES.PROFILE;

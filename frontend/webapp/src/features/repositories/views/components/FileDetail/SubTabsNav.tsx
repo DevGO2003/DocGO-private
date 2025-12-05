@@ -21,7 +21,6 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
       { id: 'clauses', label: 'Điều khoản' },
       { id: 'risk', label: 'Rủi ro' },
       { id: 'reminders', label: 'Nhắc nhở' },
-      { id: 'compliance', label: 'Tuân thủ' },
     ],
     overview: [
       { id: 'details', label: 'Chi tiết' },

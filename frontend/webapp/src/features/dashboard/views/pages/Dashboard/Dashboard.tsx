@@ -365,19 +365,21 @@ export const Dashboard = () => {
                     {files.content.slice(0, 5).map((file) => (
                       <div
                         key={file.id}
-                        className="p-3 rounded-lg hover:bg-gray-100 transition-all hover:scale-[1.02] cursor-pointer" style={{ backgroundColor: '#f9fafb' }} >
-                        <div className="flex items-center justify-between">
+                        className="p-3 rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
+                        style={{ backgroundColor: '#ffffff' }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span className="text-lg">📄</span>
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <Text as="h4" className="font-semibold truncate" style={{ color: '#111827' }} >
+                            <Text as="h4" className="text-sm font-medium truncate" style={{ color: '#111827' }}>
                               {file.originalName || file.name}
                             </Text>
-                            <Text as="p" className="text-sm" style={{ color: '#4b5563' }} >
-                              {(file.fileSize / 1024).toFixed(2)} KB
+                            <Text as="p" className="text-xs" style={{ color: '#6b7280' }}>
+                              {new Date(file.createdAt).toLocaleDateString('vi-VN')}
                             </Text>
                           </div>
-                          <span className="text-xs" style={{ color: '#6b7280' }} >
-                            {new Date(file.createdAt).toLocaleDateString()}
-                          </span>
                         </div>
                       </div>
                     ))}

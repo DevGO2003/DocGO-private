@@ -253,7 +253,7 @@ export const RepositoryFileDetail: React.FC = () => {
       // Navigate to organization workspace with contracts tab
       const orgId = documentData?.organizationId || documentData?.overview?.organizationId;
       if (orgId) {
-        navigate(`/organizations/${orgId}/workspace?tab=contracts`);
+        navigate(`/organizations/${orgId}?tab=contracts`);
       } else {
         // Fallback to repository
         navigate(`/repositories/${id}`);
@@ -406,7 +406,6 @@ export const RepositoryFileDetail: React.FC = () => {
             { id: 'clauses', label: 'Điều khoản', icon: 'file-text' },
             { id: 'risk', label: 'Rủi ro', icon: 'alert-circle' },
             { id: 'reminders', label: 'Nhắc nhở', icon: 'bell' },
-            { id: 'compliance', label: 'Tuân thủ', icon: 'tag' },
           ],
           overview: [
             { id: 'details', label: 'Chi tiết', icon: 'info' },

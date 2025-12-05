@@ -31,7 +31,7 @@ export const AcceptInvitation = () => {
           console.log('✅ [Accept Invitation] Success:', data);
           // Redirect to organization
           if (data.organizationId) {
-            navigate(`/organizations/${data.organizationId}/workspace`);
+            navigate(`/organizations/${data.organizationId}`);
           } else {
             navigate('/organizations');
           }

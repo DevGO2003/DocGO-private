@@ -9,12 +9,13 @@ interface RepositoryPickerProps {
   value?: string
   onChange: (id: string, name: string) => void
   className?: string
+  initialOrganizationId?: string
 }
 
-const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, className }) => {
-  const [activeTab, setActiveTab] = useState<'personal' | 'orgs'>('personal')
+const RepositoryPicker: React.FC<RepositoryPickerProps> = ({ value, onChange, className, initialOrganizationId }) => {
+  const [activeTab, setActiveTab] = useState<'personal' | 'orgs'>(initialOrganizationId ? 'orgs' : 'personal')
   const [search, setSearch] = useState('')
-  const [selectedOrgId, setSelectedOrgId] = useState<string>('')
+  const [selectedOrgId, setSelectedOrgId] = useState<string>(initialOrganizationId || '')
   const [showCreate, setShowCreate] = useState(false)
   const [newRepoName, setNewRepoName] = useState('')
   const [newRepoDesc, setNewRepoDesc] = useState('')

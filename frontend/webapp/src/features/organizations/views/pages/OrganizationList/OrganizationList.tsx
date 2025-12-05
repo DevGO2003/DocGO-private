@@ -16,7 +16,7 @@ import {
   RefreshButton,
 } from '@shared/components';
 import { useMyOrganizations, CreateOrganizationDialog } from '@/features/organizations';
-import { ORGANIZATION_WORKSPACE_PATH } from '@constants';
+import { ORGANIZATION_DETAIL_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 
 export const OrganizationList = () => {
@@ -43,7 +43,7 @@ export const OrganizationList = () => {
   };
 
   const handleOrganizationClick = (orgId: string) => {
-    navigate(ORGANIZATION_WORKSPACE_PATH.replace(':id', orgId));
+    navigate(ORGANIZATION_DETAIL_PATH.replace(':id', orgId));
   };
 
   const getRoleBadge = (role?: string) => {

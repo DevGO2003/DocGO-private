@@ -1042,6 +1042,10 @@ async def upload_document(
             
             # Pre-check with SmartSampler (keyword-based confidence)
             print(f"[DEBUG] SmartSampler pre-check starting...")
+            print(f"[DEBUG] MIME type: {detected_mime_type}")
+            print(f"[DEBUG] plaintext_text available: {bool(plaintext_text)}, length: {len(plaintext_text) if plaintext_text else 0}")
+            if plaintext_text:
+                print(f"[DEBUG] plaintext_text preview (first 200 chars): {plaintext_text[:200] if len(plaintext_text) > 200 else plaintext_text}")
             from utils.smart_sampler import SmartSampler
             
             keyword_confidence = 0.0
@@ -1052,8 +1056,8 @@ async def upload_document(
                 print(f"[DEBUG] SmartSampler keyword confidence: {keyword_confidence}")
                 print(f"[DEBUG] SmartSampler keywords found: {SmartSampler.CONTRACT_KEYWORDS}")
                 
-                # If high confidence from keywords, skip AI and use SmartSampler result
-                if keyword_confidence >= 0.7:
+                # If medium-high confidence from keywords, skip AI and use SmartSampler result
+                if keyword_confidence >= 0.6:
                     print(f"[DEBUG] SmartSampler high confidence ({keyword_confidence}), skipping AI classification")
                     classification_result = {
                         "documentType": "contract",
@@ -1345,8 +1349,16 @@ async def upload_document(
                     # 2) FILE_CONTENT_EXTRACTED - Enhanced payload theo EVENT-ARCHITECTURE-V3.md
                     print(f"[DEBUG] Preparing publish -> topic=docgo-file-events eventType=FILE_CONTENT_EXTRACTED fileId={file_id} hasPlaintext={bool(plaintext_text)} hasJson={bool(json_content_text)}")
                     
-                    # Enhanced classification result - Match EVENT-ARCHITECTURE-V3.md enums
-                    enhanced_classification = None  # Phase 1: set classification = null in FILE_CONTENT_EXTRACTED
+                    # Enhanced classification result - Gửi classification_result thực tế
+                    enhanced_classification = {
+                        "documentType": classification_result.get("documentType"),
+                        "isContract": classification_result.get("isContract", False),
+                        "confidence": classification_result.get("confidence", 0.0),
+                        "reasons": classification_result.get("reasons", []),
+                        "contractSubtype": classification_result.get("contractSubtype"),
+                        "category": classification_result.get("category"),
+                        "language": classification_result.get("language")
+                    } if classification_result else None
                     
                     # Extract key terms from plaintext (simple extraction)
                     # Phase 1: remove keyTerms/sections/summary from FILE_CONTENT_EXTRACTED
@@ -1388,11 +1400,11 @@ async def upload_document(
                             "ocr": {
                                 "text": safe_plaintext if file.content_type.lower() != "application/json" else None,  # Text nội dung (filtered binary)
                                 "status": "COMPLETED" if plaintext_text else "SKIPPED",  # COMPLETED, FAILED, PROCESSING, SKIPPED
-                                "engine": "TESSERACT",  # GEMINI_VISION, TESSERACT, TESSERACT_FALLBACK, PADDLEOCR
-                                "confidence": 1.0 if plaintext_text else 0.0,
+                                "engine": extraction_result.get("engine", "UNKNOWN").upper() if extraction_result else "UNKNOWN",  # Lấy engine từ extraction result
+                                "confidence": extraction_result.get("confidence", 0.0) if extraction_result else 0.0,
                                 "processedAt": now_iso,
                                 "processingTime": 0.0,
-                                "error": None
+                                "error": extraction_result.get("error") if extraction_result else None
                             },
                             "jsonContent": json_content_text,
                             "jsonAnalysisStatus": "PARSED" if json_content_text else None,

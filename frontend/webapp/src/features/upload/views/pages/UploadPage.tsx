@@ -25,14 +25,17 @@ export default function UploadPage() {
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>('')
   const [selectedRepositoryName, setSelectedRepositoryName] = useState<string>('')
   const [recentRefreshKey, setRecentRefreshKey] = useState<number>(0)
+  const [initialOrganizationId, setInitialOrganizationId] = useState<string>('')
 
-  // Prefill repository from URL query params if present
+  // Prefill repository and organization from URL query params if present
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const repoId = params.get('repositoryId') || ''
     const repoName = params.get('repositoryName') || ''
+    const orgId = params.get('organizationId') || ''
     if (repoId) setSelectedRepositoryId(repoId)
     if (repoName) setSelectedRepositoryName(decodeURIComponent(repoName))
+    if (orgId) setInitialOrganizationId(orgId)
   }, [location.search])
 
   const [showSuccess, setShowSuccess] = useState(false)
@@ -227,6 +230,7 @@ export default function UploadPage() {
                 <RepositoryPicker
                   value={selectedRepositoryId}
                   onChange={(id: string, name: string) => { setSelectedRepositoryId(id); setSelectedRepositoryName(name) }}
+                  initialOrganizationId={initialOrganizationId}
                 />
               </div>
               {/* Upload Panel */}

@@ -11,7 +11,6 @@ import {
   RepositoryFilesList,
   AcceptRepositoryInvite,
   OrganizationList,
-  OrganizationDetail,
   OrganizationWorkspace,
   OrganizationMembers,
   Profile,
@@ -51,8 +50,7 @@ export const protectedRoutes = (
 
     {/* Organization Routes */}
     <Route path={PROTECTED_ROUTES.ORGANIZATIONS} element={<OrganizationList />} />
-    <Route path={PROTECTED_ROUTES.ORGANIZATION_DETAIL} element={<OrganizationDetail />} />
-    <Route path={PROTECTED_ROUTES.ORGANIZATION_WORKSPACE} element={<OrganizationWorkspace />} />
+    <Route path={PROTECTED_ROUTES.ORGANIZATION_DETAIL} element={<OrganizationWorkspace />} />
     <Route path={PROTECTED_ROUTES.ORGANIZATION_MEMBERS} element={<OrganizationMembers />} />
 
     {/* User Routes */}

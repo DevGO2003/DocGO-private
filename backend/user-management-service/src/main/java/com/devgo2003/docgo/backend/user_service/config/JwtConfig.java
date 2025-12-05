@@ -34,15 +34,6 @@ public class JwtConfig implements InitializingBean {
             );
         }
         
-        // Additional validation: Access token should not be too long (security best practice)
-        if (accessTokenTtlSeconds > 3600) { // 1 hour
-            throw new IllegalStateException(
-                String.format("Access token TTL (%d seconds) is too long for security reasons. " +
-                             "Recommended maximum is 3600 seconds (1 hour).",
-                             accessTokenTtlSeconds)
-            );
-        }
-        
         // Additional validation: Refresh token should not be too short (user experience)
         if (refreshTokenTtlSeconds < 3600) { // 1 hour
             throw new IllegalStateException(

@@ -11,13 +11,17 @@ import {
   Button,
   LoadingSpinner,
   RefreshButton,
+  Dialog,
+  Input,
 } from '@shared/components';
-import { useOrganization } from '@/features/organizations';
+import { useOrganization, useUpdateOrganization, useDeleteOrganization } from '@/features/organizations';
 import { useOrganizationMembers } from '@features/organizations/models/api/organizationApi';
 import { useOrganizationContracts, useOrganizationRepositories } from '@features/repositories/models/api/repositoryApi';
 import { ORGANIZATIONS_PATH } from '@constants';
 import OrganizationLayout from '../../../layouts/OrganizationLayout';
 import { saveOrganizationContext } from '@features/organizations/utils/organizationContext';
+import { CreateRepositoryModal } from '@features/repositories/views/components/CreateRepositoryModal';
+import { useCreateRepository } from '@features/repositories/models/api/repositoryApi';
 
 type WorkspaceTab = 'info' | 'contracts' | 'repositories' | 'members';
 
@@ -33,8 +37,15 @@ export const OrganizationWorkspace = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAllContracts, setShowAllContracts] = useState(false);
   const [showAllRepositories, setShowAllRepositories] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreateRepoModalOpen, setIsCreateRepoModalOpen] = useState(false);
 
   const { data: organization, isLoading } = useOrganization(id!);
+  const { mutateAsync: updateOrganization, isPending: isUpdating } = useUpdateOrganization();
+  const { mutateAsync: deleteOrganization } = useDeleteOrganization();
+  const { mutate: createRepository, isPending: isCreatingRepo } = useCreateRepository();
   const { t } = useTranslation();
   
   // Update active tab when URL query parameter changes
@@ -178,6 +189,40 @@ export const OrganizationWorkspace = () => {
     }
   };
 
+  const handleOpenEditDialog = () => {
+    setEditName(organization?.name || '');
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateName = async () => {
+    if (!id || !editName.trim()) return;
+    try {
+      await updateOrganization({ id, data: { name: editName.trim() } });
+      await queryClient.invalidateQueries({ queryKey: ['organization', id] });
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update organization:', error);
+      alert('Không thể cập nhật tên tổ chức');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    const confirmed = window.confirm('Bạn có chắc chắn muốn xóa tổ chức này? Hành động này không thể hoàn tác.');
+    if (!confirmed) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteOrganization(id);
+      navigate(ORGANIZATIONS_PATH);
+    } catch (error) {
+      console.error('Failed to delete organization:', error);
+      alert('Không thể xóa tổ chức');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner text={t('organizations.workspace.loading')} fullScreen />;
   }
@@ -212,6 +257,12 @@ export const OrganizationWorkspace = () => {
       onRefresh={handleRefresh}
       headerRight={(
         <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleOpenEditDialog}>
+              <span>✏️</span> Sửa tên
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+              <span>🗑️</span> {isDeleting ? 'Đang xóa...' : 'Xóa'}
+            </Button>
             <RefreshButton onClick={handleRefresh} loading={isRefreshing} />
         </div>
       )}
@@ -305,54 +356,61 @@ export const OrganizationWorkspace = () => {
               </div>
 
               {/* Organization Info Card */}
-              <Card className="p-4">
-                <h3 className="text-base font-semibold mb-3 flex items-center gap-2" style={{ color: '#111827' }}>
-                  <span>ℹ️</span>
+              <Card className="p-5">
+                <h3 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: '#111827' }}>
+                  <span>🏢</span>
                   Thông tin tổ chức
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {/* Organization Name */}
-                  <div className="flex items-center gap-2 p-3 rounded-lg border bg-blue-50 border-blue-200">
-                    <span>🏢</span>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500">Tên tổ chức</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">{organization.name}</p>
+                
+                {/* Info Grid */}
+                <div className="flex flex-wrap gap-6 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-lg">🏢</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Tên tổ chức</p>
+                      <p className="text-sm font-semibold text-gray-900">{organization.name}</p>
                     </div>
                   </div>
 
-                  {/* Member Count */}
-                  <div className="flex items-center gap-2 p-3 rounded-lg border bg-indigo-50 border-indigo-200">
-                    <span>👥</span>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500">Thành viên</p>
-                      <p className="text-sm font-medium text-gray-900">{membersData?.totalElements || 0} người</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <span className="text-lg">👥</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Thành viên</p>
+                      <p className="text-sm font-semibold text-gray-900">{membersData?.totalElements || 0} người</p>
                     </div>
                   </div>
 
-                  {/* Created At */}
                   {organization?.createdAt && (
-                    <div className="flex items-center gap-2 p-3 rounded-lg border bg-teal-50 border-teal-200">
-                      <span>📅</span>
-                      <div className="min-w-0">
-                        <p className="text-xs text-gray-500">Ngày tạo</p>
-                        <p className="text-sm font-medium text-gray-900">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-lg">📅</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Ngày tạo</p>
+                        <p className="text-sm font-semibold text-gray-900">
                           {new Date(organization.createdAt).toLocaleDateString('vi-VN')}
                         </p>
                       </div>
                     </div>
                   )}
-
-                  {/* Description - Full width */}
-                  {organization.description && (
-                    <div className="col-span-2 md:col-span-3 lg:col-span-4 flex items-start gap-2 p-3 rounded-lg border bg-green-50 border-green-200">
-                      <span>📝</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-gray-500">Mô tả</p>
-                        <p className="text-sm text-gray-700">{organization.description}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
+
+                {/* Description */}
+                {organization.description && (
+                  <div className="pt-4 border-t border-gray-100 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg">📝</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Mô tả</p>
+                      <p className="text-sm text-gray-700">{organization.description}</p>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           )}
@@ -561,14 +619,23 @@ export const OrganizationWorkspace = () => {
                     <CommonIcon name="folder" size={20} />
                     {t('organizations.workspace.repositoriesTitle')}
                   </CardTitle>
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
-                    className="flex items-center gap-2"
-                  >
-                    <CommonIcon name="folder" className="w-4 h-4" />
-                    Mở danh sách kho
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={() => setIsCreateRepoModalOpen(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <span>➕</span>
+                      Tạo kho tài liệu
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
+                      className="flex items-center gap-2"
+                    >
+                      <CommonIcon name="folder" className="w-4 h-4" />
+                      Mở danh sách kho
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -713,6 +780,48 @@ export const OrganizationWorkspace = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Name Dialog */}
+      <Dialog
+        open={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        title="Đổi tên tổ chức"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button onClick={handleUpdateName} disabled={isUpdating || !editName.trim()}>
+              {isUpdating ? 'Đang lưu...' : 'Lưu'}
+            </Button>
+          </>
+        }
+      >
+        <Input
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          placeholder="Nhập tên tổ chức mới"
+          className="w-full"
+        />
+      </Dialog>
+
+      {/* Create Repository Modal */}
+      <CreateRepositoryModal
+        isOpen={isCreateRepoModalOpen}
+        onClose={() => setIsCreateRepoModalOpen(false)}
+        onSubmit={(data) => {
+          createRepository(
+            { ...data, organizationId: id },
+            {
+              onSuccess: () => {
+                setIsCreateRepoModalOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['organization-repositories', id] });
+              },
+            }
+          );
+        }}
+        isLoading={isCreatingRepo}
+      />
     </OrganizationLayout>
   );
 };

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 import { useMyOrganizations } from '@features/organizations';
-import { ORGANIZATIONS_PATH, ORGANIZATION_WORKSPACE_PATH } from '@constants';
+import { ORGANIZATIONS_PATH, ORGANIZATION_DETAIL_PATH } from '@constants';
 import { Organization } from '@features/organizations/models/types/organization.types';
 
 interface OrganizationSelectorProps {
@@ -58,7 +58,7 @@ export const OrganizationSelector = ({
     if (onOrganizationChange) {
       onOrganizationChange(orgId);
     }
-    navigate(ORGANIZATION_WORKSPACE_PATH.replace(':id', orgId));
+    navigate(ORGANIZATION_DETAIL_PATH.replace(':id', orgId));
   };
 
   const handleCreateNew = () => {

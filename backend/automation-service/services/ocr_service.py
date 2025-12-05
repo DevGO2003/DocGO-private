@@ -24,6 +24,14 @@ except ImportError:
     DOCX_AVAILABLE = False
     logging.warning("python-docx not available")
 
+# PDF processing
+try:
+    import PyPDF2
+    PYPDF2_AVAILABLE = True
+except ImportError:
+    PYPDF2_AVAILABLE = False
+    logging.warning("PyPDF2 not available")
+
 # OCR Libraries
 try:
     import pytesseract
@@ -280,6 +288,72 @@ class OCRService:
                 "engine": "python-docx"
             }
 
+    def extract_text_from_pdf(self, file_content: bytes, filename: str) -> Dict[str, Any]:
+        """Trích xuất text từ file PDF sử dụng PyPDF2"""
+        if not PYPDF2_AVAILABLE:
+            return {
+                "success": False,
+                "text": "",
+                "confidence": 0.0,
+                "error": "PyPDF2 not available",
+                "engine": "pypdf2"
+            }
+        
+        try:
+            # Load PDF from bytes
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
+            
+            # Extract text from all pages
+            pages_text = []
+            total_pages = len(pdf_reader.pages)
+            
+            for page_num, page in enumerate(pdf_reader.pages):
+                try:
+                    page_text = page.extract_text()
+                    if page_text and page_text.strip():
+                        pages_text.append(page_text.strip())
+                except Exception as e:
+                    logging.warning(f"Error extracting text from page {page_num + 1}: {e}")
+                    continue
+            
+            extracted_text = "\n\n".join(pages_text)
+            
+            # Nếu không trích xuất được text, có thể là PDF scan
+            if not extracted_text.strip():
+                return {
+                    "success": False,
+                    "text": "",
+                    "confidence": 0.0,
+                    "error": "PDF không chứa text có thể trích xuất. Có thể là PDF scan cần OCR.",
+                    "engine": "pypdf2",
+                    "metadata": {
+                        "totalPages": total_pages,
+                        "isPdfScan": True
+                    }
+                }
+            
+            return {
+                "success": True,
+                "text": extracted_text,
+                "confidence": 1.0,  # Text extraction từ PDF có độ tin cậy cao
+                "engine": "pypdf2",
+                "metadata": {
+                    "totalPages": total_pages,
+                    "pagesWithText": len(pages_text),
+                    "totalTextLength": len(extracted_text)
+                }
+            }
+            
+        except Exception as e:
+            logging.error(f"Error extracting text from PDF: {e}")
+            return {
+                "success": False,
+                "text": "",
+                "confidence": 0.0,
+                "error": str(e),
+                "engine": "pypdf2"
+            }
+
     def extract_text_from_file(self, file_content: bytes, filename: str, engine: str = "auto") -> Dict[str, Any]:
         """Trích xuất text từ file ảnh"""
         try:
@@ -404,6 +478,20 @@ class OCRService:
                         **docx_result.get("metadata", {})
                     }
                 return docx_result
+            
+            # Xử lý file PDF
+            if content_type.lower() == "application/pdf":
+                pdf_result = self.extract_text_from_pdf(file_content, filename)
+                pdf_result["metadata"] = {
+                    "fileType": "PDF",
+                    "contentType": content_type,
+                    "size": len(file_content),
+                    "processedAt": datetime.now(timezone.utc).isoformat(),
+                    "extractionEngine": pdf_result.get("engine", "pypdf2"),
+                    "confidence": pdf_result.get("confidence", 0.0),
+                    **pdf_result.get("metadata", {})
+                }
+                return pdf_result
             
             # Xử lý file ảnh với OCR
             if content_type.lower().startswith('image/'):

@@ -80,7 +80,14 @@ export const RepositoryDetail: React.FC = () => {
   const goToUploadWithRepo = () => {
     if (!repository) return;
     const repoName = encodeURIComponent(repository.name || '');
-    navigate(`/upload?repositoryId=${repository.id}&repositoryName=${repoName}`);
+    let uploadUrl = `/upload?repositoryId=${repository.id}&repositoryName=${repoName}`;
+    
+    // Thêm organizationId nếu repository thuộc tổ chức
+    if (repository.organizationId) {
+      uploadUrl += `&organizationId=${repository.organizationId}`;
+    }
+    
+    navigate(uploadUrl);
   };
 
   const handleUpdatePermission = (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {

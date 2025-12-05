@@ -14,7 +14,7 @@ interface CommonLabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
 }
 
 export const CommonLabel = forwardRef<HTMLLabelElement, CommonLabelProps>(
-  ({ className, required, error, icon, iconSize = 16, iconColor, noBorder = false, children, ...props }, ref) => {
+  ({ className, required, error, icon, iconSize = 16, iconColor, noBorder = true, children, ...props }, ref) => {
     const labelRef = useRef<HTMLLabelElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
