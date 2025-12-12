@@ -55,7 +55,7 @@ export const Login = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-center">
-              Sign in to your account
+              Đăng nhập tài khoản
             </CardTitle>
           </CardHeader>
 
@@ -71,12 +71,12 @@ export const Login = () => {
                 id="username"
                 name="username"
                 type="text"
-                label="Username"
+                label="Tên đăng nhập"
                 value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.username}
-                placeholder="Enter your username"
+                placeholder="Nhập tên đăng nhập"
                 autoComplete="username"
               />
 
@@ -84,12 +84,12 @@ export const Login = () => {
                 id="password"
                 name="password"
                 type="password"
-                label="Password"
+                label="Mật khẩu"
                 value={values.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.password}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 autoComplete="current-password"
               />
 
@@ -101,7 +101,7 @@ export const Login = () => {
                   onCheckedChange={(checked) => handleChange({ target: { name: 'rememberMe', type: 'checkbox', checked } } as any)}
                 />
                 <Label htmlFor="rememberMe" className="text-sm cursor-pointer">
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </Label>
               </div>
 
@@ -112,7 +112,7 @@ export const Login = () => {
                 disabled={isLoading || isGoogleLoading}
                 className="w-full"
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </Button>
             </form>
 
@@ -122,7 +122,7 @@ export const Login = () => {
                 <div className="w-full border-t-2" style={{ borderColor: '#d1d5db' }} ></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 font-medium" style={{ backgroundColor: '#ffffff', color: '#6b7280' }} >Or continue with</span>
+                <span className="px-4 font-medium" style={{ backgroundColor: '#ffffff', color: '#6b7280' }} >Hoặc tiếp tục với</span>
               </div>
             </div>
 
@@ -153,21 +153,21 @@ export const Login = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              {isGoogleLoading ? 'Connecting...' : 'Sign in with Google'}
+              {isGoogleLoading ? 'Đang kết nối...' : 'Đăng nhập với Google'}
             </Button>
 
             <div className="mt-6 text-center space-y-3">
               <Link
                 to={FORGOT_PASSWORD_PATH}
                 className="block text-sm hover: hover:underline" style={{ color: '#2563eb' }} >
-                Forgot your password?
+                Quên mật khẩu?
               </Link>
               <div className="text-sm" style={{ color: '#4b5563' }} >
-                Don't have an account?{' '}
+                Chưa có tài khoản?{' '}
                 <Link
                   to={REGISTER_PATH}
                   className="font-medium hover: hover:underline" style={{ color: '#2563eb' }} >
-                  Sign up
+                  Đăng ký
                 </Link>
               </div>
             </div>

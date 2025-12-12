@@ -170,7 +170,9 @@
         "members": "{{count}} members",
         "size": "Size",
         "owner": "Owner",
-        "noOwner": "No owner"
+        "noOwner": "No owner",
+        "organization": "Organization",
+        "noOrganization": "Unknown"
       }
     },
     "list": {

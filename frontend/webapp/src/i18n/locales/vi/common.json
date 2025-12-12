@@ -679,7 +679,9 @@
         "members": "{{count}} thành viên",
         "size": "Dung lượng",
         "owner": "Chủ sở hữu",
-        "noOwner": "Không rõ"
+        "noOwner": "Không rõ",
+        "organization": "Tổ chức",
+        "noOrganization": "Chưa xác định"
       },
       "empty": {
         "title": "Chưa có kho nào",

@@ -38,8 +38,8 @@ export function mapFileApiToUiDocument(apiData: FileItem, fileId: string, fileNa
 
   return {
     id: String(fileId),
-    // ✅ FIXED: Use overview.title instead of fileName
-    title: ov.title || `Document ${fileId}`,
+    // ✅ FIXED: Use overview.title, fallback to file.name, then fileName param
+    title: ov.title || (apiData as any)?.file?.name || fileName || `Document ${fileId}`,
     description: ct.summary || '',
     status: ov.status || 'DRAFT',
     // ✅ APPROVAL STATUS - From workflow

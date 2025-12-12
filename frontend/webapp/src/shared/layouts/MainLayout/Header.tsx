@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { NotificationBell, ProgressBar } from '@shared/components';
 import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { logout } from '@features/auth/models/state/authSlice';
@@ -23,6 +24,7 @@ export const Header = ({
   
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { user: authUser } = useAppSelector((state) => state.auth);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +60,8 @@ export const Header = ({
 
   const handleLogout = () => {
     console.log('[Header] Logging out...');
+    // Clear React Query cache để tránh hiển thị dữ liệu cũ khi đăng nhập tài khoản khác
+    queryClient.clear();
     dispatch(logout());
     navigate(LOGIN_PATH);
   };

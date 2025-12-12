@@ -13,6 +13,8 @@ import { useContractApproval } from '@features/approvals/hooks/useContractApprov
 import { ApprovalActionModal } from '@features/approvals/components/ApprovalActionModal';
 import { ApprovalLevel } from '@features/approvals/types/approval.types';
 import { useAppSelector } from '@store/hooks';
+import { useRepository } from '@features/repositories/models/api/repositoryApi';
+import { apiClient } from '@shared/lib/api';
 
 interface FileDetailData {
   fileId: string;
@@ -32,6 +34,9 @@ export const RepositoryFileDetail: React.FC = () => {
   const [file, setFile] = useState<FileDetailData | null>(null);
   const [documentData, setDocumentData] = useState<any>(null);
   const [contractSummary, setContractSummary] = useState<any>(null);
+  
+  // Fetch repository info để lấy tên kho và tên owner
+  const { data: repository } = useRepository(id || '');
   const [activeMainTab, setActiveMainTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('details');
   const [notFound, setNotFound] = useState(false);
@@ -99,10 +104,37 @@ export const RepositoryFileDetail: React.FC = () => {
         setFile(basic);
 
         // Map API data to full structure expected by tabs (like src-old)
+        // Lấy tên file từ nhiều nguồn để đảm bảo luôn có giá trị
+        const fileName = (apiData as any)?.overview?.title 
+          || (apiData as any)?.file?.name 
+          || (apiData as any)?.name 
+          || basic.fileName 
+          || (apiData as any)?.metadata?.fileSystem?.originalFilename
+          || (apiData as any)?.metadata?.fileSystem?.mediaFilename
+          || `File ${fileId?.slice(0, 8) || ''}`;
+        
+        // Lấy thông tin user từ userId nếu cần
+        const ownerUserId = (apiData as any)?.overview?.ownerUserId || (apiData as any)?.audit?.createdBy;
+        let ownerDisplayName = repository?.ownerName || '';
+        if (!ownerDisplayName && ownerUserId) {
+          try {
+            const userResp = await apiClient.get(`/api/v1/user-management-service/users/${ownerUserId}`);
+            const userData = (userResp as any)?.data?.data;
+            ownerDisplayName = userData?.username || userData?.email || 
+              (userData?.firstName ? `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim() : '') || ownerUserId;
+          } catch (e) {
+            ownerDisplayName = ownerUserId;
+          }
+        }
+        
         const mapped = {
           id: (apiData as any)?.id ?? basic.fileId,
-          title: basic.fileName,
+          title: fileName,
           overview: (apiData as any)?.overview ?? undefined,
+          repositoryId: (apiData as any)?.repositoryId || id,
+          repositoryName: repository?.name || (apiData as any)?.repositoryName || (apiData as any)?.overview?.repositoryName || '',
+          createdAt: (apiData as any)?.audit?.createdAt || (apiData as any)?.createdAt || (apiData as any)?.uploadedAt || basic.uploadedAt || null,
+          owner: ownerDisplayName || ownerUserId || null,
           description: (apiData as any)?.description || '',
           status: (apiData as any)?.status || 'ACTIVE',
           contractType: (apiData as any)?.contractType || 'GENERAL',
@@ -283,10 +315,37 @@ export const RepositoryFileDetail: React.FC = () => {
         setFile(basic);
 
         // Re-map data
+        // Lấy tên file từ nhiều nguồn để đảm bảo luôn có giá trị
+        const fileName = (apiData as any)?.overview?.title 
+          || (apiData as any)?.file?.name 
+          || (apiData as any)?.name 
+          || basic.fileName 
+          || (apiData as any)?.metadata?.fileSystem?.originalFilename
+          || (apiData as any)?.metadata?.fileSystem?.mediaFilename
+          || `File ${fileId?.slice(0, 8) || ''}`;
+        
+        // Lấy thông tin user từ userId nếu cần (refresh)
+        const ownerUserId2 = (apiData as any)?.overview?.ownerUserId || (apiData as any)?.audit?.createdBy;
+        let ownerDisplayName2 = repository?.ownerName || '';
+        if (!ownerDisplayName2 && ownerUserId2) {
+          try {
+            const userResp2 = await apiClient.get(`/api/v1/user-management-service/users/${ownerUserId2}`);
+            const userData2 = (userResp2 as any)?.data?.data;
+            ownerDisplayName2 = userData2?.username || userData2?.email || 
+              (userData2?.firstName ? `${userData2?.firstName || ''} ${userData2?.lastName || ''}`.trim() : '') || ownerUserId2;
+          } catch (e) {
+            ownerDisplayName2 = ownerUserId2;
+          }
+        }
+        
         const mapped = {
           id: (apiData as any)?.id ?? basic.fileId,
-          title: basic.fileName,
+          title: fileName,
           overview: (apiData as any)?.overview ?? undefined,
+          repositoryId: (apiData as any)?.repositoryId || id,
+          repositoryName: repository?.name || (apiData as any)?.repositoryName || (apiData as any)?.overview?.repositoryName || '',
+          createdAt: (apiData as any)?.audit?.createdAt || (apiData as any)?.createdAt || (apiData as any)?.uploadedAt || basic.uploadedAt || null,
+          owner: ownerDisplayName2 || ownerUserId2 || null,
           description: (apiData as any)?.description || '',
           status: (apiData as any)?.status || 'ACTIVE',
           contractType: (apiData as any)?.contractType || 'GENERAL',
@@ -412,13 +471,8 @@ export const RepositoryFileDetail: React.FC = () => {
             { id: 'content', label: 'Nội dung', icon: 'file-text' },
             { id: 'ocr', label: 'Nội dung OCR', icon: 'file-text' },
             { id: 'metadata', label: 'Siêu dữ liệu', icon: 'tag' },
-            { id: 'notes', label: 'Ghi chú', icon: 'message' },
-            { id: 'history', label: 'Lịch sử', icon: 'clock' },
-            { id: 'permissions', label: 'Quyền hạn', icon: 'lock' },
           ],
-          comments: [
-            { id: 'comments-list', label: 'Danh sách bình luận', icon: 'message' },
-          ],
+          comments: [],
         },
         activeSubTab: activeSubTab,
         onSubTabChange: (tabId: string) => !isLoading && setActiveSubTab(tabId),

@@ -4,6 +4,8 @@ import { lazy } from 'react';
 // Auth pages
 export const Login = lazy(() => import('@features/auth/views/pages/Login').then(m => ({ default: m.Login })));
 export const Register = lazy(() => import('@features/auth/views/pages/Register').then(m => ({ default: m.Register })));
+export const ForgotPassword = lazy(() => import('@features/auth/views/pages').then(m => ({ default: m.ForgotPassword })));
+export const ResetPassword = lazy(() => import('@features/auth/views/pages').then(m => ({ default: m.ResetPassword })));
 export const OAuth2Callback = lazy(() => import('@features/auth/views/pages').then(m => ({ default: m.OAuth2Callback })));
 
 // Dashboard

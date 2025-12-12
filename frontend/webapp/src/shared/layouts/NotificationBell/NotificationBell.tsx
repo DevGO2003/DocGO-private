@@ -180,20 +180,6 @@ export const NotificationBell = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Bell Icon Button */}
@@ -218,16 +204,13 @@ export const NotificationBell = () => {
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#e5e7eb' }}>
             <div>
               <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
-                Notifications
+                Thông báo
                 {pendingCount > 0 && (
                   <span className="ml-2 text-sm font-normal" style={{ color: '#6b7280' }}>
-                    ({pendingCount} pending)
+                    ({pendingCount} chờ xử lý)
                   </span>
                 )}
               </h3>
-              <p className="text-xs mt-0.5" style={{ color: '#9ca3af' }}>
-                Auto-refresh every 30s
-              </p>
             </div>
             <button
               onClick={handleRefresh}
@@ -245,12 +228,12 @@ export const NotificationBell = () => {
             {isLoading ? (
               <div className="px-4 py-8" style={{ color: '#6b7280' }}>
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderColor: '#2563eb' }}></div>
-                <p className="mt-2">Loading...</p>
+                <p className="mt-2">Đang tải...</p>
               </div>
             ) : pendingCount === 0 ? (
               <div className="px-4 py-8" style={{ color: '#6b7280' }}>
                 <CommonIcon name="bell" size={48} className="mx-auto mb-2 opacity-50" />
-                <p>No pending invitations</p>
+                <p>Không có lời mời nào</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
@@ -271,30 +254,21 @@ export const NotificationBell = () => {
 
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>
-                            {isOrg ? 'Organization Invitation' : 'Repository Invitation'}
-                          </p>
-                          <p className="text-sm mt-1" style={{ color: '#4b5563' }}>
                             {isOrg ? (
-                              <>
-                                You've been invited to join as{' '}
-                                <span className="font-medium" style={{ color: '#2563eb' }}>
-                                  {orgData?.role}
-                                </span>
-                              </>
+                              <>Bạn được mời tham gia tổ chức <span style={{ color: '#2563eb' }}>{orgData?.organizationName || 'Không rõ'}</span></>
                             ) : (
-                              <>
-                                You've been invited to{' '}
-                                <span className="font-medium" style={{ color: '#d97706' }}>
-                                  {repoData?.repositoryName || 'a repository'}
-                                </span>
-                              </>
+                              <>Bạn được mời vào kho <span style={{ color: '#d97706' }}>{repoData?.repositoryName || 'Không rõ'}</span></>
                             )}
                           </p>
-
-                          <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: '#6b7280' }}>
-                            <CommonIcon name="clock" size={12} />
-                            <span>{formatDate(invitation.createdAt)}</span>
-                          </div>
+                          <p className="text-sm mt-1" style={{ color: '#4b5563' }}>
+                            Người mời:{' '}
+                            <span className="font-medium">
+                              {isOrg 
+                                ? (orgData?.invitedByName || 'Không rõ')
+                                : (repoData?.inviterName || 'Không rõ')
+                              }
+                            </span>
+                          </p>
 
                           {/* Action Buttons */}
                           <div className="flex gap-2 mt-3">
@@ -306,12 +280,12 @@ export const NotificationBell = () => {
                               {isAccepting ? (
                                 <>
                                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                                  Accepting...
+                                  Đang xử lý...
                                 </>
                               ) : (
                                 <>
                                   <CommonIcon name="check" size={12} className="mr-1" />
-                                  Accept
+                                  Chấp nhận
                                 </>
                               )}
                             </Button>
@@ -326,12 +300,12 @@ export const NotificationBell = () => {
                                 {isDeclining ? (
                                   <>
                                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 mr-1" style={{ borderColor: '#4b5563' }}></div>
-                                    Declining...
+                                    Đang xử lý...
                                   </>
                                 ) : (
                                   <>
                                     <CommonIcon name="x" size={12} className="mr-1" />
-                                    Decline
+                                    Từ chối
                                   </>
                                 )}
                               </Button>

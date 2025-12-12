@@ -144,7 +144,9 @@ public class FileEventServiceImpl implements IFileEventService {
                 Map<String, Object> classification = (Map<String, Object>) content.get("classification");
                 overview.put("documentType", classification.getOrDefault("documentType", overview.get("documentType")));
                 overview.put("category", classification.getOrDefault("category", overview.get("category")));
-                overview.put("language", classification.getOrDefault("language", overview.get("language")));
+                // Sanitize language for MongoDB text index compatibility
+                String lang = (String) classification.getOrDefault("language", overview.get("language"));
+                overview.put("language", sanitizeLanguageForMongo(lang));
             }
             
             // Update status
@@ -377,8 +379,12 @@ public class FileEventServiceImpl implements IFileEventService {
             entity.setRepositoryId(asString(data.get("repositoryId")));
             entity.setIsDeleted(false);  // Mark as not deleted
             
-            // Map basic file information
-            entity.setName(asString(data.get("name")));
+            // Map basic file information - lấy từ fileName hoặc name
+            String fileName = asString(data.get("fileName"));
+            if (fileName == null || fileName.isEmpty()) {
+                fileName = asString(data.get("name"));
+            }
+            entity.setName(fileName);
             entity.setContentType(asString(data.get("contentType")));
             entity.setSize(asLong(data.get("size")));
             entity.setOwnerUserId(asString(data.get("ownerUserId")));
@@ -609,7 +615,9 @@ public class FileEventServiceImpl implements IFileEventService {
                 entity.setDocumentType(asString(classification.get("documentType")));
                 entity.setIsContract(asBoolean(classification.get("isContract")));
                 entity.setConfidence(asDouble(classification.get("confidence")));
-                entity.setLanguage(asString(classification.get("language")));
+                // MongoDB text index không hỗ trợ "vi", map sang "none"
+                String lang = asString(classification.get("language"));
+                entity.setLanguage(sanitizeLanguageForMongo(lang));
                 
                 List<String> reasons = (List<String>) classification.get("reasons");
                 if (reasons != null) {
@@ -752,5 +760,33 @@ public class FileEventServiceImpl implements IFileEventService {
         if (o == null) return null;
         if (o instanceof Boolean) return (Boolean) o;
         return Boolean.parseBoolean(String.valueOf(o));
+    }
+    
+    /**
+     * Sanitize language code for MongoDB text index compatibility.
+     * MongoDB text index chỉ hỗ trợ một số ngôn ngữ nhất định.
+     * Languages không được hỗ trợ (như "vi") sẽ được map sang "none".
+     * 
+     * @see https://www.mongodb.com/docs/manual/reference/text-search-languages/
+     */
+    private String sanitizeLanguageForMongo(String language) {
+        if (language == null) return null;
+        
+        // MongoDB supported languages for text index
+        java.util.Set<String> supportedLanguages = java.util.Set.of(
+            "da", "dutch", "en", "english", "fi", "finnish", "fr", "french",
+            "de", "german", "hu", "hungarian", "it", "italian", "nb", "norwegian",
+            "pt", "portuguese", "ro", "romanian", "ru", "russian", "es", "spanish",
+            "sv", "swedish", "tr", "turkish", "none"
+        );
+        
+        String langLower = language.toLowerCase();
+        if (supportedLanguages.contains(langLower)) {
+            return language;
+        }
+        
+        // Map unsupported languages to "none" but keep original value in a separate field if needed
+        log.debug("Language '{}' not supported by MongoDB text index, using 'none'", language);
+        return "none";
     }
 }

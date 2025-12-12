@@ -1,5 +1,5 @@
 import { Route, Navigate } from 'react-router-dom';
-import { Login, Register, OAuth2Callback, Home } from './routeComponents';
+import { Login, Register, ForgotPassword, ResetPassword, OAuth2Callback, Home } from './routeComponents';
 import { PUBLIC_ROUTES, OAUTH_ROUTES } from './routeConfig';
 import { useAppSelector } from '@store/hooks';
 import { DASHBOARD_PATH } from '@constants';
@@ -30,6 +30,8 @@ export const publicRoutes = (
     {/* Public Routes */}
     <Route path={PUBLIC_ROUTES.LOGIN} element={<Login />} />
     <Route path={PUBLIC_ROUTES.REGISTER} element={<Register />} />
+    <Route path={PUBLIC_ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
+    <Route path={PUBLIC_ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
     <Route path={PUBLIC_ROUTES.HOME} element={<HomeEntry />} />
   </>
 );

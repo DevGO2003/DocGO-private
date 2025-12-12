@@ -1,5 +1,4 @@
-﻿import { Card, CardContent, Text, Input, Select, Button } from '@shared/components';
-import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
+﻿import { Card, CardContent, Text, Input, Select } from '@shared/components';
 import { useState } from 'react';
 
 interface DetailsTabProps {
@@ -14,27 +13,29 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
   const basic = fileData?.basic ?? {};
   const fileSystemMetadata = fileData?.fileSystemMetadata ?? {};
   
-  const [title, setTitle] = useState(basic?.fileName ?? overview?.title ?? 'Chưa có tiêu đề');
-  const [archiveSerial, setArchiveSerial] = useState(overview?.archiveSerial ?? '');
+  const [title, setTitle] = useState(fileData?.title ?? basic?.fileName ?? overview?.title ?? 'Chưa có tiêu đề');
+  const repositoryName = fileData?.repositoryName || overview?.repositoryName || 'Chưa xác định';
   const [documentType, setDocumentType] = useState(overview?.documentType ?? 'GENERAL');
   const [status, setStatus] = useState(overview?.status ?? 'ACTIVE');
-  const [ownerName] = useState(basic?.owner?.username || basic?.owner?.email || 'Chưa xác định');
-  const dateAdded = fileSystemMetadata?.dateAdded ? new Date(fileSystemMetadata.dateAdded).toLocaleDateString('vi-VN') : 'Chưa xác định';
-  const [correspondent, setCorrespondent] = useState('');
-
+  // Owner có thể là string (userId) hoặc object
+  const ownerData = basic?.owner || fileData?.owner || overview?.owner || overview?.ownerUserId;
+  const ownerName = typeof ownerData === 'string' 
+    ? ownerData  // Hiển thị userId nếu là string
+    : ownerData?.username || ownerData?.email || ownerData?.firstName 
+      ? `${ownerData?.firstName || ''} ${ownerData?.lastName || ''}`.trim() || ownerData?.username || ownerData?.email 
+      : 'Chưa xác định';
+  
+  // Lấy createdAt từ nhiều nguồn
+  const createdAt = fileData?.createdAt || basic?.createdAt || fileSystemMetadata?.dateAdded || overview?.dateCreated;
+  const dateAdded = createdAt ? new Date(createdAt).toLocaleDateString('vi-VN') : 'Chưa xác định';
+  
   const handleFieldChange = (field: string, value: any) => {
     if (onDataChange) {
       onDataChange({ ...fileData, overview: { ...overview, [field]: value } });
     }
   };
 
-  const handleIncrementSerial = () => {
-    const current = parseInt(archiveSerial) || 0;
-    const newSerial = (current + 1).toString().padStart(archiveSerial.length || 7, '0');
-    setArchiveSerial(newSerial);
-    handleFieldChange('archiveSerial', newSerial);
-  };
-
+  
   const documentTypes = [
     { value: 'GENERAL', label: 'Tài liệu thông thường' },
     { value: 'CONTRACT', label: 'Hợp đồng' },
@@ -80,33 +81,12 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               )}
             </div>
 
-            {/* Archive Serial - Editable với +1 button */}
+            {/* Repository Name - Read only */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Số lưu trữ</label>
-              {isEditing ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={archiveSerial}
-                    onChange={(e) => {
-                      setArchiveSerial(e.target.value);
-                      handleFieldChange('archiveSerial', e.target.value);
-                    }}
-                    placeholder="Auto-generated"
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={handleIncrementSerial}
-                    className="px-3"
-                  >
-                    +1
-                  </Button>
-                </div>
-              ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
-                  {archiveSerial || 'Chưa có'}
-                </Text>
-              )}
+              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Kho chứa</label>
+              <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
+                {repositoryName}
+              </Text>
             </div>
 
             {/* Date Added - Read only */}
@@ -159,28 +139,7 @@ export function DetailsTab({ fileData, isEditing = false, onDataChange }: Detail
               )}
             </div>
 
-            {/* Correspondent - Editable */}
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Đối tác</label>
-              {isEditing ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={correspondent}
-                    onChange={(e) => setCorrespondent(e.target.value)}
-                    placeholder="Chọn đối tác"
-                    className="flex-1"
-                  />
-                  <Button variant="outline" className="px-3">
-                    <CommonIcon name="chevron-down" className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
-                <Text className="w-full px-3 py-2 border rounded-md" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb' }} >
-                  {correspondent || 'Chưa có'}
-                </Text>
-              )}
-            </div>
-
+            
             {/* Owner - Read only */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >Người sở hữu</label>

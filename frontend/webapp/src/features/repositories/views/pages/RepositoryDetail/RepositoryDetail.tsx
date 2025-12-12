@@ -404,7 +404,7 @@ export const RepositoryDetail: React.FC = () => {
                             <div className="flex items-center gap-3">
                               <CommonIcon name="file-text" className="w-5 h-5 text-blue-500" />
                               <div>
-                                <h4 className="font-medium text-gray-900">{file.name}</h4>
+                                <h4 className="font-medium text-gray-900">{file.name || (file as any).fileName || (file as any).title || `File ${file.id?.slice(0,8) || ''}`}</h4>
                                 <p className="text-sm text-gray-500">
                                   {t('repositories.detail.files.uploaded')}: {new Date(file.createdAt).toLocaleDateString()}
                                 </p>

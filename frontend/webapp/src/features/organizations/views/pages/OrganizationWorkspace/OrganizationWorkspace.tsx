@@ -124,8 +124,11 @@ export const OrganizationWorkspace = () => {
     // status contains: DRAFT, ACTIVE, PENDING, etc.
     return contract.approvalStatus
       || contract.workflowStatus
-      || (contract.workflow?.status)
+      || contract.workflow?.status
+      || contract.overview?.approvalStatus
+      || contract.overview?.workflowStatus
       || contract.status
+      || contract.overview?.status
       || 'DRAFT'; // Default status
   };
   
@@ -441,15 +444,7 @@ export const OrganizationWorkspace = () => {
                         <CommonIcon name="refresh-cw" className="w-4 h-4" />
                         {contractsFetching ? 'Đang tải...' : 'Làm mới'}
                       </Button>
-                      <Button 
-                        variant="outline"
-                        onClick={() => navigate(`/organizations/${id}/contracts/full-list`)}
-                        className="flex items-center gap-2"
-                      >
-                        <CommonIcon name="folder" className="w-4 h-4" />
-                        Mở danh sách kho
-                      </Button>
-                    </div>
+                                          </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -545,11 +540,17 @@ export const OrganizationWorkspace = () => {
                               case 'CANCELLED':
                                 return { text: '🚫 Đã huỷ', className: 'bg-red-100 text-red-800' };
                               case 'DRAFT':
-                                return { text: '📝 Nháp', className: 'bg-gray-100 text-gray-800' };
+                                return { text: '📝 Bản nháp', className: 'bg-gray-100 text-gray-800' };
+                              case 'PENDING':
+                                return { text: '⏳ Đang chờ xử lý', className: 'bg-yellow-100 text-yellow-800' };
                               case 'ACTIVE':
                                 return { text: '✓ Đang hoạt động', className: 'bg-green-100 text-green-800' };
+                              case 'UPLOADED':
+                                return { text: '📤 Đã tải lên', className: 'bg-blue-100 text-blue-800' };
+                              case 'PROCESSED':
+                                return { text: '✓ Đã xử lý', className: 'bg-green-100 text-green-800' };
                               default:
-                                return { text: status, className: 'bg-gray-100 text-gray-800' };
+                                return { text: status || 'Không xác định', className: 'bg-gray-100 text-gray-800' };
                             }
                           };
                           const statusInfo = getStatusInfo(contractStatus);
@@ -627,15 +628,7 @@ export const OrganizationWorkspace = () => {
                       <span>➕</span>
                       Tạo kho tài liệu
                     </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => navigate(`/organizations/${id}/repositories/full-list`)}
-                      className="flex items-center gap-2"
-                    >
-                      <CommonIcon name="folder" className="w-4 h-4" />
-                      Mở danh sách kho
-                    </Button>
-                  </div>
+                                      </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -685,20 +678,7 @@ export const OrganizationWorkspace = () => {
                       </div>
                     ))}
 
-                    {/* Show More Button for Repositories */}
-                    {!showAllRepositories && repositoriesData.content.length > 10 && (
-                    <div className="flex justify-center mt-6">
-                    <Button
-                    variant="outline"
-                    onClick={() => setShowAllRepositories(true)}
-                    className="flex items-center gap-2"
-                    >
-                    <CommonIcon name="folder" className="w-4 h-4" />
-                    Mở danh sách kho ({repositoriesData.content.length} repository)
-                    </Button>
-                    </div>
-                    )}
-                  </div>
+                                      </div>
                 ) : (
                   <div className="text-center py-12">
                     <CommonIcon name="folder" className="h-16 mx-auto mb-4" style={{ color: '#9ca3af' }} />
@@ -821,6 +801,7 @@ export const OrganizationWorkspace = () => {
           );
         }}
         isLoading={isCreatingRepo}
+        defaultOrganizationId={id}
       />
     </OrganizationLayout>
   );

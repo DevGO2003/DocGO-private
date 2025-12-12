@@ -65,9 +65,9 @@ const repositoryApi = {
   },
 
   getPersonalRepositories: async (params?: PaginationParams): Promise<PaginatedResponse<Repository>> => {
-    // Align to backend Swagger: personal repos via /repositories/my
+    // Gọi đúng endpoint /repositories/personal để chỉ lấy repo cá nhân (type=PERSONAL)
     const response = await apiClient.get<PaginatedResponse<Repository>>(
-      `${BASE_PATH}/repositories/my`,
+      `${BASE_PATH}/repositories/personal`,
       { params }
     );
     return response.data.data!;
@@ -800,15 +800,13 @@ export const useMyPendingRepositoryInvites = () => {
         return result;
       } catch (error: any) {
         console.error('[useMyPendingRepositoryInvites] ❌ Error fetching invites:', error);
-        // Return empty array on error to prevent UI breaking
         return [];
       }
     },
-
-    refetchOnWindowFocus: false, // Disable to reduce requests
-    staleTime: 60000, // Cache for 1 minute
-    retry: 1, // Only retry once
-    retryDelay: 3000, // Wait 3s before retry
+    refetchOnMount: 'always', // Luôn fetch khi component mount
+    refetchOnWindowFocus: true, // Refresh khi focus vào trang
+    staleTime: 10 * 1000, // Dữ liệu fresh trong 10 giây
+    retry: 1,
   });
 };
 

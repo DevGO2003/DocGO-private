@@ -100,6 +100,7 @@ export interface Invitation {
   token: string;
   status: InvitationStatus;
   invitedBy: string;
+  invitedByName?: string; // Tên người mời (từ backend)
   expiresAt: string;
   createdAt: string;
 }

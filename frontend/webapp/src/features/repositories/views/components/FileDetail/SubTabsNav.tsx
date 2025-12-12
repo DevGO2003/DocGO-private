@@ -27,9 +27,6 @@ export const SubTabsNav: React.FC<Props> = ({ activeMainTab, activeSubTab, onCha
       { id: 'content', label: 'Nội dung' },
       { id: 'ocr', label: 'Nội dung OCR' },
       { id: 'metadata', label: 'Siêu dữ liệu' },
-      { id: 'notes', label: 'Ghi chú' },
-      { id: 'history', label: 'Lịch sử' },
-      { id: 'permissions', label: 'Quyền hạn' },
     ],
     comments: [
       { id: 'comments-list', label: 'Danh sách bình luận' },

@@ -62,7 +62,7 @@ export const Register = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-center">
-              Create your account
+              Tạo tài khoản mới
             </CardTitle>
           </CardHeader>
 
@@ -78,12 +78,12 @@ export const Register = () => {
                 id="username"
                 name="username"
                 type="text"
-                label="Username"
+                label="Tên đăng nhập"
                 value={values.username}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.username}
-                placeholder="Choose a username"
+                placeholder="Chọn tên đăng nhập"
                 autoComplete="username"
               />
 
@@ -91,12 +91,12 @@ export const Register = () => {
                 id="email"
                 name="email"
                 type="email"
-                label="Email address"
+                label="Địa chỉ email"
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.email}
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 autoComplete="email"
               />
 
@@ -104,12 +104,12 @@ export const Register = () => {
                 id="password"
                 name="password"
                 type="password"
-                label="Password"
+                label="Mật khẩu"
                 value={values.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.password}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 autoComplete="new-password"
               />
 
@@ -117,12 +117,12 @@ export const Register = () => {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                label="Confirm Password"
+                label="Xác nhận mật khẩu"
                 value={values.confirmPassword}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={errors.confirmPassword}
-                placeholder="Confirm your password"
+                placeholder="Nhập lại mật khẩu"
                 autoComplete="new-password"
               />
 
@@ -133,18 +133,18 @@ export const Register = () => {
                 disabled={isLoading}
                 className="w-full"
               >
-                {isLoading ? 'Creating account...' : 'Sign up'}
+                {isLoading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
               </Button>
             </form>
 
             <div className="mt-6 text-center"
             >
               <div className="text-sm" style={{ color: '#4b5563' }} >
-                Already have an account?{' '}
+                Đã có tài khoản?{' '}
                 <Link
                   to={LOGIN_PATH}
                   className="font-medium hover: hover:underline" style={{ color: '#2563eb' }} >
-                  Sign in
+                  Đăng nhập
                 </Link>
               </div>
             </div>

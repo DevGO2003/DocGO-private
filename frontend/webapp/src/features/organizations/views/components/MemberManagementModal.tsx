@@ -19,7 +19,6 @@ interface MemberManagementModalProps {
 }
 
 const AVAILABLE_ROLES = [
-  { value: 'OWNER', label: 'Owner', description: 'Full control of the organization' },
   { value: 'MANAGER', label: 'Manager', description: 'Can manage members and approve documents' },
   { value: 'MEMBER', label: 'Member', description: 'Basic access to repositories' },
 ];

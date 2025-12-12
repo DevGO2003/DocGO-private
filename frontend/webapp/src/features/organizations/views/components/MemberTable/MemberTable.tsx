@@ -189,11 +189,10 @@ export const MemberTable = ({
                                 className="fixed inset-0 z-[100]"
                                 onClick={() => setOpenMenuId(null)}
                               />
-                              {/* Menu - Fixed position to avoid being cut off */}
+                              {/* Menu - Positioned relative to button */}
                               <div 
-                                className="fixed rounded-lg" style={{ backgroundColor: '#ffffff', top: '50%',
-                                  left: '50%',
-                                  transform: 'translate(-50%, -50%)' }}
+                                className="absolute right-0 top-full mt-1 z-[101] rounded-lg shadow-lg border min-w-[160px]" 
+                                style={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb' }}
                               >
                                 <div className="py-1">
                                   {onEditMember && (

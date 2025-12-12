@@ -82,11 +82,11 @@ export interface ApprovalApiResponse<T> {
 export function getApprovalLevelLabel(level: ApprovalLevel): string {
   switch (level) {
     case ApprovalLevel.LEGAL:
-      return 'Phê duyệt Pháp lý';
+      return 'về Pháp lý';
     case ApprovalLevel.FINANCE:
-      return 'Phê duyệt Tài chính';
+      return 'về Tài chính';
     case ApprovalLevel.EXECUTIVE:
-      return 'Phê duyệt cuối';
+      return 'cuối cùng';
     default:
       return level;
   }

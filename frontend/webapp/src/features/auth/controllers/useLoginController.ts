@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLogin } from '../models/api/authApi';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials, setLoading, setError } from '../models/state/authSlice';
@@ -9,6 +10,7 @@ import { DASHBOARD_PATH } from '@constants';
 export const useLoginController = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const loginMutation = useLogin();
 
   const handleLogin = useCallback(async (credentials: LoginCredentials) => {
@@ -27,7 +29,10 @@ export const useLoginController = () => {
       });
 
       if (authResponse.accessToken && authResponse.user) {
-        console.log('[LoginController] Login successful, setting credentials...');
+        console.log('[LoginController] Login successful, clearing old cache and setting credentials...');
+        
+        // Clear React Query cache để tránh hiển thị dữ liệu của tài khoản trước
+        queryClient.clear();
         
         // Calculate token expiration
         const expiresAt = Date.now() + (authResponse.expiresIn * 1000);
@@ -62,7 +67,7 @@ export const useLoginController = () => {
     } finally {
       dispatch(setLoading(false));
     }
-  }, [loginMutation, dispatch, navigate]);
+  }, [loginMutation, dispatch, navigate, queryClient]);
 
   return {
     handleLogin,

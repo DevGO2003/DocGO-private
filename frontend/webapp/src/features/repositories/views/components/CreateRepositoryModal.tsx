@@ -18,6 +18,7 @@ interface CreateRepositoryModalProps {
   onClose: () => void;
   onSubmit: (data: RepositoryCreateData) => void;
   isLoading?: boolean;
+  defaultOrganizationId?: string;
 }
 
 interface RepositoryCreateData {
@@ -33,14 +34,27 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
   onClose,
   onSubmit,
   isLoading = false,
+  defaultOrganizationId,
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState<RepositoryCreateData>({
     name: '',
     description: '',
-    type: 'PERSONAL',
+    type: defaultOrganizationId ? 'ORGANIZATION' : 'PERSONAL',
     isPublic: false,
+    organizationId: defaultOrganizationId,
   });
+
+  // Update formData when defaultOrganizationId changes (e.g., when modal opens)
+  React.useEffect(() => {
+    if (defaultOrganizationId) {
+      setFormData(prev => ({
+        ...prev,
+        type: 'ORGANIZATION',
+        organizationId: defaultOrganizationId,
+      }));
+    }
+  }, [defaultOrganizationId]);
 
   const [errors, setErrors] = useState<Partial<Record<keyof RepositoryCreateData, string>>>({});
   
@@ -100,8 +114,9 @@ export const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = ({
     setFormData({
       name: '',
       description: '',
-      type: 'PERSONAL',
+      type: defaultOrganizationId ? 'ORGANIZATION' : 'PERSONAL',
       isPublic: false,
+      organizationId: defaultOrganizationId,
     });
     setErrors({});
   };

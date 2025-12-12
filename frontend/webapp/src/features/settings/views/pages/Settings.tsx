@@ -10,20 +10,18 @@ import {
   Button,
   Input,
   RefreshButton,
-  Select,
 } from '@shared/components';
 import SettingsLayout from '../../layouts/SettingsLayout';
 import { useAppSelector } from '@store/hooks';
 import { useUpdateProfile, useChangePassword } from '@features/auth';
 
-type SettingsTab = 'profile' | 'security' | 'preferences';
+type SettingsTab = 'profile' | 'security';
 
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
-  const [showNewPassword, setShowNewPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const updateProfileMutation = useUpdateProfile();
@@ -41,17 +39,10 @@ export const Settings = () => {
     confirmPassword: '',
   });
 
-  const [preferenceSettings, setPreferenceSettings] = useState({
-    language: 'en',
-    timezone: 'UTC+7',
-    theme: 'light',
-    dateFormat: 'DD/MM/YYYY',
-  });
-
+  
   const tabs = [
     { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: 'user' },
     { id: 'security' as SettingsTab, label: t('settings.tabs.security'), icon: 'lock' },
-    { id: 'preferences' as SettingsTab, label: t('settings.tabs.preferences'), icon: 'globe' },
   ];
 
   const handleProfileUpdate = async () => {
@@ -236,9 +227,8 @@ export const Settings = () => {
                           <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >
                             {t('settings.security.newPassword')}
                           </label>
-                          <div className="relative">
-                            <Input
-                              type={showNewPassword ? 'text' : 'password'}
+                          <Input
+                              type="password"
                               value={passwordData.newPassword}
                               onChange={(e) =>
                                 setPasswordData({
@@ -248,16 +238,6 @@ export const Settings = () => {
                               }
                               placeholder={t('settings.security.newPassword')}
                             />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 h-auto p-1"
-                            >
-                              <CommonIcon name={showNewPassword ? "eye-off" : "eye-open"} size={20} />
-                            </Button>
-                          </div>
                         </div>
 
                         <div>
@@ -295,113 +275,6 @@ export const Settings = () => {
               </Card>
             )}
 
-            {/* Preferences Tab */}
-            {activeTab === 'preferences' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('settings.tabs.preferences')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }} >
-                        {t('settings.preferences.language')}
-                      </label>
-                      <Select
-                        value={preferenceSettings.language}
-                        onChange={(e) => {
-                          const lang = e.target.value;
-                          setPreferenceSettings({
-                            ...preferenceSettings,
-                            language: lang,
-                          });
-                          void i18n.changeLanguage(lang);
-                        }}
-                        options={[
-                          { value: 'en', label: t('settings.preferences.english') },
-                          { value: 'vi', label: t('settings.preferences.vietnamese') },
-                        ]}
-                      />
-                    </div>
-
-                    <div
-                      className="relative"
-                      title={t('settings.comingSoon')}
-                    >
-                      <label className="block text-sm font-medium mb-2 opacity-60" style={{ color: '#374151' }} >
-                        {t('settings.preferences.timezone')}
-                      </label>
-                      <Select
-                        value={preferenceSettings.timezone}
-                        onChange={(e) =>
-                          setPreferenceSettings({
-                            ...preferenceSettings,
-                            timezone: e.target.value,
-                          })
-                        }
-                        disabled
-                        options={[
-                          { value: 'UTC+7', label: 'UTC+7 (Bangkok, Hanoi)' },
-                          { value: 'UTC', label: 'UTC (London)' },
-                          { value: 'UTC-5', label: 'UTC-5 (New York)' },
-                        ]}
-                        className="cursor-not-allowed opacity-60"
-                      />
-                    </div>
-
-                    <div
-                      className="relative"
-                      title={t('settings.comingSoon')}
-                    >
-                      <label className="block text-sm font-medium mb-2 opacity-60" style={{ color: '#374151' }} >
-                        {t('settings.preferences.theme')}
-                      </label>
-                      <Select
-                        value={preferenceSettings.theme}
-                        onChange={(e) =>
-                          setPreferenceSettings({
-                            ...preferenceSettings,
-                            theme: e.target.value,
-                          })
-                        }
-                        disabled
-                        options={[
-                          { value: 'light', label: 'Light' },
-                          { value: 'dark', label: 'Dark' },
-                          { value: 'auto', label: 'Auto' },
-                        ]}
-                        className="cursor-not-allowed opacity-60"
-                      />
-                    </div>
-
-                    <div
-                      className="relative"
-                      title={t('settings.comingSoon')}
-                    >
-                      <label className="block text-sm font-medium mb-2 opacity-60" style={{ color: '#374151' }} >
-                        {t('settings.preferences.dateFormat')}
-                      </label>
-                      <Select
-                        value={preferenceSettings.dateFormat}
-                        onChange={(e) =>
-                          setPreferenceSettings({
-                            ...preferenceSettings,
-                            dateFormat: e.target.value,
-                          })
-                        }
-                        disabled
-                        options={[
-                          { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-                          { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-                          { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
-                        ]}
-                        className="cursor-not-allowed opacity-60"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
         </div>
       </div>
     </SettingsLayout>

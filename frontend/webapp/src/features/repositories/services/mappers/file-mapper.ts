@@ -11,9 +11,18 @@ export function mapFileApiToUiDocument(data: FileApiData): FileUnion {
     || typeof (ct as any).totalValue === 'number'
     || Array.isArray((ct as any).parties);
 
+  // Lấy tên file từ nhiều nguồn để đảm bảo luôn có giá trị
+  const fileName = ov.title 
+    || data.file?.name 
+    || (data as any).name 
+    || (data as any).fileName
+    || (data as any).metadata?.fileSystem?.originalFilename
+    || (data as any).metadata?.fileSystem?.mediaFilename
+    || `File ${data.id}`;
+
   const base = {
     fileId: String(data.id),
-    fileName: ov.title || (data.file?.name || `File ${data.id}`),
+    fileName,
     status: ov.status || 'DRAFT',
     contractType: ov.contractType || ov.category || undefined,
     tags: ov.tags || [],

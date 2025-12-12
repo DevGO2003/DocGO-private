@@ -262,10 +262,10 @@ export const useMyPendingInvitations = () => {
   return useQuery({
     queryKey: ['my-pending-invitations'],
     queryFn: () => organizationApi.getMyPendingInvitations(),
-    refetchInterval: false, // Disable auto-refresh
-    refetchOnWindowFocus: false, // Disable auto-refresh on focus
-    retry: 1, // Retry once if failed
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    refetchOnMount: 'always', // Luôn fetch khi component mount
+    refetchOnWindowFocus: true, // Refresh khi focus vào trang
+    retry: 1,
+    staleTime: 10 * 1000, // Dữ liệu fresh trong 10 giây
   });
 };
 

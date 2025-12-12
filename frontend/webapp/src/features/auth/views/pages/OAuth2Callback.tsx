@@ -1,5 +1,6 @@
 ﻿import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch } from '@store/hooks';
 import { setCredentials } from '../../models/state/authSlice';
 import { HOME_PATH, LOGIN_PATH } from '@constants';
@@ -8,6 +9,7 @@ import env from '@shared/config/env';
 export const OAuth2Callback = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -68,6 +70,9 @@ export const OAuth2Callback = () => {
                 expiresIn 
               });
 
+              // Clear React Query cache để tránh hiển thị dữ liệu của tài khoản trước
+              queryClient.clear();
+              
               // Store user + tokens together to ensure user ID is available for API calls
               dispatch(setCredentials({ 
                 user: result.data.user, 
