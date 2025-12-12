@@ -1,0 +1,29 @@
+services: []
+
+staticSites:
+  - name: docgo-frontend
+    rootDir: frontend/webapp
+    buildCommand: npm ci && npm run build
+    publishDir: dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_API_GATEWAY_URL
+        sync: false
+      - key: VITE_REPOSITORY_SERVICE_URL
+        sync: false
+      - key: VITE_APP_NAME
+        value: DocGO
+      - key: VITE_APP_VERSION
+        value: 1.0.0
+      - key: VITE_APP_ENVIRONMENT
+        value: production
+      - key: VITE_ENABLE_ANALYTICS
+        value: "false"
+      - key: VITE_ENABLE_DEBUG
+        value: "false"
+      - key: VITE_DEFAULT_LANGUAGE
+        value: vi
+      - key: VITE_SUPPORTED_LANGUAGES
+        value: vi,en
