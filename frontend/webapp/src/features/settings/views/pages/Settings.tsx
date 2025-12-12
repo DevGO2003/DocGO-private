@@ -12,17 +12,20 @@ import {
   RefreshButton,
 } from '@shared/components';
 import SettingsLayout from '../../layouts/SettingsLayout';
-import { useAppSelector } from '@store/hooks';
+import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { useUpdateProfile, useChangePassword } from '@features/auth';
+import { setUser } from '@features/auth/models/state/authSlice';
 
 type SettingsTab = 'profile' | 'security';
 
 export const Settings = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const updateProfileMutation = useUpdateProfile();
   const changePasswordMutation = useChangePassword();
@@ -48,17 +51,28 @@ export const Settings = () => {
   const handleProfileUpdate = async () => {
     if (!user?.id) {
       console.error('User ID not found');
+      setUpdateMessage({ type: 'error', text: 'Không tìm thấy ID người dùng' });
       return;
     }
     
+    setUpdateMessage(null);
+    
     try {
-      await updateProfileMutation.mutateAsync({
+      console.log('[Settings] Updating profile with data:', profileData);
+      const updatedUser = await updateProfileMutation.mutateAsync({
         ...profileData,
         userId: user.id,
       });
-      console.log('Profile updated successfully');
-    } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.log('[Settings] Profile updated successfully:', updatedUser);
+      
+      // Cập nhật Redux store với dữ liệu mới
+      dispatch(setUser(updatedUser));
+      
+      setUpdateMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+    } catch (error: any) {
+      console.error('[Settings] Failed to update profile:', error);
+      const errorMessage = error?.response?.data?.description || error?.message || 'Cập nhật thất bại';
+      setUpdateMessage({ type: 'error', text: errorMessage });
     }
   };
 
@@ -193,6 +207,13 @@ export const Settings = () => {
                         placeholder="+84 xxx xxx xxx"
                       />
                     </div>
+
+                    {/* Thông báo kết quả */}
+                    {updateMessage && (
+                      <div className={`p-3 rounded-lg ${updateMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {updateMessage.text}
+                      </div>
+                    )}
 
                     <div className="flex justify-end">
                       <Button

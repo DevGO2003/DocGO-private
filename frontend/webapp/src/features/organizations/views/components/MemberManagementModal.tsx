@@ -19,16 +19,16 @@ interface MemberManagementModalProps {
 }
 
 const AVAILABLE_ROLES = [
-  { value: 'MANAGER', label: 'Manager', description: 'Can manage members and approve documents' },
-  { value: 'MEMBER', label: 'Member', description: 'Basic access to repositories' },
+  { value: 'MANAGER', label: 'Quản lý', description: 'Có thể quản lý thành viên và phê duyệt tài liệu' },
+  { value: 'MEMBER', label: 'Thành viên', description: 'Quyền truy cập cơ bản vào kho lưu trữ' },
 ];
 
 const AVAILABLE_PERMISSIONS = [
-  { id: 'approve:legal', label: 'Legal Approval', description: 'Approve legal documents' },
-  { id: 'approve:finance', label: 'Finance Approval', description: 'Approve financial documents' },
-  { id: 'approve:executive', label: 'Executive Approval', description: 'Approve executive documents' },
-  { id: 'member:invite', label: 'Invite Members', description: 'Invite new members to organization' },
-  { id: 'org:settings', label: 'Organization Settings', description: 'Change organization settings' },
+  { id: 'approve:legal', label: 'Phê duyệt Pháp lý', description: 'Phê duyệt tài liệu về pháp lý' },
+  { id: 'approve:finance', label: 'Phê duyệt Tài chính', description: 'Phê duyệt tài liệu về tài chính' },
+  { id: 'approve:executive', label: 'Phê duyệt cuối cùng', description: 'Phê duyệt cấp điều hành' },
+  { id: 'member:invite', label: 'Mời thành viên', description: 'Mời thành viên mới vào tổ chức' },
+  { id: 'org:settings', label: 'Quản lý cài đặt', description: 'Thay đổi cài đặt tổ chức' },
 ];
 
 export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
@@ -136,7 +136,7 @@ export const MemberManagementModal: React.FC<MemberManagementModalProps> = ({
             <div className="space-y-3">
               <label className="text-sm font-semibold flex items-center gap-2" style={{ color: '#111827' }} >
                 <CommonIcon name="lock" size={16} color="#16a34a" />
-                Manager Permissions
+                Quyền của Quản lý
               </label>
               <div className="space-y-3 max-h-64 border rounded-lg p-4" style={{ borderColor: '#e5e7eb', backgroundColor: '#f9fafb' }} >
                 {AVAILABLE_PERMISSIONS.map((permission) => (

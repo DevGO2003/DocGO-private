@@ -100,7 +100,7 @@ export const CommonSelect = forwardRef<HTMLSelectElement, CommonSelectProps>(
       if (chevron) {
         anime({
           targets: chevron,
-          rotate: isOpen ? 180 : 0,
+          rotate: 0,
           duration: 300,
           easing: 'easeOutQuad',
         });
@@ -139,7 +139,7 @@ export const CommonSelect = forwardRef<HTMLSelectElement, CommonSelectProps>(
               </option>
             ))}
           </select>
-          <div data-chevron className="absolute right-3 top-1/2 pointer-events-none" style={{ color: '#4b5563' }} >
+          <div data-chevron className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center" style={{ color: '#4b5563' }} >
             <CommonIcon name="chevron-down" size={20} />
           </div>
         </div>

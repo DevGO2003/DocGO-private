@@ -32,12 +32,6 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
       disabled: false,
     },
     {
-      id: 'members',
-      label: t('repositories.detail.tabs.members'),
-      icon: 'users',
-      disabled: false,
-    },
-    {
       id: 'activity',
       label: t('repositories.detail.tabs.activity'),
       icon: 'clock',
@@ -47,7 +41,7 @@ export const RepositoryDetailTabs: React.FC<RepositoryDetailTabsProps> = ({
   ];
 
   return (
-    <Tabs className="border-b" style={{ borderColor: '#e5e7eb' }}>
+    <Tabs className="border-b">
       <TabList className="mb-6">
         {tabs.map((tab) => {
           const tabContent = (

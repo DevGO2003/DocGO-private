@@ -14,28 +14,28 @@ interface InviteMemberModalProps {
 const MANAGER_PERMISSIONS: { value: ManagerPermission; label: string; description: string }[] = [
   {
     value: 'approve:legal',
-    label: 'Legal Approval',
-    description: 'Approve contracts from legal perspective',
+    label: 'Phê duyệt Pháp lý',
+    description: 'Phê duyệt hợp đồng về mặt pháp lý',
   },
   {
     value: 'approve:finance',
-    label: 'Finance Approval',
-    description: 'Approve contracts from financial perspective',
+    label: 'Phê duyệt Tài chính',
+    description: 'Phê duyệt hợp đồng về mặt tài chính',
   },
   {
     value: 'approve:executive',
-    label: 'Executive Approval',
-    description: 'Executive-level contract approval',
+    label: 'Phê duyệt cuối cùng',
+    description: 'Phê duyệt cấp điều hành',
   },
   {
     value: 'member:invite',
-    label: 'Invite Members',
-    description: 'Can invite new members to the organization',
+    label: 'Mời thành viên',
+    description: 'Có thể mời thành viên mới vào tổ chức',
   },
   {
     value: 'org:settings',
-    label: 'Manage Settings',
-    description: 'Can manage organization settings',
+    label: 'Quản lý cài đặt',
+    description: 'Có thể quản lý cài đặt tổ chức',
   },
 ];
 

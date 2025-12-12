@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, RefreshButton, Card, CommonSwitch } from '@shared/components';
+import { Button, RefreshButton, Card } from '@shared/components';
 import RepositoryLayout from '../../../layouts/RepositoryLayout';
 import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
-import { useRepository, useRepositoryMembers, useUpdateMemberPermissions, useDeleteRepository } from '@features/repositories/models/api/repositoryApi';
+import { useRepository, useDeleteRepository } from '@features/repositories/models/api/repositoryApi';
 import { NOT_FOUND_PATH, REPOSITORY_ROUTES, buildPath } from '@constants';
-import { InviteRepositoryMemberModal } from '../../components/InviteRepositoryMemberModal';
 
 export const RepositoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,12 +14,9 @@ export const RepositoryDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('files');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const { t } = useTranslation();
-  const updatePermissionsMutation = useUpdateMemberPermissions();
 
   const { data: repository, isLoading, error } = useRepository(id || '');
-  const { data: membersData, isLoading: membersLoading } = useRepositoryMembers(id || '');
 
   // Debug logging
   useEffect(() => {
@@ -33,25 +29,14 @@ export const RepositoryDetail: React.FC = () => {
     });
 
     if (repository) {
-      console.log('[RepositoryDetail] ✅ Repository loaded:', repository);
-      console.log('[RepositoryDetail] Owner info:', {
-        ownerName: repository.ownerName,
-        ownerUserId: repository.ownerUserId,
-      });
+      console.log('[RepositoryDetail] Repository loaded:', repository);
     }
 
     if (error) {
-      console.error('[RepositoryDetail] ❌ Error loading repository:', error);
+      console.error('[RepositoryDetail] Error loading repository:', error);
       console.error('[RepositoryDetail] Error response:', (error as any)?.response);
     }
   }, [repository, isLoading, error, id]);
-
-  useEffect(() => {
-    if (membersData) {
-      console.log('[RepositoryDetail] ✅ Members loaded:', membersData);
-      console.log('[RepositoryDetail] Members count:', membersData.content?.length);
-    }
-  }, [membersData]);
 
   // Redirect sang 404 nếu repository ID không hợp lệ hoặc không tồn tại
   useEffect(() => {
@@ -88,24 +73,6 @@ export const RepositoryDetail: React.FC = () => {
     }
     
     navigate(uploadUrl);
-  };
-
-  const handleUpdatePermission = (memberId: string, permissionType: 'canUpload' | 'canView' | 'canDelete', value: boolean) => {
-    if (!id) return;
-
-    updatePermissionsMutation.mutate(
-      {
-        repositoryId: id,
-        memberId,
-        permissions: { [permissionType]: value },
-      },
-      {
-        onError: (error) => {
-          console.error('[RepositoryDetail] Failed to update permission:', error);
-          alert(t('repositories.detail.members.permissions.error'));
-        },
-      }
-    );
   };
 
   const handleRefresh = async () => {
@@ -200,10 +167,6 @@ export const RepositoryDetail: React.FC = () => {
             <CommonIcon name="upload" size={16} />
             {t('repositories.detail.actions.upload')}
           </Button>
-          <Button variant="outline" onClick={() => setShowInviteModal(true)} className="flex items-center gap-2">
-            <CommonIcon name="user-plus" size={16} />
-            {t('repositories.detail.actions.invite')}
-          </Button>
           {/* Delete Button - Only show for owner or if user has permission (checking owner for now as safety) */}
           {(repository?.ownerUserId && repository?.ownerUserId === (repository as any).currentUserId) || true ? (
             <Button
@@ -211,7 +174,7 @@ export const RepositoryDetail: React.FC = () => {
               onClick={handleDelete}
               className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
             >
-              <CommonIcon name="trash-2" size={16} />
+              <CommonIcon name="trash" size={16} />
               {t('repositories.detail.actions.delete', { defaultValue: 'Xóa' })}
             </Button>
           ) : null}
@@ -224,12 +187,6 @@ export const RepositoryDetail: React.FC = () => {
             id: 'files',
             label: t('repositories.detail.tabs.files'),
             icon: 'file-text',
-            disabled: false,
-          },
-          {
-            id: 'members',
-            label: t('repositories.detail.tabs.members'),
-            icon: 'users',
             disabled: false,
           },
           {
@@ -302,29 +259,8 @@ export const RepositoryDetail: React.FC = () => {
                               return repository.ownerName;
                             }
 
-                            // Priority 2: If we have members data, search for owner in members list
-                            if (membersData?.content && membersData.content.length > 0) {
-                              const ownerMember = membersData.content.find((m: any) => m.userId === repository?.ownerUserId);
-                              if (ownerMember) {
-                                const memberName = ownerMember.username || ownerMember.name || ownerMember.email;
-                                if (memberName) {
-                                  return memberName;
-                                }
-                              }
-                            }
-
-                            // Priority 3: If members still loading, show loading state
-                            if (membersLoading && !membersData) {
-                              return 'Đang tải...';
-                            }
-
-                            // Priority 4: If we have ownerUserId but no name, show friendly message
+                            // If we have ownerUserId but no name, show friendly message
                             if (repository?.ownerUserId) {
-                              // If members returned empty (403 or no permission), show "Chủ sở hữu"
-                              if (membersData?.content?.length === 0) {
-                                return 'Chủ sở hữu repository';
-                              }
-                              // Otherwise show partial ID
                               return `User ID: ${repository.ownerUserId.substring(0, 8)}...`;
                             }
 
@@ -342,17 +278,11 @@ export const RepositoryDetail: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
                       <div>
                         <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.files')}</h4>
                         <p className="text-2xl font-semibold text-gray-900">
                           {repository?.files?.length ?? repository?.fileCount ?? 0}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500 mb-1">{t('repositories.detail.stats.members')}</h4>
-                        <p className="text-2xl font-semibold text-gray-900">
-                          {Math.max(membersData?.totalElements ?? repository?.memberCount ?? 0, 1)}
                         </p>
                       </div>
                       <div>
@@ -432,95 +362,9 @@ export const RepositoryDetail: React.FC = () => {
                 </Card>
               )}
 
-              {activeTab === 'members' && (
-                <Card className="p-6">
-                  {membersLoading ? (
-                    <div className="text-center py-8">{t('app.loading')}</div>
-                  ) : membersData?.content && membersData.content.length > 0 ? (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-gray-900">{t('repositories.detail.tabs.members')}</h3>
-                        <Button onClick={() => setShowInviteModal(true)}>
-                          {t('repositories.detail.empty.members.invite')}
-                        </Button>
-                      </div>
-                      {membersData.content.map((member: any) => (
-                        <div key={member.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <p className="font-medium text-gray-900">{member.username}</p>
-                              <p className="text-sm text-gray-600">{member.email}</p>
-                            </div>
-                            <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
-                              {member.role}
-                            </span>
-                          </div>
-
-                          {/* Permissions Section */}
-                          <div className="space-y-3 border-t border-gray-200 pt-4">
-                            <p className="text-sm font-medium text-gray-700">{t('repositories.detail.members.permissions.title')}</p>
-
-                            <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.upload')}</label>
-                              <CommonSwitch
-                                checked={member.permissions?.canUpload || false}
-                                onChange={(e) => handleUpdatePermission(member.id, 'canUpload', e.target.checked)}
-                                disabled={member.role === 'OWNER'}
-                              />
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.view')}</label>
-                              <CommonSwitch
-                                checked={member.permissions?.canView || false}
-                                onChange={(e) => handleUpdatePermission(member.id, 'canView', e.target.checked)}
-                                disabled={member.role === 'OWNER'}
-                              />
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                              <label className="text-sm text-gray-600">{t('repositories.detail.members.permissions.delete')}</label>
-                              <CommonSwitch
-                                checked={member.permissions?.canDelete || false}
-                                onChange={(e) => handleUpdatePermission(member.id, 'canDelete', e.target.checked)}
-                                disabled={member.role === 'OWNER'}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <CommonIcon name="users" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        {t('repositories.detail.empty.members.title')}
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        {t('repositories.detail.empty.members.desc')}
-                      </p>
-                      <Button onClick={() => setShowInviteModal(true)}>
-                        {t('repositories.detail.empty.members.invite')}
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-              )}
             </div>
           )}
         </div>
-      )}
-
-      {/* Invite Member Modal */}
-      {repository && (
-        <InviteRepositoryMemberModal
-          isOpen={showInviteModal}
-          onClose={() => setShowInviteModal(false)}
-          repositoryId={repository.id}
-          repositoryType={repository.type}
-          repositoryName={repository.name}
-          organizationId={repository.organizationId}
-        />
       )}
     </RepositoryLayout>
   );

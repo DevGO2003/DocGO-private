@@ -9,14 +9,12 @@ import { CommonIcon } from '@shared/components/UIComponents/Icon/CommonIcon';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
-  showSearch?: boolean;
   showNotifications?: boolean;
   showUserMenu?: boolean;
 }
 
 export const Header = ({
   onMenuToggle,
-  showSearch = true,
   showNotifications = true,
   showUserMenu = true,
 }: HeaderProps) => {
@@ -27,7 +25,6 @@ export const Header = ({
   const queryClient = useQueryClient();
   const { user: authUser } = useAppSelector((state) => state.auth);
   
-  const [searchTerm, setSearchTerm] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   // Get user data from Redux store
@@ -41,22 +38,6 @@ export const Header = ({
 
   console.log('[Header] User from Redux:', authUser);
   console.log('[Header] Formatted user:', user);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = searchTerm.trim();
-
-    // Nếu không có từ khóa, điều hướng về danh sách repositories mặc định
-    if (!trimmed) {
-      navigate('/repositories');
-      return;
-    }
-
-    // Điều hướng tới trang danh sách repositories với query search
-    const params = new URLSearchParams();
-    params.set('search', trimmed);
-    navigate(`/repositories?${params.toString()}`);
-  };
 
   const handleLogout = () => {
     console.log('[Header] Logging out...');
@@ -82,34 +63,8 @@ export const Header = ({
             )}
           </div>
 
-          {/* Center - Search Bar */}
-          {showSearch && (
-            <div className="flex-1 max-w-lg mx-8 hidden md:block">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-4 pr-10 py-2 border-2 rounded-lg focus:outline-none focus:" style={{ borderColor: '#3b82f6' }} />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <CommonIcon name="search" size={20} color="#9ca3af" />
-                </div>
-              </div>
-            </form>
-          </div>
-          )}
-
           {/* Right side - Actions and User Menu */}
           <div className="flex items-center gap-4">
-            {/* Search for mobile */}
-            {showSearch && (
-              <button className="md:hidden p-2 rounded-md hover: hover:bg-gray-100" style={{ color: '#9ca3af' }} >
-                <CommonIcon name="search" size={20} color="#9ca3af" />
-              </button>
-            )}
-
             {/* Notifications */}
             {showNotifications && <NotificationBell />}
 

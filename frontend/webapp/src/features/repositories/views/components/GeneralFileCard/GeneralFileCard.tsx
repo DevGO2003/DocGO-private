@@ -48,10 +48,9 @@ interface GeneralFileCardProps {
   isSelected?: boolean;
   onSelect?: (checked: boolean) => void;
   detailHref: string;
-  openUrl?: string;
 }
 
-export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect, detailHref, openUrl }) => {
+export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, isSelected, onSelect, detailHref }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [showPreview, setShowPreview] = React.useState(false);
@@ -120,8 +119,8 @@ export const GeneralFileCard: React.FC<GeneralFileCardProps> = ({ item, right, i
         )}
       </div>
       </CardContent>
-      <div className="absolute inset-x-0 bottom-0 z-10">
-        <div className="flex rounded-none border-t items-stretch" style={{ borderColor: '#e5e7eb' }}>
+      <div className="absolute inset-x-0 bottom-0 z-10 px-2 pb-2">
+        <div className="flex rounded-md border items-stretch bg-white overflow-hidden" style={{ borderColor: '#e5e7eb' }}>
           <Link to={detailHref} className="flex-1">
             <Button variant="ghost" className="w-full h-9 text-xs">
               <CommonIcon name="file-text" className="mr-1 h-4 w-4" />
