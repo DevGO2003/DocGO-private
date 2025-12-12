@@ -1,4 +1,142 @@
-services: []
+services:
+  # API Gateway - Node.js/Next.js
+  - type: web
+    name: docgo-api-gateway
+    runtime: node
+    rootDir: backend/api-gateway
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      - key: JWT_SECRET
+        value: TDVxrHruTI72tDCpmkwKPlyF7LmdlzKQ7x8D+P2BDw4=
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: NEXT_PUBLIC_USER_SERVICE_URL
+        fromService:
+          name: docgo-user-service
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_DOCUMENT_SERVICE_URL
+        fromService:
+          name: docgo-repository-service
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_AUTOMATION_SERVICE_URL
+        fromService:
+          name: docgo-automation-service
+          type: web
+          property: host
+
+  # User Management Service - Java/Maven
+  - type: web
+    name: docgo-user-service
+    runtime: docker
+    rootDir: backend/user-management-service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SERVER_PORT
+        value: "8001"
+      - key: JWT_SECRET
+        value: TDVxrHruTI72tDCpmkwKPlyF7LmdlzKQ7x8D+P2BDw4=
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: GOOGLE_CLIENT_ID
+        value: 183573622288-0tu123mj11i40sgr7i0l1jsuqppnolkn.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        value: 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
+      - key: GOOGLE_PROJECT_ID
+        value: docgoauthen
+      - key: MONGODB_ATLAS_URI
+        value: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - key: MONGODB_DATABASE
+        value: docgo
+      - key: LOG_LEVEL
+        value: INFO
+
+  # Repository Management Service - Java/Maven
+  - type: web
+    name: docgo-repository-service
+    runtime: docker
+    rootDir: backend/repository-management-service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SERVER_PORT
+        value: "8002"
+      - key: MONGODB_URI
+        value: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - key: MONGODB_DATABASE
+        value: docgo
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        value: ""
+      - key: KAFKA_CONSUMER_GROUP_ID
+        value: docgo-repo-events-v1
+      - key: LOGGING_LEVEL_COM_DEVGO2003_DOCGO
+        value: INFO
+
+  # Automation Service - Python/FastAPI
+  - type: web
+    name: docgo-automation-service
+    runtime: python
+    rootDir: backend/automation-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: ENVIRONMENT
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: GEMINI_API_KEY
+        value: AIzaSyCVNL1FgEKmkYZV7ZAf_uvQXXuaVN3OTK0
+      - key: GEMINI_MODELS
+        value: gemini-2.5-flash,gemini-2.0-flash
+      - key: OPENROUTER_API_KEY
+        value: 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
+      - key: OPENROUTER_MODEL
+        value: deepseek/deepseek-chat-v3.1
+      - key: OPENROUTER_FALLBACK_MODELS
+        value: meituan/longcat-flash-chat,nvidia/nemotron-nano-9b-v2,alibaba/tongyi-deepresearch-30b-a3b,openrouter/auto
+      - key: S3_ENABLED
+        value: "true"
+      - key: S3_ENDPOINT
+        value: https://s3.filebase.com
+      - key: S3_REGION
+        value: us-east-1
+      - key: S3_ACCESS_KEY_ID
+        value: D6D49B01A4B01DE0EA12
+      - key: S3_SECRET_ACCESS_KEY
+        value: z9oNlDnVcW7eoVkLNquYzKFfv7Ca5vSz146KXeMX
+      - key: S3_BUCKET
+        value: devgo2003-docgo-bucket
+      - key: MONGODB_ENABLED
+        value: "true"
+      - key: MONGODB_ATLAS_URI
+        value: mongodb+srv://root:sapassword@devgo-docgo-cluster0.hsudzga.mongodb.net/?retryWrites=true&w=majority&appName=devgo-docgo-cluster0
+      - key: MONGODB_AUDIT_DATABASE
+        value: docgo_automation_audit
+      - key: KAFKA_ENABLED
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
 
 staticSites:
   - name: docgo-frontend
@@ -8,11 +146,20 @@ staticSites:
     pullRequestPreviewsEnabled: true
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false
+        fromService:
+          name: docgo-api-gateway
+          type: web
+          property: host
       - key: VITE_API_GATEWAY_URL
-        sync: false
+        fromService:
+          name: docgo-api-gateway
+          type: web
+          property: host
       - key: VITE_REPOSITORY_SERVICE_URL
-        sync: false
+        fromService:
+          name: docgo-repository-service
+          type: web
+          property: host
       - key: VITE_APP_NAME
         value: DocGO
       - key: VITE_APP_VERSION
